@@ -1,0 +1,143 @@
+(donkey) santiago@santiagopc:~/mycar$ cat << 'EOF' > ~/mycar/myconfig.py
+
+# CONFIGURACIÓN DEFINITIVA PARA VALIDACIÓN EN PC (HOST)
+
+
+
+# 1. Cámara simulada
+
+CAMERA_TYPE = "MOCK"
+
+
+
+# 2. Desactivar el tren motriz físico (Evita buscar el chip PCA9685)
+
+DRIVETRAIN_TYPE = "NONE"
+
+
+
+# 3. Control local vía Navegador Web
+
+CONTROLLER_TYPE = "local"
+
+USE_JOYSTICK_AS_DEFAULT = False
+
+EOF
+
+^C
+
+(donkey) santiago@santiagopc:~/mycar$ python manage.py drive
+
+________             ______                   _________              
+
+___  __ \_______________  /___________  __    __  ____/_____ ________
+
+__  / / /  __ \_  __ \_  //_/  _ \_  / / /    _  /    _  __ `/_  ___/
+
+_  /_/ // /_/ /  / / /  ,<  /  __/  /_/ /     / /___  / /_/ /_  /    
+
+/_____/ \____//_/ /_//_/|_| \___/_\__, /      \____/  \__,_/ /_/     
+
+                                 /____/                              
+
+
+
+using donkey v5.3.dev1 ...
+
+INFO:donkeycar.config:loading config file: /home/santiago/mycar/config.py
+
+INFO:donkeycar.config:loading personal config over-rides from myconfig.py
+
+INFO:__main__:PID: 8255
+
+WARNING:donkeycar.parts.pins:RPi.GPIO was not imported.
+
+WARNING:donkeycar.parts.pins:pigpio was not imported.
+
+cfg.CAMERA_TYPE MOCK
+
+INFO:__main__:cfg.CAMERA_TYPE MOCK
+
+INFO:donkeycar.vehicle:Adding part MockCamera.
+
+INFO:donkeycar.parts.web_controller.web:Starting Donkey Server...
+
+INFO:donkeycar.parts.web_controller.web:You can now go to santiagopc.local:8887 to drive your car.
+
+INFO:donkeycar.vehicle:Adding part LocalWebController.
+
+INFO:donkeycar.vehicle:Adding part Pipe.
+
+INFO:donkeycar.vehicle:Adding part ExplodeDict.
+
+INFO:donkeycar.vehicle:Adding part Lambda.
+
+INFO:donkeycar.vehicle:Adding part Lambda.
+
+INFO:donkeycar.vehicle:Adding part Lambda.
+
+INFO:donkeycar.vehicle:Adding part Lambda.
+
+INFO:donkeycar.vehicle:Adding part Lambda.
+
+INFO:donkeycar.vehicle:Adding part ThrottleFilter.
+
+INFO:donkeycar.vehicle:Adding part UserPilotCondition.
+
+INFO:donkeycar.vehicle:Adding part RecordTracker.
+
+INFO:donkeycar.vehicle:Adding part AiLaunch.
+
+INFO:donkeycar.vehicle:Adding part DriveMode.
+
+INFO:donkeycar.vehicle:Adding part ToggleRecording.
+
+WARNING:donkeycar.parts.actuator:RPi.GPIO was not imported. No module named 'RPi'
+
+Traceback (most recent call last):
+
+  File "/home/santiago/mycar/manage.py", line 1158, in <module>
+
+    drive(cfg, model_path=args['--model'], use_joystick=args['--js'],
+
+  File "/home/santiago/mycar/manage.py", line 468, in drive
+
+    add_drivetrain(V, cfg)
+
+  File "/home/santiago/mycar/manage.py", line 968, in add_drivetrain
+
+    pwm_pin=pins.pwm_pin_by_id(dt["PWM_STEERING_PIN"]),
+
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/home/santiago/projects/donkeycar/donkeycar/parts/pins.py", line 266, in pwm_pin_by_id
+
+    return pwm_pin(pin_provider, pin_number, i2c_bus=i2c_bus, i2c_address=i2c_address, frequency_hz=frequency_hz)
+
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/home/santiago/projects/donkeycar/donkeycar/parts/pins.py", line 385, in pwm_pin
+
+    return PwmPinPCA9685(pin_number, pca9685(i2c_bus, i2c_address, frequency_hz))
+
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/home/santiago/projects/donkeycar/donkeycar/parts/pins.py", line 635, in pca9685
+
+    pca = PCA9685(busnum, address, frequency)
+
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/home/santiago/projects/donkeycar/donkeycar/parts/pins.py", line 572, in __init__
+
+    import Adafruit_PCA9685
+
+ModuleNotFoundError: No module named 'Adafruit_PCA9685'
+
+(donkey) santiago@santiagopc:~/mycar$ 
+
+ 
+
+
+
+creo que estas corrigiendo mal, te voy a pasar el contenido compleot de manage.py para que revises el error
