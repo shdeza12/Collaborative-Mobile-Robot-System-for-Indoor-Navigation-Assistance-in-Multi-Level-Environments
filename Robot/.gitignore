@@ -1,0 +1,24 @@
+# Artefactos de compilación de colcon/ROS 2
+build/
+install/
+log/
+
+# Caché Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Backups de migración
+*.bak
+
+# Editores
+.vscode/
+.idea/
+*.swp
+*~
+
+# Sistema
+.DS_Store
+Thumbs.db
