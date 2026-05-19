@@ -18,13 +18,17 @@ from ament_index_python.packages import get_package_share_directory
 import launch_ros.actions
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration
 
 def generate_launch_description():
     deepracer_bringup_dir = get_package_share_directory('deepracer_bringup')
 
+    use_sim_time = LaunchConfiguration('use_sim_time')
+
     slam_toolbox_node = launch_ros.actions.Node(
             parameters=[
-                deepracer_bringup_dir + '/config/slam_toolbox.yaml'
+                deepracer_bringup_dir + '/config/slam_toolbox.yaml',
+                {'use_sim_time': use_sim_time}
             ],
             package='slam_toolbox',
             executable='sync_slam_toolbox_node',
@@ -34,7 +38,7 @@ def generate_launch_description():
     return LaunchDescription([
         DeclareLaunchArgument(
             name='use_sim_time',
-            default_value='false'
+            default_value='true'
         ),
         slam_toolbox_node,
     ])
