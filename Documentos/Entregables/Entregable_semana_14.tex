@@ -1,0 +1,273 @@
+\documentclass[12pt,letterpaper]{article}
+
+% --- Paquetes Requeridos ---
+\usepackage[utf8]{inputenc}
+\usepackage[spanish,es-tabla]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{titlesec}
+\usepackage{setspace}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{float}
+
+% --- Configuración de Párrafo ---
+\onehalfspacing
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1em}
+
+% --- Configuración de listings ---
+\lstset{
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,
+    frame=single,
+    captionpos=b,
+    showstringspaces=false
+}
+
+% --- Inicio del Documento ---
+\begin{document}
+
+% --- PORTADA ---
+\begin{titlepage}
+    \centering
+
+    {\Large \textbf{UNIVERSIDAD SANTO TOMÁS}} \\[1cm]
+
+    {\Large \textbf{Sistema colaborativo de robots móviles para asistencia de orientación en entornos interiores con múltiples pisos}} \\[2cm]
+
+    {\large \textbf{Realizado por:}} \\
+    {\large Santiago Hernández Ávila} \\
+    {\large Jonny Alejandro Mejía León} \\[1cm]
+
+    \begin{figure}[!ht]
+        \centering
+        \includegraphics[width=0.6\textwidth]{Logos Uni.png}
+        \label{Logo Universidad Santo Tomas y facultad de ingenieria electronica}
+    \end{figure}
+
+    \vfill
+
+    {\large \textbf{Informe de Avance - Semana 14}} \\
+    {\large Fase 4: Desarrollo progresivo de la solución --- Validación funcional del stack de sensores} \\[1.5cm]
+
+    \textbf{Dirigido por:} \\
+    Ing. Armando Mateus Rojas, Msc. \\
+    Ing. Nestor Ivan Ospina, Msc. \\
+    Ing. Oscar Mauricio Gélvez Lizarazo, Msc. \\[1.5cm]
+
+    \vfill
+
+    {\large GED (Grupo de Estudio y Desarrollo en Robótica)} \\
+    {\large Facultad de Ingeniería Electrónica} \\
+    {\large División de Ingenierías} \\
+    {\large Bogotá, mayo de 2026}
+\end{titlepage}
+
+% --- CONTENIDO ---
+
+\section{Introducción}
+
+El presente informe documenta el avance correspondiente a la \textbf{Semana 14} del cronograma de actividades. Esta semana se ubica dentro de la \textbf{Fase 4 (Desarrollo progresivo de la solución)} conforme al cronograma del anteproyecto, con las actividades \textit{Implementación de funciones necesarias} (S13--S16) y \textit{Evaluación preliminar del comportamiento} (S14--S16) activas en este punto del proyecto.
+
+Tras el cierre de Fase 3 en la Semana 12 y el ejercicio del wall follower documentado en la Semana 13, esta semana se orientó a la validación funcional integral del stack de sensores del DeepRacer dentro del entorno realista del proyecto. El objetivo fue confirmar que el conjunto plataforma--simulador--sensores opera de forma consistente sobre el gemelo digital del primer piso de la Universidad Santo Tomás, antes de avanzar hacia la implementación de funciones de navegación basada en mapa (SLAM y AMCL), líneas de trabajo previstas para las semanas siguientes.
+
+\section{Objetivos de la Semana}
+
+\begin{itemize}
+    \item Validar la integración del DeepRacer con el mundo \texttt{primer\_piso.world}, correspondiente al gemelo digital del primer piso de la Universidad Santo Tomás.
+    \item Configurar manualmente \texttt{RViz} para visualizar simultáneamente los sensores principales del vehículo dentro del entorno realista.
+    \item Verificar el flujo de datos correcto de los tópicos \texttt{/scan} (LiDAR), \texttt{/zed\_camera\_*} (cámara estéreo) y \texttt{/odom} (odometría).
+    \item Comprobar la respuesta del vehículo a comandos de teleoperación dentro del entorno realista, observando simultáneamente el comportamiento de los sensores.
+    \item Generar evidencia técnica que sustente la disponibilidad del stack de sensores para las fases siguientes de implementación.
+\end{itemize}
+
+\section{Configuración del entorno de pruebas}
+
+\subsection{Carga del mundo \texttt{primer\_piso.world} en Gazebo}
+
+Se utilizó el mundo \texttt{primer\_piso.world}, que corresponde a una representación geométrica del primer piso del bloque de pruebas de la Universidad Santo Tomás. A diferencia de los modelos auxiliares \texttt{pasillo\_usta} (7~m × 3~m) y \texttt{pasillo\_grande} (15~m × 5~m) utilizados en la Semana 13 para los ejercicios de wall follower, este mundo representa la geometría del entorno real donde se evaluará el sistema. La estructura del mundo se describe en la Tabla \ref{tab:geometria_mundo}.
+
+\begin{table}[!ht]
+    \centering
+    \caption{Estructura geométrica del mundo \texttt{primer\_piso.world}.}
+    \label{tab:geometria_mundo}
+    \begin{tabular}{@{}lll@{}}
+        \toprule
+        \textbf{Elemento} & \textbf{Identificador} & \textbf{Descripción} \\ \midrule
+        Pared norte continua & \texttt{Wall\_17} & 44.25 m de longitud. \\
+        Pared sur segmentada & \texttt{Wall\_5} a \texttt{Wall\_13} & Cinco tramos con aperturas entre ellos. \\
+        Quiebre en L (extremo este) & \texttt{Wall\_15}, \texttt{Wall\_19} & Cierre lateral del pasillo. \\
+        Largo total del pasillo & --- & Aproximadamente 44 m. \\
+        Ancho libre & --- & Aproximadamente 5 m. \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+Las aperturas en la pared sur corresponden a accesos a salones que no fueron modelados como espacios cerrados en el SDF, por lo cual el LiDAR podrá observar a través de ellos durante las pruebas. Esta característica es relevante para las semanas siguientes (mapeo SLAM) y se documenta para tenerla presente.
+
+\subsection{Spawn del DeepRacer en el entorno realista}
+
+El vehículo AWS DeepRacer migrado a ROS 2 Humble en la Semana 12 fue cargado en el entorno mediante el launch principal del paquete \texttt{deepracer\_bringup}. Los siete controladores de \texttt{ros2\_control} (\texttt{joint\_state\_broadcaster}, cuatro controladores de ruedas y dos hinges de dirección) se activaron correctamente, confirmando que la migración Foxy~$\rightarrow$~Humble realizada previamente sigue estable sobre el mundo de mayor tamaño.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{deepracer_primer_piso.png}
+    \rule{0.9\textwidth}{0.4pt}\\
+    \textit{[Captura: DeepRacer spawneado dentro del mundo primer\_piso.world en Gazebo Classic 11, con vista superior del pasillo y el vehículo posicionado en el extremo oeste]}
+    \caption{Vehículo AWS DeepRacer cargado dentro del gemelo digital del primer piso de la Universidad Santo Tomás.}
+    \label{fig:deepracer_primer_piso}
+\end{figure}
+
+\section{Configuración manual de RViz para visualización de sensores}
+
+RViz fue lanzado como nodo independiente, sin una configuración \texttt{.rviz} preexistente. La configuración de los \textit{Displays} se realizó manualmente con el objetivo de tener control directo sobre qué tópicos se visualizaban y poder validar individualmente cada uno de los canales de información del vehículo.
+
+Los \textit{Displays} añadidos durante la sesión fueron:
+
+\begin{itemize}
+    \item \textbf{RobotModel}: para visualizar la geometría URDF del DeepRacer.
+    \item \textbf{LaserScan}: suscrito al tópico \texttt{/scan}, para observar las lecturas del LiDAR.
+    \item \textbf{Image}: suscrito al tópico del feed de la cámara estéreo \texttt{/zed\_camera\_*}.
+    \item \textbf{Odometry}: suscrito al tópico \texttt{/odom}, para observar la trayectoria estimada del vehículo.
+    \item \textbf{TF}: para verificar la coherencia del árbol de transformadas del sistema.
+\end{itemize}
+
+Se configuró el \texttt{Fixed Frame} en \texttt{odom} para que las observaciones de los sensores quedaran ancladas a un marco de referencia consistente durante el desplazamiento del vehículo. La configuración manual de los \textit{Displays} ---en contraste con cargar una configuración predefinida--- permitió validar de forma explícita la disponibilidad de cada tópico y el comportamiento individual de cada sensor.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{rviz_configuracion.png}
+    \rule{0.9\textwidth}{0.4pt}\\
+    \textit{[Captura: RViz con los Displays de RobotModel, LaserScan, Image, Odometry y TF activos sobre el DeepRacer en el primer\_piso.world]}
+    \caption{Configuración manual de RViz mostrando simultáneamente los sensores principales del DeepRacer.}
+    \label{fig:rviz_configuracion}
+\end{figure}
+
+\section{Validación funcional de los sensores}
+
+\subsection{LiDAR --- tópico \texttt{/scan}}
+
+Se observó que el LiDAR del DeepRacer publica de forma continua sobre el tópico \texttt{/scan}. Las lecturas dibujaron correctamente los contornos del pasillo en RViz, identificando tanto la pared norte continua como los tramos de la pared sur. La cobertura angular del sensor corresponde a aproximadamente 300°, con una zona ciega de 60° en la parte trasera del vehículo, característica conocida de la plataforma y documentada previamente en el informe de la Semana 13.
+
+Se confirmó que las aperturas en la pared sur (correspondientes a accesos a salones no modelados en el SDF) generan lecturas de rango máximo en esa dirección, lo cual es coherente con la geometría del mundo y constituye una consideración relevante para las etapas posteriores de mapeo.
+
+\subsection{Cámara estéreo --- tópico \texttt{/zed\_camera\_*}}
+
+El feed de la cámara ZED se visualizó correctamente en el \textit{Display} de \texttt{Image} de RViz. La imagen muestra el pasillo desde la perspectiva frontal del vehículo, con coherencia visual respecto a la posición del DeepRacer en el mundo. Esto confirma que el sensor de cámara está operativo y disponible para futuras tareas relacionadas con interacción humano--robot (HRI), reconocimiento semántico o percepción visual complementaria.
+
+\subsection{Odometría --- tópico \texttt{/odom}}
+
+El tópico \texttt{/odom} publica de forma continua durante toda la sesión. La pose del vehículo se actualiza coherentemente durante el desplazamiento, sin saltos abruptos ni discontinuidades. Es importante señalar que, al tratarse de un entorno simulado, la odometría proporcionada por el plugin \texttt{deepracer\_drive\_plugin} no presenta deriva acumulada como sí ocurriría en hardware real con encoders físicos. Esta diferencia debe tenerse presente como referencia honesta al interpretar el comportamiento del sistema en simulación y al planear la posterior implementación en Raspberry Pi 4.
+
+\subsection{Árbol de transformadas (TF)}
+
+El \textit{Display} de TF muestra el árbol de frames sin ramas descolgadas. Los frames principales (\texttt{odom}, \texttt{base\_link}, frames de las ruedas, frames de los sensores) se actualizan de forma sincronizada con el movimiento del vehículo, confirmando que la cadena cinemática del URDF está correctamente integrada con el plugin de simulación.
+
+\section{Teleoperación y observación de sensores en movimiento}
+
+Se utilizó el paquete \texttt{teleop\_twist\_keyboard} para enviar comandos sobre el tópico \texttt{/cmd\_vel} y operar el vehículo manualmente dentro del pasillo del \texttt{primer\_piso.world}. El DeepRacer respondió de manera coherente a los comandos:
+
+\begin{itemize}
+    \item Avance y retroceso lineal según comandos de velocidad lineal positiva y negativa.
+    \item Giros con la cinemática Ackermann característica del vehículo, respetando el radio de giro mínimo determinado por la geometría del modelo.
+    \item Detención inmediata al cesar los comandos.
+\end{itemize}
+
+Durante los desplazamientos se observó simultáneamente en RViz cómo el LaserScan barría dinámicamente las paredes a medida que el vehículo avanzaba, la imagen de la cámara mostraba la perspectiva cambiante del pasillo, y la odometría dibujaba la trayectoria recorrida. La consistencia entre los tres canales de información durante el movimiento es la evidencia central del funcionamiento integrado del stack de sensores.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{rviz_teleoperacion.png}
+    \rule{0.9\textwidth}{0.4pt}\\
+    \textit{[Captura: RViz durante teleoperación mostrando el DeepRacer en movimiento, el LaserScan barriendo las paredes del pasillo, la imagen de la cámara y la trayectoria de odometría]}
+    \caption{Visualización simultánea de los sensores durante teleoperación del DeepRacer en el \texttt{primer\_piso.world}.}
+    \label{fig:rviz_teleoperacion}
+\end{figure}
+
+\section{Análisis del trabajo de la semana}
+
+A partir de las pruebas realizadas se desprenden varias conclusiones técnicas relevantes para las semanas siguientes:
+
+\textbf{1. Integración end-to-end verificada.} El conjunto DeepRacer + \texttt{primer\_piso.world} + ROS 2 Humble opera de forma estable sobre el entorno realista. No se requirieron correcciones al plugin Ackermann, a la migración de \texttt{ros2\_control}, ni a la configuración del entorno de Gazebo. Esto cierra los riesgos técnicos heredados de las semanas anteriores (migración Foxy~$\rightarrow$~Humble, modelado del entorno, integración del DeepRacer en mundos de mayor tamaño).
+
+\textbf{2. Stack de sensores completo y disponible.} Los tres sensores principales del vehículo (LiDAR, cámara estéreo y odometría) están operativos y publicando información coherente. Esta confirmación es relevante porque cada uno cumplirá una función diferenciada en el sistema final:
+
+\begin{itemize}
+    \item El \textbf{LiDAR} es el sensor primario para tareas geométricas: construcción del mapa 2D mediante SLAM y posterior localización mediante AMCL.
+    \item La \textbf{cámara estéreo} queda confirmada como sensor disponible para tareas semánticas: detección de elementos del entorno, posibles componentes de la interacción humano--robot y reconocimiento visual de zonas de transición.
+    \item La \textbf{odometría} aportará la información de movimiento del vehículo, que será fusionada con las observaciones del LiDAR durante el mapeo y la localización.
+\end{itemize}
+
+\textbf{3. Caracterización del LiDAR del DeepRacer.} La cobertura angular de 300° (con zona ciega de 60° posterior) es una característica que debe tenerse en cuenta al diseñar las trayectorias de mapeo y al evaluar el desempeño del SLAM. Esta limitación es estructural del sensor y no se resuelve por software; en la práctica obligará a planificar recorridos que aseguren cobertura completa de las paredes desde múltiples orientaciones.
+
+\textbf{4. Aperturas no modeladas en \texttt{primer\_piso.world}.} Las aperturas correspondientes a los accesos a salones no tienen geometría detrás (los salones no están modelados como espacios cerrados). Esto producirá lecturas de rango máximo en esas direcciones y se traducirá en zonas de ``espacio libre desconocido'' en el mapa generado por SLAM. Es un comportamiento esperado pero debe quedar registrado como característica del entorno actual.
+
+\textbf{5. Sustento técnico para la pregunta de sensores.} La validación simultánea de LiDAR y cámara dentro del mismo entorno proporciona base experimental para sustentar la decisión técnica del sensor primario del sistema. La observación directa confirma lo previsto por la literatura citada en el anteproyecto: el LiDAR es más adecuado para mapeo y localización en entornos estructurados como pasillos interiores, mientras que la cámara es más adecuada para tareas que requieren información semántica del entorno. Los dos sensores son complementarios, no excluyentes.
+
+\section{Estado del cronograma y trabajo previsto}
+
+\subsection{Estado actual de actividades}
+
+El estado de las actividades del cronograma del anteproyecto activas en la Semana 14 se resume en la Tabla \ref{tab:estado_s14}.
+
+\begin{table}[!ht]
+    \centering
+    \caption{Estado de actividades --- Semana 14 (Fase 4).}
+    \label{tab:estado_s14}
+    \begin{tabular}{@{}lll@{}}
+        \toprule
+        \textbf{Actividad (anteproyecto)} & \textbf{Estado} & \textbf{Observación} \\ \midrule
+        Implementación de funciones necesarias (S13--S16) & En curso & Validación del stack de sensores. \\
+        Evaluación preliminar del comportamiento (S14--S16) & En curso & Observación funcional en RViz. \\
+        Registro de avances del proyecto (S8--S32) & En curso & Presente entregable. \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Trabajo previsto para la semana siguiente}
+
+A partir de la validación realizada esta semana, las actividades previstas para la Semana 15 incluyen:
+
+\begin{itemize}
+    \item \textbf{Inicio de la implementación de SLAM} (\texttt{slam\_toolbox}) sobre el entorno \texttt{primer\_piso.world}, utilizando las lecturas del LiDAR validadas esta semana.
+    \item \textbf{Captura del mapa 2D del pasillo} mediante recorrido teleoperado, aprovechando que el flujo de teleoperación quedó verificado.
+    \item \textbf{Evaluación preliminar de la calidad del mapa} generado: rectitud de paredes, dimensiones aproximadas, identificación del quiebre en L.
+    \item \textbf{Documentación de los parámetros} de \texttt{slam\_toolbox} utilizados, como base para los ajustes progresivos previstos en la actividad \textit{Ajuste progresivo de los elementos desarrollados} (S15--S17) del cronograma.
+\end{itemize}
+
+\section{Conclusiones de la Semana}
+
+Durante la Semana 14 se completó la validación funcional integral del stack de sensores del DeepRacer dentro del entorno realista \texttt{primer\_piso.world}. La configuración manual de RViz permitió verificar de forma directa que los tres canales principales de información del vehículo --- LiDAR, cámara estéreo y odometría --- operan de manera coherente y consistente, tanto en condiciones estáticas como durante el desplazamiento mediante teleoperación.
+
+Esta validación cumple las dos actividades del cronograma activas en la semana: corresponde a \textit{Implementación de funciones necesarias} en el sentido de que se integró y dejó operativo el conjunto de funciones de percepción del vehículo, y corresponde a \textit{Evaluación preliminar del comportamiento} en el sentido de que se observó cómo se comporta cada sensor en el entorno realista y se documentaron sus características.
+
+La principal contribución técnica de la semana es haber dejado el sistema en un estado en el cual las siguientes funciones del proyecto (mapeo SLAM, localización AMCL, planificación con Nav2) pueden implementarse sobre una base verificada, sin acumular dudas sobre el funcionamiento de los sensores subyacentes. Adicionalmente, la observación simultánea de LiDAR y cámara dentro del mismo entorno aporta sustento experimental directo para las decisiones técnicas relativas al rol de cada sensor en el sistema final.
+
+\begin{thebibliography}{99}
+
+\bibitem{ros2_humble_docs}
+Open Robotics,
+``ROS 2 Humble Hawksbill Documentation,''
+[Online]. Available: \url{https://docs.ros.org/en/humble/}
+
+\bibitem{rviz_docs}
+Open Robotics,
+``RViz User Guide,''
+[Online]. Available: \url{https://github.com/ros2/rviz}
+
+\bibitem{slam_toolbox}
+S. Macenski and I. Jambrecic,
+``SLAM Toolbox: SLAM for the dynamic world,''
+Journal of Open Source Software, vol. 6, no. 61, p. 2783, 2021. [Online]. Available: \url{https://github.com/SteveMacenski/slam_toolbox}
+
+\bibitem{teleop_twist_keyboard}
+Open Robotics,
+``teleop\_twist\_keyboard: Generic keyboard teleop for ROS 2,''
+[Online]. Available: \url{https://github.com/ros2/teleop_twist_keyboard}
+
+\end{thebibliography}
+
+\end{document}
