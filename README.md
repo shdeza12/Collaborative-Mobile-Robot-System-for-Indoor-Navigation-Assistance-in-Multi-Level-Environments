@@ -20,4 +20,4 @@ Sistema de robots móviles colaborativos para asistir en la navegación dentro d
 
 ## Autor
 
-Santiago Hernández Ávila
+Santiago Hernández Ávila y Jonny Alejandro Mejía León
