@@ -60,7 +60,7 @@ Ordenado por dependencia. Nada de lo que sigue puede saltarse.
 | ID | Riesgo | Impacto | Mitigación | Estado |
 |----|--------|---------|------------|--------|
 | R1 | **Ningún mapa obtenido es utilizable.** Mejor resultado: 41,9 % de cobertura en X y una extensión en Y de 16,5 m contra los 5,3 m reales del pasillo | Bloquea AMCL y Nav2 → bloquea todo | **Causa raíz confirmada:** `max_laser_range` de slam_toolbox estaba en 12,0 m, por encima del alcance físico del LiDAR (10,0 m). Los rayos sin retorno volvían como 10,0 m, quedaban bajo el umbral y se rasterizaban como paredes fantasma en arcos de 10 m de radio. Corregido a 9,5 m el 2026-08-03. Falta repetir el mapeo recorriendo los 63,5 m completos | 🟡 Causa corregida, pendiente re-mapeo |
-| R7 | **El código que se ejecuta no es el que está versionado.** `~/deepracer_sim_ws/src/aws-deepracer` era una copia independiente del repositorio, no un enlace | Las correcciones no surten efecto; hay trabajo que nunca llega al historial | Rescatado al repositorio lo que solo existía en el workspace. Falta reemplazar la copia por un enlace simbólico | 🟡 Rescatado, pendiente el enlace |
+| R7 | **El código que se ejecuta no es el que está versionado.** `~/deepracer_sim_ws/src/aws-deepracer` era una copia independiente del repositorio, no un enlace | Las correcciones no surten efecto; hay trabajo que nunca llega al historial | Resuelto el 2026-08-03: rescatado al repositorio lo que solo existía en el workspace y reemplazada la copia por un enlace simbólico. Verificado que `install/` resuelve al repositorio | ✅ Cerrado |
 | R2 | **Ackermann vs. Nav2.** El controlador por defecto (DWB) asume tracción diferencial; el DeepRacer no gira sobre su eje | Trayectorias inejecutables | Usar Smac Hybrid-A* + controlador con restricción no holonómica (previsto en el diagrama de arquitectura) | 🔴 Abierto |
 | R3 | **Ambigüedad de localización.** Pasillo largo de paredes lisas y repetitivas → AMCL propenso a divergir | Falsos negativos en las métricas de OE4 | Evaluar landmarks en el mundo o fusión con odometría visual | 🟡 Identificado |
 | R4 | **Pared sur abierta en el SDF** deja celdas desconocidas | Afecta planificación, no solo el mapa | Cerrar la geometría en `primer_piso_v2.world` | 🟡 Identificado (desde S14) |
@@ -115,8 +115,8 @@ Deben justificarse por escrito en el documento final:
 
 ## 8. Próximos pasos (S17–S18)
 
-1. Reconstruir la **matriz de requisitos RF↔OE↔prueba** (cierra R5 y habilita §7.4 del anteproyecto).
-2. Repetir la **sesión de mapeo** con verificación de cobertura antes de guardar (cierra R1).
+1. **Repetir la sesión de mapeo** con `max_laser_range: 9.5`, recorriendo los 63,5 m completos del pasillo, y validar con `herramientas/verificar_mapa.py` antes de guardar (cierra R1).
+2. Reconstruir la **matriz de requisitos RF↔OE↔prueba** (cierra R5 y habilita §7.4 del anteproyecto).
 3. Definir el **protocolo experimental de OE4** — determina qué instrumentar en el código antes de escribirlo.
-4. Emitir los **entregables S16 y S17** pendientes.
+4. Emitir los **entregables S16 y S17** pendientes. El S16 tiene material completo: diagnóstico diferencial de `map_saver_cli`, causa raíz del `max_laser_range` y resultado antes/después.
 5. Llevar la **decisión de alcance** a los directores.
