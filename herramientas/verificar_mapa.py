@@ -12,6 +12,7 @@ Pensado para ejecutarse ANTES de cerrar Gazebo, para poder repetir el recorrido
 sin perder la sesion de mapeo.
 """
 
+import math
 import re
 import sys
 from pathlib import Path
@@ -43,20 +44,31 @@ def leer_yaml_mapa(ruta):
 
 
 def extension_mundo(ruta):
-    """Extension en X e Y de las poses declaradas en el .world."""
+    """Extension real en X e Y de la geometria declarada en el .world.
+
+    Recorre los <link> de cada <model> y proyecta los dos extremos de cada pared
+    a partir de su pose (x, y, yaw) y del largo de su caja. Tomar solo el centro
+    de las poses subestima el largo del mundo y sobrestima su ancho.
+    """
     texto = Path(ruta).read_text()
-    poses = re.findall(r"<pose[^>]*>([^<]+)</pose>", texto)
-    xs, ys = [], []
-    for p in poses:
-        partes = p.split()
-        if len(partes) >= 2:
-            try:
-                xs.append(float(partes[0]))
-                ys.append(float(partes[1]))
-            except ValueError:
-                continue
-    if not xs:
-        sys.exit(f"No se encontraron poses en {ruta}.")
+    puntos = []
+    for _, cuerpo in re.findall(r"<link name='([^']+)'>(.*?)</link>", texto, re.S):
+        m_pose = re.search(r"<pose[^>]*>([^<]+)</pose>", cuerpo)
+        m_size = re.search(r"<size>([^<]+)</size>", cuerpo)
+        if not m_pose:
+            continue
+        valores = [float(v) for v in m_pose.group(1).split()]
+        x, y = valores[0], valores[1]
+        yaw = valores[5] if len(valores) > 5 else 0.0
+        largo = float(m_size.group(1).split()[0]) if m_size else 0.0
+        dx, dy = largo / 2 * math.cos(yaw), largo / 2 * math.sin(yaw)
+        puntos.append((x - dx, y - dy))
+        puntos.append((x + dx, y + dy))
+
+    if not puntos:
+        sys.exit(f"No se encontro geometria de paredes en {ruta}.")
+    xs = [p[0] for p in puntos]
+    ys = [p[1] for p in puntos]
     return max(xs) - min(xs), max(ys) - min(ys)
 
 
@@ -119,7 +131,11 @@ def analizar(ruta_yaml, ruta_world):
     if mapeado_y > mundo_y * 1.5:
         fallos.append(
             f"El mapa mide {mapeado_y:.1f} m en Y y el mundo solo {mundo_y:.1f} m. "
-            "Sintoma de deriva de pose: el corredor se esta 'abriendo'."
+            "Hay celdas ocupadas fuera de la geometria real. Dos causas posibles, "
+            "y conviene distinguirlas mirando el .pgm: (a) rayos sin retorno "
+            "rasterizados como pared, que dibujan arcos a distancia constante -- "
+            "revisar que max_laser_range este por debajo del alcance del sensor; "
+            "(b) deriva de pose, que dobla o curva las paredes del corredor."
         )
     if frac_desconocido > DESCONOCIDO_MAXIMO:
         fallos.append(

@@ -18,9 +18,14 @@ slam_toolbox:
     debug_logging: false
     throttle_scans: 1
     transform_publish_period: 0.25 #if 0 never publishes odometry
-    map_update_interval: 1.0
+    map_update_interval: 0.5
     resolution: 0.05
-    max_laser_range: 12.0 #for rastering images
+    # DEBE quedar por debajo del alcance fisico del LiDAR, que es 10.0 m
+    # (deepracer.xacro: lidar_360_degree_max_range). Con el valor anterior de
+    # 12.0 los rayos sin retorno volvian como 10.0 m, quedaban por debajo del
+    # umbral y se rasterizaban como paredes fantasma, dibujando arcos a 10 m
+    # de radio en los extremos abiertos del pasillo.
+    max_laser_range: 9.5
     minimum_time_interval: 0.05
     transform_timeout: 0.5
     tf_buffer_duration: 10.0
@@ -34,7 +39,7 @@ slam_toolbox:
     # Los valores previos eran los del upstream de AWS, dimensionados para una
     # pista de carreras pequena, e impedian el enlace de nodos y el cierre de
     # bucle a lo largo del corredor.
-    minimum_travel_distance: 0.2
+    minimum_travel_distance: 0.15
     minimum_travel_heading: 0.3
     scan_buffer_size: 20
     scan_buffer_maximum_scan_distance: 10.0

@@ -59,7 +59,8 @@ Ordenado por dependencia. Nada de lo que sigue puede saltarse.
 
 | ID | Riesgo | Impacto | Mitigación | Estado |
 |----|--------|---------|------------|--------|
-| R1 | **El mapa guardado no es utilizable.** Cobertura del 37,1 % en X y deriva de pose que "abre" el pasillo a 14,1 m cuando el mundo mide 6,7 m. 62,4 % de celdas desconocidas | Bloquea AMCL y Nav2 → bloquea todo | **Causa raíz identificada:** los parámetros de `slam_toolbox.yaml` eran los del upstream de AWS, dimensionados para una pista pequeña. Corregidos el 2026-08-03. Falta repetir la sesión de mapeo | 🟡 Causa corregida, pendiente re-mapeo |
+| R1 | **Ningún mapa obtenido es utilizable.** Mejor resultado: 41,9 % de cobertura en X y una extensión en Y de 16,5 m contra los 5,3 m reales del pasillo | Bloquea AMCL y Nav2 → bloquea todo | **Causa raíz confirmada:** `max_laser_range` de slam_toolbox estaba en 12,0 m, por encima del alcance físico del LiDAR (10,0 m). Los rayos sin retorno volvían como 10,0 m, quedaban bajo el umbral y se rasterizaban como paredes fantasma en arcos de 10 m de radio. Corregido a 9,5 m el 2026-08-03. Falta repetir el mapeo recorriendo los 63,5 m completos | 🟡 Causa corregida, pendiente re-mapeo |
+| R7 | **El código que se ejecuta no es el que está versionado.** `~/deepracer_sim_ws/src/aws-deepracer` era una copia independiente del repositorio, no un enlace | Las correcciones no surten efecto; hay trabajo que nunca llega al historial | Rescatado al repositorio lo que solo existía en el workspace. Falta reemplazar la copia por un enlace simbólico | 🟡 Rescatado, pendiente el enlace |
 | R2 | **Ackermann vs. Nav2.** El controlador por defecto (DWB) asume tracción diferencial; el DeepRacer no gira sobre su eje | Trayectorias inejecutables | Usar Smac Hybrid-A* + controlador con restricción no holonómica (previsto en el diagrama de arquitectura) | 🔴 Abierto |
 | R3 | **Ambigüedad de localización.** Pasillo largo de paredes lisas y repetitivas → AMCL propenso a divergir | Falsos negativos en las métricas de OE4 | Evaluar landmarks en el mundo o fusión con odometría visual | 🟡 Identificado |
 | R4 | **Pared sur abierta en el SDF** deja celdas desconocidas | Afecta planificación, no solo el mapa | Cerrar la geometría en `primer_piso_v2.world` | 🟡 Identificado (desde S14) |
@@ -105,6 +106,10 @@ Deben justificarse por escrito en el documento final:
 | 2026-08-03 | Alcance: validación en simulación, hardware como demostración | Ver §3 |
 | 2026-08-03 | Se reajustan los parámetros de `slam_toolbox.yaml` al tamaño real del entorno | `scan_buffer_maximum_scan_distance` (0.5→10.0), `link_scan_maximum_distance` (0.75→10.0) y `loop_search_maximum_distance` (3.0→8.0) eran valores de una pista de carreras; impedían enlazar nodos y cerrar bucle en un pasillo de 58 m |
 | 2026-08-03 | Se incorpora `herramientas/verificar_mapa.py` como paso obligatorio antes de guardar un mapa | Ningún mapa vuelve a declararse "satisfactorio" sin verificación objetiva de cobertura y deriva |
+| 2026-08-03 | `max_laser_range` de slam_toolbox: 12,0 → 9,5 m | Debe quedar por debajo de los 10,0 m del LiDAR (`deepracer.xacro`). Con 12,0 los rayos sin retorno se tomaban como impactos válidos y generaban paredes inexistentes |
+| 2026-08-03 | `map_saver_cli` requiere `--ros-args -p use_sim_time:=true` en simulación | Sin ese parámetro agota su espera de 2 s y falla con `Failed to spin map subscription`. Diagnóstico por descarte: `/map` publicaba a 2 Hz con QoS `TRANSIENT_LOCAL` correcta |
+| 2026-08-03 | Se declaran en `deepracer_bringup/package.xml` las dependencias de ejecución que estaban implícitas | `slam_toolbox`, `nav2_map_server`, `gazebo_ros` y otras se lanzaban sin declararse: `rosdep install` no las instalaba en un equipo nuevo |
+| 2026-08-03 | README reescrito con procedimiento de instalación reproducible | El workspace debe enlazar el repositorio, no copiarlo, para que el código compilado sea el versionado |
 
 ---
 
