@@ -59,7 +59,7 @@ Ordenado por dependencia. Nada de lo que sigue puede saltarse.
 
 | ID | Riesgo | Impacto | Mitigación | Estado |
 |----|--------|---------|------------|--------|
-| R1 | **El mapa guardado no es utilizable.** `primer_piso.pgm` cubre 23,0 m × 15,7 m; el mundo mide 58,2 m × 6,7 m. Presenta deriva y paredes dobladas | Bloquea AMCL y Nav2 → bloquea todo | Repetir la sesión de mapeo a velocidad baja, con cierre de bucle, y verificar cobertura antes de guardar | 🔴 Abierto |
+| R1 | **El mapa guardado no es utilizable.** Cobertura del 37,1 % en X y deriva de pose que "abre" el pasillo a 14,1 m cuando el mundo mide 6,7 m. 62,4 % de celdas desconocidas | Bloquea AMCL y Nav2 → bloquea todo | **Causa raíz identificada:** los parámetros de `slam_toolbox.yaml` eran los del upstream de AWS, dimensionados para una pista pequeña. Corregidos el 2026-08-03. Falta repetir la sesión de mapeo | 🟡 Causa corregida, pendiente re-mapeo |
 | R2 | **Ackermann vs. Nav2.** El controlador por defecto (DWB) asume tracción diferencial; el DeepRacer no gira sobre su eje | Trayectorias inejecutables | Usar Smac Hybrid-A* + controlador con restricción no holonómica (previsto en el diagrama de arquitectura) | 🔴 Abierto |
 | R3 | **Ambigüedad de localización.** Pasillo largo de paredes lisas y repetitivas → AMCL propenso a divergir | Falsos negativos en las métricas de OE4 | Evaluar landmarks en el mundo o fusión con odometría visual | 🟡 Identificado |
 | R4 | **Pared sur abierta en el SDF** deja celdas desconocidas | Afecta planificación, no solo el mapa | Cerrar la geometría en `primer_piso_v2.world` | 🟡 Identificado (desde S14) |
@@ -78,6 +78,9 @@ Registradas el 2026-08-03 para corrección explícita:
 | S15 Tabla 1 y §5: `resolution = 0.05` m/celda | `primer_piso.yaml` declara `resolution: 0.06` | Corregir el informe o regenerar el mapa |
 | S15 §3.4: "la extensión del mapa es consistente con las dimensiones del pasillo (44 m × 5 m)" | El mapa cubre 23,0 m × 15,7 m | Afirmación no sostenida por el artefacto |
 | S15 Tabla 2: "Captura del quiebre en L — Satisfactorio" | No es identificable en el mapa guardado | Reevaluar tras repetir el mapeo |
+| S15 Tabla 1: `minimum_travel_distance = 0.5`, `minimum_travel_heading = 0.5` | El archivo declaraba `0.1` y `0.57` | Corregir el informe con los valores vigentes |
+| S15 §3.1: "modo *online asynchronous*" | El launch instancia `sync_slam_toolbox_node` (nodo **síncrono**) | Corregir el informe |
+| S15 §3.4: las aperturas de la pared sur explican las celdas desconocidas | La causa real es deriva de pose por parámetros mal dimensionados | Rehacer el análisis de la sección |
 
 ---
 
@@ -100,6 +103,8 @@ Deben justificarse por escrito en el documento final:
 | 2026-08-03 | Se restablece el vínculo git del directorio local con el repositorio remoto | El directorio de trabajo era una copia sin historial; `primer_piso_v2.world` (18-jun) llevaba 7 semanas sin respaldo |
 | 2026-08-03 | Se adopta `ESTADO.md` como tablero único de trazabilidad | Los informes semanales registraban actividad, pero no el estado agregado frente a los objetivos |
 | 2026-08-03 | Alcance: validación en simulación, hardware como demostración | Ver §3 |
+| 2026-08-03 | Se reajustan los parámetros de `slam_toolbox.yaml` al tamaño real del entorno | `scan_buffer_maximum_scan_distance` (0.5→10.0), `link_scan_maximum_distance` (0.75→10.0) y `loop_search_maximum_distance` (3.0→8.0) eran valores de una pista de carreras; impedían enlazar nodos y cerrar bucle en un pasillo de 58 m |
+| 2026-08-03 | Se incorpora `herramientas/verificar_mapa.py` como paso obligatorio antes de guardar un mapa | Ningún mapa vuelve a declararse "satisfactorio" sin verificación objetiva de cobertura y deriva |
 
 ---
 

@@ -144,7 +144,33 @@ Si los 4 dan resultados sanos pero RViz se ve vacío, el problema es de visualiz
 
 ## Guardar el mapa
 
-Mientras la sim, slam_toolbox y RViz están todavía corriendo y el mapa se ve cerrado y consistente, **antes de cerrar nada**, ejecutar en una terminal nueva (sourceada):
+> **Mundo de trabajo actual: `primer_piso_v2.world`** (58,2 m × 6,7 m). El recorrido debe cubrir
+> el pasillo completo de extremo a extremo, no solo el primer tramo.
+
+### Paso obligatorio: verificar antes de dar el mapa por bueno
+
+Guardar primero a un archivo temporal y validarlo. **Con Gazebo y slam_toolbox todavía
+corriendo**, para poder completar el recorrido sin perder la sesión si el mapa no pasa:
+
+```bash
+ros2 run nav2_map_server map_saver_cli -f /tmp/mapa_candidato
+python3 ~/Documents/Tesis/herramientas/verificar_mapa.py \
+    /tmp/mapa_candidato.yaml \
+    ~/Documents/Tesis/primer_piso_v2.world
+```
+
+El script compara la extensión realmente mapeada contra la geometría del `.world` y rechaza
+el mapa si la cobertura es insuficiente o si detecta deriva de pose (el pasillo "abriéndose"
+más de lo que mide en realidad). Si sale `RECHAZADO`, **no guardar como definitivo**: seguir
+recorriendo los tramos faltantes y repetir la verificación.
+
+El mapa de la Semana 15 fue rechazado por esta vía: 37,1 % de cobertura en X y una anchura
+aparente de 14,1 m contra los 6,7 m reales del mundo.
+
+### Guardado definitivo
+
+Solo cuando la verificación salga `ACEPTADO`, **antes de cerrar nada**, ejecutar en una
+terminal nueva (sourceada):
 
 **Formato Nav2 / AMCL (`.pgm` + `.yaml`):**
 
