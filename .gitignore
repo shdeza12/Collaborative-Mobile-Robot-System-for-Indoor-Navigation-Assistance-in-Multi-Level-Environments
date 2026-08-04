@@ -1,0 +1,19 @@
+# Artefactos de compilación de colcon/ROS 2
+build/
+install/
+log/
+
+# Caché Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Editores
+.vscode/
+.idea/
+*.swp
+*~
+
+# Sistema
+.DS_Store
+Thumbs.db
