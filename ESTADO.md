@@ -6,11 +6,12 @@
 | | |
 |---|---|
 | **Semana del cronograma** | S17 de 32 |
-| **Fecha de corte** | 2026-08-03 |
-| **Fases activas** | Fase 4 — Desarrollo (S11–S17, cerrando) · Fase 5 — Integración (S16–S20, iniciando) |
-| **Semanas restantes** | 15 (documento final S25–S30, sustentación S30–S32) |
+| **Fecha de corte** | 2026-08-05 |
+| **Fases activas** | Fase 4 — Desarrollo (cerrando) · Fase 5 — Integración (S18–S23) |
+| **Semanas restantes** | 15 (sustentación S28–S29, documento final S29–S32) |
 | **Último entregable formal** | Semana 15 |
 | **Entregables pendientes** | S16, S17 |
+| **Planificación vigente** | [`Documentos/CRONOGRAMA_S17_S32.md`](Documentos/CRONOGRAMA_S17_S32.md) |
 
 ---
 
@@ -19,39 +20,47 @@
 | ID | Objetivo específico (anteproyecto §4.2) | Avance | Evidencia verificable | Responsable |
 |----|------------------------------------------|--------|------------------------|-------------|
 | **OE1** | Modelar arquitectura funcional: requisitos, escenarios multipiso, asignación de tareas, esquema de comunicación | 🟡 40 % | `Documentos/Evidencia/arquitectura.png` (diagrama completo con protocolo de relevo). **Falta:** documento de requisitos funcionales numerados y matriz de trazabilidad | — |
-| **OE2** | Plataforma robótica con **dos** vehículos: locomoción, sensado, procesamiento y **comunicación** | 🟡 25 % | Un robot en Gazebo, `deepracer_sim.launch.py`, stack de sensores validado (S14), SLAM 2D (S15). **Falta:** segundo agente, namespaces, servidor de coordinación, comunicación inter-robot | — |
-| **OE3** | Interfaz móvil HRI (selección origen–destino) | 🔴 0 % | Ninguna | — |
+| **OE2** | Plataforma robótica con **dos** vehículos: locomoción, sensado, procesamiento y **comunicación** | 🟡 40 % | Un robot en Gazebo, `deepracer_sim.launch.py`, stack de sensores validado (S14), SLAM 2D (S15). **Hardware (2026-08-05):** `deepracer-custom-car` instalado en Raspberry Pi 4 y en la tarjeta original del DeepRacer; acceso por red a ambas; locomoción verificada desde la interfaz web. **Falta:** sensado con LiDAR físico, control desde ROS 2 en vez de la web, namespaces, servidor de coordinación, comunicación inter-robot | — |
+| **OE3** | Interfaz HRI web responsiva (selección origen–destino) | 🔴 0 % | Ninguna | — |
 | **OE4** | Evaluación con métricas: tiempo de respuesta, tiempo de asignación, tasa de éxito, continuidad entre niveles | 🔴 0 % | Ninguna. No existe instrumentación ni protocolo experimental | — |
 
-**Lectura:** a S17 de 32 (53 % del calendario) el avance técnico agregado está cerca del 20 %. El aporte declarado del proyecto —coordinación inter-robot y protocolo de relevo— aún no tiene implementación.
+**Lectura:** a S17 de 32 (53 % del calendario) el avance técnico agregado está cerca del 25 %. El aporte declarado del proyecto —coordinación inter-robot y protocolo de relevo— aún no tiene implementación. La planificación de S17–S32 lo sitúa entre S20 y S22.
 
 ---
 
 ## 2. Camino crítico
 
-Ordenado por dependencia. Nada de lo que sigue puede saltarse.
+Ordenado por dependencia. Nada de lo que sigue puede saltarse. La columna *Semana* remite al [cronograma vigente](Documentos/CRONOGRAMA_S17_S32.md).
 
-| # | Hito | Bloquea a | Estado |
-|---|------|-----------|--------|
-| 1 | **Mapa 2D utilizable** del primer piso (cobertura completa, sin deriva) | AMCL → Nav2 → todo lo demás | 🔴 El mapa actual no sirve (ver §4) |
-| 2 | **Navegación autónoma punto a punto** de un robot con restricción Ackermann | Guiado, relevo, métricas | 🔴 No iniciado |
-| 3 | **Mundo con segundo piso y zona de transición** | Protocolo de relevo, OE4 | 🔴 No existe |
-| 4 | **Segundo agente + servidor de coordinación** | OE2, protocolo de relevo | 🔴 No iniciado |
-| 5 | **Protocolo de relevo** (máquina de estados) | OE4, núcleo del aporte | 🔴 No iniciado |
-| 6 | **Interfaz HRI** | OE3 | 🔴 No iniciado |
-| 7 | **Instrumentación de métricas** | OE4, Fase 6 | 🔴 No iniciado |
+| # | Hito | Bloquea a | Semana | Estado |
+|---|------|-----------|--------|--------|
+| 1 | **Contrato de interfaces ROS 2** (namespaces, acciones, tópicos) | Todo el desarrollo posterior | S17 | 🔴 No iniciado |
+| 2 | **Réplica del laboratorio GED en Gazebo**, dividida en dos zonas | Mapas, navegación, relevo | S18 | 🔴 No existe |
+| 3 | **Navegación autónoma punto a punto** con restricción Ackermann | Guiado, relevo, métricas | S19 | 🟡 Validada en el mundo del pasillo; falta sobre la réplica |
+| 4 | **Segundo agente + servidor de coordinación** | OE2, protocolo de relevo | S19–S20 | 🔴 No iniciado |
+| 5 | **Protocolo de relevo** (máquina de estados) | OE4, núcleo del aporte | S21 | 🔴 No iniciado |
+| 6 | **Interfaz HRI** web sobre `rosbridge_suite` | OE3 | S22 | 🔴 No iniciado |
+| 7 | **Instrumentación de métricas** | OE4, Fase 6 | S20–S21 | 🔴 No iniciado |
+| 8 | **Bring-up de los dos DeepRacers** y despliegue del stack | Demostración física de OE2 | S21–S22 | 🟡 Custom car instalado; falta ROS 2 y LiDAR |
+
+El mapa del pasillo USTA (riesgo R1) **salió del camino crítico** al adoptarse el laboratorio GED como entorno experimental. Permanece como escenario secundario opcional.
 
 ---
 
 ## 3. Decisión de alcance vigente
 
-**Estrategia adoptada (2026-08-03): validación completa en simulación, hardware como demostración.**
+**Estrategia adoptada (2026-08-05): la simulación produce la evidencia estadística; el hardware produce la demostración.** Sustituye a la versión del 2026-08-03. Desarrollo completo en [`Documentos/CRONOGRAMA_S17_S32.md`](Documentos/CRONOGRAMA_S17_S32.md) §4.
 
-- Los cuatro objetivos específicos se validan en **simulación** (dos robots, dos pisos, relevo, métricas con N repeticiones).
-- El prototipo físico queda como **demostración de viabilidad** en un piso, con relevo emulado.
-- **Razón:** el aporte declarado es la arquitectura de coordinación, no la locomoción. Con 15 semanas restantes, apostar a dos vehículos físicos + dos pisos reales + app móvil arriesga terminar sin ninguno de los dos.
+| ID | Decisión |
+|----|----------|
+| D1 | Las cuatro métricas de OE4 se miden en **simulación con N = 30**. Los vehículos físicos ejecutan el protocolo con N de 5 a 10, como demostración funcional. *Razón:* una tasa de éxito exige N. Con 5 corridas y 4 aciertos el IC del 95 % va de 38 % a 96 %; con 30 y 27 aciertos va de 80 % a 97 % |
+| D2 | **Un piso es una región navegable con mapa y agente propios; la transición es un evento lógico.** En el esquema de relevo ningún robot cruza entre niveles, luego la frontera no necesita ser vertical. Se declara como simplificación explícita en el documento final |
+| D3 | Las pruebas físicas se realizan en el **laboratorio GED**, en condiciones controladas. Alineado con OE4 y con §4.3 del anteproyecto |
+| D4 | El laboratorio se **replica en Gazebo**: mismo protocolo y misma geometría en ambos entornos, lo que hace comparables los resultados |
+| D5 | La interfaz HRI es **web responsiva** sobre `rosbridge_suite`, accedida desde un teléfono. No es un recorte: §7.2 del anteproyecto lista "JavaScript, PHP, HTML" y "dispositivos móviles" |
+| D6 | El código se escribe **una vez contra un contrato de interfaces ROS 2** y se despliega en dos destinos. Coordinación, relevo, HRI e instrumentación operan contra `/robot1/...` y `/robot2/...` sin conocer el backend |
 
-> ⚠️ **Pendiente:** esta decisión debe presentarse formalmente a los directores (Mateus, Ospina, Gélvez) y quedar en acta antes de S19.
+> ⚠️ **Pendiente:** estas decisiones deben presentarse formalmente a los directores (Mateus, Ospina, Gélvez) y quedar en acta antes de S19.
 
 ---
 
@@ -59,13 +68,15 @@ Ordenado por dependencia. Nada de lo que sigue puede saltarse.
 
 | ID | Riesgo | Impacto | Mitigación | Estado |
 |----|--------|---------|------------|--------|
-| R1 | **Ningún mapa obtenido es utilizable.** Mejor resultado: 41,9 % de cobertura en X y una extensión en Y de 16,5 m contra los 5,3 m reales del pasillo | Bloquea AMCL y Nav2 → bloquea todo | **Causa raíz confirmada:** `max_laser_range` de slam_toolbox estaba en 12,0 m, por encima del alcance físico del LiDAR (10,0 m). Los rayos sin retorno volvían como 10,0 m, quedaban bajo el umbral y se rasterizaban como paredes fantasma en arcos de 10 m de radio. Corregido a 9,5 m el 2026-08-03. Falta repetir el mapeo recorriendo los 63,5 m completos | 🟡 Causa corregida, pendiente re-mapeo |
+| R1 | **Ningún mapa obtenido es utilizable.** Mejor resultado: 41,9 % de cobertura en X y una extensión en Y de 16,5 m contra los 5,3 m reales del pasillo | **Degradado el 2026-08-05:** ya no bloquea. Afecta solo al pasillo USTA, que pasó a escenario secundario | **Causa raíz confirmada:** `max_laser_range` de slam_toolbox estaba en 12,0 m, por encima del alcance físico del LiDAR (10,0 m). Los rayos sin retorno volvían como 10,0 m, quedaban bajo el umbral y se rasterizaban como paredes fantasma en arcos de 10 m de radio. Corregido a 9,5 m el 2026-08-03 | 🟢 Fuera del camino crítico |
 | R7 | **El código que se ejecuta no es el que está versionado.** `~/deepracer_sim_ws/src/aws-deepracer` era una copia independiente del repositorio, no un enlace | Las correcciones no surten efecto; hay trabajo que nunca llega al historial | Resuelto el 2026-08-03: rescatado al repositorio lo que solo existía en el workspace y reemplazada la copia por un enlace simbólico. Verificado que `install/` resuelve al repositorio | ✅ Cerrado |
-| R2 | **Ackermann vs. Nav2.** El controlador por defecto (DWB) asume tracción diferencial; el DeepRacer no gira sobre su eje | Trayectorias inejecutables | Usar Smac Hybrid-A* + controlador con restricción no holonómica (previsto en el diagrama de arquitectura) | 🔴 Abierto |
+| R2 | **Ackermann vs. Nav2.** El controlador por defecto (DWB) asume tracción diferencial; el DeepRacer no gira sobre su eje | Trayectorias inejecutables | Resuelto en el stack publicado en `integracion-nav2`: Smac Hybrid-A\*, árboles de comportamiento propios sin `<Spin>`, `use_rotate_to_heading: false`, footprint real 0,28 × 0,19 m. **Sin verificar:** el cambio a `REEDS_SHEPP` + `allow_reversing` que se hizo tras abortar el goal (−5, 1.5) con "Resulting plan has 0 poses" | 🟡 Mitigado, verificación pendiente |
 | R3 | **Ambigüedad de localización.** Pasillo largo de paredes lisas y repetitivas → AMCL propenso a divergir | Falsos negativos en las métricas de OE4 | Evaluar landmarks en el mundo o fusión con odometría visual | 🟡 Identificado |
 | R4 | **Pared sur abierta en el SDF** deja celdas desconocidas | Afecta planificación, no solo el mapa | Cerrar la geometría en `primer_piso_v2.world` | 🟡 Identificado (desde S14) |
-| R5 | **Fases 2 y 3 sin artefacto verificable.** No existe documento de requisitos | Imposibilita §7.4 del anteproyecto ("comparación con requisitos") | Reconstruir la matriz RF↔OE↔prueba | 🔴 Abierto |
+| R5 | **Fases 2 y 3 sin artefacto verificable.** No existe documento de requisitos | Imposibilita §7.4 del anteproyecto ("comparación con requisitos") | Reconstruir la matriz RF↔OE↔prueba. **Programado para S18** | 🔴 Abierto |
 | R6 | **Discrepancias informe ↔ repositorio** (ver §5) | Credibilidad de la evidencia ante el jurado | Corregir en el entregable de cierre de fase | 🔴 Abierto |
+| R8 | **Desajuste de distribución.** El stack de simulación es ROS 2 Humble; `deepracer-custom-car` sobre Ubuntu 24.04 es Jazzy. Los parámetros de Nav2 y varias API cambian entre ambas | Puede invalidar el supuesto de D6: que el mismo código se despliega en los dos destinos sin cambios | Caracterizarlo en el **spike de S18**, pregunta 4. Si el desajuste es grande, mantener una variante de configuración por distribución | 🔴 Abierto, sin caracterizar |
+| R9 | **Capacidad insuficiente.** El trabajo pendiente suma 9–10 semanas-persona y el calendario ofrece 7 | Se llega a octubre sin capa de coordinación, que es el aporte declarado | Reparto en dos frentes entre S18 y S21, y escalera de recortes en §9 del cronograma. Punto de decisión go/no-go en S21 | 🟡 Mitigado por planificación |
 
 ---
 
@@ -91,6 +102,8 @@ Deben justificarse por escrito en el documento final:
 
 | Anteproyecto | Realidad | Justificación |
 |---|---|---|
+| §4.3: pruebas "en un entorno interior con multiples pisos" | Laboratorio GED, un solo nivel dividido en dos zonas con franja de transición | El propio §4.3 delimita el alcance a "la demostración funcional de la prueba de concepto **en condiciones controladas**", y OE4 pide "un entorno interior **controlado**". En el esquema de relevo del anteproyecto ningún robot cruza entre niveles — ese es el aporte — de modo que la frontera puede ser cualquier discontinuidad que ningún agente atraviese. **Es una simplificación del escenario físico, no del protocolo** |
+| §4.3: "una aplicación móvil que actuará como interfaz HRI" | Interfaz web responsiva sobre `rosbridge_suite`, accedida desde el navegador de un teléfono | §7.2 lista como software del proyecto "JavaScript, PHP, HTML" y como hardware "dispositivos móviles": la pila declarada era web desde el anteproyecto. OE3 exige selección de origen y destino y eso se cumple íntegro. **Aun así es una desviación y debe declararse**: no es una aplicación nativa |
 | Plataforma DonkeyCar (presupuesto: chasis, PCA9685) | AWS DeepRacer | Pendiente de redactar |
 | Simulador CoppeliaSim | Gazebo Classic 11 | Pendiente de redactar |
 | ROS 2 "Humble o Jazzy" | Humble | Cerrar la ambigüedad |
@@ -110,13 +123,24 @@ Deben justificarse por escrito en el documento final:
 | 2026-08-03 | `map_saver_cli` requiere `--ros-args -p use_sim_time:=true` en simulación | Sin ese parámetro agota su espera de 2 s y falla con `Failed to spin map subscription`. Diagnóstico por descarte: `/map` publicaba a 2 Hz con QoS `TRANSIENT_LOCAL` correcta |
 | 2026-08-03 | Se declaran en `deepracer_bringup/package.xml` las dependencias de ejecución que estaban implícitas | `slam_toolbox`, `nav2_map_server`, `gazebo_ros` y otras se lanzaban sin declararse: `rosdep install` no las instalaba en un equipo nuevo |
 | 2026-08-03 | README reescrito con procedimiento de instalación reproducible | El workspace debe enlazar el repositorio, no copiarlo, para que el código compilado sea el versionado |
+| 2026-08-04 | El trabajo Nav2 + AMCL se publica en la rama `integracion-nav2` (commit `1242651`) sobre `origin/main` | Siete semanas de avance vivían sin commitear. Se resolvió por rama y no sobre `main` porque el historial local diverge del remoto y la rama es compartida con Jonny |
+| 2026-08-05 | `deepracer-custom-car` instalado en Raspberry Pi 4 y en la tarjeta original del DeepRacer; locomoción verificada por interfaz web | Primer avance de OE2 sobre hardware real. Sube OE2 de 25 % a 40 % |
+| 2026-08-05 | Se replanifica S17–S32 y se emite `Documentos/CRONOGRAMA_S17_S32.md` | Entregable exigido por el espacio académico Proyecto de Grado 2. La sustentación quedó en S28–S29 y el documento final se traslada después de ella, lo que saca la redacción del camino crítico |
+| 2026-08-05 | Entorno experimental: laboratorio GED en lugar del pasillo USTA de dos pisos | El anteproyecto pide "entorno interior controlado" (OE4) y "condiciones controladas" (§4.3). Elimina la dependencia de permisos de acceso y retira el riesgo R1 del camino crítico |
+| 2026-08-05 | El bring-up físico completo se mantiene en S21–S22, pero se antepone un **spike acotado de 3–4 días en S18** | El beneficio de adelantar el hardware es obtener información, no avance, y eso cuesta días y no semanas. Adelantar el bring-up entero arriesga llegar a octubre con dos robots andando y sin capa de coordinación que sustentar |
+| 2026-08-05 | El trabajo se reparte en dos frentes entre S18 y S21 | El trabajo pendiente suma 9–10 semanas-persona y el calendario ofrece 7 semanas. Sin reparto no cierra |
 
 ---
 
-## 8. Próximos pasos (S17–S18)
+## 8. Próximos pasos
 
-1. **Repetir la sesión de mapeo** con `max_laser_range: 9.5`, recorriendo los 63,5 m completos del pasillo, y validar con `herramientas/verificar_mapa.py` antes de guardar (cierra R1).
-2. Reconstruir la **matriz de requisitos RF↔OE↔prueba** (cierra R5 y habilita §7.4 del anteproyecto).
-3. Definir el **protocolo experimental de OE4** — determina qué instrumentar en el código antes de escribirlo.
-4. Emitir los **entregables S16 y S17** pendientes. El S16 tiene material completo: diagnóstico diferencial de `map_saver_cli`, causa raíz del `max_laser_range` y resultado antes/después.
-5. Llevar la **decisión de alcance** a los directores.
+La planificación completa de S17 a S32, con criterio de cierre verificable por semana, está en
+[`Documentos/CRONOGRAMA_S17_S32.md`](Documentos/CRONOGRAMA_S17_S32.md). Pendiente inmediato de S17:
+
+1. Definir el **contrato de interfaces ROS 2** — namespaces, acciones, tópicos y tipos de mensaje. Bloquea todo el desarrollo posterior.
+2. Emitir los **entregables S16 y S17** pendientes. El S16 tiene material completo: diagnóstico diferencial de `map_saver_cli`, causa raíz del `max_laser_range` y resultado antes/después.
+3. Llevar las **decisiones de alcance D1–D6** a los directores, antes de S19.
+
+Y en S18, el **spike de hardware** acotado a 3–4 días, que responde cuatro preguntas y ninguna más:
+`/scan` usable con el LiDAR real, `/cmd_vel` desde ROS 2, latencia entre vehículos, y qué cambia
+entre Humble y Jazzy.
