@@ -36,7 +36,7 @@ def generate_launch_description():
             package='tf2_ros',
             executable='static_transform_publisher',
             output='screen',
-            arguments=['0.02913', '0', '0.184699', '3.1416', '0', '0', 'base_link', 'laser_frame'],
+            arguments=['0.02913', '0', '0.184699', '3.1416', '0', '0', 'base_link', 'laser'],
             parameters=[
                 deepracer_bringup_dir + '/config/static_tf.yaml']),
 
@@ -59,7 +59,7 @@ def generate_launch_description():
             parameters=[{
                     'serial_port': '/dev/ttyUSB0',
                     'serial_baudrate': 115200,
-                    'frame_id': 'laser_frame',
+                    'frame_id': 'laser',
                     'inverted': False,
                     'angle_compensate': True,
                 }]

@@ -14,18 +14,35 @@
   <exec_depend>rclpy</exec_depend>
   <exec_depend>robot_localization</exec_depend>
 
-  <!-- Dependencias de los launch de simulacion y SLAM. Estaban implicitas: los
-       archivos de este paquete las lanzan, pero no se declaraban, de modo que
-       `rosdep install` no las instalaba en un equipo nuevo. -->
+  <!-- Dependencias de los launch de simulacion, SLAM y navegacion. Estaban
+       implicitas: los archivos de este paquete las lanzan, pero no se
+       declaraban, de modo que `rosdep install` no las instalaba en un equipo
+       nuevo. -->
+
+  <!-- Simulacion y descripcion del robot -->
   <exec_depend>deepracer_description</exec_depend>
   <exec_depend>deepracer_gazebo</exec_depend>
   <exec_depend>gazebo_ros</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>
   <exec_depend>xacro</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+
+  <!-- SLAM y servidor de mapas -->
   <exec_depend>slam_toolbox</exec_depend>
   <exec_depend>nav2_map_server</exec_depend>
+
+  <!-- Stack de navegacion Nav2 -->
   <exec_depend>nav2_bringup</exec_depend>
+  <exec_depend>nav2_controller</exec_depend>
+  <exec_depend>nav2_planner</exec_depend>
+  <exec_depend>nav2_bt_navigator</exec_depend>
+  <exec_depend>nav2_behaviors</exec_depend>
+  <exec_depend>nav2_waypoint_follower</exec_depend>
+  <exec_depend>nav2_lifecycle_manager</exec_depend>
+
+  <!-- Teleoperacion -->
   <exec_depend>teleop_twist_keyboard</exec_depend>
+
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

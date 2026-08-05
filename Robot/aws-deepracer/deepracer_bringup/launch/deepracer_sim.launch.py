@@ -27,10 +27,13 @@ def generate_launch_description():
 
     # ros gazebo launcher
     gazebo_dir = get_package_share_directory('gazebo_ros')
+    world_cfg = launch.substitutions.LaunchConfiguration('world')
+
     gazebo_server_launcher = IncludeLaunchDescription(
         launch_description_source=PythonLaunchDescriptionSource(
             launch_file_path=gazebo_dir + '/launch/gzserver.launch.py'),
-            launch_arguments={'pause': 'false',
+            launch_arguments={'world': world_cfg,
+                              'pause': 'false',
                               'record': 'false',
                               'verbose': 'false',
                               'physics': 'ode'}.items())

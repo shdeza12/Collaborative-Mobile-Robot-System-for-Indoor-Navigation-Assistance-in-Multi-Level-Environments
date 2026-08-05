@@ -36,7 +36,7 @@ set(dependencies
   tf2
 )
 
-install(DIRECTORY launch config maps
+install(DIRECTORY launch config maps behavior_trees
   DESTINATION share/${PROJECT_NAME}
 )
 

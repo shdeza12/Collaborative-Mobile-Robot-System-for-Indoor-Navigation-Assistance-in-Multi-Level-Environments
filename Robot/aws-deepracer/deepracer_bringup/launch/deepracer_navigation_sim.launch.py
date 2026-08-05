@@ -30,21 +30,24 @@ def generate_launch_description():
                                                             default='true')
     autostart = launch.substitutions.LaunchConfiguration('autostart')
     params_file = launch.substitutions.LaunchConfiguration('params')
-    default_bt_xml_filename = launch.substitutions.LaunchConfiguration(
-        'default_bt_xml_filename')
+    nav_to_pose_bt_xml = launch.substitutions.LaunchConfiguration(
+        'nav_to_pose_bt_xml')
+    nav_through_poses_bt_xml = launch.substitutions.LaunchConfiguration(
+        'nav_through_poses_bt_xml')
 
     remappings = []
 
     # Create our own temporary YAML files that include substitutions
     param_substitutions = {
         'use_sim_time': use_sim_time,
-        'default_bt_xml_filename': default_bt_xml_filename,
+        'default_nav_to_pose_bt_xml': nav_to_pose_bt_xml,
+        'default_nav_through_poses_bt_xml': nav_through_poses_bt_xml,
         'autostart': autostart,
     }
 
     lifecycle_nodes = ['controller_server',
                        'planner_server',
-                       'recoveries_server',
+                       'behavior_server',
                        'bt_navigator',
                        'waypoint_follower']
 
@@ -71,12 +74,21 @@ def generate_launch_description():
                            '/config/nav2_params.yaml'],
             description='Full path to the ROS2 parameters file to use'),
 
+        # Arboles de comportamiento adecuados a cinematica Ackermann:
+        # excluyen la maniobra <Spin> del ciclo de recuperacion.
         DeclareLaunchArgument(
-            'default_bt_xml_filename',
+            'nav_to_pose_bt_xml',
             default_value=os.path.join(
-                get_package_share_directory('nav2_bt_navigator'),
-                'behavior_trees', 'navigate_w_replanning_and_recovery.xml'),
-            description='Full path to the behavior tree xml file to use'),
+                deepracer_bringup_dir,
+                'behavior_trees', 'ackermann_navigate_to_pose.xml'),
+            description='Behavior tree para NavigateToPose'),
+
+        DeclareLaunchArgument(
+            'nav_through_poses_bt_xml',
+            default_value=os.path.join(
+                deepracer_bringup_dir,
+                'behavior_trees', 'ackermann_navigate_through_poses.xml'),
+            description='Behavior tree para NavigateThroughPoses'),
 
         launch_ros.actions.Node(
             package='nav2_controller',
@@ -95,11 +107,11 @@ def generate_launch_description():
 
 
         launch_ros.actions.Node(
-            package='nav2_recoveries',
-            executable='recoveries_server',
-            name='recoveries_server',
+            package='nav2_behaviors',
+            executable='behavior_server',
+            name='behavior_server',
             output='screen',
-            parameters=[{'use_sim_time': use_sim_time}],
+            parameters=[configured_params],
             remappings=remappings),
 
         launch_ros.actions.Node(
