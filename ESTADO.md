@@ -34,7 +34,7 @@ Ordenado por dependencia. Nada de lo que sigue puede saltarse. La columna *Seman
 
 | # | Hito | Bloquea a | Semana | Estado |
 |---|------|-----------|--------|--------|
-| 1 | **Contrato de interfaces ROS 2** (namespaces, acciones, tópicos) | Todo el desarrollo posterior | S17 | 🔴 No iniciado |
+| 1 | **Contrato de interfaces ROS 2** (namespaces, acciones, tópicos) | Todo el desarrollo posterior | S17 | 🟡 Redactado en [`CONTRATO_INTERFACES.md`](Documentos/CONTRATO_INTERFACES.md); falta verificarlo en simulación (§8 del contrato) |
 | 2 | **Réplica del laboratorio GED en Gazebo**, dividida en dos zonas | Mapas, navegación, relevo | S18 | 🔴 No existe |
 | 3 | **Navegación autónoma punto a punto** con restricción Ackermann | Guiado, relevo, métricas | S19 | 🟡 Validada en el mundo del pasillo; falta sobre la réplica |
 | 4 | **Segundo agente + servidor de coordinación** | OE2, protocolo de relevo | S19–S20 | 🔴 No iniciado |
@@ -69,7 +69,7 @@ El mapa del pasillo USTA (riesgo R1) **salió del camino crítico** al adoptarse
 | ID | Riesgo | Impacto | Mitigación | Estado |
 |----|--------|---------|------------|--------|
 | R1 | **Ningún mapa obtenido es utilizable.** Mejor resultado: 41,9 % de cobertura en X y una extensión en Y de 16,5 m contra los 5,3 m reales del pasillo | **Degradado el 2026-08-05:** ya no bloquea. Afecta solo al pasillo USTA, que pasó a escenario secundario | **Causa raíz confirmada:** `max_laser_range` de slam_toolbox estaba en 12,0 m, por encima del alcance físico del LiDAR (10,0 m). Los rayos sin retorno volvían como 10,0 m, quedaban bajo el umbral y se rasterizaban como paredes fantasma en arcos de 10 m de radio. Corregido a 9,5 m el 2026-08-03 | 🟢 Fuera del camino crítico |
-| R7 | **El código que se ejecuta no es el que está versionado.** `~/deepracer_sim_ws/src/aws-deepracer` era una copia independiente del repositorio, no un enlace | Las correcciones no surten efecto; hay trabajo que nunca llega al historial | Resuelto el 2026-08-03: rescatado al repositorio lo que solo existía en el workspace y reemplazada la copia por un enlace simbólico. Verificado que `install/` resuelve al repositorio | ✅ Cerrado |
+| R7 | **El código que se ejecuta no es el que está versionado.** `~/deepracer_sim_ws/src/aws-deepracer` era una copia independiente del repositorio, no un enlace | Las correcciones no surten efecto; hay trabajo que nunca llega al historial | **Se dio por cerrado el 2026-08-03 sin estarlo.** La verificación de entonces comprobó que `install/` resolvía a `src/` —cierto— pero no que `src/` fuera a su vez una copia. Lo era: un clon de `aws-deepracer/aws-deepracer.git` con cambios locales. Cerrado de verdad el 2026-08-05 sustituyendo la copia por un enlace simbólico al repositorio, con `colcon build` limpio (7/7) y comprobando que `readlink -f` de un archivo instalado apunta a `~/Documents/Tesis` | ✅ Cerrado (2026-08-05) |
 | R2 | **Ackermann vs. Nav2.** El controlador por defecto (DWB) asume tracción diferencial; el DeepRacer no gira sobre su eje | Trayectorias inejecutables | Resuelto en el stack publicado en `integracion-nav2`: Smac Hybrid-A\*, árboles de comportamiento propios sin `<Spin>`, `use_rotate_to_heading: false`, footprint real 0,28 × 0,19 m. **Sin verificar:** el cambio a `REEDS_SHEPP` + `allow_reversing` que se hizo tras abortar el goal (−5, 1.5) con "Resulting plan has 0 poses" | 🟡 Mitigado, verificación pendiente |
 | R3 | **Ambigüedad de localización.** Pasillo largo de paredes lisas y repetitivas → AMCL propenso a divergir | Falsos negativos en las métricas de OE4 | Evaluar landmarks en el mundo o fusión con odometría visual | 🟡 Identificado |
 | R4 | **Pared sur abierta en el SDF** deja celdas desconocidas | Afecta planificación, no solo el mapa | Cerrar la geometría en `primer_piso_v2.world` | 🟡 Identificado (desde S14) |
@@ -93,6 +93,7 @@ Registradas el 2026-08-03 para corrección explícita:
 | S15 Tabla 1: `minimum_travel_distance = 0.5`, `minimum_travel_heading = 0.5` | El archivo declaraba `0.1` y `0.57` | Corregir el informe con los valores vigentes |
 | S15 §3.1: "modo *online asynchronous*" | El launch instancia `sync_slam_toolbox_node` (nodo **síncrono**) | Corregir el informe |
 | S15 §3.4: las aperturas de la pared sur explican las celdas desconocidas | La causa real es deriva de pose por parámetros mal dimensionados | Rehacer el análisis de la sección |
+| Bitácora 2026-08-03: `max_laser_range` 12,0 → 9,5 y buffers de SLAM reajustados al pasillo | El workspace en ejecución conservaba `max_laser_range: 12.0`, `scan_buffer_maximum_scan_distance: 0.5` y `link_scan_maximum_distance: 0.75` | Los arreglos existían **solo en el repositorio**; el simulador nunca los ejecutó (ver R7). Corregido el 2026-08-05. **Todo resultado de mapeo anterior a esa fecha se obtuvo con la configuración vieja y no puede citarse como evidencia de los parámetros corregidos** |
 
 ---
 
@@ -124,11 +125,20 @@ Deben justificarse por escrito en el documento final:
 | 2026-08-03 | Se declaran en `deepracer_bringup/package.xml` las dependencias de ejecución que estaban implícitas | `slam_toolbox`, `nav2_map_server`, `gazebo_ros` y otras se lanzaban sin declararse: `rosdep install` no las instalaba en un equipo nuevo |
 | 2026-08-03 | README reescrito con procedimiento de instalación reproducible | El workspace debe enlazar el repositorio, no copiarlo, para que el código compilado sea el versionado |
 | 2026-08-04 | El trabajo Nav2 + AMCL se publica en la rama `integracion-nav2` (commit `1242651`) sobre `origin/main` | Siete semanas de avance vivían sin commitear. Se resolvió por rama y no sobre `main` porque el historial local diverge del remoto y la rama es compartida con Jonny |
-| 2026-08-05 | `deepracer-custom-car` instalado en Raspberry Pi 4 y en la tarjeta original del DeepRacer; locomoción verificada por interfaz web | Primer avance de OE2 sobre hardware real. Sube OE2 de 25 % a 40 % |
+| 2026-08-05 | `deepracer-custom-car` instalado en Raspberry Pi 4 y en la tarjeta original del DeepRacer; locomoción verificada por interfaz web | Primer avance de OE2 sobre hardware real. Sube OE2 de 25 % a 40 %. Evidencia audiovisual: <https://youtu.be/ZGfAMnC4lYY> |
 | 2026-08-05 | Se replanifica S17–S32 y se emite `Documentos/CRONOGRAMA_S17_S32.md` | Entregable exigido por el espacio académico Proyecto de Grado 2. La sustentación quedó en S28–S29 y el documento final se traslada después de ella, lo que saca la redacción del camino crítico |
 | 2026-08-05 | Entorno experimental: laboratorio GED en lugar del pasillo USTA de dos pisos | El anteproyecto pide "entorno interior controlado" (OE4) y "condiciones controladas" (§4.3). Elimina la dependencia de permisos de acceso y retira el riesgo R1 del camino crítico |
 | 2026-08-05 | El bring-up físico completo se mantiene en S21–S22, pero se antepone un **spike acotado de 3–4 días en S18** | El beneficio de adelantar el hardware es obtener información, no avance, y eso cuesta días y no semanas. Adelantar el bring-up entero arriesga llegar a octubre con dos robots andando y sin capa de coordinación que sustentar |
 | 2026-08-05 | El trabajo se reparte en dos frentes entre S18 y S21 | El trabajo pendiente suma 9–10 semanas-persona y el calendario ofrece 7 semanas. Sin reparto no cierra |
+| 2026-08-05 | Se emite `Documentos/CONTRATO_INTERFACES.md` (hito H1) | Congela namespaces, marcos TF, acciones y tipos de mensaje antes de escribir el nodo de coordinación y la HRI. Materializa D6: un solo código contra dos backends |
+| 2026-08-05 | Cada robot tiene su propio árbol TF con raíz `robotN/map`; **no** hay marco global compartido | Ningún robot cruza entre niveles (D2): la transición es un evento lógico del protocolo de relevo, no un movimiento. Un `map` compartido resolvería un problema que el sistema no tiene y complicaría el bring-up |
+| 2026-08-05 | El coordinador manda a los robots **únicamente** por la acción `navigate_to_pose`; nunca publica `cmd_vel` | Es lo que hace intercambiable un robot físico con uno simulado sin tocar el coordinador |
+| 2026-08-05 | La HRI habla solo con `/coordinacion`, nunca con los robots | Mantiene mínima la superficie de `rosbridge` y permite reasignar robots sin tocar el frontend |
+| 2026-08-05 | Se elimina el `static_transform_publisher` `base_link`→`camera_link` de `deepracer_spawn.launch.py` | Disputaba el marco `camera_link` con el URDF: en TF2 un marco solo admite un padre. Las dos transformadas **no coincidían** (15,39 mm de diferencia; rotación idéntica). En simulación manda el URDF, porque es lo que Gazebo usa para colocar el sensor. Era una copia del launch del robot físico, donde sí es la única fuente de TF |
+| 2026-08-05 | `~/deepracer_sim_ws/src/aws-deepracer` pasa de copia a enlace simbólico al repositorio | Cierre real de R7. La copia era un clon de `aws-deepracer/aws-deepracer.git` con cambios sin commitear, y llevaba retrasada respecto al repositorio en los 6 archivos que diferían. `colcon build` limpio, 7/7 |
+| 2026-08-05 | Se instrumenta la verificación con `herramientas/verificar_contrato.py` | El criterio de cierre de H1 pasa de afirmación a comprobación ejecutable. Su primera ejecución detectó por sí sola el conflicto de `camera_link` |
+| 2026-08-05 | El namespaceado se aplica por pasos, cada uno con valor por defecto vacío y prueba previa de que **no cambia nada** | Separa el error de mecánica del error de diseño: si con el defecto vacío algo se rompe, la causa es la mecánica. Bitácora de aplicación en [`Documentos/Evidencia/S17_aplicacion_contrato.md`](Documentos/Evidencia/S17_aplicacion_contrato.md) |
+| 2026-08-05 | Los marcos `odom`, `base_link` y `laser` se prefijan desde el xacro y no desde `robot_state_publisher` | Los escriben plugins de Gazebo, que ignoran el parámetro `frame_prefix`. Los otros 10 marcos del URDF sí los prefija `robot_state_publisher` |
 
 ---
 
@@ -137,7 +147,12 @@ Deben justificarse por escrito en el documento final:
 La planificación completa de S17 a S32, con criterio de cierre verificable por semana, está en
 [`Documentos/CRONOGRAMA_S17_S32.md`](Documentos/CRONOGRAMA_S17_S32.md). Pendiente inmediato de S17:
 
-1. Definir el **contrato de interfaces ROS 2** — namespaces, acciones, tópicos y tipos de mensaje. Bloquea todo el desarrollo posterior.
+1. ~~Definir el **contrato de interfaces ROS 2**~~ → redactado en [`Documentos/CONTRATO_INTERFACES.md`](Documentos/CONTRATO_INTERFACES.md). **En aplicación**, con bitácora en [`Documentos/Evidencia/S17_aplicacion_contrato.md`](Documentos/Evidencia/S17_aplicacion_contrato.md):
+   - ✅ Conflicto de doble padre en `camera_link` resuelto.
+   - ✅ `frame_prefix` en los xacro (los 3 marcos que escriben plugins de Gazebo).
+   - ✅ `namespace`, `x`, `y`, `z`, `yaw` en los launch. Regresión con defecto vacío: 3/3.
+   - ⬜ `gazebo_ros2_control` y `agent_control.yaml` bajo namespace. Es el paso con incertidumbre real.
+   - ⬜ Verificación de cierre (§8): dos árboles TF separados, 14 controladores activos, mando aislado por robot.
 2. Emitir los **entregables S16 y S17** pendientes. El S16 tiene material completo: diagnóstico diferencial de `map_saver_cli`, causa raíz del `max_laser_range` y resultado antes/después.
 3. Llevar las **decisiones de alcance D1–D6** a los directores, antes de S19.
 

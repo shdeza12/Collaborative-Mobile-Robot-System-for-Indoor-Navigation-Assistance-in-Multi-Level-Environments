@@ -1,0 +1,195 @@
+# Contrato de interfaces ROS 2 — sistema colaborativo multi-robot
+
+**Hito H1 · Semana 17 (3–9 ago 2026)**
+Documento normativo. Todo lo que se escriba de S18 en adelante —nodo de coordinación, HRI web, bring-up físico— se escribe **contra estos nombres**, no contra lo que exista en el código en ese momento.
+
+Referencia: `Documentos/CRONOGRAMA_S17_S32.md` (decisión **D6**: se escribe el código una sola vez contra un contrato de interfaces y se despliega sobre dos backends, simulación y hardware).
+
+---
+
+## 1. Regla general
+
+Cada robot vive dentro de un **namespace propio**: `/robot1` y `/robot2`.
+El nodo de coordinación y la HRI viven en `/coordinacion`.
+
+**Nada fuera de esos tres namespaces.** No hay tópicos en la raíz salvo `/tf`, `/tf_static`, `/clock` y `/rosout`, que son globales por definición de ROS 2.
+
+Consecuencia práctica: `/robot1` puede ser un robot simulado y `/robot2` uno físico, o los dos simulados, o los dos físicos. El nodo de coordinación no distingue. Ese es todo el punto de D6.
+
+---
+
+## 2. Interfaz de cada robot
+
+`<ns>` es `robot1` o `robot2`.
+
+| Nombre | Tipo | Dirección | Notas |
+|---|---|---|---|
+| `/<ns>/cmd_vel` | `geometry_msgs/Twist` | entra al robot | ya es relativo en el plugin |
+| `/<ns>/odom` | `nav_msgs/Odometry` | sale del robot | ya es relativo en el plugin |
+| `/<ns>/scan` | `sensor_msgs/LaserScan` | sale del robot | ya es relativo (`~/out:=scan`) |
+| `/<ns>/joint_states` | `sensor_msgs/JointState` | sale del robot | vía `joint_state_broadcaster` |
+| `/<ns>/navigate_to_pose` | acción `nav2_msgs/NavigateToPose` | **el coordinador la llama** | interfaz única de mando |
+| `/<ns>/estado` | `coordinacion_msgs/EstadoRobot` | sale del robot | 2 Hz |
+| `/<ns>/initialpose` | `geometry_msgs/PoseWithCovarianceStamped` | entra | inicialización de AMCL |
+
+**El coordinador manda a un robot de una sola forma: llamando su acción `navigate_to_pose`.** No publica `cmd_vel`. No llama servicios internos de Nav2. Si algo no se puede expresar como "ve a esta pose", no entra en la coordinación.
+
+Esto es lo que hace que un robot físico sea intercambiable con uno simulado sin tocar el coordinador.
+
+---
+
+## 3. Marcos TF
+
+**Todos los marcos de cada robot llevan el prefijo del namespace, incluido `map`.**
+
+```
+robot1/map ── robot1/odom ── robot1/base_link ── robot1/laser
+                                              └─ robot1/camera_link
+
+robot2/map ── robot2/odom ── robot2/base_link ── robot2/laser
+                                              └─ robot2/camera_link
+```
+
+Son **dos árboles TF independientes y desconectados**. No hay transformación entre `robot1/map` y `robot2/map`, y no hace falta que la haya.
+
+**Por qué**, y esto conecta con la decisión **D2** del cronograma: cada robot opera en un nivel distinto y **ningún robot cruza nunca entre niveles**. La transición entre pisos es un evento lógico del protocolo de relevo, no un movimiento físico. Un marco global compartido resolvería un problema que el sistema no tiene, a cambio de complicar el bring-up.
+
+**Alternativa descartada:** un `map` único con dos `map_piso1`/`map_piso2` colgando. Obliga a mantener la relación métrica exacta entre pisos, que en el laboratorio GED es una ficción (D2 los aplana a dos zonas coplanares). Se descarta.
+
+**Relación entre niveles:** vive en datos, no en TF. Ver §5.
+
+---
+
+## 4. Interfaz de coordinación
+
+| Nombre | Tipo | Quién llama / escucha |
+|---|---|---|
+| `/coordinacion/guiar_usuario` | acción `coordinacion_msgs/GuiarUsuario` | la HRI la llama |
+| `/coordinacion/estado_mision` | `coordinacion_msgs/EstadoMision` | la HRI la escucha, 1 Hz |
+| `/coordinacion/puntos_interes` | `coordinacion_msgs/PuntoInteres[]` (latched) | la HRI la escucha al cargar |
+
+La HRI **no habla con los robots**. Solo con `/coordinacion`. Eso mantiene el `rosbridge` con una superficie mínima y permite cambiar la asignación de robots sin tocar el frontend.
+
+### Flujo completo de una misión
+
+1. La HRI llama `guiar_usuario(origen_id, destino_id)`.
+2. El coordinador determina el nivel de origen y el de destino desde `puntos_interes.yaml`.
+3. Envía el robot del nivel de origen al punto de origen (`navigate_to_pose`).
+4. Lo envía al **punto de transferencia** de su nivel.
+5. Al llegar, publica el relevo en `estado_mision` y envía el robot del segundo nivel al punto de transferencia de *su* nivel.
+6. Segundo tramo hasta el destino.
+7. `result`: éxito, tiempo total, número de relevos.
+
+Si origen y destino están en el mismo nivel, los pasos 4–6 se omiten: **un solo robot, cero relevos**. El coordinador debe manejar ese caso sin ramas especiales en la HRI.
+
+---
+
+## 5. Mensajes propios
+
+Paquete nuevo: **`coordinacion_msgs`** (en `Robot/aws-deepracer/`). Cuatro definiciones, nada más.
+
+```
+# EstadoRobot.msg
+string robot_id                 # "robot1" | "robot2"
+uint8 nivel                     # 1 | 2
+geometry_msgs/PoseStamped pose  # en el marco <ns>/map
+uint8 estado                    # LIBRE=0 NAVEGANDO=1 EN_TRANSFERENCIA=2 ERROR=3
+string detalle                  # texto libre para diagnóstico
+builtin_interfaces/Time stamp
+```
+
+```
+# PuntoInteres.msg
+string id                       # "lab_ged_entrada"
+string nombre                   # "Entrada del laboratorio"  <- lo que ve el usuario
+uint8 nivel
+bool es_transferencia
+geometry_msgs/Pose pose         # en el marco robotN/map del nivel correspondiente
+```
+
+```
+# EstadoMision.msg
+string mision_id
+uint8 etapa                     # INACTIVA=0 TRAMO_1=1 TRANSFERENCIA=2 TRAMO_2=3 COMPLETADA=4 FALLIDA=5
+string robot_activo
+PuntoInteres destino_actual
+float32 distancia_restante
+string mensaje_usuario          # texto ya redactado en español para mostrar tal cual
+```
+
+```
+# GuiarUsuario.action
+string origen_id
+string destino_id
+---
+bool exito
+float32 tiempo_total_s
+uint8 num_relevos
+string motivo_fallo
+---
+EstadoMision estado
+```
+
+**`mensaje_usuario` va redactado desde el coordinador**, no desde el navegador. La HRI lo muestra literal. Evita duplicar lógica de presentación en JavaScript y mantiene el frontend tonto — que es lo que conviene con el tiempo que hay.
+
+**Fuente de verdad de los puntos:** `deepracer_bringup/config/puntos_interes.yaml`. El coordinador lo carga y lo republica latched. La HRI arma sus dos listas desplegables (origen y destino) desde ahí. Eso cumple el requisito de **OE3 origen-destino** sin escribir un selector de mapa.
+
+---
+
+## 6. Qué hay que cambiar en el código para cumplir esto
+
+Inventario real, hecho sobre el árbol actual. Lo bueno primero:
+
+**Ya cumple, no se toca:**
+- `deepracer_gazebo/src/gazebo_ros_deepracer_drive.cpp` — usa nombres **relativos** (`cmd_vel`, `odom`). Hereda el namespace solo.
+- `deepracer_gazebo_lidar.xacro` línea 49 — `<argument>~/out:=scan</argument>`, también relativo.
+- `deepracer.xacro` — ya declara `<xacro:arg name="agent_name" default="agent"/>`. Es el gancho que se necesita.
+
+**Hay que tocar:**
+
+| Archivo | Cambio |
+|---|---|
+| `deepracer_ros_control.xacro:40-41` | `odom` → `$(arg frame_prefix)odom`, `base_link` → `$(arg frame_prefix)base_link` |
+| `deepracer_gazebo_lidar.xacro:52` | `<frame_name>laser</frame_name>` → `$(arg frame_prefix)laser` |
+| `deepracer_spawn.launch.py` | aceptar `namespace` y pose inicial (hoy `-x 0 -y 0 -z 0.03` está fijo, línea 78); `PushRosNamespace`; `frame_prefix` en `robot_state_publisher`; prefijar los dos marcos del `static_transform_publisher` (línea 104) |
+| `agent_control.yaml:17` | `controller_manager:` → `/**:` (comodín), porque bajo namespace la clave deja de coincidir |
+| `deepracer_spawn.launch.py:40-74` | los 7 `load_controller` necesitan `-c /<ns>/controller_manager` |
+| `nav2_params*.yaml` | `base_link`/`odom`/`map` → prefijados. **No editar a mano**: usar `nav2_common.launch.RewrittenYaml` en el launch, que es exactamente para esto |
+
+**Nota sobre `robot_state_publisher`:** en Humble tiene parámetro `frame_prefix`, que prefija todos los marcos de los enlaces del URDF de un golpe. Eso cubre la mitad del trabajo. Los plugins de Gazebo publican sus propios marcos y **no** lo respetan — por eso las dos primeras filas de la tabla siguen siendo necesarias.
+
+---
+
+## 7. Qué NO cambia
+
+Para que quede escrito y no se reabra:
+
+- La cinemática Ackermann y el `deepracer_drive_plugin` — no se tocan.
+- Los 7 controladores `ros2_control` en estado `active` — la migración de S12 se respeta.
+- La configuración de Nav2 validada (Smac Hybrid-A*, árboles sin `<Spin>`, huella 0,28×0,19 m) — solo cambian nombres de marcos.
+- El wall-follower — queda como evidencia de Fase 4, fuera del camino crítico.
+
+---
+
+## 8. Criterio de cierre de H1
+
+El contrato se declara cumplido cuando, en simulación:
+
+1. `ros2 topic list` muestra los tópicos de §2 bajo `/robot1` y `/robot2`, y ninguno duplicado en la raíz.
+2. `ros2 run tf2_tools view_frames` produce **dos árboles separados**, cada uno con su `<ns>/map` como raíz, sin advertencias de marco repetido.
+3. Los 14 controladores (7 por robot) reportan `active`.
+4. Una llamada manual a `/robot1/navigate_to_pose` mueve **solo** a `robot1`.
+
+Los puntos 1–4 son la prueba de que dos robots conviven. Sin eso, no se empieza el nodo de coordinación.
+
+---
+
+## 9. Trazabilidad
+
+| Elemento del contrato | Objetivo específico | Actividad Cap. 8 |
+|---|---|---|
+| Namespaces + TF prefijados | OE1, OE2 | Integración del sistema |
+| `navigate_to_pose` como mando único | OE1 | Navegación autónoma |
+| `GuiarUsuario` + protocolo de relevo | OE1 | Coordinación multi-robot |
+| `PuntoInteres` + listas origen-destino | OE3 | Interfaz de usuario |
+| D6 / dos backends | OE2, OE4 | Pruebas en entorno controlado |

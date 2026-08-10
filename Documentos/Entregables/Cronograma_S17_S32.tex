@@ -1,0 +1,489 @@
+\documentclass[12pt,letterpaper]{article}
+
+% --- Paquetes Requeridos ---
+\usepackage[utf8]{inputenc}
+\usepackage[spanish,es-tabla]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{titlesec}
+\usepackage{setspace}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{xcolor}
+
+% --- Configuración de Párrafo ---
+\onehalfspacing
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1em}
+
+% --- Configuración de listings ---
+\lstset{
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,
+    frame=single,
+    captionpos=b,
+    showstringspaces=false
+}
+
+% --- Inicio del Documento ---
+\begin{document}
+
+% --- PORTADA ---
+\begin{titlepage}
+    \centering
+
+    {\Large \textbf{UNIVERSIDAD SANTO TOMÁS}} \\[1cm]
+
+    {\Large \textbf{Sistema colaborativo de robots móviles para asistencia de orientación en entornos interiores con múltiples pisos}} \\[2cm]
+
+    {\large \textbf{Realizado por:}} \\
+    {\large Santiago Hernández Ávila} \\
+    {\large Jonny Alejandro Mejía León} \\[1cm]
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.6\textwidth]{Logos Uni.png}
+        \label{Logo Universidad Santo Tomas y facultad de ingenieria electronica}
+    \end{figure}
+
+    \vfill
+
+    {\large \textbf{Cronograma de actividades --- Semanas 17 a 32}} \\
+    {\large Proyecto de Grado 2 --- Fase 5: Integración del sistema y realización de pruebas} \\[1.5cm]
+
+    \textbf{Dirigido por:} \\
+    Ing. Armando Mateus Rojas, Msc. \\
+    Ing. Nestor Ivan Ospina, Msc. \\
+    Ing. Oscar Mauricio Gélvez Lizarazo, Msc. \\[1.0cm]
+
+    \vfill
+
+    {\large GED (Grupo de Estudio y Desarrollo en Robótica)} \\
+    {\large Facultad de Ingeniería Electrónica} \\
+    {\large División de Ingenierías} \\
+    {\large Bogotá, agosto de 2026}
+\end{titlepage}
+
+% --- CONTENIDO ---
+
+\section{Presentación}
+
+El presente documento desarrolla el cronograma de actividades del proyecto para el segundo periodo académico, correspondiente a las semanas S17 a S32. Las actividades aquí programadas son las contempladas en el Capítulo 8 del anteproyecto \cite{anteproyecto}; el documento las distribuye semana a semana y les asigna un criterio de cierre verificable.
+
+El proyecto se desarrolla en dos periodos académicos separados por el receso de mitad de año, según se indica en la Tabla \ref{tab:periodos}. La programación de las semanas S1 a S16 se ejecutó durante el primer periodo; este documento cubre el segundo.
+
+\begin{table}[H]
+    \centering
+    \caption{Distribución del proyecto en los dos periodos académicos.}
+    \label{tab:periodos}
+    \begin{tabular}{@{}lll@{}}
+        \toprule
+        \textbf{Periodo} & \textbf{Semanas} & \textbf{Calendario} \\ \midrule
+        Proyecto de Grado 1 & S1--S16  & febrero -- mayo de 2026 \\
+        Proyecto de Grado 2 & S17--S32 & agosto -- noviembre de 2026 \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+Sobre la marcha del desarrollo se precisaron las ventanas temporales de algunas actividades, conforme se detalla en la Sección \ref{sec:ajustes}. Se trata de ajustes propios de la ejecución del proyecto: todas las actividades del anteproyecto se conservan, con su mismo alcance y su misma secuencia de dependencias.
+
+\section{Calendario de referencia}
+
+\begin{table}[H]
+    \centering
+    \caption{Calendario de las semanas S17 a S32.}
+    \label{tab:calendario}
+    \begin{tabular}{@{}llll@{}}
+        \toprule
+        \textbf{Semana} & \textbf{Fechas} & \textbf{Semana} & \textbf{Fechas} \\ \midrule
+        S17 & 3 -- 9 ago          & S25 & 28 sep -- 4 oct \\
+        S18 & 10 -- 16 ago        & S26 & 5 -- 11 oct \\
+        S19 & 17 -- 23 ago        & S27 & 12 -- 18 oct \\
+        S20 & 24 -- 30 ago        & \textbf{S28} & \textbf{19 -- 25 oct} \\
+        S21 & 31 ago -- 6 sep     & \textbf{S29} & \textbf{26 oct -- 1 nov} \\
+        S22 & 7 -- 13 sep         & S30 & 2 -- 8 nov \\
+        S23 & 14 -- 20 sep        & S31 & 9 -- 15 nov \\
+        S24 & 21 -- 27 sep        & S32 & 16 -- 22 nov \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+La sustentación se prevé a finales de octubre, esto es, en las semanas \textbf{S28--S29}. El documento final se entrega con posterioridad a la sustentación, conforme a la norma del espacio académico, de modo que incorpore las observaciones del jurado.
+
+\subsection{Días hábiles disponibles}
+
+La programación se expresa en semanas, pero el trabajo se ejecuta en días hábiles. Dentro del periodo S17--S32 hay cinco festivos, de modo que el presupuesto real es de \textbf{75 días hábiles} y no de 80. Se relacionan a continuación porque tres de ellos caen en semanas con criterio de cierre comprometido, y uno en la semana de entrega final.
+
+\begin{table}[H]
+    \centering
+    \caption{Festivos comprendidos entre las semanas S17 y S32.}
+    \label{tab:festivos}
+    \begin{tabular}{@{}llc@{}}
+        \toprule
+        \textbf{Fecha} & \textbf{Festivo} & \textbf{Semana} \\ \midrule
+        viernes 7 de agosto    & Batalla de Boyacá                & S17 \\
+        lunes 17 de agosto     & Asunción de la Virgen            & S19 \\
+        lunes 12 de octubre    & Día de la Raza                   & S27 \\
+        lunes 2 de noviembre   & Todos los Santos                 & S30 \\
+        lunes 16 de noviembre  & Independencia de Cartagena       & S32 \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+La consecuencia se refleja en la programación: S17 dispone de cuatro días hábiles, S18 de cinco y S19 de cuatro. Las actividades se distribuyeron sobre esa disponibilidad y no sobre semanas completas.
+
+\section{Programación de actividades}
+
+\subsection{Diagrama de programación}
+
+\begin{table}[H]
+    \centering
+    \footnotesize
+    \setlength{\tabcolsep}{2.4pt}
+    \caption{Diagrama de programación de actividades para las semanas S17 a S32.}
+    \label{tab:gantt}
+    \begin{tabular}{@{}p{5.1cm}cccccccccccccccc@{}}
+        \toprule
+        \textbf{Actividad} & 17 & 18 & 19 & 20 & 21 & 22 & 23 & 24 & 25 & 26 & 27 & 28 & 29 & 30 & 31 & 32 \\ \midrule
+        Ajuste progresivo de los elementos desarrollados & $\bullet$ & $\bullet$ & & & & & & & & & & & & & & \\
+        Integración de los módulos del sistema & & $\bullet$ & $\bullet$ & $\bullet$ & $\bullet$ & $\bullet$ & & & & & & & & & & \\
+        Verificación del funcionamiento general & & & & & & & $\bullet$ & & & & & & & & & \\
+        Corrección de fallas o inconsistencias & & & & & & & $\bullet$ & & & & & & & & & \\
+        Pruebas en condiciones controladas & & & & & & & $\bullet$ & $\bullet$ & $\bullet$ & & & & & & & \\
+        Ejecución de pruebas de evaluación & & & & & & & & $\bullet$ & $\bullet$ & & & & & & & \\
+        Recolección de información & & & & & & & & $\bullet$ & $\bullet$ & & & & & & & \\
+        Análisis de resultados & & & & & & & & & & $\bullet$ & & & & & & \\
+        Elaboración de conclusiones & & & & & & & & & & & $\bullet$ & & & & & \\
+        Preparación de la sustentación final & & & & & & & & & & $\bullet$ & $\bullet$ & $\bullet$ & & & & \\
+        Sustentación & & & & & & & & & & & & $\bullet$ & $\bullet$ & & & \\
+        Elaboración del documento final & & & & & & & & & & & & & $\bullet$ & $\bullet$ & $\bullet$ & $\bullet$ \\
+        Registro de avances del proyecto & $\bullet$ & $\bullet$ & $\bullet$ & $\bullet$ & $\bullet$ & $\bullet$ & $\bullet$ & $\bullet$ & $\bullet$ & $\bullet$ & $\bullet$ & $\bullet$ & $\bullet$ & $\bullet$ & $\bullet$ & $\bullet$ \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Ajustes de programación realizados durante la ejecución}
+\label{sec:ajustes}
+
+Las ventanas temporales de la Tabla \ref{tab:gantt} incorporan las precisiones que el desarrollo del proyecto hizo necesarias durante el primer periodo. Se enumeran a continuación:
+
+\begin{itemize}
+    \item La actividad \textit{Ajuste progresivo de los elementos desarrollados} se extiende hasta S18. La puesta a punto de la navegación autónoma de un agente exigió actualizar la pila de navegación a la distribución de ROS 2 empleada por el proyecto y adecuarla a la cinemática Ackermann del vehículo, tareas contempladas dentro de esta misma actividad.
+    \item Las actividades que dependen de la anterior --- \textit{Integración de los módulos}, \textit{Verificación del funcionamiento general}, \textit{Pruebas en condiciones controladas}, \textit{Ejecución de pruebas de evaluación} y \textit{Análisis de resultados} --- se desplazan de forma consistente, conservando su orden de dependencia.
+    \item \textit{Corrección de fallas o inconsistencias} se concentra en S23, la semana en que se congela la implementación, para que las campañas experimentales posteriores se ejecuten sobre una versión estable del sistema.
+    \item \textit{Recolección de información} se ejecuta de forma simultánea a \textit{Ejecución de pruebas de evaluación}, dado que el registro de las métricas se realiza de manera automática durante cada corrida.
+    \item \textit{Preparación de la sustentación final} se adelanta a S26--S28, en correspondencia con la fecha prevista de sustentación en octubre.
+    \item \textit{Elaboración del documento final} se ubica a partir de S29, con posterioridad a la sustentación, conforme a la norma del espacio académico.
+    \item \textit{Registro de avances del proyecto} conserva su ventana completa, sin modificación alguna.
+\end{itemize}
+
+Estos ajustes se compensan entre sí: el traslado de la elaboración del documento final a la etapa posterior a la sustentación libera las semanas que permiten absorber el desplazamiento de las actividades técnicas.
+
+\subsection{Organización del trabajo}
+
+Entre S18 y S23 el trabajo se distribuye en dos frentes simultáneos, que convergen a partir de S24 cuando las campañas experimentales y el análisis de resultados operan sobre un sistema único.
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Frentes de trabajo.}
+    \label{tab:frentes}
+    \begin{tabular}{@{}cp{9.0cm}l@{}}
+        \toprule
+        \textbf{Frente} & \textbf{Contenido} & \textbf{Semanas} \\ \midrule
+        A & Coordinación en simulación: réplica del entorno, dos agentes, nodo de coordinación, protocolo de relevo, instrumentación e interfaz de usuario & S17--S23 \\ \addlinespace
+        B & Plataforma física: diagnóstico de hardware, paridad entre vehículos, mapeo del entorno real, puesta en marcha y despliegue & S18--S23 \\ \addlinespace
+        T & Transversal: requisitos, protocolo experimental y registro de avances & S17--S32 \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\section{Cronograma detallado}
+
+Cada semana cierra con un \textbf{criterio verificable}: una semana no se da por cumplida por actividad realizada, sino por artefacto producido.
+
+\subsection{S17 (3--9 ago) --- Consolidación del stack de navegación y contrato de interfaces}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{@{}cp{12.8cm}@{}}
+        \toprule
+        \textbf{Frente} & \textbf{Actividad} \\ \midrule
+        A & Consolidar y publicar en el repositorio el stack de navegación autónoma \\
+        B & Instalar el entorno de cómputo en la Raspberry Pi 4 y en la tarjeta original del vehículo \\
+        B & Verificar el acceso por red a ambas tarjetas y la locomoción del vehículo \\
+        A & Definir el contrato de interfaces ROS 2: espacios de nombres, marcos de referencia, acciones y tipos de mensaje \\
+        T & Actualizar el tablero de trazabilidad y emitir los entregables correspondientes \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\textbf{Criterio de cierre:} contrato de interfaces documentado; vehículo físico con locomoción verificada; entregables emitidos.
+
+\subsection{S18 (10--16 ago) --- Réplica del entorno y diagnóstico de hardware}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{@{}cp{12.8cm}@{}}
+        \toprule
+        \textbf{Frente} & \textbf{Actividad} \\ \midrule
+        A & Cerrar el contrato de interfaces: dos agentes con espacios de nombres independientes coexistiendo en el simulador \\ \addlinespace
+        A & Extraer la planta \texttt{primer\_piso\_v2} como modelo reutilizable y replicarla en dos niveles con separación vertical y zona de transición señalizada en cada planta \\ \addlinespace
+        A & Generar el mapa del nivel superior y verificar navegación autónoma sobre él \\ \addlinespace
+        B & Diagnóstico acotado de hardware sobre cuatro puntos: lecturas utilizables del LiDAR real, comando del vehículo desde ROS 2 sin la interfaz web, latencia de comunicación entre los dos vehículos, e implicaciones de la distribución de ROS 2 empleada \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\textbf{Criterio de cierre:} dos agentes coexisten con marcos y tópicos aislados; el mundo de dos niveles carga en el simulador y el vehículo navega sobre el nivel superior; informe del diagnóstico con los cuatro resultados.
+
+\subsection{S19 (17--23 ago) --- Navegación por agente, requisitos y protocolo}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{@{}cp{12.8cm}@{}}
+        \toprule
+        \textbf{Frente} & \textbf{Actividad} \\ \midrule
+        A & Configurar una instancia de navegación independiente por agente, una por nivel \\
+        B & Llevar el segundo vehículo al mismo estado del primero \\
+        B & Resolver los puntos que haya arrojado el diagnóstico de hardware \\
+        T & Construir la matriz de requisitos que relaciona requisito funcional, objetivo específico y prueba de verificación \\
+        T & Definir el protocolo experimental: qué se mide, cómo, cuántas repeticiones y con qué criterios de éxito, con la continuidad del servicio entre niveles como variable de respuesta principal \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\textbf{Criterio de cierre:} cada agente ejecuta órdenes de navegación dentro de su nivel sin interferencia entre marcos de referencia ni entre tópicos. Matriz de requisitos publicada y protocolo experimental escrito antes de instrumentar. La matriz y el protocolo se elaboran juntos: un requisito sin prueba asociada no es un requisito.
+
+\subsection{S20 (24--30 ago) --- Nodo de coordinación}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{@{}cp{12.8cm}@{}}
+        \toprule
+        \textbf{Frente} & \textbf{Actividad} \\ \midrule
+        A & Servidor de coordinación: registro de agentes, recepción de la solicitud del usuario y asignación por nivel \\
+        A & Instrumentar el tiempo de respuesta y el tiempo de asignación \\
+        B & Mapear con el vehículo físico las dos plantas del pasillo y contrastar el mapa resultante contra el modelo \texttt{primer\_piso\_v2} \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\textbf{Criterio de cierre:} una solicitud de origen y destino produce la asignación del agente correcto y deja registrados ambos tiempos. Mapas de las dos plantas guardados y verificados; la discrepancia entre el mapa levantado y el modelo simulado queda medida en metros.
+
+\subsection{S21 (31 ago--6 sep) --- Protocolo de relevo}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{@{}cp{12.8cm}@{}}
+        \toprule
+        \textbf{Frente} & \textbf{Actividad} \\ \midrule
+        A & Máquina de estados del relevo: guiado hasta la zona de transición, entrega, notificación al segundo agente, espera y reanudación \\
+        A & Instrumentar la tasa de éxito y la continuidad del servicio \\
+        B & Navegación autónoma punto a punto sobre el vehículo físico en el laboratorio \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\textbf{Criterio de cierre:} en simulación, una solicitud que cruza entre niveles se completa de extremo a extremo con relevo, y el registro arroja las cuatro métricas de evaluación.
+
+Esta semana concentra además el \textbf{punto de decisión} sobre el segundo vehículo. Si los dos vehículos quedan operativos, el relevo físico se demuestra con un vehículo por planta; en caso contrario, se demuestra con un vehículo real y uno simulado, y así se declara. En ninguno de los dos casos se modifican las fechas del cronograma ni se compromete la evidencia del relevo, que está cubierta por las pruebas en simulación.
+
+\textbf{Criterio de habilitación de las pruebas en el pasillo:} se habilitan cuando un vehículo navegue punto a punto de forma autónoma en el laboratorio con localización estable. El relevo completo entre dos vehículos no es criterio de habilitación: es el núcleo del cumplimiento del proyecto, y condicionar el avance a su logro previo bloquearía la secuencia.
+
+\subsection{S22 (7--13 sep) --- Interfaz de usuario e integración}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{@{}cp{12.8cm}@{}}
+        \toprule
+        \textbf{Frente} & \textbf{Actividad} \\ \midrule
+        A & Interfaz de interacción humano--robot con selección de origen y destino \\
+        A & Integrar los módulos del sistema de extremo a extremo en simulación \\
+        B & Desplegar el sistema sobre los vehículos físicos \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\textbf{Criterio de cierre:} desde un dispositivo móvil se selecciona origen y destino, y el sistema completa el guiado con relevo sin intervención manual.
+
+\subsection{S23 (14--20 sep) --- Verificación, corrección y cierre de la implementación}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{@{}cp{12.8cm}@{}}
+        \toprule
+        \textbf{Frente} & \textbf{Actividad} \\ \midrule
+        A+B & Verificación del funcionamiento general y corrección de fallas o inconsistencias \\
+        B & Ensayo del protocolo en el pasillo con los vehículos reales \\
+        T & Congelar la implementación: a partir de este punto no se incorpora funcionalidad nueva \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\textbf{Criterio de cierre:} el sistema opera de extremo a extremo en simulación y se ejecuta al menos una corrida física completa. Repositorio etiquetado.
+
+\subsection{S24 (21--27 sep) --- Pruebas de evaluación en simulación}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{@{}p{13.8cm}@{}}
+        \toprule
+        \textbf{Actividad} \\ \midrule
+        Ejecutar 30 repeticiones del protocolo completo con registro automático de las cuatro métricas \\
+        Consolidar y versionar el conjunto de datos resultante \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\textbf{Criterio de cierre:} 30 corridas registradas y conjunto de datos versionado.
+
+\subsection{S25 (28 sep--4 oct) --- Pruebas de evaluación en el entorno físico}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{@{}p{13.8cm}@{}}
+        \toprule
+        \textbf{Actividad} \\ \midrule
+        Ejecutar entre 5 y 10 repeticiones en el pasillo con los vehículos reales, un vehículo por planta, en franjas de baja circulación \\
+        Grabar y editar el video de la demostración \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\textbf{Criterio de cierre:} corridas físicas registradas con la misma instrumentación empleada en simulación y sobre la misma geometría que se simuló; video de la demostración terminado.
+
+\subsection{S26 (5--11 oct) --- Análisis de resultados}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{@{}p{13.8cm}@{}}
+        \toprule
+        \textbf{Actividad} \\ \midrule
+        Análisis comparativo entre los resultados de simulación y los del entorno físico \\
+        Verificación del sistema contra la matriz de requisitos \\
+        Iniciar la preparación de la sustentación \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\textbf{Criterio de cierre:} gráficas y tablas de las cuatro métricas; tabla de cumplimiento requisito por requisito.
+
+\subsection{S27 (12--18 oct) --- Conclusiones y preparación de la sustentación}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{@{}p{13.8cm}@{}}
+        \toprule
+        \textbf{Actividad} \\ \midrule
+        Elaborar las conclusiones sobre la viabilidad técnica de la solución propuesta \\
+        Armar la presentación y ensayarla de forma cronometrada \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\textbf{Criterio de cierre:} presentación completa y ensayada de principio a fin.
+
+\subsection{S28 (19--25 oct) --- Sustentación}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{@{}p{13.8cm}@{}}
+        \toprule
+        \textbf{Actividad} \\ \midrule
+        Ensayos finales y plan de contingencia de la demostración en vivo \\
+        Sustentación \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\textbf{Criterio de cierre:} sustentación realizada; observaciones del jurado registradas por escrito.
+
+\subsection{S29 (26 oct--1 nov) --- Sustentación e inicio del documento final}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{@{}p{13.8cm}@{}}
+        \toprule
+        \textbf{Actividad} \\ \midrule
+        Sustentación, en caso de que la fecha corresponda a esta semana \\
+        Definir la estructura del documento final e iniciar su redacción \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{S30--S31 (2--15 nov) --- Elaboración del documento final}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{@{}p{13.8cm}@{}}
+        \toprule
+        \textbf{Actividad} \\ \midrule
+        Redacción completa del documento, incorporando las observaciones del jurado \\
+        Revisión con los directores del proyecto \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\textbf{Criterio de cierre (S31):} borrador completo entregado a los directores.
+
+\subsection{S32 (16--22 nov) --- Entrega}
+
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{@{}p{13.8cm}@{}}
+        \toprule
+        \textbf{Actividad} \\ \midrule
+        Incorporar las correcciones de los directores \\
+        Entrega final \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\section{Hitos}
+
+Los hitos señalan los puntos en que el proyecto adquiere una capacidad que habilita el trabajo posterior. Su función es de control: si un hito se retrasa, se identifica de inmediato qué actividades quedan condicionadas.
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Hitos del periodo S17--S32.}
+    \label{tab:hitos}
+    \begin{tabular}{@{}cp{6.8cm}cp{4.2cm}@{}}
+        \toprule
+        \textbf{\#} & \textbf{Hito} & \textbf{Semana} & \textbf{Habilita} \\ \midrule
+        H1 & Contrato de interfaces ROS 2 definido & S17 & Desarrollo multi-robot \\
+        H2 & Riesgos de hardware caracterizados & S18 & Puesta en marcha del vehículo \\
+        H3 & Dos agentes navegando en niveles separados & S19 & Nodo de coordinación \\
+        H4 & Asignación dinámica de tareas funcionando & S20 & Protocolo de relevo \\
+        H5 & Relevo completo con métricas en simulación & S21 & Pruebas de evaluación \\
+        H6 & Sistema integrado de extremo a extremo & S22 & Verificación \\
+        H7 & Implementación congelada & S23 & Pruebas de evaluación \\
+        H8 & Conjunto de datos completo & S25 & Análisis de resultados \\
+        H9 & Sustentación & S28--S29 & Documento final \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\section{Seguimiento}
+
+El avance se registra semanalmente en el tablero de trazabilidad del proyecto, donde se consignan el porcentaje de avance de cada objetivo específico, el estado de los riesgos abiertos y el criterio de cierre alcanzado o no alcanzado. Este procedimiento materializa la actividad \textit{Registro de avances del proyecto}, contemplada en el anteproyecto para la totalidad de las semanas del cronograma.
+
+\begin{thebibliography}{99}
+
+\bibitem{anteproyecto}
+S. Hernández Ávila y J. A. Mejía León,
+``Sistema colaborativo de robots móviles para asistencia de orientación en entornos interiores con múltiples pisos --- Anteproyecto,''
+Universidad Santo Tomás, Facultad de Ingeniería Electrónica, Bogotá, 2026.
+
+\bibitem{ros2_humble_docs}
+Open Robotics,
+``ROS 2 Humble Hawksbill Documentation,''
+[Online]. Available: \url{https://docs.ros.org/en/humble/}
+
+\bibitem{nav2_docs}
+Open Robotics,
+``Nav2 Documentation,''
+[Online]. Available: \url{https://docs.nav2.org/}
+
+\end{thebibliography}
+
+\end{document}

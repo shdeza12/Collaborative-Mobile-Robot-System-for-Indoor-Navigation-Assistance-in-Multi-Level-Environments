@@ -1,0 +1,446 @@
+\documentclass[12pt,letterpaper]{article}
+
+% --- Paquetes Requeridos ---
+\usepackage[utf8]{inputenc}
+\usepackage[spanish,es-tabla]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{titlesec}
+\usepackage{setspace}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{xcolor}
+
+% --- Configuración de Párrafo ---
+\onehalfspacing
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1em}
+
+% --- Configuración de listings ---
+\lstset{
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,
+    frame=single,
+    captionpos=b,
+    showstringspaces=false
+}
+
+% --- Inicio del Documento ---
+\begin{document}
+
+% --- PORTADA ---
+\begin{titlepage}
+    \centering
+
+    {\Large \textbf{UNIVERSIDAD SANTO TOMÁS}} \\[1cm]
+
+    {\Large \textbf{Sistema colaborativo de robots móviles para asistencia de orientación en entornos interiores con múltiples pisos}} \\[2cm]
+
+    {\large \textbf{Realizado por:}} \\
+    {\large Santiago Hernández Ávila} \\
+    {\large Jonny Alejandro Mejía León} \\[1cm]
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.6\textwidth]{Logos Uni.png}
+        \label{Logo Universidad Santo Tomas y facultad de ingenieria electronica}
+    \end{figure}
+
+    \vfill
+
+    {\large \textbf{Informe de Avance --- Semana 17}} \\
+    {\large Fase 5: Integración del sistema y realización de pruebas --- Liberación del vehículo físico y contrato de interfaces ROS 2} \\[1.5cm]
+
+    \textbf{Dirigido por:} \\
+    Ing. Armando Mateus Rojas, Msc. \\
+    Ing. Nestor Ivan Ospina, Msc. \\
+    Ing. Oscar Mauricio Gélvez Lizarazo, Msc. \\[1.0cm]
+
+    \vfill
+
+    {\large GED (Grupo de Estudio y Desarrollo en Robótica)} \\
+    {\large Facultad de Ingeniería Electrónica} \\
+    {\large División de Ingenierías} \\
+    {\large Bogotá, agosto de 2026}
+\end{titlepage}
+
+% --- CONTENIDO ---
+
+\section{Introducción}
+
+El presente informe documenta el avance correspondiente a la \textbf{Semana 17} del cronograma de actividades. Esta semana abre el segundo periodo académico del proyecto y con él la \textbf{Fase 5 (Integración del sistema y realización de pruebas)}, tras el receso de mitad de año.
+
+La semana tuvo dos frentes de trabajo. En el frente físico se completó la liberación del vehículo AWS DeepRacer respecto de su \textit{firmware} original y se verificó su locomoción bajo el nuevo entorno de cómputo. En el frente de simulación se consolidó y publicó el stack de navegación autónoma desarrollado durante el primer periodo, y se definió el \textbf{contrato de interfaces ROS 2} que habilita el trabajo con dos agentes simultáneos.
+
+Adicionalmente se elaboró el cronograma de actividades del segundo periodo, entregado como documento independiente \cite{cronograma}, y se detectó y corrigió un defecto de trazabilidad en el entorno de compilación que invalida parte de la evidencia cartográfica producida en la semana anterior. Este último punto se documenta de forma explícita en la Sección \ref{sec:trazabilidad}, por su impacto sobre los resultados reportados.
+
+\section{Objetivos de la Semana}
+
+\begin{itemize}
+    \item Liberar el vehículo AWS DeepRacer del \textit{firmware} original, instalar el entorno de cómputo en la Raspberry Pi 4 y en la tarjeta original, y verificar la locomoción del vehículo.
+    \item Consolidar y publicar en el repositorio del proyecto el stack Nav2 + AMCL migrado a ROS 2 Humble y adecuado a cinemática Ackermann.
+    \item Replanificar el cronograma de actividades para el intervalo S17--S32 sobre el estado real del desarrollo.
+    \item Definir el \textbf{contrato de interfaces ROS 2} que rige la integración multi-robot: espacios de nombres, marcos de referencia, acciones y tipos de mensaje.
+    \item Capturar la línea base de comportamiento de un solo robot e instrumentar su verificación de forma automática.
+    \item Iniciar la aplicación del contrato sobre el código de descripción y lanzamiento del vehículo.
+\end{itemize}
+
+\section{Liberación y puesta en marcha del vehículo físico}
+
+\subsection{Instalación del entorno de cómputo}
+
+Se instaló la distribución \texttt{deepracer-custom-car} sobre dos plataformas de cómputo: una \textbf{Raspberry Pi 4} y la \textbf{tarjeta de cómputo original} del vehículo AWS DeepRacer. Contar con las dos plataformas operativas permite comparar su desempeño antes de decidir cuál se emplea en la demostración final, y proporciona una ruta de contingencia si alguna de las dos presenta limitaciones de cómputo al ejecutar la pila de navegación completa.
+
+La instalación libera al vehículo de las restricciones del \textit{firmware} de fábrica, que solo admite los modos de operación previstos por el fabricante y no expone el vehículo como un sistema ROS 2 accesible.
+
+\subsection{Verificación de acceso y locomoción}
+
+Se verificó el acceso por red a ambas tarjetas de cómputo y, a continuación, la locomoción del vehículo comandada desde su interfaz web. La prueba consistió en accionar el vehículo en avance, retroceso y giro, comprobando la respuesta del motor de tracción y del servomotor de dirección.
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Evidencia audiovisual de la prueba de marcha del vehículo.}
+    \label{tab:evidencia_video}
+    \begin{tabular}{@{}ll@{}}
+        \toprule
+        \textbf{Registro} & \textbf{Enlace} \\ \midrule
+        Prueba de marcha del AWS DeepRacer desde su interfaz web & \url{https://youtu.be/ZGfAMnC4lYY} \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+El registro documenta que el vehículo se encuentra \textbf{liberado y funcionando}: responde a los comandos de marcha enviados desde la interfaz web servida por el propio vehículo, sobre el entorno de cómputo instalado en esta semana \cite{video_locomocion}.
+
+\subsection{Impacto sobre el objetivo específico 2}
+
+Esta actividad constituye el primer avance del proyecto sobre hardware real y eleva el objetivo específico OE2 del 25 \% al 40 \%. El desglose se presenta en la Tabla \ref{tab:oe2}.
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Componentes de OE2 y su estado tras la Semana 17.}
+    \label{tab:oe2}
+    \begin{tabular}{@{}lll@{}}
+        \toprule
+        \textbf{Componente} & \textbf{Estado} & \textbf{Observación} \\ \midrule
+        Locomoción        & Cubierto  & Verificada desde la interfaz web \\
+        Procesamiento     & Cubierto  & Entorno de cómputo instalado en ambas tarjetas \\
+        Comunicación (red) & Cubierto  & Acceso por red a ambas tarjetas \\
+        Sensado           & Pendiente & Requiere el LiDAR físico publicando sobre \texttt{/scan} \\
+        Control desde ROS 2 & Pendiente & Requiere comandar \texttt{/cmd\_vel} sin la interfaz web \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+Los dos componentes pendientes son precisamente el objeto del \textbf{diagnóstico de hardware} programado para la Semana 18, descrito en la Sección \ref{sec:previsto}.
+
+\section{Consolidación del stack de navegación autónoma}
+
+\subsection{Migración de Nav2 de ROS 2 Foxy a Humble}
+
+El stack de navegación desarrollado durante el primer periodo se encontraba sin publicar en el repositorio. Su consolidación requirió completar la migración entre distribuciones de ROS 2, cuyos cambios principales se resumen en la Tabla \ref{tab:migracion}.
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Cambios requeridos por la migración de Nav2 de Foxy a Humble.}
+    \label{tab:migracion}
+    \begin{tabular}{@{}p{6.3cm}p{7.2cm}@{}}
+        \toprule
+        \textbf{En Foxy} & \textbf{En Humble} \\ \midrule
+        \texttt{nav2\_recoveries} & \texttt{nav2\_behaviors} \\
+        \texttt{recoveries\_server} & \texttt{behavior\_server} \\
+        \texttt{smac\_planner/SmacPlanner} & \texttt{nav2\_smac\_planner/SmacPlannerHybrid} \\
+        \texttt{robot\_model\_type: "differential"} & \texttt{robot\_model\_type:} \texttt{"nav2\_amcl::DifferentialMotionModel"} \\
+        \texttt{default\_bt\_xml\_filename} & \texttt{default\_nav\_to\_pose\_bt\_xml} y \texttt{default\_nav\_through\_poses\_bt\_xml} \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Adecuación a cinemática Ackermann}
+
+Nav2 asume por defecto una plataforma diferencial, capaz de girar sobre su propio eje. El DeepRacer no puede hacerlo: su dirección es de tipo Ackermann y posee un radio de giro mínimo. Las adecuaciones realizadas se listan a continuación:
+
+\begin{itemize}
+    \item \textbf{Árboles de comportamiento propios} sin la primitiva de giro sobre el eje, ya que el vehículo no puede ejecutarla y su invocación produce un fallo de recuperación.
+    \item \textbf{Desactivación de la rotación hacia el rumbo} en el controlador, por la misma razón.
+    \item \textbf{Corrección de la huella del vehículo} de $0{,}17 \times 0{,}17$~m a $0{,}28 \times 0{,}19$~m, ajustándola a las dimensiones reales del chasis.
+    \item \textbf{Planificador con modelo de movimiento de radio mínimo}, configurado con un radio de giro de $0{,}35$~m.
+\end{itemize}
+
+El valor configurado se contrastó con la geometría declarada en el modelo URDF del vehículo: ángulo máximo de dirección de $0{,}5236$~rad ($30^\circ$) y distancia entre ejes de $0{,}164$~m, de donde se obtiene un \textbf{radio de giro mínimo real de $0{,}284$~m}. El valor de $0{,}35$~m empleado en la configuración es por tanto conservador, con un margen aproximado del 23 \% que absorbe las imprecisiones de seguimiento del controlador.
+
+\subsection{Publicación en el repositorio}
+
+El trabajo se publicó en el repositorio del proyecto en una rama de integración independiente, sobre la referencia remota de la rama principal. Se optó por una rama y no por la rama principal porque el historial local diverge del remoto y la rama principal es compartida con el segundo autor del proyecto; su incorporación queda sujeta a revisión conjunta.
+
+\section{Contrato de interfaces ROS 2}
+
+\subsection{Motivación}
+
+Todo el trabajo restante del proyecto --- nodo de coordinación, protocolo de relevo, interfaz de usuario e instrumentación de métricas --- debe funcionar indistintamente sobre un modelo simulado en Gazebo y sobre un vehículo DeepRacer físico. Si esa equivalencia no se fija por escrito antes de escribir el código, cada módulo termina escribiéndose dos veces.
+
+El contrato de interfaces congela, por tanto, la frontera entre módulos \emph{antes} de implementarlos. Constituye el hito \textbf{H1} del cronograma actualizado y bloquea la totalidad del desarrollo posterior.
+
+\subsection{Contenido del contrato}
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Interfaces por robot fijadas por el contrato.}
+    \label{tab:contrato}
+    \begin{tabular}{@{}llp{6.4cm}@{}}
+        \toprule
+        \textbf{Interfaz} & \textbf{Tipo} & \textbf{Función} \\ \midrule
+        \texttt{/robotN/cmd\_vel}   & Tópico  & Comando de velocidad al vehículo \\
+        \texttt{/robotN/odom}       & Tópico  & Odometría publicada por el vehículo \\
+        \texttt{/robotN/scan}       & Tópico  & Lecturas del LiDAR \\
+        \texttt{/robotN/joint\_states} & Tópico & Estado de las articulaciones \\
+        \texttt{/robotN/navigate\_to\_pose} & Acción & \textbf{Único} mecanismo de mando del coordinador \\
+        \texttt{/robotN/estado}     & Tópico  & Estado del agente para el coordinador \\
+        \texttt{/robotN/initialpose} & Tópico & Pose inicial para la localización \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+Las tres definiciones estructurales del contrato son:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Todo cuelga de un espacio de nombres.} Únicamente \texttt{/tf}, \texttt{/tf\_static}, \texttt{/clock} y \texttt{/rosout} permanecen en la raíz, por definición de ROS 2. Cualquier otro tópico en la raíz constituye una violación del contrato.
+    \item \textbf{Dos árboles de transformadas independientes}, con raíz en \texttt{robot1/map} y \texttt{robot2/map}, sin marco global compartido. La justificación es que, en el esquema de relevo del anteproyecto, ningún robot cruza entre niveles: la transición es un evento lógico del protocolo y no un desplazamiento físico. Un marco global compartido resolvería un problema que el sistema no tiene.
+    \item \textbf{El coordinador manda a un robot de una sola forma}: invocando su acción \texttt{navigate\_to\_pose}. No publica \texttt{cmd\_vel}. Es precisamente esta restricción la que hace intercambiable un robot físico con uno simulado sin modificar el coordinador.
+\end{enumerate}
+
+\section{Línea base y verificación automática}
+
+\subsection{Captura de la línea base}
+
+Antes de introducir cualquier cambio se capturó el comportamiento del sistema con un solo robot, para disponer de una referencia de regresión. Los resultados se presentan en la Tabla \ref{tab:linea_base}.
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Línea base del sistema con un robot, previa a la aplicación del contrato.}
+    \label{tab:linea_base}
+    \begin{tabular}{@{}lll@{}}
+        \toprule
+        \textbf{Elemento} & \textbf{Cantidad} & \textbf{Observación} \\ \midrule
+        Controladores activos & 7 de 7 & Confirma vigente la migración de S12 \\
+        Tópicos publicados    & 27     & Todos en la raíz, sin espacio de nombres \\
+        Marcos de referencia  & 13     & Todos con nombre fijo, sin prefijo \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+Los trece marcos son cadenas fijas escritas en el modelo del vehículo. Con un segundo robot, los trece colisionan: este es el problema concreto que el contrato resuelve.
+
+\subsection{Instrumento de verificación}
+
+Se desarrolló una herramienta que comprueba de forma automática el cumplimiento del contrato sobre el sistema en ejecución. Opera en dos modos: verificación de salud con un solo robot, y verificación del contrato con dos robots en espacios de nombres separados.
+
+La herramienta no se limita a listar los marcos de referencia. Recoge el conjunto de padres declarados para cada marco durante una ventana de observación, porque las herramientas estándar de visualización muestran un único padre por marco --- el último recibido --- y ocultan por completo el caso en que dos emisores se disputan el mismo marco.
+
+\subsection{Defecto detectado por la herramienta}
+
+En su primera ejecución la herramienta detectó, por sí sola, que el marco \texttt{camera\_link} tenía \textbf{dos padres}: el modelo URDF lo declaraba hijo de \texttt{zed\_camera\_link}, mientras que un publicador de transformadas estáticas del archivo de lanzamiento lo declaraba hijo de \texttt{base\_link}. En el sistema de transformadas de ROS 2 un marco admite un solo padre, de modo que el resultado dependía del orden de llegada de los mensajes.
+
+Al componer ambas cadenas se comprobó que las dos transformadas \textbf{no coinciden}: difieren en $15{,}39$~mm en traslación, con rotación idéntica. No se trataba, por tanto, de una redundancia inocua.
+
+El defecto se resolvió eliminando el publicador de transformadas estáticas del archivo de lanzamiento de simulación. El criterio fue que, en simulación, Gazebo posiciona el sensor a partir del modelo URDF, lo que convierte al URDF en la realidad física del sistema. El archivo de lanzamiento del vehículo físico se conserva sin cambios, puesto que allí no existe modelo URDF y esa transformada es la única fuente.
+
+\section{Corrección de la trazabilidad del entorno de compilación}
+\label{sec:trazabilidad}
+
+\subsection{Defecto detectado}
+
+El entorno de compilación del proyecto debe enlazar el repositorio versionado, no copiarlo, para garantizar que el código compilado sea el mismo que el código versionado. Se comprobó que esta condición \textbf{no se cumplía}: el directorio de fuentes del entorno de compilación seguía siendo una copia independiente, procedente de un clon del repositorio original del fabricante.
+
+Una verificación previa había comprobado que el directorio de instalación enlazaba al de fuentes --- lo cual era cierto --- pero no que el directorio de fuentes fuese a su vez una copia. El defecto quedó así enmascarado.
+
+\subsection{Consecuencia sobre los resultados reportados}
+
+La consecuencia es directa y debe declararse: los ajustes de parámetros de SLAM realizados en la semana anterior \textbf{nunca llegaron a ejecutarse}. La simulación continuó operando con los valores originales. En particular, el rango máximo del LiDAR considerado por el algoritmo de mapeo siguió siendo de $12{,}0$~m en lugar de los $9{,}5$~m corregidos, valor este último que debe permanecer por debajo del alcance real del sensor.
+
+Por tanto, \textbf{toda la evidencia cartográfica producida con anterioridad a esta corrección queda invalidada} como demostración del efecto de los parámetros corregidos, y el mapeo debe repetirse. Este hecho quedó registrado en el tablero de trazabilidad del proyecto.
+
+\subsection{Corrección aplicada}
+
+El directorio de fuentes se reemplazó por un enlace simbólico al repositorio versionado, previo respaldo del contenido anterior. La compilación posterior fue satisfactoria para los siete paquetes del proyecto. A partir de este punto, cualquier modificación del repositorio se refleja de forma inmediata en el código ejecutado.
+
+\section{Inicio de la aplicación del contrato}
+
+La aplicación del contrato sobre el código se abordó por pasos, bajo un criterio metodológico explícito: \textbf{cada paso se introduce con un valor por defecto que reproduce el comportamiento anterior, y se demuestra primero que no cambia nada}. De este modo, si algo falla con el valor por defecto, la causa está en la mecánica del cambio y no en el diseño del contrato.
+
+\subsection{Prefijo de marcos en el modelo del vehículo}
+
+De los trece marcos del vehículo, diez pueden ser prefijados por el nodo publicador del estado del robot mediante su parámetro correspondiente. Los tres restantes --- \texttt{odom}, \texttt{base\_link} y \texttt{laser} --- no, porque son escritos directamente por complementos de Gazebo que ignoran ese parámetro. Estos tres se parametrizaron dentro del propio modelo del vehículo.
+
+\subsection{Espacio de nombres y pose inicial en el lanzamiento}
+
+Se incorporaron a los archivos de lanzamiento los argumentos de espacio de nombres y de pose inicial, este último necesario porque dos robots no pueden aparecer en el mismo punto del entorno. Con espacio de nombres vacío, el lanzamiento reproduce exactamente el comportamiento original.
+
+\subsection{Verificación}
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Verificaciones ejecutadas sobre la aplicación del contrato.}
+    \label{tab:verificacion}
+    \begin{tabular}{@{}p{6.0cm}p{7.5cm}@{}}
+        \toprule
+        \textbf{Verificación} & \textbf{Resultado} \\ \midrule
+        Modelo del vehículo generado sin argumentos, contra la referencia previa & Idéntico línea a línea \\ \addlinespace
+        Modelo generado con prefijo \texttt{robot1/} & Los tres marcos aparecen correctamente prefijados \\ \addlinespace
+        Argumentos declarados por los archivos de lanzamiento & Los cinco argumentos nuevos con sus valores por defecto \\ \addlinespace
+        Regresión en simulación con espacio de nombres vacío & 6 de 6 tópicos, 7 de 7 controladores activos, 12 marcos con un solo padre \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+La última fila constituye la comprobación relevante: tras los cambios, el sistema con un solo robot se comporta igual que en la línea base, y el conflicto del marco \texttt{camera\_link} ha desaparecido, lo que reduce el número de marcos de 13 a 12.
+
+\section{Estado del cronograma y trabajo previsto}
+\label{sec:previsto}
+
+\subsection{Cronograma del segundo periodo}
+
+Durante esta semana se elaboró el cronograma de actividades correspondiente a las semanas S17 a S32, entregado como documento independiente \cite{cronograma}. Sus elementos principales son:
+
+\begin{itemize}
+    \item Las actividades programadas son las contempladas en el Capítulo 8 del anteproyecto, distribuidas semana a semana y con un criterio de cierre verificable para cada una.
+    \item Las ventanas temporales incorporan las precisiones que el desarrollo hizo necesarias durante el primer periodo, en particular la extensión de la actividad \textit{Ajuste progresivo de los elementos desarrollados} hasta S18.
+    \item La elaboración del documento final se ubica con posterioridad a la sustentación, conforme a la norma del espacio académico, lo que permite absorber dichas precisiones sin afectar la fecha de entrega.
+\end{itemize}
+
+\subsection{Estado de actividades}
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Estado de actividades --- Semana 17 (Fase 5).}
+    \label{tab:estado_s17}
+    \begin{tabular}{@{}p{6.3cm}ll@{}}
+        \toprule
+        \textbf{Actividad (anteproyecto)} & \textbf{Estado} & \textbf{Observación} \\ \midrule
+        Ajuste progresivo de los elementos desarrollados & En curso & Stack de navegación consolidado y publicado \\ \addlinespace
+        Integración de los módulos del sistema & Iniciada & Contrato de interfaces definido y en aplicación \\ \addlinespace
+        Registro de avances del proyecto & En curso & Presente entregable y cronograma actualizado \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Trabajo previsto para la semana siguiente}
+
+Las actividades previstas para la Semana 18 son:
+
+\begin{itemize}
+    \item \textbf{Culminación de la aplicación del contrato}: espacio de nombres sobre el gestor de controladores y verificación de dos robots conviviendo en la misma simulación. Es la actividad crítica, porque bloquea todo el desarrollo multi-robot posterior.
+    \item \textbf{Réplica del entorno de evaluación}: extracción de la planta \texttt{primer\_piso\_v2} como modelo reutilizable y su réplica en dos niveles con separación vertical y zona de transición señalizada en cada planta, seguida del levantamiento del mapa del nivel superior.
+    \item \textbf{Diagnóstico acotado de hardware}, que responde cuatro preguntas y ninguna más: si el LiDAR real publica lecturas utilizables bajo la distribución instalada; si es posible comandar el vehículo desde ROS 2 sin pasar por la interfaz web; cuál es la latencia de comunicación entre los dos vehículos sobre la red disponible; y qué implicaría emplear ROS 2 Jazzy en lugar de Humble.
+\end{itemize}
+
+La construcción de la matriz de requisitos, inicialmente prevista para S18, se programa en S19 junto con la definición del protocolo experimental. Ambas pertenecen al mismo frente y se elaboran mejor de forma conjunta, dado que un requisito sin prueba de verificación asociada no constituye un requisito. El traslado obedece además a la disponibilidad real de días hábiles: la Semana 17 dispuso de cuatro y la Semana 18 dispone de cinco.
+
+\section{Selección del entorno de evaluación}
+\label{sec:entorno}
+
+\subsection{Formulación de la pregunta de investigación}
+
+El Capítulo 8 del anteproyecto \cite{anteproyecto} programa en S3 la actividad \textit{Formulación de pregunta de investigación}. El documento, sin embargo, no la consigna de manera explícita: su Capítulo 2 contiene una única sección de planteamiento y no un apartado que enuncie la pregunta. Se formula en los siguientes términos, destilada del párrafo de cierre de dicho planteamiento, y se incorporará al documento final:
+
+\begin{quote}
+\textit{¿Puede un esquema de relevo entre robots móviles de bajo costo, cada uno dedicado a un nivel y coordinados mediante comunicación inter-robot, mantener la continuidad del servicio de orientación a un visitante a través de las discontinuidades verticales de un edificio, sin hardware especializado para transiciones verticales ni intervención sobre la infraestructura?}
+\end{quote}
+
+El argumento del proyecto es de sustitución. Donde la literatura resuelve el cambio de piso mediante locomoción sobre escalones o mediante intervención electrónica sobre los sistemas de control de ascensores ---soluciones costosas e invasivas---, este trabajo sustituye dicho hardware por coordinación: lo que atraviesa el piso es la comunicación entre agentes, no el robot.
+
+De esta formulación se desprende la jerarquía de las métricas de evaluación del objetivo específico OE4. La \textbf{continuidad del servicio entre niveles} constituye la variable de respuesta principal; la tasa de éxito en la entrega de asistencia, el tiempo de asignación de robot y el tiempo de respuesta son métricas de apoyo.
+
+\subsection{Resultado del análisis del entorno de evaluación}
+
+El Capítulo 8 del anteproyecto contempla en su Fase 2 la actividad \textit{Análisis del entorno de evaluación} (S9--S11). Su resultado se documenta en esta semana y se consigna de forma completa en un documento técnico independiente del proyecto.
+
+El anteproyecto no compromete un sitio de pruebas determinado. Lo que su alcance exige del entorno son cuatro condiciones: que sea interior, controlado, que cuente con múltiples niveles y que disponga de un punto de transición vertical. Los escenarios modelados durante la Fase 4 ---\texttt{pasillo\_usta} y \texttt{pasillo\_grande}--- fueron seleccionados contra un criterio distinto, el de disponer de un corredor sobre el cual desarrollar el algoritmo de seguimiento de paredes, y no satisfacen las dos últimas condiciones.
+
+Se selecciona como entorno de evaluación la planta modelada en \texttt{primer\_piso\_v2}, replicada en dos niveles. La réplica no constituye una simplificación: el segundo piso real de la edificación es idéntico al primero, de modo que la duplicación con desplazamiento vertical reproduce la geometría real del edificio. Ningún vehículo asciende por la escalera, lo cual es consecuencia deliberada del esquema de relevo y es coherente con la exclusión que el propio alcance establece respecto de interactuar mecánicamente con la infraestructura.
+
+Las pruebas se organizan en tres etapas de escalamiento, cada una de las cuales responde una pregunta distinta.
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Escalamiento de las pruebas de evaluación.}
+    \label{tab:escalamiento}
+    \begin{tabular}{@{}cp{4.1cm}p{7.6cm}@{}}
+        \toprule
+        \textbf{Etapa} & \textbf{Escenario} & \textbf{Pregunta que responde} \\ \midrule
+        1 & Simulación, planta replicada en dos niveles & ¿El esquema de relevo mantiene la continuidad del servicio entre niveles? \\ \addlinespace
+        2 & Laboratorio GED, 4 $\times$ 4 m, un nivel & ¿El hardware se comporta según lo previsto en simulación? \\ \addlinespace
+        3 & Pasillo real, dos plantas & ¿El comportamiento se sostiene en el espacio que fue simulado? \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+El laboratorio no constituye entorno de evaluación sino etapa de puesta en marcha. Sus 16 m\textsuperscript{2} en un solo nivel no admiten la pregunta de investigación, que requiere una discontinuidad vertical; adicionalmente, el vehículo presenta un círculo de giro de 0,57 m de diámetro, con lo cual los recorridos disponibles se reducen a 2 o 3 m, y una sala cuadrada desprovista de mobiliario constituye el peor caso para la localización por AMCL, dado que el LiDAR observa los cuatro muros desde cualquier posición.
+
+\subsection{Limitaciones declaradas}
+
+\begin{itemize}
+    \item Las repeticiones en el pasillo se ejecutan en franjas de baja circulación, conforme a la exigencia de condiciones controladas del alcance. Las personas como obstáculos dinámicos se registran como observación cualitativa y no forman parte de las repeticiones instrumentadas.
+    \item El laboratorio no representa el entorno de operación. Su función es verificar la plataforma, no el sistema.
+    \item Los vehículos no atraviesan físicamente el punto de transición vertical. Es una consecuencia deliberada del esquema de relevo y no una carencia de la implementación.
+    \item La evidencia cartográfica anterior al 5 de agosto se declara inválida, conforme a lo expuesto en la Sección \ref{sec:trazabilidad}. Los mapas correspondientes deben levantarse nuevamente.
+\end{itemize}
+
+\section{Conclusiones de la Semana}
+
+Durante la Semana 17 el proyecto obtuvo su primer resultado sobre hardware real: el vehículo AWS DeepRacer quedó liberado de su \textit{firmware} original, con el entorno de cómputo instalado sobre dos plataformas y con su locomoción verificada desde la interfaz web, según consta en el registro audiovisual referenciado. Esto eleva el objetivo específico OE2 al 40 \% y deja como únicos pendientes el sensado con el LiDAR físico y el control desde ROS 2.
+
+En el frente de simulación se consolidó y publicó el stack de navegación autónoma, cerrando siete semanas de trabajo que permanecían sin versionar, y se definió el contrato de interfaces ROS 2 que constituye el hito H1 y habilita todo el desarrollo multi-robot posterior. Su aplicación sobre el código se inició de forma incremental y verificada, con una prueba de regresión satisfactoria.
+
+Se detectó y corrigió, además, un defecto de trazabilidad en el entorno de compilación que mantenía desconectado el código versionado del código ejecutado. Su consecuencia --- la invalidación de la evidencia cartográfica previa --- se declara de forma explícita en este informe y obliga a repetir el mapeo. Se considera un hallazgo de valor: revela que ninguna corrección de parámetros anterior a esta semana había surtido efecto real sobre la simulación.
+
+Finalmente, el cronograma de actividades del segundo periodo deja el proyecto con las ventanas temporales precisadas sobre la marcha del desarrollo y con un criterio de cierre verificable para cada semana, conservando íntegras las actividades contempladas en el anteproyecto.
+
+\begin{thebibliography}{99}
+
+\bibitem{video_locomocion}
+S. Hernández Ávila y J. A. Mejía León,
+``Liberación y prueba de marcha del AWS DeepRacer desde su interfaz web --- Evidencia Semana 17,''
+Registro audiovisual, agosto de 2026. [Online]. Available: \url{https://youtu.be/ZGfAMnC4lYY}
+
+\bibitem{cronograma}
+S. Hernández Ávila y J. A. Mejía León,
+``Cronograma de actividades --- Semanas 17 a 32,''
+Universidad Santo Tomás, Facultad de Ingeniería Electrónica, Bogotá, agosto de 2026.
+
+\bibitem{anteproyecto}
+S. Hernández Ávila y J. A. Mejía León,
+``Sistema colaborativo de robots móviles para asistencia de orientación en entornos interiores con múltiples pisos --- Anteproyecto,''
+Universidad Santo Tomás, Facultad de Ingeniería Electrónica, Bogotá, 2026.
+
+\bibitem{deepracer_custom}
+AWS DeepRacer Community,
+``deepracer-custom-car: Custom software stack for the AWS DeepRacer,''
+[Online]. Available: \url{https://github.com/aws-deepracer-community/deepracer-custom-car}
+
+\bibitem{ros2_humble_docs}
+Open Robotics,
+``ROS 2 Humble Hawksbill Documentation,''
+[Online]. Available: \url{https://docs.ros.org/en/humble/}
+
+\bibitem{nav2_docs}
+Open Robotics,
+``Nav2 Documentation,''
+[Online]. Available: \url{https://docs.nav2.org/}
+
+\bibitem{tf2}
+Open Robotics,
+``tf2: The transform library,''
+[Online]. Available: \url{https://docs.ros.org/en/humble/Concepts/Intermediate/About-Tf2.html}
+
+\bibitem{slam_toolbox}
+S. Macenski and I. Jambrecic,
+``SLAM Toolbox: SLAM for the dynamic world,''
+Journal of Open Source Software, vol. 6, no. 61, p. 2783, 2021. [Online]. Available: \url{https://github.com/SteveMacenski/slam_toolbox}
+
+\end{thebibliography}
+
+\end{document}
