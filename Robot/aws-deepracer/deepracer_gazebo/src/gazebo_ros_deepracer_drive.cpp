@@ -238,23 +238,28 @@ void GazeboRosDeepRacerDrive::Load(gazebo::physics::ModelPtr _model, sdf::Elemen
   impl_->update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&GazeboRosDeepRacerDrivePrivate::OnUpdate, impl_.get(), std::placeholders::_1));
     
+  // Nombres RELATIVOS, sin barra inicial (CONTRATO_INTERFACES.md §6). Un nombre
+  // absoluto ignora el namespace del nodo: el plugin de /robot1 publicaba en la
+  // raiz y los controladores de /robot1, que escuchan en /robot1/.../commands,
+  // no recibian nada. Sin namespace el nombre relativo se resuelve a
+  // /left_front_wheel_velocity_controller/commands, igual que antes.
   impl_->left_front_wheel_vel_controller_pub_ = impl_->ros_node_->create_publisher<std_msgs::msg::Float64MultiArray>(
-    "/left_front_wheel_velocity_controller/commands", qos.get_publisher_qos("left_front_wheel_velocity_controller", rclcpp::QoS(1)));
+    "left_front_wheel_velocity_controller/commands", qos.get_publisher_qos("left_front_wheel_velocity_controller", rclcpp::QoS(1)));
 
   impl_->right_front_wheel_vel_controller_pub_ = impl_->ros_node_->create_publisher<std_msgs::msg::Float64MultiArray>(
-    "/right_front_wheel_velocity_controller/commands", qos.get_publisher_qos("right_front_wheel_velocity_controller", rclcpp::QoS(1)));
+    "right_front_wheel_velocity_controller/commands", qos.get_publisher_qos("right_front_wheel_velocity_controller", rclcpp::QoS(1)));
 
   impl_->left_rear_wheel_vel_controller_pub_ = impl_->ros_node_->create_publisher<std_msgs::msg::Float64MultiArray>(
-    "/left_rear_wheel_velocity_controller/commands", qos.get_publisher_qos("left_rear_wheel_velocity_controller", rclcpp::QoS(1)));
+    "left_rear_wheel_velocity_controller/commands", qos.get_publisher_qos("left_rear_wheel_velocity_controller", rclcpp::QoS(1)));
 
   impl_->right_rear_wheel_vel_controller_pub_ = impl_->ros_node_->create_publisher<std_msgs::msg::Float64MultiArray>(
-    "/right_rear_wheel_velocity_controller/commands", qos.get_publisher_qos("right_rear_wheel_velocity_controller", rclcpp::QoS(1)));
+    "right_rear_wheel_velocity_controller/commands", qos.get_publisher_qos("right_rear_wheel_velocity_controller", rclcpp::QoS(1)));
 
   impl_->left_steering_hinge_position_controller_pub_ = impl_->ros_node_->create_publisher<std_msgs::msg::Float64MultiArray>(
-    "/left_steering_hinge_position_controller/commands", qos.get_publisher_qos("left_steering_hinge_position_controller", rclcpp::QoS(1)));
+    "left_steering_hinge_position_controller/commands", qos.get_publisher_qos("left_steering_hinge_position_controller", rclcpp::QoS(1)));
 
   impl_->right_steering_hinge_position_controller_pub_ = impl_->ros_node_->create_publisher<std_msgs::msg::Float64MultiArray>(
-    "/right_steering_hinge_position_controller/commands", qos.get_publisher_qos("right_steering_hinge_position_controller", rclcpp::QoS(1)));
+    "right_steering_hinge_position_controller/commands", qos.get_publisher_qos("right_steering_hinge_position_controller", rclcpp::QoS(1)));
 
 }
 

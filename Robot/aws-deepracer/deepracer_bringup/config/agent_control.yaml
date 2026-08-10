@@ -14,7 +14,11 @@
 #   limitations under the License.                                              #
 #################################################################################
 
-controller_manager:
+# El comodin '/**' (CONTRATO_INTERFACES.md §6) casa con CERO o mas niveles de
+# namespace. Por eso '/**/controller_manager' aplica igual a /controller_manager
+# (un robot: comportamiento original) que a /robot1/controller_manager y
+# /robot2/controller_manager. Un solo archivo sirve para los dos agentes.
+/**/controller_manager:
   ros__parameters:
     update_rate: 60  # Hz
 
@@ -39,14 +43,14 @@ controller_manager:
     right_steering_hinge_position_controller:
       type: position_controllers/JointGroupPositionController
 
-left_rear_wheel_velocity_controller:
+/**/left_rear_wheel_velocity_controller:
   ros__parameters:
     joints:
       - left_rear_wheel_joint
     interface_name: velocity
     pid: {p: 1.0, i: 0.0, d: 0.0, i_clamp: 0.0}
 
-right_rear_wheel_velocity_controller:
+/**/right_rear_wheel_velocity_controller:
   ros__parameters:
     joints:
       - right_rear_wheel_joint
@@ -54,7 +58,7 @@ right_rear_wheel_velocity_controller:
     pid: {p: 1.0, i: 0.0, d: 0.0, i_clamp: 0.0}
 
 
-left_front_wheel_velocity_controller:
+/**/left_front_wheel_velocity_controller:
   ros__parameters:
     joints:
       - left_front_wheel_joint
@@ -62,7 +66,7 @@ left_front_wheel_velocity_controller:
     pid: {p: 0.5, i: 0.0, d: 0.0, i_clamp: 0.0}
 
 
-right_front_wheel_velocity_controller:
+/**/right_front_wheel_velocity_controller:
   ros__parameters:
     joints:
       - right_front_wheel_joint
@@ -70,7 +74,7 @@ right_front_wheel_velocity_controller:
     pid: {p: 0.5, i: 0.0, d: 0.0, i_clamp: 0.0}
 
 
-left_steering_hinge_position_controller:
+/**/left_steering_hinge_position_controller:
   ros__parameters:
     joints:
       - left_steering_hinge_joint
@@ -78,7 +82,7 @@ left_steering_hinge_position_controller:
     pid: {p: 1.0, i: 0.0, d: 0.5}
 
 
-right_steering_hinge_position_controller:
+/**/right_steering_hinge_position_controller:
   ros__parameters:
     joints:
       - right_steering_hinge_joint

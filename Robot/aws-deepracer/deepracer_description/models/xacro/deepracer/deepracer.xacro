@@ -17,6 +17,20 @@ limitations under the License.
 <robot name="agent" xmlns:xacro="http://www.ros.org/wiki/xacro">
   <!-- agent argument from python xacro call-->
   <xacro:arg name="agent_name" default="agent" />
+  <!-- Prefijo de marcos TF (CONTRATO_INTERFACES.md §3). Vacio por defecto: con
+       un solo robot el URDF generado es identico al original. Con dos robots se
+       pasa 'robot1/' y 'robot2/' para que los 13 marcos dejen de colisionar.
+       Debe terminar en '/' porque se concatena tal cual.
+       Los marcos que declara el URDF (base_link, chassis, laser, ...) los
+       prefija robot_state_publisher con su parametro frame_prefix; estos tres
+       los escriben plugins de Gazebo, que lo ignoran, y hay que pasarselos. -->
+  <xacro:arg name="frame_prefix" default="" />
+  <!-- Namespace ROS 2 del agente (CONTRATO_INTERFACES.md §6). Vacio por defecto:
+       con un solo robot el URDF generado es identico al original. El plugin
+       gazebo_ros2_control no es un plugin de gazebo_ros, asi que no hereda el
+       -robot_namespace de spawn_entity.py: lee su propio bloque <ros><namespace>,
+       y por eso hay que pasarselo por aqui. Sin barra final: ROS 2 la agrega. -->
+  <xacro:arg name="robot_namespace" default="" />
   <!-- Default: Use front facing camera and LiDAR sensor -->
   <xacro:arg name="sensor_type" default="front_facing_camera_and_lidar" />
   <xacro:arg name="shell" default="deepracer.STL" />
@@ -40,6 +54,18 @@ limitations under the License.
   <!-- convert sensor type from arg to property -->
   <xacro:property name="sensor_type_val" value="$(arg sensor_type)" />
   <xacro:property name="shell_val" value="$(arg shell)" />
+
+  <!-- Sufijo para el atributo 'name' de los <plugin> de Gazebo.
+       gazebo_ros mantiene un registro ESTATICO Y GLOBAL de nombres de nodo
+       (gazebo_ros/node.hpp, 'static_existing_nodes_') y guarda el nombre PELADO,
+       sin namespace. El nombre sale del atributo 'name' del <plugin>. Si los dos
+       robots usan el mismo, al cargar el segundo gazebo_ros::Node::Get() ve el
+       nombre ocupado y devuelve el nodo del PRIMERO: el plugin de robot2 acaba
+       suscrito a /robot1/cmd_vel. El propio libgazebo_ros_node.so lo avisa:
+       "Found multiple nodes with same name... Try changing one of the plugin
+       names". Cambiar solo el namespace NO basta, porque el registro no lo mira.
+       Vacio sin namespace: los nombres quedan exactamente como en el original. -->
+  <xacro:property name="sufijo_ns" value="${'_$(arg robot_namespace)' if '$(arg robot_namespace)' else ''}" />
 
   <!-- agent macro -->
   <xacro:include filename="$(find deepracer_description)/models/xacro/macro/macros.xacro" />

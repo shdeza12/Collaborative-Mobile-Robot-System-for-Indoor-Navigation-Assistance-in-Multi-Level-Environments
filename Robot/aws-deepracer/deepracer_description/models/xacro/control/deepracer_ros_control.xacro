@@ -16,8 +16,19 @@ limitations under the License.
 -->
 <robot name="agent" xmlns:xacro="http://www.ros.org/wiki/xacro">
   <gazebo>
-      <plugin name='gazebo_ros_deepracer_drive' filename='libgazebo_ros_deepracer_drive.so'>
-        
+      <!-- El sufijo hace unico el nombre del nodo entre robots; ver 'sufijo_ns'
+           en deepracer.xacro. Sin el, el plugin del segundo robot reutiliza el
+           nodo del primero y se suscribe a /robot1/cmd_vel. -->
+      <plugin name='gazebo_ros_deepracer_drive${sufijo_ns}' filename='libgazebo_ros_deepracer_drive.so'>
+        <!-- El plugin llama a gazebo_ros::Node::Get(_sdf), que lee este bloque.
+             Sin el, /cmd_vel y /odom se quedan en la raiz aunque el resto del
+             robot este bajo namespace. Vacio por defecto: no se emite. -->
+        <xacro:if value="${'$(arg robot_namespace)' != ''}">
+          <ros>
+            <namespace>$(arg robot_namespace)</namespace>
+          </ros>
+        </xacro:if>
+
         <update_rate>15.0</update_rate>
 
         <!-- Max absolute steer angle for tyre in radians-->
@@ -37,8 +48,9 @@ limitations under the License.
         <publish_odom>true</publish_odom>
         <publish_odom_tf>true</publish_odom_tf>
 
-        <odometry_frame>odom</odometry_frame>
-        <robot_base_frame>base_link</robot_base_frame>
+        <!-- Este plugin ignora el frame_prefix de robot_state_publisher. -->
+        <odometry_frame>$(arg frame_prefix)odom</odometry_frame>
+        <robot_base_frame>$(arg frame_prefix)base_link</robot_base_frame>
 
       </plugin>
   </gazebo>
@@ -88,7 +100,16 @@ limitations under the License.
   </ros2_control>
 
   <gazebo>
-    <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+    <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control${sufijo_ns}">
+      <!-- Este plugin no es un plugin de gazebo_ros: no hereda el
+           -robot_namespace de spawn_entity.py. Su namespace se declara aqui.
+           El bloque solo se emite si el argumento trae valor, de modo que con
+           un robot el URDF sale byte a byte igual al original. -->
+      <xacro:if value="${'$(arg robot_namespace)' != ''}">
+        <ros>
+          <namespace>$(arg robot_namespace)</namespace>
+        </ros>
+      </xacro:if>
       <robot_param>robot_description</robot_param>
       <robot_param_node>robot_state_publisher</robot_param_node>
       <parameters>$(find deepracer_bringup)/config/agent_control.yaml</parameters>

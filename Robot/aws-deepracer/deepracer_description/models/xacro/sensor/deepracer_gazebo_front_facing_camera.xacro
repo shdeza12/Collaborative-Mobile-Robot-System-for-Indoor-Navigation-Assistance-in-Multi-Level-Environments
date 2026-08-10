@@ -31,7 +31,18 @@ limitations under the License.
           <far>300</far>
         </clip>
       </camera>
-      <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+      <!-- El sufijo da un nombre de nodo unico entre robots (ver 'sufijo_ns' en
+           deepracer.xacro). Vacio sin namespace.
+           Cuidado con los comentarios que sobreviven al renderizado. launch_ros
+           pasa el URDF por un parser YAML, y unos dos puntos seguidos de espacio
+           lo rompen con "Unable to parse the value of parameter
+           robot_description as yaml". -->
+      <plugin name="camera_controller${sufijo_ns}" filename="libgazebo_ros_camera.so">
+        <xacro:if value="${'$(arg robot_namespace)' != ''}">
+          <ros>
+            <namespace>$(arg robot_namespace)</namespace>
+          </ros>
+        </xacro:if>
         <alwaysOn>true</alwaysOn>
         <updateRate>60</updateRate>
         <cameraName>camera/zed</cameraName>

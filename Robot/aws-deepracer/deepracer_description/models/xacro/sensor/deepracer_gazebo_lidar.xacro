@@ -43,13 +43,19 @@ limitations under the License.
         <topicName>/scan</topicName>
         <frameName>laser</frameName>
       </plugin>-->
-       <plugin name="rp_lidar" filename="libgazebo_ros_ray_sensor.so">
+       <!-- El sufijo da un nombre de nodo unico entre robots (ver 'sufijo_ns'
+            en deepracer.xacro). Vacio sin namespace. -->
+       <plugin name="rp_lidar${sufijo_ns}" filename="libgazebo_ros_ray_sensor.so">
           <ros>
-            <!-- <namespace>/laser</namespace> -->
+            <!-- Con namespace, '~/out' es /robot1/rp_lidar_robot1/out y el
+                 remapeo a 'scan' (relativo) lo resuelve a /robot1/scan. -->
+            <xacro:if value="${'$(arg robot_namespace)' != ''}">
+              <namespace>$(arg robot_namespace)</namespace>
+            </xacro:if>
             <argument>~/out:=scan</argument>
           </ros>
           <output_type>sensor_msgs/LaserScan</output_type>
-          <frame_name>laser</frame_name>
+          <frame_name>$(arg frame_prefix)laser</frame_name>
         </plugin>
     </sensor>
   </gazebo>
