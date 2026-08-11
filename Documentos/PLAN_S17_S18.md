@@ -11,6 +11,47 @@ simulador, y emitir los documentos de S17.
 
 ---
 
+## Para qué sirve cada tarea
+
+Este periodo no produce ninguna funcionalidad que se vea en la sustentación. Produce la
+**condición de posibilidad** de todo lo que sí se ve. Conviene tenerlo escrito, porque desde
+dentro se parece demasiado a estar arreglando launches.
+
+La cadena es corta y no tiene atajos:
+
+> Un solo robot navega hoy. Para que **dos** naveguen hacen falta dos grafos ROS que no se
+> pisen (9b) y dos pilas Nav2 que no se pisen (9c). Sin eso no hay dos agentes; sin dos
+> agentes no hay relevo; sin relevo no hay nada que medir ni nada que mostrar en la interfaz.
+
+| Tarea | Objetivo específico | Qué desbloquea | Si no se hace |
+|---|---|---|---|
+| 4–7 · `robot_namespace` en xacro, plugin y controladores | OE2 | Que el vehículo entero (URDF, control, sensores) sea instanciable más de una vez | Un segundo vehículo comparte controladores con el primero |
+| 8 · Regresión con defecto vacío | — | Que el trabajo de un robot siga siendo válido | Se pierde la línea base; ningún resultado anterior es comparable |
+| 9 · Un robot bajo espacio de nombres | OE2 | Primera instancia aislada y verificable | — |
+| **9b · Dos simuladores** | **OE2, OE4** | Los dos agentes del sistema colaborativo, y la constancia de que el hardware los sostiene a tiempo real | Las métricas de tiempo de OE4 saldrían contaminadas por falta de cómputo y no serían defendibles |
+| **9c · Nav2 y AMCL con namespace** | **OE2** | Que los dos agentes *naveguen*, no solo que coexistan | Dos robots quietos: H3 (S19) queda sin base |
+| 9d · URIs de los meshes | — | Evidencia gráfica en los dos visores | El entregable de S17 va sin capturas del modelo |
+| 10, 10b · Regresión y cierre de H1 | OE1, OE2 | El hito que el cronograma sitúa en S17 | H3 arranca sobre una base no verificada |
+| 11–13 · Entorno de dos niveles | OE1, OE4 | El escenario multipiso donde ocurre el relevo | No hay dónde ejecutar el experimento |
+| 14 · Mapa del nivel 2 | OE2 | Localización en el nivel superior | El segundo agente no sabe dónde está |
+| Diagnóstico de hardware (viernes) | OE2 | El punto de decisión de S21 sobre el segundo vehículo | Se descubre en S21 que un vehículo no responde, sin margen para reaccionar |
+
+**Dónde queda OE3.** La interfaz humano–robot está al 0 % y no se toca en este periodo, a
+propósito: la interfaz muestra el estado de dos agentes y les asigna destinos. Construirla
+antes de que existan dos agentes sería programar contra una maqueta.
+
+**Dónde queda OE4.** Igual: las métricas se miden sobre el relevo. Lo que sí aporta este
+periodo a OE4 es negativo y vale mucho — quedó demostrado (9b) que las dos simulaciones corren
+a RTF ≈ 1,0, así que las medidas de tiempo no estarán falseadas por el equipo.
+
+**Trazabilidad con el cronograma.** H1 («contrato de interfaces ROS 2 definido», S17) es
+prerrequisito declarado de *todo el desarrollo posterior*, y H3 («dos agentes navegando en
+niveles separados», S19) depende directamente de las tareas 9b y 9c. El riesgo de S17–S18 no
+es llegar tarde a H1: es darlo por cerrado sin evidencia y descubrir el hueco en S19, cuando
+ya no haya margen.
+
+---
+
 ## Calendario real
 
 No se trabaja fines de semana. Festivos colombianos dentro del periodo S17–S32:
@@ -74,6 +115,11 @@ requiere el simulador, el hardware o tu criterio.
 | `.../xacro/control/deepracer_ros_control.xacro:91-97` | Modificar | Bloque `<ros>` del plugin `gazebo_ros2_control` |
 | `deepracer_bringup/config/agent_control.yaml` | Modificar | Claves de nodo a comodín `/**/` |
 | `deepracer_bringup/launch/deepracer_spawn.launch.py` | Modificar | Pasar `robot_namespace` al xacro |
+| `deepracer_bringup/launch/deepracer_navigation_sim.launch.py` | ✔ Modificado 10 ago | Argumento `namespace` en los 6 nodos de Nav2 |
+| `deepracer_bringup/launch/deepracer_localization_sim.launch.py` | ✔ Creado 10 ago | Sustituye a `nav2_bringup/localization_launch.py` |
+| `deepracer_bringup/launch/nav_amcl_demo_sim.launch.py` | ✔ Modificado 10 ago | Propagar `namespace` a los tres launches incluidos |
+| `deepracer_description/models/xacro/urdf/*.xacro` (4) | ✔ Modificado 10 ago | 26 URIs `package://` con nombre de paquete |
+| `deepracer_description/package.xml` | ✔ Modificado 10 ago | Exportar también `${prefix}/..` a `GAZEBO_MODEL_PATH` |
 | `primer_piso/model.config` | Crear | Metadatos del modelo Gazebo |
 | `primer_piso/model.sdf` | Crear | Geometría de la planta, extraída del `.world` |
 | `primer_piso_dos_niveles.world` | Crear | Mundo con las dos plantas y la losa del nivel 2 |
@@ -371,40 +417,160 @@ verificador 5/5, y el coche arranca y se detiene por `/robot1/cmd_vel`.
 
 ---
 
-# Martes 11 de agosto — H1: dos robots
+## Lo que además salió el lunes 10 (no estaba en el plan)
 
-### Tarea 10: Dos robots coexistiendo — *tu terminal*
+El día se alargó porque la tarea 9 destapó un bloqueo y ese bloqueo destapó otros dos. Se
+registra aquí porque cambia el contenido del martes.
 
-Es el criterio de cierre de H1 según `CONTRATO_INTERFACES.md` §8.
+### Tarea 9b: Topología de dos simuladores ✔ hecho 2026-08-10
 
-- [ ] **Paso 1.** Con `robot1` corriendo, lanzar el segundo contra el mismo Gazebo. Se hace
-  así y no modificando `deepracer_sim.launch.py`: si falla, el fallo está en el spawn y no en
-  un launch nuevo sin estrenar.
+**Evidencia:** `Documentos/Evidencia/S17_dos_simuladores.md`
+
+Dos robots dentro de un mismo `gzserver` **no se pueden aislar**: `gazebo_ros` de Humble
+aplica a todos los plugins el namespace del primer modelo cargado. La salida no es un parche
+sino un cambio de topología: **un `gzserver` por robot**, cada uno con su `ROS_DOMAIN_ID` y su
+`GAZEBO_MASTER_URI`. Es además la traducción fiel del alcance del anteproyecto (*"cada robot
+opera de forma dedicada en un nivel específico"*) y mapea 1:1 al despliegue final, una
+Raspberry Pi por vehículo.
+
+Medido: aislamiento total del grafo, movimiento mutuamente independiente (3,34 m contra 6 mm
+en el testigo) y RTF 0,998 en ambas instancias. **Esto invalida la tarea 10 tal como estaba
+escrita**, que asumía un Gazebo compartido.
+
+### Tarea 9c: Nav2 y AMCL bajo espacio de nombres ✔ hecho 2026-08-10
+
+**Evidencia:** `Documentos/Evidencia/S17_nav2_namespaces.md`
+
+`nav_amcl_demo_sim.launch.py` no contenía la palabra `namespace`, y el `global_costmap` fallaba
+en bucle. Sin esto los dos robots coexisten pero no navegan, así que era el trabajo bloqueante.
+
+Se modificaron dos launches y se escribió uno nuevo,
+`deepracer_localization_sim.launch.py`, porque el de `nav2_bringup` falla **en silencio** bajo
+namespace (sus nodos no llevan `namespace=` y remapea `/tf` de forma fija). Verificado el
+cambio nulo parámetro a parámetro, y los dos robots alcanzaron objetivos `NavigateToPose`
+simultáneamente a RTF 0,996.
+
+### Tarea 9d: URIs `package://` de los meshes ✔ corregido, ⏳ sin verificar
+
+Al preparar la evidencia visual, `RobotModel` de RViz fallaba en los 12 enlaces: los `.xacro`
+escribían `package://meshes/...`, sin nombre de paquete. Se corrigieron 26 ocurrencias, RViz
+pasó a cargar el modelo **y Gazebo dejó de dibujarlo**, porque cada uno resuelve la URI de
+forma distinta. Arreglado en `deepracer_description/package.xml` exportando también
+`${prefix}/..`. Detalle completo en el hallazgo colateral nº2 de `S17_nav2_namespaces.md`.
+
+**Falta la comprobación visual.** Es el primer paso del martes.
+
+---
+
+# Martes 11 de agosto — Cerrar H1 de verdad
+
+El estado real de H1 es: **funcionalmente demostrado, sin una corrida limpia que lo respalde de
+principio a fin.** Las pruebas de aislamiento (9b) y de navegación (9c) son buenas, pero se
+tomaron antes de tocar los `.xacro` en 9d. El martes no busca resultados nuevos: busca una sola
+corrida reproducible que valga como evidencia del hito, y el commit que la fija.
+
+### Tarea 10: Regresión visual tras la corrección de meshes — *tu terminal*
+
+Es lo único que hoy está sin verificar. Va primero porque, si falla, todo lo demás se posterga.
+
+- [ ] **Paso 1.** Un robot con espacio de nombres, con interfaz:
 
   ```bash
-  ros2 launch deepracer_bringup deepracer_spawn.launch.py namespace:=robot2 x:=2.0 y:=0.0
+  cd ~/deepracer_sim_ws && source install/setup.bash && ros2 launch deepracer_bringup nav_amcl_demo_sim.launch.py namespace:=robot1 2>&1 | tee /tmp/paso2.log
   ```
 
-- [ ] **Paso 2.** `ros2 control list_controllers -c /robot1/controller_manager && ros2 control list_controllers -c /robot2/controller_manager`
+  Esperado: el vehículo **visible** en el visor de Gazebo (aleja la cámara: por defecto queda
+  pegada al robot). Si sigue invisible, buscar `Unable to find file` en `/tmp/paso2.log`: ese
+  mensaje trae la ruta exacta que no se encontró y cierra el diagnóstico sin adivinar.
 
-  Esperado: siete `active` en cada uno.
+- [ ] **Paso 2.** No cortar antes de ver estas tres líneas, que confirman que el plugin de
+  control cargó dentro del espacio de nombres:
 
-- [ ] **Paso 3.** `ros2 run tf2_tools view_frames`
+  ```
+  [gzserver-1] [INFO] [gazebo_ros2_control]: Loading gazebo_ros2_control plugin
+  [gzserver-1] [INFO] [gazebo_ros2_control]: Starting gazebo_ros2_control plugin in namespace: /robot1
+  [gzserver-1] [INFO] [gazebo_ros2_control]: Loading controller_manager
+  ```
 
-  Esperado: 24 marcos, dos raíces independientes, ningún marco con dos padres.
+  En la corrida fallida del lunes no aparecieron porque se interrumpió ~25 s tras el spawn.
+  Sin ellas no existe `/robot1/controller_manager` y todo lo demás cae en cascada: los
+  `Invalid frame ID "robot1/odom"` son consecuencia, no causa.
 
-- [ ] **Paso 4.** El aislamiento de mando, que es la prueba que de verdad importa:
+- [ ] **Paso 3.** `ros2 control list_controllers -c /robot1/controller_manager`
+
+  Esperado: siete `active`. Si alguno queda `unconfigured`, es la carrera de carga documentada
+  como hallazgo colateral nº1; se recupera con
+  `ros2 control set_controller_state <nombre> inactive && ros2 control set_controller_state <nombre> active`.
+
+- [ ] **Paso 4.** RViz, en el mismo espacio de nombres:
 
   ```bash
-  ros2 topic pub --once /robot1/cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.5}}"
+  rviz2 --ros-args -r __ns:=/robot1
   ```
 
-  Esperado: se mueve `robot1` y **no** `robot2`. Si se mueven los dos, hay un tópico global
-  colándose y H1 no está cerrado.
+  En `RobotModel`, poner **TF Prefix** = `robot1`. Los nombres de los enlaces del URDF van sin
+  prefijo, pero `robot_state_publisher` sí prefija los marcos TF: es el diseño documentado en
+  `deepracer.xacro:20-27`, no un error. El `__ns` hace además que el botón *Nav2 Goal* publique
+  en `/robot1/goal_pose`, porque los plugins de Nav2 usan nombres relativos.
 
-- [ ] **Paso 5.** Registrar, cerrar H1 y commitear.
+- [ ] **Paso 5.** Captura de Gazebo y captura de RViz, las dos con el modelo visible, a
+  `Documentos/Evidencia/`. Son la evidencia gráfica de H1 para el entregable.
 
-**Criterio de cierre del día:** H1 cerrado, o documentado por qué no.
+**Criterio de cierre:** el mismo modelo se ve en los dos visores a la vez. Es la prueba de que
+la URI corregida sirve a los dos resolvedores, que era justamente el conflicto.
+
+### Tarea 10b: Corrida completa de H1 y cierre — *tu terminal*
+
+Repetir el resultado 3 de `S17_nav2_namespaces.md` sobre el código de hoy. **No es trabajo
+nuevo**; es dejar constancia de que la corrección de meshes no alteró el comportamiento.
+
+- [ ] **Paso 1.** Instancia 1:
+
+  ```bash
+  cd ~/deepracer_sim_ws && source install/setup.bash && ros2 launch deepracer_bringup nav_amcl_demo_sim.launch.py namespace:=robot1
+  ```
+
+- [ ] **Paso 2.** Instancia 2, en otra terminal. Las dos variables de entorno son lo único que
+  cambia:
+
+  ```bash
+  cd ~/deepracer_sim_ws && source install/setup.bash && GAZEBO_MASTER_URI=http://localhost:11346 ROS_DOMAIN_ID=2 ros2 launch deepracer_bringup nav_amcl_demo_sim.launch.py namespace:=robot2 y:=2.0
+  ```
+
+- [ ] **Paso 3.** Un objetivo a cada uno, y anotar el resultado de los dos:
+
+  ```bash
+  ros2 action send_goal /robot1/navigate_to_pose nav2_msgs/action/NavigateToPose "{pose: {header: {frame_id: map}, pose: {position: {x: 2.0, y: 0.0}, orientation: {w: 1.0}}}}"
+  ```
+
+  Esperado: `SUCCEEDED` en ambos. Si uno falla, **anotarlo tal cual**: un H1 con una excepción
+  escrita vale más que un H1 declarado cerrado sin respaldo.
+
+- [ ] **Paso 4.** Actualizar el criterio de cierre de `S17_nav2_namespaces.md` con la fecha de
+  esta repetición, y quitar la advertencia de vigencia.
+
+- [ ] **Paso 5.** Commit. Son once archivos y llevan días fuera de git; si algo se rompe hoy no
+  hay a dónde volver.
+
+  ```bash
+  git add Robot/aws-deepracer/deepracer_bringup/launch/ Robot/aws-deepracer/deepracer_description/ Documentos/Evidencia/ Documentos/PLAN_S17_S18.md
+  git commit -m "Add: Nav2 y AMCL bajo espacio de nombres, y correccion de las URIs de los meshes"
+  ```
+
+**Criterio de cierre del día:** H1 cerrado con evidencia reproducible y commiteado, o
+documentado exactamente en qué punto falla.
+
+### Si sobra tiempo
+
+Por orden de utilidad, no de dificultad:
+
+- [ ] `herramientas/lanzar_sim.sh` acepta puerto y dominio (hallazgo nº2 de `S17_dos_simuladores.md`).
+  Hoy mata todos los `gzserver` al arrancar, lo que impide la segunda instancia.
+- [ ] La carrera de carga de controladores (hallazgo nº1 de `S17_nav2_namespaces.md`).
+  **Hay que arreglarla antes de medir tiempos de OE4**: un robot con una rueda motriz sin
+  actuar falsea la dinámica.
+- [ ] Que el argumento `gui` funcione de verdad (hallazgo nº3). Tres líneas. Importa porque la
+  operación por defecto debe ser *headless*: la VRAM es el cuello de botella, no la CPU.
 
 ---
 

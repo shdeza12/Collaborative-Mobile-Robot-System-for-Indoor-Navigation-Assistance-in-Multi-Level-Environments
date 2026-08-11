@@ -130,6 +130,8 @@ Se deja registrado por si en el futuro se necesita que ambos robots compartan gr
    `Invalid frame ID "map" ... frame does not exist`, porque busca `base_link` y `map` sin prefijo
    mientras el robot publica `robot1/base_link`. **Es el siguiente trabajo bloqueante:** sin esto
    los dos robots no navegan.
+   **Resuelto el mismo día** — ver `S17_nav2_namespaces.md`: los tres launches aceptan `namespace`
+   y los dos robots alcanzan objetivos de Nav2 simultáneamente.
 
 2. **`herramientas/lanzar_sim.sh` asume una sola instancia.** Mata todos los `gzserver` al arrancar
    y solo comprueba el puerto 11345. Necesita aceptar puerto y dominio como parámetros.
