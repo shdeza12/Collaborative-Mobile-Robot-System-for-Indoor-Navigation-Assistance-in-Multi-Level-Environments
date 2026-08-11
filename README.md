@@ -17,12 +17,12 @@ El estado de avance detallado se mantiene en [`ESTADO.md`](ESTADO.md).
 
 ## Requisitos
 
-| Componente | Versión |
-|------------|---------|
-| Sistema operativo | Ubuntu 22.04 LTS |
-| Middleware | ROS 2 Humble Hawksbill |
-| Simulador | Gazebo Classic 11 |
-| Python | 3.10 |
+| Componente | Versión | A tener en cuenta |
+|------------|---------|-------------------|
+| Sistema operativo | Ubuntu 22.04 LTS | Otras versiones no están probadas |
+| Middleware | ROS 2 **Humble** | Foxy no sirve: el código se migró y usa `joint_state_broadcaster` y el estado `active` |
+| Simulador | Gazebo **Classic** 11 | No confundir con Ignition / Gazebo Sim: el plugin Ackermann del proyecto es de Classic |
+| Python | 3.10 | El que trae Ubuntu 22.04 |
 
 Instalar ROS 2 Humble siguiendo la [guía oficial](https://docs.ros.org/en/humble/Installation.html),
 y luego las dependencias de simulación:
@@ -41,37 +41,57 @@ sudo apt update && sudo apt install -y \
 
 ## Instalación
 
-Los paquetes ROS 2 viven en `Robot/aws-deepracer/`. Para compilarlos se crea un workspace
-de colcon que **enlaza** esa carpeta, de modo que el código compilado sea exactamente el
-código versionado.
+Seis pasos. El último comprueba los cinco anteriores, así que no hay que fiarse de que
+"pareció funcionar". Las rutas de ejemplo son `~/Tesis` para el repositorio y
+`~/deepracer_sim_ws` para el workspace; si se usan otras, ajustarlas en todos los pasos.
+
+### 1. Clonar el repositorio
 
 ```bash
-# 1. Clonar el repositorio
 git clone https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments.git ~/Tesis
+```
 
-# 2. Crear el workspace y enlazar los paquetes
+### 2. Crear el workspace enlazando los paquetes
+
+Los paquetes ROS 2 viven en `Robot/aws-deepracer/`, pero se compilan desde un workspace de
+colcon aparte, que **enlaza** esa carpeta:
+
+```bash
 mkdir -p ~/deepracer_sim_ws/src
 ln -s ~/Tesis/Robot/aws-deepracer ~/deepracer_sim_ws/src/aws-deepracer
+```
 
-# 3. Resolver dependencias
+> **Un enlace, nunca una copia.** Con `cp -r` el código que se ejecuta deja de ser el que
+> está bajo control de versiones, y ambos divergen sin avisar. En este proyecto eso ya pasó
+> —incidente R7—: durante semanas se compiló una copia mientras se editaba el repositorio,
+> así que los arreglos de SLAM nunca llegaron a ejecutarse y la cartografía de ese periodo
+> quedó invalidada. El paso 6 comprueba explícitamente que sea un enlace.
+
+### 3. Resolver dependencias
+
+```bash
 cd ~/deepracer_sim_ws
 sudo rosdep init 2>/dev/null || true
 rosdep update
 rosdep install --from-paths src --ignore-src -r -y
-
-# 4. Compilar
-colcon build --symlink-install
-source install/setup.bash
 ```
 
-> **Importante:** usar un enlace simbólico y no una copia. Si se copia la carpeta, el código
-> que se ejecuta deja de ser el que está bajo control de versiones y ambos divergen en
-> silencio.
+`sudo rosdep init` solo hace falta la primera vez en el equipo; si ya estaba inicializado
+avisa y no pasa nada.
+
+### 4. Compilar
+
+```bash
+colcon build --symlink-install
+```
+
+Esperado: `Summary: 6 packages finished`, en algo menos de un minuto y sin ninguna
+advertencia. Si aparece cualquier paquete en `failed`, no seguir al paso siguiente.
 
 ### 5. Variables de entorno
 
-Los mundos y los modelos SDF viven en la raíz del repositorio, **fuera** del workspace de
-colcon, así que ni ROS ni Gazebo los encuentran solos:
+Los mundos y los modelos SDF viven en la raíz del repositorio, **fuera** del workspace, así
+que Gazebo no los encuentra solo:
 
 ```bash
 echo 'source ~/deepracer_sim_ws/install/setup.bash' >> ~/.bashrc
@@ -79,35 +99,22 @@ echo 'export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:$HOME/Tesis' >> ~/.bashrc
 exec bash
 ```
 
-| Variable | Para qué sirve | ¿Obligatoria? |
-|----------|----------------|---------------|
-| `GAZEBO_MODEL_PATH` | Resolver las URIs `model://pasillo_usta` y `model://pasillo_grande` | Solo para los mundos que las usan (ver abajo) |
-| `TESIS_WORLDS_DIR` | Forzar la carpeta donde los launch buscan el `.world` por defecto | No — se deduce del propio repositorio |
+La primera línea evita tener que hacer `source` en cada terminal nueva. La segunda solo la
+necesitan los mundos que incluyen modelos externos con `model://` —`pasillo_grande.world`,
+`pasillo_test.world`, `USTA_WORLD/usta_test.world`—; los de `primer_piso` llevan la
+geometría embebida y funcionan sin ella.
 
-Los mundos se dividen en dos grupos:
+> **Por qué es una trampa.** Sin la variable Gazebo **no aborta**: devuelve código de salida
+> 0 y carga el mundo incompleto —plano gris y sol, pero sin pasillo—, dejando una sola línea
+> perdida en su salida: `Error Code 12 Msg: Unable to find uri[model://pasillo_grande]`.
+> Y encima **funciona igual sin la variable si se lanza desde la raíz del repositorio**,
+> porque Gazebo también busca en el directorio actual. Por eso este fallo no aparece nunca en
+> el equipo de quien escribe las instrucciones, y sí en el de quien lanza desde otra carpeta.
 
-| Mundo | ¿Necesita `GAZEBO_MODEL_PATH`? |
-|-------|-------------------------------|
-| `primer_piso.world`, `primer_piso_v2.world`, `MapaV2.world` | No — la geometría está embebida en el propio archivo |
-| `pasillo_grande.world`, `pasillo_test.world`, `USTA_WORLD/usta_test.world` | Sí — incluyen modelos externos con `model://` |
-
-> **Por qué importa, y por qué es una trampa.** Si falta la variable, Gazebo **no aborta**:
-> devuelve código de salida 0 y sigue adelante con el mundo incompleto —el plano gris y el
-> sol, pero sin pasillo—, dejando solo una línea perdida entre su salida:
->
-> ```
-> Error Code 12 Msg: Unable to find uri[model://pasillo_grande]
-> ```
->
-> Y lo peor: **si se lanza desde la raíz del repositorio, funciona igual sin la variable**,
-> porque Gazebo también busca en el directorio actual. Por eso el fallo nunca aparece en el
-> equipo de quien escribió las instrucciones, y sí en el de quien lanza desde otra carpeta.
->
-> Si el repositorio se clonó en una ruta distinta de `~/Tesis`, ajustar la variable a esa ruta.
-
-`TESIS_WORLDS_DIR` solo hace falta para apuntar a otro checkout: por defecto los launch
-deducen la raíz del repositorio a partir de la ubicación real del propio archivo, de modo
-que los mundos que se cargan salen siempre del mismo clon que el código que se ejecuta.
+Existe una tercera variable opcional, `TESIS_WORLDS_DIR`, para apuntar a otro checkout del
+repositorio. No hace falta declararla: por defecto cada launch deduce la raíz a partir de la
+ubicación real de su propio archivo, de modo que los mundos salen siempre del mismo clon que
+el código que se está ejecutando.
 
 ### 6. Verificar la instalación
 
@@ -116,22 +123,16 @@ que los mundos que se cargan salen siempre del mismo clon que el código que se 
 ```
 
 Comprueba entorno, workspace, los seis paquetes, los recursos instalados, el URDF y sus
-mallas, que los seis launch files parseen, y las variables de entorno anteriores — **sin
-levantar Gazebo ni ningún nodo**. Debe terminar en:
+mallas, el parseo de los seis launch files y las variables de entorno —**sin levantar Gazebo
+ni ningún nodo**—, e imprime junto a cada fallo el comando que lo corrige. Debe terminar en:
 
 ```
   30 comprobaciones pasan, 0 fallan.
 ```
 
-Cada fallo imprime el comando que lo corrige. Mientras haya fallos, no tiene sentido lanzar
-la simulación: el script existe precisamente porque unas instrucciones de instalación solo
-se prueban en el equipo de quien las escribió, donde todo ya funcionaba.
-
-Cada terminal nueva necesita (o dejarlo en `~/.bashrc` como en el paso 5):
-
-```bash
-source ~/deepracer_sim_ws/install/setup.bash
-```
+Mientras haya fallos no tiene sentido lanzar la simulación. El script existe porque unas
+instrucciones de instalación se prueban una sola vez, en el equipo de quien las escribió,
+donde todo ya funcionaba.
 
 ---
 
