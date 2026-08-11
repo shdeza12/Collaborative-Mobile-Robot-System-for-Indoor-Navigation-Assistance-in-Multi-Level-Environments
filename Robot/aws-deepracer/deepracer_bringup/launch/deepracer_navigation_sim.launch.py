@@ -14,64 +14,168 @@
 #   limitations under the License.                                              #
 #################################################################################
 
+# Modificado para el sistema colaborativo (Documentos/CONTRATO_INTERFACES.md §6).
+#
+# Cambios respecto al original de AWS:
+#   - Argumento 'namespace': vacio (por defecto) deja el lanzamiento identico al
+#     original; con 'robot1' los seis nodos de Nav2 cuelgan de /robot1.
+#   - Los marcos que Nav2 lee del YAML se prefijan ('robot1/base_link'), porque
+#     el URDF los publica prefijados via 'frame_prefix' de robot_state_publisher.
+#     Sin esto el costmap global falla en bucle con
+#     'Invalid frame ID "map" ... frame does not exist'.
+#
+# Se usa OpaqueFunction por la misma razon que en deepracer_spawn.launch.py: el
+# prefijo hay que componerlo como texto y, con namespace vacio, hay que OMITIRLO
+# en vez de concatenar cadenas vacias. Las sustituciones de launch no saben
+# omitir; Python si.
+
 import os
 
-from launch import LaunchDescription
-import launch.actions
-import launch_ros.actions
-from launch.actions import DeclareLaunchArgument, SetEnvironmentVariable
 from ament_index_python.packages import get_package_share_directory
+from launch import LaunchDescription
+from launch.actions import (DeclareLaunchArgument, OpaqueFunction,
+                            SetEnvironmentVariable)
+from launch.substitutions import LaunchConfiguration
+from launch_ros.actions import Node
 from nav2_common.launch import RewrittenYaml
 
+LIFECYCLE_NODES = ['controller_server',
+                   'planner_server',
+                   'behavior_server',
+                   'bt_navigator',
+                   'waypoint_follower']
 
-def generate_launch_description():
-    deepracer_bringup_dir = get_package_share_directory('deepracer_bringup')
-    use_sim_time = launch.substitutions.LaunchConfiguration('use_sim_time',
-                                                            default='true')
-    autostart = launch.substitutions.LaunchConfiguration('autostart')
-    params_file = launch.substitutions.LaunchConfiguration('params')
-    nav_to_pose_bt_xml = launch.substitutions.LaunchConfiguration(
-        'nav_to_pose_bt_xml')
-    nav_through_poses_bt_xml = launch.substitutions.LaunchConfiguration(
-        'nav_through_poses_bt_xml')
 
-    remappings = []
+def marcos_prefijados(prefijo):
+    """Rutas del YAML de Nav2 cuyo valor es un marco del robot.
 
-    # Create our own temporary YAML files that include substitutions
+    Se usan rutas COMPLETAS ('a.b.c.clave') y no la clave suelta a proposito.
+    RewrittenYaml sustituye primero por clave hoja, y 'global_frame' aparece dos
+    veces con valores distintos: 'map' en el costmap global y 'odom' en el local.
+    Reescribir por clave suelta igualaria los dos y romperia el costmap local en
+    silencio, que es de los fallos mas caros de diagnosticar.
+
+    Los marcos globales ('map') NO se prefijan: no pertenecen al robot, los
+    publica el map_server y son el punto de anclaje comun del mapa.
+    """
+    if not prefijo:
+        # Sin namespace no se reescribe NADA: el YAML llega al nodo tal cual
+        # esta en disco, byte a byte igual que en el original.
+        return {}
+
+    base = f'{prefijo}base_link'
+    odom = f'{prefijo}odom'
+    return {
+        'bt_navigator.ros__parameters.robot_base_frame': base,
+
+        'local_costmap.local_costmap.ros__parameters.global_frame': odom,
+        'local_costmap.local_costmap.ros__parameters.robot_base_frame': base,
+
+        'global_costmap.global_costmap.ros__parameters.robot_base_frame': base,
+
+        'behavior_server.ros__parameters.global_frame': odom,
+        'behavior_server.ros__parameters.robot_base_frame': base,
+    }
+
+
+def acciones(context, *args, **kwargs):
+    ns = LaunchConfiguration('namespace').perform(context).strip('/')
+
+    # launch_ros distingue None (sin namespace) de '' (que traduce a '__ns:=/').
+    # Solo None deja la orden de ejecucion identica a la original.
+    ns_nodo = ns if ns else None
+
+    # El prefijo de marcos lleva '/' final: 'robot1/base_link'. Es la convencion
+    # de robot_state_publisher, que concatena sin separador.
+    prefijo = f'{ns}/' if ns else ''
+
+    use_sim_time = LaunchConfiguration('use_sim_time')
+    autostart = LaunchConfiguration('autostart')
+    params_file = LaunchConfiguration('params')
+    nav_to_pose_bt_xml = LaunchConfiguration('nav_to_pose_bt_xml')
+    nav_through_poses_bt_xml = LaunchConfiguration('nav_through_poses_bt_xml')
+
     param_substitutions = {
         'use_sim_time': use_sim_time,
         'default_nav_to_pose_bt_xml': nav_to_pose_bt_xml,
         'default_nav_through_poses_bt_xml': nav_through_poses_bt_xml,
         'autostart': autostart,
     }
+    param_substitutions.update(marcos_prefijados(prefijo))
 
-    lifecycle_nodes = ['controller_server',
-                       'planner_server',
-                       'behavior_server',
-                       'bt_navigator',
-                       'waypoint_follower']
-
+    # root_key anida TODO el YAML bajo la clave del namespace. Es obligatorio:
+    # el archivo tiene claves de primer nivel sueltas ('bt_navigator:'), que ROS
+    # solo asocia al nodo '/bt_navigator'. Con namespace el nodo pasa a llamarse
+    # '/robot1/bt_navigator' y dejaria de leer sus parametros EN SILENCIO, con
+    # los valores por defecto del codigo. Anidando queda 'robot1: bt_navigator:',
+    # que si corresponde al nombre completo.
+    #
+    # El anidado ocurre DESPUES de las sustituciones (ver rewritten_yaml.py:89-94),
+    # asi que las rutas de 'marcos_prefijados' se escriben sin el prefijo de ns.
     configured_params = RewrittenYaml(
         source_file=params_file,
+        root_key=ns_nodo,
         param_rewrites=param_substitutions,
         convert_types=True)
+
+    # NO se remapea /tf ni /tf_static, a diferencia de lo que hace nav2_bringup
+    # para multi-robot. Aqui cada robot vive en su propio ROS_DOMAIN_ID y en su
+    # propio gzserver (ver Documentos/Evidencia/S17_dos_simuladores.md), asi que
+    # el arbol TF global de cada dominio ya esta aislado. Remapear ademas
+    # obligaria a tocar el robot_state_publisher, que publica en /tf absoluto.
+    remappings = []
+
+    comunes = dict(output='screen',
+                   namespace=ns_nodo,
+                   parameters=[configured_params],
+                   remappings=remappings)
+
+    return [
+        Node(package='nav2_controller', executable='controller_server',
+             **comunes),
+        Node(package='nav2_planner', executable='planner_server',
+             name='planner_server', **comunes),
+        Node(package='nav2_behaviors', executable='behavior_server',
+             name='behavior_server', **comunes),
+        Node(package='nav2_bt_navigator', executable='bt_navigator',
+             name='bt_navigator', **comunes),
+        Node(package='nav2_waypoint_follower', executable='waypoint_follower',
+             name='waypoint_follower', **comunes),
+
+        # El gestor de ciclo de vida no lee el YAML: sus nombres de nodo son
+        # relativos y se resuelven dentro del mismo namespace.
+        Node(package='nav2_lifecycle_manager', executable='lifecycle_manager',
+             name='lifecycle_manager_navigation', output='screen',
+             namespace=ns_nodo,
+             parameters=[{'use_sim_time': use_sim_time},
+                         {'autostart': autostart},
+                         {'node_names': LIFECYCLE_NODES}]),
+    ]
+
+
+def generate_launch_description():
+    deepracer_bringup_dir = get_package_share_directory('deepracer_bringup')
 
     return LaunchDescription([
         # Set env var to print messages to stdout immediately
         SetEnvironmentVariable('RCUTILS_LOGGING_BUFFERED_STREAM', '1'),
 
-        launch.actions.DeclareLaunchArgument(
+        DeclareLaunchArgument(
+            'namespace', default_value='',
+            description="Namespace del robot, p.ej. 'robot1'. "
+                        'Vacio = comportamiento original de un solo robot.'),
+
+        DeclareLaunchArgument(
             'use_sim_time', default_value='false',
             description='Use simulation (Gazebo) clock if true'),
 
-        launch.actions.DeclareLaunchArgument(
+        DeclareLaunchArgument(
             'autostart', default_value='true',
             description='Automatically startup the nav2 stack'),
 
-        launch.actions.DeclareLaunchArgument(
+        DeclareLaunchArgument(
             'params',
-            default_value=[deepracer_bringup_dir,
-                           '/config/nav2_params.yaml'],
+            default_value=[deepracer_bringup_dir, '/config/nav2_params.yaml'],
             description='Full path to the ROS2 parameters file to use'),
 
         # Arboles de comportamiento adecuados a cinematica Ackermann:
@@ -90,53 +194,5 @@ def generate_launch_description():
                 'behavior_trees', 'ackermann_navigate_through_poses.xml'),
             description='Behavior tree para NavigateThroughPoses'),
 
-        launch_ros.actions.Node(
-            package='nav2_controller',
-            executable='controller_server',
-            output='screen',
-            parameters=[configured_params],
-            remappings=remappings),
-
-        launch_ros.actions.Node(
-            package='nav2_planner',
-            executable='planner_server',
-            name='planner_server',
-            output='screen',
-            parameters=[configured_params],
-            remappings=remappings),
-
-
-        launch_ros.actions.Node(
-            package='nav2_behaviors',
-            executable='behavior_server',
-            name='behavior_server',
-            output='screen',
-            parameters=[configured_params],
-            remappings=remappings),
-
-        launch_ros.actions.Node(
-            package='nav2_bt_navigator',
-            executable='bt_navigator',
-            name='bt_navigator',
-            output='screen',
-            parameters=[configured_params],
-            remappings=remappings),
-
-        launch_ros.actions.Node(
-            package='nav2_waypoint_follower',
-            executable='waypoint_follower',
-            name='waypoint_follower',
-            output='screen',
-            parameters=[configured_params],
-            remappings=remappings),
-
-        launch_ros.actions.Node(
-            package='nav2_lifecycle_manager',
-            executable='lifecycle_manager',
-            name='lifecycle_manager_navigation',
-            output='screen',
-            parameters=[{'use_sim_time': use_sim_time},
-                        {'autostart': autostart},
-                        {'node_names': lifecycle_nodes}]),
-
+        OpaqueFunction(function=acciones),
     ])

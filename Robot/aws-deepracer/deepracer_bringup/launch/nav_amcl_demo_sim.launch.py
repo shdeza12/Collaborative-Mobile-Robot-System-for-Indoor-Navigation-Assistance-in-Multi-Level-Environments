@@ -24,7 +24,6 @@ from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
     deepracer_bringup_dir = get_package_share_directory('deepracer_bringup')
-    nav2_bringup_dir = get_package_share_directory('nav2_bringup')
 
     # Los mundos y modelos SDF viven en la raiz del repositorio, fuera del paquete.
     # Se puede sobreescribir con la variable de entorno TESIS_WORLDS_DIR o con world:=<ruta>.
@@ -38,28 +37,43 @@ def generate_launch_description():
     world_cfg = LaunchConfiguration('world')
     map_cfg = LaunchConfiguration('map')
     params_cfg = LaunchConfiguration('params')
+    # Namespace del robot. Vacio = comportamiento original de un solo robot.
+    # Se propaga tal cual a los tres launches incluidos; cada uno sabe que con
+    # cadena vacia no debe namespacear ni prefijar marcos.
+    ns_cfg = LaunchConfiguration('namespace')
 
     declare_world_arg = DeclareLaunchArgument('world', default_value=default_world, description='SDF world file')
     declare_map_arg = DeclareLaunchArgument('map', default_value=default_map, description='map file')
     declare_params_arg = DeclareLaunchArgument('params', default_value=nav_params, description='params file')
+    declare_ns_arg = DeclareLaunchArgument(
+        'namespace', default_value='',
+        description="Namespace del robot, p.ej. 'robot1'. Vacio = un solo robot.")
 
     include_files = GroupAction([
         # start deepracer simulation
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([deepracer_bringup_dir, '/launch/deepracer_sim.launch.py']),
-            launch_arguments = {'world': world_cfg}.items()
+            launch_arguments = {'world': world_cfg,
+                                'namespace': ns_cfg}.items()
          ),
         # start navigation planner and controller
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([deepracer_bringup_dir, '/launch/deepracer_navigation_sim.launch.py']),
             launch_arguments = {'params': params_cfg,
+                                'namespace': ns_cfg,
                                 'use_sim_time': 'true'}.items()
         ),
         # start localization (amcl) and map_server
+        #
+        # Se usa el launch propio y NO nav2_bringup/localization_launch.py: aquel
+        # no namespacea sus nodos (solo anida el YAML) y remapea /tf de forma
+        # fija, lo que parte el arbol TF bajo un namespace. El motivo largo esta
+        # en la cabecera de deepracer_localization_sim.launch.py.
         IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([nav2_bringup_dir, '/launch/localization_launch.py']),
+            PythonLaunchDescriptionSource([deepracer_bringup_dir, '/launch/deepracer_localization_sim.launch.py']),
             launch_arguments={'map': map_cfg,
-                              'params_file': params_cfg,
+                              'params': params_cfg,
+                              'namespace': ns_cfg,
                               'use_sim_time': 'true'}.items()),
     ])
 
@@ -67,6 +81,7 @@ def generate_launch_description():
     ld.add_action(declare_world_arg)
     ld.add_action(declare_map_arg)
     ld.add_action(declare_params_arg)
+    ld.add_action(declare_ns_arg)
     ld.add_action(include_files)
 
     return ld
