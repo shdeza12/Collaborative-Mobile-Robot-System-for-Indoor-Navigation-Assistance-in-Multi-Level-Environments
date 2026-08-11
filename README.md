@@ -81,14 +81,29 @@ exec bash
 
 | Variable | Para qué sirve | ¿Obligatoria? |
 |----------|----------------|---------------|
-| `GAZEBO_MODEL_PATH` | Resolver las URIs `model://pasillo_usta` y `model://pasillo_grande` que usan los `.world` | Sí |
+| `GAZEBO_MODEL_PATH` | Resolver las URIs `model://pasillo_usta` y `model://pasillo_grande` | Solo para los mundos que las usan (ver abajo) |
 | `TESIS_WORLDS_DIR` | Forzar la carpeta donde los launch buscan el `.world` por defecto | No — se deduce del propio repositorio |
 
-> **Por qué importa.** Si falta `GAZEBO_MODEL_PATH`, Gazebo **abre igual, sin ningún mensaje
-> de error, pero con el mundo vacío**: se ve el robot flotando sobre el plano gris y ninguna
-> pared. Es el fallo más caro de diagnosticar de toda la instalación, porque no parece un
-> fallo. Si el repositorio se clonó en una ruta distinta de `~/Tesis`, ajustar la variable a
-> esa ruta.
+Los mundos se dividen en dos grupos:
+
+| Mundo | ¿Necesita `GAZEBO_MODEL_PATH`? |
+|-------|-------------------------------|
+| `primer_piso.world`, `primer_piso_v2.world`, `MapaV2.world` | No — la geometría está embebida en el propio archivo |
+| `pasillo_grande.world`, `pasillo_test.world`, `USTA_WORLD/usta_test.world` | Sí — incluyen modelos externos con `model://` |
+
+> **Por qué importa, y por qué es una trampa.** Si falta la variable, Gazebo **no aborta**:
+> devuelve código de salida 0 y sigue adelante con el mundo incompleto —el plano gris y el
+> sol, pero sin pasillo—, dejando solo una línea perdida entre su salida:
+>
+> ```
+> Error Code 12 Msg: Unable to find uri[model://pasillo_grande]
+> ```
+>
+> Y lo peor: **si se lanza desde la raíz del repositorio, funciona igual sin la variable**,
+> porque Gazebo también busca en el directorio actual. Por eso el fallo nunca aparece en el
+> equipo de quien escribió las instrucciones, y sí en el de quien lanza desde otra carpeta.
+>
+> Si el repositorio se clonó en una ruta distinta de `~/Tesis`, ajustar la variable a esa ruta.
 
 `TESIS_WORLDS_DIR` solo hace falta para apuntar a otro checkout: por defecto los launch
 deducen la raíz del repositorio a partir de la ubicación real del propio archivo, de modo
@@ -105,7 +120,7 @@ mallas, que los seis launch files parseen, y las variables de entorno anteriores
 levantar Gazebo ni ningún nodo**. Debe terminar en:
 
 ```
-  29 comprobaciones pasan, 0 fallan.
+  30 comprobaciones pasan, 0 fallan.
 ```
 
 Cada fallo imprime el comando que lo corrige. Mientras haya fallos, no tiene sentido lanzar

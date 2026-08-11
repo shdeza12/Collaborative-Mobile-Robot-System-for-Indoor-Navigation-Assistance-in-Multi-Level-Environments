@@ -139,6 +139,25 @@ for w in primer_piso.world primer_piso_v2.world pasillo_grande.world; do
   else mal "no esta en la raiz del repositorio"; fi
 done
 
+# Que la variable este exportada no prueba que sirva. Los mundos con 'model://'
+# se resuelven igual sin ella SI se lanza desde la raiz del repositorio, porque
+# Gazebo tambien mira el directorio actual: por eso el fallo nunca aparece en el
+# equipo de quien escribio las instrucciones. Aqui se resuelve desde /tmp, a
+# proposito, para reproducir la situacion de quien lanza desde otra carpeta.
+# Gazebo no aborta en ese caso -devuelve 0 y carga el mundo incompleto-, asi que
+# lo que se inspecciona es su stderr.
+paso 'los model:// externos resuelven desde otra carpeta'
+if [ ! -f "$REPO/pasillo_grande.world" ]; then
+  mal 'falta pasillo_grande.world, no se puede comprobar'
+elif ! command -v gz >/dev/null; then
+  aviso 'no esta la herramienta gz; se omite'
+else
+  SDF_ERR=$(cd /tmp && gz sdf -p "$REPO/pasillo_grande.world" 2>&1 >/dev/null)
+  if echo "$SDF_ERR" | grep -q 'Unable to find uri'; then
+    mal "$(echo "$SDF_ERR" | grep -m1 'Unable to find uri'). Anadir a ~/.bashrc:  export GAZEBO_MODEL_PATH=\$GAZEBO_MODEL_PATH:$REPO"
+  else bien; fi
+fi
+
 # ---------------------------------------------------------------- resultado
 titulo 'Resultado'
 echo "  $OK comprobaciones pasan, $FALLOS fallan."
