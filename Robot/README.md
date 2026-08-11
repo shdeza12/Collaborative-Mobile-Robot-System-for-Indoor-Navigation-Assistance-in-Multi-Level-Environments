@@ -64,20 +64,15 @@ reemplazará por una Raspberry Pi 4 en la fase de implementación física.
 
 ## Compilación
 
-```bash
-# Crear workspace y mover los paquetes
-mkdir -p ~/deepracer_sim_ws/src
-cp -r aws-deepracer ~/deepracer_sim_ws/src/
+El procedimiento completo —dependencias, variables de entorno y verificación— está en el
+[`README.md` de la raíz](../README.md). Deliberadamente **no se duplica aquí**: dos copias de
+unas instrucciones divergen, y quien instala acaba siguiendo la equivocada.
 
-# Resolver dependencias
-cd ~/deepracer_sim_ws
-source /opt/ros/humble/setup.bash
-rosdep install --from-paths src --ignore-src -r -y
-
-# Compilar
-colcon build --symlink-install
-source install/setup.bash
-```
+> **Nunca copiar esta carpeta al workspace.** La versión anterior de este archivo decía
+> `cp -r aws-deepracer ~/deepracer_sim_ws/src/`, y eso provocó el incidente registrado como R7:
+> durante semanas se compiló una copia mientras se editaba el repositorio, de modo que los
+> arreglos de SLAM nunca llegaron a ejecutarse y toda la cartografía tomada en ese periodo quedó
+> invalidada. El workspace **enlaza** la carpeta con `ln -s`; no la copia.
 
 ## Lanzamiento de la simulación
 

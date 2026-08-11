@@ -68,7 +68,51 @@ source install/setup.bash
 > que se ejecuta deja de ser el que está bajo control de versiones y ambos divergen en
 > silencio.
 
-Cada terminal nueva necesita:
+### 5. Variables de entorno
+
+Los mundos y los modelos SDF viven en la raíz del repositorio, **fuera** del workspace de
+colcon, así que ni ROS ni Gazebo los encuentran solos:
+
+```bash
+echo 'source ~/deepracer_sim_ws/install/setup.bash' >> ~/.bashrc
+echo 'export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:$HOME/Tesis' >> ~/.bashrc
+exec bash
+```
+
+| Variable | Para qué sirve | ¿Obligatoria? |
+|----------|----------------|---------------|
+| `GAZEBO_MODEL_PATH` | Resolver las URIs `model://pasillo_usta` y `model://pasillo_grande` que usan los `.world` | Sí |
+| `TESIS_WORLDS_DIR` | Forzar la carpeta donde los launch buscan el `.world` por defecto | No — se deduce del propio repositorio |
+
+> **Por qué importa.** Si falta `GAZEBO_MODEL_PATH`, Gazebo **abre igual, sin ningún mensaje
+> de error, pero con el mundo vacío**: se ve el robot flotando sobre el plano gris y ninguna
+> pared. Es el fallo más caro de diagnosticar de toda la instalación, porque no parece un
+> fallo. Si el repositorio se clonó en una ruta distinta de `~/Tesis`, ajustar la variable a
+> esa ruta.
+
+`TESIS_WORLDS_DIR` solo hace falta para apuntar a otro checkout: por defecto los launch
+deducen la raíz del repositorio a partir de la ubicación real del propio archivo, de modo
+que los mundos que se cargan salen siempre del mismo clon que el código que se ejecuta.
+
+### 6. Verificar la instalación
+
+```bash
+~/Tesis/herramientas/verificar_instalacion.sh
+```
+
+Comprueba entorno, workspace, los seis paquetes, los recursos instalados, el URDF y sus
+mallas, que los seis launch files parseen, y las variables de entorno anteriores — **sin
+levantar Gazebo ni ningún nodo**. Debe terminar en:
+
+```
+  29 comprobaciones pasan, 0 fallan.
+```
+
+Cada fallo imprime el comando que lo corrige. Mientras haya fallos, no tiene sentido lanzar
+la simulación: el script existe precisamente porque unas instrucciones de instalación solo
+se prueban en el equipo de quien las escribió, donde todo ya funcionaba.
+
+Cada terminal nueva necesita (o dejarlo en `~/.bashrc` como en el paso 5):
 
 ```bash
 source ~/deepracer_sim_ws/install/setup.bash
@@ -111,6 +155,42 @@ rviz2
 
 En RViz: `Fixed Frame` = `map`, y en el display `Map` la propiedad
 `Durability Policy` = `Transient Local` (con `Volatile` el mapa nunca llega).
+
+### Navegación autónoma sobre un mapa ya construido
+
+Una vez existe el mapa, un solo comando levanta Gazebo, el robot, AMCL y la pila Nav2:
+
+```bash
+ros2 launch deepracer_bringup nav_amcl_demo_sim.launch.py
+```
+
+Argumentos disponibles (`--show-args` los lista): `world`, `map`, `params`, `namespace`.
+El objetivo se envía desde RViz con la herramienta **2D Goal Pose**, o por línea de comandos:
+
+```bash
+ros2 action send_goal /navigate_to_pose nav2_msgs/action/NavigateToPose \
+  "{pose: {header: {frame_id: map}, pose: {position: {x: 2.0, y: 0.0}, orientation: {w: 1.0}}}}"
+```
+
+### Dos robots (en desarrollo)
+
+El argumento `namespace` permite correr dos agentes aislados, cada uno con su propia pila
+Nav2 y sus marcos TF prefijados (`robot1/base_link`). Requiere además separar el simulador
+y el grafo DDS de cada instancia:
+
+```bash
+# Terminal 1
+GAZEBO_MASTER_URI=http://localhost:11345 ROS_DOMAIN_ID=1 \
+  ros2 launch deepracer_bringup nav_amcl_demo_sim.launch.py namespace:=robot1
+
+# Terminal 2
+GAZEBO_MASTER_URI=http://localhost:11346 ROS_DOMAIN_ID=2 \
+  ros2 launch deepracer_bringup nav_amcl_demo_sim.launch.py namespace:=robot2 y:=2.0
+```
+
+Con `namespace` vacío (el valor por defecto) el comportamiento es exactamente el de un solo
+robot, sin prefijos. El estado y las limitaciones de este modo están en
+[`Documentos/Evidencia/S17_nav2_namespaces.md`](Documentos/Evidencia/S17_nav2_namespaces.md).
 
 ---
 
