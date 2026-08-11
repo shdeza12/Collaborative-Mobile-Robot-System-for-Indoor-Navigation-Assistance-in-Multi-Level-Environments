@@ -21,7 +21,11 @@
 
   <!-- Simulacion y descripcion del robot -->
   <exec_depend>deepracer_description</exec_depend>
-  <exec_depend>deepracer_gazebo</exec_depend>
+  <!-- OJO: el paquete se llama 'deepracer_drive_plugin' aunque su carpeta sea
+       'deepracer_gazebo'. Declarar aqui el nombre de la carpeta hacia que
+       `rosdep install` abortara con "Cannot locate rosdep definition for
+       [deepracer_gazebo]" en un equipo nuevo. -->
+  <exec_depend>deepracer_drive_plugin</exec_depend>
   <exec_depend>gazebo_ros</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>
   <exec_depend>xacro</exec_depend>

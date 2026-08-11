@@ -15,6 +15,7 @@
 #################################################################################
 
 import os
+import sys
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, GroupAction
 from launch.actions import IncludeLaunchDescription
@@ -27,9 +28,40 @@ def generate_launch_description():
 
     # Los mundos y modelos SDF viven en la raiz del repositorio, fuera del paquete.
     # Se puede sobreescribir con la variable de entorno TESIS_WORLDS_DIR o con world:=<ruta>.
-    worlds_dir = os.environ.get(
-        'TESIS_WORLDS_DIR',
-        os.path.join(os.path.expanduser('~'), 'Documents', 'Tesis'))
+    #
+    # El candidato principal se DEDUCE de la ubicacion real de este archivo, no de una
+    # ruta fija ni del $HOME. Con `colcon build --symlink-install` el launch instalado
+    # es un enlace al del repositorio, asi que realpath() cae en
+    #   <repo>/Robot/aws-deepracer/deepracer_bringup/launch/
+    # y subiendo cuatro niveles se obtiene la raiz de ESE clon. Es la unica forma de
+    # garantizar que los mundos que se cargan salen del mismo checkout que el codigo
+    # que se ejecuta.
+    #
+    # Antes habia una ruta fija ('~/Documents/Tesis'). Eso fallaba de dos maneras: en
+    # un equipo que clonara en otro sitio, el launch entregaba a Gazebo la ruta de un
+    # .world inexistente y el simulador abria un mundo VACIO sin mensaje de error; y
+    # si por casualidad existia otra copia del repositorio en la ruta adivinada, se
+    # cargaban en silencio los mundos de la copia equivocada.
+    _raiz_repo = os.path.abspath(os.path.join(
+        os.path.dirname(os.path.realpath(__file__)), '..', '..', '..', '..'))
+    _candidatos = [os.environ['TESIS_WORLDS_DIR']] if os.environ.get('TESIS_WORLDS_DIR') else [
+        _raiz_repo,
+        os.path.join(os.path.expanduser('~'), 'Documents', 'Tesis'),
+        os.path.join(os.path.expanduser('~'), 'Tesis'),
+    ]
+    worlds_dir = next(
+        (d for d in _candidatos if os.path.isfile(os.path.join(d, 'primer_piso.world'))),
+        None)
+    if worlds_dir is None:
+        # Si el usuario pasa world:= explicitamente, el valor por defecto no se usa
+        # y no hay motivo para abortar.
+        if not any(a.startswith('world:=') for a in sys.argv):
+            raise RuntimeError(
+                'No se encontro primer_piso.world. Se busco en: '
+                + ', '.join(_candidatos)
+                + '. Exportar TESIS_WORLDS_DIR con la raiz del repositorio, '
+                  'o pasar world:=<ruta absoluta al .world>.')
+        worlds_dir = _candidatos[0]
     default_world = os.path.join(worlds_dir, 'primer_piso.world')
     default_map = os.path.join(deepracer_bringup_dir, 'maps', 'primer_piso.yaml')
     nav_params = os.path.join(deepracer_bringup_dir, 'config', 'nav2_params_nav_amcl_sim_demo.yaml')
