@@ -150,7 +150,7 @@ limitations under the License.
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://meshes/left_steering_hinge.STL" />
+          filename="package://deepracer_description/meshes/left_steering_hinge.STL" />
       </geometry>
     </visual>
   </link>
@@ -240,7 +240,7 @@ limitations under the License.
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://meshes/right_steering_hinge.STL" />
+          filename="package://deepracer_description/meshes/right_steering_hinge.STL" />
       </geometry>
     </visual>
   </link>
@@ -332,7 +332,7 @@ limitations under the License.
           rpy="0 0 0" />
         <geometry>
           <mesh
-            filename="package://meshes/zed_camera_link_leftcam.STL" />
+            filename="package://deepracer_description/meshes/zed_camera_link_leftcam.STL" />
         </geometry>
       </visual>
     </xacro:if>
@@ -403,7 +403,7 @@ limitations under the License.
           rpy="0 0 0" />
         <geometry>
           <mesh
-            filename="package://meshes/zed_camera_link_rightcam.STL" />
+            filename="package://deepracer_description/meshes/zed_camera_link_rightcam.STL" />
         </geometry>
       </visual>
     </xacro:if>
@@ -473,7 +473,7 @@ limitations under the License.
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://meshes/$(arg shell)" />
+          filename="package://deepracer_description/meshes/$(arg shell)" />
       </geometry>
     </visual>
     <collision>
@@ -482,7 +482,7 @@ limitations under the License.
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://meshes/$(arg shell)" />
+          filename="package://deepracer_description/meshes/$(arg shell)" />
       </geometry>
     </collision>
   </link>

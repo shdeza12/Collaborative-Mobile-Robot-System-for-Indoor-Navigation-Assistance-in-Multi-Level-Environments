@@ -29,7 +29,15 @@
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
-    <gazebo_ros gazebo_model_path="${prefix}" />
+    <!-- Se exportan dos rutas separadas por ':' (gazebo_ros_paths.py las une con
+         os.pathsep, asi que el valor puede ser una lista):
+           ${prefix}    = .../share/deepracer_description
+           ${prefix}/.. = .../share
+         La segunda es la que permite a Gazebo resolver
+         'package://deepracer_description/meshes/...', que es la sintaxis que
+         necesita RViz (resuelve por indice ament y exige el nombre del paquete).
+         La primera se conserva por compatibilidad con URIs sin nombre de paquete. -->
+    <gazebo_ros gazebo_model_path="${prefix}:${prefix}/.." />
     <build_type>ament_cmake</build_type>
   </export>
 </package>
