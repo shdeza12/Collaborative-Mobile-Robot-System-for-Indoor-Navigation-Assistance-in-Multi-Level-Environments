@@ -51,6 +51,21 @@ Seis pasos. El último comprueba los cinco anteriores, así que no hay que fiars
 git clone https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments.git ~/Tesis
 ```
 
+Eso trae `main`, que es la última versión verificada y la que conviene en general. Para
+fijar una versión concreta —útil si se quiere reproducir un resultado o reportar un fallo
+sin ambigüedad sobre qué código se tenía— se clona un tag en su lugar:
+
+```bash
+git clone --branch v0.1-simulacion-verificada \
+  https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments.git ~/Tesis
+```
+
+Git avisará de que el repositorio queda en estado *detached HEAD*. **No es un error**:
+significa que se está sobre un punto fijo del historial en vez de sobre una rama que avanza.
+Para instalar y simular no cambia nada; solo importa si se van a hacer commits.
+
+Los tags publicados se consultan con `git ls-remote --tags <url>`.
+
 ### 2. Crear el workspace enlazando los paquetes
 
 Los paquetes ROS 2 viven en `Robot/aws-deepracer/`, pero se compilan desde un workspace de
