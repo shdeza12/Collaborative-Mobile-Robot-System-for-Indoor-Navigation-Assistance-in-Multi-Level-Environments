@@ -173,14 +173,38 @@ Para que quede escrito y no se reabra:
 
 ## 8. Criterio de cierre de H1
 
+> **Revisado el 2026-08-11.** La redacción original de esta sección daba por hecho que los dos
+> robots compartirían un `gzserver` y un grafo ROS. Eso resultó **imposible**: `gazebo_ros` de
+> Humble aplica a todos los plugins el namespace del primer modelo cargado
+> (`Evidencia/S17_dos_simuladores.md`). La topología adoptada es un `gzserver` por robot, cada uno
+> con su `ROS_DOMAIN_ID` y su `GAZEBO_MASTER_URI`, que además es la traducción fiel del alcance del
+> anteproyecto —cada robot dedicado a un nivel, coordinación por servidor— y mapea 1:1 al
+> despliegue final, una Raspberry Pi por vehículo. Las comprobaciones se reescriben en
+> consecuencia: **cada una se ejecuta dos veces, una por dominio.**
+
 El contrato se declara cumplido cuando, en simulación:
 
-1. `ros2 topic list` muestra los tópicos de §2 bajo `/robot1` y `/robot2`, y ninguno duplicado en la raíz.
-2. `ros2 run tf2_tools view_frames` produce **dos árboles separados**, cada uno con su `<ns>/map` como raíz, sin advertencias de marco repetido.
-3. Los 14 controladores (7 por robot) reportan `active`.
-4. Una llamada manual a `/robot1/navigate_to_pose` mueve **solo** a `robot1`.
+1. `ros2 topic list --no-daemon` en el dominio 0 muestra los tópicos de §2 bajo `/robot1` y
+   **ninguno de `/robot2`**; y a la inversa en el dominio 2. El flag es obligatorio: el daemon
+   conserva nodos fantasma (§E.3 de `S17_aplicacion_contrato.md`).
+2. `ros2 run tf2_tools view_frames` en cada dominio produce **un árbol de 12 marcos**, todos con
+   el prefijo de su robot y raíz `map`, sin advertencias de marco repetido y **sin un solo marco
+   del otro robot**.
+3. Los 7 controladores de cada `controller_manager` reportan `active`, en los dos dominios.
+4. Una llamada manual a `/robot1/navigate_to_pose` mueve a `robot1`, y la odometría de `robot2`
+   —leída desde su propio dominio— no se altera más allá de la deriva numérica del solver.
 
-Los puntos 1–4 son la prueba de que dos robots conviven. Sin eso, no se empieza el nodo de coordinación.
+Los puntos 1–4 son la prueba de que dos robots conviven. Sin eso, no se empieza el nodo de
+coordinación.
+
+**Qué no se demuestra aquí, y por qué no hace falta.** Los dos vehículos no comparten espacio
+físico: están en procesos de simulación distintos y no pueden colisionar ni siquiera en principio.
+Eso no es una carencia de la prueba sino el diseño: el anteproyecto define el relevo (6.3.4) como
+*"transferencia secuencial de responsabilidad entre agentes en puntos definidos"* —un evento
+lógico— y sitúa a cada robot *"de forma dedicada en un nivel específico"*. La ausencia de
+interacción física es por tanto una **limitación declarada y deliberada**, no un resultado
+pendiente de medir. Lo que sí hay que demostrar, y es el punto 4, es el **aislamiento de mando**:
+que ordenar a uno no mueva al otro.
 
 ---
 

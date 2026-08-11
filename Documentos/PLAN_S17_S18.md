@@ -546,6 +546,57 @@ nuevo**; es dejar constancia de que la corrección de meshes no alteró el compo
   Esperado: `SUCCEEDED` en ambos. Si uno falla, **anotarlo tal cual**: un H1 con una excepción
   escrita vale más que un H1 declarado cerrado sin respaldo.
 
+- [ ] **Paso 3b.** Aislamiento de mando, que es el punto 4 del criterio de cierre del contrato.
+  **Esta es la prueba que de verdad importa**, y la única que puede fallar de forma interesante.
+
+  Cuatro terminales. Las dos de lectura se dejan corriendo y se fotografían juntas:
+
+  | Terminal | Orden |
+  |---|---|
+  | lectura robot1 (dominio 0) | `ros2 topic echo /robot1/odom --field pose.pose.position` |
+  | lectura robot2 (dominio 2) | `ROS_DOMAIN_ID=2 ros2 topic echo /robot2/odom --field pose.pose.position` |
+  | mando (dominio 0) | `ros2 topic pub --once /robot1/cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.5}}"` |
+  | freno (dominio 0) | `ros2 topic pub --once /robot1/cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.0}}"` |
+
+  `cmd_vel` es velocidad, no distancia: hay que **frenar explícitamente** antes de leer, o el robot
+  sigue rodando con el último comando y contamina la medida.
+
+  Esperado: la `x` de `robot1` cambia en metros; la de `robot2`, en milímetros. Si `robot2` se
+  desplaza de verdad, hay un tópico global colándose y **H1 no está cerrado**.
+
+  Repetir en el sentido contrario, comandando `robot2`. Un solo sentido no demuestra aislamiento:
+  demuestra que un mensaje llegó a donde debía.
+
+- [ ] **Paso 3c.** Capturas. Solo estas cuatro; el resto es decoración y ocupa repositorio:
+
+  | Archivo | Qué debe verse |
+  |---|---|
+  | `S17_dos_gazebo_lado_a_lado.png` | las dos ventanas de Gazebo, cada una con su vehículo visible y su barra inferior legible (RTF, Sim Time) |
+  | `S17_aislamiento_mando.png` | las dos terminales de `echo` una sobre otra, tras comandar `robot1`: metros arriba, milímetros abajo |
+  | `S17_rviz_robot1_robotmodel.png` | RViz con `RobotModel` sin errores, `TF Prefix: robot1`, `Fixed Frame: map` |
+  | `S17_dos_objetivos_succeeded.png` | las dos terminales de `send_goal` con `SUCCEEDED` |
+
+  Ventana completa, sin recortar: la barra de Gazebo lleva el RTF, que es un dato de la evidencia.
+
+  **No se fotografía «los robots no chocan».** No comparten espacio físico —procesos de simulación
+  distintos—, así que esa imagen no probaría nada. La no-interacción física es una limitación
+  declarada del alcance, no un resultado: ver §8 de `CONTRATO_INTERFACES.md`.
+
+- [ ] **Paso 3d.** Evidencia textual, que es más barata y más fuerte que la fotográfica:
+
+  ```bash
+  mkdir -p Documentos/Evidencia/logs
+  ros2 topic list --no-daemon > Documentos/Evidencia/logs/S17_topicos_dominio0.txt
+  ROS_DOMAIN_ID=2 ros2 topic list --no-daemon > Documentos/Evidencia/logs/S17_topicos_dominio2.txt
+  ros2 control list_controllers -c /robot1/controller_manager > Documentos/Evidencia/logs/S17_controladores_robot1.txt
+  ros2 param get /robot1/global_costmap/global_costmap robot_base_frame >> Documentos/Evidencia/logs/S17_controladores_robot1.txt
+  ros2 run tf2_tools view_frames
+  ```
+
+  `view_frames` en el dominio 0 debe dar **12 marcos con prefijo `robot1/`, raíz `map`, y ninguno
+  de `robot2`**. Que no vea al otro robot es la prueba de aislamiento; es más fuerte que verlos
+  juntos. El PDF que genera se pega directo al informe.
+
 - [ ] **Paso 4.** Actualizar el criterio de cierre de `S17_nav2_namespaces.md` con la fecha de
   esta repetición, y quitar la advertencia de vigencia.
 
