@@ -130,18 +130,46 @@ advertencia. Si aparece cualquier paquete en `failed`, no seguir al paso siguien
 ### 5. Variables de entorno
 
 Los mundos y los modelos SDF viven en la raíz del repositorio, **fuera** del workspace, así
-que Gazebo no los encuentra solo:
+que Gazebo no los encuentra solo. El paso 4 termina dentro de `~/deepracer_sim_ws`; antes
+de ejecutar el bloque de aquí hay que volver a la raíz del repositorio (la carpeta que se
+clonó o descomprimió en el paso 1):
 
 ```bash
-echo 'source ~/deepracer_sim_ws/install/setup.bash' >> ~/.bashrc
-echo 'export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:$HOME/Tesis' >> ~/.bashrc
+# Ir a la raíz del repositorio: aquí va la ruta donde se descargó el código
+cd ~/Tesis
+
+# Red de seguridad: si esto NO lista el archivo, la ruta del cd de arriba no es la
+# correcta. Hay que parar y corregirla antes de seguir: las órdenes siguientes usan
+# $PWD, y desde otra carpeta escribirían una GAZEBO_MODEL_PATH que apunta a un sitio
+# sin mundos, con el fallo silencioso que se describe más abajo.
+ls pasillo_grande.world
+
+grep -qxF 'source ~/deepracer_sim_ws/install/setup.bash' ~/.bashrc || echo 'source ~/deepracer_sim_ws/install/setup.bash' >> ~/.bashrc
+
+LINEA="export GAZEBO_MODEL_PATH=\"\$GAZEBO_MODEL_PATH:$PWD\""
+grep -qxF "$LINEA" ~/.bashrc || echo "$LINEA" >> ~/.bashrc
+
 exec bash
 ```
 
-La primera línea evita tener que hacer `source` en cada terminal nueva. La segunda solo la
-necesitan los mundos que incluyen modelos externos con `model://` —`pasillo_grande.world`,
-`pasillo_test.world`, `USTA_WORLD/usta_test.world`—; los de `primer_piso` llevan la
-geometría embebida y funcionan sin ella.
+> **Por qué se comprueba antes de añadir.** Repetir este paso es lo habitual cuando algo
+> falla a mitad de instalación. Con un `>>` a ciegas, cada intento agrega las líneas otra
+> vez y `~/.bashrc` acaba con varias copias que se pisan entre sí; el `grep -qxF ... ||` de
+> delante añade cada línea solo si no está ya.
+>
+> Las tres letras importan. `-F` compara texto literal: sin ella, una carpeta con corchetes
+> o puntos en el nombre se leería como expresión regular y la comprobación dejaría de
+> proteger **sin dar ningún error**. `-x` exige que coincida la línea entera: sin ella, un
+> `~/.bashrc` ya estropeado —con la línea buena pegada a otra orden— contaría como acierto y
+> la línea correcta no llegaría a añadirse nunca. Y las comillas alrededor del valor son lo
+> que permite que la ruta lleve espacios sin que la siguiente terminal arranque con
+> `not a valid identifier`.
+
+La primera línea evita tener que hacer `source` en cada terminal nueva. La segunda añade la
+raíz del repositorio a `GAZEBO_MODEL_PATH`, y solo la necesitan los mundos que incluyen
+modelos externos con `model://` —`pasillo_grande.world`, `pasillo_test.world`,
+`USTA_WORLD/usta_test.world`—; los de `primer_piso` llevan la geometría embebida y
+funcionan sin ella.
 
 > **Por qué es una trampa.** Sin la variable Gazebo **no aborta**: devuelve código de salida
 > 0 y carga el mundo incompleto —plano gris y sol, pero sin pasillo—, dejando una sola línea
@@ -163,7 +191,8 @@ el código que se está ejecutando.
 
 Comprueba entorno, workspace, los seis paquetes, los recursos instalados, el URDF y sus
 mallas, el parseo de los seis launch files y las variables de entorno —**sin levantar Gazebo
-ni ningún nodo**—, e imprime junto a cada fallo el comando que lo corrige. Debe terminar en:
+ni ningún nodo**—, y explica junto a cada fallo qué hacer; cuando existe un comando exacto
+que lo corrige, lo imprime solo en su línea, listo para copiar. Debe terminar en:
 
 ```
   30 comprobaciones pasan, 0 fallan.

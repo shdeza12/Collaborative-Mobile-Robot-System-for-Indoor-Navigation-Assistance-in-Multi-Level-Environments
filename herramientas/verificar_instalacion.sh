@@ -30,6 +30,27 @@ mal()    { printf '\033[31m[FALLO]\033[0m\n'; FALLOS=$((FALLOS+1)); [ -n "${1:-}
 aviso()  { printf '\033[33m[AVISO]\033[0m\n'; [ -n "${1:-}" ] && printf '         -> %s\n' "$1"; }
 titulo() { printf '\n\033[1m%s\033[0m\n' "$1"; }
 
+# El comando que corrige el fallo va SOLO en su linea, con el rotulo aparte. Si
+# se imprime 'Ejecutar: <comando>' todo seguido, al seleccionar la linea (triple
+# clic) se arrastra la palabra 'Ejecutar:' delante del comando; bash falla al
+# ejecutarla y, en una orden con '||', ese fallo se confunde con "la linea no
+# estaba" y la parte de la derecha se ejecuta igual, una vez por cada intento.
+cmd()    { printf '         Ejecutar:\n           %s\n' "$1"; }
+
+# Orden que anade GAZEBO_MODEL_PATH a ~/.bashrc sin poder duplicarla ni romperla.
+# Se emite en los dos sitios que la piden, identica, y esta construida asi:
+#   - la ruta aparece UNA sola vez, dentro de una variable: la orden se acorta en
+#     una copia entera de la ruta, y asi el ajuste de linea del terminal (tmux,
+#     screen, less) tiene menos ocasiones de partirla con un salto real;
+#   - el valor va entre comillas dobles, para que una ruta con espacios no acabe
+#     en 'not a valid identifier' al abrir la siguiente terminal;
+#   - la asignacion va entre comillas simples, para que '$GAZEBO_MODEL_PATH' se
+#     escriba literal en ~/.bashrc y se expanda alli, no aqui;
+#   - 'grep -qxF' compara la LINEA ENTERA de forma LITERAL: -F evita que una ruta
+#     con corchetes o puntos se interprete como expresion regular, y -x evita que
+#     una linea ya corrupta que contenga el texto de al lado cuente como acierto.
+CMD_GZP="LINEA='export GAZEBO_MODEL_PATH=\"\$GAZEBO_MODEL_PATH:$REPO\"'; grep -qxF \"\$LINEA\" ~/.bashrc || echo \"\$LINEA\" >> ~/.bashrc"
+
 echo "Repositorio: $REPO"
 echo "Workspace:   $WS"
 
@@ -46,11 +67,17 @@ else mal 'falta /opt/ros/humble/setup.bash. Instalar ROS 2 Humble (docs.ros.org/
 
 paso 'Gazebo Classic 11'
 if command -v gzserver >/dev/null && gzserver --version 2>&1 | grep -q 'version 11'; then bien
-else mal 'falta Gazebo 11. sudo apt install gazebo libgazebo-dev'; fi
+else
+  mal 'falta Gazebo Classic 11'
+  cmd 'sudo apt install gazebo libgazebo-dev'
+fi
 
 paso 'colcon'
 if command -v colcon >/dev/null; then bien
-else mal 'sudo apt install python3-colcon-common-extensions'; fi
+else
+  mal 'falta colcon, la herramienta que compila el workspace'
+  cmd 'sudo apt install python3-colcon-common-extensions'
+fi
 
 # ------------------------------------------------------------- 2. workspace
 titulo '2. Workspace compilado'
@@ -58,13 +85,17 @@ titulo '2. Workspace compilado'
 paso 'el workspace existe y esta compilado'
 if [ -f "$WS/install/setup.bash" ]; then bien
 else
-  mal "no existe $WS/install/setup.bash. Ejecutar: cd $WS && colcon build --symlink-install"
+  mal "no existe $WS/install/setup.bash"
+  cmd "cd $WS && colcon build --symlink-install"
   echo; echo "Sin workspace compilado no se puede seguir."; exit 1
 fi
 
 paso 'src/aws-deepracer es un enlace al repositorio'
 if [ -L "$WS/src/aws-deepracer" ]; then bien
-else mal "es una COPIA, no un enlace. El codigo que se ejecuta dejara de ser el versionado y divergiran en silencio. Corregir: rm -rf $WS/src/aws-deepracer && ln -s $REPO/Robot/aws-deepracer $WS/src/aws-deepracer && cd $WS && colcon build --symlink-install"; fi
+else
+  mal "es una COPIA, no un enlace. El codigo que se ejecuta dejara de ser el versionado y divergiran en silencio"
+  cmd "rm -rf $WS/src/aws-deepracer && ln -s $REPO/Robot/aws-deepracer $WS/src/aws-deepracer && cd $WS && colcon build --symlink-install"
+fi
 
 # shellcheck disable=SC1090,SC1091
 source /opt/ros/humble/setup.bash >/dev/null 2>&1
@@ -76,7 +107,10 @@ for p in deepracer_bringup deepracer_description deepracer_drive_plugin \
          deepracer_interfaces_pkg cmdvel_to_servo_pkg enable_deepracer_nav_pkg; do
   paso "$p"
   if ros2 pkg prefix "$p" >/dev/null 2>&1; then bien
-  else mal "no lo encuentra ROS. Recompilar: cd $WS && colcon build --symlink-install"; fi
+  else
+    mal "no lo encuentra ROS: hay que recompilar el workspace"
+    cmd "cd $WS && colcon build --symlink-install"
+  fi
 done
 
 # ------------------------------------------------------------ 4. contenido
@@ -95,7 +129,10 @@ URDF=$(mktemp)
 
 paso 'el URDF se genera desde el xacro'
 if xacro "$XACRO" > "$URDF" 2>/dev/null; then bien
-else mal "xacro fallo. Probar a mano para ver el error: xacro $XACRO"; fi
+else
+  mal "xacro fallo; probarlo a mano para ver el error"
+  cmd "xacro $XACRO"
+fi
 
 paso 'tiene los 12 enlaces esperados'
 N=$(grep -c '<link' "$URDF" 2>/dev/null || echo 0)
@@ -123,7 +160,10 @@ for l in deepracer_sim.launch.py deepracer_spawn.launch.py slam_toolbox.launch.p
          deepracer_localization_sim.launch.py; do
   paso "$l"
   if ros2 launch deepracer_bringup "$l" --show-args >/dev/null 2>&1; then bien
-  else mal "no parsea. Ver el error con: ros2 launch deepracer_bringup $l --show-args"; fi
+  else
+    mal "no parsea; el error completo sale al lanzarlo a mano"
+    cmd "ros2 launch deepracer_bringup $l --show-args"
+  fi
 done
 
 # ------------------------------------------------------------- 7. escenarios
@@ -131,7 +171,10 @@ titulo '7. Mundos y modelos de Gazebo'
 
 paso 'GAZEBO_MODEL_PATH incluye la raiz del repositorio'
 if [[ ":${GAZEBO_MODEL_PATH:-}:" == *":$REPO:"* ]]; then bien
-else mal "anadir a ~/.bashrc:  export GAZEBO_MODEL_PATH=\$GAZEBO_MODEL_PATH:$REPO   (sin esto, los mundos que usan model://pasillo_usta y model://pasillo_grande cargan vacios)"; fi
+else
+  mal "sin esto, los mundos con model://pasillo_usta y model://pasillo_grande cargan vacios"
+  cmd "$CMD_GZP"
+fi
 
 for w in primer_piso.world primer_piso_v2.world pasillo_grande.world; do
   paso "$w"
@@ -154,7 +197,8 @@ elif ! command -v gz >/dev/null; then
 else
   SDF_ERR=$(cd /tmp && gz sdf -p "$REPO/pasillo_grande.world" 2>&1 >/dev/null)
   if echo "$SDF_ERR" | grep -q 'Unable to find uri'; then
-    mal "$(echo "$SDF_ERR" | grep -m1 'Unable to find uri'). Anadir a ~/.bashrc:  export GAZEBO_MODEL_PATH=\$GAZEBO_MODEL_PATH:$REPO"
+    mal "$(echo "$SDF_ERR" | grep -m1 'Unable to find uri')"
+    cmd "$CMD_GZP"
   else bien; fi
 fi
 
