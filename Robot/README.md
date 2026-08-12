@@ -43,7 +43,9 @@ reemplazará por una Raspberry Pi 4 en la fase de implementación física.
 - **Razón:** el paquete `joint_state_controller` fue deprecado y reemplazado
   por `joint_state_broadcaster` en `ros2_controllers` desde Humble.
 
-## Resultados validados en simulación (Semana 12)
+## Resultados validados en simulación
+
+**Semana 12 — la migración funciona:**
 
 - Los 6 paquetes del repositorio compilan sin errores en ROS 2 Humble.
 - El plugin Ackermann personalizado (`deepracer_drive_plugin`) funciona en
@@ -54,6 +56,18 @@ reemplazará por una Raspberry Pi 4 en la fase de implementación física.
 - Sensores publicando: cámaras estéreo (`/zed_camera_*`), LiDAR (`/scan`).
 - Movimiento físico verificado mediante `/cmd_vel` y odometría coherente
   publicada en `/odom`.
+
+**Semana 15 — SLAM 2D** con `slam_toolbox` sobre el mundo del primer piso.
+Procedimiento en [`Documentos/guia_simulacion_slam.md`](../Documentos/guia_simulacion_slam.md).
+El mapa resultante **no** pasa `herramientas/verificar_mapa.py`: es el riesgo R10
+de [`ESTADO.md`](../ESTADO.md), abierto.
+
+**Semana 17 — navegación autónoma y dos agentes:** AMCL y la pila Nav2 con
+planificador Smac Hybrid-A\* y árboles de comportamiento sin `<Spin>`, por la
+restricción Ackermann; y `namespace:=robotN`, que aísla nodos, tópicos y marcos
+TF de cada agente. Con `namespace` vacío el comportamiento es el de un solo robot,
+sin prefijos. Evidencia en
+[`Documentos/Evidencia/S17_nav2_namespaces.md`](../Documentos/Evidencia/S17_nav2_namespaces.md).
 
 ## Entorno de compilación
 
@@ -76,6 +90,11 @@ unas instrucciones divergen, y quien instala acaba siguiendo la equivocada.
 
 ## Lanzamiento de la simulación
 
+Los comandos de uso —mapeo, navegación y modo de dos robots— están en el
+[`README.md` de la raíz](../README.md#uso), por el mismo motivo que la instalación:
+una sola copia. Para comprobar solo que el vehículo aparece y se mueve, basta el
+mundo vacío que trae Gazebo:
+
 ```bash
 ros2 launch deepracer_bringup deepracer_sim.launch.py \
     world:=/usr/share/gazebo-11/worlds/empty.world
@@ -88,11 +107,16 @@ ros2 launch deepracer_bringup deepracer_sim.launch.py \
 
 ## Trabajo pendiente
 
-- Modelado del entorno de la Universidad Santo Tomás en Gazebo (mundo SDF).
-- Replicación del vehículo con namespaces (`/robot1`, `/robot2`) para el
-  esquema colaborativo de relevo entre pisos.
-- Integración del nodo de coordinación con el servidor central y el panel
-  HRI vía `rosbridge_suite`.
+El estado vigente, con avance por objetivo y riesgos abiertos, está en
+[`ESTADO.md`](../ESTADO.md); esta lista solo recoge lo que falta **en el código
+del robot**:
+
+- Nodo de coordinación contra el servidor central, según
+  [`Documentos/CONTRATO_INTERFACES.md`](../Documentos/CONTRATO_INTERFACES.md).
+- Panel HRI web vía `rosbridge_suite`.
+- Instrumentación de las métricas de OE4.
+- Bring-up sobre los DeepRacer físicos (`deepracer-custom-car`), pendiente de
+  resolver el desajuste Humble ↔ Jazzy (riesgo R8).
 
 ## Referencias
 

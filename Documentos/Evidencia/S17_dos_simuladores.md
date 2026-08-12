@@ -46,7 +46,7 @@ herramientas/lanzar_sim.sh primer_piso.world namespace:=robot1
 Instancia 2 — las dos variables de entorno son lo único que cambia:
 
 ```
-GAZEBO_MASTER_URI=http://localhost:11346 ROS_DOMAIN_ID=2 ros2 launch deepracer_bringup deepracer_sim.launch.py world:=$HOME/Documents/Tesis/primer_piso.world namespace:=robot2 y:=2.0
+GAZEBO_MASTER_URI=http://localhost:11346 ROS_DOMAIN_ID=2 ros2 launch deepracer_bringup deepracer_sim.launch.py world:=$HOME/Tesis/primer_piso.world namespace:=robot2 y:=2.0
 ```
 
 `GAZEBO_MASTER_URI` separa los dos Gazebo; `ROS_DOMAIN_ID` separa los dos grafos ROS.

@@ -2,7 +2,15 @@
 
 Procedimiento para mapear un mundo Gazebo con `slam_toolbox` sobre la sim del DeepRacer y prepararlo para AMCL/Nav2. Cuatro terminales independientes. **Cada terminal nueva** necesita sourcear `~/deepracer_sim_ws/install/setup.bash`.
 
-> Mundo de trabajo actual (S15): `primer_piso.world`. Para otros mundos, cambiar la ruta de `world:=`.
+Requiere el proyecto instalado y verificado según los seis pasos del
+[`README`](../README.md#instalación); las rutas de ejemplo son las de ahí (`~/Tesis`
+para el repositorio, `~/deepracer_sim_ws` para el workspace).
+
+> Mundo vigente: `primer_piso_v2.world`, el que declara el README y el que cargan los
+> launch por defecto —de este mismo repositorio—. Para otro mundo: `world:=<ruta>`.
+> El mapa que se obtenga se acepta **solo** si
+> `herramientas/verificar_mapa.py` devuelve 0: los mapas actuales de `primer_piso` no
+> pasan esa verificación (riesgo R10 de [`ESTADO.md`](../ESTADO.md)).
 
 ---
 
@@ -11,7 +19,7 @@ Procedimiento para mapear un mundo Gazebo con `slam_toolbox` sobre la sim del De
 ```bash
 cd ~/deepracer_sim_ws
 source install/setup.bash
-ros2 launch deepracer_bringup deepracer_sim.launch.py world:=/home/santiago/Documents/Tesis/primer_piso.world
+ros2 launch deepracer_bringup deepracer_sim.launch.py
 ```
 
 Esperar a que Gazebo abra el mundo y el DeepRacer aparezca dentro. Verificar en el log que los 7 controladores (`joint_state_broadcaster` + 4 ruedas + 2 hinges de dirección) queden en estado `active`. Si alguno sale como `inactive` o aparece `Unknown state 'start'`, hay una regresión en `agent_control.yaml` que hay que corregir antes de seguir.
@@ -105,7 +113,7 @@ Para ver los frames moviéndose (`base_link`, `odom`, `map`). Permite confirmar 
 
 #### Add → RobotModel (opcional)
 
-Actualmente las rutas `package://meshes/...` en los xacros están mal formadas (Task #7 pendiente). El display funciona pero muestra errores en consola por meshes no encontradas. **No bloquea el mapeo.** Si molestan los errores, removerlo (clic derecho → Remove).
+Las URIs `package://` de las mallas estaban mal formadas y RViz no las resolvía; **corregido el 2026-08-11**. `herramientas/verificar_instalacion.sh` comprueba que todas resuelvan en disco.
 
 #### Ver al robot cuando está lejos del origen
 
@@ -119,7 +127,7 @@ Si el robot se spawnea lejos del origen `odom` (en pruebas reales aparece a ~30 
 Una vez funcionando, **`Ctrl+S`** en RViz para guardarla en:
 
 ```
-~/Documents/Tesis/Robot/aws-deepracer/deepracer_bringup/config/slam_view.rviz
+~/Tesis/Robot/aws-deepracer/deepracer_bringup/config/slam_view.rviz
 ```
 
 Próximas sesiones se abre con `rviz2 -d <ruta>` y no hace falta armar los displays otra vez.
@@ -153,10 +161,10 @@ Guardar primero a un archivo temporal y validarlo. **Con Gazebo y slam_toolbox t
 corriendo**, para poder completar el recorrido sin perder la sesión si el mapa no pasa:
 
 ```bash
-ros2 run nav2_map_server map_saver_cli -f /tmp/mapa_candidato
-python3 ~/Documents/Tesis/herramientas/verificar_mapa.py \
+ros2 run nav2_map_server map_saver_cli -f /tmp/mapa_candidato --ros-args -p use_sim_time:=true
+python3 ~/Tesis/herramientas/verificar_mapa.py \
     /tmp/mapa_candidato.yaml \
-    ~/Documents/Tesis/primer_piso_v2.world
+    ~/Tesis/primer_piso_v2.world
 ```
 
 El script compara la extensión realmente mapeada contra la geometría del `.world` y rechaza
@@ -164,8 +172,9 @@ el mapa si la cobertura es insuficiente o si detecta deriva de pose (el pasillo 
 más de lo que mide en realidad). Si sale `RECHAZADO`, **no guardar como definitivo**: seguir
 recorriendo los tramos faltantes y repetir la verificación.
 
-El mapa de la Semana 15 fue rechazado por esta vía: 37,1 % de cobertura en X y una anchura
-aparente de 14,1 m contra los 6,7 m reales del mundo.
+Los dos mapas que hay en el repositorio están rechazados por esta vía. Medido el 2026-08-11:
+`primer_piso` da 34,0 % de cobertura en X y 14,1 m de anchura aparente; `primer_piso_v2`,
+35,5 % y 15,0 m. El mundo mide 5,3 m de ancho. Es el riesgo R10 de `ESTADO.md`.
 
 ### Guardado definitivo
 
@@ -175,13 +184,13 @@ terminal nueva (sourceada):
 **Formato Nav2 / AMCL (`.pgm` + `.yaml`):**
 
 ```bash
-ros2 run nav2_map_server map_saver_cli -f ~/Documents/Tesis/Robot/aws-deepracer/deepracer_bringup/maps/primer_piso
+ros2 run nav2_map_server map_saver_cli -f ~/Tesis/Robot/aws-deepracer/deepracer_bringup/maps/primer_piso_v2 --ros-args -p use_sim_time:=true
 ```
 
 **Formato slam_toolbox (`.posegraph` + `.data`) — opcional, para retomar mapeo después:**
 
 ```bash
-ros2 service call /slam_toolbox/serialize_map slam_toolbox/srv/SerializePoseGraph "{filename: '/home/santiago/Documents/Tesis/Robot/aws-deepracer/deepracer_bringup/maps/primer_piso'}"
+ros2 service call /slam_toolbox/serialize_map slam_toolbox/srv/SerializePoseGraph "{filename: '$HOME/Tesis/Robot/aws-deepracer/deepracer_bringup/maps/primer_piso_v2'}"
 ```
 
 Verificar que los archivos aparecen en `Robot/aws-deepracer/deepracer_bringup/maps/`. Recién entonces cerrar Gazebo, slam_toolbox y RViz.

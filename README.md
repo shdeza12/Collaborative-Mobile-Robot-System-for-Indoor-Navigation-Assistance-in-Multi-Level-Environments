@@ -51,12 +51,20 @@ Seis pasos. El último comprueba los cinco anteriores, así que no hay que fiars
 git clone https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments.git ~/Tesis
 ```
 
-Eso trae `main`, que es la última versión verificada y la que conviene en general. Para
-fijar una versión concreta —útil si se quiere reproducir un resultado o reportar un fallo
-sin ambigüedad sobre qué código se tenía— se clona un tag en su lugar:
+Eso trae `main`, que es la última versión verificada y la que conviene en general.
+
+<details>
+<summary><b>Alternativa: descargar una versión fija (un tag)</b></summary>
+
+Un tag es un punto del historial que ya no se mueve. Sirve para reproducir un resultado o
+para reportar un fallo sin ambigüedad sobre qué código se tenía. El vigente es
+**`v0.2-repositorio-coherente`**; los publicados se listan con
+`git ls-remote --tags <url del repositorio>`.
+
+**Por consola:**
 
 ```bash
-git clone --branch v0.1-simulacion-verificada \
+git clone --branch v0.2-repositorio-coherente \
   https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments.git ~/Tesis
 ```
 
@@ -64,7 +72,23 @@ Git avisará de que el repositorio queda en estado *detached HEAD*. **No es un e
 significa que se está sobre un punto fijo del historial en vez de sobre una rama que avanza.
 Para instalar y simular no cambia nada; solo importa si se van a hacer commits.
 
-Los tags publicados se consultan con `git ls-remote --tags <url>`.
+**Por la web de GitHub, sin usar git:** abrir el repositorio → pestaña **Releases** (o
+**Tags**) → en `v0.2-repositorio-coherente`, **Source code (zip)**. Descomprimirlo y
+**renombrar la carpeta**, porque GitHub le quita la `v` al tag y el nombre no coincide con
+el de las instrucciones:
+
+```bash
+unzip ~/Descargas/*-0.2-repositorio-coherente.zip -d ~
+mv ~/*-0.2-repositorio-coherente ~/Tesis
+```
+
+El ZIP no trae la carpeta `.git`: se puede instalar y simular igual, pero no consultar el
+historial ni actualizar con `git pull`. Los permisos de ejecución de los scripts **sí** se
+conservan; si aun así algo da `Permission denied`, `chmod +x herramientas/*.sh`.
+
+Desde aquí, los pasos 2 a 6 son idénticos.
+
+</details>
 
 ### 2. Crear el workspace enlazando los paquetes
 
@@ -160,8 +184,12 @@ cuatro terminales:
 **Terminal A — Gazebo y spawn del robot**
 
 ```bash
-ros2 launch deepracer_bringup deepracer_sim.launch.py world:=$HOME/Tesis/primer_piso_v2.world
+ros2 launch deepracer_bringup deepracer_sim.launch.py
 ```
+
+Carga el mundo vigente **del mismo repositorio del que se compiló el código**: la raíz se
+deduce de la ubicación real del archivo de lanzamiento, no del `$HOME` ni de una ruta fija.
+Para usar otro mundo, `world:=<ruta al .world>`.
 
 Verificar en el log que los **7 controladores** (`joint_state_broadcaster`, 4 ruedas y
 2 hinges de dirección) queden en estado `active`.
@@ -189,11 +217,18 @@ En RViz: `Fixed Frame` = `map`, y en el display `Map` la propiedad
 
 ### Navegación autónoma sobre un mapa ya construido
 
-Una vez existe el mapa, un solo comando levanta Gazebo, el robot, AMCL y la pila Nav2:
+Un solo comando levanta Gazebo, el robot, AMCL y la pila Nav2, sobre
+`primer_piso_v2.world` y su mapa:
 
 ```bash
 ros2 launch deepracer_bringup nav_amcl_demo_sim.launch.py
 ```
+
+> **Sobre el mapa que trae por defecto.** Sirve para ver la pila Nav2 funcionando de
+> extremo a extremo, pero **no** pasa `herramientas/verificar_mapa.py`: cubre el 35 % del
+> mundo en X y tiene un 63 % de celdas desconocidas. Está registrado como riesgo R10 en
+> [`ESTADO.md`](ESTADO.md) y la cartografía se va a rehacer. No usarlo como base de
+> ninguna medida.
 
 Argumentos disponibles (`--show-args` los lista): `world`, `map`, `params`, `namespace`.
 El objetivo se envía desde RViz con la herramienta **2D Goal Pose**, o por línea de comandos:
@@ -254,10 +289,28 @@ por lo que puede encadenarse en scripts.
 | `Robot/aws-deepracer/` | Paquetes ROS 2 del robot (ver [`Robot/README.md`](Robot/README.md)) |
 | `Documentos/` | Anteproyecto, entregables semanales y guías operativas |
 | `Documentos/Evidencia/` | Capturas y diagramas citados en los informes |
-| `herramientas/` | Utilidades de verificación del proyecto |
+| `herramientas/` | Verificadores y utilidades (ver abajo) |
 | `*.world` | Mundos de Gazebo. El vigente es `primer_piso_v2.world` |
 | `USTA_WORLD/`, `pasillo_grande/`, `pasillo_usta/` | Modelos SDF de entornos |
 | `ESTADO.md` | Tablero de avance, riesgos y decisiones |
+
+### Las herramientas
+
+Ninguna levanta Gazebo ni ningún nodo, y todas devuelven código de salida distinto de
+cero cuando fallan, de modo que se pueden encadenar:
+
+| Herramienta | Responde a |
+|---|---|
+| `verificar_instalacion.sh` | ¿el código compila y funciona **en este equipo**? (30 comprobaciones) |
+| `verificar_repositorio.sh` | ¿los documentos dicen la verdad y las rutas no son las de una máquina concreta? (10 comprobaciones) |
+| `verificar_mapa.py` | ¿este mapa representa de verdad la geometría de su `.world`? |
+| `verificar_contrato.py` | ¿la simulación cumple el contrato de interfaces? (requiere la simulación corriendo) |
+| `medir_rtf.py` | ¿a qué fracción del tiempo real corre la simulación? (requiere la simulación corriendo) |
+| `lanzar_sim.sh` | limpia procesos huérfanos de Gazebo y lanza la simulación |
+
+El segundo existe porque el primero no cubría nada de lo escrito: había 30 comprobaciones
+sobre el código y ninguna sobre la documentación, así que el código convergía y los
+documentos divergían.
 
 ---
 

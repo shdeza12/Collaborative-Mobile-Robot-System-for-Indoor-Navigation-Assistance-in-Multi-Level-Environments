@@ -106,7 +106,10 @@ Frames:
 - **Archivo:** `launch/nav_amcl_demo_sim.launch.py`
 - **Cambios:**
   - Eliminada dependencia de `aws_robomaker_bookstore_world`
-  - Default world → `/home/santiago/Documents/Tesis2/primer_piso.world`
+  - Default world → `primer_piso.world` en la raiz del repositorio
+    (en su momento se escribio una ruta absoluta; **superado en S17**: ahora la
+    raiz se deduce de la ubicacion real del propio launch, ver la cabecera de
+    `nav_amcl_demo_sim.launch.py`)
   - Default map → ruta absoluta a `maps/primer_piso.yaml`
 - **Razón:** El launch apuntaba al mundo bookstore de AWS, no al primer piso del USTA.
 

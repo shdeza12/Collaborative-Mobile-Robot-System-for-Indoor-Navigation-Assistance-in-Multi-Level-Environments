@@ -262,7 +262,7 @@ argumento y el launch pasa los dos.
 - [x] **Paso 2.** Comprobar el cambio nulo:
 
   ```bash
-  cd ~/Documents/Tesis/Robot/aws-deepracer/deepracer_description/models/xacro/deepracer && xacro deepracer.xacro > /tmp/nuevo.urdf && git stash && xacro deepracer.xacro > /tmp/viejo.urdf && git stash pop && diff <(grep -v '^ *<!--' /tmp/viejo.urdf) <(grep -v '^ *<!--' /tmp/nuevo.urdf) && echo "IDENTICO"
+  cd ~/Tesis/Robot/aws-deepracer/deepracer_description/models/xacro/deepracer && xacro deepracer.xacro > /tmp/nuevo.urdf && git stash && xacro deepracer.xacro > /tmp/viejo.urdf && git stash pop && diff <(grep -v '^ *<!--' /tmp/viejo.urdf) <(grep -v '^ *<!--' /tmp/nuevo.urdf) && echo "IDENTICO"
   ```
 
   Esperado: `IDENTICO`.
@@ -308,7 +308,7 @@ contiene `__ns:=`, `remapping` y `--ros-args`.
 - [x] **Paso 3.** Comprobar que con espacio de nombres sí aparece:
 
   ```bash
-  cd ~/Documents/Tesis/Robot/aws-deepracer/deepracer_description/models/xacro/deepracer && xacro deepracer.xacro robot_namespace:=robot1 | grep -A2 "<ros>"
+  cd ~/Tesis/Robot/aws-deepracer/deepracer_description/models/xacro/deepracer && xacro deepracer.xacro robot_namespace:=robot1 | grep -A2 "<ros>"
   ```
 
   Esperado: `<namespace>robot1</namespace>`.
@@ -671,7 +671,7 @@ ser un modelo con directorio propio, como `pasillo_usta/`.
   estaban:
 
   ```bash
-  cd ~/Documents/Tesis && gazebo --verbose -s libgazebo_ros_factory.so &
+  cd ~/Tesis && gazebo --verbose -s libgazebo_ros_factory.so &
   ros2 run gazebo_ros spawn_entity.py -entity prueba -file primer_piso/model.sdf
   ```
 
@@ -725,7 +725,7 @@ existe en z=0 y sin losa el vehículo cae.
 - [ ] **Paso 4.** *Tu terminal.* Comprobar que el vehículo se sostiene arriba:
 
   ```bash
-  ./herramientas/lanzar_sim.sh world:=$HOME/Documents/Tesis/primer_piso_dos_niveles.world namespace:=robot2 z:=3.05
+  ./herramientas/lanzar_sim.sh world:=$HOME/Tesis/primer_piso_dos_niveles.world namespace:=robot2 z:=3.05
   ```
 
   Esperado: `robot2` aparece sobre la losa y no cae. Si la atraviesa, es que quedó solo el

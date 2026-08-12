@@ -2,12 +2,16 @@
 
 ## Requisitos previos
 
+El proyecto ya instalado y verificado segun los seis pasos del
+[`README`](../README.md#instalación). Esta guia da por hecho que
+`herramientas/verificar_instalacion.sh` termina en `0 fallan`.
+
+Las rutas de ejemplo son las del README: `~/Tesis` para el repositorio y
+`~/deepracer_sim_ws` para el workspace.
+
 ```bash
 # Compilar (solo la primera vez o despues de cambios)
-rsync -av --exclude='.git' \
-  /home/santiago/Documents/Tesis/Robot/aws-deepracer/deepracer_bringup/ \
-  /home/santiago/deepracer_sim_ws/src/aws-deepracer/deepracer_bringup/
-cd /home/santiago/deepracer_sim_ws
+cd ~/deepracer_sim_ws
 source /opt/ros/humble/setup.bash
 colcon build --packages-select deepracer_bringup
 ```
@@ -20,7 +24,7 @@ Abrir **Terminal 1**:
 
 ```bash
 source /opt/ros/humble/setup.bash
-source /home/santiago/deepracer_sim_ws/install/setup.bash
+source ~/deepracer_sim_ws/install/setup.bash
 export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 export ROS_DOMAIN_ID=0
 ros2 launch deepracer_bringup nav_amcl_demo_sim.launch.py
@@ -88,7 +92,7 @@ Abrir **Terminal 2** (dejar Terminal 1 corriendo):
 
 ```bash
 source /opt/ros/humble/setup.bash
-source /home/santiago/deepracer_sim_ws/install/setup.bash
+source ~/deepracer_sim_ws/install/setup.bash
 export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 export ROS_DOMAIN_ID=0
 ros2 action send_goal -f /navigate_to_pose nav2_msgs/action/NavigateToPose \
@@ -170,7 +174,7 @@ En **Terminal 3**:
 
 ```bash
 source /opt/ros/humble/setup.bash
-source /home/santiago/deepracer_sim_ws/install/setup.bash
+source ~/deepracer_sim_ws/install/setup.bash
 export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 export ROS_DOMAIN_ID=0
 ros2 run tf2_ros tf2_echo map base_link
@@ -230,7 +234,7 @@ Abrir **Terminal 4**:
 
 ```bash
 source /opt/ros/humble/setup.bash
-source /home/santiago/deepracer_sim_ws/install/setup.bash
+source ~/deepracer_sim_ws/install/setup.bash
 export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 export ROS_DOMAIN_ID=0
 ros2 topic echo /amcl_pose --once
@@ -263,7 +267,7 @@ Los valores de `x` e `y` deben ser parecidos a los que viste en el `tf2_echo`.
 
 ```bash
 source /opt/ros/humble/setup.bash
-source /home/santiago/deepracer_sim_ws/install/setup.bash
+source ~/deepracer_sim_ws/install/setup.bash
 export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 export ROS_DOMAIN_ID=0
 rviz2
@@ -300,19 +304,18 @@ Y: de  -8.89 a  6.83 metros
 
 ## Compilar despues de cambios
 
-Si modificas archivos en `Robot/aws-deepracer/deepracer_bringup/`, siempre:
+Si modificas archivos en `Robot/aws-deepracer/deepracer_bringup/`, basta compilar:
 
 ```bash
-# 1. Sincronizar al workspace
-rsync -av --exclude='.git' \
-  /home/santiago/Documents/Tesis/Robot/aws-deepracer/deepracer_bringup/ \
-  /home/santiago/deepracer_sim_ws/src/aws-deepracer/deepracer_bringup/
-
-# 2. Compilar
-cd /home/santiago/deepracer_sim_ws
+cd ~/deepracer_sim_ws
 source /opt/ros/humble/setup.bash
 colcon build --packages-select deepracer_bringup
 ```
+
+No hay nada que sincronizar: `src/aws-deepracer` es un **enlace** al repositorio
+(paso 2 del README), asi que el workspace ya ve el archivo editado. Copiar el
+codigo al workspace es justamente el incidente R7 —se compila una copia mientras
+se edita el repositorio y los arreglos nunca llegan a ejecutarse—.
 
 Despues de compilar, hay que relanzar la simulacion (matar la anterior primero).
 
