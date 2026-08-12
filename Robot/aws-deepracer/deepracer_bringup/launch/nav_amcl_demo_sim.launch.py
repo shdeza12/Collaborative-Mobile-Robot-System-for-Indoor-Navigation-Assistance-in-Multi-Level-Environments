@@ -23,47 +23,25 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from ament_index_python.packages import get_package_share_directory
 
+# El modulo vive junto a este archivo, dentro del propio paquete instalado.
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
+from deepracer_raiz_repo import mundo_por_defecto  # noqa: E402
+
+
 def generate_launch_description():
     deepracer_bringup_dir = get_package_share_directory('deepracer_bringup')
 
-    # Los mundos y modelos SDF viven en la raiz del repositorio, fuera del paquete.
-    # Se puede sobreescribir con la variable de entorno TESIS_WORLDS_DIR o con world:=<ruta>.
+    # La raiz del repositorio se deduce de la ubicacion real del archivo; el porque
+    # esta en la cabecera de 'deepracer_raiz_repo.py'. La logica vive alli y no
+    # duplicada aqui: dos copias de la misma regla divergen sin avisar.
     #
-    # El candidato principal se DEDUCE de la ubicacion real de este archivo, no de una
-    # ruta fija ni del $HOME. Con `colcon build --symlink-install` el launch instalado
-    # es un enlace al del repositorio, asi que realpath() cae en
-    #   <repo>/Robot/aws-deepracer/deepracer_bringup/launch/
-    # y subiendo cuatro niveles se obtiene la raiz de ESE clon. Es la unica forma de
-    # garantizar que los mundos que se cargan salen del mismo checkout que el codigo
-    # que se ejecuta.
-    #
-    # Antes habia una ruta fija ('~/Documents/Tesis'). Eso fallaba de dos maneras: en
-    # un equipo que clonara en otro sitio, el launch entregaba a Gazebo la ruta de un
-    # .world inexistente y el simulador abria un mundo VACIO sin mensaje de error; y
-    # si por casualidad existia otra copia del repositorio en la ruta adivinada, se
-    # cargaban en silencio los mundos de la copia equivocada.
-    _raiz_repo = os.path.abspath(os.path.join(
-        os.path.dirname(os.path.realpath(__file__)), '..', '..', '..', '..'))
-    _candidatos = [os.environ['TESIS_WORLDS_DIR']] if os.environ.get('TESIS_WORLDS_DIR') else [
-        _raiz_repo,
-        os.path.join(os.path.expanduser('~'), 'Documents', 'Tesis'),
-        os.path.join(os.path.expanduser('~'), 'Tesis'),
-    ]
-    worlds_dir = next(
-        (d for d in _candidatos if os.path.isfile(os.path.join(d, 'primer_piso.world'))),
-        None)
-    if worlds_dir is None:
-        # Si el usuario pasa world:= explicitamente, el valor por defecto no se usa
-        # y no hay motivo para abortar.
-        if not any(a.startswith('world:=') for a in sys.argv):
-            raise RuntimeError(
-                'No se encontro primer_piso.world. Se busco en: '
-                + ', '.join(_candidatos)
-                + '. Exportar TESIS_WORLDS_DIR con la raiz del repositorio, '
-                  'o pasar world:=<ruta absoluta al .world>.')
-        worlds_dir = _candidatos[0]
-    default_world = os.path.join(worlds_dir, 'primer_piso.world')
-    default_map = os.path.join(deepracer_bringup_dir, 'maps', 'primer_piso.yaml')
+    # Mundo y mapa van EN PAREJA: el .yaml se construyo mapeando ese .world. Cambiar
+    # uno solo hace que AMCL localice contra una geometria distinta de la simulada,
+    # y el sintoma -deriva que crece- no se parece a un error de configuracion.
+    # El mundo vigente lo declara el README; 'herramientas/verificar_repositorio.sh'
+    # comprueba que este default y el del README sigan siendo el mismo.
+    default_world = mundo_por_defecto()
+    default_map = os.path.join(deepracer_bringup_dir, 'maps', 'primer_piso_v2.yaml')
     nav_params = os.path.join(deepracer_bringup_dir, 'config', 'nav2_params_nav_amcl_sim_demo.yaml')
 
     world_cfg = LaunchConfiguration('world')

@@ -167,10 +167,13 @@ if [ "$FALLOS" -eq 0 ]; then
   La instalacion esta completa. Siguiente paso, en una terminal:
 
     source $WS/install/setup.bash
-    ros2 launch deepracer_bringup deepracer_sim.launch.py world:=$REPO/primer_piso.world
+    ros2 launch deepracer_bringup deepracer_sim.launch.py
 
   Esperado: Gazebo abre con el vehiculo visible, y en el log los 7
   controladores quedan en estado 'active'.
+
+  El mundo por defecto sale de ESTE repositorio ($REPO),
+  el mismo del que se compilo el codigo. Para usar otro:  world:=<ruta al .world>
 FIN
   exit 0
 else

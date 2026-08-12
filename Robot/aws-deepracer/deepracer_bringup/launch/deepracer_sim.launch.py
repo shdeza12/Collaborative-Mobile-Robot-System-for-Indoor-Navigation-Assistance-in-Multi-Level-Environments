@@ -15,12 +15,18 @@
 #################################################################################
 
 import os
+import sys
 
 from ament_index_python.packages import get_package_share_directory
 import launch
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
+
+# El modulo vive junto a este archivo, dentro del propio paquete instalado.
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
+from deepracer_raiz_repo import mundo_por_defecto  # noqa: E402
+
 
 def generate_launch_description():
     deepracer_bringup_dir = get_package_share_directory('deepracer_bringup')
@@ -57,8 +63,13 @@ def generate_launch_description():
         }.items()
     )
 
+    # 'world' tenia que escribirse a mano en cada lanzamiento, con la ruta absoluta
+    # del clon. Eso hacia trivial mapear contra la geometria de OTRA copia del
+    # repositorio sin enterarse. Ahora el defecto sale del mismo checkout que este
+    # archivo; world:= sigue disponible para cambiar de mundo.
     return LaunchDescription([DeclareLaunchArgument(
           'world',
+          default_value=mundo_por_defecto(),
           description='SDF world file'),
         DeclareLaunchArgument(
             name='gui',

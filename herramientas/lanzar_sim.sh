@@ -8,7 +8,7 @@
 # Uso:
 #   herramientas/lanzar_sim.sh                     # mundo vacio
 #   herramientas/lanzar_sim.sh primer_piso.world   # mundo del proyecto
-#   herramientas/lanzar_sim.sh /ruta/absoluta.world
+#   herramientas/lanzar_sim.sh <ruta>/<mundo>.world      # ruta absoluta
 #
 # Cualquier argumento con ':=' se pasa tal cual a 'ros2 launch'. El orden no
 # importa y se pueden combinar:
@@ -19,8 +19,15 @@
 # (AMENT_TRACE_SETUP_FILES entre otras) y abortarian el script al sourcearlos.
 set -eo pipefail
 
-WS="$HOME/deepracer_sim_ws"
-MUNDOS="$HOME/Documents/Tesis"
+# Los mundos salen del MISMO clon que este script, deducido de su propia
+# ubicacion. Antes habia una ruta fija ('$HOME/Documents/Tesis'): en un equipo
+# que clonara en otro sitio el script abortaba diciendo que el mundo no existe,
+# y si por casualidad habia otra copia del repositorio en la ruta adivinada,
+# cargaba en silencio los mundos de la copia equivocada.
+MUNDOS="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# El workspace si es una convencion del proyecto (README, paso 2). Se puede
+# apuntar a otro sin editar el script:  DEEPRACER_WS=/otro/ws lanzar_sim.sh
+WS="${DEEPRACER_WS:-$HOME/deepracer_sim_ws}"
 PUERTO_GAZEBO=11345
 
 # Se separa por FORMA, no por posicion: lo que lleva ':=' es un argumento de
