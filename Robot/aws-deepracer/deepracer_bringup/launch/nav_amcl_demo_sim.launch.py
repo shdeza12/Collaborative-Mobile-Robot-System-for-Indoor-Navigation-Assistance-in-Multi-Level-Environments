@@ -41,7 +41,7 @@ def generate_launch_description():
     # El mundo vigente lo declara el README; 'herramientas/verificar_repositorio.sh'
     # comprueba que este default y el del README sigan siendo el mismo.
     default_world = mundo_por_defecto()
-    default_map = os.path.join(deepracer_bringup_dir, 'maps', 'primer_piso_v2.yaml')
+    default_map = os.path.join(deepracer_bringup_dir, 'maps', 'primer_piso_definitivo.yaml')
     nav_params = os.path.join(deepracer_bringup_dir, 'config', 'nav2_params_nav_amcl_sim_demo.yaml')
 
     world_cfg = LaunchConfiguration('world')
@@ -51,6 +51,14 @@ def generate_launch_description():
     # Se propaga tal cual a los tres launches incluidos; cada uno sabe que con
     # cadena vacia no debe namespacear ni prefijar marcos.
     ns_cfg = LaunchConfiguration('namespace')
+    # Pose de spawn. Va a DOS sitios: al spawn en Gazebo y a la pose inicial de
+    # AMCL. Antes solo llegaba al primero -por herencia de configuraciones, sin
+    # aparecer escrito en ningun sitio- y AMCL arrancaba siempre creyendose en el
+    # origen. Se declaran aqui para que 'ros2 launch ... --show-args' los liste y
+    # para que el reparto quede a la vista de quien lea el archivo.
+    x_cfg = LaunchConfiguration('x')
+    y_cfg = LaunchConfiguration('y')
+    yaw_cfg = LaunchConfiguration('yaw')
 
     declare_world_arg = DeclareLaunchArgument('world', default_value=default_world, description='SDF world file')
     declare_map_arg = DeclareLaunchArgument('map', default_value=default_map, description='map file')
@@ -58,13 +66,21 @@ def generate_launch_description():
     declare_ns_arg = DeclareLaunchArgument(
         'namespace', default_value='',
         description="Namespace del robot, p.ej. 'robot1'. Vacio = un solo robot.")
+    # Los defectos coinciden con los de deepracer_spawn.launch.py; cambiarlos
+    # solo aqui haria que el robot y AMCL nacieran en sitios distintos.
+    declare_x_arg = DeclareLaunchArgument('x', default_value='0')
+    declare_y_arg = DeclareLaunchArgument('y', default_value='0')
+    declare_yaw_arg = DeclareLaunchArgument('yaw', default_value='0')
 
     include_files = GroupAction([
         # start deepracer simulation
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([deepracer_bringup_dir, '/launch/deepracer_sim.launch.py']),
             launch_arguments = {'world': world_cfg,
-                                'namespace': ns_cfg}.items()
+                                'namespace': ns_cfg,
+                                'x': x_cfg,
+                                'y': y_cfg,
+                                'yaw': yaw_cfg}.items()
          ),
         # start navigation planner and controller
         IncludeLaunchDescription(
@@ -84,6 +100,9 @@ def generate_launch_description():
             launch_arguments={'map': map_cfg,
                               'params': params_cfg,
                               'namespace': ns_cfg,
+                              'x': x_cfg,
+                              'y': y_cfg,
+                              'yaw': yaw_cfg,
                               'use_sim_time': 'true'}.items()),
     ])
 
@@ -92,6 +111,9 @@ def generate_launch_description():
     ld.add_action(declare_map_arg)
     ld.add_action(declare_params_arg)
     ld.add_action(declare_ns_arg)
+    ld.add_action(declare_x_arg)
+    ld.add_action(declare_y_arg)
+    ld.add_action(declare_yaw_arg)
     ld.add_action(include_files)
 
     return ld

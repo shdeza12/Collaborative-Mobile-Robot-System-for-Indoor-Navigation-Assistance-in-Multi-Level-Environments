@@ -78,6 +78,40 @@ def marcos_prefijados(prefijo):
     }
 
 
+def topicos_prefijados(ns):
+    """Rutas del YAML de Nav2 cuyo valor es un topic que publica ESTE robot.
+
+    Nav2 en Humble NO resuelve namespaces en los topics de las capas del
+    costmap: usa el nombre del YAML tal cual, sea absoluto o no. Lo demuestra el
+    propio nav2_bringup, que para multi-robot no recurre a nombres relativos
+    sino que escribe el namespace a mano en un YAML por robot
+    (nav2_multirobot_params_1.yaml:200 dice '/robot1/scan'). Aqui se hace lo
+    mismo, pero desde el launch, para no acabar con un YAML por cada robot.
+
+    Poner el nombre RELATIVO ('scan') tampoco funcionaria, y es la trampa facil:
+    el nodo del costmap no se llama '/robot1' sino
+    '/robot1/global_costmap/global_costmap', asi que 'scan' se resolveria a
+    '/robot1/global_costmap/scan', que no publica nadie.
+
+    Y suscribirse a un topic sin publicador NO da error. La capa se queda vacia,
+    el costmap solo contiene lo que venia del mapa estatico, y el robot atraviesa
+    tan tranquilo cualquier obstaculo que no estuviera ya en el mapa.
+
+    Cuidado con el nombre de la capa: en el costmap local es 'voxel_layer' y en
+    el global 'obstacle_layer'. Son distintas y no son intercambiables.
+    """
+    if not ns:
+        # Sin namespace el LiDAR publica en '/scan', que es justo lo que el YAML
+        # ya dice. No se reescribe nada.
+        return {}
+
+    scan = f'/{ns}/scan'
+    return {
+        'local_costmap.local_costmap.ros__parameters.voxel_layer.scan.topic': scan,
+        'global_costmap.global_costmap.ros__parameters.obstacle_layer.scan.topic': scan,
+    }
+
+
 def acciones(context, *args, **kwargs):
     ns = LaunchConfiguration('namespace').perform(context).strip('/')
 
@@ -102,6 +136,7 @@ def acciones(context, *args, **kwargs):
         'autostart': autostart,
     }
     param_substitutions.update(marcos_prefijados(prefijo))
+    param_substitutions.update(topicos_prefijados(ns))
 
     # root_key anida TODO el YAML bajo la clave del namespace. Es obligatorio:
     # el archivo tiene claves de primer nivel sueltas ('bt_navigator:'), que ROS

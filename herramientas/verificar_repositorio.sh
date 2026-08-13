@@ -134,12 +134,33 @@ else mal "$RAIZ_PY declara MUNDO_VIGENTE='$EN_CODIGO' y el README declara vigent
 # no se parece a un error de configuracion: parece un problema de sintonizacion.
 paso 'el mapa por defecto de Nav2 es el par del mundo vigente'
 MAPA=$(grep -o "'maps', '[^']*'" "$NAV_PY" | sed "s/.*'\(.*\)'/\1/")
+RUTA_MAPA="Robot/aws-deepracer/deepracer_bringup/maps/$MAPA"
+
+# Como se decide si el mapa "es el par" del mundo:
+#
+#   - Los mapas generados desde la geometria del .world declaran su origen en la
+#     cabecera del .yaml ('# mundo: <archivo>.world'). Ese es el dato fiable, y
+#     permite que el mapa se llame como convenga.
+#   - Los mapas hechos con SLAM no llevan esa linea, porque nadie la escribe al
+#     guardarlos. Para esos la unica pista disponible es el nombre del archivo,
+#     asi que se sigue exigiendo que coincida con el del mundo.
+#
+# Antes solo existia la segunda regla, y rechazaba un mapa CORRECTO por llamarse
+# distinto del mundo del que habia salido.
+MUNDO_DEL_MAPA=$(grep -m1 '^# mundo: ' "$RUTA_MAPA" 2>/dev/null | sed 's/^# mundo: //')
 ESPERADO="${VIGENTE%.world}.yaml"
-if [ "$MAPA" != "$ESPERADO" ]; then
-  mal "el launch carga el mapa '$MAPA' sobre el mundo '$VIGENTE'; le corresponde '$ESPERADO'"
-elif [ ! -f "Robot/aws-deepracer/deepracer_bringup/maps/$MAPA" ]; then
+
+if [ ! -f "$RUTA_MAPA" ]; then
   mal "el launch carga 'maps/$MAPA', que no existe en el repositorio"
-else bien; fi
+elif [ -n "$MUNDO_DEL_MAPA" ] && [ "$MUNDO_DEL_MAPA" = "$VIGENTE" ]; then
+  bien
+elif [ -n "$MUNDO_DEL_MAPA" ]; then
+  mal "el mapa '$MAPA' declara venir de '$MUNDO_DEL_MAPA' y el mundo vigente es '$VIGENTE'"
+elif [ "$MAPA" = "$ESPERADO" ]; then
+  bien
+else
+  mal "el launch carga '$MAPA' sobre el mundo '$VIGENTE'; como no declara de que mundo salio, tendria que llamarse '$ESPERADO'"
+fi
 
 # ---------------------------------------------------------- 5. estado al dia
 titulo '5. El tablero de estado refleja la realidad'

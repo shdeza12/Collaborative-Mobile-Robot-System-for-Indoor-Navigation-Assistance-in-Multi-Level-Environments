@@ -152,7 +152,7 @@ global_costmap:
       robot_base_frame: base_link
       use_sim_time: True
       footprint: '[[0.140, 0.095], [0.140, -0.095], [-0.140, -0.095], [-0.140, 0.095]]'
-      resolution: 0.06   # debe coincidir con la resolucion del mapa (primer_piso_v2.yaml)
+      resolution: 0.06   # debe coincidir con la resolucion del mapa (primer_piso_definitivo.yaml)
       track_unknown_space: true
       plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
       obstacle_layer:
@@ -275,7 +275,14 @@ amcl:
   ros__parameters:
     use_sim_time: True
     set_initial_pose: true
-    initial_pose: [0.0, 0.0, 0.0]
+    # Ver la nota extensa en nav2_params_nav_amcl_sim_demo.yaml: AMCL declara
+    # 'initial_pose.x/.y/.z/.yaw' por separado y descartaba en silencio la lista
+    # 'initial_pose: [0.0, 0.0, 0.0]' que habia aqui.
+    initial_pose:
+      x: 0.0
+      y: 0.0
+      z: 0.0
+      yaw: 0.0
     alpha1: 0.2
     alpha2: 0.2
     alpha3: 0.2
@@ -325,4 +332,4 @@ amcl_rclcpp_node:
 map_server:
   ros__parameters:
     use_sim_time: True
-    yaml_filename: primer_piso_v2.yaml   # sobreescrito por el argumento map:= del launch
+    yaml_filename: primer_piso_definitivo.yaml   # sobreescrito por el argumento map:= del launch

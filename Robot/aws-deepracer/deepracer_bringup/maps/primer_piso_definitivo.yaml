@@ -1,0 +1,10 @@
+# mundo: primer_piso_v2.world
+# Mapa exacto de ese mundo, generado leyendo su geometria.
+# Regenerar con herramientas/generar_mapa_desde_mundo.py; no editar a mano.
+image: primer_piso_definitivo.pgm
+mode: trinary
+resolution: 0.06
+origin: [-1.2000, -1.6000, 0.0]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.25

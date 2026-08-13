@@ -31,6 +31,49 @@ from nav2_common.launch import RewrittenYaml
 LIFECYCLE_NODES = ['map_server', 'amcl']
 
 
+def como_decimal(context, nombre):
+    """Lee un argumento numerico del launch y lo devuelve como texto decimal.
+
+    Existe por un detalle que rompe el arranque de AMCL de forma muy poco obvia.
+    RewrittenYaml se construye con 'convert_types=True', asi que convierte cada
+    valor mirando si el texto lleva un punto: con punto lo pasa a float, sin
+    punto a int (rewritten_yaml.py:179). Los argumentos del spawn traen '0' por
+    defecto, luego llegarian al YAML como el entero 0. Y 'initial_pose.x' esta
+    declarado como double: recibir un entero aborta el nodo con un error de tipo
+    de parametro, no con un mensaje sobre la pose.
+
+    Pasarlo por float() y de vuelta a texto garantiza el punto: '0' -> '0.0'.
+    """
+    texto = LaunchConfiguration(nombre).perform(context)
+    try:
+        return repr(float(texto))
+    except ValueError:
+        raise RuntimeError(
+            f"El argumento {nombre}:={texto} no es un numero. "
+            "x, y e yaw son la pose de spawn del robot, en metros y radianes.")
+
+
+def pose_inicial(context):
+    """Le dice a AMCL en que pose nace el robot.
+
+    Sin esto AMCL siempre empieza creyendose en el origen. Para un robot que
+    nace en el origen da igual; para uno lanzado con 'y:=2.0' significa arrancar
+    con dos metros de error, y AMCL no lo corrige de golpe: va arrastrando la
+    nube de particulas mientras el robot se mueve, asi que el sintoma no es un
+    error claro sino un robot que navega de forma rara los primeros metros.
+
+    Se reescribe SIEMPRE, tambien sin namespace, porque la pose de spawn es una
+    propiedad del robot y no del namespace. Con los valores por defecto (0, 0, 0)
+    el resultado es identico a lo que AMCL usaba antes; comprobado con
+    'ros2 param get /amcl initial_pose.x' -> 0.0.
+    """
+    return {
+        'amcl.ros__parameters.initial_pose.x': como_decimal(context, 'x'),
+        'amcl.ros__parameters.initial_pose.y': como_decimal(context, 'y'),
+        'amcl.ros__parameters.initial_pose.yaw': como_decimal(context, 'yaw'),
+    }
+
+
 def acciones(context, *args, **kwargs):
     ns = LaunchConfiguration('namespace').perform(context).strip('/')
 
@@ -47,6 +90,7 @@ def acciones(context, *args, **kwargs):
         'use_sim_time': use_sim_time,
         'yaml_filename': map_yaml,
     }
+    param_substitutions.update(pose_inicial(context))
 
     if prefijo:
         # 'global_frame_id' NO se toca: 'map' lo publica el map_server y es el
@@ -105,6 +149,15 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'autostart', default_value='true',
             description='Arrancar automaticamente el ciclo de vida'),
+
+        # Los mismos nombres que usa deepracer_spawn.launch.py, para que quien
+        # lanza escriba 'y:=2.0' una sola vez y valga para el robot y para AMCL.
+        DeclareLaunchArgument('x', default_value='0',
+                              description='Pose de spawn del robot, en metros'),
+        DeclareLaunchArgument('y', default_value='0',
+                              description='Pose de spawn del robot, en metros'),
+        DeclareLaunchArgument('yaw', default_value='0',
+                              description='Orientacion de spawn, en radianes'),
 
         OpaqueFunction(function=acciones),
     ])
