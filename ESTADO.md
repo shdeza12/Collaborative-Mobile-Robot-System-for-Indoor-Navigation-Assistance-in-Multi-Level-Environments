@@ -5,8 +5,8 @@
 
 | | |
 |---|---|
-| **Semana del cronograma** | S17 de 32 |
-| **Fecha de corte** | 2026-08-11 |
+| **Semana del cronograma** | S18 de 32 |
+| **Fecha de corte** | 2026-08-14 |
 | **Fases activas** | Fase 4 — Desarrollo (cerrando) · Fase 5 — Integración (S18–S23) |
 | **Semanas restantes** | 15 (sustentación S28–S29, documento final S29–S32) |
 | **Último entregable formal** | Semana 17 |
@@ -34,7 +34,7 @@ Ordenado por dependencia. Nada de lo que sigue puede saltarse. La columna *Seman
 
 | # | Hito | Bloquea a | Semana | Estado |
 |---|------|-----------|--------|--------|
-| 1 | **Contrato de interfaces ROS 2** (namespaces, acciones, tópicos) | Todo el desarrollo posterior | S17 | 🟡 Redactado en [`CONTRATO_INTERFACES.md`](Documentos/CONTRATO_INTERFACES.md); falta verificarlo en simulación (§8 del contrato) |
+| 1 | **Contrato de interfaces ROS 2** (namespaces, acciones, tópicos) | Todo el desarrollo posterior | S17 | 🟢 Verificado en simulación el 2026-08-14: dos robots navegan bajo namespace con mando aislado ([`S17_nav2_namespaces.md`](Documentos/Evidencia/S17_nav2_namespaces.md), resultado 4) |
 | 2 | **Réplica del laboratorio GED en Gazebo**, dividida en dos zonas | Mapas, navegación, relevo | S18 | 🔴 No existe |
 | 3 | **Navegación autónoma punto a punto** con restricción Ackermann | Guiado, relevo, métricas | S19 | 🟡 Validada en el mundo del pasillo; falta sobre la réplica |
 | 4 | **Segundo agente + servidor de coordinación** | OE2, protocolo de relevo | S19–S20 | 🔴 No iniciado |
@@ -76,7 +76,7 @@ El mapa del pasillo USTA (riesgo R1) **salió del camino crítico** al adoptarse
 | R5 | **Fases 2 y 3 sin artefacto verificable.** No existe documento de requisitos | Imposibilita §7.4 del anteproyecto ("comparación con requisitos") | Reconstruir la matriz RF↔OE↔prueba. **Programado para S18** | 🔴 Abierto |
 | R6 | **Discrepancias informe ↔ repositorio** (ver §5) | Credibilidad de la evidencia ante el jurado | Corregir en el entregable de cierre de fase | 🔴 Abierto |
 | R8 | **Desajuste de distribución.** El stack de simulación es ROS 2 Humble; `deepracer-custom-car` sobre Ubuntu 24.04 es Jazzy. Los parámetros de Nav2 y varias API cambian entre ambas | Puede invalidar el supuesto de D6: que el mismo código se despliega en los dos destinos sin cambios | Caracterizarlo en el **spike de S18**, pregunta 4. Si el desajuste es grande, mantener una variante de configuración por distribución | 🔴 Abierto, sin caracterizar |
-| R10 | **El mapa por defecto de Nav2 no pasa la verificación del propio proyecto.** `herramientas/verificar_mapa.py` **rechaza** los dos mapas de `primer_piso` contra su `.world`: cobertura en X del 35,5 % (mínimo 85 %), extensión en Y de 15,0 m contra los 5,3 m reales y 62,8 % de celdas desconocidas | La instalación queda verificada y compila, pero cualquier métrica de navegación obtenida sobre este mapa es discutible ante el jurado. No bloquea el bring-up ni la capa de coordinación | Rehacer la cartografía sobre `primer_piso_v2.world` con los parámetros ya corregidos de slam_toolbox —los mapas actuales se levantaron antes— y aceptarla solo si `verificar_mapa.py` devuelve 0. El entorno que importa para OE4 es la réplica del laboratorio GED (hito 2), así que la prioridad va con ese mapa, no con este | 🔴 Abierto (detectado 2026-08-11) |
+| R10 | **El mapa por defecto de Nav2 no pasa la verificación del propio proyecto.** `herramientas/verificar_mapa.py` **rechaza** los dos mapas de `primer_piso` contra su `.world`: cobertura en X del 35,5 % (mínimo 85 %), extensión en Y de 15,0 m contra los 5,3 m reales y 62,8 % de celdas desconocidas | La instalación queda verificada y compila, pero cualquier métrica de navegación obtenida sobre este mapa es discutible ante el jurado. No bloquea el bring-up ni la capa de coordinación | Resuelto por otra vía que la prevista: en vez de rehacer el SLAM, `herramientas/generar_mapa_desde_mundo.py` deriva el mapa de la geometría del `.world` (commit `35c47da`). El mapa vigente es `primer_piso_definitivo`, y `python3 herramientas/verificar_mapa.py Robot/aws-deepracer/deepracer_bringup/maps/primer_piso_definitivo.yaml primer_piso_v2.world` devuelve **0**: cobertura 99,7 % en X y 100,8 % en Y, 14,5 % de celdas desconocidas y **0 de 5149 obstáculos sin pared real** a menos de 0,30 m. El entorno que importa para OE4 sigue siendo la réplica del laboratorio GED (hito 2), que necesitará su propio mapa | 🟢 Cerrado 2026-08-14 (detectado 2026-08-11) |
 | R9 | **Capacidad insuficiente.** El trabajo pendiente suma 9–10 semanas-persona y el calendario ofrece 7 | Se llega a octubre sin capa de coordinación, que es el aporte declarado | Reparto en dos frentes entre S18 y S21, y escalera de recortes en §9 del cronograma. Punto de decisión go/no-go en S21 | 🟡 Mitigado por planificación |
 
 ---

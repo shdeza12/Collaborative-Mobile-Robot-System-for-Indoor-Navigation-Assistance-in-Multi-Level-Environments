@@ -1,0 +1,25 @@
+=== Aislamiento de mando -- 2026-08-14, codigo d7d8387 ===
+
+--- Procesos de simulacion independientes ---
+11680 gzserver /home/santiago/Documents/Tesis/primer_piso_v2.world       --physics=ode          -slibgazebo_ros_init.so -slibgazebo_ros_factory.so -slibgazebo_ros_force_system.so      
+12375 gzserver /home/santiago/Documents/Tesis/primer_piso_v2.world       --physics=ode          -slibgazebo_ros_init.so -slibgazebo_ros_factory.so -slibgazebo_ros_force_system.so      
+
+--- Quien escucha /robot1/cmd_vel (dominio 0) ---
+Type: geometry_msgs/msg/Twist
+Publisher count: 4
+Node name: controller_server
+Node namespace: /robot1
+Endpoint type: PUBLISHER
+Node name: behavior_server
+Node namespace: /robot1
+Endpoint type: PUBLISHER
+Node name: behavior_server
+Node namespace: /robot1
+Endpoint type: PUBLISHER
+Node name: behavior_server
+Node namespace: /robot1
+Endpoint type: PUBLISHER
+Subscription count: 1
+Node name: gazebo_ros_deepracer_drive_robot1
+Node namespace: /robot1
+Endpoint type: SUBSCRIPTION

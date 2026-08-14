@@ -1,0 +1,11 @@
+=== Controladores de robot1 -- 2026-08-14 ===
+joint_state_broadcaster                  joint_state_broadcaster/JointStateBroadcaster      active
+right_rear_wheel_velocity_controller     velocity_controllers/JointGroupVelocityController  active
+left_front_wheel_velocity_controller     velocity_controllers/JointGroupVelocityController  active
+right_steering_hinge_position_controller position_controllers/JointGroupPositionController  active
+right_front_wheel_velocity_controller    velocity_controllers/JointGroupVelocityController  active
+left_steering_hinge_position_controller  position_controllers/JointGroupPositionController  active
+left_rear_wheel_velocity_controller      velocity_controllers/JointGroupVelocityController  active
+
+=== robot_base_frame del costmap global ===
+String value is: robot1/base_link

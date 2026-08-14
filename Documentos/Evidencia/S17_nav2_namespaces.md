@@ -87,11 +87,10 @@ Carga: 7.9 de 12 hilos en el pico de arranque; 5.9 GiB de 13.8 GiB de RAM, 7.3 G
 Las dos pilas de navegación caben con margen y **siguen a tiempo real**, que es la condición para
 que las métricas de tiempo del objetivo 4 sean válidas.
 
-> **Vigencia de los resultados 1 a 3.** Se tomaron **antes** de los cambios de visualización
-> descritos más abajo (hallazgos nº2 y nº3), que tocan los mismos `.xacro` que describen el
-> vehículo. Lo que demuestran —propagación del namespace, anidado del YAML, marcos prefijados,
-> objetivos alcanzados— no depende de la geometría de los meshes, pero **la corrida completa hay
-> que repetirla** antes de dar H1 por cerrado. Queda como paso 1 del martes 11.
+> **Vigencia de los resultados 1 a 3.** Se tomaron antes de los cambios de visualización descritos
+> más abajo (hallazgos nº2 y nº3), que tocan los mismos `.xacro` del vehículo. **Repetidos el
+> 2026-08-14 sobre el código de `d7d8387`, con el mismo resultado**; ver «Resultado 4». La
+> advertencia queda anulada.
 
 ## Hallazgo colateral nº1
 
@@ -149,7 +148,10 @@ distintas del vehículo resuelven contra el `GAZEBO_MODEL_PATH` que produce `gaz
 `package.xml` está enlazado por symlink al `install`, así que **no requiere `colcon build`**, pero
 sí relanzar: `GAZEBO_MODEL_PATH` se calcula al arrancar.
 
-**Estado: corregido, pendiente de comprobación visual simultánea en Gazebo y RViz.**
+**Estado: corregido y comprobado** el 2026-08-14. El mismo modelo se ve a la vez en Gazebo
+(`S17_gazebo_robot1_modelo.png`) y en RViz con `TF Prefix: robot1`
+(`S17_rviz_robot1_robotmodel.png`), que era justamente el conflicto: una sola URI sirviendo a los
+dos resolvedores.
 
 ## Hallazgo colateral nº3
 
@@ -172,15 +174,83 @@ conservadoras —con la interfaz cerrada el margen sería mayor—, no optimista
 No se corrige aquí. Es un cambio de dos líneas (`IfCondition` sobre `gazebo_client_launcher`),
 pero no es necesario para H1 y toca un launch que en este periodo no se estaba modificando.
 
+## Resultado 4 — repetición sobre el código corregido (2026-08-14)
+
+Repetición de los resultados 1 a 3 sobre `d7d8387`, es decir **después** de la corrección de los
+meshes y de la del mapa y AMCL (`35c47da`). Dos instancias, separadas por `ROS_DOMAIN_ID` y
+`GAZEBO_MASTER_URI`; robot2 aparece en `y = 2.0`.
+
+**Navegación.** Un objetivo a cada robot, y el desplazamiento medido contra `/odom` —no contra la
+estimación de AMCL, que es lo que evalúa el propio Nav2 al declarar `SUCCEEDED`:
+
+| | `/odom` antes | `/odom` después | Recorrido real | Objetivo (5,0 m) |
+|---|---|---|---|---|
+| robot1 | (−0,099 · 0,113) | (4,790 · 0,097) | **4,89 m** | `SUCCEEDED` |
+| robot2 | (−0,064 · 2,130) | (4,893 · 2,062) | **4,96 m** | `SUCCEEDED` |
+
+Los dos vehículos se desplazaron de verdad. El residuo (11 cm y 4 cm) cae dentro de la tolerancia
+de llegada configurada.
+
+**Aislamiento de mando.** Cuatro evidencias independientes, ninguna de ellas de desplazamiento:
+
+1. `ros2 topic list` en cada dominio: **62 tópicos en cada uno**, y **ninguno** cruzado —cero
+   `/robot2/*` desde el dominio 0, cero `/robot1/*` desde el dominio 2
+   (`logs/S17_topicos_dominio0.txt`, `logs/S17_topicos_dominio2.txt`). Es una prueba de
+   imposibilidad: no existe el canal por el que un mensaje podría cruzar.
+
+   Hay que listar con `--no-daemon --spin-time 8`. Con la ventana de descubrimiento por defecto
+   (~1 s) el listado sale **incompleto y asimétrico** —una toma dio 6 tópicos y otra 50, con la
+   pila entera arriba en ambos casos—, lo que parece un nodo faltante y no lo es.
+2. `ros2 topic info /robot1/cmd_vel --verbose`: **una sola suscripción**,
+   `gazebo_ros_deepracer_drive_robot1`, en el espacio `/robot1`. Los cuatro publicadores son el
+   propio Nav2 de robot1 (`controller_server`, `behavior_server`), todos dentro de `/robot1`.
+   Ver `logs/S17_aislamiento_mando.txt`.
+3. `pgrep -a gzserver`: dos procesos independientes (PID 11680 y 12375).
+4. Comprobación visual: al comandar `/robot1/cmd_vel` en el dominio 0, el vehículo de robot2 **no
+   se mueve** en su visor.
+
+**Alcance de lo que esto demuestra.** El aislamiento está garantizado por construcción —dominios
+ROS y servidores de Gazebo separados—, así que estas pruebas verifican que la construcción es la
+que se cree, no descubren un aislamiento inesperado. Los dos robots no comparten espacio físico:
+es una limitación declarada del alcance (§8 de `CONTRATO_INTERFACES.md`), no un resultado.
+
+## Hallazgo colateral nº4 — abierto
+
+**Una lectura de `/odom` reportó un desplazamiento que no ocurrió.** Midiendo el aislamiento con
+`ros2 topic echo /robot2/odom` a través del daemon, robot2 informó 4,51 m de avance mientras
+permanecía inmóvil en su visor. Lo leído era la posición de robot1 desplazada 2,0 m en `y`, que es
+exactamente el offset de spawn de robot2:
+
+```
+robot2_después − robot1_después = (−0,001 · 2,016)
+robot2_antes   − robot1_antes   = ( 0,007 · 1,988)
+```
+
+No afecta a H1 —el aislamiento se demuestra por los cuatro puntos anteriores, ninguno de los cuales
+depende de `/odom`—, pero **sí bloquea el objetivo 4**: las cuatro métricas (tiempo de respuesta,
+tiempo de asignación, tasa de éxito, continuidad entre niveles) se calculan sobre odometría. Antes
+de instrumentar OE4 hay que establecer si la causa es el daemon de ROS 2 sirviendo datos de otro
+dominio o algo en la publicación de `/odom` bajo espacio de nombres. Mientras tanto, **leer con
+`--no-daemon`**.
+
+## Hallazgo colateral nº5 — abierto
+
+**Los vehículos se desvían con `angular.z = 0`.** Bajo un comando puramente lineal, el desplazamiento
+resultante no es paralelo al eje del pasillo: se midieron desviaciones de 9,5°, 15° y ~18° en
+distintas corridas. Puede ser que las articulaciones de dirección no nazcan en cero, o un sesgo del
+plugin Ackermann; también puede ser simplemente la orientación en que Nav2 dejó al vehículo al
+terminar el objetivo anterior. **No está determinado.** Importa por lo mismo que el nº4: falsea
+cualquier medida de trayectoria de OE4.
+
 ## Criterio de cierre
 
-Cumplido **en lo funcional**. Dos robots con pila Nav2 completa, cada uno bajo su namespace,
-alcanzan objetivos de navegación simultáneamente y a tiempo real. Con namespace vacío nada cambia
-respecto al comportamiento anterior.
+**Cumplido (2026-08-14).** Dos robots con pila Nav2 completa, cada uno bajo su namespace, alcanzan
+objetivos de navegación simultáneamente, a tiempo real, con desplazamiento verificado contra
+`/odom`, y sin ningún canal de mando compartido. Con namespace vacío nada cambia respecto al
+comportamiento anterior.
 
-Queda una repetición pendiente: los hallazgos nº2 y nº3 se descubrieron después de tomar esos
-resultados, y el nº2 modificó los `.xacro` del vehículo. La repetición no busca un resultado
-nuevo, busca constancia de que la corrección de los meshes no alteró el comportamiento.
+Quedan abiertos los hallazgos nº1, nº4 y nº5, todos ellos condiciones previas para instrumentar el
+objetivo 4, ninguno de ellos condición de H1.
 
 ## Cómo refutar este resultado
 
