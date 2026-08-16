@@ -39,17 +39,46 @@ cmd()    { printf '         Ejecutar:\n           %s\n' "$1"; }
 
 # Orden que anade GAZEBO_MODEL_PATH a ~/.bashrc sin poder duplicarla ni romperla.
 # Se emite en los dos sitios que la piden, identica, y esta construida asi:
-#   - la ruta aparece UNA sola vez, dentro de una variable: la orden se acorta en
-#     una copia entera de la ruta, y asi el ajuste de linea del terminal (tmux,
-#     screen, less) tiene menos ocasiones de partirla con un salto real;
 #   - el valor va entre comillas dobles, para que una ruta con espacios no acabe
 #     en 'not a valid identifier' al abrir la siguiente terminal;
-#   - la asignacion va entre comillas simples, para que '$GAZEBO_MODEL_PATH' se
+#   - lo que se anade va entre comillas simples, para que '$GAZEBO_MODEL_PATH' se
 #     escriba literal en ~/.bashrc y se expanda alli, no aqui;
-#   - 'grep -qxF' compara la LINEA ENTERA de forma LITERAL: -F evita que una ruta
-#     con corchetes o puntos se interprete como expresion regular, y -x evita que
-#     una linea ya corrupta que contenga el texto de al lado cuente como acierto.
-CMD_GZP="LINEA='export GAZEBO_MODEL_PATH=\"\$GAZEBO_MODEL_PATH:$REPO\"'; grep -qxF \"\$LINEA\" ~/.bashrc || echo \"\$LINEA\" >> ~/.bashrc"
+#   - la guarda pregunta si ALGUNA linea activa de ~/.bashrc mete ya esta raiz en
+#     GAZEBO_MODEL_PATH; NO si existe una linea identica, caracter a caracter, a
+#     la que emitimos. La version anterior comparaba la linea entera con
+#     'grep -qxF', asi que cualquier forma equivalente escrita a mano -sin
+#     comillas, con otro espaciado- no coincidia y la orden anadia una SEGUNDA
+#     copia de la misma ruta. No es hipotetico: el ~/.bashrc de este equipo tenia
+#     la version sin comillas desde el 11-ago, y al pegar el consejo se duplicaba.
+#   - '-F' compara literal, para que una ruta con corchetes o puntos no se lea
+#     como expresion regular y la guarda deje de proteger sin dar ningun error;
+#   - '^[[:space:]]*#' descarta las lineas comentadas, y la comprobacion de abajo
+#     descarta las mismas. Si las dos no miraran igual, una linea comentada
+#     dejaria a la guarda sin anadir nada y al consejo afirmando que ya esta:
+#     el verificador seguiria fallando sin que nada de lo que dice lo explique.
+CMD_GZP="grep -v '^[[:space:]]*#' ~/.bashrc 2>/dev/null | grep -F GAZEBO_MODEL_PATH | grep -qF '$REPO' || echo 'export GAZEBO_MODEL_PATH=\"\$GAZEBO_MODEL_PATH:$REPO\"' >> ~/.bashrc"
+
+# La misma pregunta que hace la guarda de CMD_GZP, para que el consejo y la orden
+# no puedan discrepar.
+bashrc_declara_raiz() {
+  grep -v '^[[:space:]]*#' "$HOME/.bashrc" 2>/dev/null \
+    | grep -F GAZEBO_MODEL_PATH | grep -qF "$REPO"
+}
+
+# Que falte la variable tiene dos causas distintas, con arreglos distintos, y el
+# consejo equivocado no es inofensivo. Si la linea NO esta en ~/.bashrc, hay que
+# anadirla. Si SI esta, anadirla otra vez no arregla nada: escribir en ~/.bashrc
+# no cambia una terminal que ya estaba abierta, de modo que el verificador vuelve
+# a fallar exactamente igual y quien lo lee pega la orden una y otra vez sin que
+# nada mejore. Lo que falta ahi es cargar el archivo, no volver a escribirlo.
+consejo_gzp() {
+  if bashrc_declara_raiz; then
+    printf '         -> la linea YA esta en ~/.bashrc; falta que ESTA terminal la cargue\n'
+    cmd 'exec bash'
+  else
+    cmd "$CMD_GZP"
+  fi
+}
 
 echo "Repositorio: $REPO"
 echo "Workspace:   $WS"
@@ -173,7 +202,7 @@ paso 'GAZEBO_MODEL_PATH incluye la raiz del repositorio'
 if [[ ":${GAZEBO_MODEL_PATH:-}:" == *":$REPO:"* ]]; then bien
 else
   mal "sin esto, todo mundo que use model:// carga vacio y sin dar error"
-  cmd "$CMD_GZP"
+  consejo_gzp
 fi
 
 for w in primer_piso.world primer_piso_v2.world primer_piso_dos_niveles.world pasillo_grande.world; do
@@ -221,7 +250,7 @@ else
     # Una linea por mundo, todas sangradas igual: 'mal' solo sangra la primera.
     mal "${URI_ROTOS[0]}"
     for i in "${URI_ROTOS[@]:1}"; do printf '         -> %s\n' "$i"; done
-    cmd "$CMD_GZP"
+    consejo_gzp
   else bien; fi
 fi
 

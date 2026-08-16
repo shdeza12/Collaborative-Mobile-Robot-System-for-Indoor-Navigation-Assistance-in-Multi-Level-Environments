@@ -144,32 +144,40 @@ cd ~/Tesis
 # sin mundos, con el fallo silencioso que se describe más abajo.
 ls pasillo_grande.world
 
-grep -qxF 'source ~/deepracer_sim_ws/install/setup.bash' ~/.bashrc || echo 'source ~/deepracer_sim_ws/install/setup.bash' >> ~/.bashrc
+grep -v '^[[:space:]]*#' ~/.bashrc 2>/dev/null | grep -qF 'deepracer_sim_ws/install/setup.bash' || echo 'source ~/deepracer_sim_ws/install/setup.bash' >> ~/.bashrc
 
-LINEA="export GAZEBO_MODEL_PATH=\"\$GAZEBO_MODEL_PATH:$PWD\""
-grep -qxF "$LINEA" ~/.bashrc || echo "$LINEA" >> ~/.bashrc
+grep -v '^[[:space:]]*#' ~/.bashrc 2>/dev/null | grep -F GAZEBO_MODEL_PATH | grep -qF "$PWD" || echo "export GAZEBO_MODEL_PATH=\"\$GAZEBO_MODEL_PATH:$PWD\"" >> ~/.bashrc
 
 exec bash
 ```
 
 > **Por qué se comprueba antes de añadir.** Repetir este paso es lo habitual cuando algo
 > falla a mitad de instalación. Con un `>>` a ciegas, cada intento agrega las líneas otra
-> vez y `~/.bashrc` acaba con varias copias que se pisan entre sí; el `grep -qxF ... ||` de
+> vez y `~/.bashrc` acaba con varias copias que se pisan entre sí; el `grep ... ||` de
 > delante añade cada línea solo si no está ya.
 >
-> Las tres letras importan. `-F` compara texto literal: sin ella, una carpeta con corchetes
-> o puntos en el nombre se leería como expresión regular y la comprobación dejaría de
-> proteger **sin dar ningún error**. `-x` exige que coincida la línea entera: sin ella, un
-> `~/.bashrc` ya estropeado —con la línea buena pegada a otra orden— contaría como acierto y
-> la línea correcta no llegaría a añadirse nunca. Y las comillas alrededor del valor son lo
-> que permite que la ruta lleve espacios sin que la siguiente terminal arranque con
-> `not a valid identifier`.
+> **La comprobación pregunta por el efecto, no por el texto:** ¿hay alguna línea activa que
+> meta *esta* ruta en `GAZEBO_MODEL_PATH`? Antes comparaba la línea entera con `grep -qxF`,
+> y eso solo reconoce su propia forma exacta: una línea equivalente escrita a mano —sin las
+> comillas, con otro espaciado— no coincidía y la orden añadía una segunda copia de la misma
+> ruta. Pasó de verdad, en el equipo de desarrollo, con una línea puesta el 11 de agosto.
+>
+> El `grep -v '^[[:space:]]*#'` descarta las líneas comentadas, para que una línea desactivada
+> a propósito no cuente como puesta y deje la orden sin hacer nada. `-F` compara texto
+> literal: sin ella, una carpeta con corchetes o puntos en el nombre se leería como expresión
+> regular y la comprobación dejaría de proteger **sin dar ningún error**. Y las comillas
+> alrededor del valor son lo que permite que la ruta lleve espacios sin que la siguiente
+> terminal arranque con `not a valid identifier`.
+>
+> `exec bash` no es decorativo: escribir en `~/.bashrc` **no cambia la terminal ya abierta**.
+> Sin recargar, todo lo que se lance desde aquí seguirá sin ver la variable.
 
 La primera línea evita tener que hacer `source` en cada terminal nueva. La segunda añade la
-raíz del repositorio a `GAZEBO_MODEL_PATH`, y solo la necesitan los mundos que incluyen
-modelos externos con `model://` —`pasillo_grande.world`, `pasillo_test.world`,
-`USTA_WORLD/usta_test.world`—; los de `primer_piso` llevan la geometría embebida y
-funcionan sin ella.
+raíz del repositorio a `GAZEBO_MODEL_PATH`, y la necesitan los mundos que incluyen modelos
+externos con `model://`: `pasillo_grande.world`, `pasillo_test.world`,
+`USTA_WORLD/usta_test.world` y **`primer_piso_dos_niveles.world`**, que es el entorno de
+evaluación de OE4. Solo `primer_piso.world` y `primer_piso_v2.world` llevan la geometría
+embebida y funcionan sin ella.
 
 > **Por qué es una trampa.** Sin la variable Gazebo **no aborta**: devuelve código de salida
 > 0 y carga el mundo incompleto —plano gris y sol, pero sin pasillo—, dejando una sola línea
