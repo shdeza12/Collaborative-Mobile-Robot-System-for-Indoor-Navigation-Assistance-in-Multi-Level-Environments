@@ -6,7 +6,7 @@
 | | |
 |---|---|
 | **Semana del cronograma** | S18 de 32 |
-| **Fecha de corte** | 2026-08-15 |
+| **Fecha de corte** | 2026-08-16 |
 | **Fases activas** | Fase 4 — Desarrollo (cerrando) · Fase 5 — Integración (S18–S23) |
 | **Semanas restantes** | 15 (sustentación S28–S29, documento final S29–S32) |
 | **Último entregable formal** | Semana 17 |
@@ -180,6 +180,8 @@ Deben justificarse por escrito en el documento final:
 | 2026-08-14 | **Acta firmada.** Armando Mateus emite constancia de revisión sobre *Actividad 1 – Corte 1*: cronograma S17–S32, matriz objetivo–evidencia, nueve hitos y tabla de desviaciones | Cierra el pendiente de §3 dentro del plazo (antes de S19) y cubre la actividad 5 del cronograma. Deja dos cosas registradas: que la firma es de **un** director y no de los tres, y que el documento firmado tiene fecha de corte del 13-ago, un día antes de adoptar el entorno de dos niveles — su actividad 12 y su matriz de OE1 siguen citando el laboratorio GED |
 | 2026-08-14 | Se registra como riesgo **R11** que uno de los dos DeepRacers está en intervención técnica | Lo declara el director por escrito en el acta. Cambia el orden del spike de S19: las preguntas 1, 2 y 4 se responden con un solo vehículo; la 3 —latencia entre vehículos— exige los dos y queda supeditada a la reparación. Sin registrarlo, el spike se habría planificado suponiendo dos vehículos disponibles |
 | 2026-08-15 | **D3 y D4 revisadas.** El laboratorio GED deja de ser el entorno de evaluación y pasa a ser la etapa 2 del escalamiento —puerta de validación del hardware—; la evidencia física la produce el pasillo real del primer piso USTA, que es la geometría que el mundo simulado replica | `ESTADO.md` §3 y §6 todavía describían el laboratorio como entorno de pruebas y como lo replicado en Gazebo, mientras `CRONOGRAMA_S17_S32.md` §4 ya decía lo contrario desde el 14-ago. Dos documentos del mismo proyecto afirmando cosas distintas sobre dónde se mide es exactamente lo que el jurado encuentra |
+| 2026-08-16 | Se versiona la configuración de RViz con la que se tomó la evidencia de S17 (`nav2_robot1_view.rviz`), citada desde `S17_nav2_namespaces.md`, y **con sus herramientas republicando en `/robot1/initialpose` y `/robot1/goal_pose`** | Estaba sin versionar: la captura del informe no se podía reproducir sin rearmar el panel a mano. Al revisarla antes de commitearla apareció que *2D Pose Estimate* y *2D Nav Goal* apuntaban a los tópicos globales —RViz los escribe así por defecto—, que bajo namespace no escucha nadie: el clic se publica y no pasa nada, sin error. El contrato de interfaces fija `/<ns>/initialpose`. Un archivo de configuración que ningún documento cita se queda obsoleto en silencio, así que entra citado o no entra |
+| 2026-08-16 | El README declara los **dos** mundos y para qué sirve cada uno: `primer_piso_v2.world` como defecto de los launch y `primer_piso_dos_niveles.world` como entorno de evaluación de OE4 | El README solo nombraba el vigente, y `verificar_repositorio.sh` lo daba por coherente porque únicamente compara el README contra la constante del código: los dos decían `v2` y la comprobación pasaba. Mientras tanto `ESTADO.md` declaraba desde el 14-ago que el entorno que importa para OE4 es el de dos niveles, que no aparecía en el README ni una vez. Quien clona el repositorio lee el README, no el tablero |
 
 ---
 

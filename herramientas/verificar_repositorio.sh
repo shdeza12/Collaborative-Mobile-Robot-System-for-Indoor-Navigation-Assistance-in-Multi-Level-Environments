@@ -77,8 +77,9 @@ titulo '3. Todo lo que se cita existe'
 # Solo se miran los documentos que dan instrucciones para HOY: el README, las
 # guias operativas, el README del robot y las herramientas. Los planes y el
 # cronograma nombran a proposito mundos que todavia no existen
-# ('laboratorio_ged.world', 'primer_piso_dos_niveles.world'): eso es trabajo
-# previsto, no una cita rota.
+# ('laboratorio_ged.world'): eso es trabajo previsto, no una cita rota.
+# 'primer_piso_dos_niveles.world' estuvo en esa lista hasta el 2026-08-14; ya
+# existe, asi que ahora lo cubre la comprobacion como cualquier otro.
 paso 'los .world citados en las instrucciones existen'
 FALTAN=''
 INSTRUCCIONES=(README.md Documentos/guia_*.md Robot/README.md)

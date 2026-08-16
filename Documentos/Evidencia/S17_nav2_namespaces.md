@@ -153,6 +153,20 @@ sí relanzar: `GAZEBO_MODEL_PATH` se calcula al arrancar.
 (`S17_rviz_robot1_robotmodel.png`), que era justamente el conflicto: una sola URI sirviendo a los
 dos resolvedores.
 
+La configuración con la que se tomó esa captura está versionada en
+`Robot/aws-deepracer/deepracer_description/rviz/nav2_robot1_view.rviz`, para que la evidencia sea
+reproducible y no dependa de reconstruir el panel a mano:
+
+```bash
+rviz2 -d ~/deepracer_sim_ws/src/aws-deepracer/deepracer_description/rviz/nav2_robot1_view.rviz
+```
+
+Sus herramientas publican en `/robot1/initialpose` y `/robot1/goal_pose`, no en los tópicos
+globales. Nacieron sin prefijo —RViz los escribe así por defecto— y en esa forma los clics de
+*2D Pose Estimate* y *2D Nav Goal* salían a un tópico que bajo namespace no escucha nadie: se ven
+publicados y no pasa nada. El contrato de interfaces fija `/<ns>/initialpose`
+(`Documentos/CONTRATO_INTERFACES.md`), así que se corrigieron antes de versionar el archivo.
+
 ## Hallazgo colateral nº3
 
 **El argumento `gui` nunca ha funcionado.** `deepracer_sim.launch.py` lo declara en la línea 63

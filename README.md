@@ -195,7 +195,7 @@ ni ningún nodo**—, y explica junto a cada fallo qué hacer; cuando existe un 
 que lo corrige, lo imprime solo en su línea, listo para copiar. Debe terminar en:
 
 ```
-  30 comprobaciones pasan, 0 fallan.
+  31 comprobaciones pasan, 0 fallan.
 ```
 
 Mientras haya fallos no tiene sentido lanzar la simulación. El script existe porque unas
@@ -319,7 +319,7 @@ por lo que puede encadenarse en scripts.
 | `Documentos/` | Anteproyecto, entregables semanales y guías operativas |
 | `Documentos/Evidencia/` | Capturas y diagramas citados en los informes |
 | `herramientas/` | Verificadores y utilidades (ver abajo) |
-| `*.world` | Mundos de Gazebo. El vigente es `primer_piso_v2.world` |
+| `*.world` | Mundos de Gazebo. El vigente es `primer_piso_v2.world` (un nivel, el que cargan los launch por defecto). El **entorno de evaluación de OE4** es `primer_piso_dos_niveles.world` desde el 2026-08-14: la misma planta instanciada a z=0 y z=3,0, y se pide explícitamente con `world:=` |
 | `USTA_WORLD/`, `pasillo_grande/`, `pasillo_usta/` | Modelos SDF de entornos |
 | `ESTADO.md` | Tablero de avance, riesgos y decisiones |
 
@@ -330,7 +330,7 @@ cero cuando fallan, de modo que se pueden encadenar:
 
 | Herramienta | Responde a |
 |---|---|
-| `verificar_instalacion.sh` | ¿el código compila y funciona **en este equipo**? (30 comprobaciones) |
+| `verificar_instalacion.sh` | ¿el código compila y funciona **en este equipo**? (31 comprobaciones) |
 | `verificar_repositorio.sh` | ¿los documentos dicen la verdad y las rutas no son las de una máquina concreta? (10 comprobaciones) |
 | `verificar_mapa.py` | ¿este mapa representa de verdad la geometría de su `.world`? |
 | `verificar_contrato.py` | ¿la simulación cumple el contrato de interfaces? (requiere la simulación corriendo) |
