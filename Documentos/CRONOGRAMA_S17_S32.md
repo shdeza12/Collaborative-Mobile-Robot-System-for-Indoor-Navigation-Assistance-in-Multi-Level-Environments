@@ -4,7 +4,22 @@
 **Autores:** Santiago Hernández Ávila · Jonny Alejandro Mejía León
 **Directores:** Ing. Armando Mateus Rojas, Msc. · Ing. Nestor Ivan Ospina, Msc. · Ing. Oscar Mauricio Gélvez Lizarazo, Msc.
 **Documento de referencia:** `Anteproyecto_Jonny_Santi.pdf`, Cap. 8 (cronograma a 32 semanas)
-**Fecha de corte:** 2026-08-05 (S17)
+**Fecha de corte:** 2026-08-15 (S18) · *S18 y S19 revisadas; el resto conserva el corte del 2026-08-05*
+
+> **Existen tres copias de este cronograma y no dicen lo mismo.** Antes de citar una fecha o un
+> criterio de cierre, hay que saber cuál se está mirando:
+>
+> | Artefacto | Qué es | Corte | Autoridad |
+> |---|---|---|---|
+> | [`Actividad_1_Corte_1_Cronograma_2026-2_firmado.pdf`](Entregables/Actividad_1_Corte_1_Cronograma_2026-2_firmado.pdf) | 57 actividades, matriz objetivo–evidencia, hitos y desviaciones. Generado del `.xlsx` | 13-ago | **Es el único firmado.** Ante los directores, manda este |
+> | [`Entregables/Cronograma_S17_S32.tex`](Entregables/Cronograma_S17_S32.tex) | Versión LaTeX del entregable | 11-ago | Absorbió las correcciones de [`ENTORNO_DE_EVALUACION.md`](ENTORNO_DE_EVALUACION.md) §11 |
+> | **Este `.md`** | Documento de trabajo: más detalle operativo y estado real por actividad | 15-ago | **Es el más actual.** Para saber qué está hecho de verdad, este |
+>
+> **Los tres arrastran el laboratorio GED en algún punto, salvo este.** El PDF firmado lo lleva
+> en su actividad 12 y en la matriz de OE1; el `.tex` en su línea 232. Se corrigen en el próximo
+> corte, no ahora: **un artefacto firmado no se reedita en silencio.**
+>
+> *Registrado el 2026-08-14 (dos artefactos) y ampliado el 2026-08-15 al recibir el PDF firmado.*
 
 ---
 
@@ -84,8 +99,11 @@ múltiples niveles: eso no se puede diluir. Por tanto:
 
 - **En simulación** el mundo tiene **dos niveles reales con separación vertical** y una zona de
   escaleras. Es el escenario fiel al anteproyecto y es donde se ejecuta la campaña de N = 30.
-- **En el laboratorio GED** los dos niveles se representan como dos zonas del mismo plano,
-  separadas por una franja de transición marcada.
+- **En el pasillo real** (etapa 3) los dos niveles son los dos pisos del edificio, con el
+  descanso de la escalera como zona de transición: la misma geometría que se simuló.
+- **En el laboratorio GED** (etapa 2, solo validación de hardware) los dos niveles se representan
+  como dos zonas del mismo plano, separadas por una franja de transición marcada. Ahí no se mide
+  la continuidad entre niveles; solo se comprueba que el vehículo hace lo que la simulación dice.
 
 Lo que legitima la simplificación física es que, en el esquema de relevo del anteproyecto, **ningún
 robot cruza entre niveles** — ese es precisamente el aporte, evitar el hardware de transición
@@ -94,17 +112,25 @@ que ningún agente cruza. El protocolo se reproduce íntegro: solicitud, asignac
 notificación, espera y reanudación. *Es una simplificación del escenario físico, no del protocolo,
 y se declara como tal en el documento final.*
 
-**D3 — Las pruebas físicas se realizan en el laboratorio GED, en condiciones controladas.**
-Alineado con OE4 ("entorno interior controlado") y con §4.3 del anteproyecto ("el alcance se limita
-a la demostración funcional de la prueba de concepto en condiciones controladas"). Elimina la
-dependencia de permisos de acceso y ventanas horarias.
+**D3 — Las pruebas físicas se escalan en tres etapas.** *(Revisada el 2026-08-14; la versión
+original las situaba íntegramente en el laboratorio GED.)* El laboratorio deja de ser el destino de
+las pruebas y pasa a ser la **etapa 2**, una compuerta de validación de hardware. La etapa 3 —la
+que produce la evidencia— es el pasillo real de la USTA en dos plantas, cuyo acceso está
+confirmado. El detalle está en [`ENTORNO_DE_EVALUACION.md`](ENTORNO_DE_EVALUACION.md) §5 y §6.
 
-**D4 — El mundo simulado replica la geometría del laboratorio, duplicada en dos niveles.**
-Un solo mundo Gazebo: la planta del laboratorio GED modelada dos veces, a dos alturas, unidas por
-una escalera. Cada nivel tiene entonces la **misma geometría que el laboratorio real**, lo que hace
-directamente comparables los resultados de simulación y de físico, y a la vez conserva la
-separación vertical que exige el anteproyecto. El costo adicional sobre modelar dos zonas contiguas
-es un desplazamiento en Z y una escalera decorativa, porque los robots nunca la recorren.
+**D4 — El mundo simulado replica el primer piso del edificio, instanciado en dos niveles.**
+*(Revisada el 2026-08-14; la versión original replicaba la geometría del laboratorio.)* El
+laboratorio no sirve como entorno de evaluación: 16 m² en un solo nivel, sin discontinuidad
+vertical, y una sala cuadrada vacía es el peor caso para AMCL. El entorno es
+`primer_piso_dos_niveles.world`: `primer_piso` extraído a modelo reutilizable e instanciado a
+z = 0 y z = 3,0.
+
+**El argumento es más fuerte que antes, y conviene enunciarlo así en el documento final:** el
+segundo piso real del edificio es idéntico al primero, de modo que replicar la planta con
+desplazamiento vertical **no es una simplificación de modelado, es la geometría real**. Y el
+recinto del que se dedujo geométricamente la zona de transición resultó ser el descanso de la
+escalera real, sin haber consultado la planta. Construido y validado el 2026-08-14
+([`S18_entorno_dos_niveles.md`](Evidencia/S18_entorno_dos_niveles.md)).
 
 **D5 — La interfaz HRI es web responsiva, servida por `rosbridge_suite`, y se accede desde el
 navegador de un teléfono.** §7.2 del anteproyecto lista como software "JavaScript, PHP, HTML" y
@@ -178,32 +204,78 @@ realizada, sino por artefacto producido.
 **Criterio de cierre:** existe `Documentos/CONTRATO_INTERFACES.md`; `ESTADO.md` refleja OE2 al 40 %
 y registra D1–D6; entregable S16 emitido.
 
-### S18 · 10 – 16 ago — Spike de hardware, requisitos y réplica del entorno
+### S18 · 10 – 16 ago — Entorno de dos niveles *(cerrada parcialmente el 2026-08-14)*
 
-| Frente | Actividad |
-|---|---|
-| B | **Spike acotado (3–4 días)**, responde cuatro preguntas y no más: (1) ¿el LiDAR real publica un `/scan` usable bajo el custom car? (2) ¿se puede comandar `/cmd_vel` desde ROS 2 sin pasar por la interfaz web? (3) ¿cuál es la latencia de ida y vuelta entre los dos vehículos sobre el Wi-Fi del laboratorio? (4) Humble contra Jazzy: ¿qué paquetes hay que reconstruir y qué parámetros de Nav2 cambian? |
-| A | Medir el laboratorio GED y modelar su planta en SDF, duplicada en dos niveles con separación vertical y escalera |
-| T | Construir la matriz de requisitos RF ↔ OE ↔ prueba (cierra el riesgo R5) |
-| T | Emitir el entregable S17 |
+> **Revisada el 2026-08-14.** La versión original de esta semana pedía modelar el laboratorio
+> GED y cerraba contra `laboratorio_ged.world`. Ese archivo no existe ni va a existir:
+> [`ENTORNO_DE_EVALUACION.md`](ENTORNO_DE_EVALUACION.md) §5 descartó el laboratorio como
+> entorno de evaluación. Un criterio de cierre que apunta a un archivo inexistente no se puede
+> cumplir ni fallar, así que se reescribe contra lo que de verdad se hizo.
 
-**Criterio de cierre:** informe del spike con las cuatro respuestas y su impacto en el plan;
-`laboratorio_ged.world` carga en Gazebo con sus dos niveles; matriz de requisitos publicada.
+| Frente | Actividad | Estado |
+|---|---|---|
+| A | Dos agentes aislados bajo namespace (hito H1) | ✅ Cerrado 14-ago — [`S17_nav2_namespaces.md`](Evidencia/S17_nav2_namespaces.md) |
+| A | Entorno de dos niveles: `primer_piso` extraído a modelo, instanciado a z=0 y z=3,0, con losa y zona de transición | ✅ Cerrado 14-ago — [`S18_entorno_dos_niveles.md`](Evidencia/S18_entorno_dos_niveles.md) |
+| A | Mapa del nivel 2 | ✅ **Suprimida**: un solo mapa sirve para los dos niveles |
+| T | Emitir el entregable S17 | ✅ `Entregable_semana_17.pdf` |
+| T | Actividad 1 – Corte 1 (no estaba planeada; vencía el martes 18) | ✅ **Firmada el 14-ago** por Armando Mateus — [PDF](Entregables/Actividad_1_Corte_1_Cronograma_2026-2_firmado.pdf) |
+| B | **Spike de hardware** (4 preguntas) | 🔴 **No se corrió** → S19 |
+| T | Matriz de requisitos RF ↔ OE ↔ prueba (riesgo R5) | 🔴 **No se hizo** → S19 |
+| T | Entregable S16 | 🔴 Nunca se emitió; decidir si se emite tarde o se absorbe |
 
-### S19 · 17 – 23 ago — Dos agentes en simulación
+**Criterio de cierre original:** «informe del spike con las cuatro respuestas; el mundo de dos
+niveles carga y se navega sobre él; matriz de requisitos publicada.» → **cumplido 1 de 3.**
 
-| Frente | Actividad |
-|---|---|
-| A | Lanzar dos agentes con namespaces `/robot1` y `/robot2` sobre la réplica |
-| A | Generar el mapa de cada nivel y configurar Nav2 independiente por agente |
-| B | Llevar el segundo DeepRacer al mismo estado del primero |
-| B | Resolver lo que haya arrojado el spike |
-| T | Definir el protocolo experimental de OE4: qué se mide, cómo, cuántas repeticiones, criterios de éxito |
-| T | Emitir el entregable S18 |
+**Lo que se cumplió está medido, no declarado:** el nivel 2 se navegó con 4,79 m de recorrido
+real sobre un objetivo de 5,0 m, con la coordenada z constante a 1,9 µm. La medida de z era
+necesaria porque las dos plantas son idénticas y el LiDAR no las distingue.
 
-**Criterio de cierre:** `ros2 action send_goal /robot1/navigate_to_pose` y su equivalente en
-`/robot2` mueven a cada agente dentro de su nivel sin interferencia de TF ni de tópicos. Protocolo
-experimental escrito **antes** de instrumentar.
+**El acta trae un dato que no se pidió y que cambia S19.** La observación del director dice
+literalmente: *«Se ha desarrolla un buen avance. Uno de los DeepRacers está esta semana en
+intervención técnica.»* Queda registrado como riesgo **R11** en `ESTADO.md` §4. También hay que
+tener presente que el documento firmado tiene fecha de corte del **13 de agosto**, un día antes
+de adoptar el entorno de dos niveles: su actividad 12 y su matriz de OE1 todavía citan el
+laboratorio GED y `laboratorio_ged.world`. Eso se comunica en el próximo corte.
+
+### S19 · 17 – 23 ago — Spike de hardware y requisitos *(cuatro días)*
+
+> **Revisada el 2026-08-15.** Tres cambios de fondo. **(1)** El trabajo de dos agentes que esta
+> semana tenía asignado ya se hizo en S18, así que el frente A queda casi vacío y su capacidad
+> absorbe lo que S18 no alcanzó. **(2)** El **lunes 17 es festivo**: son cuatro días, no cinco.
+> **(3)** Con un DeepRacer en intervención técnica (**R11**, declarado por el director en el acta
+> del 14-ago), el spike **se reordena**: no se puede planificar suponiendo dos vehículos.
+
+| Frente | Actividad | Vehículos que exige |
+|---|---|---|
+| B | **Spike, pregunta 4 — Humble ↔ Jazzy.** Se adelanta al primer puesto: comparar paquetes a reconstruir y parámetros de Nav2 que cambian entre las dos distribuciones | **Ninguno.** No necesita hardware encendido |
+| B | **Spike, pregunta 1.** ¿El LiDAR real publica un `/scan` usable bajo el custom car, y hasta qué distancia de verdad? | Uno |
+| B | **Spike, pregunta 2.** ¿Se puede comandar `/cmd_vel` desde ROS 2 sin pasar por la interfaz web? | Uno |
+| B | **Spike, pregunta 3.** Latencia de ida y vuelta entre los dos vehículos | **Los dos** — supeditada a la reparación (R11) |
+| B | Llevar el segundo vehículo al mismo estado del primero, y resolver lo que arroje el spike | **Los dos** — supeditada a la reparación (R11) |
+| T | **Matriz de requisitos RF ↔ OE ↔ prueba**, arrastrada de S18. Cierra R5 y desbloquea OE1, clavado en 40 % por esto | Ninguno |
+| T | Definir el protocolo experimental de OE4: qué se mide, cómo, cuántas repeticiones, criterios de éxito | Ninguno |
+| A | Único resto del frente A: **robot1 en el nivel 1 y robot2 en el nivel 2 a la vez**. Por separado ya está demostrado; falta simultáneo | Ninguno (simulación) |
+| A | Resolver los dos hallazgos que **bloquean OE4**: la lectura de `/odom` que devolvió la posición del otro robot, y la desviación de hasta 18° con `angular.z = 0` | Ninguno (simulación) |
+| T | Emitir el entregable S18 | Ninguno |
+
+**Dato que Jonny tiene que declarar por escrito antes de planificar la semana:** qué vehículo
+está intervenido, qué se le intervino y en qué fecha vuelve a estar operativo. Sin eso, la
+pregunta 3 y la paridad entre vehículos no tienen fecha, solo intención.
+
+**La pregunta 4 del spike ha subido de rango.** Ya no es «qué implicaría usar Jazzy»: los dos
+vehículos **son** Jazzy sobre Ubuntu Server 24.04 y la simulación es Humble. El riesgo R8 pasa
+de hipótesis a hecho confirmado, y lo que falta es medir su tamaño. Afecta directamente al nodo
+de coordinación de S20, que tiene que hablar con los dos vehículos.
+
+**Criterio de cierre:** informe del spike con **las preguntas 1, 2 y 4 respondidas** y su impacto
+en el plan; matriz de requisitos publicada; protocolo experimental escrito **antes** de
+instrumentar nada; los dos agentes navegando simultáneamente, cada uno en su nivel.
+
+La pregunta 3 **queda fuera del criterio de cierre de S19** y no por conveniencia: depende de una
+reparación cuya fecha no controlamos (R11). Se cierra en cuanto el segundo vehículo vuelva, y su
+resultado alimenta la métrica de tiempo de respuesta de OE4, que no se instrumenta hasta S20–S21.
+Si el vehículo no ha vuelto para el final de S20, deja de ser un retraso y pasa a ser un riesgo
+sobre la demostración física: es el momento de mirar el punto de decisión GO / NO-GO de S21.
 
 ### S20 · 24 – 30 ago — Nodo de coordinación
 
@@ -273,7 +345,7 @@ una corrida física completa. Repositorio etiquetado.
 
 | Actividad |
 |---|
-| Ejecutar entre 5 y 10 repeticiones en el laboratorio GED con los vehículos reales |
+| Ejecutar entre 5 y 10 repeticiones con los vehículos reales **en el pasillo de la USTA, en dos plantas** (etapa 3). El laboratorio GED es la compuerta previa —etapa 2, `ENTORNO_DE_EVALUACION.md` §6—, no el sitio de la campaña: no tiene discontinuidad vertical, así que ahí la continuidad entre niveles no se puede medir |
 | Grabar y editar el video de la demostración |
 | Emitir el entregable S24 |
 
@@ -338,17 +410,18 @@ por requisito.
 
 ## 8. Hitos
 
-| # | Hito | Semana | Habilita |
-|---|---|---|---|
-| H1 | Contrato de interfaces ROS 2 definido | S17 | Todo el desarrollo posterior |
-| H2 | Riesgos de hardware caracterizados (spike) | S18 | Planificación realista del bring-up |
-| H3 | Dos agentes navegando en niveles separados | S19 | Nodo de coordinación |
-| H4 | Asignación dinámica de tareas funcionando | S20 | Protocolo de relevo |
-| H5 | Relevo completo con métricas en simulación | S21 | Campaña experimental |
-| H6 | Sistema integrado de extremo a extremo | S22 | Verificación |
-| H7 | Implementación congelada | S23 | Campañas experimentales |
-| H8 | Conjunto de datos completo | S25 | Análisis |
-| H9 | Sustentación | S28–S29 | Documento final |
+| # | Hito | Semana | Habilita | Estado (2026-08-14) |
+|---|---|---|---|---|
+| H1 | Contrato de interfaces ROS 2 definido | S17 | Todo el desarrollo posterior | ✅ Verificado en simulación el 14-ago |
+| H2 | Riesgos de hardware caracterizados (spike) | ~~S18~~ **S19** | Planificación realista del bring-up | 🔴 El spike no se corrió en S18 |
+| H2b | **Entorno de dos niveles construido y navegado** | S18 | Campaña experimental en simulación | ✅ Cerrado el 14-ago |
+| H3 | Dos agentes navegando en niveles separados | S19 | Nodo de coordinación | 🟡 Por separado, sí; falta simultáneo |
+| H4 | Asignación dinámica de tareas funcionando | S20 | Protocolo de relevo | 🔴 No iniciado |
+| H5 | Relevo completo con métricas en simulación | S21 | Campaña experimental | 🔴 No iniciado |
+| H6 | Sistema integrado de extremo a extremo | S22 | Verificación | 🔴 No iniciado |
+| H7 | Implementación congelada | S23 | Campañas experimentales | 🔴 No iniciado |
+| H8 | Conjunto de datos completo | S25 | Análisis | 🔴 No iniciado |
+| H9 | Sustentación | S28–S29 | Documento final | 🔴 No iniciado |
 
 ---
 
