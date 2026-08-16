@@ -172,11 +172,11 @@ titulo '7. Mundos y modelos de Gazebo'
 paso 'GAZEBO_MODEL_PATH incluye la raiz del repositorio'
 if [[ ":${GAZEBO_MODEL_PATH:-}:" == *":$REPO:"* ]]; then bien
 else
-  mal "sin esto, los mundos con model://pasillo_usta y model://pasillo_grande cargan vacios"
+  mal "sin esto, todo mundo que use model:// carga vacio y sin dar error"
   cmd "$CMD_GZP"
 fi
 
-for w in primer_piso.world primer_piso_v2.world pasillo_grande.world; do
+for w in primer_piso.world primer_piso_v2.world primer_piso_dos_niveles.world pasillo_grande.world; do
   paso "$w"
   if [ -f "$REPO/$w" ]; then bien
   else mal "no esta en la raiz del repositorio"; fi
@@ -189,15 +189,38 @@ done
 # proposito, para reproducir la situacion de quien lanza desde otra carpeta.
 # Gazebo no aborta en ese caso -devuelve 0 y carga el mundo incompleto-, asi que
 # lo que se inspecciona es su stderr.
+#
+# Los mundos a comprobar NO se escriben a mano: se descubren buscando 'model://'
+# en la raiz. Una lista fija solo cubre los mundos que existian el dia que se
+# escribio, y el que se anade despues -que es el que nadie ha probado todavia-
+# se queda justo fuera de la unica guarda que lo protegia. Paso: se anadio
+# 'primer_piso_dos_niveles.world', el unico de su familia que usa model://, y la
+# comprobacion siguio mirando solo 'pasillo_grande.world'.
+# 'GAZEBO_MODEL_DATABASE_URI' se vacia a proposito. Cuando Gazebo no encuentra un
+# 'model://' en disco, lo BUSCA EN INTERNET antes de rendirse: sin esto la
+# comprobacion tarda unos dos minutos y parece colgada, justo en el unico caso
+# que importa -clon recien bajado, sin GAZEBO_MODEL_PATH- y justo para la persona
+# que menos margen tiene para saber que hay que esperar. El 'timeout' es la
+# segunda linea: si algun dia la variable deja de bastar, el script falla en 20 s
+# con un motivo, en vez de quedarse quieto sin decir nada.
 paso 'los model:// externos resuelven desde otra carpeta'
-if [ ! -f "$REPO/pasillo_grande.world" ]; then
-  mal 'falta pasillo_grande.world, no se puede comprobar'
+MUNDOS_URI=$(grep -l 'model://' "$REPO"/*.world 2>/dev/null || true)
+if [ -z "$MUNDOS_URI" ]; then
+  mal 'ningun .world de la raiz usa model://, no se puede comprobar'
 elif ! command -v gz >/dev/null; then
   aviso 'no esta la herramienta gz; se omite'
 else
-  SDF_ERR=$(cd /tmp && gz sdf -p "$REPO/pasillo_grande.world" 2>&1 >/dev/null)
-  if echo "$SDF_ERR" | grep -q 'Unable to find uri'; then
-    mal "$(echo "$SDF_ERR" | grep -m1 'Unable to find uri')"
+  URI_ROTOS=()
+  for w in $MUNDOS_URI; do
+    SDF_ERR=$(cd /tmp && GAZEBO_MODEL_DATABASE_URI='' timeout 20 gz sdf -p "$w" 2>&1 >/dev/null) || true
+    if echo "$SDF_ERR" | grep -q 'Unable to find uri'; then
+      URI_ROTOS+=("$(basename "$w"): $(echo "$SDF_ERR" | grep -m1 -o 'Unable to find uri\[[^]]*\]')")
+    fi
+  done
+  if [ ${#URI_ROTOS[@]} -gt 0 ]; then
+    # Una linea por mundo, todas sangradas igual: 'mal' solo sangra la primera.
+    mal "${URI_ROTOS[0]}"
+    for i in "${URI_ROTOS[@]:1}"; do printf '         -> %s\n' "$i"; done
     cmd "$CMD_GZP"
   else bien; fi
 fi
