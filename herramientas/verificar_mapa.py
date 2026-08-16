@@ -11,12 +11,16 @@ Hace dos preguntas distintas, y las dos hacen falta:
      peor, devuelve SUCCEEDED sobre una pose de AMCL que no es la real.
 
 Las paredes reales del mundo las lee generar_mapa_desde_mundo.paredes_del_mundo,
-que es la unica funcion del proyecto que compone bien la posicion del modelo con
-la del link y aplica el bloque <state> (el porque esta en la cabecera de aquel
-archivo: en primer_piso_v2.world las dos posiciones difieren 21 metros).
+que es la unica funcion del proyecto que compone la pose del modelo con la del
+link, resuelve los <include> y aplica el bloque <state>. El porque de cada cosa
+esta en la cabecera de aquel archivo.
 
 Uso:
-    python3 herramientas/verificar_mapa.py <mapa.yaml> <mundo.world>
+    python3 herramientas/verificar_mapa.py <mapa.yaml> <mundo.world> [altura]
+
+La altura es la del corte horizontal, 0.30 m si no se pasa. En un mundo de
+varios niveles hay que decir cual se verifica: comparar un mapa del nivel 2
+contra el corte del nivel 1 mide la geometria equivocada.
 
 Devuelve 0 si el mapa pasa los umbrales y 1 si no. Conviene ejecutarlo ANTES de
 cerrar Gazebo, para poder repetir el recorrido sin perder la sesion de mapeo.
@@ -73,7 +77,7 @@ def distancia_a_pared(x, y, pared):
     return math.hypot(dx, dy)
 
 
-def analizar(ruta_yaml, ruta_world):
+def analizar(ruta_yaml, ruta_world, altura=0.30):
     meta = leer_yaml_mapa(ruta_yaml)
     ruta_pgm = Path(ruta_yaml).parent / meta["image"]
     if not ruta_pgm.exists():
@@ -85,7 +89,7 @@ def analizar(ruta_yaml, ruta_world):
     origen_x, origen_y = meta["origin"][0], meta["origin"][1]
     pixel = imagen.load()
 
-    paredes = paredes_del_mundo(ruta_world)
+    paredes = paredes_del_mundo(ruta_world, altura)
 
     # En un .pgm de nav2_map_server: 254 = libre, 0 = ocupado, 205 = desconocido.
     # La fila 0 de la imagen es la Y mayor, de ahi el (filas - 1 - f) al pasar a metros.
@@ -185,6 +189,7 @@ def analizar(ruta_yaml, ruta_world):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
+    if len(sys.argv) not in (3, 4):
         sys.exit(__doc__)
-    sys.exit(analizar(sys.argv[1], sys.argv[2]))
+    sys.exit(analizar(sys.argv[1], sys.argv[2],
+                      float(sys.argv[3]) if len(sys.argv) == 4 else 0.30))

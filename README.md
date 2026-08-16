@@ -309,6 +309,20 @@ La herramienta compara la extensión mapeada con la del archivo `.world` y recha
 si la cobertura es insuficiente. Devuelve código de salida distinto de cero cuando falla,
 por lo que puede encadenarse en scripts.
 
+En un mundo de varios niveles hay que decir **cuál** se está verificando, con un tercer
+argumento: la altura del corte horizontal, en metros sobre el suelo del mundo. Por defecto
+son 0,30 m, la altura del LiDAR sobre el nivel 1:
+
+```bash
+python3 herramientas/verificar_mapa.py Robot/aws-deepracer/deepracer_bringup/maps/primer_piso_definitivo.yaml primer_piso_dos_niveles.world 3.30
+```
+
+Un mapa 2D es un corte, no una sombra: proyectar todo al plano metería la losa del nivel 2
+—una caja de 50 × 20 m— como si fuera pared, y taparía el mapa entero. Ese tercer argumento
+es también la forma de comprobar que **el mismo mapa sirve para los dos niveles**: los dos
+cortes dan `ACEPTADO` con las mismas cifras, que es la evidencia de que las dos plantas son
+la misma geometría. `generar_mapa_desde_mundo.py` acepta la misma opción como `--altura`.
+
 ---
 
 ## Estructura del repositorio

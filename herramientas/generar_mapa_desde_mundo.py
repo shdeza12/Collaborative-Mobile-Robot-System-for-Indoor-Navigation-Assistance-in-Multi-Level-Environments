@@ -18,14 +18,14 @@ Como funciona
 -------------
 Son cuatro pasos, en este orden:
 
-  1. Sacar del .world el rectangulo que ocupa cada pared.
+  1. Sacar del .world el rectangulo que ocupa cada pared, a la altura de corte.
   2. Crear una cuadricula donde TODO empieza como desconocido.
   3. Pintar de ocupado las celdas que toca cada rectangulo.
   4. Rellenar de libre desde donde arranca el robot, avanzando celda a celda
      sin atravesar ocupado. Lo que el relleno no alcanza se queda desconocido.
 
-Dos detalles que no son obvios
-------------------------------
+Tres detalles que no son obvios
+-------------------------------
 EL BLOQUE <state>. Cuando un .world se guarda desde la ventana de Gazebo queda
 al final un bloque <state> con la posicion de cada pared. Gazebo aplica ese
 bloque al cargar, asi que manda sobre las posiciones escritas en <model>.
@@ -47,6 +47,20 @@ mundo entero. Por eso existe --region: pone un limite explicito a la zona que
 se declara mapeada. Fuera de ahi queda desconocido, que es lo que tendria un
 robot real que nunca fue a mirar.
 
+UN MAPA 2D ES UN CORTE, NO UNA SOMBRA. Mientras el mundo tuvo un solo nivel la
+distincion daba igual: proyectar todas las cajas al plano o cortarlas a la
+altura del LiDAR daba el mismo dibujo. Con dos niveles deja de darlo. En
+primer_piso_dos_niveles.world la losa del nivel 2 es una caja de 50 x 20 m a
+z=2,95: proyectada, tapa el mapa entero de ocupado; cortada a la altura del
+LiDAR, no aparece, que es justo lo que ve el robot. Por eso el paso 1 descarta
+toda caja cuyo tramo vertical no cruce --altura.
+
+Y por eso el mismo mundo produce un mapa distinto segun donde se corte:
+--altura 0.30 da el nivel 1 y --altura 3.30 da el nivel 2. Que los dos salgan
+identicos no es casualidad ni error, es la comprobacion de que las dos plantas
+son la misma geometria, que es lo que permite navegar los dos niveles con un
+solo mapa.
+
 Uso
 ---
     python3 herramientas/generar_mapa_desde_mundo.py primer_piso_v2.world \\
@@ -66,18 +80,19 @@ OCUPADO = 0
 DESCONOCIDO = 205
 
 
-def paredes_del_mundo(ruta):
+def paredes_del_mundo(ruta, altura):
     """Devuelve una lista de rectangulos (x_min, y_min, x_max, y_max) en metros."""
     mundo = ET.parse(ruta).getroot().find('world')
     if mundo is None:
         sys.exit(f"{ruta} no contiene un elemento <world>.")
 
-    # Paso 1a: tamano y posicion de cada pared segun el bloque <model>.
+    # Paso 1a: tamano y posicion de cada pared, mirando tanto los <model>
+    # escritos en el propio .world como los que entran por <include>.
     tamano = {}
     posicion = {}
-    for modelo in mundo.findall('model'):
-        mx, my = leer_pose(modelo)[:2]
-        for link in modelo.findall('link'):
+    grosor = {}
+    for nombre, (mx, my, mz, myaw), elemento in modelos_del_mundo(mundo, ruta):
+        for link in elemento.findall('link'):
             # Solo <collision>: una pared es lo que el LiDAR choca, no lo que se
             # dibuja. Los enlaces con visual pero sin colision -como la marca de
             # la zona de transicion- no son obstaculos y no deben salir al mapa.
@@ -85,11 +100,16 @@ def paredes_del_mundo(ruta):
                          for c in col.iter('box')), None)
             if caja is None:
                 continue                      # ese link no es una pared
-            clave = (modelo.get('name'), link.get('name'))
-            ancho, largo = [float(v) for v in caja.find('size').text.split()][:2]
+            if abs(myaw) > 0.02:
+                sys.exit(f"El modelo '{nombre}' esta girado {math.degrees(myaw):.1f} grados. "
+                         "Este programa suma la pose del modelo a la del enlace, no compone "
+                         "rotaciones, asi que dibujaria las paredes en el sitio equivocado.")
+            clave = (nombre, link.get('name'))
+            ancho, largo, alto = [float(v) for v in caja.find('size').text.split()][:3]
             tamano[clave] = (ancho, largo)
-            lx, ly, lyaw = leer_pose(link)
-            posicion[clave] = (mx + lx, my + ly, lyaw)
+            grosor[clave] = alto
+            lx, ly, lz, lyaw = leer_pose(link)
+            posicion[clave] = (mx + lx, my + ly, mz + lz, lyaw)
 
     # Paso 1b: si hay bloque <state>, sus posiciones mandan (ver cabecera).
     estado = mundo.find('state')
@@ -102,20 +122,92 @@ def paredes_del_mundo(ruta):
                     posicion[clave] = leer_pose(link)
                     corregidas += 1
 
+    # Paso 1c: quedarse solo con lo que cruza la altura de corte (ver cabecera).
+    dentro = [c for c in tamano
+              if posicion[c][2] - grosor[c] / 2 <= altura <= posicion[c][2] + grosor[c] / 2]
+    fuera = len(tamano) - len(dentro)
+
     print(f"  paredes encontradas      : {len(tamano)}")
     print(f"  posiciones desde <state> : {corregidas}"
           + ("" if corregidas else "   (el .world no trae bloque <state>)"))
+    print(f"  cortando a z = {altura:.2f} m    : {len(dentro)} paredes"
+          + (f"   ({fuera} fuera del corte)" if fuera else ""))
 
-    return [rectangulo(posicion[c], tamano[c]) for c in tamano]
+    return [rectangulo(posicion[c], tamano[c]) for c in dentro]
+
+
+def modelos_del_mundo(mundo, ruta_world):
+    """Cada modelo del mundo como (nombre, pose absoluta, elemento <model>).
+
+    Un .world puede traer los modelos escritos dentro o referirlos con
+    <include><uri>model://x</uri></include>. Gazebo trata las dos formas igual;
+    leer solo la primera es el motivo de que este programa encontrara 1 pared
+    en vez de 12 en el mundo de dos niveles, donde la planta entra por
+    <include> e instanciada dos veces.
+    """
+    for modelo in mundo.findall('model'):
+        yield modelo.get('name'), leer_pose(modelo), modelo
+
+    for inc in mundo.findall('include'):
+        uri = (inc.findtext('uri') or '').strip()
+        carpeta = carpeta_del_modelo(uri, ruta_world)
+        if carpeta is None:
+            sys.exit(f"No se pudo resolver {uri!r}, incluido por {ruta_world}.\n"
+                     "Se busca en la carpeta del propio .world, en GAZEBO_MODEL_PATH y en "
+                     "~/.gazebo/models.\nSi el modelo esta en otro sitio, anadirlo a "
+                     "GAZEBO_MODEL_PATH antes de ejecutar.")
+        archivo = sdf_del_modelo(carpeta)
+        if archivo is None:
+            sys.exit(f"{carpeta} no contiene un .sdf utilizable (ni el que declara "
+                     "model.config ni model.sdf).")
+        modelo = ET.parse(archivo).getroot().find('model')
+        if modelo is None:
+            sys.exit(f"{archivo} no contiene un elemento <model>.")
+        ix, iy, iz, iyaw = leer_pose(inc)
+        px, py, pz, pyaw = leer_pose(modelo)
+        nombre = (inc.findtext('name') or modelo.get('name') or uri)
+        yield nombre.strip(), (ix + px, iy + py, iz + pz, iyaw + pyaw), modelo
+
+
+def carpeta_del_modelo(uri, ruta_world):
+    """Carpeta de un 'model://nombre', o None si no aparece por ningun lado.
+
+    Se mira primero junto al .world: asi un repositorio recien clonado funciona
+    sin exportar nada, que es cuando menos se sabe que hay que exportar algo.
+    """
+    if not uri.startswith('model://'):
+        return None
+    nombre = uri[len('model://'):].strip('/')
+    bases = [os.path.dirname(os.path.abspath(ruta_world))]
+    bases += [d for d in os.environ.get('GAZEBO_MODEL_PATH', '').split(':') if d]
+    bases.append(os.path.expanduser('~/.gazebo/models'))
+    for base in bases:
+        carpeta = os.path.join(base, nombre)
+        if os.path.isdir(carpeta):
+            return carpeta
+    return None
+
+
+def sdf_del_modelo(carpeta):
+    """El .sdf que declara model.config; si no lo declara, model.sdf."""
+    config = os.path.join(carpeta, 'model.config')
+    if os.path.isfile(config):
+        declarado = ET.parse(config).getroot().findtext('sdf')
+        if declarado:
+            ruta = os.path.join(carpeta, declarado.strip())
+            if os.path.isfile(ruta):
+                return ruta
+    ruta = os.path.join(carpeta, 'model.sdf')
+    return ruta if os.path.isfile(ruta) else None
 
 
 def leer_pose(elemento):
-    """(x, y, yaw) de un <pose>; (0, 0, 0) si el elemento no lo declara."""
+    """(x, y, z, yaw) de un <pose>; (0, 0, 0, 0) si el elemento no lo declara."""
     pose = elemento.find('pose')
     if pose is None:
-        return (0.0, 0.0, 0.0)
+        return (0.0, 0.0, 0.0, 0.0)
     v = [float(k) for k in pose.text.split()]
-    return (v[0], v[1], v[5])
+    return (v[0], v[1], v[2], v[5])
 
 
 def rectangulo(pos, tam):
@@ -126,7 +218,7 @@ def rectangulo(pos, tam):
     hace falta rotar coordenadas. Si algun dia hay una pared en diagonal el
     programa avisa en vez de dibujarla mal en silencio.
     """
-    cx, cy, yaw = pos
+    cx, cy, _, yaw = pos
     ancho, largo = tam
     cuartos = round(yaw / (math.pi / 2))
     if abs(yaw - cuartos * math.pi / 2) > 0.02:
@@ -237,12 +329,17 @@ def main():
                          'esta abierto por algun extremo')
     ap.add_argument('--margen', type=float, default=1.0,
                     help='margen alrededor de las paredes cuando no se pasa --region')
+    ap.add_argument('--altura', type=float, default=0.30, metavar='Z',
+                    help='altura del corte horizontal, en metros sobre el suelo del mundo '
+                         '(0.30 es la del LiDAR sobre el nivel 1). En un mundo de varios '
+                         'niveles, es lo que elige cual se mapea: 3.30 para el nivel 2')
     args = ap.parse_args()
 
     print(f"Mundo: {args.mundo}")
-    paredes = paredes_del_mundo(args.mundo)
+    paredes = paredes_del_mundo(args.mundo, args.altura)
     if not paredes:
-        sys.exit("No se encontro ninguna pared (<box>) en el mundo.")
+        sys.exit(f"Ninguna pared (<box>) cruza z = {args.altura:.2f} m. Si el mundo tiene "
+                 "varios niveles, revisar --altura: cada nivel se mapea por separado.")
 
     res = args.resolucion
     rejilla, x0, y0 = crear_cuadricula(paredes, res, args.region, args.margen)
