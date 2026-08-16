@@ -69,7 +69,11 @@ def paredes_del_mundo(ruta):
     for modelo in mundo.findall('model'):
         mx, my = leer_pose(modelo)[:2]
         for link in modelo.findall('link'):
-            caja = next(iter(link.iter('box')), None)
+            # Solo <collision>: una pared es lo que el LiDAR choca, no lo que se
+            # dibuja. Los enlaces con visual pero sin colision -como la marca de
+            # la zona de transicion- no son obstaculos y no deben salir al mapa.
+            caja = next((c for col in link.findall('collision')
+                         for c in col.iter('box')), None)
             if caja is None:
                 continue                      # ese link no es una pared
             clave = (modelo.get('name'), link.get('name'))

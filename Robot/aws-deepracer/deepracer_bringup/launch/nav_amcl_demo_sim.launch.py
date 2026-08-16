@@ -59,6 +59,10 @@ def generate_launch_description():
     x_cfg = LaunchConfiguration('x')
     y_cfg = LaunchConfiguration('y')
     yaw_cfg = LaunchConfiguration('yaw')
+    # 'z' va SOLO al spawn en Gazebo, no a AMCL: la pose inicial de AMCL es 2D
+    # (x, y, yaw) y el nivel se elige con el mapa, no con la altura. Hace falta
+    # para el entorno de dos niveles, donde el nivel 2 esta a z=3.0.
+    z_cfg = LaunchConfiguration('z')
 
     declare_world_arg = DeclareLaunchArgument('world', default_value=default_world, description='SDF world file')
     declare_map_arg = DeclareLaunchArgument('map', default_value=default_map, description='map file')
@@ -71,6 +75,7 @@ def generate_launch_description():
     declare_x_arg = DeclareLaunchArgument('x', default_value='0')
     declare_y_arg = DeclareLaunchArgument('y', default_value='0')
     declare_yaw_arg = DeclareLaunchArgument('yaw', default_value='0')
+    declare_z_arg = DeclareLaunchArgument('z', default_value='0.03')
 
     include_files = GroupAction([
         # start deepracer simulation
@@ -80,6 +85,7 @@ def generate_launch_description():
                                 'namespace': ns_cfg,
                                 'x': x_cfg,
                                 'y': y_cfg,
+                                'z': z_cfg,
                                 'yaw': yaw_cfg}.items()
          ),
         # start navigation planner and controller
@@ -114,6 +120,7 @@ def generate_launch_description():
     ld.add_action(declare_x_arg)
     ld.add_action(declare_y_arg)
     ld.add_action(declare_yaw_arg)
+    ld.add_action(declare_z_arg)
     ld.add_action(include_files)
 
     return ld

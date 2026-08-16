@@ -83,10 +83,35 @@ Replicar la planta con desplazamiento vertical no es una simplificación de mode
 geometría real. Este es el argumento más fuerte del entorno elegido y hay que enunciarlo
 así en el documento final.
 
-**Qué hay que añadir al modelo:**
+**Implementación** (2026-08-14). La planta se extrajo de `primer_piso_v2.world` a un modelo
+reutilizable, `primer_piso/`, y el entorno vive en `primer_piso_dos_niveles.world`, que la
+instancia dos veces:
 
-- Zona de transición vertical señalizada en cada planta (el descanso de la escalera).
-- Separación vertical entre niveles.
+| Elemento | Valor |
+|---|---|
+| `primer_piso_n1` (nivel 1) | pose `20.9036 1.43563 0` |
+| `primer_piso_n2` (nivel 2) | pose `20.9036 1.43563 3.0` |
+| Separación vertical | **3,0 m** |
+| `losa_nivel_2` (suelo del nivel 2) | caja `50 × 20 × 0,1` en `22.5 1.5 2.95`; cara superior en z = 3,0 |
+| **Zona de transición** | centro **(41,40 · 3,03)**, cuadrado de 1,5 × 1,5 m |
+
+La losa existe porque `ground_plane` solo está en z = 0: sin ella el nivel 2 no tiene suelo.
+
+**La zona de transición no tiene `<collision>`, y es deliberado.** Es una marca, no un
+obstáculo: no debe estorbar la navegación ni aparecer en el mapa de ocupación. Vive dentro de
+`primer_piso/model.sdf`, así que al instanciarse el modelo dos veces cae en las mismas
+coordenadas x-y de las dos plantas — que es justo lo que el esquema de relevo necesita.
+
+**De dónde salen esas coordenadas.** No se estimaron a ojo: se derivaron de la geometría. La
+planta es un pasillo de ~44 m con un recinto terminal en el extremo este, acotado por
+`Wall_19` al sur (y = 2,00), `Wall_17` al norte (y = 4,07) y `Wall_15` al oeste (x = 39,78,
+que solo llega hasta y = 2,06 y por eso deja el paso abierto). El recinto abarca
+`x ∈ [39,85 · 42,95]` e `y ∈ [2,08 · 3,99]`; su centro es (41,40 · 3,03) y la marca de 1,5 m
+deja ~0,20 m de holgura en y y ~0,80 m en x.
+
+**Confirmado el 2026-08-14:** ese recinto es el descanso de la escalera real del edificio. La
+derivación geométrica y la planta real coinciden, lo que refuerza el argumento de §4 sobre la
+fidelidad del entorno.
 
 **Qué NO se modela, y por qué:**
 
