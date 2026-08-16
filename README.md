@@ -331,7 +331,7 @@ la misma geometría. `generar_mapa_desde_mundo.py` acepta la misma opción como 
 |------|-----------|
 | `Robot/aws-deepracer/` | Paquetes ROS 2 del robot (ver [`Robot/README.md`](Robot/README.md)) |
 | `Documentos/` | Anteproyecto, entregables semanales y guías operativas |
-| `Documentos/Evidencia/` | Capturas y diagramas citados en los informes |
+| `Documentos/Evidencia/` | Capturas, registros de terminal e informes de sesión. Cada archivo con su pie de foto en [`Documentos/Evidencia/README.md`](Documentos/Evidencia/README.md): qué muestra, de cuándo es y qué afirmación sostiene |
 | `herramientas/` | Verificadores y utilidades (ver abajo) |
 | `*.world` | Mundos de Gazebo. El vigente es `primer_piso_v2.world` (un nivel, el que cargan los launch por defecto). El **entorno de evaluación de OE4** es `primer_piso_dos_niveles.world` desde el 2026-08-14: la misma planta instanciada a z=0 y z=3,0, y se pide explícitamente con `world:=` |
 | `USTA_WORLD/`, `pasillo_grande/`, `pasillo_usta/` | Modelos SDF de entornos |
