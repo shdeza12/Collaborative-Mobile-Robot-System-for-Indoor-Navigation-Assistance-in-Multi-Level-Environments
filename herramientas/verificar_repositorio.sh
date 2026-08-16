@@ -111,6 +111,36 @@ done < <(printf '%s\n' "${TEXTOS[@]}" | grep '\.md$')
 if [ -z "$ROTOS" ]; then bien
 else mal "enlaces que no resuelven:$ROTOS"; fi
 
+# La comprobacion anterior mira el enlace desde el lado del que apunta. Esta lo
+# mira desde el lado del apuntado, que es donde estaba el agujero: un documento
+# al que no llega ningun enlace no lo abre nadie, no lo revisa nadie y se queda
+# obsoleto en silencio. Paso de teoria a hecho dos veces el mismo dia:
+# 'nav2_robot1_view.rviz' llevaba sin versionar desde S17, y 'DESARROLLO_NAV2.md'
+# un mes sin tocar afirmando cosas que el proyecto ya habia refutado.
+#
+# Se busca por nombre de archivo, no por ruta, porque un enlace relativo se
+# escribe de muchas formas ('../ESTADO.md', 'Documentos/X.md') y todas valen.
+paso 'ningun documento ni configuracion queda sin citar'
+HUERFANOS=''
+for f in $(git ls-files '*.md' '*.rviz'); do
+  case "$f" in
+    # Puertas de entrada: nadie tiene que enlazarlas para que se lean.
+    README.md|*/README.md) continue ;;
+    # Vienen del repositorio original de AWS; no son documentos del proyecto.
+    */CODE_OF_CONDUCT.md|*/CONTRIBUTING.md) continue ;;
+  esac
+  if ! grep -rlF --include='*.md' --include='*.tex' --include='*.py' \
+                 --include='*.xml' --include='*.sh' \
+                 "$(basename "$f")" . 2>/dev/null \
+       | grep -qv "^\./$f$"; then
+    HUERFANOS="$HUERFANOS
+    $f"
+  fi
+done
+if [ -z "$HUERFANOS" ]; then bien
+else mal "no los cita ningun documento, launch ni herramienta:$HUERFANOS
+Enganchar cada uno donde se use, o borrarlo. Un archivo que nadie abre se pudre sin avisar."; fi
+
 # --------------------------------------------------------- 4. una sola verdad
 titulo '4. Los documentos no se contradicen'
 

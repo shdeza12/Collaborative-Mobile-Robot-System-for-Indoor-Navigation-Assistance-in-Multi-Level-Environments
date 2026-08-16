@@ -331,7 +331,7 @@ cero cuando fallan, de modo que se pueden encadenar:
 | Herramienta | Responde a |
 |---|---|
 | `verificar_instalacion.sh` | ¿el código compila y funciona **en este equipo**? (31 comprobaciones) |
-| `verificar_repositorio.sh` | ¿los documentos dicen la verdad y las rutas no son las de una máquina concreta? (10 comprobaciones) |
+| `verificar_repositorio.sh` | ¿los documentos dicen la verdad y las rutas no son las de una máquina concreta? (11 comprobaciones) |
 | `verificar_mapa.py` | ¿este mapa representa de verdad la geometría de su `.world`? |
 | `verificar_contrato.py` | ¿la simulación cumple el contrato de interfaces? (requiere la simulación corriendo) |
 | `medir_rtf.py` | ¿a qué fracción del tiempo real corre la simulación? (requiere la simulación corriendo) |

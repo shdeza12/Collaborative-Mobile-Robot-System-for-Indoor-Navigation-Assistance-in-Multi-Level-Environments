@@ -28,9 +28,18 @@ Dos detalles que no son obvios
 ------------------------------
 EL BLOQUE <state>. Cuando un .world se guarda desde la ventana de Gazebo queda
 al final un bloque <state> con la posicion de cada pared. Gazebo aplica ese
-bloque al cargar, asi que manda sobre las posiciones escritas en <model>. En
-primer_piso_v2.world las dos difieren en 21 metros: leyendo solo <model> se
-obtiene una geometria que no es la que se simula.
+bloque al cargar, asi que manda sobre las posiciones escritas en <model>.
+
+Los dos bloques no estan en el mismo marco, y por eso se leen distinto: la pose
+de <state> es ABSOLUTA, referida al mundo, mientras que la de un <link> dentro
+de <model> es RELATIVA al origen de su modelo. Para comparar hay que componer,
+que es lo que hace el paso 1a sumando la pose del modelo a la del enlace. Sin
+esa suma, un modelo colocado lejos del origen aparenta una discrepancia igual a
+su propia pose: en primer_piso_v2.world son 21 metros. No los hay. Compuestas,
+las doce paredes coinciden en los dos bloques con residuo menor a 0,1 mm.
+
+Se sigue leyendo <state> porque es lo que Gazebo aplica —si alguien mueve una
+pared en la ventana y guarda, ahi queda—, no porque contradiga a <model>.
 
 EL PASILLO ESTA ABIERTO. No tiene pared de fondo en ninguno de sus dos
 extremos, asi que el relleno del paso 4 se sale del edificio y marca libre el

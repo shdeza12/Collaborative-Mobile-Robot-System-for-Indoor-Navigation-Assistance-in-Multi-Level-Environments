@@ -100,6 +100,23 @@ ros2 launch deepracer_bringup deepracer_sim.launch.py \
     world:=/usr/share/gazebo-11/worlds/empty.world
 ```
 
+### Configuraciones de RViz
+
+Están versionadas en `deepracer_description/rviz/` y se instalan con el paquete, de modo
+que se abren por su ruta en `share` sin depender de dónde se clonó el repositorio:
+
+| Archivo | Para qué | Marco fijo |
+|---|---|---|
+| `urdf_config.rviz` | Ver el modelo del vehículo y su árbol TF, **sin mapa y sin navegación**: sirve para comprobar que el URDF carga y que las 7 articulaciones están donde deben. Escucha `/robot_description` sin espacio de nombres | `base_link` |
+| `nav2_robot1_view.rviz` | El vehículo sobre el mapa bajo el espacio de nombres `robot1`. Es la configuración con la que se tomó la evidencia de S17; el detalle está en [`S17_nav2_namespaces.md`](../Documentos/Evidencia/S17_nav2_namespaces.md) | `map` |
+
+```bash
+rviz2 -d "$(ros2 pkg prefix deepracer_description)/share/deepracer_description/rviz/urdf_config.rviz"
+```
+
+Un modelo que no se ve no siempre es un modelo que no cargó: `urdf_config.rviz` distingue
+los dos casos antes de meter Nav2 de por medio.
+
 ## Estructura de la carpeta
 
 - `aws-deepracer/` — código del repositorio AWS con las modificaciones aplicadas.
