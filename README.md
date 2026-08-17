@@ -58,13 +58,13 @@ Eso trae `main`, que es la última versión verificada y la que conviene en gene
 
 Un tag es un punto del historial que ya no se mueve. Sirve para reproducir un resultado o
 para reportar un fallo sin ambigüedad sobre qué código se tenía. El vigente es
-**`v0.2.1-instalacion-robusta`**; los publicados se listan con
+**`v0.2.2-dos-niveles-y-evidencia`**; los publicados se listan con
 `git ls-remote --tags <url del repositorio>`.
 
 **Por consola:**
 
 ```bash
-git clone --branch v0.2.1-instalacion-robusta \
+git clone --branch v0.2.2-dos-niveles-y-evidencia \
   https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments.git ~/Tesis
 ```
 
@@ -73,13 +73,13 @@ significa que se está sobre un punto fijo del historial en vez de sobre una ram
 Para instalar y simular no cambia nada; solo importa si se van a hacer commits.
 
 **Por la web de GitHub, sin usar git:** abrir el repositorio → pestaña **Releases** (o
-**Tags**) → en `v0.2.1-instalacion-robusta`, **Source code (zip)**. Descomprimirlo y
+**Tags**) → en `v0.2.2-dos-niveles-y-evidencia`, **Source code (zip)**. Descomprimirlo y
 **renombrar la carpeta**, porque GitHub le quita la `v` al tag y el nombre no coincide con
 el de las instrucciones:
 
 ```bash
-unzip ~/Descargas/*-0.2.1-instalacion-robusta.zip -d ~
-mv ~/*-0.2.1-instalacion-robusta ~/Tesis
+unzip ~/Descargas/*-0.2.2-dos-niveles-y-evidencia.zip -d ~
+mv ~/*-0.2.2-dos-niveles-y-evidencia ~/Tesis
 ```
 
 El ZIP no trae la carpeta `.git`: se puede instalar y simular igual, pero no consultar el
