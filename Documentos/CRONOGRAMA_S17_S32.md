@@ -199,10 +199,11 @@ realizada, sino por artefacto producido.
 | B | Acceso por red a ambas tarjetas y prueba de locomoción vía interfaz web | ✅ hecho |
 | A | Definir el contrato de interfaces ROS 2: namespaces, acciones, tópicos, tipos de mensaje | pendiente |
 | T | Actualizar `ESTADO.md` con el avance de hardware y las decisiones D1–D6 | pendiente |
-| T | Emitir el entregable S16 (material disponible: causa raíz de `max_laser_range`) | pendiente |
+| T | Emitir el entregable S16 | ⬛ No se emitió. Cerrado el 2026-08-16: se absorbe y no se reprograma |
 
 **Criterio de cierre:** existe `Documentos/CONTRATO_INTERFACES.md`; `ESTADO.md` refleja OE2 al 40 %
-y registra D1–D6; entregable S16 emitido.
+y registra D1–D6; entregable S16 emitido. *(Esta última condición se anula el 2026-08-16: el
+entregable S16 se absorbe y no cuenta como pendiente.)*
 
 ### S18 · 10 – 16 ago — Entorno de dos niveles *(cerrada parcialmente el 2026-08-14)*
 
@@ -221,7 +222,7 @@ y registra D1–D6; entregable S16 emitido.
 | T | Actividad 1 – Corte 1 (no estaba planeada; vencía el martes 18) | ✅ **Firmada el 14-ago** por Armando Mateus — [PDF](Entregables/Actividad_1_Corte_1_Cronograma_2026-2_firmado.pdf) |
 | B | **Spike de hardware** (4 preguntas) | 🔴 **No se corrió** → S19 |
 | T | Matriz de requisitos RF ↔ OE ↔ prueba (riesgo R5) | 🔴 **No se hizo** → S19 |
-| T | Entregable S16 | 🔴 Nunca se emitió; decidir si se emite tarde o se absorbe |
+| T | Entregable S16 | ⬛ **No se emite.** Decidido el 2026-08-16: queda absorbido y deja de ser un pendiente |
 
 **Criterio de cierre original:** «informe del spike con las cuatro respuestas; el mundo de dos
 niveles carga y se navega sobre él; matriz de requisitos publicada.» → **cumplido 1 de 3.**

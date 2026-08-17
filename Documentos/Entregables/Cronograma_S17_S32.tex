@@ -229,12 +229,14 @@ Cada semana cierra con un \textbf{criterio verificable}: una semana no se da por
         \textbf{Frente} & \textbf{Actividad} \\ \midrule
         A & Cerrar el contrato de interfaces: dos agentes con espacios de nombres independientes coexistiendo en el simulador \\ \addlinespace
         A & Extraer la planta \texttt{primer\_piso\_v2} como modelo reutilizable y replicarla en dos niveles con separación vertical y zona de transición señalizada en cada planta \\ \addlinespace
-        A & Generar el mapa del nivel superior y verificar navegación autónoma sobre él \\ \addlinespace
+        A & Verificar navegación autónoma sobre el nivel superior \\ \addlinespace
         B & Diagnóstico acotado de hardware sobre cuatro puntos: lecturas utilizables del LiDAR real, comando del vehículo desde ROS 2 sin la interfaz web, latencia de comunicación entre los dos vehículos, e implicaciones de la distribución de ROS 2 empleada \\ \bottomrule
     \end{tabular}
 \end{table}
 
 \textbf{Criterio de cierre:} dos agentes coexisten con marcos y tópicos aislados; el mundo de dos niveles carga en el simulador y el vehículo navega sobre el nivel superior; informe del diagnóstico con los cuatro resultados.
+
+\textbf{Nota (2026-08-16).} La redacción original de esta semana pedía además \textit{generar el mapa del nivel superior}. Esa actividad queda \textbf{suprimida}: las dos plantas son la misma geometría en las mismas coordenadas horizontales, de modo que un solo mapa sirve para ambos niveles, y un segundo mapa de la misma planta solo podría divergir del primero. No se suprime por argumento sino por medida: los cortes horizontales a 0,30 m y a 3,30 m de \texttt{primer\_piso\_dos\_niveles.world} producen mapas idénticos píxel a píxel, y ambos superan \texttt{verificar\_mapa.py} con 99,7 \% de cobertura y cero obstáculos sin pared real detrás. La navegación sobre el nivel superior sí se verificó, y esa parte de la actividad se conserva: 4,79 m de recorrido medidos contra \texttt{/odom} sobre un objetivo de 5,0 m, con la altura constante a 1,9 micrómetros.
 
 \subsection{S19 (17--23 ago) --- Navegación por agente, requisitos y protocolo}
 

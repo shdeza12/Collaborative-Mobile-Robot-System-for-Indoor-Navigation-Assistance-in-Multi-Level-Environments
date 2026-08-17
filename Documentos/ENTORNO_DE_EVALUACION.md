@@ -1,7 +1,8 @@
 # Entorno de evaluación y escalamiento de pruebas
 
 **Fecha:** 2026-08-06 (S17)
-**Estado:** aprobado — pendiente de reflejarse en `Cronograma_S17_S32.tex` y `Entregable_semana_17.tex`
+**Estado:** aprobado y **reflejado** el 2026-08-11 en `Cronograma_S17_S32.tex` y
+`Entregable_semana_17.tex` (los cambios que pedía §11), comprobado uno a uno el 2026-08-16
 **Documento de referencia:** `Anteproyecto_Jonny_Santi.pdf`
 
 Este documento fija dónde se evalúa el sistema y en qué orden se prueban las cosas. No
