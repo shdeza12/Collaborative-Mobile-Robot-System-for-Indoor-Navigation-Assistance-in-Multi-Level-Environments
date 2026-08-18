@@ -95,6 +95,14 @@ corridas ya grabadas. Salida completa en `logs/S19_maniobra_metricas.txt`.
 El renglón decisivo es el primero: el vehículo gira ahora aproximadamente a la velocidad que
 Nav2 le pide, con la mitad de error en las dos corridas. Todo lo demás se deriva de eso.
 
+![Giro comandado contra giro real, antes y después](S19_seguimiento_antes_despues.png)
+
+La misma prueba 1 dibujada (`herramientas/graficar_seguimiento.py`): en azul lo que Nav2 pide,
+en rojo lo que el vehículo hace. Antes el rojo se pasa del azul de forma sistemática y entre
+t = 50 s y t = 58 s entra en una oscilación que **no está en el comando** —el vehículo se salía
+del plan y el controlador corregía a destiempo—; después lo sigue. Los dos paneles comparten
+escala a propósito: con una escala por panel la comparación engañaría.
+
 **La deriva en reposo era el mismo defecto.** Venía anotada como defecto abierto sin
 cuantificar («hasta 18°»). Con el robot detenido, un `angular.z` residual seguía torciendo el
 volante; ahora, por debajo de 1 mm/s la dirección se fuerza a cero. Bajó 7,6 veces. Se da por

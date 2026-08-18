@@ -129,6 +129,29 @@ pantalla. Los comandos que lo reproducen están en el §1 del informe.
 |---|---|---|
 | [`S19_spike_p4_humble_jazzy.md`](S19_spike_p4_humble_jazzy.md) | Que `nav2_msgs/NavigateToPose` **difiere** entre Humble y Jazzy, y que por tanto un coordinador Humble no manda a un robot Jazzy | [`ESTADO.md`](../../ESTADO.md) §4 (R8), [`REQUISITOS.md`](../REQUISITOS.md) §3 (RF-16) |
 
+## Semana 19 — la maniobra de retorno y el defecto de conversión de `cmd_vel` (agosto 2026)
+
+![Giro comandado contra giro real, antes y después de la corrección](S19_seguimiento_antes_despues.png)
+
+`S19_seguimiento_antes_despues.png` — la misma maniobra de retorno, antes (izquierda) y después
+(derecha) de corregir la conversión de `angular.z`. **Fila superior:** en azul lo que Nav2 pide y
+en rojo lo que el vehículo hace. A la izquierda el rojo se pasa del azul de forma sistemática y
+entre t = 50 s y t = 58 s entra en una oscilación que no está en el comando; a la derecha lo
+sigue. Es el mismo hecho que la tabla del informe cifra como RMS 0,298 → 0,111 rad/s, pero
+visible sin leer números. **Fila inferior:** la trayectoria de cada corrida. Están para descartar
+la objeción de que se comparan recorridos distintos: los dos son la misma travesía del pasillo
+con el volteo al extremo este.
+
+Las dos gráficas salen de `herramientas/graficar_seguimiento.py` sobre los bags de las corridas.
+**Los bags no están versionados** —viven en `/tmp` y son efímeros—, así que esta figura no se
+puede regenerar a partir del repositorio: hay que volver a grabar las corridas con el
+procedimiento del informe. Se conservan la herramienta y su salida, no los datos crudos.
+
+| Archivo | Qué sostiene | Dónde se cita |
+|---|---|---|
+| `S19_seguimiento_antes_despues.png` | Que el vehículo obedecía mal el giro comandado, y que tras la corrección lo sigue | [`S19_conversion_cmdvel_ackermann.md`](S19_conversion_cmdvel_ackermann.md) |
+| [`S19_conversion_cmdvel_ackermann.md`](S19_conversion_cmdvel_ackermann.md) | Que `angular.z` se interpretaba como ángulo de volante y no como velocidad angular, con una ganancia que variaba por un factor de 4 según la velocidad | [`ESTADO.md`](../../ESTADO.md) §4 (R2) |
+
 ## Diagrama
 
 | Archivo | Qué muestra | Dónde se cita |
@@ -148,6 +171,7 @@ absolutas van redactadas como `<repo>` para que no dependan de la máquina.
 | `S17_controladores_robot1.txt` | Los 7 controladores de `robot1` en estado `active` |
 | `S17_topicos_dominio0.txt` | Tópicos visibles en `ROS_DOMAIN_ID=0` |
 | `S17_topicos_dominio2.txt` | Tópicos visibles en `ROS_DOMAIN_ID=2` |
+| `S19_maniobra_metricas.txt` | Las cuatro corridas de la maniobra de retorno, antes y después de corregir la conversión de `cmd_vel` |
 
 Los dos últimos van en pareja: por separado no dicen nada, juntos demuestran que los dos
 dominios no se ven entre sí.
@@ -156,7 +180,8 @@ dominios no se ven entre sí.
 
 Los `.md` de esta carpeta son el análisis, no la evidencia: explican qué se hizo, qué falló
 y por qué. `S17_nav2_namespaces.md`, `S17_aplicacion_contrato.md`, `S17_dos_simuladores.md`,
-`S17_linea_base.md`, `S18_entorno_dos_niveles.md` y `S19_spike_p4_humble_jazzy.md`.
+`S17_linea_base.md`, `S18_entorno_dos_niveles.md`, `S19_spike_p4_humble_jazzy.md` y
+`S19_conversion_cmdvel_ackermann.md`.
 
 ---
 
