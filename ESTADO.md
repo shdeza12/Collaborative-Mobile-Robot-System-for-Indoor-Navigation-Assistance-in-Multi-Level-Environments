@@ -5,11 +5,11 @@
 
 | | |
 |---|---|
-| **Semana del cronograma** | S18 de 32 |
-| **Fecha de corte** | 2026-08-16 |
-| **Fases activas** | Fase 4 — Desarrollo (cerrando) · Fase 5 — Integración (S18–S23) |
-| **Semanas restantes** | 15 (sustentación S28–S29, documento final S29–S32) |
-| **Último entregable formal** | Semana 17 |
+| **Semana del cronograma** | S19 de 32 |
+| **Fecha de corte** | 2026-08-18 |
+| **Fases activas** | Fase 5 — Integración (S18–S23) |
+| **Semanas restantes** | 14 (sustentación S28–S29, documento final S29–S32) |
+| **Último entregable formal** | Semana 18 |
 | **Entregables pendientes** | Ninguno |
 | **Acta de directores** | ✅ *Actividad 1 – Corte 1* revisada y firmada por **Armando Mateus** el 2026-08-14 ([PDF](Documentos/Entregables/Actividad_1_Corte_1_Cronograma_2026-2_firmado.pdf)) |
 | **Planificación vigente** | [`Documentos/CRONOGRAMA_S17_S32.md`](Documentos/CRONOGRAMA_S17_S32.md) |

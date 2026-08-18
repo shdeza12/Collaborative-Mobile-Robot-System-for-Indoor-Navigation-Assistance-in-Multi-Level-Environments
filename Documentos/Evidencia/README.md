@@ -152,9 +152,9 @@ y por qué. `S17_nav2_namespaces.md`, `S17_aplicacion_contrato.md`, `S17_dos_sim
 
 ## Lo que no se puede rastrear
 
-De los ocho entregables en PDF, **solo dos conservan su fuente LaTeX** (`Entregable_semana_17.tex`
-y `Cronograma_S17_S32.tex`). Los de las semanas 10 a 15 existen únicamente como PDF
-compilado.
+De los nueve entregables en PDF, **solo tres conservan su fuente LaTeX** (`Entregable_semana_17.tex`,
+`Entregable_semana_18.tex` y `Cronograma_S17_S32.tex`). Los de las semanas 10 a 15 existen
+únicamente como PDF compilado.
 
 Consecuencia concreta: las imágenes de S12, S13 y S14 de este índice fueron casi con certeza
 a esos entregables, pero **no hay forma de comprobarlo** —no queda el `.tex` que las
@@ -163,7 +163,10 @@ recuperando su contexto original. Si un jurado pide el origen de una figura de e
 entregables, la respuesta es que no se conserva.
 
 No tiene arreglo retroactivo. Hacia adelante, la fuente `.tex` de cada entregable se
-versiona junto al PDF.
+versiona junto al PDF. **El primero que cumple la regla desde el día uno es el de la semana
+18** (`Entregable_semana_18.tex`, compilado en Overleaf y devuelto al repositorio antes de
+publicar el PDF): sus tres figuras están citadas por nombre en la fuente, así que su
+procedencia sí se puede rastrear.
 
 ## Convención de nombres
 
