@@ -119,6 +119,16 @@ versionada en `Robot/aws-deepracer/deepracer_description/rviz/nav2_robot1_view.r
 |---|---|---|
 | `S18_gazebo_dos_niveles.png` | Las dos plantas separadas 3,0 m en vertical | [`S18_entorno_dos_niveles.md`](S18_entorno_dos_niveles.md) |
 
+## Semana 19 — spike de hardware, pregunta 4 (agosto 2026)
+
+Sin capturas: el spike es documental por diseño —compara fuentes oficiales y el propio
+repositorio, sin encender ningún vehículo— y su evidencia son los archivos que compara, no una
+pantalla. Los comandos que lo reproducen están en el §1 del informe.
+
+| Archivo | Qué sostiene | Dónde se cita |
+|---|---|---|
+| [`S19_spike_p4_humble_jazzy.md`](S19_spike_p4_humble_jazzy.md) | Que `nav2_msgs/NavigateToPose` **difiere** entre Humble y Jazzy, y que por tanto un coordinador Humble no manda a un robot Jazzy | [`ESTADO.md`](../../ESTADO.md) §4 (R8), [`REQUISITOS.md`](../REQUISITOS.md) §3 (RF-16) |
+
 ## Diagrama
 
 | Archivo | Qué muestra | Dónde se cita |
@@ -146,15 +156,15 @@ dominios no se ven entre sí.
 
 Los `.md` de esta carpeta son el análisis, no la evidencia: explican qué se hizo, qué falló
 y por qué. `S17_nav2_namespaces.md`, `S17_aplicacion_contrato.md`, `S17_dos_simuladores.md`,
-`S17_linea_base.md` y `S18_entorno_dos_niveles.md`.
+`S17_linea_base.md`, `S18_entorno_dos_niveles.md` y `S19_spike_p4_humble_jazzy.md`.
 
 ---
 
 ## Lo que no se puede rastrear
 
-De los nueve entregables en PDF, **solo tres conservan su fuente LaTeX** (`Entregable_semana_17.tex`,
-`Entregable_semana_18.tex` y `Cronograma_S17_S32.tex`). Los de las semanas 10 a 15 existen
-únicamente como PDF compilado.
+De los nueve entregables en PDF, **solo tres conservan su fuente LaTeX**
+(`Entregable_semana_17.tex`, `Entregable_semana_18.tex` y `Cronograma_S17_S32.tex`). Los de las
+semanas 10 a 15 existen únicamente como PDF compilado.
 
 Consecuencia concreta: las imágenes de S12, S13 y S14 de este índice fueron casi con certeza
 a esos entregables, pero **no hay forma de comprobarlo** —no queda el `.tex` que las
@@ -163,10 +173,10 @@ recuperando su contexto original. Si un jurado pide el origen de una figura de e
 entregables, la respuesta es que no se conserva.
 
 No tiene arreglo retroactivo. Hacia adelante, la fuente `.tex` de cada entregable se
-versiona junto al PDF. **El primero que cumple la regla desde el día uno es el de la semana
-18** (`Entregable_semana_18.tex`, compilado en Overleaf y devuelto al repositorio antes de
-publicar el PDF): sus tres figuras están citadas por nombre en la fuente, así que su
-procedencia sí se puede rastrear.
+versiona junto al PDF. **El primero que cumple la regla desde el día uno es el de la semana 18**
+(`Entregable_semana_18.tex`, compilado en Overleaf y devuelto al repositorio antes de publicar el
+PDF): sus tres figuras están citadas por nombre en la fuente, así que su procedencia sí se puede
+rastrear.
 
 ## Convención de nombres
 
