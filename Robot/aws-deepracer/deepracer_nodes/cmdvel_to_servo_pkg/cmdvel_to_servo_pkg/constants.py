@@ -32,6 +32,9 @@ class VehicleNav2Dynamics():
     MAX_STEER = 0.523599
     # Min steering angle of tyre
     MIN_STEER = -0.523599
+    # Distancia entre ejes en m. Necesaria para convertir la velocidad angular de
+    # geometry_msgs/Twist en un angulo de direccion.
+    WHEEL_BASE = 0.164023
     # Ratios for throttle calculated using abs(given_throttle / max_throttle)
     MIN_THROTTLE_RATIO = 0.5
     MID_THROTTLE_RATIO = 0.3

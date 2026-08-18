@@ -222,13 +222,22 @@ class CmdvelToServoNode(Node):
         target_throttle_signed = target_throttle_mapped * math.copysign(1.0, self.target_linear)
         # Get rescaled throttle.
         throttle = self.get_rescaled_manual_speed(target_throttle_signed, self.max_speed_pct)
+        # geometry_msgs/Twist define angular.z como velocidad angular en rad/s, no como
+        # angulo de direccion. Pasarlo directo al servo dejaba la ganancia del volante
+        # en funcion de la velocidad. Modelo de bicicleta: delta = atan(wz * L / v).
+        # El signo de v ya queda contemplado, por eso no lleva copysign de target_linear.
+        if abs(self.target_linear) > 1e-3:
+            target_steer = math.atan(self.target_rot * constants.VehicleNav2Dynamics.WHEEL_BASE
+                                     / self.target_linear)
+        else:
+            target_steer = 0.0
         # Clamping the rotation between MAX_STEER and MIN_STEER supported by DeepRacer.
-        target_rot_clamped = max(min(self.target_rot, constants.VehicleNav2Dynamics.MAX_STEER),
+        target_rot_clamped = max(min(target_steer, constants.VehicleNav2Dynamics.MAX_STEER),
                                         constants.VehicleNav2Dynamics.MIN_STEER)
         # Get the steering angle mapped wrt DeepRacer servo.
         target_steering_mapped = self.get_mapped_steering(target_rot_clamped)
         # Set the direction.
-        steering = target_steering_mapped * math.copysign(1.0, self.target_rot) * math.copysign(1.0, self.target_linear)
+        steering = target_steering_mapped * math.copysign(1.0, target_rot_clamped)
         return steering, throttle
 
     def action_publish(self, target_steer, target_speed):

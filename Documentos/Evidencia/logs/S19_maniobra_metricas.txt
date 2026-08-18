@@ -1,0 +1,59 @@
+# Salida de herramientas/analizar_maniobra.py sobre las cuatro corridas del 2026-08-18.
+# Bags originales en /tmp (efimeros). Regenerar relanzando las pruebas del documento S19.
+
+=== PRUEBA 1 - ANTES del arreglo ===
+  bag                   : /tmp/maniobra_p1b
+  meta                  : (10.60, 1.45)
+  tiempo en movimiento  : 37.1 s
+  recorrido             : 15.88 m
+  llegada real          : (10.345, 1.453) yaw 3.3 deg
+  error real de llegada : 0.255 m
+  cuspides planificadas : 2   (maximo sobre 36 planes)
+  cuspides ejecutadas   : 4   RE1.1 AD28.8 RE0.2 AD0.3 RE6.8
+  giro real vs comandado: RMS 0.298 rad/s sobre 480 muestras
+  volante al tope       : 65 de 545 (12%)
+  error de localizacion : mediana 0.224 m  maximo 0.628 m
+  deriva en reposo      : 0.1167 deg/s  (ventana de 26 s)
+
+=== PRUEBA 1 - DESPUES del arreglo ===
+  bag                   : /tmp/fix_p1
+  meta                  : (10.60, 1.45)
+  tiempo en movimiento  : 38.9 s
+  recorrido             : 15.66 m
+  llegada real          : (10.643, 1.530) yaw -6.2 deg
+  error real de llegada : 0.091 m
+  cuspides planificadas : 2   (maximo sobre 38 planes)
+  cuspides ejecutadas   : 4   RE1.5 AD0.8 RE0.3 AD28.1 RE8.3
+  giro real vs comandado: RMS 0.111 rad/s sobre 463 muestras
+  volante al tope       : 83 de 546 (15%)
+  error de localizacion : mediana 0.121 m  maximo 0.444 m
+  deriva en reposo      : 0.0154 deg/s  (ventana de 37 s)
+
+=== PRUEBA 2 - ANTES del arreglo ===
+  bag                   : /tmp/maniobra_p2
+  meta                  : (37.08, 1.45)
+  tiempo en movimiento  : 17.6 s
+  recorrido             : 5.52 m
+  llegada real          : (37.217, 1.515) yaw -10.2 deg
+  error real de llegada : 0.152 m
+  cuspides planificadas : 2   (maximo sobre 18 planes)
+  cuspides ejecutadas   : 6   RE1.8 AD10.6 RE1.1 AD0.5 RE2.6 AD0.4 RE0.6
+  giro real vs comandado: RMS 0.256 rad/s sobre 146 muestras
+  volante al tope       : 39 de 185 (21%)
+  error de localizacion : mediana 0.090 m  maximo 0.189 m
+  deriva en reposo      : 0.0465 deg/s  (ventana de 5 s)
+
+=== PRUEBA 2 - DESPUES del arreglo ===
+  bag                   : /tmp/fix_p2
+  meta                  : (37.08, 1.45)
+  tiempo en movimiento  : 13.6 s
+  recorrido             : 4.95 m
+  llegada real          : (37.194, 1.400) yaw 13.9 deg
+  error real de llegada : 0.124 m
+  cuspides planificadas : 4   (maximo sobre 14 planes)
+  cuspides ejecutadas   : 0   RE13.6
+  giro real vs comandado: RMS 0.130 rad/s sobre 135 muestras
+  volante al tope       : 56 de 191 (29%)
+  error de localizacion : mediana 0.045 m  maximo 0.136 m
+  deriva en reposo      : 0.0259 deg/s  (ventana de 35 s)
+

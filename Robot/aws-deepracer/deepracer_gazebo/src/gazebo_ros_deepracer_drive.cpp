@@ -34,6 +34,7 @@
 #include <tf2_ros/transform_broadcaster.h>
 #include <tf2_ros/transform_listener.h>
 
+#include <cmath>
 #include <memory>
 #include <string>
 #include <vector>
@@ -329,7 +330,17 @@ void GazeboRosDeepRacerDrivePrivate::PublishOdometryTf(const gazebo::common::Tim
 void GazeboRosDeepRacerDrivePrivate::CalcTargetVelAndPosition(double& _target_speed, double& _target_left_steering, double& _target_right_steering)
 {
   auto target_linear = ignition::math::clamp(target_linear_, -max_speed_, max_speed_);
-  auto target_rot = target_rot_ * copysign(1.0, target_linear_);
+
+  // geometry_msgs/Twist define angular.z como velocidad angular en rad/s, no como
+  // angulo de direccion. El codigo heredado lo pasaba directo a tan(), con lo que la
+  // ganancia efectiva del volante quedaba en v/wheel_base: a 0.5 m/s el vehiculo
+  // giraba 3 veces mas cerrado de lo comandado y a 0.12 m/s un 27% menos.
+  // Modelo de bicicleta: wz = v * tan(delta) / L  ->  delta = atan(wz * L / v).
+  // El signo de v ya queda contemplado, por eso no lleva copysign.
+  double target_rot = 0.0;
+  if (std::fabs(target_linear) > 1e-3) {
+    target_rot = std::atan(target_rot_ * wheel_base_ / target_linear);
+  }
   target_rot = ignition::math::clamp(target_rot, -max_steer_, max_steer_);
 
   double tanSteer = tan(target_rot);
