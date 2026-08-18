@@ -1,6 +1,9 @@
 # Estado del proyecto — tablero de trazabilidad
 
-> Fuente única de verdad del avance. Se actualiza **al cerrar cada sesión de trabajo**, antes del commit.
+> Fuente única de verdad del avance. **El corte formal es el viernes en la noche** (regla adoptada
+> el 2026-08-18): ese día se actualiza este tablero, se cierra el entregable de la semana y se
+> commitea. Entre semana entra lo que no puede esperar —un hallazgo que invalida una decisión se
+> registra el día que aparece—, pero la contabilidad semanal no se dispersa en cinco commits.
 > Documento de referencia: `Documentos/Anteproyecto_Jonny_Santi.pdf` (cronograma en Cap. 8).
 
 | | |
