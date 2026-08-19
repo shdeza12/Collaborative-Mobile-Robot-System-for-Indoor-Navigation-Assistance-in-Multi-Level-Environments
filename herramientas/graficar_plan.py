@@ -9,8 +9,15 @@ bag, asi que se puede volver a dibujar cuantas veces haga falta, con las
 cuspides senaladas y sobre el mismo mapa contra el que se planifico.
 
 Una cuspide es un cambio de sentido de marcha: el avance deja de proyectarse
-sobre el rumbo del vehiculo. Es la maniobra que permite a un Ackermann darse la
-vuelta en un pasillo mas estrecho que su radio de giro.
+sobre el rumbo del vehiculo. Un Ackermann no gira sobre su eje, asi que la
+cuspide es como resuelve una inversion de rumbo cuando la vuelta en U no le sale
+a cuenta.
+
+Por que no le sale a cuenta AQUI es una pregunta abierta, y conviene no darla por
+contestada: el pasillo tiene 4,98 m libres en la zona de la maniobra y el
+planificador usa minimum_turning_radius 0,35 m, de modo que la vuelta en U cabe
+con holgura. La causa apunta al gradiente de la capa de inflacion (0,55 m) frente
+al reverse_penalty (2,1), no a la geometria. Sin medirlo es solo una hipotesis.
 
 Uso:
     python3 herramientas/graficar_plan.py <dir_bag> <mapa.yaml> <salida.png>
