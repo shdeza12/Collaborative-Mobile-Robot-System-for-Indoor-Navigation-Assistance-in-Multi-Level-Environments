@@ -147,10 +147,34 @@ Las dos gráficas salen de `herramientas/graficar_seguimiento.py` sobre los bags
 puede regenerar a partir del repositorio: hay que volver a grabar las corridas con el
 procedimiento del informe. Se conservan la herramienta y su salida, no los datos crudos.
 
+![El plan con su cúspide sobre el mapa](S19_plan_maniobra_cuspide.png)
+
+`S19_plan_maniobra_cuspide.png` — el plan de Nav2 (verde), el recorrido real (naranja) y la
+cúspide (estrella) sobre el mapa del pasillo. **La ampliación es la figura**: a escala del
+pasillo entero la maniobra ocupa un metro de dieciséis. Sostiene que el planificador *propuso*
+la maniobra de volteo y que el vehículo la *ejecutó* — las dos cosas, que es lo que una captura
+de RViz no distingue. Sale de `herramientas/graficar_plan.py` sobre el bag, no de una pantalla:
+por eso se puede volver a dibujar y comprobar.
+
 | Archivo | Qué sostiene | Dónde se cita |
 |---|---|---|
 | `S19_seguimiento_antes_despues.png` | Que el vehículo obedecía mal el giro comandado, y que tras la corrección lo sigue | [`S19_conversion_cmdvel_ackermann.md`](S19_conversion_cmdvel_ackermann.md) |
+| `S19_plan_maniobra_cuspide.png` | Que la maniobra de volteo se planifica y se ejecuta | [`S19_conversion_cmdvel_ackermann.md`](S19_conversion_cmdvel_ackermann.md) §Resultado 3 |
+| `S19_metricas_maniobra.png` | La salida de `analizar_maniobra.py` sobre la corrida de evidencia: RMS 0,082 rad/s, por debajo del criterio de 0,15 | ídem |
+| `S19_rviz_maniobra_completada.png` | El montaje de la corrida —RViz con mapa, huella y plan junto a Gazebo— y el panel de Nav2 dando la meta por alcanzada | ídem |
+| `S19_llegada_abortada_rumbo.png` | Una llegada **abortada** peleando por cerrar el rumbo: el defecto del verificador de meta contra la restricción Ackermann | ídem, §Resultado 3 |
+| `S19_llegada_cancelada_rumbo.png` | El mismo defecto en su forma extrema: 80 cúspides de maniobra en el sitio hasta que se cancela | ídem |
 | [`S19_conversion_cmdvel_ackermann.md`](S19_conversion_cmdvel_ackermann.md) | Que `angular.z` se interpretaba como ángulo de volante y no como velocidad angular, con una ganancia que variaba por un factor de 4 según la velocidad | [`ESTADO.md`](../../ESTADO.md) §4 (R2) |
+
+**Vídeo de la maniobra.** Pesa 153 MB, así que no se versiona; queda alojado fuera del
+repositorio y su enlace debe añadirse a esta fila en cuanto esté subido. Es el único artefacto
+de S19 que no se puede auditar desde el repositorio, y por eso las tres figuras de arriba están
+hechas para no depender de él.
+
+**Las capturas de RViz exigen lanzarlo aparte.** `nav_amcl_demo_sim.launch.py` **no arranca
+RViz**; hay que abrirlo con `ros2 run rviz2 rviz2 -d install/deepracer_bringup/share/deepracer_bringup/config/nav2_default_view.rviz --ros-args -p use_sim_time:=true`
+y encender a mano **RobotModel** y **Amcl Particle Swarm**, que vienen apagados en el `.rviz`.
+Sin eso no se ve ni el vehículo ni la nube de partículas.
 
 ## Diagrama
 

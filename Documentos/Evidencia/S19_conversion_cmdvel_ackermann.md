@@ -105,8 +105,57 @@ escala a propósito: con una escala por panel la comparación engañaría.
 
 **La deriva en reposo era el mismo defecto.** Venía anotada como defecto abierto sin
 cuantificar («hasta 18°»). Con el robot detenido, un `angular.z` residual seguía torciendo el
-volante; ahora, por debajo de 1 mm/s la dirección se fuerza a cero. Bajó 7,6 veces. Se da por
-explicada, no por cerrada: queda un residuo de 0,015 °/s sin causa identificada.
+volante; ahora, por debajo de 1 mm/s la dirección se fuerza a cero. En estas dos corridas bajó
+7,6 veces. **El mecanismo se da por explicado; la cifra no.** Una corrida posterior midió
+0,1192 °/s con una ventana tres veces más larga, así que la comparación de arriba no está hecha
+en igualdad de condiciones (ver más abajo).
+
+### Confirmación independiente, y un defecto nuevo
+
+Se repitió la maniobra una vez más para grabar la evidencia audiovisual, con la meta en ETM1
+pero **mirando al oeste** (`z: 1.0, w: 0.0`) en vez de al este. El cambio no es cosmético: con
+la meta mirando al este el vehículo tiene que *entrar de reversa* para alinearse, y ahí es donde
+pelea con la tolerancia de rumbo; mirando al oeste el volteo sigue siendo obligatorio —la meta
+está detrás— pero la llegada es de frente.
+
+| métrica | valor | criterio |
+|---|---|---|
+| Giro real vs comandado (RMS) | **0,082 rad/s** | < 0,15 ✅ |
+| Volante al tope | 7 % | — |
+| Cúspides planificadas / ejecutadas | 1 / 3 | ≠ 0 ✅ |
+| Rumbo de llegada | −179,7° contra 180° pedidos | **0,3° de error** |
+| Error real de llegada | 0,383 m | fuera de los 0,25 declarados |
+
+Es el mejor RMS de las seis corridas y **confirma la corrección en un escenario que no es el que
+se usó para validarla**, que es la única forma de que la validación no sea circular.
+
+![El plan con su cúspide, y el recorrido real](S19_plan_maniobra_cuspide.png)
+
+El plan y el recorrido dibujados sobre el mapa (`herramientas/graficar_plan.py`). La ampliación
+es lo que importa: el planificador propuso **una cúspide** y el vehículo la ejecutó. A escala del
+pasillo entero la maniobra ocupa un metro de dieciséis y no se distingue, que es exactamente por
+qué una captura de pantalla de RViz no servía.
+
+**El defecto que apareció.** Dos corridas previas de esa misma tanda terminaron en `ABORTED` y
+`CANCELED`, y el patrón es inconfundible: **80 cúspides ejecutadas contra 2 planificadas**, en
+una secuencia de `RE0.2 AD0.2` repetida medio centenar de veces. El vehículo terminó a 164,4° con
+la meta en 180°: **15,6° fuera de una tolerancia de 14,32°** (`yaw_goal_tolerance: 0.25` rad).
+
+Hipótesis, no hecho probado: el verificador de meta está en `stateful: True`. Cuando cumple la
+tolerancia de posición la **da por buena y deja de comprobarla**, y a partir de ahí solo exige el
+rumbo. Un Ackermann no gira sobre su eje, de modo que se pone a maniobrar en el sitio, nunca
+cierra los últimos grados y acaba abortando por el `progress checker` (0,5 m en 10 s). Esto ya
+figuraba abajo como riesgo —*«pasa por 0,4°»*— pero ahí solo pasaba raspando. **Ahora falla, y
+sube de anotación a defecto.**
+
+![Llegada abortada peleando con el rumbo](S19_llegada_abortada_rumbo.png)
+
+**Una anomalía que no encaja.** La deriva en reposo de esta corrida fue de **0,1192 °/s**, casi
+la de antes de la corrección (0,1167) y siete veces la de después (0,0154). La ventana medida
+también es distinta —33 s frente a 5 y 11 s—, así que puede ser un artefacto del asentamiento
+del vehículo tras aparecer en el mundo y no una regresión. Queda anotado sin explicar: no se
+pide otra corrida para resolverlo hoy, pero **invalida la afirmación de que la deriva bajó 7,6
+veces** hasta que se mida con ventanas comparables.
 
 ## Resultado 4 — la maniobra de dos medios círculos no es obligatoria
 
@@ -171,10 +220,15 @@ contra `/odom`, que en esta simulación es la pose verdadera de Gazebo
   menor a los 0,284 m físicos; ahora saturan correctamente en vez de sobreactuar, pero el
   seguimiento se degrada en esos instantes. `regulated_linear_scaling_min_radius` sólo frena,
   no limita.
-- **La llegada de la prueba 2 quedó a 13,9° del rumbo pedido**, contra una tolerancia de 14,3°.
-  Pasa por 0,4°. Conviene revisar `yaw_goal_tolerance` o el rumbo declarado del punto de
-  transferencia.
-- **Residuo de deriva en reposo de 0,015 °/s** sin causa identificada.
+- **El verificador de meta pelea con la restricción Ackermann.** Ya no es que «pase raspando»:
+  hay dos corridas abortadas con 80 cúspides de maniobra en el sitio. Hay que decidir entre
+  `stateful: False`, ampliar `yaw_goal_tolerance`, o declarar el rumbo de los puntos de interés
+  de modo que coincida con la dirección de marcha. **Es el siguiente defecto a atacar** y
+  bloquea la campaña de OE4, porque una tasa de éxito medida con este verificador cuenta como
+  fallos maniobras que llegaron bien.
+- **La deriva en reposo no está cerrada.** Se midió 0,0154 °/s tras la corrección y 0,1192 °/s
+  en la corrida de evidencia, con ventanas de duración distinta. Hay que volver a medirla con
+  ventanas iguales antes de sostener ninguna de las dos cifras.
 - Los bags están en `/tmp` y son efímeros. Se conserva la herramienta
   (`herramientas/analizar_maniobra.py`) y su salida, no los datos crudos.
 
