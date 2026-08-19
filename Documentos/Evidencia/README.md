@@ -166,10 +166,11 @@ por eso se puede volver a dibujar y comprobar.
 | `S19_llegada_cancelada_rumbo.png` | El mismo defecto en su forma extrema: 80 cúspides de maniobra en el sitio hasta que se cancela | ídem |
 | [`S19_conversion_cmdvel_ackermann.md`](S19_conversion_cmdvel_ackermann.md) | Que `angular.z` se interpretaba como ángulo de volante y no como velocidad angular, con una ganancia que variaba por un factor de 4 según la velocidad | [`ESTADO.md`](../../ESTADO.md) §4 (R2) |
 
-**Vídeo de la maniobra.** Pesa 153 MB, así que no se versiona; queda alojado fuera del
-repositorio y su enlace debe añadirse a esta fila en cuanto esté subido. Es el único artefacto
-de S19 que no se puede auditar desde el repositorio, y por eso las tres figuras de arriba están
-hechas para no depender de él.
+**Vídeo de la maniobra:** <https://youtu.be/6SABSgCxVEw>. Pesa 153 MB, así que no se versiona;
+queda alojado en YouTube. Es el único artefacto de S19 que **no se puede auditar desde el
+repositorio** —si el enlace muere, la evidencia se pierde—, y por eso las tres figuras de arriba
+están hechas para no depender de él: todas se regeneran desde el bag con herramientas
+versionadas.
 
 **Las capturas de RViz exigen lanzarlo aparte.** `nav_amcl_demo_sim.launch.py` **no arranca
 RViz**; hay que abrirlo con `ros2 run rviz2 rviz2 -d install/deepracer_bringup/share/deepracer_bringup/config/nav2_default_view.rviz --ros-args -p use_sim_time:=true`
