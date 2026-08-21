@@ -66,7 +66,7 @@ cd ~/deepracer_sim_ws && source install/setup.bash && ros2 launch deepracer_brin
 ```
 
 No hace falta pasar `world:=` ni `map:=`: los valores por defecto salen de **este mismo
-clon** del repositorio (`primer_piso_v2.world` y `primer_piso_definitivo.yaml`). Mundo y
+clon** del repositorio (`mundo_definitivo.world` y `mundo_definitivo_piso1.yaml`). Mundo y
 mapa van en pareja; cambiar uno solo hace que AMCL localice contra una geometría distinta
 de la simulada, y el síntoma —deriva creciente— no se parece a un error de configuración.
 
@@ -166,7 +166,8 @@ cd ~/Tesis && bash herramientas/verificar_instalacion.sh
 Si salen 2 fallos de `GAZEBO_MODEL_PATH` y de `los model:// externos resuelven`, **no es un
 problema del modelo**: es que esa terminal no cargó `~/.bashrc`, donde está la línea. Se
 arregla con `exec bash` y se vuelve a ejecutar. Afecta a los mundos que usan `model://`
-—entre ellos `primer_piso_dos_niveles.world`—, que cargarían **vacíos y sin dar error**.
+—**entre ellos `mundo_definitivo.world`, que es el que se carga por defecto**—, que abrirían
+**vacíos y sin dar error**.
 
 **3. Que el `RobotModel` recibió la descripción.** El tópico se publica con durabilidad
 `Transient Local`; un `ros2 topic echo` normal se queda esperando para siempre y parece que
@@ -426,7 +427,7 @@ Igual que en el escenario F: el segundo robot va en su propio `GAZEBO_MASTER_URI
 propio `ROS_DOMAIN_ID`, y cada uno lleva su `slam_toolbox`.
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && GAZEBO_MASTER_URI=http://localhost:11346 ROS_DOMAIN_ID=2 ros2 launch deepracer_bringup deepracer_sim.launch.py namespace:=robot2 y:=-4.48
+cd ~/deepracer_sim_ws && source install/setup.bash && GAZEBO_MASTER_URI=http://localhost:11346 ROS_DOMAIN_ID=2 ros2 launch deepracer_bringup deepracer_sim.launch.py namespace:=robot2 x:=-21.889 y:=-8.379 yaw:=0
 ```
 
 ```bash
@@ -480,18 +481,23 @@ cd ~/deepracer_sim_ws && source install/setup.bash && ros2 launch deepracer_brin
 Lo único que cambia son las dos variables de entorno y la **ordenada** de nacimiento:
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && GAZEBO_MASTER_URI=http://localhost:11346 ROS_DOMAIN_ID=2 ros2 launch deepracer_bringup deepracer_sim.launch.py namespace:=robot2 y:=-4.48
+cd ~/deepracer_sim_ws && source install/setup.bash && GAZEBO_MASTER_URI=http://localhost:11346 ROS_DOMAIN_ID=2 ros2 launch deepracer_bringup deepracer_sim.launch.py namespace:=robot2 x:=-21.889 y:=-8.379 yaw:=0
 ```
 
 `GAZEBO_MASTER_URI` separa los dos Gazebo; `ROS_DOMAIN_ID` separa los dos grafos ROS. No
 hace falta ningún cambio en el código ni en los `.xacro`.
 
-> **Por qué `y:=` y ya no `z:=3.03`.** Hasta el 2026-08-20 el escenario corría sobre
+> **Estas poses no se teclean a ojo.** Salen de la tabla de
+> [`herramientas/robot.sh`](../herramientas/robot.sh), que es la única del proyecto: están
+> medidas sobre el SDF de `mundo_Definitivo` y comprobadas con el LiDAR. Si se van a escribir
+> a mano, copiarlas de ahí. Mejor todavía, no escribirlas: `robot.sh robot2 sim` hace lo mismo
+> sin teclear ninguna.
+
+> **Por qué `x:=`/`y:=` y ya no `z:=3.03`.** Hasta el 2026-08-20 el escenario corría sobre
 > `primer_piso_dos_niveles.world`, donde el piso 2 era la misma planta elevada a z = 3,0 y el
 > robot2 nacía en z = 3,03 para asentarse en 2,993. En `mundo_definitivo.world` los dos pisos
-> son **pasillos distintos, uno al lado del otro en Y**: piso 1 en el eje y = +10,02 —que es
-> ya el valor por defecto— y piso 2 en y = −4,48. Pasar `z:=3.03` aquí haría caer al vehículo
-> desde tres metros sobre el pasillo equivocado.
+> son **pasillos distintos, uno al lado del otro en Y**. Pasar `z:=3.03` aquí haría caer al
+> vehículo desde tres metros sobre el pasillo equivocado.
 
 En Gazebo deben aparecer tres modelos: `ground_plane`, `mundo_definitivo` y el vehículo.
 
@@ -584,12 +590,16 @@ Dejar el daemon reiniciado evita heredar el problema en la siguiente sesión.
 
 ---
 
-## 9. El mundo definitivo, su mapa y sus destinos — en curso
+## 9. El mundo definitivo, su mapa y sus destinos
 
-Los escenarios A a F de esta guía corren sobre `primer_piso_v2.world`, que sigue siendo el
-mundo vigente del repositorio. Este apartado describe lo que lo va a sustituir y que **todavía
-no es el valor por defecto de ningún launch**: para usarlo hay que pasar `world:=` y `map:=` a
-mano, o dejar que lo haga `robot.sh`.
+Desde el 2026-08-20 `mundo_definitivo.world` **es** el mundo vigente y el valor por defecto de
+los launch, junto con `mundo_definitivo_piso1.yaml`. Ya no hay que pasar `world:=` ni `map:=`
+a mano.
+
+Cuidado al leer los escenarios A a F de más arriba: sus **medidas** se tomaron sobre
+`primer_piso_v2.world` y `primer_piso_dos_niveles.world`, que eran los mundos de entonces, y
+las cifras concretas que citan hay que volver a tomarlas. Los procedimientos siguen valiendo;
+los números, no.
 
 ### `herramientas/robot.sh`
 

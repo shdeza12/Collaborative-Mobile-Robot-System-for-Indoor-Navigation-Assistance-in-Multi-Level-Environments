@@ -208,7 +208,7 @@ ni ningún nodo**—, y explica junto a cada fallo qué hacer; cuando existe un 
 que lo corrige, lo imprime solo en su línea, listo para copiar. Debe terminar en:
 
 ```
-  31 comprobaciones pasan, 0 fallan.
+  32 comprobaciones pasan, 0 fallan.
 ```
 
 Mientras haya fallos no tiene sentido lanzar la simulación. El script existe porque unas
@@ -342,6 +342,14 @@ es también la forma de comprobar que **el mismo mapa sirve para los dos niveles
 cortes dan `ACEPTADO` con las mismas cifras, que es la evidencia de que las dos plantas son
 la misma geometría. `generar_mapa_desde_mundo.py` acepta la misma opción como `--altura`.
 
+> **Esto no aplica al mundo vigente.** En `mundo_definitivo.world` los dos pisos están a la
+> misma altura y separados en Y, así que no hay corte que los distinga: cada piso se acota con
+> `--region` al generar su mapa. La consecuencia es que `verificar_mapa.py` **rechaza**
+> `mundo_definitivo_piso1.yaml`, con un 29,7 % de cobertura en Y, porque mide contra el mundo
+> entero —los dos pasillos— y el mapa cubre uno. No es un defecto del mapa: su fidelidad es
+> exacta, 0 obstáculos falsos de 4725. La herramienta necesita un `--region` propio para
+> volver a ser útil aquí; hasta entonces, leer esa cifra sabiendo de dónde sale.
+
 ---
 
 ## Estructura del repositorio
@@ -363,7 +371,7 @@ cero cuando fallan, de modo que se pueden encadenar:
 
 | Herramienta | Responde a |
 |---|---|
-| `verificar_instalacion.sh` | ¿el código compila y funciona **en este equipo**? (31 comprobaciones) |
+| `verificar_instalacion.sh` | ¿el código compila y funciona **en este equipo**? (32 comprobaciones) |
 | `verificar_repositorio.sh` | ¿los documentos dicen la verdad y las rutas no son las de una máquina concreta? (11 comprobaciones) |
 | `verificar_mapa.py` | ¿este mapa representa de verdad la geometría de su `.world`? |
 | `verificar_contrato.py` | ¿la simulación cumple el contrato de interfaces? (requiere la simulación corriendo) |
