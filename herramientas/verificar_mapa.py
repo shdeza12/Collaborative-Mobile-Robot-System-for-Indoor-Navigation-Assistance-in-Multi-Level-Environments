@@ -64,17 +64,31 @@ def leer_yaml_mapa(ruta):
 
 def extension_mundo(paredes):
     """Cuanto mide el mundo en X y en Y, de pared a pared."""
-    xs = [p[0] for p in paredes] + [p[2] for p in paredes]
-    ys = [p[1] for p in paredes] + [p[3] for p in paredes]
+    xs = [x for pared in paredes for x, _ in pared]
+    ys = [y for pared in paredes for _, y in pared]
     return max(xs) - min(xs), max(ys) - min(ys)
 
 
 def distancia_a_pared(x, y, pared):
-    """Distancia de un punto al rectangulo de una pared; 0 si esta dentro."""
-    x0, y0, x1, y1 = pared
-    dx = max(x0 - x, 0.0, x - x1)
-    dy = max(y0 - y, 0.0, y - y1)
-    return math.hypot(dx, dy)
+    """Distancia de un punto al rectangulo de una pared; 0 si esta dentro.
+
+    Cada pared llega como sus cuatro vertices en sentido antihorario, no como
+    una caja alineada con los ejes: mundo_Definitivo trae paredes en diagonal, y
+    medir contra su caja envolvente daria por buena una celda ocupada que esta
+    hasta 15 cm fuera de la pared de verdad.
+    """
+    dentro = True
+    mejor = float('inf')
+    for i in range(len(pared)):
+        x1, y1 = pared[i]
+        x2, y2 = pared[(i + 1) % len(pared)]
+        ex, ey = x2 - x1, y2 - y1
+        if ex * (y - y1) - ey * (x - x1) < 0:
+            dentro = False                # el punto queda por fuera de ese lado
+        t = ((x - x1) * ex + (y - y1) * ey) / (ex * ex + ey * ey)
+        t = min(1.0, max(0.0, t))
+        mejor = min(mejor, math.hypot(x - (x1 + t * ex), y - (y1 + t * ey)))
+    return 0.0 if dentro else mejor
 
 
 def analizar(ruta_yaml, ruta_world, altura=0.30):

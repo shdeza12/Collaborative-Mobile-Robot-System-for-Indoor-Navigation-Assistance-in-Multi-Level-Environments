@@ -81,7 +81,7 @@ DESCONOCIDO = 205
 
 
 def paredes_del_mundo(ruta, altura):
-    """Devuelve una lista de rectangulos (x_min, y_min, x_max, y_max) en metros."""
+    """Devuelve una lista de paredes, cada una como sus cuatro vertices en metros."""
     mundo = ET.parse(ruta).getroot().find('world')
     if mundo is None:
         sys.exit(f"{ruta} no contiene un elemento <world>.")
@@ -163,10 +163,18 @@ def modelos_del_mundo(mundo, ruta_world):
         modelo = ET.parse(archivo).getroot().find('model')
         if modelo is None:
             sys.exit(f"{archivo} no contiene un elemento <model>.")
-        ix, iy, iz, iyaw = leer_pose(inc)
-        px, py, pz, pyaw = leer_pose(modelo)
+        # El <pose> de un <include> SUSTITUYE a la que trae el modelo incluido,
+        # no se suma a ella. Sumarlas no dio problema mientras el unico modelo
+        # incluido fue primer_piso, cuya pose propia es 0 0 0. mundo_Definitivo
+        # declara 0.752962 -0.165006 y ahi el mapa salia corrido tres cuartos de
+        # metro en x; se detecto porque el LiDAR situaba las paredes del pasillo
+        # 0.75 m al oeste de donde las ponia el mapa.
+        if inc.find('pose') is not None:
+            pose = leer_pose(inc)
+        else:
+            pose = leer_pose(modelo)
         nombre = (inc.findtext('name') or modelo.get('name') or uri)
-        yield nombre.strip(), (ix + px, iy + py, iz + pz, iyaw + pyaw), modelo
+        yield nombre.strip(), pose, modelo
 
 
 def carpeta_del_modelo(uri, ruta_world):
@@ -211,33 +219,58 @@ def leer_pose(elemento):
 
 
 def rectangulo(pos, tam):
-    """Convierte pared (centro + giro + tamano) en su rectangulo en el plano.
+    """Convierte pared (centro + giro + tamano) en sus cuatro vertices.
 
-    Las paredes de estos mundos estan giradas 0, 90, 180 o 270 grados. Con eso
-    basta con intercambiar ancho y largo cuando el giro es de 90 o 270, y no
-    hace falta rotar coordenadas. Si algun dia hay una pared en diagonal el
-    programa avisa en vez de dibujarla mal en silencio.
+    Antes esto devolvia un rectangulo alineado con los ejes y abortaba ante
+    cualquier pared en diagonal, porque en primer_piso las 12 paredes estaban a
+    0, 90, 180 o 270 grados. mundo_Definitivo trae dos que no lo estan -Wall_154
+    a 177,53 y Wall_69 a -91,43 grados-, asi que hay que girarlas de verdad:
+    aproximarlas al angulo recto mas cercano desplazaria su extremo lejano
+    varios centimetros.
     """
     cx, cy, _, yaw = pos
     ancho, largo = tam
-    cuartos = round(yaw / (math.pi / 2))
-    if abs(yaw - cuartos * math.pi / 2) > 0.02:
-        sys.exit(f"Hay una pared girada {math.degrees(yaw):.1f} grados en ({cx:.2f}, {cy:.2f}). "
-                 "Este programa solo sabe dibujar paredes en angulo recto.")
-    if cuartos % 2:                            # girada 90 o 270 grados
-        ancho, largo = largo, ancho
-    return (cx - ancho / 2, cy - largo / 2, cx + ancho / 2, cy + largo / 2)
+    ca, sa = math.cos(yaw), math.sin(yaw)
+    return [(cx + ca * u - sa * v, cy + sa * u + ca * v)
+            for u, v in ((-ancho / 2, -largo / 2), (ancho / 2, -largo / 2),
+                         (ancho / 2, largo / 2), (-ancho / 2, largo / 2))]
 
 
-def crear_cuadricula(paredes, res, region, margen):
+def se_tocan(a, b):
+    """Si dos rectangulos convexos comparten area, por el teorema del eje separador.
+
+    Basta con probar las normales de los lados de ambos: si en alguna de ellas
+    las proyecciones no se solapan, los rectangulos no se tocan. Se usa '<=' a
+    proposito, de modo que rozarse por el borde NO cuenta como tocarse: una
+    pared cuyo canto cae justo en la linea entre dos celdas no debe pintar la
+    celda de al lado. Ese criterio -area compartida mayor que cero- es
+    exactamente el que daba el floor/ceil de la version anterior, y por eso los
+    mapas de mundos en angulo recto salen identicos byte a byte.
+    """
+    for poligono in (a, b):
+        for i in range(len(poligono)):
+            x1, y1 = poligono[i]
+            x2, y2 = poligono[(i + 1) % len(poligono)]
+            ex, ey = -(y2 - y1), x2 - x1          # normal del lado
+            pa = [ex * x + ey * y for x, y in a]
+            pb = [ex * x + ey * y for x, y in b]
+            if max(pa) <= min(pb) or max(pb) <= min(pa):
+                return False
+    return True
+
+
+def crear_cuadricula(paredes, res, regiones, margen):
     """Cuadricula llena de DESCONOCIDO, y la esquina (x, y) a la que corresponde."""
-    if region:
-        x0, y0, x1, y1 = region
+    if regiones:
+        x0 = min(r[0] for r in regiones)
+        y0 = min(r[1] for r in regiones)
+        x1 = max(r[2] for r in regiones)
+        y1 = max(r[3] for r in regiones)
     else:
-        x0 = min(p[0] for p in paredes) - margen
-        y0 = min(p[1] for p in paredes) - margen
-        x1 = max(p[2] for p in paredes) + margen
-        y1 = max(p[3] for p in paredes) + margen
+        xs = [x for pared in paredes for x, _ in pared]
+        ys = [y for pared in paredes for _, y in pared]
+        x0, x1 = min(xs) - margen, max(xs) + margen
+        y0, y1 = min(ys) - margen, max(ys) + margen
     columnas = int(math.ceil((x1 - x0) / res))
     filas = int(math.ceil((y1 - y0) / res))
     rejilla = [bytearray([DESCONOCIDO]) * columnas for _ in range(filas)]
@@ -245,28 +278,57 @@ def crear_cuadricula(paredes, res, region, margen):
 
 
 def pintar_paredes(rejilla, paredes, x0, y0, res):
-    """Marca OCUPADO toda celda que una pared toque, aunque sea en parte."""
+    """Marca OCUPADO toda celda que una pared toque, aunque sea en parte.
+
+    Se pinta cualquier celda con area compartida, por pequena que sea, nunca
+    solo las que quedan cubiertas del todo: una pared de 0.15 m no llena tres
+    celdas de 0.06 m, y si se exigiera cobertura completa el planificador
+    encontraria rendijas por donde colar una ruta a traves de la pared.
+    """
     filas, columnas = len(rejilla), len(rejilla[0])
-    for px0, py0, px1, py1 in paredes:
-        # Rango de celdas que cubre el rectangulo. Se redondea hacia afuera para
-        # no dejar huecos: una pared de 0.15 m mide 2.5 celdas de 0.06 m, y si se
-        # redondea hacia adentro el planificador encuentra rendijas por donde
-        # colar una ruta a traves de la pared.
-        c_ini = int(math.floor((px0 - x0) / res))
-        c_fin = int(math.ceil((px1 - x0) / res))
-        f_ini = int(math.floor((py0 - y0) / res))
-        f_fin = int(math.ceil((py1 - y0) / res))
-        for fila in range(max(0, f_ini), min(filas, f_fin)):
-            for col in range(max(0, c_ini), min(columnas, c_fin)):
-                rejilla[fila][col] = OCUPADO
+    for pared in paredes:
+        # La caja que envuelve a la pared acota que celdas hay que mirar. Para
+        # una pared en angulo recto la caja es la pared misma y la prueba de
+        # abajo acierta siempre; para una en diagonal sobran celdas en las
+        # esquinas, y de esas se encarga se_tocan().
+        xs = [x for x, _ in pared]
+        ys = [y for _, y in pared]
+        c_ini = max(0, int(math.floor((min(xs) - x0) / res)))
+        c_fin = min(columnas, int(math.ceil((max(xs) - x0) / res)))
+        f_ini = max(0, int(math.floor((min(ys) - y0) / res)))
+        f_fin = min(filas, int(math.ceil((max(ys) - y0) / res)))
+        for fila in range(f_ini, f_fin):
+            cy = y0 + fila * res
+            for col in range(c_ini, c_fin):
+                if rejilla[fila][col] == OCUPADO:
+                    continue
+                cx = x0 + col * res
+                celda = [(cx, cy), (cx + res, cy), (cx + res, cy + res), (cx, cy + res)]
+                if se_tocan(celda, pared):
+                    rejilla[fila][col] = OCUPADO
 
 
-def rellenar_libre(rejilla, x0, y0, res, semilla):
-    """Marca LIBRE lo alcanzable desde la semilla sin atravesar una pared."""
+def rellenar_libre(rejilla, x0, y0, res, semilla, regiones):
+    """Marca LIBRE lo alcanzable desde la semilla sin atravesar una pared.
+
+    El relleno no sale de las regiones declaradas. Eso no es un adorno: el
+    pasillo de mundo_Definitivo tiene una veintena de puertas de 0,65 m a
+    habitaciones que nadie modelo, y por cada una el relleno se escapa a un
+    vacio donde no hay nada que lo detenga. Sin este limite el mapa del piso 1
+    salia 94 % libre, con Nav2 atajando en linea recta por fuera del pasillo.
+    """
     filas, columnas = len(rejilla), len(rejilla[0])
+
+    def declarada(f, c):
+        if not regiones:
+            return True
+        cx, cy = x0 + (c + 0.5) * res, y0 + (f + 0.5) * res
+        return any(rx0 <= cx <= rx1 and ry0 <= cy <= ry1
+                   for rx0, ry0, rx1, ry1 in regiones)
+
     col = int((semilla[0] - x0) / res)
     fila = int((semilla[1] - y0) / res)
-    if not (0 <= col < columnas and 0 <= fila < filas):
+    if not (0 <= col < columnas and 0 <= fila < filas) or not declarada(fila, col):
         sys.exit(f"El punto de arranque {semilla} cae fuera de la zona del mapa.")
     if rejilla[fila][col] == OCUPADO:
         sys.exit(f"El punto de arranque {semilla} cae DENTRO de una pared. "
@@ -277,7 +339,8 @@ def rellenar_libre(rejilla, x0, y0, res, semilla):
     while pendientes:
         f, c = pendientes.pop()
         for vf, vc in ((f + 1, c), (f - 1, c), (f, c + 1), (f, c - 1)):
-            if 0 <= vf < filas and 0 <= vc < columnas and rejilla[vf][vc] == DESCONOCIDO:
+            if (0 <= vf < filas and 0 <= vc < columnas
+                    and rejilla[vf][vc] == DESCONOCIDO and declarada(vf, vc)):
                 rejilla[vf][vc] = LIBRE
                 pendientes.append((vf, vc))
 
@@ -304,7 +367,13 @@ def escribir(rejilla, x0, y0, res, base, mundo):
         # el mundo. Aqui queda escrito el hecho, que es lo que importa.
         f.write(f"# mundo: {os.path.basename(mundo)}\n")
         f.write("# Mapa exacto de ese mundo, generado leyendo su geometria.\n")
-        f.write("# Regenerar con herramientas/generar_mapa_desde_mundo.py; no editar a mano.\n")
+        f.write("# No editar a mano. Regenerar con esta orden, que es la que lo hizo:\n")
+        # Se escribe la orden entera, no solo el nombre del programa. Una planta
+        # en L pide varios '--region', y esos rectangulos son una decision, no
+        # algo que se deduzca del mundo: sin dejarlos escritos aqui el mapa no
+        # se puede rehacer igual, y lo que no se puede rehacer no se corrige.
+        orden = ['herramientas/' + os.path.basename(sys.argv[0])] + sys.argv[1:]
+        f.write("#   python3 " + " ".join(orden) + "\n")
         f.write(f"image: {os.path.basename(base)}.pgm\n")
         f.write("mode: trinary\n")
         f.write(f"resolution: {res}\n")
@@ -323,10 +392,12 @@ def main():
                     help='metros por celda (0.06 es la que usa nav2_params del proyecto)')
     ap.add_argument('--semilla', type=float, nargs=2, default=[0.0, 0.0], metavar=('X', 'Y'),
                     help='punto libre desde el que rellenar; normalmente el spawn del robot')
-    ap.add_argument('--region', type=float, nargs=4, default=None,
+    ap.add_argument('--region', type=float, nargs=4, action='append', default=None,
                     metavar=('X0', 'Y0', 'X1', 'Y1'),
                     help='limite de la zona a declarar mapeada; hace falta si el recinto '
-                         'esta abierto por algun extremo')
+                         'esta abierto por algun extremo. Se puede repetir, y entonces la '
+                         'zona es la union: asi se describe una planta en L sin meter en '
+                         'ella el vacio que queda dentro de su rectangulo envolvente')
     ap.add_argument('--margen', type=float, default=1.0,
                     help='margen alrededor de las paredes cuando no se pasa --region')
     ap.add_argument('--altura', type=float, default=0.30, metavar='Z',
@@ -344,7 +415,7 @@ def main():
     res = args.resolucion
     rejilla, x0, y0 = crear_cuadricula(paredes, res, args.region, args.margen)
     pintar_paredes(rejilla, paredes, x0, y0, res)
-    rellenar_libre(rejilla, x0, y0, res, args.semilla)
+    rellenar_libre(rejilla, x0, y0, res, args.semilla, args.region)
     escribir(rejilla, x0, y0, res, args.salida, args.mundo)
 
     filas, columnas = len(rejilla), len(rejilla[0])

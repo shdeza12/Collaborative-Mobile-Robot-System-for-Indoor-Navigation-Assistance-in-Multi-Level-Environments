@@ -21,6 +21,7 @@ from ament_index_python.packages import get_package_share_directory
 import launch
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 # El modulo vive junto a este archivo, dentro del propio paquete instalado.
@@ -43,10 +44,14 @@ def generate_launch_description():
                               'record': 'false',
                               'verbose': 'false',
                               'physics': 'ode'}.items())
+    # 'gui' se declaraba pero no se conectaba a nada, asi que gui:=false abria la
+    # ventana igual. Importa al medir con dos simulaciones: el cuello de botella
+    # es la VRAM de la GPU integrada, y cada gzclient cuesta unos 170 MB.
     gazebo_client_launcher = IncludeLaunchDescription(
         launch_description_source=PythonLaunchDescriptionSource(
             launch_file_path=gazebo_dir + '/launch/gzclient.launch.py'),
-        launch_arguments={'verbose': 'false'}.items())
+        launch_arguments={'verbose': 'false'}.items(),
+        condition=IfCondition(launch.substitutions.LaunchConfiguration('gui')))
 
     # Los argumentos de namespace y pose se pasan tal cual al launch de spawn:
     # este archivo solo levanta Gazebo, quien decide donde y con que nombre
@@ -85,8 +90,19 @@ def generate_launch_description():
             description="Namespace del robot, p.ej. 'robot1'. "
                         'Vacio = comportamiento original de un solo robot.'
         ),
+        # La pose por defecto es el EJE DEL PASILLO DEL PISO 1 del mundo vigente,
+        # no el origen del mundo. Mientras el mundo fue 'primer_piso_v2.world' el
+        # origen caia dentro del pasillo y (0, 0) servia; en
+        # 'mundo_definitivo.world' los dos pasillos estan corridos en Y -piso 1 en
+        # y = +10.02, piso 2 en y = -4.48- y (0, 0) queda en la explanada vacia
+        # ENTRE los dos. El fallo no se ve al lanzar: Gazebo abre, el vehiculo
+        # aparece y los 7 controladores quedan activos; lo que no hay es pasillo
+        # alrededor, y (0, 0) ni siquiera es una celda del mapa del piso 1, de modo
+        # que AMCL arranca fuera del mapa.
+        # y = 10.05 deja 1.08 m de holgura al obstaculo mas cercano, medido por
+        # transformada de distancia sobre maps/mundo_definitivo_piso1.pgm.
         DeclareLaunchArgument(name='x', default_value='0'),
-        DeclareLaunchArgument(name='y', default_value='0'),
+        DeclareLaunchArgument(name='y', default_value='10.05'),
         DeclareLaunchArgument(name='z', default_value='0.03'),
         DeclareLaunchArgument(name='yaw', default_value='0'),
         gazebo_server_launcher,

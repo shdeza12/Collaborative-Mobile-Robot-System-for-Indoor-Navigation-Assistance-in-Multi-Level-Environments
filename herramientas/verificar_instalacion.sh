@@ -205,7 +205,7 @@ else
   consejo_gzp
 fi
 
-for w in primer_piso.world primer_piso_v2.world primer_piso_dos_niveles.world pasillo_grande.world; do
+for w in mundo_definitivo.world primer_piso.world primer_piso_v2.world primer_piso_dos_niveles.world pasillo_grande.world; do
   paso "$w"
   if [ -f "$REPO/$w" ]; then bien
   else mal "no esta en la raiz del repositorio"; fi

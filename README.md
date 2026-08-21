@@ -174,10 +174,15 @@ exec bash
 
 La primera línea evita tener que hacer `source` en cada terminal nueva. La segunda añade la
 raíz del repositorio a `GAZEBO_MODEL_PATH`, y la necesitan los mundos que incluyen modelos
-externos con `model://`: `pasillo_grande.world`, `pasillo_test.world`,
-`USTA_WORLD/usta_test.world` y **`primer_piso_dos_niveles.world`**, que es el entorno de
-evaluación de OE4. Solo `primer_piso.world` y `primer_piso_v2.world` llevan la geometría
-embebida y funcionan sin ella.
+externos con `model://`: **`mundo_definitivo.world`**, que es el mundo vigente y el que los
+launch cargan por defecto, `pasillo_grande.world`, `pasillo_test.world`,
+`USTA_WORLD/usta_test.world` y `primer_piso_dos_niveles.world`. Solo `primer_piso.world` y
+`primer_piso_v2.world` llevan la geometría embebida y funcionan sin ella.
+
+> Esta variable dejó de ser opcional el 2026-08-20. Mientras el mundo vigente fue
+> `primer_piso_v2.world`, con la geometría embebida, olvidarla solo rompía mundos que había
+> que pedir a mano con `world:=`. Ahora la necesita el mundo por defecto, así que sin ella
+> **el lanzamiento normal abre un mundo vacío** —plano gris y sol— sin dar error.
 
 > **Por qué es una trampa.** Sin la variable Gazebo **no aborta**: devuelve código de salida
 > 0 y carga el mundo incompleto —plano gris y sol, pero sin pasillo—, dejando una sola línea
@@ -255,17 +260,23 @@ En RViz: `Fixed Frame` = `map`, y en el display `Map` la propiedad
 ### Navegación autónoma sobre un mapa ya construido
 
 Un solo comando levanta Gazebo, el robot, AMCL y la pila Nav2, sobre
-`primer_piso_v2.world` y su mapa:
+`mundo_definitivo.world` y el mapa de su piso 1:
 
 ```bash
 ros2 launch deepracer_bringup nav_amcl_demo_sim.launch.py
 ```
 
-> **Sobre el mapa que trae por defecto.** Sirve para ver la pila Nav2 funcionando de
-> extremo a extremo, pero **no** pasa `herramientas/verificar_mapa.py`: cubre el 35 % del
-> mundo en X y tiene un 63 % de celdas desconocidas. Está registrado como riesgo R10 en
-> [`ESTADO.md`](ESTADO.md) y la cartografía se va a rehacer. No usarlo como base de
-> ninguna medida.
+> **Sobre el mapa que trae por defecto.** `maps/mundo_definitivo_piso1.yaml` no salió de un
+> recorrido de SLAM: lo generó `herramientas/generar_mapa_desde_mundo.py` leyendo la
+> geometría del `.world`, así que su fidelidad es exacta —0 de 4725 obstáculos sin pared
+> real detrás—. Es la misma vía por la que se cerró el riesgo R10 el 2026-08-14, aplicada al
+> mundo nuevo: no hay cartografía inventada que corregir.
+>
+> Aun así `herramientas/verificar_mapa.py` lo **rechaza**, y conviene saber por qué antes de
+> tomarlo por un defecto del mapa: el mundo trae los dos pasillos lado a lado en Y, este mapa
+> cubre solo uno, y la herramienta mide la cobertura contra el mundo entero. De ahí el 29,7 %
+> en Y. La herramienta sabe separar niveles por altura (su tercer argumento), pero aquí los
+> dos pisos están a la misma z y separados en Y, y eso todavía no lo sabe expresar.
 
 Argumentos disponibles (`--show-args` los lista): `world`, `map`, `params`, `namespace`.
 El objetivo se envía desde RViz con la herramienta **2D Goal Pose**, o por línea de comandos:
@@ -310,7 +321,7 @@ ros2 run nav2_map_server map_saver_cli -f /tmp/mapa_candidato \
 Antes de aceptar un mapa como definitivo, validarlo contra la geometría del mundo:
 
 ```bash
-python3 herramientas/verificar_mapa.py /tmp/mapa_candidato.yaml primer_piso_v2.world
+python3 herramientas/verificar_mapa.py /tmp/mapa_candidato.yaml mundo_definitivo.world
 ```
 
 La herramienta compara la extensión mapeada con la del archivo `.world` y rechaza el mapa
@@ -341,7 +352,7 @@ la misma geometría. `generar_mapa_desde_mundo.py` acepta la misma opción como 
 | `Documentos/` | Anteproyecto, entregables semanales y guías operativas |
 | `Documentos/Evidencia/` | Capturas, registros de terminal e informes de sesión. Cada archivo con su pie de foto en [`Documentos/Evidencia/README.md`](Documentos/Evidencia/README.md): qué muestra, de cuándo es y qué afirmación sostiene |
 | `herramientas/` | Verificadores y utilidades (ver abajo) |
-| `*.world` | Mundos de Gazebo. El vigente es `primer_piso_v2.world` (un nivel, el que cargan los launch por defecto). El **entorno de evaluación de OE4** es `primer_piso_dos_niveles.world` desde el 2026-08-14: la misma planta instanciada a z=0 y z=3,0, y se pide explícitamente con `world:=` |
+| `*.world` | Mundos de Gazebo. El vigente es `mundo_definitivo.world` desde el 2026-08-20, y es también el **entorno de evaluación de OE4**: los dos pisos son dos pasillos distintos, uno al lado del otro en Y —piso 1 arriba (eje y≈10,0), piso 2 abajo (eje y≈−4,5)—, no una planta duplicada en altura. Cada robot corre en su propio `gzserver` con su `ROS_DOMAIN_ID`, así que nunca comparten escena y no hace falta elevar un nivel. Sustituye a `primer_piso_dos_niveles.world`, que hacía lo segundo y queda como referencia |
 | `USTA_WORLD/`, `pasillo_grande/`, `pasillo_usta/` | Modelos SDF de entornos |
 | `ESTADO.md` | Tablero de avance, riesgos y decisiones |
 

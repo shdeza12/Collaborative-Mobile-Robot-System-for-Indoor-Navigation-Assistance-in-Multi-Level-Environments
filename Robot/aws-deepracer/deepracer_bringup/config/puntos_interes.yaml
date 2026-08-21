@@ -1,0 +1,231 @@
+# Localizaciones de interes del entorno de evaluacion. Piso 1 de mundo_definitivo.
+#
+# POR QUE EXISTE
+# --------------
+# El contrato de interfaces (Documentos/CONTRATO_INTERFACES.md, seccion 5) hace
+# de este archivo la fuente de verdad de los destinos: el coordinador lo carga y
+# lo republica latched en /coordinacion/puntos_interes, y la HRI arma sus dos
+# listas desplegables -origen y destino- desde ahi. Ningun destino se escribe en
+# codigo, y cambiar un nombre no obliga a recompilar.
+#
+# DE DONDE SALEN LAS COORDENADAS
+# ------------------------------
+# No estan medidas a ojo sobre RViz. Cada destino es una puerta del pasillo del
+# piso 1, y las puertas no se leyeron del SDF una por una: se detectaron sobre
+# el mapa (maps/mundo_definitivo_piso1.pgm) como los huecos por donde el espacio
+# libre toca lo desconocido. Eso encontro dieciseis vanos. Quince son destinos;
+# el decimosexto -pared sur, x = +8.65- se descarto a mano por no corresponder a
+# ninguna dependencia real.
+#
+# El dibujo con los dieciseis marcados esta en Documentos/mapa_destinos.txt.
+# Sirve para volver a mirar cual es cual sin tener que abrir Gazebo.
+#
+# MARCO
+# -----
+# Todas las poses van en el marco <ns>/map, y ahi coinciden numericamente con las
+# coordenadas del mundo de Gazebo: el origen del mapa es [-20.72, 4.62], que es
+# la esquina de la region con la que se genero. No hay desplazamiento que aplicar
+# entre un marco y el otro.
+#
+# DONDE SE DETIENE EL ROBOT, Y POR QUE AHI
+# ----------------------------------------
+# El robot no atraviesa las puertas: se detiene AL LADO y la HRI dice de que lado
+# queda el destino. Eso fija dos cosas.
+#
+# La primera es el yaw. Va alineado con el pasillo, nunca apuntando a la puerta:
+# el vehiculo no puede girar sobre su eje -por eso se quito <Spin> del arbol de
+# comportamiento- asi que un destino con yaw perpendicular convertiria cada
+# llegada en una maniobra, con su tiempo y su probabilidad de fallo metidos
+# dentro de las metricas de OE4. En el pasillo largo eso es yaw = 0, mirando al
+# este. En el tramo norte-sur del extremo oeste es yaw = -pi/2, mirando al sur,
+# porque ese tramo solo comunica con el pasillo por su extremo norte y a sus dos
+# puertas se llega bajando.
+#
+# La segunda es la posicion transversal. La parada conserva la abscisa del vano y
+# se aparta del eje del pasillo HACIA LA PARED DE SU PROPIA PUERTA, hasta el
+# primer punto con 0.70 m de holgura. No es cosmetico: la regla obvia -pararse en
+# el punto mas despejado cerca del vano- pone las dos puertas enfrentadas en el
+# mismo sitio, porque el punto mas despejado de un pasillo es su eje y las dos lo
+# comparten. Con ella, ETM13 y ETM3 salian a 0.18 m uno de otro; la
+# xy_goal_tolerance de Nav2 es 0.25 m, o sea que eran el mismo destino para el
+# planificador y la HRI habria ofrecido dos nombres que llevan al mismo punto.
+# Arrimadas cada una a su pared quedan a 1.22 m, y la pareja mas junta de todo el
+# archivo -Escaleras y Representacion, enfrentadas en el tramo norte-sur- queda a
+# 0.54 m, por encima del doble de la tolerancia.
+#
+# EL CAMPO lado_pared
+# -------------------
+# Nombra la pared en la que esta la puerta, y es lo que le permite al coordinador
+# redactar la frase de la HRI: con la pared y el rumbo de llegada sale si el
+# destino queda a la izquierda o a la derecha. Con las cuatro puertas del mundo
+# anterior no hacia falta, porque todas estaban en la misma pared y bastaba el
+# sentido de marcha; aqui hay puertas en las dos, y sin este campo la frase no se
+# puede escribir.
+#
+# Toma cinco valores: norte, sur, oeste, este y fondo. 'fondo' es el caso de
+# ETM10, cuyo vano esta en el muro del extremo este del pasillo: no se pasa por
+# al lado, se llega de frente, y ahi la izquierda y la derecha no aplican.
+#
+# Todavia NO esta en PuntoInteres.msg; entra al contrato en el corte de la
+# semana. Un consumidor que no lo conozca puede ignorarlo sin romperse.
+#
+# HOLGURA
+# -------
+# Es la distancia de la parada al obstaculo mas cercano del mapa, medida por
+# transformada de distancia sobre el .pgm. Para comparar: la huella del vehiculo
+# es 0.28 x 0.19 m, o sea 0.17 m de radio letal, y el inflation_radius de 0.55 m
+# no es letal -solo encarece el paso-. Las quince paradas estan entre 0.72 y
+# 1.14 m, asi que ninguna queda dentro del inflado.
+#
+# LO QUE FALTA
+# ------------
+# Solo esta el piso 1. El piso 2 tiene su mapa y sus dieciocho vanos detectados,
+# pero sus nombres todavia no estan decididos y por eso no se escriben aqui: un
+# destino sin nombre real no es un destino, es una coordenada.
+#
+# Los nombres ETM van del 1 al 13 sin ETM12: no es un olvido de numeracion, es
+# que ese vano no existe en la planta.
+#
+# FORMATO
+# -------
+# Lista YAML plana, no un archivo de parametros de ROS 2: los parametros no
+# admiten arreglos de diccionarios sin aplanarlos a mano, y aplanarlos haria
+# ilegible justo lo que la HRI tiene que leer. El coordinador lo abre con
+# yaml.safe_load. La pose va como x, y, yaw en radianes; convertir yaw a
+# cuaternion para geometry_msgs/Pose es trabajo del coordinador, no de este
+# archivo.
+
+puntos:
+
+  # ------------------------------------------------- TRAMO NORTE-SUR (oeste) --
+  # Dos puertas enfrentadas al fondo de este tramo. Se llega bajando desde el
+  # pasillo, luego yaw = -pi/2: Escaleras queda a la derecha y Representacion a
+  # la izquierda.
+
+  - id: piso1_escalera
+    nombre: "Escaleras"
+    nivel: 1
+    es_transferencia: true
+    lado_pared: oeste        # vano de 0.78 m, centro en y = +5.19
+    pose: {x: -19.43, y: 5.91, yaw: -1.5708}
+    holgura_m: 1.14
+
+  - id: piso1_representacion
+    nombre: "Representación"
+    nivel: 1
+    es_transferencia: false
+    lado_pared: este         # vano de 0.90 m, centro en y = +5.07
+    pose: {x: -18.89, y: 5.91, yaw: -1.5708}
+    holgura_m: 1.14
+
+  # ------------------------------------------------------------ PASILLO LARGO --
+  # De oeste a este. Todas con yaw = 0, alineadas con el pasillo.
+
+  - id: piso1_etm1
+    nombre: "ETM1"
+    nivel: 1
+    es_transferencia: false
+    lado_pared: norte        # vano de 0.60 m
+    pose: {x: -15.92, y: 10.59, yaw: 0.0}
+    holgura_m: 0.72
+
+  - id: piso1_etm2
+    nombre: "ETM2"
+    nivel: 1
+    es_transferencia: false
+    lado_pared: norte        # vano de 0.66 m
+    pose: {x: -14.75, y: 10.59, yaw: 0.0}
+    holgura_m: 0.72
+
+  - id: piso1_etm13
+    nombre: "ETM13"
+    nivel: 1
+    es_transferencia: false
+    lado_pared: sur          # vano de 1.74 m, el mas ancho del piso
+    pose: {x: -7.25, y: 9.51, yaw: 0.0}
+    holgura_m: 0.72
+
+  - id: piso1_etm3
+    nombre: "ETM3"
+    nivel: 1
+    es_transferencia: false
+    lado_pared: norte        # vano de 0.60 m, casi enfrente de ETM13
+    pose: {x: -7.82, y: 10.59, yaw: 0.0}
+    holgura_m: 0.72
+
+  - id: piso1_etm4
+    nombre: "ETM4"
+    nivel: 1
+    es_transferencia: false
+    lado_pared: norte        # vano de 0.60 m
+    pose: {x: -6.62, y: 10.59, yaw: 0.0}
+    holgura_m: 0.72
+
+  - id: piso1_etm5
+    nombre: "ETM5"
+    nivel: 1
+    es_transferencia: false
+    lado_pared: norte        # vano de 0.54 m, el mas estrecho del piso
+    pose: {x: -4.01, y: 10.59, yaw: 0.0}
+    holgura_m: 0.72
+
+  - id: piso1_etm6
+    nombre: "ETM6"
+    nivel: 1
+    es_transferencia: false
+    lado_pared: norte        # vano de 0.84 m
+    pose: {x: 1.24, y: 10.59, yaw: 0.0}
+    holgura_m: 0.72
+
+  - id: piso1_etm11
+    nombre: "ETM11"
+    nivel: 1
+    es_transferencia: false
+    lado_pared: sur          # vano de 0.78 m
+    pose: {x: 4.09, y: 9.51, yaw: 0.0}
+    holgura_m: 0.72
+
+  - id: piso1_etm7
+    nombre: "ETM7"
+    nivel: 1
+    es_transferencia: false
+    lado_pared: norte        # vano de 0.60 m
+    pose: {x: 6.76, y: 10.59, yaw: 0.0}
+    holgura_m: 0.72
+
+  - id: piso1_etm8
+    nombre: "ETM8"
+    nivel: 1
+    es_transferencia: false
+    lado_pared: norte        # vano de 0.60 m
+    pose: {x: 9.70, y: 10.59, yaw: 0.0}
+    holgura_m: 0.72
+
+  - id: piso1_almacen
+    nombre: "Almacén ETM"
+    nivel: 1
+    es_transferencia: false
+    lado_pared: sur          # vano de 0.60 m
+    pose: {x: 15.16, y: 9.51, yaw: 0.0}
+    holgura_m: 0.72
+
+  - id: piso1_etm9
+    nombre: "ETM9"
+    nivel: 1
+    es_transferencia: false
+    lado_pared: norte        # vano de 0.60 m
+    pose: {x: 18.10, y: 10.59, yaw: 0.0}
+    holgura_m: 0.72
+
+  # El vano del extremo este del pasillo, en el muro del fondo. Es el unico al
+  # que se llega de frente y no por al lado, y su parada es la mas apretada del
+  # archivo: el centro del vano esta a 0.45 m del muro norte, menos de los 0.70 m
+  # que se le exigen al resto, asi que la parada queda 0.90 m antes de la puerta
+  # y desplazada al sur. Conviene probar esta llegada antes de darla por buena.
+  - id: piso1_etm10
+    nombre: "ETM10"
+    nivel: 1
+    es_transferencia: false
+    lado_pared: fondo        # vano de 0.66 m, centro en y = +10.65
+    pose: {x: 19.27, y: 10.35, yaw: 0.0}
+    holgura_m: 0.78

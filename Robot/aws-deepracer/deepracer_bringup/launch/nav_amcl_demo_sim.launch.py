@@ -41,7 +41,7 @@ def generate_launch_description():
     # El mundo vigente lo declara el README; 'herramientas/verificar_repositorio.sh'
     # comprueba que este default y el del README sigan siendo el mismo.
     default_world = mundo_por_defecto()
-    default_map = os.path.join(deepracer_bringup_dir, 'maps', 'primer_piso_definitivo.yaml')
+    default_map = os.path.join(deepracer_bringup_dir, 'maps', 'mundo_definitivo_piso1.yaml')
     nav_params = os.path.join(deepracer_bringup_dir, 'config', 'nav2_params_nav_amcl_sim_demo.yaml')
 
     world_cfg = LaunchConfiguration('world')

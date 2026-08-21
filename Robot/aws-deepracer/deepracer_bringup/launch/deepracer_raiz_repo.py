@@ -38,7 +38,7 @@ import sys
 # confirmar que la carpeta deducida es de verdad la raiz del repositorio.
 # 'herramientas/verificar_repositorio.sh' comprueba que este nombre y el del
 # README sigan siendo el mismo.
-MUNDO_VIGENTE = 'primer_piso_v2.world'
+MUNDO_VIGENTE = 'mundo_definitivo.world'
 
 
 def raiz_repositorio():

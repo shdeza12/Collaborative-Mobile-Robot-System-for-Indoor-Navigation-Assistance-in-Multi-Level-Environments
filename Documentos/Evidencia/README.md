@@ -129,6 +129,29 @@ pantalla. Los comandos que lo reproducen están en el §1 del informe.
 |---|---|---|
 | [`S19_spike_p4_humble_jazzy.md`](S19_spike_p4_humble_jazzy.md) | Que `nav2_msgs/NavigateToPose` **difiere** entre Humble y Jazzy, y que por tanto un coordinador Humble no manda a un robot Jazzy | [`ESTADO.md`](../../ESTADO.md) §4 (R8), [`REQUISITOS.md`](../REQUISITOS.md) §3 (RF-16) |
 
+## Semana 19 — spike de hardware, preguntas 1 y 2 (agosto 2026)
+
+Primera evidencia tomada sobre el **vehículo físico** y sobre el **LiDAR real**, no sobre la
+simulación. Sin capturas: los resultados son numéricos y salen de una herramienta versionada, así
+que se pueden volver a producir en vez de mirarse.
+
+Cubre la condición 1 de cierre de [`PLAN_S19.md`](../PLAN_S19.md), que es quien reparte el §S19
+del cronograma entre los dos últimos días de la semana.
+
+| Archivo | Qué sostiene | Dónde se cita |
+|---|---|---|
+| [`S19_spike_p1_p2_hardware.md`](S19_spike_p1_p2_hardware.md) | Que el LiDAR real repite la misma pared con 2,8 mm de dispersión y que el vehículo obedece a `/ctrl_pkg/servo_msg` de forma proporcional en dirección y tracción — luego la cuantización binaria es defecto **nuestro**, reparable | [`ESTADO.md`](../../ESTADO.md) §2 (OE2), §4 (R8, R11) |
+| [`../../herramientas/verificar_lidar.py`](../../herramientas/verificar_lidar.py) | La herramienta que produce la medida: halla superficies por su **forma** (RANSAC secuencial), sin recibir nunca la distancia esperada | ídem, §1 |
+
+**La herramienta es la evidencia, y por eso se versiona.** Su docstring conserva los dos métodos
+descartados —tomar el mínimo del barrido, que habría dado 83 % de error contra el propio soporte del
+sensor, y buscar lecturas «cerca de 1 m», que es circular—. Esa parte no se puede reconstruir
+después: un resultado se puede volver a medir, pero el razonamiento por el que se descartó una
+alternativa se pierde si no se escribe cuando ocurre.
+
+**Lo que no se versiona:** la sesión de terminal contra el vehículo. Las cifras del informe proceden
+de esa sesión y son reproducibles con el vehículo delante, no desde el repositorio.
+
 ## Semana 19 — la maniobra de retorno y el defecto de conversión de `cmd_vel` (agosto 2026)
 
 ![Giro comandado contra giro real, antes y después de la corrección](S19_seguimiento_antes_despues.png)
@@ -205,8 +228,8 @@ dominios no se ven entre sí.
 
 Los `.md` de esta carpeta son el análisis, no la evidencia: explican qué se hizo, qué falló
 y por qué. `S17_nav2_namespaces.md`, `S17_aplicacion_contrato.md`, `S17_dos_simuladores.md`,
-`S17_linea_base.md`, `S18_entorno_dos_niveles.md`, `S19_spike_p4_humble_jazzy.md` y
-`S19_conversion_cmdvel_ackermann.md`.
+`S17_linea_base.md`, `S18_entorno_dos_niveles.md`, `S19_spike_p4_humble_jazzy.md`,
+`S19_spike_p1_p2_hardware.md` y `S19_conversion_cmdvel_ackermann.md`.
 
 ---
 

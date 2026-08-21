@@ -1,0 +1,129 @@
+<sdf version='1.7'>
+  <world name='default'>
+    <light name='sun' type='directional'>
+      <cast_shadows>1</cast_shadows>
+      <pose>0 0 10 0 -0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <direction>-0.5 0.1 -0.9</direction>
+      <spot>
+        <inner_angle>0</inner_angle>
+        <outer_angle>0</outer_angle>
+        <falloff>0</falloff>
+      </spot>
+    </light>
+    <model name='ground_plane'>
+      <static>1</static>
+      <link name='link'>
+        <collision name='collision'>
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+          <surface>
+            <friction>
+              <ode>
+                <mu>100</mu>
+                <mu2>50</mu2>
+              </ode>
+              <torsional>
+                <ode/>
+              </torsional>
+            </friction>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+          </surface>
+          <max_contacts>10</max_contacts>
+        </collision>
+        <visual name='visual'>
+          <cast_shadows>0</cast_shadows>
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Grey</name>
+            </script>
+          </material>
+        </visual>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+    </model>
+    <gravity>0 0 -9.8</gravity>
+    <magnetic_field>6e-06 2.3e-05 -4.2e-05</magnetic_field>
+    <atmosphere type='adiabatic'/>
+    <physics type='ode'>
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <real_time_update_rate>1000</real_time_update_rate>
+    </physics>
+    <scene>
+      <ambient>0.4 0.4 0.4 1</ambient>
+      <background>0.7 0.7 0.7 1</background>
+      <shadows>1</shadows>
+    </scene>
+    <audio>
+      <device>default</device>
+    </audio>
+    <wind/>
+    <spherical_coordinates>
+      <surface_model>EARTH_WGS84</surface_model>
+      <latitude_deg>0</latitude_deg>
+      <longitude_deg>0</longitude_deg>
+      <elevation>0</elevation>
+      <heading_deg>0</heading_deg>
+    </spherical_coordinates>
+
+    <!-- Los dos pasillos definitivos vienen en un solo modelo (59 paredes), uno
+         al lado del otro en Y. La URI resuelve por NOMBRE DE CARPETA, no por el
+         <name> de model.config: la carpeta es 'mundo_Definitivo' con D mayuscula
+         y el modelo se llama 'mapaV2'.
+
+         Cada pasillo es un piso. Cual es cual NO es libre: lo fija el mapa que
+         ya existe, maps/mundo_definitivo_piso1.pgm, generado sobre la banda
+         y = [4.62, 11.30], y con el los quince destinos de
+         config/puntos_interes.yaml, que llevan nombres reales de dependencia.
+         Es decir, el piso 1 es el pasillo de ARRIBA:
+           piso 1 -> pasillo superior, eje y = +10.02, ancho 2.35 m, x de -20.7 a +20.2
+           piso 2 -> pasillo inferior, eje y =  -4.48, ancho 2.55 m, x de -23.4 a +21.7
+         Ejes y anchos medidos sobre este mismo SDF, no estimados: son la media
+         de las dos paredes largas de cada pasillo (arriba +11.20 y +8.85; abajo
+         -3.20 y -5.75).
+
+         A diferencia de primer_piso_dos_niveles.world, aqui NO se eleva un nivel
+         a z=3 ni se anade losa. Alli el nivel 2 era una copia del mismo pasillo y
+         solo la altura los distinguia; aqui son dos pasillos distintos, separados
+         en Y, y cada robot corre en su propio gzserver con su ROS_DOMAIN_ID, de
+         modo que nunca comparten escena. Elevar uno costaria duplicar las 59
+         paredes sin ganar nada. El ground_plane de z=0 les sirve a los dos. -->
+    <include>
+      <name>mundo_definitivo</name>
+      <uri>model://mundo_Definitivo</uri>
+      <pose>0 0 0 0 0 0</pose>
+    </include>
+
+    <gui fullscreen='0'>
+      <camera name='user_camera'>
+        <pose>0 -34 38 0 0.8 1.5708</pose>
+        <view_controller>orbit</view_controller>
+        <projection_type>perspective</projection_type>
+      </camera>
+    </gui>
+  </world>
+</sdf>
