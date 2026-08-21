@@ -57,15 +57,27 @@ Eso trae `main`, que es la última versión verificada y la que conviene en gene
 <summary><b>Alternativa: descargar una versión fija (un tag)</b></summary>
 
 Un tag es un punto del historial que ya no se mueve. Sirve para reproducir un resultado o
-para reportar un fallo sin ambigüedad sobre qué código se tenía. El vigente es
-**`v0.2.2-dos-niveles-y-evidencia`**; los publicados se listan con
-`git ls-remote --tags <url del repositorio>`.
+para reportar un fallo sin ambigüedad sobre qué código se tenía.
 
-**Por consola:**
+> **Cuál es el último no se escribe aquí, se consulta.** Este párrafo decía «el vigente es
+> `v0.2.2-dos-niveles-y-evidencia`» y lo siguió diciendo once commits después, cuando ese tag
+> ya no traía `mundo_definitivo.world`, ni `herramientas/robot.sh`, ni `Documentos/REQUISITOS.md`.
+> Quien lo hubiera seguido habría instalado sin el mundo de evaluación. Un dato que cambia
+> solo no puede vivir escrito en prosa:
 
 ```bash
-git clone --branch v0.2.2-dos-niveles-y-evidencia \
-  https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments.git ~/Tesis
+git ls-remote --tags --refs --sort=-v:refname https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments.git | head -5
+```
+
+Cada línea es un tag, de más nuevo a más viejo; el nombre es lo que va después de
+`refs/tags/`, y el primero de la lista es el que conviene. (`--refs` no es adorno: sin él
+cada tag sale dos veces y una de ellas termina en `^{}`, que no es parte del nombre.)
+**Por consola**, con ese nombre:
+
+```bash
+TAG=v0.3-mundo-definitivo   # sustituir por el primero que devolvio el comando de arriba
+
+git clone --branch "$TAG" https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments.git ~/Tesis
 ```
 
 Git avisará de que el repositorio queda en estado *detached HEAD*. **No es un error**:
@@ -73,20 +85,24 @@ significa que se está sobre un punto fijo del historial en vez de sobre una ram
 Para instalar y simular no cambia nada; solo importa si se van a hacer commits.
 
 **Por la web de GitHub, sin usar git:** abrir el repositorio → pestaña **Releases** (o
-**Tags**) → en `v0.2.2-dos-niveles-y-evidencia`, **Source code (zip)**. Descomprimirlo y
+**Tags**) → en el tag de más arriba de la lista, **Source code (zip)**. Descomprimirlo y
 **renombrar la carpeta**, porque GitHub le quita la `v` al tag y el nombre no coincide con
-el de las instrucciones:
+el de las instrucciones (abajo, `0.3-mundo-definitivo` es un ejemplo: va el tag elegido,
+sin su `v`):
 
 ```bash
-unzip ~/Descargas/*-0.2.2-dos-niveles-y-evidencia.zip -d ~
-mv ~/*-0.2.2-dos-niveles-y-evidencia ~/Tesis
+unzip ~/Descargas/*-0.3-mundo-definitivo.zip -d ~
+mv ~/*-0.3-mundo-definitivo ~/Tesis
 ```
 
 El ZIP no trae la carpeta `.git`: se puede instalar y simular igual, pero no consultar el
 historial ni actualizar con `git pull`. Los permisos de ejecución de los scripts **sí** se
 conservan; si aun así algo da `Permission denied`, `chmod +x herramientas/*.sh`.
 
-Desde aquí, los pasos 2 a 6 son idénticos.
+Desde aquí, los pasos 2 a 6 son idénticos. Si se eligió un tag demasiado viejo, el paso 6 lo
+dice: comprueba uno por uno los mundos de la raíz y `mundo_definitivo.world` saldría como
+`no esta en la raiz del repositorio`. La salida no acusa al tag, así que conviene sospechar
+de él antes que de la instalación.
 
 </details>
 
