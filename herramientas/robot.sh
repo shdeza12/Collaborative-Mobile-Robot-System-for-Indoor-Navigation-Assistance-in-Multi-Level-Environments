@@ -152,10 +152,20 @@ case "$accion" in
     parar_robot
     preparar_entorno
     # nav_amcl_demo_sim.launch.py levanta TAMBIEN Gazebo: no se combina con 'sim'.
-    if [[ ! " ${extras[*]} " =~ " map:=" ]]; then
-      echo "   AVISO: sin 'map:=' se carga el mapa por defecto, que es de" >&2
-      echo "          primer_piso, NO de mundo_definitivo. Genera el suyo con" >&2
-      echo "          herramientas/generar_mapa_desde_mundo.py" >&2
+    #
+    # El mapa por defecto del launch es mundo_definitivo_piso1.yaml desde el
+    # 2026-08-20, asi que para robot1 no hay nada que pasar. Para robot2 SI:
+    # esta en el pasillo del piso 2 y ese mapa no existe todavia, de modo que
+    # cargaria la geometria del piso 1 estando en otro sitio. AMCL no da error
+    # -converge contra las paredes equivocadas- y el sintoma aparece despues
+    # como una ruta imposible, que es el patron que ya costo el mapa inventado
+    # del 12-ago.
+    if [[ "$robot" != robot1 && ! " ${extras[*]} " =~ " map:=" ]]; then
+      echo "ERROR: $robot esta en el piso 2 y no hay mapa de ese piso." >&2
+      echo "       Sin 'map:=' se cargaria el del piso 1: AMCL localizaria" >&2
+      echo "       contra otra geometria SIN dar error." >&2
+      echo "       Generalo con herramientas/generar_mapa_desde_mundo.py" >&2
+      exit 1
     fi
     echo "== $robot: Nav2 + AMCL + Gazebo (dominio $DOMINIO) =="
     exec ros2 launch deepracer_bringup nav_amcl_demo_sim.launch.py \
