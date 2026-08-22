@@ -200,6 +200,34 @@ RViz**; hay que abrirlo con `ros2 run rviz2 rviz2 -d install/deepracer_bringup/s
 y encender a mano **RobotModel** y **Amcl Particle Swarm**, que vienen apagados en el `.rviz`.
 Sin eso no se ve ni el vehículo ni la nube de partículas.
 
+## Semana 19 — el LiDAR original del kit Evo (agosto 2026)
+
+Segunda sesión sobre el **vehículo físico**, con el sensor que trae el kit de fábrica en vez del
+LiDAR externo del 19-ago. Sin capturas: todo son salidas de `systemctl`, `lsusb` y
+`ros2 topic echo`, que se pegan mejor en texto de las que se fotografían.
+
+**Los dos informes de hardware de S19 no se contradicen: hablan de sensores distintos.** El del
+19-ago caracteriza un **YDLidar G4** conectado por fuera; este caracteriza el **RPLIDAR A1M8-R5**
+que venía en el kit. Leerlos como si fueran el mismo aparato hace parecer que uno de los dos
+midió mal.
+
+| Archivo | Qué sostiene | Dónde se cita |
+|---|---|---|
+| [`S19_lidar_original_evo.md`](S19_lidar_original_evo.md) | Que el LiDAR **no bloquea S20**: de las tres capas que el spike culpaba, solo falla una —el lanzador pide `rplidar_node` y lo instalado se llama `rplidar_composition`—, y que el sensor real publica 360 muestras a 1,000° sobre 360°, no lo que dice la URDF | [`ESTADO.md`](../../ESTADO.md) §4 (R8), [`S19_spike_p1_p2_hardware.md`](S19_spike_p1_p2_hardware.md) §4.1 y §5 |
+
+**Lo que este informe invalida del anterior.** El punto 1 del backlog del spike —«instalar un
+driver YDLidar para Jazzy», marcado como bloqueante de S20— apuntaba a un sensor que no es el del
+carro. El punto 5, la corrección de la URDF, apuntaba a los números del G4. Ambos quedan
+reescritos en el §10 del informe nuevo. Se deja el original sin tachar: **el error de
+identificación es parte de lo que hay que poder sustentar**, no ruido a limpiar.
+
+**Lo que no queda demostrado.** Las dos cámaras aparecen enumeradas en USB, pero **no** se
+comprobó que publiquen en ROS. Está anotado como tal en el §7, no como pendiente menor: una
+cámara que enumera y no publica se ve idéntica a una que funciona, hasta que se mira el tópico.
+
+**Lo que no se versiona:** la sesión de terminal. Las cifras son reproducibles con el vehículo
+delante y los comandos del informe, no desde el repositorio.
+
 ## Diagrama
 
 | Archivo | Qué muestra | Dónde se cita |
@@ -229,7 +257,8 @@ dominios no se ven entre sí.
 Los `.md` de esta carpeta son el análisis, no la evidencia: explican qué se hizo, qué falló
 y por qué. `S17_nav2_namespaces.md`, `S17_aplicacion_contrato.md`, `S17_dos_simuladores.md`,
 `S17_linea_base.md`, `S18_entorno_dos_niveles.md`, `S19_spike_p4_humble_jazzy.md`,
-`S19_spike_p1_p2_hardware.md` y `S19_conversion_cmdvel_ackermann.md`.
+`S19_spike_p1_p2_hardware.md`, `S19_conversion_cmdvel_ackermann.md` y
+`S19_lidar_original_evo.md`.
 
 ---
 
