@@ -59,6 +59,14 @@ def leer_yaml_mapa(ruta):
     campos["resolution"] = float(campos["resolution"])
     numeros = re.findall(r"-?\d+\.?\d*", campos.get("origin", "0 0 0"))
     campos["origin"] = [float(v) for v in numeros[:3]]
+    # Los '--region' de la orden que genero el mapa, si el .yaml la trae escrita
+    # en su cabecera. No es un comentario decorativo: generar_mapa_desde_mundo.py
+    # la escribe solo, y esos rectangulos son la ZONA QUE SE DECLARA MAPEADA. Se
+    # leen aqui porque son el denominador correcto del recuento de desconocidas
+    # (ver el porque en la cabecera de analizar). Un mapa de SLAM no los trae, y
+    # entonces la lista queda vacia.
+    campos["regiones"] = [tuple(float(v) for v in m) for m in re.findall(
+        r"--region\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)", texto)]
     return campos
 
 
@@ -113,11 +121,23 @@ def analizar(ruta_yaml, ruta_world, altura=0.30):
     fantasmas = []                      # obstaculos del mapa sin pared real detras
     col_min = col_max = fila_min = fila_max = None
 
+    regiones = meta["regiones"]
+    dentro_total = 0                    # celdas dentro de la zona declarada mapeada
+    dentro_desconocidas = 0
+
     for f in range(filas):
+        y = origen_y + (filas - 1 - f + 0.5) * res
         for c in range(columnas):
+            x = origen_x + (c + 0.5) * res
             v = pixel[c, f]
+            en_region = any(rx0 <= x <= rx1 and ry0 <= y <= ry1
+                            for rx0, ry0, rx1, ry1 in regiones)
+            if en_region:
+                dentro_total += 1
             if 200 <= v <= 210:
                 desconocidas += 1
+                if en_region:
+                    dentro_desconocidas += 1
                 continue
             conocidas += 1
             col_min = c if col_min is None else min(col_min, c)
@@ -127,8 +147,6 @@ def analizar(ruta_yaml, ruta_world, altura=0.30):
             if v >= 50:
                 continue
             ocupadas += 1
-            x = origen_x + (c + 0.5) * res
-            y = origen_y + (filas - 1 - f + 0.5) * res
             if min(distancia_a_pared(x, y, p) for p in paredes) > TOLERANCIA:
                 fantasmas.append(x)
 
@@ -141,7 +159,23 @@ def analizar(ruta_yaml, ruta_world, altura=0.30):
 
     cobertura_x = mapeado_x / mundo_x if mundo_x else 0.0
     cobertura_y = mapeado_y / mundo_y if mundo_y else 0.0
-    frac_desconocido = desconocidas / (conocidas + desconocidas)
+    # QUE SE MIDE CONTRA QUE. La pregunta es '¿quedo sin mapear algo que se
+    # declaro mapeado?', y el denominador honesto es la zona declarada, no la
+    # caja envolvente de la imagen. La distincion no importaba mientras la planta
+    # era un pasillo recto, porque entonces las dos coinciden. Con una planta en
+    # L o en S deja de coincidir y por mucho: el piso 1 daba 58.5% de
+    # desconocidas y el piso 2 el 65.0%, y las dos cifras eran, casi enteras, las
+    # esquinas VACIAS del rectangulo que envuelve la planta -- suelo que nunca
+    # estuvo dentro del edificio y que es correcto que figure como desconocido.
+    # Medido sobre las regiones declaradas, el mismo piso 1 da 1.5% y el piso 2
+    # da 0.1%. Un mapa de SLAM no declara regiones; ahi se mide sobre la imagen
+    # entera, que para ese caso es lo que siempre se quiso.
+    if regiones and dentro_total:
+        frac_desconocido = dentro_desconocidas / dentro_total
+        ambito = f"dentro de las {len(regiones)} regiones declaradas"
+    else:
+        frac_desconocido = desconocidas / (conocidas + desconocidas)
+        ambito = "sobre la imagen entera (el mapa no declara regiones)"
     frac_fantasma = len(fantasmas) / ocupadas if ocupadas else 0.0
 
     print(f"Mapa           : {ruta_pgm.name}  ({columnas}x{filas} px a {res} m/celda)")
@@ -149,7 +183,7 @@ def analizar(ruta_yaml, ruta_world, altura=0.30):
     print(f"Extension mundo: {mundo_x:6.1f} m X  x {mundo_y:5.1f} m Y")
     print(f"Extension mapa : {mapeado_x:6.1f} m X  x {mapeado_y:5.1f} m Y")
     print(f"Cobertura      : {cobertura_x:6.1%} X  x {cobertura_y:5.1%} Y")
-    print(f"Celdas desconocidas: {frac_desconocido:.1%}")
+    print(f"Celdas desconocidas: {frac_desconocido:.1%}  {ambito}")
     print(f"Obstaculos sin pared real a menos de {TOLERANCIA:.2f} m: "
           f"{len(fantasmas)} de {ocupadas} ({frac_fantasma:.1%})")
     if fantasmas:
@@ -181,7 +215,7 @@ def analizar(ruta_yaml, ruta_world, altura=0.30):
         )
     if frac_desconocido > DESCONOCIDO_MAXIMO:
         fallos.append(
-            f"{frac_desconocido:.1%} de celdas desconocidas "
+            f"{frac_desconocido:.1%} de celdas desconocidas {ambito} "
             f"(maximo {DESCONOCIDO_MAXIMO:.0%})."
         )
     if frac_fantasma > FANTASMA_MAXIMO:

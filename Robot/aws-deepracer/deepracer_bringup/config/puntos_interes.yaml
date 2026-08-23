@@ -79,19 +79,19 @@
 #
 # LO QUE FALTA
 # ------------
-# Solo esta el piso 1. El piso 2 tiene sus dieciocho vanos detectados, pero le
-# faltan DOS cosas, no una:
+# Solo esta el piso 1. El piso 2 tiene sus dieciocho vanos detectados y, desde el
+# 2026-08-23, tambien su MAPA: maps/mundo_definitivo_piso2.{pgm,yaml}, generado
+# contra mundo_definitivo_piso2.world y ACEPTADO por herramientas/verificar_mapa.py
+# (0 de 6096 obstaculos sin pared real, 0.1 % de celdas desconocidas dentro de sus
+# cinco regiones). La receta esta escrita dentro de ese .yaml, como la del piso 1.
 #
-#   - El MAPA. Hasta el 2026-08-22 esta linea afirmaba que ya existia; no es
-#     cierto y nunca lo fue. Bajo maps/ solo esta mundo_definitivo_piso1, y el
-#     historial completo -git log --all --diff-filter=A- no registra que se haya
-#     anadido nunca un mapa del piso 2. La receta que lo genera tampoco existe:
-#     la del piso 1 esta escrita dentro de su propio .yaml, y la del piso 2 no
-#     esta en ningun sitio, asi que hay que volver a deducir sus --region.
-#   - Los NOMBRES de las salas, que todavia no estan decididos. Un destino sin
-#     nombre real no es un destino, es una coordenada.
+# Lo que sigue faltando es UNA cosa: los NOMBRES de las salas, que todavia no
+# estan decididos. Un destino sin nombre real no es un destino, es una coordenada.
+# Hasta que los haya, este archivo no puede crecer, y con el se queda parado el
+# unico punto del piso 2 que esta en la ruta critica: su punto de transferencia,
+# el par de piso1_escalera.
 #
-# Las dos se llevan en la seccion PISO 2 de Documentos/mapa_destinos.txt, y son
+# Se lleva en la seccion PISO 2 de Documentos/mapa_destinos.txt, y es
 # prerrequisito de la condicion B de la campana de OE4 (seccion 10 de
 # Documentos/PROTOCOLO_EXPERIMENTAL.md).
 #

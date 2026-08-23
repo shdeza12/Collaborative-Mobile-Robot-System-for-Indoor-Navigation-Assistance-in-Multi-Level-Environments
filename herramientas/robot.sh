@@ -73,18 +73,27 @@ import sys
 sys.path.insert(0, '$LAUNCH_DIR')
 from deepracer_raiz_repo import pose_por_defecto
 p = pose_por_defecto('$robot')
-print(p['x'], p['y'], p['z'], p['yaw'], p['nivel'], p['mapa'] or '-')
+print(p['x'], p['y'], p['z'], p['yaw'], p['nivel'], p['mapa'] or '-', p['mundo'] or '-')
 " 2>&1); then
   echo "ERROR: no se pudo leer la pose de '$robot' de POSE_INICIAL" >&2
   echo "       en $LAUNCH_DIR/deepracer_raiz_repo.py" >&2
   printf '%s\n' "$POSE" | sed 's/^/       /' >&2
   exit 1
 fi
-# MAPA vale '-' cuando ese nivel todavia no tiene mapa: la cadena vacia se
-# perderia al partir la linea y NIVEL acabaria en MAPA.
-read -r X Y Z YAW NIVEL MAPA <<< "$POSE"
+# MAPA y MUNDO valen '-' cuando ese nivel todavia no tiene el archivo: la cadena
+# vacia se perderia al partir la linea y NIVEL acabaria en MAPA.
+read -r X Y Z YAW NIVEL MAPA MUNDO_REL <<< "$POSE"
 
-MUNDO="${MUNDO:-$REPO/mundo_definitivo.world}"
+# EL MUNDO ES DEL NIVEL, NO DEL PROYECTO. Hasta el 2026-08-23 esta linea fijaba
+# 'mundo_definitivo.world' para los dos robots, y aquel mundo traia los dos pisos
+# en la misma escena: el LiDAR simulado alcanza 10.0 m y entre los dos pasillos
+# hay 5.44 m, de modo que robot1 media paredes del piso 2. El porque completo, con
+# las cifras, esta en la cabecera de deepracer_raiz_repo.py.
+if [[ "$MUNDO_REL" == "-" ]]; then
+  echo "ERROR: '$robot' no tiene mundo declarado en POSE_INICIAL" >&2
+  exit 1
+fi
+MUNDO="${MUNDO:-$REPO/$MUNDO_REL}"
 
 # --- procesos de ESTE robot -------------------------------------------------
 # El filtro es el ROS_DOMAIN_ID del proceso, no su nombre. Un proceso sin la
@@ -196,7 +205,15 @@ case "$accion" in
       echo "       anotalo en POSE_INICIAL['$robot']['mapa']." >&2
       exit 1
     fi
-    echo "== $robot: Nav2 + AMCL + Gazebo, piso $NIVEL (dominio $DOMINIO) =="
+    # Y si SI hay mapa, hay que pasarlo. El defecto del launch es el del piso 1
+    # -tiene que serlo, porque un launch no sabe que robot lo invoca- y desde que
+    # el piso 2 tiene mapa propio (2026-08-23) el guardian de arriba ya no salta.
+    # Sin esta linea, 'robot2 nav' cargaria el mapa del piso 1 en silencio, que es
+    # exactamente el fallo que aquel guardian existia para impedir.
+    if [[ ! " ${extras[*]} " =~ " map:=" ]]; then
+      extras+=("map:=$REPO/Robot/aws-deepracer/deepracer_bringup/maps/$MAPA")
+    fi
+    echo "== $robot: Nav2 + AMCL + Gazebo, piso $NIVEL, mapa $MAPA (dominio $DOMINIO) =="
     exec ros2 launch deepracer_bringup nav_amcl_demo_sim.launch.py \
       world:="$MUNDO" namespace:="$robot" x:="$X" y:="$Y" z:="$Z" yaw:="$YAW" \
       "${extras[@]}"

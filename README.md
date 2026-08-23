@@ -190,8 +190,9 @@ exec bash
 
 La primera línea evita tener que hacer `source` en cada terminal nueva. La segunda añade la
 raíz del repositorio a `GAZEBO_MODEL_PATH`, y la necesitan los mundos que incluyen modelos
-externos con `model://`: **`mundo_definitivo.world`**, que es el mundo vigente y el que los
-launch cargan por defecto, `pasillo_grande.world`, `pasillo_test.world`,
+externos con `model://`: **`mundo_definitivo_piso1.world`** y **`mundo_definitivo_piso2.world`**,
+que son los mundos vigentes —el primero es el que los launch cargan por defecto—,
+`mundo_definitivo.world`, `pasillo_grande.world`, `pasillo_test.world`,
 `USTA_WORLD/usta_test.world` y `primer_piso_dos_niveles.world`. Solo `primer_piso.world` y
 `primer_piso_v2.world` llevan la geometría embebida y funcionan sin ella.
 
@@ -276,7 +277,7 @@ En RViz: `Fixed Frame` = `map`, y en el display `Map` la propiedad
 ### Navegación autónoma sobre un mapa ya construido
 
 Un solo comando levanta Gazebo, el robot, AMCL y la pila Nav2, sobre
-`mundo_definitivo.world` y el mapa de su piso 1:
+`mundo_definitivo_piso1.world` y el mapa de ese piso:
 
 ```bash
 ros2 launch deepracer_bringup nav_amcl_demo_sim.launch.py
@@ -337,7 +338,7 @@ ros2 run nav2_map_server map_saver_cli -f /tmp/mapa_candidato \
 Antes de aceptar un mapa como definitivo, validarlo contra la geometría del mundo:
 
 ```bash
-python3 herramientas/verificar_mapa.py /tmp/mapa_candidato.yaml mundo_definitivo.world
+python3 herramientas/verificar_mapa.py /tmp/mapa_candidato.yaml mundo_definitivo_piso1.world
 ```
 
 La herramienta compara la extensión mapeada con la del archivo `.world` y rechaza el mapa
@@ -358,13 +359,19 @@ es también la forma de comprobar que **el mismo mapa sirve para los dos niveles
 cortes dan `ACEPTADO` con las mismas cifras, que es la evidencia de que las dos plantas son
 la misma geometría. `generar_mapa_desde_mundo.py` acepta la misma opción como `--altura`.
 
-> **Esto no aplica al mundo vigente.** En `mundo_definitivo.world` los dos pisos están a la
-> misma altura y separados en Y, así que no hay corte que los distinga: cada piso se acota con
-> `--region` al generar su mapa. La consecuencia es que `verificar_mapa.py` **rechaza**
-> `mundo_definitivo_piso1.yaml`, con un 29,7 % de cobertura en Y, porque mide contra el mundo
-> entero —los dos pasillos— y el mapa cubre uno. No es un defecto del mapa: su fidelidad es
-> exacta, 0 obstáculos falsos de 4725. La herramienta necesita un `--region` propio para
-> volver a ser útil aquí; hasta entonces, leer esa cifra sabiendo de dónde sale.
+> **Esto no aplica a los mundos vigentes**, porque desde el 2026-08-23 cada piso tiene el
+> suyo y no hay dos niveles dentro de un mismo archivo que separar por altura: cada mapa se
+> verifica contra su propio `.world` y el tercer argumento sobra. Lo que distingue una zona
+> de otra dentro de un piso es `--region`, no la altura.
+>
+> Mientras los dos pisos convivieron en `mundo_definitivo.world`, `verificar_mapa.py`
+> **rechazaba** `mundo_definitivo_piso1.yaml` por dos motivos, y los dos eran artefactos de
+> medición, no defectos del mapa: la cobertura en Y salía 29,7 % porque medía contra los dos
+> pasillos y el mapa cubre uno, y las celdas desconocidas salían 58,5 % porque el denominador
+> era la caja envolvente entera. Partir el mundo arregló el primero —la cobertura pasa a
+> 100,6 %—; el segundo se arregló en la herramienta, que ahora cuenta las desconocidas
+> **dentro de las regiones declaradas** en la cabecera del `.yaml`. Con ese denominador el
+> piso 1 da 1,5 % y el piso 2 da 0,1 %, y los dos mapas salen `ACEPTADO`.
 
 ---
 
@@ -376,7 +383,7 @@ la misma geometría. `generar_mapa_desde_mundo.py` acepta la misma opción como 
 | `Documentos/` | Anteproyecto, entregables semanales y guías operativas |
 | `Documentos/Evidencia/` | Capturas, registros de terminal e informes de sesión. Cada archivo con su pie de foto en [`Documentos/Evidencia/README.md`](Documentos/Evidencia/README.md): qué muestra, de cuándo es y qué afirmación sostiene |
 | `herramientas/` | Verificadores y utilidades (ver abajo) |
-| `*.world` | Mundos de Gazebo. El vigente es `mundo_definitivo.world` desde el 2026-08-20, y es también el **entorno de evaluación de OE4**: los dos pisos son dos pasillos distintos, uno al lado del otro en Y —piso 1 arriba (eje y≈10,0), piso 2 abajo (eje y≈−4,5)—, no una planta duplicada en altura. Cada robot corre en su propio `gzserver` con su `ROS_DOMAIN_ID`, así que nunca comparten escena y no hace falta elevar un nivel. Sustituye a `primer_piso_dos_niveles.world`, que hacía lo segundo y queda como referencia |
+| `*.world` | Mundos de Gazebo. El vigente es `mundo_definitivo_piso1.world` desde el 2026-08-23, y su par es `mundo_definitivo_piso2.world`: **un mundo por piso**, que juntos son el **entorno de evaluación de OE4**. Los dos pisos son pasillos distintos del mismo edificio —en la realidad, uno sobre el otro; dibujados en Gazebo uno al lado del otro en Y, piso 1 en y≈10,0 y piso 2 en y≈−4,5—, no una planta duplicada en altura. Sustituyen a `mundo_definitivo.world`, que los traía en la **misma escena** y se conserva solo como referencia histórica: ver el aviso sobre el cruce de LiDAR más abajo. `primer_piso_dos_niveles.world`, que sí los apila en altura, queda también como referencia |
 | `USTA_WORLD/`, `pasillo_grande/`, `pasillo_usta/` | Modelos SDF de entornos |
 | `ESTADO.md` | Tablero de avance, riesgos y decisiones |
 

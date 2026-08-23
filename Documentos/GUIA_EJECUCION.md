@@ -98,14 +98,14 @@ cd ~/deepracer_sim_ws && source install/setup.bash && ros2 launch deepracer_brin
 ```
 
 No hace falta pasar `world:=`, `map:=` ni la pose: los tres valores por defecto salen de
-**este mismo clon** del repositorio (`mundo_definitivo.world`, `mundo_definitivo_piso1.yaml`
+**este mismo clon** del repositorio (`mundo_definitivo_piso1.world`, `mundo_definitivo_piso1.yaml`
 y la fila `robot1` de `POSE_INICIAL`). Mundo y mapa van en pareja; cambiar uno solo hace que
 AMCL localice contra una geometría distinta de la simulada, y el síntoma —deriva creciente—
 no se parece a un error de configuración.
 
 > **Esta línea estuvo rota entre el 20 y el 22 de agosto** y conviene saber por qué, porque el
 > fallo no era visible. Este launch declaraba su propia pose por defecto en `(0, 0)`, que era
-> correcta cuando el mundo era `primer_piso_v2.world` pero en `mundo_definitivo.world` cae en la
+> correcta cuando el mundo era `primer_piso_v2.world` pero en el mundo de entonces cae en la
 > explanada vacía **entre** los dos pasillos. Gazebo abría, el vehículo aparecía, los siete
 > controladores quedaban activos y no había un solo mensaje de error: lo que no había era
 > pasillo alrededor. Hoy la pose sale de una sola tabla y
@@ -208,7 +208,7 @@ cd "$TESIS" && bash herramientas/verificar_instalacion.sh
 Si salen 2 fallos de `GAZEBO_MODEL_PATH` y de `los model:// externos resuelven`, **no es un
 problema del modelo**: es que esa terminal no cargó `~/.bashrc`, donde está la línea. Se
 arregla con `exec bash` y se vuelve a ejecutar. Afecta a los mundos que usan `model://`
-—**entre ellos `mundo_definitivo.world`, que es el que se carga por defecto**—, que abrirían
+—**entre ellos `mundo_definitivo_piso1.world`, que es el que se carga por defecto**—, que abrirían
 **vacíos y sin dar error**.
 
 **3. Que el `RobotModel` recibió la descripción.** El tópico se publica con durabilidad
@@ -535,10 +535,20 @@ cd ~/deepracer_sim_ws && source install/setup.bash && ros2 run nav2_map_server m
 
 La topología adoptada es **un `gzserver` por robot**, porque `gazebo_ros` de Humble aplica a
 todos los plugins el namespace del primer modelo cargado y dentro de un mismo simulador los
-dos robots no se pueden aislar. Los dos procesos cargan el **mismo** mundo, cada uno con un
-solo vehículo: así hay una sola geometría canónica.
+dos robots no se pueden aislar. Cada proceso carga **el mundo de su piso**, con un solo
+vehículo dentro.
 
-No hace falta `world:=`: el mundo por defecto es `mundo_definitivo.world` y sale del mismo
+> **Hasta el 2026-08-23 los dos cargaban el mismo mundo**, `mundo_definitivo.world`, con el
+> argumento de que así había «una sola geometría canónica». El argumento se cayó al medirlo:
+> aquel mundo traía los dos pasillos en la **misma escena** de Gazebo, y aislar el grafo de ROS
+> con `ROS_DOMAIN_ID` no aísla la escena. El LiDAR simulado alcanza 10,0 m y entre los dos
+> pasillos hay 5,44 m, así que desde 61 posiciones libres del piso 1 los rayos llegaban a
+> paredes del piso 2 y volvían con distancia —justo en el tramo norte-sur donde nace `robot1` y
+> donde está el punto de transferencia—. Partir el mundo fue una **extracción pura**: 25 paredes
+> al piso 1 y 34 al piso 2, con los rectángulos idénticos antes y después y el `.pgm` del mapa
+> del piso 1 igual byte a byte.
+
+No hace falta `world:=`: cada robot toma el mundo de su fila en `POSE_INICIAL`, y sale del mismo
 repositorio del que se compiló el código.
 
 ### Terminal 1 — robot1, piso 1, dominio 0
@@ -574,11 +584,12 @@ hace falta ningún cambio en el código ni en los `.xacro`.
 
 > **Por qué `x:=`/`y:=` y ya no `z:=3.03`.** Hasta el 2026-08-20 el escenario corría sobre
 > `primer_piso_dos_niveles.world`, donde el piso 2 era la misma planta elevada a z = 3,0 y el
-> robot2 nacía en z = 3,03 para asentarse en 2,993. En `mundo_definitivo.world` los dos pisos
-> son **pasillos distintos, uno al lado del otro en Y**. Pasar `z:=3.03` aquí haría caer al
+> robot2 nacía en z = 3,03 para asentarse en 2,993. Ahora los dos pisos son **pasillos distintos,
+> uno al lado del otro en Y**, cada uno en su propio mundo. Pasar `z:=3.03` aquí haría caer al
 > vehículo desde tres metros sobre el pasillo equivocado.
 
-En Gazebo deben aparecer tres modelos: `ground_plane`, `mundo_definitivo` y el vehículo.
+En Gazebo deben aparecer tres modelos: `ground_plane`, `mundo_definitivo_piso1` o
+`mundo_definitivo_piso2` según el robot, y el vehículo.
 
 ### RViz de cada uno
 
@@ -682,9 +693,10 @@ sigue saliendo en `pgrep` aunque ya no estorbe.
 
 ## 9. El mundo definitivo, su mapa y sus destinos
 
-Desde el 2026-08-20 `mundo_definitivo.world` **es** el mundo vigente y el valor por defecto de
-los launch, junto con `mundo_definitivo_piso1.yaml`. Ya no hay que pasar `world:=` ni `map:=`
-a mano.
+Desde el 2026-08-23 hay **un mundo por piso**: `mundo_definitivo_piso1.world` es el vigente y el
+valor por defecto de los launch, junto con `mundo_definitivo_piso1.yaml`, y
+`mundo_definitivo_piso2.world` va con `mundo_definitivo_piso2.yaml`. Ya no hay que pasar
+`world:=` ni `map:=` a mano: `herramientas/robot.sh` toma los dos de la fila del robot.
 
 Cuidado al leer los escenarios A a F de más arriba: sus **medidas** se tomaron sobre
 `primer_piso_v2.world` y `primer_piso_dos_niveles.world`, que eran los mundos de entonces, y
@@ -726,13 +738,14 @@ Para añadir un `robot3` se toca `POSE_INICIAL` —pose, nivel y mapa— y la ta
 
 ### El mundo y el mapa del piso 1
 
-`mundo_definitivo.world` tiene las dos plantas en el mismo mundo, separadas en Y: el piso 1
-al norte y el piso 2 al sur. Cada planta lleva **su propio mapa**, y eso es deliberado: un
-mapa único dejaría a Nav2 planificar una ruta de un nivel al otro por el vacío que los separa,
-que es justo lo que RNF-01 prohíbe.
+Cada planta lleva **su propio mundo y su propio mapa**, y eso es deliberado por dos motivos
+distintos. El mapa propio, porque un mapa único dejaría a Nav2 planificar una ruta de un nivel al
+otro por el vacío que los separa, que es justo lo que RNF-01 prohíbe. El mundo propio, porque
+mientras las dos plantas compartieron escena el LiDAR de una alcanzaba las paredes de la otra.
 
-Hasta ahora sólo está el del piso 1, en
-[`maps/mundo_definitivo_piso1.yaml`](../Robot/aws-deepracer/deepracer_bringup/maps/mundo_definitivo_piso1.yaml).
+Están los dos:
+[`maps/mundo_definitivo_piso1.yaml`](../Robot/aws-deepracer/deepracer_bringup/maps/mundo_definitivo_piso1.yaml)
+y [`maps/mundo_definitivo_piso2.yaml`](../Robot/aws-deepracer/deepracer_bringup/maps/mundo_definitivo_piso2.yaml).
 No se levantó con SLAM: se dibujó leyendo la geometría declarada del `.world` con
 `herramientas/generar_mapa_desde_mundo.py`. El `.yaml` lleva escrita en un comentario la orden
 completa que lo generó, con sus dos `--region`, porque esos rectángulos son una decisión y no

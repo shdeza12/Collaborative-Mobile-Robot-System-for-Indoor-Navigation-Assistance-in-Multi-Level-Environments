@@ -202,8 +202,10 @@ son comparables con las posteriores y la campaña se reinicia.
 | `required_movement_radius` | 0,5 m | progress checker |
 | `movement_time_allowance` | 10,0 s | progress checker |
 | `allow_reversing` | true (Reeds-Shepp) | planificador |
-| Mundo | `mundo_definitivo.world` | raíz del repositorio |
+| Mundo piso 1 | `mundo_definitivo_piso1.world` | raíz del repositorio |
+| Mundo piso 2 | `mundo_definitivo_piso2.world` | ídem |
 | Mapa piso 1 | `mundo_definitivo_piso1.yaml` | `deepracer_bringup/maps/` |
+| Mapa piso 2 | `mundo_definitivo_piso2.yaml` | ídem |
 | Radio mínimo de giro | 0,284 m (derivado: `max_steer` 0,5236 rad, batalla 0,164 m) | URDF |
 | Factor de tiempo real | ≥ 0,99 (RNF-06) | se verifica en cada corrida |
 
@@ -339,13 +341,13 @@ calla sus condiciones previas se ejecuta igual y produce números que no valen.
 |---|---|
 | **`/odom` cruzado** — una lectura devolvió la posición del otro agente | 🔴 ABIERTO. Las cuatro métricas salen de odometría; con esto abierto, ninguna es fiable. Entretanto, leer con `--no-daemon` |
 | **Carrera al cargar controladores** — un controlador puede quedar `unconfigured` | 🔴 ABIERTA. Hoy es causa de descarte (§8); si es frecuente, se come la cuota del 20 % |
-| **Mapa del piso 2** | 🔴 NO EXISTE. Prerrequisito de la condición B entera |
+| **Mapa del piso 2** | 🟢 CERRADO el 2026-08-23. `maps/mundo_definitivo_piso2.{pgm,yaml}`, generado contra `mundo_definitivo_piso2.world` y `ACEPTADO`: 0 de 6096 obstáculos sin pared real, 0,1 % de celdas desconocidas dentro de sus cinco regiones |
 | **Destinos del piso 2 en `puntos_interes.yaml`** | 🔴 Los 18 vanos están detectados pero sin nombrar. Ver la sección PISO 2 de [`mapa_destinos.txt`](mapa_destinos.txt) |
 | **Los dos agentes navegando simultáneamente** (H3) | 🔴 Arrastre de S19 a S20 |
 | **Segundo vehículo físico** (R11) | 🔴 Administrativo. Bloquea solo la campaña física (RF-27), no la de simulación |
 
-**La condición A se puede pilotar en cuanto se cierren los dos primeros.** La condición B necesita
-además el mapa y los nombres del piso 2.
+**La condición A se puede pilotar en cuanto se cierren los dos primeros.** A la condición B ya solo
+le faltan los **nombres** del piso 2: el mapa se cerró el 23-ago.
 
 ---
 
@@ -363,8 +365,8 @@ Lo que puede hacer que estos números signifiquen otra cosa de la que parecen.
 - **N = 30 da intervalos anchos.** Con 27 aciertos, el IC del 95 % va del 80 % al 97 %. Las
   afirmaciones del informe tienen que caber en ese ancho: «la tasa supera el 80 %» es defendible,
   «la tasa es del 90 %» no lo es.
-- **Un solo entorno.** Todo se mide en `mundo_definitivo.world`. Los resultados describen el
-  desempeño **en ese pasillo**, y así hay que enunciarlos. Generalizar a «entornos interiores» sería
+- **Un solo entorno.** Todo se mide en los dos pasillos de `mundo_definitivo_piso{1,2}.world`. Los
+  resultados describen el desempeño **en ese edificio**, y así hay que enunciarlos. Generalizar a «entornos interiores» sería
   ir más allá de los datos.
 - **El operador conoce la hipótesis.** Las corridas son automáticas de principio a fin
   precisamente por eso: el sorteo con semilla y el registro sin intervención manual (RF-25) quitan

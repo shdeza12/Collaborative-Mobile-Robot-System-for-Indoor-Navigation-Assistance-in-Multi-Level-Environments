@@ -90,52 +90,43 @@
       <heading_deg>0</heading_deg>
     </spherical_coordinates>
 
-    <!-- ================================================================= -->
-    <!-- YA NO ES EL MUNDO VIGENTE. Desde el 2026-08-23 cada piso tiene su
-         propio mundo: mundo_definitivo_piso1.world y
-         mundo_definitivo_piso2.world. Este se conserva como referencia
-         historica y NO debe usarse para navegar ni para medir.
+    <!-- PISO 2 del edificio. Un mundo por piso, y ese es el punto.
 
-         El motivo esta al final de este mismo comentario, en la frase «nunca
-         comparten escena», que es FALSA y se midio: aisla el grafo de ROS, no
-         la escena de Gazebo. Las 59 paredes estaban aqui, en un solo .world, y
-         el LiDAR simulado alcanza 10.0 m mientras entre los dos pasillos hay
-         5.44 m. Muestreando 1701 celdas libres del mapa del piso 1, 61
-         posiciones ven geometria del piso 2 y suman 159 rayos contaminados
-         -el peor caso, 12 rayos a 6.48 m-, todos en x -19.25..-17.81 e
-         y 5.07..8.91: el tramo norte-sur donde nace robot1 y donde esta el
-         punto de transferencia 'Escaleras'.
+         Antes los dos pasillos vivian en un solo mundo, 'mundo_definitivo.world',
+         dibujados lado a lado en Y. El comentario de aquel archivo defendia la
+         decision diciendo que cada robot corre en su propio gzserver "de modo que
+         nunca comparten escena". Eso confunde dos cosas: no comparten grafo ROS,
+         pero cada gzserver cargaba las 59 paredes de LOS DOS pisos, asi que el
+         LiDAR de un robot alcanzaba geometria del otro nivel.
 
-         Mientras los pisos se apilaban a z=3.0 el problema no existia, porque
-         un laser plano no ve una planta que esta encima. Aplanarlos el
-         2026-08-20 quito esa proteccion sin que nadie lo anotara.
-         ================================================================= -->
+         Medido el 2026-08-23 antes de partir: alcance del LiDAR simulado 10.0 m,
+         separacion entre pisos 5.44 m. Lanzando rayos desde 1701 posiciones libres
+         del mapa del piso 1, 61 de ellas ven paredes del piso 2 -en el peor caso
+         12 rayos, el mas cercano a 6.48 m-. Las 61 caen en x -19.25..-17.81,
+         y 5.07..8.91: el tramo norte-sur, que es justo donde nace robot1
+         (-19.165, 7.292) y donde esta el punto de transferencia, la escalera
+         (-19.43, 5.91), a 0.89 m del foco mas cercano. Es decir, el error caia
+         encima de las dos poses de las que dependen la convergencia inicial de
+         AMCL y la medida de RF-24.
 
-    <!-- Los dos pasillos definitivos vienen en un solo modelo (59 paredes), uno
-         al lado del otro en Y. La URI resuelve por NOMBRE DE CARPETA, no por el
-         <name> de model.config: la carpeta es 'mundo_Definitivo' con D mayuscula
-         y el modelo se llama 'mapaV2'.
+         Ese error no existe en el edificio: los pisos estan uno SOBRE otro y
+         ningun LiDAR plano ve el de arriba. Separar los mundos no es una
+         simplificacion, es la representacion fiel. La relacion entre niveles vive
+         en datos -el nivel de cada punto de interes y los puntos de
+         transferencia-, igual que ya se decidio para TF en CONTRATO_INTERFACES.md
+         seccion 3.
 
-         Cada pasillo es un piso. Cual es cual NO es libre: lo fija el mapa que
-         ya existe, maps/mundo_definitivo_piso1.pgm, generado sobre la banda
-         y = [4.62, 11.30], y con el los quince destinos de
-         config/puntos_interes.yaml, que llevan nombres reales de dependencia.
-         Es decir, el piso 1 es el pasillo de ARRIBA:
-           piso 1 -> pasillo superior, eje y = +10.02, ancho 2.35 m, x de -20.7 a +20.2
-           piso 2 -> pasillo inferior, eje y =  -4.48, ancho 2.55 m, x de -23.4 a +21.7
-         Ejes y anchos medidos sobre este mismo SDF, no estimados: son la media
-         de las dos paredes largas de cada pasillo (arriba +11.20 y +8.85; abajo
-         -3.20 y -5.75).
+         La particion fue una EXTRACCION PURA: los links se copiaron con su pose
+         intacta, asi que las coordenadas no se movieron y maps/mundo_definitivo_piso2.yaml (pendiente) y las
+         medidas anteriores al 2026-08-23 siguen valiendo.
 
-         A diferencia de primer_piso_dos_niveles.world, aqui NO se eleva un nivel
-         a z=3 ni se anade losa. Alli el nivel 2 era una copia del mismo pasillo y
-         solo la altura los distinguia; aqui son dos pasillos distintos, separados
-         en Y, y cada robot corre en su propio gzserver con su ROS_DOMAIN_ID, de
-         modo que nunca comparten escena. Elevar uno costaria duplicar las 59
-         paredes sin ganar nada. El ground_plane de z=0 les sirve a los dos. -->
+         Geometria de este piso, medida sobre el SDF:
+           pasillo inferior, eje y =  -4.48, ancho 2.55 m, x de -23.4 a +21.7 (34 paredes)
+         Se conserva 'mundo_Definitivo/' como origen de la extraccion. No usar
+         'mundo_definitivo.world' para navegar: reintroduce el cruce. -->
     <include>
-      <name>mundo_definitivo</name>
-      <uri>model://mundo_Definitivo</uri>
+      <name>mundo_definitivo_piso2</name>
+      <uri>model://mundo_definitivo_piso2</uri>
       <pose>0 0 0 0 0 0</pose>
     </include>
 

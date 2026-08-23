@@ -38,7 +38,29 @@ import sys
 # confirmar que la carpeta deducida es de verdad la raiz del repositorio.
 # 'herramientas/verificar_repositorio.sh' comprueba que este nombre y el del
 # README sigan siendo el mismo.
-MUNDO_VIGENTE = 'mundo_definitivo.world'
+#
+# DESDE EL 2026-08-23 YA NO HAY UN SOLO MUNDO. 'mundo_definitivo.world' traia los
+# dos pisos en la misma escena, uno al lado del otro en Y, y eso resulto tener un
+# efecto medido que nadie habia buscado: el LiDAR simulado alcanza 10.0 m
+# (deepracer.xacro) y entre los dos pasillos solo hay 5.44 m de separacion, asi
+# que desde el piso 1 los rayos llegan a la geometria del piso 2 y vuelven con
+# distancia. Muestreando 1701 celdas libres del mapa del piso 1, 61 posiciones
+# ven el otro piso y suman 159 rayos contaminados, todos entre x -19.25..-17.81 e
+# y 5.07..8.91 -- que es justo el tramo norte-sur donde nace robot1 (-19.165,
+# 7.292) y donde esta el punto de transferencia 'Escaleras' (-19.43, 5.91), a
+# 0.89 m del foco mas cercano.
+#
+# El comentario del mundo antiguo afirmaba que los robots 'nunca comparten
+# escena' porque cada uno corre en su gzserver con su ROS_DOMAIN_ID. Eso aisla el
+# GRAFO de ROS, no la ESCENA: las 59 paredes estaban en el mismo .world y el
+# laser de un piso barria las del otro. Cuando los pisos se apilaban a z=3.0 el
+# problema no existia, porque un laser plano no ve una planta que esta encima; al
+# aplanarlos el 2026-08-20 se perdio esa proteccion sin que nadie la anotara.
+#
+# La solucion es partir el mundo, no volver a apilarlo: 25 paredes al piso 1 y 34
+# al piso 2, extraccion pura -- los rectangulos de pared salen IDENTICOS antes y
+# despues, y el .pgm del mapa del piso 1 es el mismo byte a byte.
+MUNDO_VIGENTE = 'mundo_definitivo_piso1.world'
 
 # Donde nace cada robot en el mundo vigente. ESTA ES LA UNICA TABLA DE POSES DEL
 # PROYECTO: la leen los launch y 'herramientas/robot.sh'.
@@ -58,23 +80,37 @@ MUNDO_VIGENTE = 'mundo_definitivo.world'
 # 'herramientas/verificar_pose_spawn.py' comprueba en cada corte que cada una
 # sigue cayendo en celda libre de su mapa y con holgura suficiente.
 #
-# 'mapa' es el par del nivel: mundo y mapa van juntos, y localizar contra el mapa
-# del otro nivel converge SIN dar error contra la geometria equivocada. 'None'
-# significa que ese nivel todavia no tiene mapa generado.
+# 'mundo' y 'mapa' son el par del nivel: los tres van juntos. Localizar contra el
+# mapa del otro nivel converge SIN dar error contra la geometria equivocada, y
+# cargar el mundo del otro nivel -o el combinado- reintroduce el cruce de LiDAR
+# descrito arriba. 'None' significaria que ese nivel todavia no tiene el archivo.
 POSE_INICIAL = {
     'robot1': {
         'x': -19.165, 'y': 7.292, 'z': 0.03, 'yaw': 1.5708,   # tramo norte-sur
-        'nivel': 1, 'mapa': 'mundo_definitivo_piso1.yaml',
+        'nivel': 1,
+        'mundo': 'mundo_definitivo_piso1.world',
+        'mapa': 'mundo_definitivo_piso1.yaml',
     },
     'robot2': {
         'x': -21.889, 'y': -8.379, 'z': 0.03, 'yaw': 0.0,     # canal oeste
-        'nivel': 2, 'mapa': None,
+        'nivel': 2,
+        'mundo': 'mundo_definitivo_piso2.world',
+        'mapa': 'mundo_definitivo_piso2.yaml',
     },
 }
 
 # Con 'namespace' vacio -un solo robot- se usa esta fila. Es la que ven los
 # launch cuando nadie pasa x:=/y:=/yaw:=.
 ROBOT_POR_DEFECTO = 'robot1'
+
+# MUNDO_VIGENTE tiene que seguir siendo el mundo del robot por defecto. Se
+# comprueba aqui y no en un test porque este modulo lo importan los dos launch:
+# si alguien cambia una de las dos lineas y no la otra, el launch por defecto
+# abriria un mundo y naceria con la pose del otro, y eso no da error ruidoso.
+assert MUNDO_VIGENTE == POSE_INICIAL[ROBOT_POR_DEFECTO]['mundo'], (
+    "MUNDO_VIGENTE ('{}') y el mundo de {} ('{}') tienen que ser el mismo "
+    'archivo.'.format(MUNDO_VIGENTE, ROBOT_POR_DEFECTO,
+                      POSE_INICIAL[ROBOT_POR_DEFECTO]['mundo']))
 
 
 def pose_por_defecto(robot=ROBOT_POR_DEFECTO):
