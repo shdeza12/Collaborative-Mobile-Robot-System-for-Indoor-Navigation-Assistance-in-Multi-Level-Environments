@@ -49,14 +49,40 @@ accion="${2:-}"
 shift 2
 extras=("$@")
 
-# Tabla unica de los datos que distinguen a un robot de otro. Las poses salen de
-# medir el SDF de mundo_Definitivo y estan verificadas con el LiDAR: el ancho de
-# pasillo medido concuerda con el del modelo dentro de 56 mm.
+# Lo que distingue a un robot de otro se reparte en dos sitios, a proposito:
+#
+#   - Dominio y puerto son TRANSPORTE. Solo los usa este script, para aislar las
+#     dos pilas entre si, y nunca han divergido de nada. Se quedan aqui.
+#   - Pose y mapa son GEOMETRIA, y se comparten con los launch. Salen de
+#     POSE_INICIAL, en deepracer_raiz_repo.py. Ya no se copian aqui: hasta el
+#     2026-08-22 esta tabla era la tercera copia de la pose, y al cambiar de
+#     mundo se actualizaron dos de las tres. La que se quedo vieja hacia nacer al
+#     vehiculo fuera del pasillo sin dar ningun error.
 case "$robot" in
-  robot1) DOMINIO=0; PUERTO=11345; X=-19.165; Y=7.292;  YAW=1.5708 ;;  # piso 1, tramo norte-sur
-  robot2) DOMINIO=2; PUERTO=11346; X=-21.889; Y=-8.379; YAW=0.0    ;;  # piso 2, canal oeste
+  robot1) DOMINIO=0; PUERTO=11345 ;;
+  robot2) DOMINIO=2; PUERTO=11346 ;;
   *) echo "ERROR: robot desconocido '$robot' (robot1 o robot2)" >&2; uso ;;
 esac
+
+# 'python3' a secas basta: el modulo no importa nada de ROS, asi que se lee antes
+# de hacer 'source' de nada. Si falla, el mensaje del propio modulo dice que
+# robots conoce, y se corta aqui en vez de lanzar Gazebo con una pose vacia.
+LAUNCH_DIR="$REPO/Robot/aws-deepracer/deepracer_bringup/launch"
+if ! POSE=$(python3 -c "
+import sys
+sys.path.insert(0, '$LAUNCH_DIR')
+from deepracer_raiz_repo import pose_por_defecto
+p = pose_por_defecto('$robot')
+print(p['x'], p['y'], p['z'], p['yaw'], p['nivel'], p['mapa'] or '-')
+" 2>&1); then
+  echo "ERROR: no se pudo leer la pose de '$robot' de POSE_INICIAL" >&2
+  echo "       en $LAUNCH_DIR/deepracer_raiz_repo.py" >&2
+  printf '%s\n' "$POSE" | sed 's/^/       /' >&2
+  exit 1
+fi
+# MAPA vale '-' cuando ese nivel todavia no tiene mapa: la cadena vacia se
+# perderia al partir la linea y NIVEL acabaria en MAPA.
+read -r X Y Z YAW NIVEL MAPA <<< "$POSE"
 
 MUNDO="${MUNDO:-$REPO/mundo_definitivo.world}"
 
@@ -134,9 +160,9 @@ case "$accion" in
     echo "== Limpiando el dominio $DOMINIO =="
     parar_robot
     preparar_entorno
-    echo "== $robot: Gazebo en $(basename "$MUNDO"), pose ($X, $Y), dominio $DOMINIO =="
+    echo "== $robot: Gazebo en $(basename "$MUNDO"), piso $NIVEL, pose ($X, $Y), dominio $DOMINIO =="
     exec ros2 launch deepracer_bringup deepracer_sim.launch.py \
-      world:="$MUNDO" namespace:="$robot" x:="$X" y:="$Y" z:=0.03 yaw:="$YAW" \
+      world:="$MUNDO" namespace:="$robot" x:="$X" y:="$Y" z:="$Z" yaw:="$YAW" \
       "${extras[@]}"
     ;;
 
@@ -153,23 +179,26 @@ case "$accion" in
     preparar_entorno
     # nav_amcl_demo_sim.launch.py levanta TAMBIEN Gazebo: no se combina con 'sim'.
     #
-    # El mapa por defecto del launch es mundo_definitivo_piso1.yaml desde el
-    # 2026-08-20, asi que para robot1 no hay nada que pasar. Para robot2 SI:
-    # esta en el pasillo del piso 2 y ese mapa no existe todavia, de modo que
-    # cargaria la geometria del piso 1 estando en otro sitio. AMCL no da error
-    # -converge contra las paredes equivocadas- y el sintoma aparece despues
-    # como una ruta imposible, que es el patron que ya costo el mapa inventado
-    # del 12-ago.
-    if [[ "$robot" != robot1 && ! " ${extras[*]} " =~ " map:=" ]]; then
-      echo "ERROR: $robot esta en el piso 2 y no hay mapa de ese piso." >&2
+    # Quien no tiene mapa de su nivel no puede lanzar Nav2 y ya. El mapa por
+    # defecto del launch es el del piso 1, asi que un robot de otro piso
+    # cargaria la geometria equivocada: AMCL no da error -converge contra las
+    # paredes de otro sitio- y el sintoma aparece mucho despues como una ruta
+    # imposible, que es el patron que ya costo el mapa inventado del 12-ago.
+    #
+    # La condicion mira el MAPA de POSE_INICIAL, no el nombre del robot. Escrita
+    # como '$robot != robot1' habria que acordarse de tocarla al generar el mapa
+    # del piso 2, y nadie se acuerda de eso.
+    if [[ "$MAPA" == "-" && ! " ${extras[*]} " =~ " map:=" ]]; then
+      echo "ERROR: $robot esta en el piso $NIVEL y no hay mapa de ese piso." >&2
       echo "       Sin 'map:=' se cargaria el del piso 1: AMCL localizaria" >&2
       echo "       contra otra geometria SIN dar error." >&2
-      echo "       Generalo con herramientas/generar_mapa_desde_mundo.py" >&2
+      echo "       Generalo con herramientas/generar_mapa_desde_mundo.py y" >&2
+      echo "       anotalo en POSE_INICIAL['$robot']['mapa']." >&2
       exit 1
     fi
-    echo "== $robot: Nav2 + AMCL + Gazebo (dominio $DOMINIO) =="
+    echo "== $robot: Nav2 + AMCL + Gazebo, piso $NIVEL (dominio $DOMINIO) =="
     exec ros2 launch deepracer_bringup nav_amcl_demo_sim.launch.py \
-      world:="$MUNDO" namespace:="$robot" x:="$X" y:="$Y" z:=0.03 yaw:="$YAW" \
+      world:="$MUNDO" namespace:="$robot" x:="$X" y:="$Y" z:="$Z" yaw:="$YAW" \
       "${extras[@]}"
     ;;
 

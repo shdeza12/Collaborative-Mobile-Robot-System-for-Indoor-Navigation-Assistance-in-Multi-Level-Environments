@@ -26,7 +26,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 # El modulo vive junto a este archivo, dentro del propio paquete instalado.
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
-from deepracer_raiz_repo import mundo_por_defecto  # noqa: E402
+from deepracer_raiz_repo import mundo_por_defecto, pose_texto  # noqa: E402
 
 
 def generate_launch_description():
@@ -90,25 +90,17 @@ def generate_launch_description():
             description="Namespace del robot, p.ej. 'robot1'. "
                         'Vacio = comportamiento original de un solo robot.'
         ),
-        # La pose por defecto esta DENTRO del piso 1 del mundo vigente, no en el
-        # origen del mundo. Mientras el mundo fue 'primer_piso_v2.world' el origen
-        # caia dentro del pasillo y (0, 0) servia; en 'mundo_definitivo.world' los
-        # dos pasillos estan corridos en Y -piso 1 en y = +10.02, piso 2 en
-        # y = -4.48- y (0, 0) queda en la explanada vacia ENTRE los dos. El fallo
-        # no se ve al lanzar: Gazebo abre, el vehiculo aparece y los 7
-        # controladores quedan activos; lo que no hay es pasillo alrededor, y
-        # (0, 0) ni siquiera es una celda del mapa del piso 1, de modo que AMCL
-        # arrancaria fuera del mapa.
-        #
-        # El valor NO se elige aqui: es el mismo de la fila robot1 de
-        # 'herramientas/robot.sh', que son poses medidas sobre el SDF y
-        # comprobadas con el LiDAR. Dos tablas de poses divergen sin avisar, y la
-        # que se quede vieja manda al vehiculo contra una pared. Holgura 1.38 m,
-        # la mayor del mapa, por transformada de distancia sobre el .pgm.
-        DeclareLaunchArgument(name='x', default_value='-19.165'),
-        DeclareLaunchArgument(name='y', default_value='7.292'),
-        DeclareLaunchArgument(name='z', default_value='0.03'),
-        DeclareLaunchArgument(name='yaw', default_value='1.5708'),
+        # La pose por defecto NO se escribe aqui: sale de POSE_INICIAL, en
+        # 'deepracer_raiz_repo.py', que es la unica tabla de poses del proyecto.
+        # El porque esta en la cabecera de aquel archivo; en resumen, esta pose
+        # vivio en tres sitios a la vez, uno se quedo viejo al cambiar de mundo y
+        # el vehiculo nacio fuera del pasillo sin que nada diera error.
+        # 'herramientas/verificar_pose_spawn.py' comprueba que siga siendo celda
+        # libre del mapa y prohibe volver a escribir un numero en esta linea.
+        DeclareLaunchArgument(name='x', default_value=pose_texto('x')),
+        DeclareLaunchArgument(name='y', default_value=pose_texto('y')),
+        DeclareLaunchArgument(name='z', default_value=pose_texto('z')),
+        DeclareLaunchArgument(name='yaw', default_value=pose_texto('yaw')),
         gazebo_server_launcher,
         gazebo_client_launcher,
         spawn_deepracer

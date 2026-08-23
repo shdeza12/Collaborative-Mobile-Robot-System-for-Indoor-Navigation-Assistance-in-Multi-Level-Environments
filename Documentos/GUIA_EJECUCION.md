@@ -12,11 +12,33 @@ para el recorrido de mapeo y la verificación de cobertura del mapa,
 **Regla que se aplica a todos los comandos:** cada terminal nueva necesita su propio
 `cd ~/deepracer_sim_ws && source install/setup.bash`. El workspace no se sourcea solo.
 
+**Dónde está el repositorio.** Los comandos que llaman a `herramientas/…` empiezan por
+`cd "$TESIS"`. Define esa variable una vez por terminal, con la ruta de **tu** clon:
+
+```bash
+echo 'export TESIS=$HOME/Tesis' >> ~/.bashrc && source ~/.bashrc        # ← cámbialo si clonaste en otro sitio
+```
+
+Se escribe en `~/.bashrc`, y no sólo en la terminal actual, porque esta guía abre **tres o
+cuatro terminales a la vez** y la variable no se hereda entre ellas. Si en una terminal se
+queda sin definir, `cd "$TESIS"` no va a ninguna parte —`cd ""` no es un error para bash— y lo
+que falla es el `herramientas/…` siguiente, con un `No such file or directory` que señala al
+script y no a la variable. Ante esa duda, `echo $TESIS`: si sale una línea vacía, es esto.
+
+Es la única ruta del proyecto que depende de tu equipo. Va como variable, y no escrita en cada
+comando, por dos motivos: así solo hay un sitio que corregir, y así la guía no afirma dónde
+clonaste. Aquí hubo una **ruta fija** con el `Documents/` de un equipo concreto incrustado, que
+es la forma más traicionera del error porque lleva `$HOME` y parece portable;
+`herramientas/verificar_repositorio.sh` la rechaza por eso.
+
+El `cd` sí hace falta, aunque parezca ruido: `herramientas/…` a secas solo funciona si ya
+estabas dentro del repositorio, y el error que da —`No such file or directory`— no dice cuál
+era el problema.
+
 **Atajo:** [`herramientas/robot.sh`](../herramientas/robot.sh) hace todo eso —el `source`, el
-dominio, el puerto de Gazebo, la pose de spawn y el `GAZEBO_MODEL_PATH`— desde una sola tabla.
-Los comandos largos de esta guía siguen siendo la referencia de lo que ocurre por debajo; el
-script es para no teclearlos. Está descrito en el §9, junto con el mundo que carga, que **no
-es el de los escenarios A a F**.
+dominio, el puerto de Gazebo, la pose de spawn y el `GAZEBO_MODEL_PATH`— desde una sola tabla,
+y carga **el mismo mundo** que los escenarios de esta guía. Los comandos largos siguen siendo la
+referencia de lo que ocurre por debajo; el script es para no teclearlos. Está descrito en el §9.
 
 ---
 
@@ -29,8 +51,18 @@ que no se parece a un conflicto de puertos. Comprobar y, si hay algo vivo, cerra
 pgrep -af "gzserver|gzclient|rviz2"
 ```
 
+La forma recomendada es dejar que el script lo haga, una vez por robot. Filtra por
+`ROS_DOMAIN_ID` y se salta los shells, así que no puede cerrarte la terminal:
+
 ```bash
-pkill -f "ros2 launch deepracer_bringup" ; pkill -f gzserver ; pkill -f gzclient ; pkill -x rviz2 ; sleep 4 ; ros2 daemon stop ; ros2 daemon start
+cd "$TESIS" && herramientas/robot.sh robot1 parar && herramientas/robot.sh robot2 parar
+```
+
+A mano, si hace falta —mata **los dos** dominios de golpe, no lo uses con un compañero
+trabajando en el otro robot:
+
+```bash
+pkill -f "ros2 launch deepracer_bringup" ; pkill -x gzserver ; pkill -x gzclient ; pkill -x rviz2 ; sleep 4 ; ros2 daemon stop ; ros2 daemon start
 ```
 
 **El `pkill` del `ros2 launch` va primero y es imprescindible.** Matar sólo `gzserver` deja
@@ -65,10 +97,20 @@ simulación, Nav2, AMCL y el servidor de mapas de una vez.
 cd ~/deepracer_sim_ws && source install/setup.bash && ros2 launch deepracer_bringup nav_amcl_demo_sim.launch.py namespace:=robot1
 ```
 
-No hace falta pasar `world:=` ni `map:=`: los valores por defecto salen de **este mismo
-clon** del repositorio (`mundo_definitivo.world` y `mundo_definitivo_piso1.yaml`). Mundo y
-mapa van en pareja; cambiar uno solo hace que AMCL localice contra una geometría distinta
-de la simulada, y el síntoma —deriva creciente— no se parece a un error de configuración.
+No hace falta pasar `world:=`, `map:=` ni la pose: los tres valores por defecto salen de
+**este mismo clon** del repositorio (`mundo_definitivo.world`, `mundo_definitivo_piso1.yaml`
+y la fila `robot1` de `POSE_INICIAL`). Mundo y mapa van en pareja; cambiar uno solo hace que
+AMCL localice contra una geometría distinta de la simulada, y el síntoma —deriva creciente—
+no se parece a un error de configuración.
+
+> **Esta línea estuvo rota entre el 20 y el 22 de agosto** y conviene saber por qué, porque el
+> fallo no era visible. Este launch declaraba su propia pose por defecto en `(0, 0)`, que era
+> correcta cuando el mundo era `primer_piso_v2.world` pero en `mundo_definitivo.world` cae en la
+> explanada vacía **entre** los dos pasillos. Gazebo abría, el vehículo aparecía, los siete
+> controladores quedaban activos y no había un solo mensaje de error: lo que no había era
+> pasillo alrededor. Hoy la pose sale de una sola tabla y
+> [`herramientas/verificar_pose_spawn.py`](../herramientas/verificar_pose_spawn.py) comprueba en
+> cada corte que siga cayendo en celda libre del mapa.
 
 **Esperar** a leer en el log `Starting gazebo_ros2_control plugin in namespace: /robot1`.
 El plugin tarda, y juzgar el lanzamiento antes de esa línea lleva a reiniciar sin motivo.
@@ -158,7 +200,7 @@ invisible o reducido a los ejes. El URDF publicado referencia cinco mallas
 `zed_camera_link.STL`— y la comprobación de que todas resuelven en disco está automatizada:
 
 ```bash
-cd ~/Tesis && bash herramientas/verificar_instalacion.sh
+cd "$TESIS" && bash herramientas/verificar_instalacion.sh
 ```
 
 **Esperado: `32 comprobaciones pasan, 0 fallan`.**
@@ -232,14 +274,29 @@ luego **Nav2 Goal** para clicar el destino.
 La reproducible, desde consola —es la que se usa para medir, porque deja constancia escrita
 del objetivo:
 
+El destino es **ETM1**, una de las quince localizaciones de
+[`puntos_interes.yaml`](../Robot/aws-deepracer/deepracer_bringup/config/puntos_interes.yaml).
+Conviene usar destinos de ese archivo y no coordenadas inventadas: son puertas reales del
+pasillo, con su holgura medida, y son las mismas que verá la HRI.
+
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /robot1/navigate_to_pose nav2_msgs/action/NavigateToPose "{pose: {header: {frame_id: map}, pose: {position: {x: 5.0, y: 0.0, z: 0.0}, orientation: {w: 1.0}}}}"
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /robot1/navigate_to_pose nav2_msgs/action/NavigateToPose "{pose: {header: {frame_id: map}, pose: {position: {x: -15.92, y: 10.59, z: 0.0}, orientation: {w: 1.0}}}}"
 ```
 
+El marco es `map` **sin prefijo**, aunque el robot vaya bajo `/robot1`: lo publica el
+`map_server` y es el ancla común a los dos robots. Con `robot1/map` la meta se rechaza.
+
 **`SUCCEEDED` no significa que el vehículo llegó**, solo que el árbol de comportamiento
-terminó. La comprobación válida es medir `/robot1/odom` antes y después y comparar el
-desplazamiento contra el objetivo. En las corridas de H1 y S18, sobre un objetivo de 5,0 m,
-lo medido fue 4,79 – 4,96 m.
+terminó. La comprobación válida es leer `/robot1/odom` al terminar y comparar contra el
+objetivo, porque el controlador se mide contra AMCL y no contra la verdad del simulador:
+
+```bash
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 topic echo /robot1/odom --once
+```
+
+Lo medido el 21-ago sobre este mundo, con los tres destinos probados, fue **0,177 – 0,296 m**
+de error. El del medio, ETM13, quedó **fuera** de la `xy_goal_tolerance` de 0,25 m y aun así
+Nav2 devolvió `SUCCEEDED`: por eso esta comprobación no es opcional.
 
 ---
 
@@ -264,25 +321,37 @@ la maniobra nunca se ejercitó.
 Lo medido: arco en reversa de 46°, cúspide, arco adelante de 102° — **148° de giro en 4 s
 dentro de una caja de 1,0 × 0,4 m**.
 
+> Esas cifras se tomaron el 18-ago **sobre `primer_piso_v2.world`**, con la pose de arranque
+> `x:=25.0 y:=1.45` que ya no existe en el mundo vigente. El procedimiento sigue valiendo y la
+> maniobra sigue estando en los parámetros; los grados y los segundos hay que volver a medirlos
+> en `mundo_definitivo.world` con los comandos de abajo. **No citar los 148° como resultado de
+> este escenario hasta repetirlo.**
+
 ### Cómo lanzarla
 
-Arranca el vehículo en el pasillo abierto mirando al este, con la meta **detrás**:
+El arranque por defecto ya sirve: `robot1` nace en el tramo norte-sur mirando **al norte**
+(`yaw = 1,5708`), y el destino **Escaleras** queda 1,4 m **detrás**, además con rumbo de
+llegada opuesto (`yaw = −1,5708`). No hay que pasar pose:
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && ros2 launch deepracer_bringup nav_amcl_demo_sim.launch.py x:=25.0 y:=1.45 yaw:=0.0
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 launch deepracer_bringup nav_amcl_demo_sim.launch.py namespace:=robot1
 ```
 
 Grabar antes de mandar la meta, en otra terminal:
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && ros2 bag record -o /tmp/v_p1 /plan /odom /cmd_vel /amcl_pose
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 bag record -o /tmp/v_p1 /robot1/plan /robot1/odom /robot1/cmd_vel /robot1/amcl_pose
 ```
 
 Y la meta, en una tercera:
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /navigate_to_pose nav2_msgs/action/NavigateToPose "{pose: {header: {frame_id: map}, pose: {position: {x: 10.60, y: 1.45}, orientation: {w: 1.0}}}}"
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /robot1/navigate_to_pose nav2_msgs/action/NavigateToPose "{pose: {header: {frame_id: map}, pose: {position: {x: -19.43, y: 5.91}, orientation: {z: -0.7071, w: 0.7071}}}}"
 ```
+
+La `orientation` de aquí **no** es la identidad como en el escenario C: es el cuaternión de
+`yaw = −π/2`, que es lo que obliga a la maniobra. Con `w: 1.0` el vehículo llegaría al mismo
+punto mirando al norte y no habría nada que medir.
 
 **Manda la meta dentro de los primeros 30 s tras el arranque.** Con el robot parado más
 tiempo, la deriva en reposo introduce un desvío inicial que confunde el diagnóstico.
@@ -290,11 +359,13 @@ tiempo, la deriva en reposo introduce un desvío inicial que confunde el diagnó
 Medir después:
 
 ```bash
-cd ~/Tesis && python3 herramientas/analizar_maniobra.py /tmp/v_p1 10.60 1.45
+cd "$TESIS" && python3 herramientas/analizar_maniobra.py /tmp/v_p1 -19.43 5.91
 ```
 
-> Los comandos anteriores van **sin namespace**, que es como se grabaron las seis corridas de
-> referencia. Con `namespace:=robot1` hay que prefijar la acción y los tópicos del bag.
+> Las seis corridas de referencia del 18-ago se grabaron **sin namespace** y contra el mundo
+> anterior, así que sus bags llevan `/odom` y `/plan` a secas. Los comandos de arriba usan
+> `robot1` porque es lo que hace el resto de la guía; si vuelves a abrir uno de aquellos bags,
+> los nombres de tópico son los de entonces.
 
 ### Qué mirar en RViz
 
@@ -455,7 +526,7 @@ El procedimiento y la verificación de cobertura están en
 tópico, porque `map_saver_cli` escucha `/map`:
 
 ```bash
-ros2 run nav2_map_server map_saver_cli -f /tmp/mapa_candidato --ros-args -p use_sim_time:=true -r map:=/robot1/map
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 run nav2_map_server map_saver_cli -f /tmp/mapa_candidato --ros-args -p use_sim_time:=true -r map:=/robot1/map
 ```
 
 ---
@@ -487,11 +558,19 @@ cd ~/deepracer_sim_ws && source install/setup.bash && GAZEBO_MASTER_URI=http://l
 `GAZEBO_MASTER_URI` separa los dos Gazebo; `ROS_DOMAIN_ID` separa los dos grafos ROS. No
 hace falta ningún cambio en el código ni en los `.xacro`.
 
-> **Estas poses no se teclean a ojo.** Salen de la tabla de
-> [`herramientas/robot.sh`](../herramientas/robot.sh), que es la única del proyecto: están
-> medidas sobre el SDF de `mundo_Definitivo` y comprobadas con el LiDAR. Si se van a escribir
-> a mano, copiarlas de ahí. Mejor todavía, no escribirlas: `robot.sh robot2 sim` hace lo mismo
-> sin teclear ninguna.
+> **Estas poses no se teclean a ojo, y escritas aquí son una copia.** La original es
+> `POSE_INICIAL`, en
+> [`deepracer_raiz_repo.py`](../Robot/aws-deepracer/deepracer_bringup/launch/deepracer_raiz_repo.py):
+> la única tabla de poses del proyecto, medida sobre el SDF de `mundo_Definitivo` y comprobada
+> con el LiDAR. Estas dos líneas están escritas enteras a propósito, porque el escenario existe
+> para enseñar **lo que ocurre por debajo**; el precio es que son las únicas del repositorio que
+> pueden quedarse viejas sin que nadie avise. Antes de fiarte de ellas, contrástalas:
+>
+> ```bash
+> cd "$TESIS" && herramientas/robot.sh robot2 sim
+> ```
+>
+> hace exactamente esto mismo, leyendo la pose de la tabla, y no hay nada que teclear.
 
 > **Por qué `x:=`/`y:=` y ya no `z:=3.03`.** Hasta el 2026-08-20 el escenario corría sobre
 > `primer_piso_dos_niveles.world`, donde el piso 2 era la misma planta elevada a z = 3,0 y el
@@ -582,11 +661,22 @@ operación por defecto debe ser sin ventanas.
 
 ## 8. Apagado
 
+Es el mismo procedimiento del §0 y por el mismo motivo, así que se usan los mismos dos
+comandos. Por robot:
+
+```bash
+cd "$TESIS" && herramientas/robot.sh robot1 parar && herramientas/robot.sh robot2 parar
+```
+
+O a mano, matando los dos dominios de golpe:
+
 ```bash
 pkill -f "ros2 launch deepracer_bringup" ; pkill -x gzserver ; pkill -x gzclient ; pkill -x rviz2 ; sleep 4 ; ros2 daemon stop ; ros2 daemon start
 ```
 
-Dejar el daemon reiniciado evita heredar el problema en la siguiente sesión.
+Dejar el daemon reiniciado evita heredar el problema en la siguiente sesión. `robot.sh parar`
+además **comprueba el puerto**, que es la señal fiable: un proceso muerto queda como zombi y
+sigue saliendo en `pgrep` aunque ya no estorbe.
 
 ---
 
@@ -610,16 +700,29 @@ ROS, el puerto de Gazebo, la pose de spawn, la ruta absoluta del mundo y el
 `Service /spawn_entity unavailable`, que apunta al sitio equivocado.
 
 ```bash
-herramientas/robot.sh robot1 sim
+cd "$TESIS" && herramientas/robot.sh robot1 sim
 ```
 
 Las acciones son `sim`, `rviz`, `slam`, `nav2`, `teleop`, `lidar`, `estado` y `parar`. Todo
-argumento con `:=` se reenvía tal cual a `ros2 launch`, así que
-`herramientas/robot.sh robot1 sim gui:=false` funciona.
+argumento con `:=` se reenvía tal cual a `ros2 launch` y **sobreescribe** lo que traiga el
+script, así que `cd "$TESIS" && herramientas/robot.sh robot1 sim gui:=false` funciona.
+
+El `cd` de delante hace falta: la ruta es relativa al repositorio y sin él sale
+`No such file or directory`, que no dice cuál era el problema.
 
 No reemplaza a `lanzar_sim.sh`: aquel mata **todo** lo que huela a ROS o Gazebo antes de
 arrancar, lo que con dos robots simultáneos tumba al compañero. Éste limita la limpieza a los
 procesos cuyo `ROS_DOMAIN_ID` coincide con el del robot pedido.
+
+**De dónde saca la pose.** No la lleva escrita: la lee de `POSE_INICIAL`, en
+[`deepracer_raiz_repo.py`](../Robot/aws-deepracer/deepracer_bringup/launch/deepracer_raiz_repo.py),
+que es la única tabla de poses del proyecto y la misma que usan los launch. Antes del
+2026-08-22 había tres copias y una se quedó vieja al cambiar de mundo. Lo único que el script
+sigue guardando por su cuenta son el `ROS_DOMAIN_ID` y el puerto de Gazebo, que son transporte
+y no los comparte con nadie.
+
+Para añadir un `robot3` se toca `POSE_INICIAL` —pose, nivel y mapa— y la tabla de dominios de
+`robot.sh`. En ningún launch.
 
 ### El mundo y el mapa del piso 1
 

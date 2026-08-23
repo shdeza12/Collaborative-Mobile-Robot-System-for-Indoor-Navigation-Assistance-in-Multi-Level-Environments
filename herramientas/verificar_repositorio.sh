@@ -193,6 +193,19 @@ else
   mal "el launch carga '$MAPA' sobre el mundo '$VIGENTE'; como no declara de que mundo salio, tendria que llamarse '$ESPERADO'"
 fi
 
+# La pose de nacimiento vivio en tres archivos a la vez -robot.sh y los dos
+# launch- y al cambiar de mundo se actualizaron dos. La que se quedo vieja hacia
+# nacer al vehiculo en la explanada entre los dos pasillos, y eso NO da error:
+# Gazebo abre, los siete controladores quedan activos y no hay pasillo alrededor.
+# Se delega en la herramienta porque hay que leer el .pgm para saberlo.
+paso 'cada robot nace en celda libre de su mapa'
+SALIDA_POSE=$(python3 herramientas/verificar_pose_spawn.py 2>&1)
+if [ $? -eq 0 ]; then
+  bien
+else
+  mal "$(printf '%s\n' "$SALIDA_POSE" | grep -E 'FALLO|Error|error' | head -5)"
+fi
+
 # ---------------------------------------------------------- 5. estado al dia
 titulo '5. El tablero de estado refleja la realidad'
 

@@ -25,7 +25,7 @@ from ament_index_python.packages import get_package_share_directory
 
 # El modulo vive junto a este archivo, dentro del propio paquete instalado.
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
-from deepracer_raiz_repo import mundo_por_defecto  # noqa: E402
+from deepracer_raiz_repo import mundo_por_defecto, pose_texto  # noqa: E402
 
 
 def generate_launch_description():
@@ -70,12 +70,21 @@ def generate_launch_description():
     declare_ns_arg = DeclareLaunchArgument(
         'namespace', default_value='',
         description="Namespace del robot, p.ej. 'robot1'. Vacio = un solo robot.")
-    # Los defectos coinciden con los de deepracer_spawn.launch.py; cambiarlos
-    # solo aqui haria que el robot y AMCL nacieran en sitios distintos.
-    declare_x_arg = DeclareLaunchArgument('x', default_value='0')
-    declare_y_arg = DeclareLaunchArgument('y', default_value='0')
-    declare_yaw_arg = DeclareLaunchArgument('yaw', default_value='0')
-    declare_z_arg = DeclareLaunchArgument('z', default_value='0.03')
+    # Los defectos salen de POSE_INICIAL, en 'deepracer_raiz_repo.py', que es la
+    # unica tabla de poses del proyecto.
+    #
+    # Aqui es donde mordio el defecto del 2026-08-22, y conviene dejarlo escrito.
+    # Estas cuatro lineas decian (0, 0, 0) "para coincidir con
+    # deepracer_spawn.launch.py". Coincidian con aquel, si, pero NO con
+    # deepracer_sim.launch.py, que al pasar a 'mundo_definitivo.world' si recibio
+    # la pose nueva. Como este launch INCLUYE a aquel pasandole su propia x/y/yaw,
+    # el defecto de aqui ganaba: quien seguia la guia -que no pasa x:= ni y:=-
+    # veia nacer el vehiculo en la explanada vacia entre los dos pasillos, sin un
+    # solo mensaje de error. Con una sola tabla, ese desacuerdo ya no es posible.
+    declare_x_arg = DeclareLaunchArgument('x', default_value=pose_texto('x'))
+    declare_y_arg = DeclareLaunchArgument('y', default_value=pose_texto('y'))
+    declare_yaw_arg = DeclareLaunchArgument('yaw', default_value=pose_texto('yaw'))
+    declare_z_arg = DeclareLaunchArgument('z', default_value=pose_texto('z'))
 
     include_files = GroupAction([
         # start deepracer simulation

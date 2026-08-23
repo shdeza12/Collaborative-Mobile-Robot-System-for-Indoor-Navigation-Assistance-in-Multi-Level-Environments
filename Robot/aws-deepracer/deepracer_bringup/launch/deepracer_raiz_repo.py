@@ -40,6 +40,58 @@ import sys
 # README sigan siendo el mismo.
 MUNDO_VIGENTE = 'mundo_definitivo.world'
 
+# Donde nace cada robot en el mundo vigente. ESTA ES LA UNICA TABLA DE POSES DEL
+# PROYECTO: la leen los launch y 'herramientas/robot.sh'.
+#
+# Por que esta aqui y no en cada launch. Hasta el 2026-08-22 la pose vivia en
+# tres sitios que no se hablaban: la tabla de robot.sh, los defectos de
+# deepracer_sim.launch.py y los de nav_amcl_demo_sim.launch.py. Al pasar de
+# 'primer_piso_v2.world' a 'mundo_definitivo.world' se actualizaron dos de los
+# tres, y el que se quedo viejo -nav_amcl, en (0, 0)- hacia nacer al vehiculo en
+# la explanada vacia ENTRE los dos pasillos. El fallo no es ruidoso: Gazebo abre,
+# el vehiculo aparece y los siete controladores quedan activos; lo que no hay es
+# pasillo alrededor, y (0, 0) ni siquiera es una celda del mapa, de modo que AMCL
+# arranca sin geometria contra la que localizar.
+#
+# Las poses estan MEDIDAS sobre el SDF de mundo_Definitivo y comprobadas con el
+# LiDAR: el ancho de pasillo medido concuerda con el del modelo dentro de 56 mm.
+# 'herramientas/verificar_pose_spawn.py' comprueba en cada corte que cada una
+# sigue cayendo en celda libre de su mapa y con holgura suficiente.
+#
+# 'mapa' es el par del nivel: mundo y mapa van juntos, y localizar contra el mapa
+# del otro nivel converge SIN dar error contra la geometria equivocada. 'None'
+# significa que ese nivel todavia no tiene mapa generado.
+POSE_INICIAL = {
+    'robot1': {
+        'x': -19.165, 'y': 7.292, 'z': 0.03, 'yaw': 1.5708,   # tramo norte-sur
+        'nivel': 1, 'mapa': 'mundo_definitivo_piso1.yaml',
+    },
+    'robot2': {
+        'x': -21.889, 'y': -8.379, 'z': 0.03, 'yaw': 0.0,     # canal oeste
+        'nivel': 2, 'mapa': None,
+    },
+}
+
+# Con 'namespace' vacio -un solo robot- se usa esta fila. Es la que ven los
+# launch cuando nadie pasa x:=/y:=/yaw:=.
+ROBOT_POR_DEFECTO = 'robot1'
+
+
+def pose_por_defecto(robot=ROBOT_POR_DEFECTO):
+    """Fila de POSE_INICIAL de un robot. Falla ruidosamente si no existe."""
+    if robot not in POSE_INICIAL:
+        raise KeyError(
+            "No hay pose para '{}'. Conocidos: {}. Anadirlo a POSE_INICIAL en "
+            'este archivo, nunca en el launch.'.format(
+                robot, ', '.join(sorted(POSE_INICIAL))))
+    return POSE_INICIAL[robot]
+
+
+def pose_texto(clave, robot=ROBOT_POR_DEFECTO):
+    """Un componente de la pose como cadena, que es lo que exige
+    DeclareLaunchArgument: no acepta numeros."""
+    return str(pose_por_defecto(robot)[clave])
+
 
 def raiz_repositorio():
     """Carpeta raiz del repositorio, o None si no se pudo confirmar."""
