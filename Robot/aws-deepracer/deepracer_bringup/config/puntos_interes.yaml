@@ -79,9 +79,21 @@
 #
 # LO QUE FALTA
 # ------------
-# Solo esta el piso 1. El piso 2 tiene su mapa y sus dieciocho vanos detectados,
-# pero sus nombres todavia no estan decididos y por eso no se escriben aqui: un
-# destino sin nombre real no es un destino, es una coordenada.
+# Solo esta el piso 1. El piso 2 tiene sus dieciocho vanos detectados, pero le
+# faltan DOS cosas, no una:
+#
+#   - El MAPA. Hasta el 2026-08-22 esta linea afirmaba que ya existia; no es
+#     cierto y nunca lo fue. Bajo maps/ solo esta mundo_definitivo_piso1, y el
+#     historial completo -git log --all --diff-filter=A- no registra que se haya
+#     anadido nunca un mapa del piso 2. La receta que lo genera tampoco existe:
+#     la del piso 1 esta escrita dentro de su propio .yaml, y la del piso 2 no
+#     esta en ningun sitio, asi que hay que volver a deducir sus --region.
+#   - Los NOMBRES de las salas, que todavia no estan decididos. Un destino sin
+#     nombre real no es un destino, es una coordenada.
+#
+# Las dos se llevan en la seccion PISO 2 de Documentos/mapa_destinos.txt, y son
+# prerrequisito de la condicion B de la campana de OE4 (seccion 10 de
+# Documentos/PROTOCOLO_EXPERIMENTAL.md).
 #
 # Los nombres ETM van del 1 al 13 sin ETM12: no es un olvido de numeracion, es
 # que ese vano no existe en la planta.

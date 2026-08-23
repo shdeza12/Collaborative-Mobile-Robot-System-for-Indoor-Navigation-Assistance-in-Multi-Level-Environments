@@ -327,15 +327,43 @@
        |...........#      
        |...........#      
        |#########..#      
- -9.44 |############      
-       |       #####      
+ -9.44 |############
+       |       #####
+
+    ANTES DE ESCRIBIR NADA, TRES COSAS COMPROBADAS EL 2026-08-22
+    ------------------------------------------------------------
+    Se contrastaron los dieciocho vanos contra la geometria del .world, y dos
+    de ellos NO son puertas. Van marcados 'N' de antemano:
+
+      1  (4.20 m)  El piso 2 no tiene muro oeste. Solo hay dos paredes
+                   horizontales -x -23.39..-14.89 en y -11.30, y x -23.37..
+                   -17.37 en y -6.91- y entre ellas quedan 4.24 m de BOCA
+                   ABIERTA, que es lo que se detecto. No es un vano, es donde
+                   se acaba el edificio. Los 4.24 m medidos y los 4.20 m
+                   detectados son el mismo hueco.
+
+      I  (0.30 m)  Hueco real, pero de 0.36 m, entre dos tramos de pared del
+                   extremo este que no llegan a tocarse (y -6.95..-5.45 y
+                   y -5.09..-3.34). El radio minimo de giro del vehiculo es
+                   0.284 m: por ahi no pasa. Es una junta mal cerrada del
+                   modelo, no una puerta.
+
+    Los otros dieciseis miden entre 0.60 y 1.32 m y si son aberturas reales.
+    El 2 (1.32 m) es un paso ancho, no una puerta de habitacion.
+
+    OJO CON LAS PARADAS: la columna 'parada propuesta' es la salida CRUDA, sin
+    aplicar la regla de arrimar cada parada a la pared de su propia puerta. Las
+    cuatro parejas enfrentadas -5/6, 7/8, 9/A y B/C- tienen hoy la MISMA parada,
+    a 0.00 m una de otra, con una xy_goal_tolerance de 0.25 m. Es el mismo fallo
+    que en el piso 1 dejaba ETM13 y ETM3 a 0.18 m. Se recalculan al generar el
+    mapa; no hace falta que toques esa columna.
 
     Tabla de vanos. Escribe el nombre, y en '?' pon S si es un destino
     de verdad o N si hay que descartarlo.
 
      ID  centro del vano      vano   pared      parada propuesta   ?  nombre
     ------------------------------------------------------------------------------
-     1  ( -23.36, -9.02)   4.20 m vertical   ( -23.36, -9.05) yaw 1.571 al este   _  ______________
+     1  ( -23.36, -9.02)   4.20 m vertical   ( -23.36, -9.05) yaw 1.571 al este   _  N  (boca abierta)
      2  ( -17.42, -1.70)   1.32 m vertical   ( -16.10, -2.33) yaw 1.571 al oeste  _  ______________
      3  ( -14.48,-11.27)   0.78 m horizontal ( -15.26,-10.07) yaw 0.000 al sur    _  ______________
      4  ( -14.51, -0.95)   0.60 m horizontal ( -15.32, -2.15) yaw 0.000 al norte  _  ______________
@@ -352,7 +380,44 @@
      F  ( +15.22, -5.69)   0.78 m horizontal ( +15.22, -4.73) yaw 0.000 al sur    _  ______________
      G  ( +15.46, -3.77)   0.90 m horizontal ( +15.46, -4.73) yaw 0.000 al norte  _  ______________
      H  ( +22.00, -3.41)   0.66 m horizontal ( +21.88, -4.85) yaw 0.000 al norte  _  ______________
-     I  ( +23.26, -5.27)   0.30 m vertical   ( +21.76, -5.27) yaw 1.571 al este   _  ______________
+     I  ( +23.26, -5.27)   0.30 m vertical   ( +21.76, -5.27) yaw 1.571 al este   _  N  (0.36 m, no cabe)
 
     Arranque del robot ahora: x=-21.889 y=-8.379 yaw=+0.0000
     Si debe ser otro, escribelo aqui:  x=________ y=________ yaw=________
+
+    DONDE CORTAR EL EXTREMO OESTE  (marca una con X)
+    ------------------------------------------------
+    El canal esta abierto por el oeste -es el vano 1 de arriba-, asi que el
+    mapa no se cierra solo: hay que decir hasta donde se declara mapeado. Ese
+    rectangulo es una DECISION, no algo que se deduzca del mundo, y por eso se
+    pregunta aqui en vez de elegirlo el script.
+
+      [ ]  A   Cortar a ras, en x = -23.39, donde acaban las dos paredes.
+               Es lo que hace el piso 1: su 'origin' es exactamente la esquina
+               de su --region. No mete en el mapa suelo que en el mundo no
+               limita con nada. El robot nace a 1.5 m del borde.
+
+      [ ]  B   Cortar con margen, en x = -24.50. Entrarian ~1.1 m de "libre"
+               al oeste de donde se acaba el edificio, y Nav2 podria planificar
+               hacia fuera. No se recomienda.
+
+      [ ]  C   No es cosa del mapa: poner una pared en mundo_definitivo.world
+               que cierre la boca. Es lo correcto si el piso 2 real esta
+               cerrado por ahi, pero cambia el .world, y eso invalida el mapa
+               del piso 1 y las medidas ya tomadas sobre el. Si se elige, va
+               en su propio corte, no en este.
+
+    Con A o B el vano 1 seguira detectandose, porque el libre toca lo
+    desconocido justo en el borde. Se descarta a mano, igual que se descarto el
+    vano C del piso 1.
+
+    LO QUE PASA CUANDO DEVUELVAS ESTO
+    ---------------------------------
+      1. Se genera el mapa del piso 2 con el corte elegido, y la orden completa
+         queda escrita dentro del .yaml, que es lo que hoy le falta: la del
+         piso 1 esta ahi y por eso su mapa se puede rehacer; la del piso 2 se
+         genero una vez y la receta se perdio.
+      2. Se recalculan las paradas con la regla de la pared propia.
+      3. Los nombres que escribas arriba entran en config/puntos_interes.yaml.
+      4. verificar_pose_spawn.py deja de decir '[ -- ]' para robot2, y
+         'robot.sh robot2 nav2' arranca en vez de negarse por falta de mapa.
