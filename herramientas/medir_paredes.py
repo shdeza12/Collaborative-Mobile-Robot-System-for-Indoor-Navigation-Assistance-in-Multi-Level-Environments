@@ -12,10 +12,25 @@ Que hay que mirar en la salida
 ------------------------------
 - El rayo elegido trae entre parentesis su desviacion respecto al eje pedido. Si
   esa desviacion pasa de unos pocos grados, NO hay rayo en esa direccion y el
-  numero no sirve: el barrido tiene un sector ciego en el empalme +-180 deg.
+  numero no sirve. La causa esta declarada en deepracer.xacro: el barrido va de
+  -150 a +150 deg (lidar_360_degree_min_angle / max_angle, que pese al nombre
+  son 300 deg y no 360), o sea un cono ciego de 60 deg centrado en los 180 deg
+  del LASER. Y como el laser va girado 180 deg respecto al chasis, esos 60 deg
+  caen sobre el FRENTE del vehiculo: el eje al que apunta el morro nunca es
+  medible. Comprobado el 23-ago con tres poses de yaw distinto -robot1 a
+  +91,34 deg ciego en +y, robot2 a -0,60 deg ciego en +x, robot2 a -36,77 deg
+  sin ningun eje ciego-: el cono sigue al morro, no a un eje del mundo.
 - Una distancia larga en una direccion donde el mapa esta abierto no es una
-  pared. El vehiculo reposa 1,4 deg de morro abajo y el rayo choca contra el
-  piso a unos 7,3 m. Es un defecto conocido del modelo URDF de AWS.
+  pared: es el ground_plane. El vehiculo reposa inclinado ~1,4 deg, y los rayos
+  que BAJAN son los de ATRAS. La distancia sigue r = (h/theta) / |cos(phi)| con
+  phi medido desde el morro, y solo para phi > 90 deg; hacia adelante el rayo
+  sube y no toca el suelo nunca. h/theta = 7,36 m, medido el 23-ago desde dos
+  poses de robot2 (7,350 m a phi = 180,6 deg y 9,191 m a phi = 143,2 deg, que
+  concuerdan al 0,24 %). Es un defecto conocido del modelo URDF de AWS.
+  OJO: hasta el 23-ago aqui decia "morro abajo", que es el sentido CONTRARIO.
+  La magnitud estaba bien y los 7,3 m tambien, pero el sentido nunca se pudo
+  comprobar con esta herramienta, porque el rayo del morro cae justo dentro del
+  cono ciego del punto anterior.
 
 Uso:
     python3 herramientas/medir_paredes.py robot1

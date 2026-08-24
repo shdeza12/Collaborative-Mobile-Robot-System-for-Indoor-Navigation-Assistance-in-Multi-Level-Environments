@@ -117,11 +117,26 @@
          seccion 3.
 
          La particion fue una EXTRACCION PURA: los links se copiaron con su pose
-         intacta, asi que las coordenadas no se movieron y maps/mundo_definitivo_piso2.yaml (pendiente) y las
-         medidas anteriores al 2026-08-23 siguen valiendo.
+         intacta, asi que las coordenadas no se movieron y las medidas anteriores
+         al 2026-08-23 siguen valiendo.
 
          Geometria de este piso, medida sobre el SDF:
-           pasillo inferior, eje y =  -4.48, ancho 2.55 m, x de -23.4 a +21.7 (34 paredes)
+           pasillo inferior, eje y =  -4.48, ancho 2.55 m, x de -23.4 a +21.7
+
+         AÑADIDO DESPUES DE LA EXTRACCION (2026-08-23). El modelo trae ahora 35
+         links, no los 34 extraidos. El de mas es 'Barrera_Escalera', y no es una
+         pared del edificio: tapa el hueco de 4.24 m del extremo oeste, que es por
+         donde suben fisicamente las escaleras del piso 1. Un LiDAR plano no ve un
+         desnivel hacia abajo, asi que sin esa caja Nav2 planifica por encima del
+         hueco. El porque completo esta en el comentario del propio link, dentro de
+         mundo_definitivo_piso2/model.sdf. Mapa regenerado ese mismo dia.
+
+         OJO al modificar poses. Este <include> lleva <pose>0 0 0 0 0 0</pose>, que
+         ANULA el <pose>0.752962 -0.165006 ...</pose> declarado en el model.sdf. En
+         la practica las poses de los links ya son coordenadas del mundo y no hay
+         que componer nada; si alguien quita esa linea del include, las 35 paredes
+         se desplazan 0.75 m.
+
          Se conserva 'mundo_Definitivo/' como origen de la extraccion. No usar
          'mundo_definitivo.world' para navegar: reintroduce el cruce. -->
     <include>

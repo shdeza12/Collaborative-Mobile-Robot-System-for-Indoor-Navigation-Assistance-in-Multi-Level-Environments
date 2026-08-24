@@ -368,6 +368,14 @@ Lo que puede hacer que estos números signifiquen otra cosa de la que parecen.
 - **Un solo entorno.** Todo se mide en los dos pasillos de `mundo_definitivo_piso{1,2}.world`. Los
   resultados describen el desempeño **en ese edificio**, y así hay que enunciarlos. Generalizar a «entornos interiores» sería
   ir más allá de los datos.
+- **El LiDAR simulado y el real no ven lo mismo** (R13, medido el 2026-08-23). El del simulador
+  barre **300°**, con un cono ciego de 60° sobre el morro; el de fábrica del vehículo mide
+  **360 muestras sobre 360°** (2026-08-21). Además la simulación lanza 600 rayos contra los 360
+  reales. Cualquier diferencia sim ↔ hardware en *tasa de éxito* admite esta explicación
+  alternativa, así que **no puede atribuirse sin más a la distribución** (R8) ni al controlador.
+  Afecta sobre todo a los destinos que se abordan de frente, que hoy es solo `ETM10`. Mientras no
+  se iguale el sensor —decisión abierta y ligada a la del número de muestras—, las dos condiciones
+  se reportan por separado, como ya exige el punto anterior sobre Humble y Jazzy.
 - **El operador conoce la hipótesis.** Las corridas son automáticas de principio a fin
   precisamente por eso: el sorteo con semilla y el registro sin intervención manual (RF-25) quitan
   al operador toda decisión durante la medida.

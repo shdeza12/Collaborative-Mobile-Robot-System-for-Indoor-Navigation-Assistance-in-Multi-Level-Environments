@@ -872,6 +872,70 @@
       </visual>
       <pose>-20.3685 -6.83187 0 0 -0 3.14159</pose>
     </link>
+    <!-- ================================================================
+         Barrera_Escalera - NO ES UNA PARED DEL EDIFICIO
+
+         Cierra la boca abierta de 4.238 m del extremo oeste del ala, la
+         que queda a la ESPALDA del spawn de robot2. Ahi no hay muro en el
+         edificio real: ahi es donde desembocan las escaleras que suben del
+         piso 1 al piso 2 (confirmado por el autor el 2026-08-23). O sea,
+         es un VACIO, no un obstaculo.
+
+         Por que se modela como obstaculo entonces. El LiDAR es plano y va
+         a 0.16 m del suelo: un desnivel hacia abajo no devuelve ningun
+         rayo, se lee como espacio libre hasta range_max. En un costmap de
+         Nav2 el hueco de la escalera aparece despejado y planificable, y
+         el unico modo de codificar "por aqui no se pasa" es poner algo que
+         el sensor si vea. De ahi esta caja.
+
+         Geometria. Va en x = -23.07, el punto que marco el autor en
+         Gazebo, no en x = -23.39 donde acaban Wall_81 y Wall_88. Los 32 cm
+         de diferencia importan en el sentido conservador: a -23.39 la
+         franja -23.39..-23.07 quedaria del lado transitable, y segun la
+         marca esa franja ya es el hueco. Se extiende de eje a eje de las
+         dos paredes -y de -11.2201 a -6.8319, largo 4.4 con 6 mm de
+         solape a cada lado- para que no queden rendijas en las esquinas.
+
+         Consecuencias que hay que respetar:
+         - Si alguien "corrige" esto borrando la barrera por parecer un
+           muro inventado, Nav2 volvera a planificar por encima del hueco
+           de la escalera.
+         - En el carro real NO hay sensor de precipicio, asi que la
+           proteccion equivalente no existe fuera de la simulacion. El
+           punto de transferencia piso2_escalera se para a 1.50 m de esta
+           cara, no a los 0.90 m del patron ETM10, justamente por eso.
+         - El material es Gazebo/Orange y no Gazebo/Grey como las demas,
+           para que se distinga a simple vista de la geometria real.
+         ================================================================ -->
+    <link name='Barrera_Escalera'>
+      <collision name='Barrera_Escalera_Collision'>
+        <geometry>
+          <box>
+            <size>4.4 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Barrera_Escalera_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>4.4 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 1 1 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>-23.07 -9.026 0 0 -0 1.5708</pose>
+    </link>
     <link name='Wall_90'>
       <collision name='Wall_90_Collision'>
         <geometry>

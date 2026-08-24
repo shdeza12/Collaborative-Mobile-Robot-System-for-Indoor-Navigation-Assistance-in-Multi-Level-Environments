@@ -1,4 +1,5 @@
-# Localizaciones de interes del entorno de evaluacion. Piso 1 de mundo_definitivo.
+# Localizaciones de interes del entorno de evaluacion. Los quince destinos del
+# piso 1, mas el punto de transferencia del piso 2.
 #
 # POR QUE EXISTE
 # --------------
@@ -79,19 +80,18 @@
 #
 # LO QUE FALTA
 # ------------
-# Solo esta el piso 1. El piso 2 tiene sus dieciocho vanos detectados y, desde el
-# 2026-08-23, tambien su MAPA: maps/mundo_definitivo_piso2.{pgm,yaml}, generado
-# contra mundo_definitivo_piso2.world y ACEPTADO por herramientas/verificar_mapa.py
+# Del piso 2 esta solo su punto de transferencia, al final de este archivo. El
+# piso 2 tiene sus dieciocho vanos detectados y, desde el 2026-08-23, tambien su
+# MAPA: maps/mundo_definitivo_piso2.{pgm,yaml}, generado contra
+# mundo_definitivo_piso2.world y ACEPTADO por herramientas/verificar_mapa.py
 # (0 de 6096 obstaculos sin pared real, 0.1 % de celdas desconocidas dentro de sus
 # cinco regiones). La receta esta escrita dentro de ese .yaml, como la del piso 1.
 #
-# Lo que sigue faltando es UNA cosa: los NOMBRES de las salas, que todavia no
-# estan decididos. Un destino sin nombre real no es un destino, es una coordenada.
-# Hasta que los haya, este archivo no puede crecer, y con el se queda parado el
-# unico punto del piso 2 que esta en la ruta critica: su punto de transferencia,
-# el par de piso1_escalera.
+# Lo que sigue faltando son los NOMBRES de las salas, que todavia no estan
+# decididos. Un destino sin nombre real no es un destino, es una coordenada, asi
+# que los quince o dieciseis destinos del piso 2 no se pueden escribir todavia.
 #
-# Se lleva en la seccion PISO 2 de Documentos/mapa_destinos.txt, y es
+# Se llevan en la seccion PISO 2 de Documentos/mapa_destinos.txt, y son
 # prerrequisito de la condicion B de la campana de OE4 (seccion 10 de
 # Documentos/PROTOCOLO_EXPERIMENTAL.md).
 #
@@ -241,3 +241,79 @@ puntos:
     lado_pared: fondo        # vano de 0.66 m, centro en y = +10.65
     pose: {x: 19.27, y: 10.35, yaw: 0.0}
     holgura_m: 0.78
+
+  # ==================================================================== PISO 2 --
+  # Del piso 2 solo esta esto: el otro extremo del relevo. Los demas destinos
+  # esperan a que las salas tengan nombre (ver LO QUE FALTA, arriba).
+  #
+  # DONDE ESTA LA ESCALERA, Y COMO SE SUPO
+  # --------------------------------------
+  # No se dedujo: la senalo Santiago sobre Gazebo el 2026-08-23, en
+  # (-23.067, -9.104), y esta detras del arranque de robot2.
+  #
+  # Habia que preguntarlo porque los dos planos NO estan alineados. Los ejes de
+  # los dos pasillos distan 14.50 m exactos en Y, y ese desfase sí transfiere:
+  # aplicado a la escalera del piso 1 (y = +5.19) predice y = -9.31 contra los
+  # -9.10 reales, 21 cm. Pero en X no transfiere nada -el piso 2 es 2.67 m mas
+  # ancho por el oeste y 3.21 m por el este-, asi que la abscisa no se puede
+  # calcular desde el piso 1.
+  #
+  # Y sobre todo: Documentos/mapa_destinos.txt tenia este hueco DESCARTADO. Su
+  # vano 1, de 4.20 m, iba marcado 'N (boca abierta)' con la razon «no es un
+  # vano, es donde se acaba el edificio». Lo que se acaba ahi es el dibujo, no el
+  # edificio. Corregido en ese archivo el 2026-08-23.
+  #
+  # Encaja ademas con el arranque de los dos robots: robot1 nace a 1.41 m de
+  # piso1_escalera y robot2 a 0.88 m de esta. Los dos esperan en su escalera.
+  #
+  # LA BARRERA (2026-08-23)
+  # -----------------------
+  # La boca de 4.24 m no era una pared que faltara: era el hueco por donde
+  # suben las escaleras del piso 1. Un vacio. Ignorarlo no era opcion, porque
+  # el LiDAR es plano y va a 0.16 m del suelo: un desnivel hacia ABAJO no
+  # devuelve ningun rayo y el costmap lo lee como espacio libre planificable
+  # hasta range_max. Nav2 habria trazado rutas por encima del hueco.
+  #
+  # Se cerro con el link 'Barrera_Escalera' de mundo_definitivo_piso2/
+  # model.sdf: x = -23.07 -el punto que marco el autor en Gazebo, 32 cm al
+  # este de donde acaban Wall_81 y Wall_88, que es la eleccion conservadora-,
+  # de eje a eje de esas dos paredes, 2.5 m de alto, material Gazebo/Orange
+  # para que no se confunda con geometria del edificio. Es la opcion C de
+  # mapa_destinos.txt, que dejo de ser cara cuando cada piso paso a tener su
+  # propio .world. Mapa regenerado el mismo dia con la receta grabada en su
+  # .yaml: cobertura 100 %, 0 obstaculos sin pared real de 6306.
+  #
+  # LA PARADA
+  # ---------
+  # Con la barrera ya hay superficie contra la que localizar y se llega de
+  # frente, como en ETM10. Pero el retiro NO es el de ETM10: son 1.50 m en
+  # vez de 0.90. La razon es que al otro lado de esta cara no hay una pared
+  # sino una caida, y en el carro real NO existe sensor de precipicio: la
+  # proteccion es puramente simulada. Los 0.60 m extra absorben ademas la
+  # incertidumbre de donde empieza exactamente el primer escalon, que no se
+  # pudo medir.
+  #
+  # Comprobado sobre el .pgm regenerado: en (-21.50, -9.026) la holgura vale
+  # 1.50 m y coincide al centimetro con la distancia a la cara de la barrera,
+  # o sea que la restriccion activa es la barrera y no las paredes laterales,
+  # que quedan a 2.12 m. y = -9.026 es el eje del ala. yaw = pi porque se
+  # llega de frente desde el este.
+  #
+  # POR QUE SIGUE COMO provisional
+  # ------------------------------
+  # Ya no por la geometria, que quedo resuelta. Quedan dos cosas:
+  #
+  #   1. Le falta el nombre real, como al resto del piso 2.
+  #   2. El cono ciego de 60 deg del LiDAR (R13) apunta justo a la barrera
+  #      con yaw = pi: en la pose de llegada, la unica superficie nueva del
+  #      mapa es precisamente la que el sensor no ve. Hay que medir si AMCL
+  #      converge aqui antes de dar la pose por definitiva; la campana de S24
+  #      la exige cerrada.
+  - id: piso2_escalera
+    nombre: "Escaleras"      # provisional: nombre real sin decidir
+    nivel: 2
+    es_transferencia: true
+    provisional: true
+    lado_pared: fondo        # se llega de frente contra Barrera_Escalera
+    pose: {x: -21.50, y: -9.03, yaw: 3.1416}
+    holgura_m: 1.50

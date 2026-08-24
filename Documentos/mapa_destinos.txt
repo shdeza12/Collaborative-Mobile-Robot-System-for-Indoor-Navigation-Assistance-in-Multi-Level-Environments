@@ -335,12 +335,39 @@
     Se contrastaron los dieciocho vanos contra la geometria del .world, y dos
     de ellos NO son puertas. Van marcados 'N' de antemano:
 
-      1  (4.20 m)  El piso 2 no tiene muro oeste. Solo hay dos paredes
-                   horizontales -x -23.39..-14.89 en y -11.30, y x -23.37..
-                   -17.37 en y -6.91- y entre ellas quedan 4.24 m de BOCA
-                   ABIERTA, que es lo que se detecto. No es un vano, es donde
-                   se acaba el edificio. Los 4.24 m medidos y los 4.20 m
-                   detectados son el mismo hueco.
+      1  (4.20 m)  MAL DESCARTADO. Ver la correccion del 2026-08-23 debajo.
+
+                   Lo que decia: "El piso 2 no tiene muro oeste. Solo hay dos
+                   paredes horizontales -x -23.39..-14.89 en y -11.30, y
+                   x -23.37..-17.37 en y -6.91- y entre ellas quedan 4.24 m de
+                   BOCA ABIERTA, que es lo que se detecto. No es un vano, es
+                   donde se acaba el edificio. Los 4.24 m medidos y los 4.20 m
+                   detectados son el mismo hueco."
+
+                   CORRECCION (2026-08-23). La geometria estaba bien medida; la
+                   conclusion no. Ahi no se acaba el edificio: ahi esta LA
+                   ESCALERA, o sea el punto de transferencia del piso 2, el par
+                   de piso1_escalera y el unico punto de este piso que esta en
+                   la ruta critica del relevo. Lo senalo Santiago sobre Gazebo,
+                   en (-23.067, -9.104). Lo que se acaba en x = -23.39 es el
+                   DIBUJO, no el edificio.
+
+                   Como se colo: el detector busca donde el libre toca lo
+                   desconocido, y por ahi no distingue una puerta de un borde
+                   sin cerrar. Se resolvio mirando el ancho -4.20 m no es una
+                   puerta- y esa regla es correcta para una puerta pero no para
+                   una escalera, que no tiene por que serlo.
+
+                   Cuesta advertirlo porque el descarte se justifica solo: si
+                   crees que el edificio se acaba ahi, la boca abierta es la
+                   prueba. Habia una senal en contra y no se miro: robot2 nace
+                   a 0.88 m de esa boca, igual que robot1 nace a 1.41 m de la
+                   escalera del piso 1.
+
+                   Queda escrito en config/puntos_interes.yaml como
+                   'piso2_escalera', con provisional: true. Y deja viva la
+                   decision del corte oeste, mas abajo: la opcion A se eligio
+                   creyendo que ahi no habia nada.
 
       I  (0.30 m)  Hueco real, pero de 0.36 m, entre dos tramos de pared del
                    extremo este que no llegan a tocarse (y -6.95..-5.45 y
@@ -363,7 +390,7 @@
 
      ID  centro del vano      vano   pared      parada propuesta   ?  nombre
     ------------------------------------------------------------------------------
-     1  ( -23.36, -9.02)   4.20 m vertical   ( -23.36, -9.05) yaw 1.571 al este   _  N  (boca abierta)
+     1  ( -23.36, -9.02)   4.20 m vertical   ( -22.49, -9.03) yaw 3.142 al oeste  _  S  ESCALERA (transferencia)
      2  ( -17.42, -1.70)   1.32 m vertical   ( -16.10, -2.33) yaw 1.571 al oeste  _  ______________
      3  ( -14.48,-11.27)   0.78 m horizontal ( -15.26,-10.07) yaw 0.000 al sur    _  ______________
      4  ( -14.51, -0.95)   0.60 m horizontal ( -15.32, -2.15) yaw 0.000 al norte  _  ______________
@@ -396,20 +423,73 @@
                Es lo que hace el piso 1: su 'origin' es exactamente la esquina
                de su --region. No mete en el mapa suelo que en el mundo no
                limita con nada. El robot nace a 1.5 m del borde.
+               ELEGIDA EL 2026-08-22, APLICADA EL 23 Y REVERTIDA EL 23 MISMO.
+               Se eligio con una premisa que resulto falsa. Ver abajo.
 
       [ ]  B   Cortar con margen, en x = -24.50. Entrarian ~1.1 m de "libre"
                al oeste de donde se acaba el edificio, y Nav2 podria planificar
                hacia fuera. No se recomienda.
 
-      [ ]  C   No es cosa del mapa: poner una pared en mundo_definitivo.world
-               que cierre la boca. Es lo correcto si el piso 2 real esta
-               cerrado por ahi, pero cambia el .world, y eso invalida el mapa
-               del piso 1 y las medidas ya tomadas sobre el. Si se elige, va
-               en su propio corte, no en este.
+      [X]  C   No es cosa del mapa: poner una pared en el .world que cierre la
+               boca. Es lo correcto si el piso 2 real esta cerrado por ahi, pero
+               cambia el .world, y eso invalida el mapa del piso 1 y las medidas
+               ya tomadas sobre el. Si se elige, va en su propio corte.
+               ELEGIDA Y APLICADA EL 2026-08-23. La objecion del parrafo de
+               arriba dejo de existir cuando cada piso paso a tener su propio
+               .world, y la premisa de que el piso 2 estuviera cerrado por ahi
+               resulto NO ser la razon: ver abajo.
 
-    Con A o B el vano 1 seguira detectandose, porque el libre toca lo
-    desconocido justo en el borde. Se descarta a mano, igual que se descarto el
-    vano C del piso 1.
+    REVISION DEL 2026-08-23: SE CAMBIO DE A A C
+    -------------------------------------------
+    A se eligio con este argumento: "No mete en el mapa suelo que en el mundo no
+    limita con nada". La premisa era que ahi no habia nada que importara. Es
+    falsa: ahi esta la ESCALERA, el punto de transferencia del piso 2.
+
+    Lo que A dejaba, todo medido el 23-ago:
+      - la parada del relevo quedaba a 0.90 m del borde del mapa;
+      - no habia pared contra la que localizar en la direccion de llegada: el
+        rayo hacia el oeste devolvia el ground_plane a 7.35 m, no una pared;
+      - el cono ciego de 60 deg del LiDAR (R13) apunta justo a la boca con el
+        yaw de llegada.
+    O sea que el punto mas critico del relevo estaba en el peor sitio del mapa
+    para localizar.
+
+    Y la razon por la que C se habia descartado dejo de existir. Decia que
+    cambiar el .world "invalida el mapa del piso 1 y las medidas ya tomadas
+    sobre el": era cierto cuando los dos pisos vivian en un solo archivo. Desde
+    el 23-ago cada piso tiene el suyo, asi que tocar mundo_definitivo_piso2.world
+    no roza el piso 1. Partir el mundo abarato C sin que ese fuera el objetivo.
+
+    OJO CON POR QUE SE ELIGIO C, porque no es el motivo que estaba escrito. El
+    dato que faltaba era si la escalera del piso 2 esta CERRADA por el oeste con
+    su muro, como la del piso 1. La respuesta del autor fue que NO lo esta: la
+    boca es el hueco por donde suben fisicamente las escaleras desde el piso 1.
+    C no se aplica entonces porque haya un muro real que copiar -no lo hay-, sino
+    porque un LiDAR plano a 0.16 m del suelo NO PUEDE VER UN DESNIVEL HACIA
+    ABAJO: el hueco no devuelve ningun rayo y el costmap lo declara libre y
+    planificable. La caja es la unica forma de escribir "por aqui no se pasa" en
+    un mapa plano.
+
+    Consecuencia que hay que tener presente y no borrar: 'Barrera_Escalera' NO ES
+    GEOMETRIA DEL EDIFICIO. Representa un riesgo de caida. Si alguien la quita
+    por parecer un muro inventado, Nav2 vuelve a planificar sobre el hueco de la
+    escalera. Va en Gazebo/Orange, y no en el gris de las demas paredes, para que
+    se distinga a simple vista. Y en el carro real no hay sensor de precipicio,
+    asi que esta proteccion no existe fuera de la simulacion: por eso la parada
+    se retiro a 1.50 m en vez de los 0.90 m del patron ETM10.
+
+    Lo aplicado el 23-ago: link 'Barrera_Escalera' en mundo_definitivo_piso2/
+    model.sdf, en x = -23.07 -el punto marcado en Gazebo, 32 cm al este del final
+    de Wall_81 y Wall_88, que es lo conservador-, de eje a eje de esas dos
+    paredes, 2.5 m de alto. Mapa regenerado con la misma receta de --region de
+    siempre: cobertura 100 %, 0 obstaculos sin pared real de 6306. La parada de
+    piso2_escalera paso de (-22.49, -9.03) holgura 2.10 a (-21.50, -9.03) holgura
+    1.50, y esa holgura coincide al centimetro con la distancia a la barrera, o
+    sea que la restriccion activa es ella y no las paredes laterales.
+
+    El vano 1 ya no se detecta como boca abierta -esta cerrado-, pero sigue
+    siendo un destino y esta escrito en config/puntos_interes.yaml como
+    'piso2_escalera'.
 
     LO QUE PASA CUANDO DEVUELVAS ESTO
     ---------------------------------
