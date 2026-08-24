@@ -56,11 +56,44 @@ controller_server:
       plugin: "nav2_controller::SimpleProgressChecker"
       required_movement_radius: 0.5
       movement_time_allowance: 10.0
+    # POR QUE EL RUMBO NO DECIDE LA LLEGADA (R12, medido el 2026-08-24).
+    #
+    # Una mision real que abortó, con las dos cifras de la MISMA llegada:
+    #
+    #     destino ETM1 (-15.92, 10.59), yaw pedido 0.0
+    #     /odom al parar (-16.302, 10.748)  ->  posicion 0.413 m   FUERA de 0.25
+    #     yaw al parar    0.200 rad (11.4 deg) ->  rumbo    0.200  DENTRO de 0.25
+    #
+    # El carro venia de ETM10 rumbo OESTE (yaw ~ pi) y ETM1 pide ESTE (yaw 0):
+    # 180 grados de diferencia. Con 'stateful: True' el SimpleGoalChecker, una vez
+    # cumplida la tolerancia de posicion, DEJA DE COMPROBARLA y solo exige el
+    # rumbo. Un Ackermann no gira sobre su eje, asi que la maniobra para cerrar
+    # esos 180 grados lo ALEJO del punto -de menos de 0.25 m a 0.413 m- y Nav2
+    # devolvio SUCCEEDED igual. Es el mismo patron del ETM13 del 21-ago
+    # (SUCCEEDED a 0.296 m), pero aquella vez solo se tenia una de las dos cifras.
+    #
+    # Dos cambios, y son independientes:
+    #
+    #   stateful: False        la posicion se comprueba SIEMPRE, hasta el final.
+    #                          Decidido el 22-ago en PROTOCOLO_EXPERIMENTAL.md §4
+    #                          y no aplicado hasta hoy por falta de evidencia.
+    #
+    #   yaw_goal_tolerance     el rumbo final NO se impone. El robot queda
+    #     3.15 (~pi)           apuntando hacia donde lo dejo la ruta, que es lo
+    #                          util para guiar a una persona: llegar al sitio,
+    #                          no aparcar en una direccion concreta. El 'yaw' de
+    #                          puntos_interes.yaml pasa a ser orientativo.
+    #
+    # QUE NO CAMBIA, Y ES LO QUE HACE LEGITIMO EL CAMBIO. El criterio de exito
+    # sigue siendo 0.25 m contra /odom, el mismo de antes de ver estos datos. Aqui
+    # se cambia lo que se le PIDE a Nav2, no el listón con el que se le mide. El
+    # protocolo se escribio antes de instrumentar justamente para que un umbral no
+    # se elija viendo los resultados; ese umbral sigue intacto.
     goal_checker:
       plugin: "nav2_controller::SimpleGoalChecker"
       xy_goal_tolerance: 0.25
-      yaw_goal_tolerance: 0.25
-      stateful: True
+      yaw_goal_tolerance: 3.15
+      stateful: False
     FollowPath:
       plugin: "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController"
       desired_linear_vel: 0.5
@@ -339,4 +372,9 @@ map_server:
   ros__parameters:
     use_sim_time: True
     yaml_filename: primer_piso_definitivo.yaml   # sobreescrito por el argumento map:= del launch
+    # Marco con el que se sella el OccupancyGrid. Tiene que estar ESCRITO aqui
+    # aunque el launch lo reescriba: RewrittenYaml recorre las claves que ya
+    # existen (pathify) y una clave que no esta en el YAML se ignora sin avisar.
+    # Bajo namespace pasa a 'robotN/map' (ver deepracer_localization_sim.launch.py).
+    frame_id: map
 

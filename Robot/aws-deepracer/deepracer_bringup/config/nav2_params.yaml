@@ -56,11 +56,23 @@ controller_server:
       plugin: "nav2_controller::SimpleProgressChecker"
       required_movement_radius: 0.5
       movement_time_allowance: 10.0
+    # R12, medido el 2026-08-24: con 'stateful: True' el checker deja de mirar la
+    # posicion en cuanto la cumple una vez, y solo exige rumbo. Un Ackermann que
+    # maniobra 180 grados para cerrarlo se ALEJA del punto: se midio una llegada a
+    # ETM1 con rumbo dentro de tolerancia (0.200 rad) y posicion fuera (0.413 m),
+    # devuelta como SUCCEEDED. El rumbo final deja de imponerse: el robot queda
+    # apuntando hacia donde lo dejo la ruta.
+    #
+    # Este archivo NO es el que cargan los launch -usan
+    # nav2_params_nav_amcl_sim_demo.yaml- pero se mantiene igual a proposito: dos
+    # copias que divergen en el goal checker harian que una corrida diera un
+    # resultado distinto segun quien la lanzara. El razonamiento completo, con las
+    # cifras y con lo que NO cambia del protocolo, esta en la otra copia.
     goal_checker:
       plugin: "nav2_controller::SimpleGoalChecker"
       xy_goal_tolerance: 0.25
-      yaw_goal_tolerance: 0.25
-      stateful: True
+      yaw_goal_tolerance: 3.15
+      stateful: False
     FollowPath:
       plugin: "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController"
       desired_linear_vel: 0.5
@@ -333,3 +345,7 @@ map_server:
   ros__parameters:
     use_sim_time: True
     yaml_filename: primer_piso_definitivo.yaml   # sobreescrito por el argumento map:= del launch
+    # Ver la nota de nav2_params_nav_amcl_sim_demo.yaml: la clave tiene que
+    # existir aqui aunque el launch la reescriba, porque RewrittenYaml ignora
+    # sin avisar las claves que no estan en el YAML.
+    frame_id: map
