@@ -90,7 +90,9 @@ Los motivos que sí se sostienen sobre el entorno vigente son tres:
 |---|---|---|
 | `/coordinacion/guiar_usuario` | acción `coordinacion_msgs/GuiarUsuario` | la HRI la llama |
 | `/coordinacion/estado_mision` | `coordinacion_msgs/EstadoMision` | la HRI la escucha, 1 Hz |
-| `/coordinacion/puntos_interes` | `coordinacion_msgs/PuntoInteres[]` (latched) | la HRI la escucha al cargar |
+| `/coordinacion/puntos_interes` | `coordinacion_msgs/ListaPuntosInteres` (latched) | la HRI la escucha al cargar |
+
+> **Corregido el 2026-08-24.** Esta fila decía `coordinacion_msgs/PuntoInteres[]`, y **ese tipo no se puede publicar**: un tópico de ROS 2 transporta un mensaje, no un arreglo — `PuntoInteres[]` es sintaxis válida para un *campo*, no para un tipo. Salió al construir el paquete, no al escribir el contrato, y afectaba también al §5, que cerraba con «cuatro definiciones, nada más». El envoltorio `ListaPuntosInteres` es la quinta. *Latched* aquí sí es lo correcto —el catálogo no caduca y la HRI se conecta mucho después de que arranque el coordinador—, al revés que en `amcl_pose`, donde el mismo QoS engañó dos veces ese mismo día porque una pose vieja sí parece actual. **La regla que separa los dos casos: se retienen catálogos, nunca medidas.**
 
 La HRI **no habla con los robots**. Solo con `/coordinacion`. Eso mantiene el `rosbridge` con una superficie mínima y permite cambiar la asignación de robots sin tocar el frontend.
 
@@ -110,7 +112,9 @@ Si origen y destino están en el mismo nivel, los pasos 4–6 se omiten: **un so
 
 ## 5. Mensajes propios
 
-Paquete nuevo: **`coordinacion_msgs`** (en `Robot/aws-deepracer/`). Cuatro definiciones, nada más.
+Paquete **`coordinacion_msgs`** (en `Robot/aws-deepracer/`). Cinco definiciones, nada más.
+
+**Existe desde el 2026-08-24**, compilado en Humble y verificado con un round-trip real por DDS —`coordinacion_msgs/test/prueba_round_trip.py`, 18 de 18—, no solo con que compile: el paquete tiene que correr también en la tarjeta Jazzy del carro, y generar los headers no prueba que `rmw` transporte igual en las dos distribuciones. Las constantes (`LIBRE=0`…, `INACTIVA=0`…) se declaran en los `.msg` para que ningún nodo escriba el número suelto.
 
 ```
 # EstadoRobot.msg
@@ -129,6 +133,13 @@ string nombre                   # "Escalera del primer piso"  <- lo que ve el us
 uint8 nivel                     # 1  <- el ejemplo es la zona de transicion, en (41,40 . 3,03)
 bool es_transferencia           # true en este caso; false en un destino corriente
 geometry_msgs/Pose pose         # en el marco robotN/map del nivel correspondiente
+```
+
+```
+# ListaPuntosInteres.msg  <- el catalogo entero, en UN mensaje publicable
+string origen                   # ruta del YAML del que salio, para diagnostico
+builtin_interfaces/Time stamp   # cuando se cargo
+PuntoInteres[] puntos
 ```
 
 ```

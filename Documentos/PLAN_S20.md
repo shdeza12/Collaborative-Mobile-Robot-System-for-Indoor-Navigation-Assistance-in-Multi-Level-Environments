@@ -93,18 +93,24 @@ prever los campos de hardware aunque en simulación vayan vacíos.
 > **Los puntos 1 a 3 se adelantaron el domingo 23-ago.** Se dejan escritos porque el criterio de
 > cierre del día era suyo y conviene poder comprobarlo, no para volver a hacerlos.
 
-1. ✅ **Corte oeste: opción A**, a ras en x = −23,39. No modifica ni un byte del `.world`: solo
-   declara hasta dónde llega el mapa.
+1. ✅ ~~**Corte oeste: opción A**, a ras en x = −23,39. No modifica ni un byte del `.world`: solo
+   declara hasta dónde llega el mapa.~~ **Se cambió a la opción C el mismo 23-ago**: sí se modifica
+   el `.world`, con el link `Barrera_Escalera`. El motivo no es que exista una pared real ahí —no
+   existe—, sino que un LiDAR plano **no ve un desnivel hacia abajo**: sin obstáculo sólido, el
+   hueco de la escalera se lee como espacio libre para siempre y Nav2 planifica por encima. El
+   razonamiento completo está en `mapa_destinos.txt` y en el comentario del propio link.
 2. ✅ **`mundo_definitivo_piso2` generado.** Hicieron falta **cinco `--region`**, no uno: el piso 2
    es una S —ala oeste, tramo norte-sur, pasillo largo y ramal sur al este— y un solo rectángulo
    deja que el relleno se escape por los vanos de ~0,9 m, que es lo que dio el 95,1 % libre del
    21-ago. La receta queda escrita dentro del `.yaml`, como en el piso 1.
 3. ✅ **Verificado** contra `mundo_definitivo_piso2.world` —cada piso tiene ya **su propio mundo**,
-   partido el 23-ago por el cruce de LiDAR entre pasillos—: `ACEPTADO`, 0 de 6096 obstáculos sin
-   pared real y 0,1 % de celdas desconocidas dentro de sus regiones.
-4. **Punto de transferencia del piso 2** en `puntos_interes.yaml`, con `es_transferencia: true` y
-   marcado **`provisional: true`** mientras no se confirme cuál es el hueco de la escalera. **Es lo
-   único del lunes que queda**, y es lo único del piso 2 que está en la ruta crítica.
+   partido el 23-ago por el cruce de LiDAR entre pasillos—: `ACEPTADO`, 0 de 6306 obstáculos sin
+   pared real y 0,7 % de celdas desconocidas dentro de sus regiones. (Las cifras son las del mapa
+   **regenerado** tras añadir la barrera; antes de ella eran 6096 y 0,1 %.)
+4. ✅ **Punto de transferencia del piso 2** en `puntos_interes.yaml`, con `es_transferencia: true` y
+   marcado **`provisional: true`** mientras no se confirme cuál es el hueco de la escalera.
+   `piso2_escalera` en `(-21.50, -9.03, yaw π)`, de frente contra la barrera, con **1,50 m** de
+   holgura en vez de los 0,90 m de ETM10 porque el carro real no lleva sensor de desnivel.
 
 > **Provisional no contamina la campaña, y hay que dejarlo escrito.** Sirve para construir e
 > integrar el relevo, que es lo que ocupa S20–S23. La campaña de S24 exige la pose real: si se
@@ -114,8 +120,13 @@ prever los campos de hardware aunque en simulación vayan vacíos.
 
 **Criterio de cierre del día:** `herramientas/verificar_pose_spawn.py` deja de imprimir `[ -- ]`
 para `robot2`, y `robot2` arranca con Nav2 localizando contra **su** mapa. La primera mitad está
-cumplida desde el 23-ago —`robot2: (-21.889, -8.379) libre, holgura 1.50 m`—; la segunda pide
-lanzarlo, y se comprueba el lunes.
+cumplida desde el 23-ago —`robot2: (-21.889, -8.379) libre, holgura 1,14 m`, que bajó de 1,50 m al
+añadir la barrera—; la segunda **se comprobó el 24-ago**: `robot2` localizó contra su mapa y navegó
+a `piso2_escalera` con 0,190 m de error contra `/odom`, dentro de la tolerancia de 0,25 m.
+
+> **El spawn de `robot2` queda a 1,11 m de la barrera**, es decir 0,39 m *más cerca* del vano que su
+> propia parada de relevo (x = −21,50). Es una incoherencia menor y conocida; no se corrige todavía
+> porque mover `POSE_INICIAL` invalidaría las medidas del 23 y el 24 de agosto.
 
 ### Martes 25 — H3 y el `/odom` cruzado · *frente A*
 

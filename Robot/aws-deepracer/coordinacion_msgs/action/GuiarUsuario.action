@@ -1,0 +1,22 @@
+# La accion que dispara una mision completa de guiado, con relevo entre pisos
+# si hace falta. Es la unica entrada de la HRI al sistema.
+#
+# Definida en Documentos/CONTRATO_INTERFACES.md seccion 5. La secuencia de la
+# mision esta en la seccion 4 del mismo documento.
+#
+# Se pasan IDs, no poses: el coordinador resuelve cada ID contra
+# puntos_interes.yaml. La HRI no conoce coordenadas, y asi mover un destino en
+# el YAML no obliga a tocar el frontend.
+
+# --- goal ---
+string origen_id
+string destino_id
+---
+# --- result ---
+bool exito
+float32 tiempo_total_s
+uint8 num_relevos               # 0 si origen y destino estan en el mismo nivel
+string motivo_fallo             # vacio si exito
+---
+# --- feedback ---
+EstadoMision estado
