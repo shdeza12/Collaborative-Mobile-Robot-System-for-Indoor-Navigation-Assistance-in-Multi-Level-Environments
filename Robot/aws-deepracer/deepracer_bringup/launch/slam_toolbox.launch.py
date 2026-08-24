@@ -26,10 +26,16 @@
 # pequena- y el mapa del pasillo sale sin enlazar. Por eso se anida el YAML con
 # root_key.
 #
-# Los marcos SI van prefijados ('robot1/odom', 'robot1/base_link'), porque asi
-# los publica el URDF. 'map_frame' NO se prefija: es el ancla comun, igual que
-# en el launch de localizacion. Cada robot vive en su propio ROS_DOMAIN_ID, asi
-# que dos 'map' simultaneos no colisionan.
+# Los marcos van prefijados ('robot1/map', 'robot1/odom', 'robot1/base_link'),
+# porque asi los publica el URDF y asi lo exige el §3 del contrato.
+#
+# 'map_frame' se prefija DESDE EL 2026-08-24. Antes no, con este argumento: "es
+# el ancla comun; cada robot vive en su propio ROS_DOMAIN_ID, asi que dos 'map'
+# simultaneos no colisionan". Las dos frases son falsas. No es un ancla comun
+# -son dos mapas distintos con el mismo nombre-, y el aislamiento por dominio es
+# temporal: el relevo H3 exige que los dos robots compartan grafo, y ese dia dos
+# 'map' con geometrias distintas SI colisionan. El mismo parrafo en el launch de
+# localizacion costo una mision abortada (Evidencia/S20_marco_map_prefijado.md).
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
@@ -53,6 +59,7 @@ def acciones(context, *args, **kwargs):
 
     if prefijo:
         param_substitutions.update({
+            'slam_toolbox.ros__parameters.map_frame': f'{prefijo}map',
             'slam_toolbox.ros__parameters.odom_frame': f'{prefijo}odom',
             'slam_toolbox.ros__parameters.base_frame': f'{prefijo}base_link',
             # El nodo esta namespaceado, luego 'scan' relativo bastaria; se deja

@@ -55,8 +55,14 @@ def marcos_prefijados(prefijo):
     Reescribir por clave suelta igualaria los dos y romperia el costmap local en
     silencio, que es de los fallos mas caros de diagnosticar.
 
-    Los marcos globales ('map') NO se prefijan: no pertenecen al robot, los
-    publica el map_server y son el punto de anclaje comun del mapa.
+    'map' SI se prefija, desde el 2026-08-24. Aqui estuvo escrito que no -"no
+    pertenece al robot, lo publica el map_server"- y ese parrafo costo una
+    mision abortada: el coordinador mandaba el goal en 'robot1/map' siguiendo el
+    §3 del contrato, el marco no existia, el planner no podia transformarlo y
+    Nav2 terminaba en ABORTED tras un BackUp de 0,41 m sin haber avanzado nunca.
+    No hay un 'map' comun: hay DOS mapas distintos que se llamaban igual, y solo
+    convivian porque cada robot esta en su propio dominio DDS. Diagnostico en
+    Evidencia/S20_marco_map_prefijado.md.
     """
     if not prefijo:
         # Sin namespace no se reescribe NADA: el YAML llega al nodo tal cual
@@ -65,12 +71,15 @@ def marcos_prefijados(prefijo):
 
     base = f'{prefijo}base_link'
     odom = f'{prefijo}odom'
+    mapa = f'{prefijo}map'
     return {
+        'bt_navigator.ros__parameters.global_frame': mapa,
         'bt_navigator.ros__parameters.robot_base_frame': base,
 
         'local_costmap.local_costmap.ros__parameters.global_frame': odom,
         'local_costmap.local_costmap.ros__parameters.robot_base_frame': base,
 
+        'global_costmap.global_costmap.ros__parameters.global_frame': mapa,
         'global_costmap.global_costmap.ros__parameters.robot_base_frame': base,
 
         'behavior_server.ros__parameters.global_frame': odom,

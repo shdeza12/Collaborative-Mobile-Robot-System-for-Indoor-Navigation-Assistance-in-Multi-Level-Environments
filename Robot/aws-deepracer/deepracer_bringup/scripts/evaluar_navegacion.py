@@ -35,6 +35,13 @@ class EvaluadorNavegacion(Node):
     def __init__(self):
         super().__init__('evaluador_navegacion')
         self.cliente = ActionClient(self, NavigateToPose, 'navigate_to_pose')
+        # El marco del objetivo se DEDUCE del namespace, no se escribe fijo.
+        # Estaba fijo en 'map' y desde que los marcos globales van prefijados
+        # (2026-08-24, §3 del contrato) eso apunta a un marco inexistente: el
+        # planner no puede transformar el goal y Nav2 aborta tras recuperarse en
+        # vano, sin decir en ningun sitio que la culpa era del marco.
+        ns = self.get_namespace().strip('/')
+        self.marco = f'{ns}/map' if ns else 'map'
         self.recuperaciones = 0
         self.distancia_restante = float('nan')
 
@@ -54,7 +61,7 @@ class EvaluadorNavegacion(Node):
 
         objetivo = NavigateToPose.Goal()
         objetivo.pose = PoseStamped()
-        objetivo.pose.header.frame_id = 'map'
+        objetivo.pose.header.frame_id = self.marco
         # Se deja el stamp en cero a proposito: Nav2 lo interpreta como "ahora"
         # y evita el desfase entre reloj de pared y tiempo de simulacion.
         objetivo.pose.pose.position.x = float(x)

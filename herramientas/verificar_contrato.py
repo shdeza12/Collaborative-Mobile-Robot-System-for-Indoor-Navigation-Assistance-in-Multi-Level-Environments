@@ -224,12 +224,26 @@ def revisar_tf(padres, robots):
     else:
         ok("Marcos prefijados", f"{len(todos)} marcos, todos bajo un namespace")
 
+    # Esta comprobación era un 'info' con la excusa «normal si no hay AMCL/SLAM
+    # levantado», y esa excusa tapó el fallo del 2026-08-24: los launch dejaban
+    # el marco global sin prefijar, así que '<ns>/map' NO existía ni con AMCL
+    # levantada, y aquí salía la misma línea tranquilizadora. El coordinador
+    # mandaba el goal a un marco inexistente y Nav2 abortaba sin explicar nada.
+    #
+    # Ahora se distingue: si hay 'odom' del robot en el árbol, la localización
+    # está publicando y la falta de '<ns>/map' es un FALLO, no una circunstancia.
     for ns in robots:
         raiz = f"{ns}/map"
         if raiz in todos:
             ok(f"Raíz de {ns}", raiz)
+        elif f"{ns}/odom" in todos:
+            falla(
+                f"Raíz de {ns}",
+                f"hay '{ns}/odom' pero no '{raiz}': el marco global se quedó "
+                f"sin prefijar y un goal en '{raiz}' no se puede transformar",
+            )
         else:
-            info(f"Raíz de {ns}", f"no existe '{raiz}' (normal si no hay AMCL/SLAM levantado)")
+            info(f"Raíz de {ns}", f"no existe '{raiz}' (no hay AMCL/SLAM levantado)")
 
 
 # --- Principal ---------------------------------------------------------------

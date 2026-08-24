@@ -93,12 +93,29 @@ def acciones(context, *args, **kwargs):
     param_substitutions.update(pose_inicial(context))
 
     if prefijo:
-        # 'global_frame_id' NO se toca: 'map' lo publica el map_server y es el
-        # ancla comun. Se usan rutas completas por coherencia con el launch de
-        # navegacion, donde la clave suelta seria ambigua.
+        # 'map' TAMBIEN se prefija. Aqui estuvo escrito lo contrario -"es el
+        # ancla comun"- hasta el 2026-08-24, y costo una mision abortada: el
+        # coordinador mandaba el goal en 'robot1/map' siguiendo el §3 del
+        # contrato, ese marco no existia, el planner no podia transformarlo y
+        # Nav2 acababa en ABORTED tras un BackUp de 0,41 m. Diagnostico completo
+        # en Evidencia/S20_marco_map_prefijado.md.
+        #
+        # 'map' no es un ancla comun sino DOS mapas distintos con el mismo
+        # nombre. Hoy no chocan porque cada robot vive en su dominio DDS; en
+        # cuanto compartan uno -que es lo que exige el relevo H3- habria dos
+        # map_server publicando el mismo marco con geometrias distintas, que es
+        # justo el fallo silencioso que el §3 existe para impedir.
+        #
+        # Se usan rutas completas por coherencia con el launch de navegacion,
+        # donde la clave suelta seria ambigua.
         param_substitutions.update({
             'amcl.ros__parameters.base_frame_id': f'{prefijo}base_link',
             'amcl.ros__parameters.odom_frame_id': f'{prefijo}odom',
+            'amcl.ros__parameters.global_frame_id': f'{prefijo}map',
+            # El map_server sella su OccupancyGrid con este marco. Si se queda
+            # en 'map' mientras el costmap global espera 'robot1/map', la capa
+            # estatica se queda vacia sin dar error.
+            'map_server.ros__parameters.frame_id': f'{prefijo}map',
         })
 
     # root_key: el YAML tiene claves de primer nivel sueltas ('amcl:'), que solo
