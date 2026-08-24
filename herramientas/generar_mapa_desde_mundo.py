@@ -79,9 +79,22 @@ LIBRE = 254
 OCUPADO = 0
 DESCONOCIDO = 205
 
+# Un muro que NO existe en el edificio: la puerta de una sala que el modelo no
+# incluye, tapiada a proposito para que el relleno por inundacion no se escape.
+# Para Nav2 es exactamente igual de solido que OCUPADO -(255-50)/255 = 0.804,
+# muy por encima de occupied_thresh 0.65-, pero al mirar el .pgm se ve gris
+# oscuro en vez de negro y se sabe de un vistazo que ahi no hay pared medida.
+# Es la contraparte en el mapa del naranja que llevan en Gazebo.
+SINTETICO = 50
+
+# Los enlaces cuyo nombre empieza asi se pintan SINTETICO. Es una convencion de
+# nombres, no una propiedad del SDF: Gazebo no tiene donde anotar "esto me lo
+# invente", asi que se anota en el nombre y aqui se lee.
+PREFIJO_SINTETICO = 'Limite_'
+
 
 def paredes_del_mundo(ruta, altura):
-    """Devuelve una lista de paredes, cada una como sus cuatro vertices en metros."""
+    """Lista de (cuatro vertices en metros, valor con el que pintarla)."""
     mundo = ET.parse(ruta).getroot().find('world')
     if mundo is None:
         sys.exit(f"{ruta} no contiene un elemento <world>.")
@@ -133,7 +146,9 @@ def paredes_del_mundo(ruta, altura):
     print(f"  cortando a z = {altura:.2f} m    : {len(dentro)} paredes"
           + (f"   ({fuera} fuera del corte)" if fuera else ""))
 
-    return [rectangulo(posicion[c], tamano[c]) for c in dentro]
+    return [(rectangulo(posicion[c], tamano[c]),
+             SINTETICO if c[1].startswith(PREFIJO_SINTETICO) else OCUPADO)
+            for c in dentro]
 
 
 def modelos_del_mundo(mundo, ruta_world):
@@ -267,8 +282,8 @@ def crear_cuadricula(paredes, res, regiones, margen):
         x1 = max(r[2] for r in regiones)
         y1 = max(r[3] for r in regiones)
     else:
-        xs = [x for pared in paredes for x, _ in pared]
-        ys = [y for pared in paredes for _, y in pared]
+        xs = [x for pared, _ in paredes for x, _ in pared]
+        ys = [y for pared, _ in paredes for _, y in pared]
         x0, x1 = min(xs) - margen, max(xs) + margen
         y0, y1 = min(ys) - margen, max(ys) + margen
     columnas = int(math.ceil((x1 - x0) / res))
@@ -286,7 +301,11 @@ def pintar_paredes(rejilla, paredes, x0, y0, res):
     encontraria rendijas por donde colar una ruta a traves de la pared.
     """
     filas, columnas = len(rejilla), len(rejilla[0])
-    for pared in paredes:
+    # Los muros reales se pintan DESPUES de los sinteticos, para que en el
+    # solape de 0,05 m entre un panel y su pared vecina mande el muro real. Si
+    # fuera al reves, cada pared autentica luciria dos mordiscos de color de
+    # invento en los extremos y el .pgm mentiria sobre lo que si esta medido.
+    for pared, valor in sorted(paredes, key=lambda p: p[1] == OCUPADO):
         # La caja que envuelve a la pared acota que celdas hay que mirar. Para
         # una pared en angulo recto la caja es la pared misma y la prueba de
         # abajo acierta siempre; para una en diagonal sobran celdas en las
@@ -305,7 +324,7 @@ def pintar_paredes(rejilla, paredes, x0, y0, res):
                 cx = x0 + col * res
                 celda = [(cx, cy), (cx + res, cy), (cx + res, cy + res), (cx, cy + res)]
                 if se_tocan(celda, pared):
-                    rejilla[fila][col] = OCUPADO
+                    rejilla[fila][col] = valor
 
 
 def rellenar_libre(rejilla, x0, y0, res, semilla, regiones):
@@ -330,7 +349,10 @@ def rellenar_libre(rejilla, x0, y0, res, semilla, regiones):
     fila = int((semilla[1] - y0) / res)
     if not (0 <= col < columnas and 0 <= fila < filas) or not declarada(fila, col):
         sys.exit(f"El punto de arranque {semilla} cae fuera de la zona del mapa.")
-    if rejilla[fila][col] == OCUPADO:
+    # 'distinto de DESCONOCIDO', no 'igual a OCUPADO': desde que hay muros
+    # sinteticos hay dos valores que son pared, y comparar solo con uno dejaria
+    # pasar una semilla metida dentro de un panel.
+    if rejilla[fila][col] != DESCONOCIDO:
         sys.exit(f"El punto de arranque {semilla} cae DENTRO de una pared. "
                  "Revisar la pose de spawn del robot, o pasar --semilla.")
 
@@ -380,7 +402,22 @@ def escribir(rejilla, x0, y0, res, base, mundo):
         f.write(f"origin: [{x0:.4f}, {y0:.4f}, 0.0]\n")
         f.write("negate: 0\n")
         f.write("occupied_thresh: 0.65\n")
-        f.write("free_thresh: 0.25\n")
+        # free_thresh 0.1, NO el 0.25 del ejemplo de nav2. Aqui estuvo 0.25
+        # hasta el 2026-08-24 y contradecia en silencio al propio programa.
+        #
+        # map_server calcula ocupacion = (255 - valor) / 255 y llama LIBRE a
+        # todo lo que baje de free_thresh. El 205 con que este programa escribe
+        # DESCONOCIDO da (255-205)/255 = 0.196, que es MENOR que 0.25: cada
+        # celda desconocida se cargaba como libre. En el mapa del piso 1 eso
+        # eran 44697 celdas -el 58,5 %- de espacio inventado, y en los cinco
+        # mapas del repositorio entre el 14 % y el 65 %.
+        #
+        # No es un detalle cosmetico: 'allow_unknown: false' del Smac y
+        # 'track_unknown_space: true' del costmap global estaban BIEN puestos y
+        # no servian de nada, porque para cuando llegaban a mirar ya no quedaba
+        # ninguna celda desconocida que rechazar. Con 0.1 el 205 cae del lado
+        # correcto (0.196 > 0.1) y el 254 sigue siendo libre (0.004 < 0.1).
+        f.write("free_thresh: 0.1\n")
 
 
 def main():
@@ -419,7 +456,7 @@ def main():
     escribir(rejilla, x0, y0, res, args.salida, args.mundo)
 
     filas, columnas = len(rejilla), len(rejilla[0])
-    cuenta = {LIBRE: 0, OCUPADO: 0, DESCONOCIDO: 0}
+    cuenta = {LIBRE: 0, OCUPADO: 0, SINTETICO: 0, DESCONOCIDO: 0}
     for fila in rejilla:
         for v in fila:
             cuenta[v] += 1
@@ -429,7 +466,8 @@ def main():
     print(f"              {args.salida}.yaml  origin = [{x0:.4f}, {y0:.4f}, 0.0]")
     print(f"  abarca     : x de {x0:.2f} a {x0 + columnas * res:.2f} m, "
           f"y de {y0:.2f} a {y0 + filas * res:.2f} m")
-    for nombre, valor in (('libre', LIBRE), ('ocupado', OCUPADO), ('desconocido', DESCONOCIDO)):
+    for nombre, valor in (('libre', LIBRE), ('ocupado', OCUPADO),
+                          ('sintetico', SINTETICO), ('desconocido', DESCONOCIDO)):
         print(f"  {nombre:11s}: {cuenta[valor]:7d} celdas ({100 * cuenta[valor] / total:5.1f} %)")
 
     if cuenta[DESCONOCIDO] == 0:

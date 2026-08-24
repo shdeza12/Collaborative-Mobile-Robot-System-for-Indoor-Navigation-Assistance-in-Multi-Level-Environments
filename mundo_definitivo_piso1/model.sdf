@@ -727,6 +727,521 @@
       </visual>
       <pose>-12.9215 8.89495 0 0 -0 3.14159</pose>
     </link>
+
+    <!-- ================================================================== -->
+    <!-- LIMITES SINTETICOS (2026-08-24)                                     -->
+    <!--                                                                     -->
+    <!-- Estos DIECISEIS paneles NO existen en el edificio: son las puertas   -->
+    <!-- de las salas que este modelo no incluye. Van en naranja justamente   -->
+    <!-- para que se distingan a simple vista de los muros reales, que son    -->
+    <!-- grises, y para que nadie los confunda con geometria medida.          -->
+    <!--                                                                     -->
+    <!-- POR QUE SE ANADEN. Sin ellos el recinto esta abierto por dieciseis   -->
+    <!-- sitios: el generador de mapas veia el pasillo abierto y el relleno   -->
+    <!-- por inundacion se escapaba al ground_plane infinito. El mapa salia   -->
+    <!-- con un vestibulo fantasma de 38 m al sur, y el 2026-08-24 el         -->
+    <!-- planificador trazo por el la diagonal piso1_representacion ->        -->
+    <!-- piso1_etm10: mas corta (38,4 m frente a ~42 m por el pasillo) y      -->
+    <!-- completamente inexistente. Nav2 ABORTED a los 137 s con el robot     -->
+    <!-- fuera del edificio.                                                  -->
+    <!--                                                                     -->
+    <!-- POR QUE PANELES Y NO ESPACIO DESCONOCIDO. Nav2 infla los obstaculos  -->
+    <!-- LETHAL pero NO las celdas NO_INFORMATION. Dejar el vano como         -->
+    <!-- desconocido lo cierra al planificador pero sin colchon; un panel le  -->
+    <!-- da los 0,55 m de inflation_radius. Ademas el LiDAR ve el panel, asi  -->
+    <!-- que AMCL no se degrada cada vez que el robot pasa por delante de una -->
+    <!-- puerta, que es lo que pasaba cuando el rayo se perdia en el vacio.   -->
+    <!--                                                                     -->
+    <!-- COMO SE OBTUVIERON. Analiticamente, no a ojo: los extremos de cada   -->
+    <!-- panel son las caras de los dos Wall_* vecinos, mas 0,05 m de solape  -->
+    <!-- por lado. Sin solape queda una rendija de menos de una celda por la  -->
+    <!-- que el relleno se cuela igual. Los centros calculados coinciden con  -->
+    <!-- los destinos de config/puntos_interes.yaml con menos de 2 cm de      -->
+    <!-- diferencia, lo que valida las dos listas a la vez.                   -->
+    <!--                                                                     -->
+    <!-- CRITERIO DE CIERRE. Regenerar el mapa SIN pasar la opcion region:      -->
+    <!-- mundo esta de verdad sellado, el relleno se contiene solo.           -->
+    <!-- ================================================================== -->
+    <!-- piso1_etm1 -->
+    <link name='Limite_vano_etm1'>
+      <collision name='Limite_vano_etm1_Collision'>
+        <geometry>
+          <box>
+            <size>0.75070 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_vano_etm1_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.75070 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>-15.9371 11.19440 0 0 -0 0</pose>
+    </link>
+    <!-- piso1_etm2 -->
+    <link name='Limite_vano_etm2'>
+      <collision name='Limite_vano_etm2_Collision'>
+        <geometry>
+          <box>
+            <size>0.81180 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_vano_etm2_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.81180 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>-14.7559 11.18635 0 0 -0 0</pose>
+    </link>
+    <!-- piso1_etm3 -->
+    <link name='Limite_vano_etm3'>
+      <collision name='Limite_vano_etm3_Collision'>
+        <geometry>
+          <box>
+            <size>0.78423 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_vano_etm3_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.78423 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>-7.8079 11.18875 0 0 -0 0</pose>
+    </link>
+    <!-- piso1_etm4 -->
+    <link name='Limite_vano_etm4'>
+      <collision name='Limite_vano_etm4_Collision'>
+        <geometry>
+          <box>
+            <size>0.78306 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_vano_etm4_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.78306 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>-6.6242 11.19240 0 0 -0 0</pose>
+    </link>
+    <!-- piso1_etm5 -->
+    <link name='Limite_vano_etm5'>
+      <collision name='Limite_vano_etm5_Collision'>
+        <geometry>
+          <box>
+            <size>0.69526 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_vano_etm5_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.69526 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>-3.9851 11.18870 0 0 -0 0</pose>
+    </link>
+    <!-- piso1_etm6 -->
+    <link name='Limite_vano_etm6'>
+      <collision name='Limite_vano_etm6_Collision'>
+        <geometry>
+          <box>
+            <size>0.96454 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_vano_etm6_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.96454 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>1.2448 11.18620 0 0 -0 0</pose>
+    </link>
+    <!-- piso1_etm7 -->
+    <link name='Limite_vano_etm7'>
+      <collision name='Limite_vano_etm7_Collision'>
+        <geometry>
+          <box>
+            <size>0.78911 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_vano_etm7_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.78911 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>6.7716 11.18870 0 0 -0 0</pose>
+    </link>
+    <!-- piso1_etm8 -->
+    <link name='Limite_vano_etm8'>
+      <collision name='Limite_vano_etm8_Collision'>
+        <geometry>
+          <box>
+            <size>0.77590 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_vano_etm8_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.77590 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>9.7041 11.18125 0 0 -0 0</pose>
+    </link>
+    <!-- piso1_etm9 -->
+    <link name='Limite_vano_etm9'>
+      <collision name='Limite_vano_etm9_Collision'>
+        <geometry>
+          <box>
+            <size>0.74270 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_vano_etm9_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.74270 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>18.1135 11.17455 0 0 -0 0</pose>
+    </link>
+    <!-- piso1_etm13 -->
+    <link name='Limite_vano_etm13'>
+      <collision name='Limite_vano_etm13_Collision'>
+        <geometry>
+          <box>
+            <size>1.94073 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_vano_etm13_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>1.94073 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>-7.2511 8.89495 0 0 -0 0</pose>
+    </link>
+    <!-- piso1_etm11 -->
+    <link name='Limite_vano_etm11'>
+      <collision name='Limite_vano_etm11_Collision'>
+        <geometry>
+          <box>
+            <size>0.92640 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_vano_etm11_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.92640 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>4.0824 8.87116 0 0 -0 0</pose>
+    </link>
+    <!-- sin destino: descartado a mano en puntos_interes.yaml -->
+    <link name='Limite_vano_sur_x87'>
+      <collision name='Limite_vano_sur_x87_Collision'>
+        <geometry>
+          <box>
+            <size>0.94127 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_vano_sur_x87_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.94127 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>8.6663 8.84302 0 0 -0 0</pose>
+    </link>
+    <!-- piso1_almacen -->
+    <link name='Limite_vano_almacen'>
+      <collision name='Limite_vano_almacen_Collision'>
+        <geometry>
+          <box>
+            <size>0.77787 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_vano_almacen_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.77787 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>15.1758 8.83649 0 0 -0 0</pose>
+    </link>
+    <!-- piso1_escalera (punto de transferencia) -->
+    <link name='Limite_vano_escalera'>
+      <collision name='Limite_vano_escalera_Collision'>
+        <geometry>
+          <box>
+            <size>0.91797 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_vano_escalera_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.91797 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>-20.6294 5.17636 0 0 -0 -1.5708</pose>
+    </link>
+    <!-- piso1_representacion -->
+    <link name='Limite_vano_representacion'>
+      <collision name='Limite_vano_representacion_Collision'>
+        <geometry>
+          <box>
+            <size>0.86976 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_vano_representacion_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.86976 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>-17.6889 5.15226 0 0 -0 -1.5708</pose>
+    </link>
+    <!-- piso1_etm10 -->
+    <link name='Limite_vano_etm10'>
+      <collision name='Limite_vano_etm10_Collision'>
+        <geometry>
+          <box>
+            <size>0.82391 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_vano_etm10_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.82391 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>20.0924 10.64085 0 0 -0 -1.5708</pose>
+    </link>
     <static>1</static>
   </model>
 </sdf>

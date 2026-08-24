@@ -37,11 +37,23 @@ except ImportError:
     sys.exit("Falta Pillow. Instalar con: pip3 install Pillow")
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from generar_mapa_desde_mundo import paredes_del_mundo  # noqa: E402
+from generar_mapa_desde_mundo import (  # noqa: E402
+    DESCONOCIDO, LIBRE, OCUPADO, PREFIJO_SINTETICO, SINTETICO, paredes_del_mundo)
+
+# Que significa cada valor del .pgm para QUIEN LO ESCRIBIO. La comprobacion de
+# coherencia de abajo contrasta esta intencion con lo que map_server deduce de
+# los umbrales del .yaml, que es cosa distinta y puede no coincidir.
+INTENCION = {
+    LIBRE: "libre",
+    OCUPADO: "ocupado",
+    SINTETICO: "ocupado",       # limite sintetico: solido, pero no medido
+    DESCONOCIDO: "desconocido",
+}
 
 # Umbrales de aceptacion
 COBERTURA_MINIMA = 0.85     # parte de la extension del mundo que debe quedar mapeada
-DESCONOCIDO_MAXIMO = 0.35   # parte maxima de celdas desconocidas
+DESCONOCIDO_MAXIMO = 0.35   # ya no decide nada; ver la nota dentro de analizar()
+FRONTERA_MAXIMA = 0.01      # parte maxima de celdas libres pegadas a lo desconocido
 FANTASMA_MAXIMO = 0.05      # parte maxima de obstaculos sin pared real detras
 TOLERANCIA = 0.30           # m; a que distancia se acepta que un obstaculo "corresponde"
 
@@ -67,13 +79,58 @@ def leer_yaml_mapa(ruta):
     # entonces la lista queda vacia.
     campos["regiones"] = [tuple(float(v) for v in m) for m in re.findall(
         r"--region\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)\s+(-?[\d.]+)", texto)]
+    for clave, defecto in (("occupied_thresh", 0.65), ("free_thresh", 0.196)):
+        m = re.search(rf"^{clave}\s*:\s*([\d.]+)", texto, re.M)
+        campos[clave] = float(m.group(1)) if m else defecto
     return campos
+
+
+def revisar_umbrales(ruta_yaml, meta, valores):
+    """¿map_server leera cada valor del .pgm como quien lo escribio pretendia?
+
+    ESTA COMPROBACION EXISTE POR UN FALLO CONCRETO (2026-08-24). El .yaml decia
+    'free_thresh: 0.25' -copiado del ejemplo de nav2- mientras el .pgm escribia
+    205 para 'desconocido'. map_server calcula ocupacion = (255 - valor) / 255,
+    o sea 0.196 para el 205, y llama LIBRE a todo lo que baje del umbral: 0.196
+    < 0.25, luego CADA CELDA DESCONOCIDA SE CARGABA COMO LIBRE. En el mapa del
+    piso 1 eran 44697 celdas, el 58,5 % del mapa, de espacio que no existe.
+
+    Nadie lo vio porque los dos archivos son correctos por separado y solo se
+    contradicen al leerlos juntos, que es justo lo que nunca se hacia. El
+    sintoma llego mucho despues y disfrazado: Nav2 trazando una diagonal de 38 m
+    por fuera del edificio y abortando a los 137 s.
+
+    'allow_unknown: false' del Smac y 'track_unknown_space: true' del costmap
+    global estaban BIEN puestos y no sirvieron de nada: para cuando miraban, ya
+    no quedaba ninguna celda desconocida que rechazar.
+    """
+    problemas = []
+    for v in sorted(valores):
+        ocupacion = (255 - v) / 255
+        if ocupacion > meta["occupied_thresh"]:
+            leido = "ocupado"
+        elif ocupacion < meta["free_thresh"]:
+            leido = "libre"
+        else:
+            leido = "desconocido"
+        esperado = INTENCION.get(v)
+        if esperado is None:
+            problemas.append(
+                f"el .pgm contiene el valor {v}, que no escribe "
+                f"generar_mapa_desde_mundo.py; map_server lo leera como '{leido}'")
+        elif leido != esperado:
+            problemas.append(
+                f"el valor {v} se escribio para decir '{esperado}' y map_server lo "
+                f"leera como '{leido}' (ocupacion {ocupacion:.3f} frente a "
+                f"free_thresh {meta['free_thresh']} y occupied_thresh "
+                f"{meta['occupied_thresh']})")
+    return problemas
 
 
 def extension_mundo(paredes):
     """Cuanto mide el mundo en X y en Y, de pared a pared."""
-    xs = [x for pared in paredes for x, _ in pared]
-    ys = [y for pared in paredes for _, y in pared]
+    xs = [x for pared, _ in paredes for x, _ in pared]
+    ys = [y for pared, _ in paredes for _, y in pared]
     return max(xs) - min(xs), max(ys) - min(ys)
 
 
@@ -112,13 +169,22 @@ def analizar(ruta_yaml, ruta_world, altura=0.30):
     pixel = imagen.load()
 
     paredes = paredes_del_mundo(ruta_world, altura)
+    if not paredes:
+        # Sin esto el programa moria mas abajo con 'min() arg is an empty
+        # sequence', que no dice nada sobre la unica causa que lo produce:
+        # verificar un mapa del nivel 2 contra el corte del nivel 1.
+        sys.exit(f"Ninguna pared del mundo cruza z = {altura:.2f} m. En un mundo de "
+                 "varios niveles hay que pasar la altura del nivel que se verifica "
+                 "(tercer argumento); la del nivel 2 de este proyecto es 3.30.")
 
-    # En un .pgm de nav2_map_server: 254 = libre, 0 = ocupado, 205 = desconocido.
+    # En un .pgm de nav2_map_server: 254 = libre, 0 = ocupado, 205 = desconocido,
+    # y 50 = limite sintetico (ver SINTETICO en generar_mapa_desde_mundo.py).
     # La fila 0 de la imagen es la Y mayor, de ahi el (filas - 1 - f) al pasar a metros.
     conocidas = 0
     desconocidas = 0
     ocupadas = 0
     fantasmas = []                      # obstaculos del mapa sin pared real detras
+    valores = set()                     # que valores aparecen de verdad en la imagen
     col_min = col_max = fila_min = fila_max = None
 
     regiones = meta["regiones"]
@@ -130,6 +196,7 @@ def analizar(ruta_yaml, ruta_world, altura=0.30):
         for c in range(columnas):
             x = origen_x + (c + 0.5) * res
             v = pixel[c, f]
+            valores.add(v)
             en_region = any(rx0 <= x <= rx1 and ry0 <= y <= ry1
                             for rx0, ry0, rx1, ry1 in regiones)
             if en_region:
@@ -144,14 +211,40 @@ def analizar(ruta_yaml, ruta_world, altura=0.30):
             col_max = c if col_max is None else max(col_max, c)
             fila_min = f if fila_min is None else min(fila_min, f)
             fila_max = f if fila_max is None else max(fila_max, f)
-            if v >= 50:
+            # '> SINTETICO', no '>= 50': un limite sintetico es tan solido como
+            # un muro medido y tambien tiene que tener geometria detras. Con el
+            # '>=' anterior los paneles se saltaban la prueba de fidelidad, que
+            # es precisamente la que confirma que estan donde se dijo.
+            if v > SINTETICO:
                 continue
             ocupadas += 1
-            if min(distancia_a_pared(x, y, p) for p in paredes) > TOLERANCIA:
+            if min(distancia_a_pared(x, y, p) for p, _ in paredes) > TOLERANCIA:
                 fantasmas.append(x)
 
     if not conocidas:
         sys.exit("El mapa no contiene ninguna celda conocida.")
+
+    # LA FRONTERA: celdas desconocidas pegadas a espacio libre. Es donde el mapa
+    # deja de saber sin que haya una pared que lo justifique, o sea un agujero
+    # por el que el planificador puede sacar una ruta del edificio.
+    #
+    # Sustituye a la fraccion de desconocidas como criterio de rechazo. Mide la
+    # misma preocupacion -- '¿el mapa esta terminado?' -- pero sin depender de
+    # ningun rectangulo declarado a mano, y ademas dice DONDE. En el mapa del
+    # piso 1, antes de tapiar los dieciseis vanos, la frontera tenia 174 celdas
+    # repartidas en catorce sitios; despues, cero.
+    libres = set()
+    frontera = []
+    for f in range(filas):
+        for c in range(columnas):
+            if pixel[c, f] == LIBRE:
+                libres.add((c, f))
+    for c, f in libres:
+        for vc, vf in ((c + 1, f), (c - 1, f), (c, f + 1), (c, f - 1)):
+            if 0 <= vc < columnas and 0 <= vf < filas and pixel[vc, vf] == DESCONOCIDO:
+                frontera.append((origen_x + (vc + 0.5) * res,
+                                 origen_y + (filas - 1 - vf + 0.5) * res))
+    frac_frontera = len(frontera) / len(libres) if libres else 0.0
 
     mapeado_x = (col_max - col_min + 1) * res
     mapeado_y = (fila_max - fila_min + 1) * res
@@ -170,6 +263,16 @@ def analizar(ruta_yaml, ruta_world, altura=0.30):
     # Medido sobre las regiones declaradas, el mismo piso 1 da 1.5% y el piso 2
     # da 0.1%. Un mapa de SLAM no declara regiones; ahi se mide sobre la imagen
     # entera, que para ese caso es lo que siempre se quiso.
+    #
+    # DESDE EL 2026-08-24 ESTA CIFRA YA NO DECIDE NADA, y se deja solo como dato.
+    # La decision la toma 'frontera' (abajo), por dos motivos. El primero es que
+    # las regiones dejaron de existir: se declaraban para que el relleno por
+    # inundacion no se escapara por las puertas sin modelar, y ahora las puertas
+    # estan tapiadas con paneles, asi que el mapa se genera sin ellas y este
+    # denominador vuelve a ser la caja envolvente -- que en una planta de 41 x 6.7
+    # m dentro de un rectangulo de 43 x 8.7 da un 69% de desconocidas que es
+    # enteramente correcto. El segundo es que el rectangulo declarado a mano
+    # nunca fue una medida, sino una promesa; la frontera si es una medida.
     if regiones and dentro_total:
         frac_desconocido = dentro_desconocidas / dentro_total
         ambito = f"dentro de las {len(regiones)} regiones declaradas"
@@ -186,6 +289,19 @@ def analizar(ruta_yaml, ruta_world, altura=0.30):
     print(f"Celdas desconocidas: {frac_desconocido:.1%}  {ambito}")
     print(f"Obstaculos sin pared real a menos de {TOLERANCIA:.2f} m: "
           f"{len(fantasmas)} de {ocupadas} ({frac_fantasma:.1%})")
+    print(f"Frontera libre/desconocido: {len(frontera)} celdas de {len(libres)} libres "
+          f"({frac_frontera:.2%})")
+    if frontera:
+        vistos = []
+        for x, y in sorted(frontera):
+            if not vistos or math.hypot(x - vistos[-1][0], y - vistos[-1][1]) > 3 * res:
+                vistos.append((x, y))
+        print(f"  {len(vistos)} sitios distintos; los primeros:")
+        for x, y in vistos[:8]:
+            print(f"     x = {x:7.2f}   y = {y:6.2f}")
+    incoherencias = revisar_umbrales(ruta_yaml, meta, valores)
+    print(f"Umbrales del .yaml frente a los valores del .pgm: "
+          + ("coherentes" if not incoherencias else f"{len(incoherencias)} INCOHERENCIAS"))
     if fantasmas:
         print("  donde se concentran (tramos de 1 m con mas de 20 celdas):")
         for metro in range(int(math.floor(min(fantasmas))), int(math.ceil(max(fantasmas))) + 1):
@@ -195,6 +311,11 @@ def analizar(ruta_yaml, ruta_world, altura=0.30):
     print()
 
     fallos = []
+    # Va la PRIMERA a proposito. Si el .pgm y el .yaml se contradicen, todas las
+    # cifras de arriba estan medidas sobre un mapa distinto del que Nav2 va a
+    # cargar, y discutir su cobertura antes de arreglar eso es perder el tiempo.
+    for p in incoherencias:
+        fallos.append("Incoherencia entre el .pgm y sus umbrales: " + p)
     if cobertura_x < COBERTURA_MINIMA:
         fallos.append(
             f"Cobertura en X del {cobertura_x:.1%} (minimo {COBERTURA_MINIMA:.0%}). "
@@ -213,10 +334,15 @@ def analizar(ruta_yaml, ruta_world, altura=0.30):
             "revisar que max_laser_range este por debajo del alcance del sensor; "
             "(b) deriva de pose, que dobla o curva las paredes del corredor."
         )
-    if frac_desconocido > DESCONOCIDO_MAXIMO:
+    if frac_frontera > FRONTERA_MAXIMA:
         fallos.append(
-            f"{frac_desconocido:.1%} de celdas desconocidas {ambito} "
-            f"(maximo {DESCONOCIDO_MAXIMO:.0%})."
+            f"{len(frontera)} celdas de frontera libre/desconocido "
+            f"({frac_frontera:.2%} del espacio libre, maximo {FRONTERA_MAXIMA:.0%}). "
+            "El recinto esta abierto por ahi: el espacio libre toca lo desconocido "
+            "sin ninguna pared en medio. Si son puertas a salas sin modelar, "
+            "tapiarlas en el .world con enlaces "
+            f"'{PREFIJO_SINTETICO}*' y regenerar el mapa; si es un mapa de SLAM, "
+            "falta recorrer esa zona."
         )
     if frac_fantasma > FANTASMA_MAXIMO:
         fallos.append(

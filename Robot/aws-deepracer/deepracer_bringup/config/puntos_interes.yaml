@@ -24,9 +24,12 @@
 # MARCO
 # -----
 # Todas las poses van en el marco <ns>/map, y ahi coinciden numericamente con las
-# coordenadas del mundo de Gazebo: el origen del mapa es [-20.72, 4.62], que es
-# la esquina de la region con la que se genero. No hay desplazamiento que aplicar
-# entre un marco y el otro.
+# coordenadas del mundo de Gazebo. No hay desplazamiento que aplicar entre un
+# marco y el otro, y no lo habria aunque cambiase el origen del .yaml del mapa:
+# ese campo dice donde cae la esquina de la IMAGEN, no donde esta el marco. Aqui
+# estuvo escrito que el origen era [-20.72, 4.62] "que es la esquina de la region
+# con la que se genero"; desde el 2026-08-24 el mapa se genera sin regiones y el
+# origen es [-21.7245, 3.6174], sin que ninguna pose de este archivo cambie.
 #
 # DONDE SE DETIENE EL ROBOT, Y POR QUE AHI
 # ----------------------------------------
@@ -41,6 +44,30 @@
 # este. En el tramo norte-sur del extremo oeste es yaw = -pi/2, mirando al sur,
 # porque ese tramo solo comunica con el pasillo por su extremo norte y a sus dos
 # puertas se llega bajando.
+#
+# ESE RAZONAMIENTO ERA CORRECTO Y AUN ASI INSUFICIENTE, y el 2026-08-24 costo una
+# mision. Alinear el yaw con el pasillo evita la maniobra de quien llega DE
+# FRENTE, pero no dice nada de quien llega POR DETRAS. Una mision de ETM10 a ETM1
+# recorre el pasillo hacia el OESTE y termina en un punto que pide mirar al ESTE:
+# 180 grados. El vehiculo hizo el medio giro, y como no gira sobre su eje la
+# maniobra lo aparto del punto -de menos de 0.25 m a 0.413 m- mientras Nav2, con
+# 'stateful: True', ya solo comprobaba el rumbo. Devolvio SUCCEEDED y el
+# coordinador lo rechazo contra /odom. Con quince destinos en linea recta, la
+# mitad de los pares origen-destino se recorren en el sentido "equivocado": no era
+# un caso raro, era la mitad de los casos.
+#
+# ASI QUE EL YAW DE ESTE ARCHIVO YA NO SE EXIGE. En
+# nav2_params_nav_amcl_sim_demo.yaml el 'yaw_goal_tolerance' paso a 3.15 (~pi), o
+# sea que cualquier rumbo final se acepta, y el robot queda apuntando hacia donde
+# lo dejo la ruta. Para guiar a una persona eso es lo util: importa llegar al
+# sitio, no aparcar en una direccion concreta.
+#
+# El campo se conserva -no se pone a cero ni se borra- por tres razones: es la
+# orientacion con la que se derivaron y se dibujaron las paradas, sigue siendo el
+# rumbo natural de aproximacion de frente, y el dia que la HRI quiera decir "el
+# destino queda a su izquierda" lo hara con esto y con lado_pared. Pero hoy es
+# ORIENTATIVO: nadie lo comprueba. Quien lo lea buscando una garantia de como
+# quedara aparcado el vehiculo, no la encontrara aqui.
 #
 # La segunda es la posicion transversal. La parada conserva la abscisa del vano y
 # se aparta del eje del pasillo HACIA LA PARED DE SU PROPIA PUERTA, hasta el
@@ -75,8 +102,33 @@
 # Es la distancia de la parada al obstaculo mas cercano del mapa, medida por
 # transformada de distancia sobre el .pgm. Para comparar: la huella del vehiculo
 # es 0.28 x 0.19 m, o sea 0.17 m de radio letal, y el inflation_radius de 0.55 m
-# no es letal -solo encarece el paso-. Las quince paradas estan entre 0.72 y
-# 1.14 m, asi que ninguna queda dentro del inflado.
+# no es letal -solo encarece el paso-.
+#
+# LAS CIFRAS BAJARON EL 2026-08-24, y no porque se moviera ninguna parada. Ese
+# dia se tapiaron los dieciseis vanos del piso 1 con paneles sinteticos, porque
+# mientras estuvieron abiertos el relleno del generador de mapas se escapaba por
+# ellos y Nav2 trazaba rutas por un vestibulo fantasma de 38 m fuera del
+# edificio. Al tapiarlos, el obstaculo mas cercano a cada parada dejo de ser la
+# jamba del vano y paso a ser el panel que tiene delante, a medio metro.
+#
+# El rango es ahora de 0.48 a 1.14 m. Once de las quince paradas quedan DENTRO
+# del inflado, cosa que la version anterior de este parrafo negaba. Ninguna
+# queda dentro del radio letal de 0.17 m -la mas apretada esta a 2.8 veces esa
+# distancia- asi que las quince siguen siendo objetivos validos: el inflado
+# encarece el paso, no lo prohibe. Pero encarecerlo tiene efecto sobre el Smac,
+# que lleva cost_penalty 1.3.
+#
+# LO QUE FALTA DECIDIR. La regla escrita mas arriba -apartarse hacia la pared de
+# la propia puerta hasta el primer punto con 0.70 m de holgura- se derivo sobre
+# el mapa CON los vanos abiertos, y las poses de abajo ya no la cumplen. La
+# regla sigue siendo satisfacible: el pasillo mide 2.14 m, luego 0.70 m de la
+# pared norte es y = 10.41 en vez de 10.59, y 0.70 m de la sur es y = 9.67 en
+# vez de 9.51. Con esas poses la pareja mas junta -ETM13 y ETM3, enfrentadas-
+# quedaria a 0.93 m, todavia por encima del doble de la xy_goal_tolerance.
+# Rederivarlas seria OBEDECER la regla, no cambiarla, pero mueve quince destinos
+# de un archivo que el contrato declara fuente de verdad, asi que no se hace sin
+# decidirlo. Mientras tanto, las poses son las de siempre y las holguras las
+# medidas de verdad.
 #
 # LO QUE FALTA
 # ------------
@@ -139,7 +191,7 @@ puntos:
     es_transferencia: false
     lado_pared: norte        # vano de 0.60 m
     pose: {x: -15.92, y: 10.59, yaw: 0.0}
-    holgura_m: 0.72
+    holgura_m: 0.54
 
   - id: piso1_etm2
     nombre: "ETM2"
@@ -147,7 +199,7 @@ puntos:
     es_transferencia: false
     lado_pared: norte        # vano de 0.66 m
     pose: {x: -14.75, y: 10.59, yaw: 0.0}
-    holgura_m: 0.72
+    holgura_m: 0.48
 
   - id: piso1_etm13
     nombre: "ETM13"
@@ -155,7 +207,7 @@ puntos:
     es_transferencia: false
     lado_pared: sur          # vano de 1.74 m, el mas ancho del piso
     pose: {x: -7.25, y: 9.51, yaw: 0.0}
-    holgura_m: 0.72
+    holgura_m: 0.54
 
   - id: piso1_etm3
     nombre: "ETM3"
@@ -163,7 +215,7 @@ puntos:
     es_transferencia: false
     lado_pared: norte        # vano de 0.60 m, casi enfrente de ETM13
     pose: {x: -7.82, y: 10.59, yaw: 0.0}
-    holgura_m: 0.72
+    holgura_m: 0.48
 
   - id: piso1_etm4
     nombre: "ETM4"
@@ -171,7 +223,7 @@ puntos:
     es_transferencia: false
     lado_pared: norte        # vano de 0.60 m
     pose: {x: -6.62, y: 10.59, yaw: 0.0}
-    holgura_m: 0.72
+    holgura_m: 0.54
 
   - id: piso1_etm5
     nombre: "ETM5"
@@ -179,7 +231,7 @@ puntos:
     es_transferencia: false
     lado_pared: norte        # vano de 0.54 m, el mas estrecho del piso
     pose: {x: -4.01, y: 10.59, yaw: 0.0}
-    holgura_m: 0.72
+    holgura_m: 0.48
 
   - id: piso1_etm6
     nombre: "ETM6"
@@ -187,7 +239,7 @@ puntos:
     es_transferencia: false
     lado_pared: norte        # vano de 0.84 m
     pose: {x: 1.24, y: 10.59, yaw: 0.0}
-    holgura_m: 0.72
+    holgura_m: 0.48
 
   - id: piso1_etm11
     nombre: "ETM11"
@@ -195,7 +247,7 @@ puntos:
     es_transferencia: false
     lado_pared: sur          # vano de 0.78 m
     pose: {x: 4.09, y: 9.51, yaw: 0.0}
-    holgura_m: 0.72
+    holgura_m: 0.60
 
   - id: piso1_etm7
     nombre: "ETM7"
@@ -203,7 +255,7 @@ puntos:
     es_transferencia: false
     lado_pared: norte        # vano de 0.60 m
     pose: {x: 6.76, y: 10.59, yaw: 0.0}
-    holgura_m: 0.72
+    holgura_m: 0.48
 
   - id: piso1_etm8
     nombre: "ETM8"
@@ -211,7 +263,7 @@ puntos:
     es_transferencia: false
     lado_pared: norte        # vano de 0.60 m
     pose: {x: 9.70, y: 10.59, yaw: 0.0}
-    holgura_m: 0.72
+    holgura_m: 0.48
 
   - id: piso1_almacen
     nombre: "Almacén ETM"
@@ -219,7 +271,7 @@ puntos:
     es_transferencia: false
     lado_pared: sur          # vano de 0.60 m
     pose: {x: 15.16, y: 9.51, yaw: 0.0}
-    holgura_m: 0.72
+    holgura_m: 0.60
 
   - id: piso1_etm9
     nombre: "ETM9"
@@ -227,7 +279,7 @@ puntos:
     es_transferencia: false
     lado_pared: norte        # vano de 0.60 m
     pose: {x: 18.10, y: 10.59, yaw: 0.0}
-    holgura_m: 0.72
+    holgura_m: 0.48
 
   # El vano del extremo este del pasillo, en el muro del fondo. Es el unico al
   # que se llega de frente y no por al lado, y su parada es la mas apretada del
@@ -240,7 +292,7 @@ puntos:
     es_transferencia: false
     lado_pared: fondo        # vano de 0.66 m, centro en y = +10.65
     pose: {x: 19.27, y: 10.35, yaw: 0.0}
-    holgura_m: 0.78
+    holgura_m: 0.72
 
   # ==================================================================== PISO 2 --
   # Del piso 2 solo esta esto: el otro extremo del relevo. Los demas destinos
