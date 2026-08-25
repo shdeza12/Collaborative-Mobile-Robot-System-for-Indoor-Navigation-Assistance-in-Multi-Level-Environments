@@ -491,8 +491,8 @@ puntos:
     nivel: 2
     es_transferencia: false
     lado_pared: norte        # vano de 0.66 m, centro en (+22.00, -3.41)
-    pose: {x: 22.00, y: -4.61, yaw: 0.0}
-    holgura_m: 0.74
+    pose: {x: 22.00, y: -4.43, yaw: 0.0}
+    holgura_m: 0.73          # la hornacina de su puerta dejo de estar tapiada
 
   # --------------------------------------------- PISO 2 - PASILLO LARGO (sur) --
   # De este a oeste, la vuelta del recorrido.
