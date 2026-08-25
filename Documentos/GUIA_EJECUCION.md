@@ -280,11 +280,17 @@ Conviene usar destinos de ese archivo y no coordenadas inventadas: son puertas r
 pasillo, con su holgura medida, y son las mismas que verá la HRI.
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /robot1/navigate_to_pose nav2_msgs/action/NavigateToPose "{pose: {header: {frame_id: map}, pose: {position: {x: -15.92, y: 10.59, z: 0.0}, orientation: {w: 1.0}}}}"
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /robot1/navigate_to_pose nav2_msgs/action/NavigateToPose "{pose: {header: {frame_id: robot1/map}, pose: {position: {x: -15.92, y: 10.59, z: 0.0}, orientation: {w: 1.0}}}}"
 ```
 
-El marco es `map` **sin prefijo**, aunque el robot vaya bajo `/robot1`: lo publica el
-`map_server` y es el ancla común a los dos robots. Con `robot1/map` la meta se rechaza.
+El marco es **`robot1/map`, con prefijo**. Aquí estuvo escrito lo contrario —«el marco es `map`
+sin prefijo, es el ancla común a los dos robots, con `robot1/map` la meta se rechaza»— y era
+falso en las dos mitades: el 2026-08-24 se prefijó también `map`, y con la meta en `map` a secas
+el marco no existe, el planificador no puede transformarla y Nav2 acaba en `ABORTED`. `map` no
+era un ancla común sino **dos mapas distintos con el mismo nombre**, que hoy no chocan solo
+porque cada robot vive en su propio dominio DDS. El razonamiento completo está en el comentario
+de `deepracer_localization_sim.launch.py`. Sin namespace —un solo robot— el marco sí es `map` a
+secas, que es el caso de los ejemplos del `README.md`.
 
 **`SUCCEEDED` no significa que el vehículo llegó**, solo que el árbol de comportamiento
 terminó. La comprobación válida es leer `/robot1/odom` al terminar y comparar contra el
@@ -346,7 +352,7 @@ cd ~/deepracer_sim_ws && source install/setup.bash && ros2 bag record -o /tmp/v_
 Y la meta, en una tercera:
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /robot1/navigate_to_pose nav2_msgs/action/NavigateToPose "{pose: {header: {frame_id: map}, pose: {position: {x: -19.43, y: 5.91}, orientation: {z: -0.7071, w: 0.7071}}}}"
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /robot1/navigate_to_pose nav2_msgs/action/NavigateToPose "{pose: {header: {frame_id: robot1/map}, pose: {position: {x: -19.43, y: 5.91}, orientation: {z: -0.7071, w: 0.7071}}}}"
 ```
 
 La `orientation` de aquí **no** es la identidad como en el escenario C: es el cuaternión de
@@ -509,10 +515,12 @@ Comprobado el 2026-08-20 con los dos SLAM simultáneos: moviendo **solo** robot2
 avanzó 7,34 m y robot1 se desplazó 4,9 mm, del mismo orden que los 6 mm de deriva numérica
 medidos en S17. El aislamiento se mantiene con `slam_toolbox` corriendo en los dos.
 
-Los dos publican el marco `map` sin prefijar, y no chocan porque viven en dominios ROS
-distintos. Es el mismo criterio que en el launch de localización: los marcos del vehículo
-se prefijan (`robot1/odom`, `robot1/base_link`) porque así los publica el URDF, pero `map`
-es el ancla común.
+Los dos publican el marco **`robotN/map`, prefijado**, igual que el resto de los marcos del
+vehículo (`robot1/odom`, `robot1/base_link`). Este párrafo decía que `map` iba sin prefijar
+«porque es el ancla común y los dominios ROS evitan la colisión»; desde el 2026-08-24
+`map_frame` se prefija también, aquí y en el launch de localización. Confiar en el aislamiento
+por dominio era temporal por definición: el relevo del hito H3 exige que los dos robots
+compartan grafo, y ese día dos `map` con geometrías distintas sí colisionan.
 
 **El tópico sí se prefija.** `slam_toolbox` crea el publicador del mapa con el nombre
 absoluto `/map`, de modo que el namespace del nodo no lo alcanza. El launch añade un remap

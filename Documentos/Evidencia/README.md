@@ -228,6 +228,17 @@ cámara que enumera y no publica se ve idéntica a una que funciona, hasta que s
 **Lo que no se versiona:** la sesión de terminal. Las cifras son reproducibles con el vehículo
 delante y los comandos del informe, no desde el repositorio.
 
+## Semana 20 — los dos agentes a la vez, y el marco que lo impedía (agosto 2026)
+
+| Archivo | Qué sostiene | Dónde se cita |
+|---|---|---|
+| [`S20_marco_map_prefijado.md`](S20_marco_map_prefijado.md) | Que `map` se prefija con el namespace, como pedía el §3 del contrato, y que no hacerlo dejaba las misiones del coordinador en `ABORTED` sin nombrar nunca al marco | [`ESTADO.md`](../../ESTADO.md) §bitácora (2026-08-24), los tres launch de `deepracer_bringup` |
+| [`S20_hito_h3_dos_agentes.md`](S20_hito_h3_dos_agentes.md) | Que los dos agentes navegan en simultáneo, cada uno en su piso, con 0,281 m y 0,143 m de error contra `/odom`, y que el `/odom` cruzado venía del demonio de `ros2cli` | [`ESTADO.md`](../../ESTADO.md) §bitácora (2026-08-25), cronograma act. 15 e hito H3 |
+
+**Van en este orden y no en el cronológico:** el primero es requisito del segundo. Mientras `map`
+estuvo sin prefijar, ninguna misión del coordinador podía completarse, así que el hito no era
+alcanzable aunque todo lo demás estuviera en su sitio.
+
 ## Diagrama
 
 | Archivo | Qué muestra | Dónde se cita |
@@ -257,8 +268,9 @@ dominios no se ven entre sí.
 Los `.md` de esta carpeta son el análisis, no la evidencia: explican qué se hizo, qué falló
 y por qué. `S17_nav2_namespaces.md`, `S17_aplicacion_contrato.md`, `S17_dos_simuladores.md`,
 `S17_linea_base.md`, `S18_entorno_dos_niveles.md`, `S19_spike_p4_humble_jazzy.md`,
-`S19_spike_p1_p2_hardware.md`, `S19_conversion_cmdvel_ackermann.md` y
-`S19_lidar_original_evo.md`.
+`S19_spike_p1_p2_hardware.md`, `S19_conversion_cmdvel_ackermann.md`,
+`S19_lidar_original_evo.md`, `S20_marco_map_prefijado.md` y
+`S20_hito_h3_dos_agentes.md`.
 
 ---
 
