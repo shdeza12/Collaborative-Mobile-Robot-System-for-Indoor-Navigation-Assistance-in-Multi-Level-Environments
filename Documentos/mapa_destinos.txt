@@ -380,34 +380,40 @@
 
     OJO CON LAS PARADAS: la columna 'parada propuesta' es la salida CRUDA, sin
     aplicar la regla de arrimar cada parada a la pared de su propia puerta. Las
-    cuatro parejas enfrentadas -5/6, 7/8, 9/A y B/C- tienen hoy la MISMA parada,
+    cuatro parejas enfrentadas -5/6, 7/8, 9/A y B/C- tienen aqui la MISMA parada,
     a 0.00 m una de otra, con una xy_goal_tolerance de 0.25 m. Es el mismo fallo
-    que en el piso 1 dejaba ETM13 y ETM3 a 0.18 m. Se recalculan al generar el
-    mapa; no hace falta que toques esa columna.
+    que en el piso 1 dejaba ETM13 y ETM3 a 0.18 m.
+
+    ESA COLUMNA YA NO ES LA BUENA. El 2026-08-25 se aplico la regla sobre el
+    mapa sellado y las paradas definitivas estan en
+    Robot/aws-deepracer/deepracer_bringup/config/puntos_interes.yaml, que es lo
+    que lee el coordinador. Las cuatro parejas enfrentadas quedan a 0.90 m o mas.
+    La columna se deja como estaba porque es la entrada del calculo, no su
+    resultado: sirve para rehacerlo, no para copiarlo.
 
     Tabla de vanos. Escribe el nombre, y en '?' pon S si es un destino
     de verdad o N si hay que descartarlo.
 
      ID  centro del vano      vano   pared      parada propuesta   ?  nombre
     ------------------------------------------------------------------------------
-     1  ( -23.36, -9.02)   4.20 m vertical   ( -22.49, -9.03) yaw 3.142 al oeste  _  S  ESCALERA (transferencia)
-     2  ( -17.42, -1.70)   1.32 m vertical   ( -16.10, -2.33) yaw 1.571 al oeste  _  ______________
-     3  ( -14.48,-11.27)   0.78 m horizontal ( -15.26,-10.07) yaw 0.000 al sur    _  S. IEEE
-     4  ( -14.51, -0.95)   0.60 m horizontal ( -15.32, -2.15) yaw 0.000 al norte  _  ______________
-     5  (  -8.96, -5.69)   0.90 m horizontal (  -8.96, -4.49) yaw 0.000 al sur    _  ______________
-     6  (  -8.96, -3.29)   0.90 m horizontal (  -8.96, -4.49) yaw 0.000 al norte  _  ______________
-     7  (  -7.52, -5.69)   0.90 m horizontal (  -7.52, -4.49) yaw 0.000 al sur    _  ______________
-     8  (  -7.49, -3.29)   0.84 m horizontal (  -7.52, -4.49) yaw 0.000 al norte  _  ______________
-     9  (  -1.85, -5.69)   0.84 m horizontal (  -1.88, -4.49) yaw 0.000 al sur    _  ______________
-     A  (  -1.85, -3.29)   0.84 m horizontal (  -1.88, -4.49) yaw 0.000 al norte  _  ______________
-     B  (  +3.85, -5.69)   0.96 m horizontal (  +3.82, -4.49) yaw 0.000 al sur    _  ______________
-     C  (  +3.85, -3.29)   0.96 m horizontal (  +3.82, -4.49) yaw 0.000 al norte  _  ______________
-     D  (  +9.97, -3.77)   0.96 m horizontal (  +9.94, -4.67) yaw 0.000 al norte  _  ______________
-     E  ( +10.84, -5.69)   0.90 m horizontal ( +10.84, -4.79) yaw 0.000 al sur    _  ______________
-     F  ( +15.22, -5.69)   0.78 m horizontal ( +15.22, -4.73) yaw 0.000 al sur    _  ______________
-     G  ( +15.46, -3.77)   0.90 m horizontal ( +15.46, -4.73) yaw 0.000 al norte  _  ______________
-     H  ( +22.00, -3.41)   0.66 m horizontal ( +21.88, -4.85) yaw 0.000 al norte  _  ______________
-     I  ( +23.26, -5.27)   0.30 m vertical   ( +21.76, -5.27) yaw 1.571 al este   _  N  (0.36 m, no cabe)
+     1  ( -23.36, -9.02)   4.20 m vertical   ( -22.49, -9.03) yaw 3.142 al oeste  S  ESCALERA (transferencia)
+     2  ( -17.42, -1.70)   1.32 m vertical   ( -16.10, -2.33) yaw 1.571 al oeste  S  División de Ing. y Arq.
+     3  ( -14.48,-11.27)   0.78 m horizontal ( -15.26,-10.07) yaw 0.000 al sur    S  IEEE
+     4  ( -14.51, -0.95)   0.60 m horizontal ( -15.32, -2.15) yaw 0.000 al norte  S  Lab. Sistemas 313
+     5  (  -8.96, -5.69)   0.90 m horizontal (  -8.96, -4.49) yaw 0.000 al sur    S  Aula 301
+     6  (  -8.96, -3.29)   0.90 m horizontal (  -8.96, -4.49) yaw 0.000 al norte  S  Lab. Sistemas 312
+     7  (  -7.52, -5.69)   0.90 m horizontal (  -7.52, -4.49) yaw 0.000 al sur    S  Aula 302
+     8  (  -7.49, -3.29)   0.84 m horizontal (  -7.52, -4.49) yaw 0.000 al norte  S  Aula 311
+     9  (  -1.85, -5.69)   0.84 m horizontal (  -1.88, -4.49) yaw 0.000 al sur    S  Aula 303
+     A  (  -1.85, -3.29)   0.84 m horizontal (  -1.88, -4.49) yaw 0.000 al norte  S  Aula 310
+     B  (  +3.85, -5.69)   0.96 m horizontal (  +3.82, -4.49) yaw 0.000 al sur    S  Aula 304
+     C  (  +3.85, -3.29)   0.96 m horizontal (  +3.82, -4.49) yaw 0.000 al norte  S  Aula 309
+     D  (  +9.97, -3.77)   0.96 m horizontal (  +9.94, -4.67) yaw 0.000 al norte  S  Aula 308
+     E  ( +10.84, -5.69)   0.90 m horizontal ( +10.84, -4.79) yaw 0.000 al sur    S  Aula 305
+     F  ( +15.22, -5.69)   0.78 m horizontal ( +15.22, -4.73) yaw 0.000 al sur    S  Sala de Docentes Fac. Ing. Civil
+     G  ( +15.46, -3.77)   0.90 m horizontal ( +15.46, -4.73) yaw 0.000 al norte  S  Aula 307
+     H  ( +22.00, -3.41)   0.66 m horizontal ( +21.88, -4.85) yaw 0.000 al norte  S  Aula 306
+     I  ( +23.26, -5.27)   0.30 m vertical   ( +21.76, -5.27) yaw 1.571 al este   N  (0.36 m, no cabe)
 
     Arranque del robot ahora: x=-21.889 y=-8.379 yaw=+0.0000
     Si debe ser otro, escribelo aqui:  x=________ y=________ yaw=________
