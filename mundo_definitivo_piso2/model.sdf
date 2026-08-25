@@ -1052,6 +1052,737 @@
       </visual>
       <pose>-11.828 -5.76408 0 0 -0 0</pose>
     </link>
+    <!-- ================================================================== -->
+    <!-- PANELES SINTETICOS DEL PISO 2                    anadidos 2026-08-24 -->
+    <!--                                                                      -->
+    <!-- QUE SON. Cierres que NO existen en el edificio real. Tapan los vanos  -->
+    <!-- laterales del piso 2 y los extremos abiertos del perimetro. Van en    -->
+    <!-- Gazebo/Orange por la misma convencion que Barrera_Escalera: naranja   -->
+    <!-- significa 'esto no es geometria real del edificio'.                   -->
+    <!--                                                                      -->
+    <!-- POR QUE HACEN FALTA. Sin ellos el relleno de generar_mapa_desde_mundo -->
+    <!-- se escapa por cada puerta y declara libre medio plano. El 23-ago eso  -->
+    <!-- se tapo con cinco opciones region, que son un recorte a mano del      -->
+    <!-- resultado: el mapa salia bien pero el mundo seguia abierto, y todo lo -->
+    <!-- que no fuera ese recorte -Gazebo, el LiDAR, un relleno desde otra     -->
+    <!-- semilla- seguia viendo los agujeros. Mismo defecto que el piso 1.     -->
+    <!--                                                                      -->
+    <!-- POR QUE PARED Y NO HUECO. Nav2 infla los obstaculos LETHAL pero NO    -->
+    <!-- las celdas NO_INFORMATION. Un vano dejado como desconocido no da      -->
+    <!-- ningun colchon; una pared da los 0,55 m de inflation_radius. Ademas   -->
+    <!-- el LiDAR ve el panel, asi que AMCL no se degrada en cada puerta.      -->
+    <!--                                                                      -->
+    <!-- COMO SE ELIGIERON. Analiticamente, no a ojo, con                      -->
+    <!-- herramientas/buscar_vanos.py: empareja cada punta suelta de pared con -->
+    <!-- la que tiene enfrente y conserva solo los huecos COLINEALES -los que  -->
+    <!-- prolongan el eje de la pared que los abre, frente a las secciones     -->
+    <!-- transversales de pasillo, que son perpendiculares- y con linea de     -->
+    <!-- vision libre. Salieron 27. Cuales dejar abiertos lo decidieron las    -->
+    <!-- cinco region del 23-ago, que ya declaraban la red navegable: si los   -->
+    <!-- dos lados del hueco caen dentro de la red, es paso. El comando exacto -->
+    <!-- esta en Documentos/GUIA_EJECUCION.md.                                 -->
+    <!--                                                                      -->
+    <!-- LOS 4 PASOS QUE NO SE TAPAN, y por que:                               -->
+    <!--   (-14.13, -4.46) 2.47 m  boca oeste del pasillo largo. Sellarlo      -->
+    <!--                           incomunica el ala oeste, donde spawnea      -->
+    <!--                           robot2 y esta piso2_escalera.               -->
+    <!--   (  8.50, -4.81) 1.89 m  empalme pasillo largo / pasillo este.       -->
+    <!--   ( 18.55, -4.73) 1.89 m  seccion interna del pasillo este.           -->
+    <!--   ( 21.55, -5.33) 2.95 m  seccion interna del pasillo este.           -->
+    <!--                                                                      -->
+    <!-- CRITERIO DE CIERRE. Regenerar el mapa SIN pasar ninguna opcion region:-->
+    <!-- si el mundo esta de verdad sellado, el relleno se contiene solo.      -->
+    <!-- ================================================================== -->
+    <!-- vano de 1.142 m entre Wall_96 y Wall_92 -->
+    <link name='Limite_p2_01'>
+      <collision name='Limite_p2_01_Collision'>
+        <geometry>
+          <box>
+            <size>1.24157 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_p2_01_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>1.24157 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>-19.80000 -1.51000 0 0 -0 1.57080</pose>
+    </link>
+    <!-- vano de 0.853 m entre Wall_90 y Wall_85 -->
+    <link name='Limite_p2_02'>
+      <collision name='Limite_p2_02_Collision'>
+        <geometry>
+          <box>
+            <size>0.95258 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_p2_02_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.95258 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>-17.87000 -2.49000 0 0 -0 0.00000</pose>
+    </link>
+    <!-- vano de 1.467 m entre Wall_85 y Wall_92 -->
+    <link name='Limite_p2_03'>
+      <collision name='Limite_p2_03_Collision'>
+        <geometry>
+          <box>
+            <size>1.56745 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_p2_03_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>1.56745 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>-17.44000 -1.67500 0 0 -0 1.57080</pose>
+    </link>
+    <!-- vano de 0.762 m entre Wall_81 y Wall_83 -->
+    <link name='Limite_p2_04'>
+      <collision name='Limite_p2_04_Collision'>
+        <geometry>
+          <box>
+            <size>0.86214 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_p2_04_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.86214 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>-14.51000 -11.20500 0 0 -0 0.03945</pose>
+    </link>
+    <!-- vano de 0.757 m entre Wall_92 y Wall_104 -->
+    <link name='Limite_p2_05'>
+      <collision name='Limite_p2_05_Collision'>
+        <geometry>
+          <box>
+            <size>0.85740 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_p2_05_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.85740 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>-14.48000 -0.94000 0 0 -0 0.00000</pose>
+    </link>
+    <!-- vano de 0.969 m entre Wall_100 y Wall_98 -->
+    <link name='Limite_p2_06'>
+      <collision name='Limite_p2_06_Collision'>
+        <geometry>
+          <box>
+            <size>1.06859 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_p2_06_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>1.06859 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>-8.96500 -5.77000 0 0 -0 -0.02062</pose>
+    </link>
+    <!-- vano de 0.942 m entre Wall_102 y Wall_106 -->
+    <link name='Limite_p2_07'>
+      <collision name='Limite_p2_07_Collision'>
+        <geometry>
+          <box>
+            <size>1.04193 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_p2_07_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>1.04193 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>-8.94000 -3.22000 0 0 -0 0.00000</pose>
+    </link>
+    <!-- vano de 0.945 m entre Wall_100 y Wall_110 -->
+    <link name='Limite_p2_08'>
+      <collision name='Limite_p2_08_Collision'>
+        <geometry>
+          <box>
+            <size>1.04483 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_p2_08_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>1.04483 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>-7.51000 -5.78000 0 0 -0 0.00000</pose>
+    </link>
+    <!-- vano de 0.946 m entre Wall_106 y Wall_108 -->
+    <link name='Limite_p2_09'>
+      <collision name='Limite_p2_09_Collision'>
+        <geometry>
+          <box>
+            <size>1.04552 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_p2_09_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>1.04552 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>-7.49500 -3.20500 0 0 -0 0.03157</pose>
+    </link>
+    <!-- vano de 0.893 m entre Wall_110 y Wall_114 -->
+    <link name='Limite_p2_10'>
+      <collision name='Limite_p2_10_Collision'>
+        <geometry>
+          <box>
+            <size>0.99258 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_p2_10_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.99258 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>-1.84500 -5.77000 0 0 -0 0.02247</pose>
+    </link>
+    <!-- vano de 0.893 m entre Wall_108 y Wall_112 -->
+    <link name='Limite_p2_11'>
+      <collision name='Limite_p2_11_Collision'>
+        <geometry>
+          <box>
+            <size>0.99258 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_p2_11_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.99258 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>-1.82500 -3.20000 0 0 -0 -0.02247</pose>
+    </link>
+    <!-- vano de 0.969 m entre Wall_112 y Wall_116 -->
+    <link name='Limite_p2_12'>
+      <collision name='Limite_p2_12_Collision'>
+        <geometry>
+          <box>
+            <size>1.06861 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_p2_12_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>1.06861 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>3.85500 -3.20000 0 0 -0 0.02062</pose>
+    </link>
+    <!-- vano de 1.036 m entre Wall_114 y Wall_128 -->
+    <link name='Limite_p2_13'>
+      <collision name='Limite_p2_13_Collision'>
+        <geometry>
+          <box>
+            <size>1.13554 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_p2_13_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>1.13554 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>3.87000 -5.75500 0 0 -0 0.00962</pose>
+    </link>
+    <!-- vano de 1.947 m entre Wall_116 y Wall_120 -->
+    <link name='Limite_p2_14'>
+      <collision name='Limite_p2_14_Collision'>
+        <geometry>
+          <box>
+            <size>2.04699 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_p2_14_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>2.04699 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>9.52000 -3.47000 0 0 -0 -0.29244</pose>
+    </link>
+    <!-- vano de 1.015 m entre Wall_118 y Wall_120 -->
+    <link name='Limite_p2_15'>
+      <collision name='Limite_p2_15_Collision'>
+        <geometry>
+          <box>
+            <size>1.11459 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_p2_15_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>1.11459 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>9.94500 -3.77000 0 0 -0 0.03958</pose>
+    </link>
+    <!-- vano de 0.939 m entre Wall_126 y Wall_128 -->
+    <link name='Limite_p2_16'>
+      <collision name='Limite_p2_16_Collision'>
+        <geometry>
+          <box>
+            <size>1.03910 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_p2_16_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>1.03910 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>10.86000 -5.73500 0 0 -0 0.03190</pose>
+    </link>
+    <!-- vano de 0.812 m entre Wall_124 y Wall_126 -->
+    <link name='Limite_p2_17'>
+      <collision name='Limite_p2_17_Collision'>
+        <geometry>
+          <box>
+            <size>0.91238 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_p2_17_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.91238 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>15.23500 -5.73500 0 0 -0 -0.03702</pose>
+    </link>
+    <!-- vano de 0.981 m entre Wall_120 y Wall_136 -->
+    <link name='Limite_p2_18'>
+      <collision name='Limite_p2_18_Collision'>
+        <geometry>
+          <box>
+            <size>1.08136 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_p2_18_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>1.08136 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>15.44000 -3.76500 0 0 -0 -0.03060</pose>
+    </link>
+    <!-- vano de 0.932 m entre Wall_138 y Wall_147 -->
+    <link name='Limite_p2_19'>
+      <collision name='Limite_p2_19_Collision'>
+        <geometry>
+          <box>
+            <size>1.03156 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_p2_19_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>1.03156 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>21.96000 -3.60000 0 0 -0 0.39644</pose>
+    </link>
+    <!-- vano de 1.783 m entre Wall_138 y Wall_149 -->
+    <link name='Limite_p2_20'>
+      <collision name='Limite_p2_20_Collision'>
+        <geometry>
+          <box>
+            <size>1.88310 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_p2_20_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>1.88310 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>22.42000 -3.78000 0 0 -0 0.00000</pose>
+    </link>
+    <!-- vano de 2.036 m entre Wall_151 y Wall_147 -->
+    <link name='Limite_p2_21'>
+      <collision name='Limite_p2_21_Collision'>
+        <geometry>
+          <box>
+            <size>2.13619 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_p2_21_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>2.13619 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>23.23000 -4.43500 0 0 -0 1.57080</pose>
+    </link>
+    <!-- vano de 0.371 m entre Wall_149 y Wall_151 -->
+    <link name='Limite_p2_22'>
+      <collision name='Limite_p2_22_Collision'>
+        <geometry>
+          <box>
+            <size>0.47056 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_p2_22_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.47056 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>23.27000 -5.27000 0 0 -0 1.35213</pose>
+    </link>
+    <!-- vano de 1.786 m entre Wall_149 y Wall_152 -->
+    <link name='Limite_p2_23'>
+      <collision name='Limite_p2_23_Collision'>
+        <geometry>
+          <box>
+            <size>1.88621 0.15 2.5</size>
+          </box>
+        </geometry>
+        <pose>0 0 1.25 0 -0 0</pose>
+      </collision>
+      <visual name='Limite_p2_23_Visual'>
+        <pose>0 0 1.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>1.88621 0.15 2.5</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+          <ambient>1 0.5 0 1</ambient>
+        </material>
+        <meta>
+          <layer>0</layer>
+        </meta>
+      </visual>
+      <pose>23.31000 -5.98500 0 0 -0 1.57080</pose>
+    </link>
     <static>1</static>
   </model>
 </sdf>

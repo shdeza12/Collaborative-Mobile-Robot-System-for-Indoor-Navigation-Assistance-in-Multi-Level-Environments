@@ -1,11 +1,11 @@
 # mundo: mundo_definitivo_piso2.world
 # Mapa exacto de ese mundo, generado leyendo su geometria.
 # No editar a mano. Regenerar con esta orden, que es la que lo hizo:
-#   python3 herramientas/generar_mapa_desde_mundo.py mundo_definitivo_piso2.world Robot/aws-deepracer/deepracer_bringup/maps/mundo_definitivo_piso2 --region -23.39 -11.30 -17.37 -6.76 --region -17.52 -11.30 -14.03 -0.83 --region -14.20 -5.85 8.50 -3.12 --region 8.50 -5.85 23.39 -3.68 --region 18.48 -9.56 21.71 -5.67 --semilla -21.889 -8.379
+#   python3 herramientas/generar_mapa_desde_mundo.py mundo_definitivo_piso2.world Robot/aws-deepracer/deepracer_bringup/maps/mundo_definitivo_piso2 --semilla -21.889 -8.379
 image: mundo_definitivo_piso2.pgm
 mode: trinary
 resolution: 0.06
-origin: [-23.3900, -11.3000, 0.0]
+origin: [-24.3895, -12.2969, 0.0]
 negate: 0
 occupied_thresh: 0.65
-free_thresh: 0.25
+free_thresh: 0.1

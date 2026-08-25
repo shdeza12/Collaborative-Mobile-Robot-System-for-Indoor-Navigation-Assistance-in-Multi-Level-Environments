@@ -361,8 +361,11 @@ la misma geometría. `generar_mapa_desde_mundo.py` acepta la misma opción como 
 
 > **Esto no aplica a los mundos vigentes**, porque desde el 2026-08-23 cada piso tiene el
 > suyo y no hay dos niveles dentro de un mismo archivo que separar por altura: cada mapa se
-> verifica contra su propio `.world` y el tercer argumento sobra. Lo que distingue una zona
-> de otra dentro de un piso es `--region`, no la altura.
+> verifica contra su propio `.world` y el tercer argumento sobra. Dentro de un piso ya no hay
+> nada que distinguir: desde el 2026-08-24 los vanos están tapados con paneles `Limite_*` en
+> el propio `.world` y los mapas se generan **sin `--region`**, de modo que el relleno se
+> contiene solo. `--region` sobrevive únicamente como entrada de `buscar_vanos.py`, para
+> decirle cuál es la red navegable y que sepa qué hueco es puerta y cuál es paso.
 >
 > Mientras los dos pisos convivieron en `mundo_definitivo.world`, `verificar_mapa.py`
 > **rechazaba** `mundo_definitivo_piso1.yaml` por dos motivos, y los dos eran artefactos de

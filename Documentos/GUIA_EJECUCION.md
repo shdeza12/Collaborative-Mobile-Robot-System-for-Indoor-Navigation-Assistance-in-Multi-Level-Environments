@@ -736,7 +736,7 @@ y no los comparte con nadie.
 Para añadir un `robot3` se toca `POSE_INICIAL` —pose, nivel y mapa— y la tabla de dominios de
 `robot.sh`. En ningún launch.
 
-### El mundo y el mapa del piso 1
+### Los mundos y los mapas
 
 Cada planta lleva **su propio mundo y su propio mapa**, y eso es deliberado por dos motivos
 distintos. El mapa propio, porque un mapa único dejaría a Nav2 planificar una ruta de un nivel al
@@ -746,40 +746,69 @@ mientras las dos plantas compartieron escena el LiDAR de una alcanzaba las pared
 Están los dos:
 [`maps/mundo_definitivo_piso1.yaml`](../Robot/aws-deepracer/deepracer_bringup/maps/mundo_definitivo_piso1.yaml)
 y [`maps/mundo_definitivo_piso2.yaml`](../Robot/aws-deepracer/deepracer_bringup/maps/mundo_definitivo_piso2.yaml).
-No se levantó con SLAM: se dibujó leyendo la geometría declarada del `.world` con
+No se levantaron con SLAM: se dibujaron leyendo la geometría declarada del `.world` con
 `herramientas/generar_mapa_desde_mundo.py`. El `.yaml` lleva escrita en un comentario la orden
-completa que lo generó, con sus dos `--region`, porque esos rectángulos son una decisión y no
-algo que se deduzca del mundo: sin ellos el mapa no se puede rehacer.
-
-**Los `--region` no son un adorno.** El pasillo tiene una quincena de puertas a habitaciones
-que nadie modeló, y por cada una el relleno de espacio libre se escapa a un vacío donde no hay
-nada que lo detenga. Sin ese límite el mapa salía 94 % libre y Nav2 atajaba en línea recta por
-fuera del pasillo.
-
-### El verificador lo rechaza, y está bien
+completa que lo generó, y esa orden basta para rehacerlo:
 
 ```bash
-python3 herramientas/verificar_mapa.py Robot/aws-deepracer/deepracer_bringup/maps/mundo_definitivo_piso1.yaml mundo_definitivo.world
+python3 herramientas/generar_mapa_desde_mundo.py mundo_definitivo_piso1.world Robot/aws-deepracer/deepracer_bringup/maps/mundo_definitivo_piso1 --semilla -19.165 7.292
+python3 herramientas/generar_mapa_desde_mundo.py mundo_definitivo_piso2.world Robot/aws-deepracer/deepracer_bringup/maps/mundo_definitivo_piso2 --semilla -21.889 -8.379
 ```
 
-Sale `RECHAZADO` por dos motivos, y los dos son artefactos de la pregunta, no defectos del
-mapa:
+**No llevan `--region`, y que no lo lleven es el punto.** Hasta el 24-ago sí lo llevaban —dos
+rectángulos el piso 1, cinco el piso 2—, porque las puertas del edificio no tienen hoja en el
+`.world` y el relleno de espacio libre se escapaba por cada una hasta inundar el exterior. Pero
+`--region` **recorta el resultado sin arreglar la fuga**: el mapa salía bien y el mundo seguía
+abierto, así que todo lo que no fuera ese recorte —Gazebo, el LiDAR, un relleno desde otra
+semilla— seguía viendo los agujeros. Ahora los vanos están tapados en los propios `.world` con
+paneles sintéticos `Limite_*`, y el relleno se contiene solo.
 
-- **Cobertura en Y del 29,7 %.** Compara los 6,7 m del piso 1 contra los 22,6 m que ocupan las
-  dos plantas juntas. Un mapa de una sola planta no puede pasar esa prueba por definición.
-- **58,5 % de celdas desconocidas.** El verificador da por hecho que un mapa llena su caja
-  envolvente. Una planta en L no la llena.
+Los paneles no se pusieron a ojo. Los elige `herramientas/buscar_vanos.py`, que empareja cada
+punta suelta de pared con la que tiene enfrente y se queda solo con los huecos **colineales**
+—los que prolongan el eje de la pared que los abre, frente a las secciones transversales de
+pasillo, que son perpendiculares— y con línea de visión libre. Cuál dejar abierto lo deciden
+los antiguos `--region`, que ya declaraban la red navegable: si los dos lados del hueco caen
+dentro de la red, es paso y no se toca. Ése es el único uso que les queda:
 
-Lo que sí mide de verdad es la fidelidad, y ahí sale perfecto: **0 de 4725 celdas ocupadas
-carecen de pared real detrás**. Ése es el caso peligroso —paredes que el mapa se inventa—
-porque no se ve mirando el mapa, sino mucho después, cuando el planificador aborta rutas por
-zonas que en realidad están libres.
+```bash
+python3 herramientas/buscar_vanos.py mundo_definitivo_piso2.world \
+    --region -23.39 -11.30 -17.37 -6.76 --region -17.52 -11.30 -14.03 -0.83 \
+    --region -14.20 -5.85 8.50 -3.12  --region 8.50 -5.85 23.39 -3.68 \
+    --region 18.48 -9.56 21.71 -5.67  --xml Limite_p2_
+```
 
-**Advertencia que no cubre esa cifra:** «0 obstáculos falsos» certifica las **paredes**, no el
-espacio libre. El espacio libre declarado son sólo los pasillos, y es a propósito más
-restrictivo que el mundo de Gazebo, donde el vehículo sí puede cruzar una puerta y salir al
-vacío. Si en simulación el robot atraviesa un vano y desaparece del mapa, eso es lo que está
-pasando.
+Van en `Gazebo/Orange`, la misma convención que `Barrera_Escalera`: naranja significa «esto no
+es geometría real del edificio». El generador los pinta con el valor **50**, que Nav2 lee como
+ocupado igual que el 0 pero un humano distingue de una pared de verdad.
+
+### El verificador los acepta, y ésa es la prueba
+
+```bash
+python3 herramientas/verificar_mapa.py Robot/aws-deepracer/deepracer_bringup/maps/mundo_definitivo_piso1.yaml mundo_definitivo_piso1.world
+python3 herramientas/verificar_mapa.py Robot/aws-deepracer/deepracer_bringup/maps/mundo_definitivo_piso2.yaml mundo_definitivo_piso2.world
+```
+
+Los dos salen `ACEPTADO`. **Hay que pasarle a cada mapa su propio mundo:** contra el
+`mundo_definitivo.world` combinado la cobertura en Y se hunde al 30 % porque compara una planta
+contra las dos, y eso es un artefacto de la pregunta, no un defecto del mapa.
+
+Tres cifras, y las tres miden cosas distintas:
+
+| | piso 1 | piso 2 | qué detecta |
+|---|---|---|---|
+| Obstáculos sin pared real | 0 de 6044 | 0 de 7977 | paredes que el mapa se inventa |
+| Frontera libre↔desconocido | 0 de 25 946 | 0 de 40 573 | **fugas del relleno** |
+| Umbrales `.yaml` frente a `.pgm` | coherentes | coherentes | el defecto del 205 |
+
+La segunda es la que certifica el sellado, y es la que antes fallaba: el 24-ago el piso 2 daba
+270 celdas de frontera en 210 sitios. Cero frontera significa que no queda ni una celda libre
+tocando una desconocida, es decir, que el espacio libre está enteramente rodeado de pared.
+
+La tercera existe por un defecto que estuvo activo hasta el 24-ago: con `free_thresh: 0.25` el
+valor 205 —el que la convención de ROS reserva para *desconocido*— salía **libre**, porque
+`(255−205)/255 = 0,196 < 0,25`. El `map_server` leía «aquí se puede pasar» donde el generador
+había escrito «aquí no sé». Está en `0.1`, que deja el 205 del lado correcto sin mover el 254.
+Los mapas antiguos que sigan en `0.25` tienen ese defecto aunque el dibujo parezca bien.
 
 ### Los destinos
 

@@ -133,11 +133,22 @@
 # LO QUE FALTA
 # ------------
 # Del piso 2 esta solo su punto de transferencia, al final de este archivo. El
-# piso 2 tiene sus dieciocho vanos detectados y, desde el 2026-08-23, tambien su
-# MAPA: maps/mundo_definitivo_piso2.{pgm,yaml}, generado contra
-# mundo_definitivo_piso2.world y ACEPTADO por herramientas/verificar_mapa.py
-# (0 de 6096 obstaculos sin pared real, 0.1 % de celdas desconocidas dentro de sus
-# cinco regiones). La receta esta escrita dentro de ese .yaml, como la del piso 1.
+# piso 2 tiene MAPA desde el 2026-08-23: maps/mundo_definitivo_piso2.{pgm,yaml},
+# generado contra mundo_definitivo_piso2.world y ACEPTADO por
+# herramientas/verificar_mapa.py. La receta esta escrita dentro de ese .yaml,
+# como la del piso 1.
+#
+# Ese mapa se rehizo el 2026-08-24. Tenia el mismo defecto que el del piso 1: el
+# relleno se escapaba por los vanos y se tapaba con cinco --region, que recortan
+# el resultado sin cerrar el mundo. Ahora los vanos estan sellados en el .world
+# con 23 paneles Limite_p2_* y el mapa se genera SIN --region. Los vanos reales
+# resultaron 27, no dieciocho como decia esta nota: el recuento viejo se hizo
+# emparejando cada punta con su vecino MAS CERCANO, y eso oculta todo empalme en
+# T -entre ellos la boca oeste del pasillo, 2,39 m, cuyo sellado habria dejado a
+# robot2 encerrado en su ala-. Cifras actuales: 0 de 7977 obstaculos sin pared
+# real y 0 celdas de frontera libre/desconocido de 40 573 libres, que es lo que
+# certifica que el mundo esta cerrado. El detalle esta en herramientas/
+# buscar_vanos.py y en la cabecera de mundo_definitivo_piso2/model.sdf.
 #
 # Lo que sigue faltando son los NOMBRES de las salas, que todavia no estan
 # decididos. Un destino sin nombre real no es un destino, es una coordenada, asi

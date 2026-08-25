@@ -99,14 +99,20 @@ prever los campos de hardware aunque en simulación vayan vacíos.
    existe—, sino que un LiDAR plano **no ve un desnivel hacia abajo**: sin obstáculo sólido, el
    hueco de la escalera se lee como espacio libre para siempre y Nav2 planifica por encima. El
    razonamiento completo está en `mapa_destinos.txt` y en el comentario del propio link.
-2. ✅ **`mundo_definitivo_piso2` generado.** Hicieron falta **cinco `--region`**, no uno: el piso 2
+2. ✅ ~~**`mundo_definitivo_piso2` generado.** Hicieron falta **cinco `--region`**, no uno: el piso 2
    es una S —ala oeste, tramo norte-sur, pasillo largo y ramal sur al este— y un solo rectángulo
    deja que el relleno se escape por los vanos de ~0,9 m, que es lo que dio el 95,1 % libre del
-   21-ago. La receta queda escrita dentro del `.yaml`, como en el piso 1.
+   21-ago.~~ **Rehecho el 24-ago sin ninguna `--region`.** Las cinco regiones no tapaban la fuga:
+   recortaban el resultado. El mapa salía bien y el mundo seguía abierto, así que cualquier cosa
+   que no fuera ese recorte —Gazebo, el LiDAR, un relleno desde otra semilla— veía los agujeros.
+   El 24-ago se selló el mundo de verdad, con **23 paneles `Limite_p2_*`**, y el mapa se regeneró
+   con la sola semilla. La receta queda escrita dentro del `.yaml`, como en el piso 1.
 3. ✅ **Verificado** contra `mundo_definitivo_piso2.world` —cada piso tiene ya **su propio mundo**,
-   partido el 23-ago por el cruce de LiDAR entre pasillos—: `ACEPTADO`, 0 de 6306 obstáculos sin
-   pared real y 0,7 % de celdas desconocidas dentro de sus regiones. (Las cifras son las del mapa
-   **regenerado** tras añadir la barrera; antes de ella eran 6096 y 0,1 %.)
+   partido el 23-ago por el cruce de LiDAR entre pasillos—: `ACEPTADO`. Las cifras del 23-ago
+   fueron 0 de 6306 obstáculos sin pared real y 0,7 % de desconocidas *dentro de sus regiones*;
+   las del mapa sellado del 24-ago son **0 de 7977 obstáculos sin pared real y 0 celdas de
+   frontera libre↔desconocido de 40 573**, sin región ninguna que las acote. Esa segunda cifra es
+   el criterio de cierre del sellado: si el mundo está cerrado, el relleno se contiene solo.
 4. ✅ **Punto de transferencia del piso 2** en `puntos_interes.yaml`, con `es_transferencia: true` y
    marcado **`provisional: true`** mientras no se confirme cuál es el hueco de la escalera.
    `piso2_escalera` en `(-21.50, -9.03, yaw π)`, de frente contra la barrera, con **1,50 m** de
@@ -127,6 +133,24 @@ a `piso2_escalera` con 0,190 m de error contra `/odom`, dentro de la tolerancia 
 > **El spawn de `robot2` queda a 1,11 m de la barrera**, es decir 0,39 m *más cerca* del vano que su
 > propia parada de relevo (x = −21,50). Es una incoherencia menor y conocida; no se corrige todavía
 > porque mover `POSE_INICIAL` invalidaría las medidas del 23 y el 24 de agosto.
+
+**Lo que el lunes añadió sobre lo planeado: sellar los dos pisos.** No estaba en el plan porque el
+defecto no se había nombrado todavía. El punto 2 se apoyaba en `--region`, y `--region` no cierra
+nada: recorta el mapa ya calculado. El 24-ago se cerraron los dos mundos con paneles sintéticos
+—**7 en el piso 1, 23 en el piso 2**— y los dos mapas se regeneraron sin una sola región.
+
+Dónde va cada panel se decidió con [`herramientas/buscar_vanos.py`](../herramientas/buscar_vanos.py),
+escrito ese mismo día. Empareja cada punta suelta de pared con la pared de enfrente y se queda con
+los huecos **colineales** —los que prolongan el eje de la pared que los abre—, que es lo que
+distingue una puerta de la sección transversal de un pasillo. En el piso 2 la separación fue
+tajante: todo vano real dio un coseno de al menos 0,92 en valor absoluto y toda transversal 0,71 o
+menos, sin zona gris. Salieron 27 vanos; las cinco `--region` del 23-ago, que ya declaraban la red
+navegable, decidieron cuáles son paso: **4 pasos abiertos y 23 sellados**.
+
+> **Una de esas cinco regiones estaba recortando espacio navegable de verdad.** La cámara del
+> sureste queda ahora `libre` y antes no; se comprobó pared por pared que no falta ningún panel:
+> la cámara abre al pasillo por el norte y no hay nada entre medias. El mapa nuevo es **más fiel**
+> que el del 23-ago, no más permisivo.
 
 ### Martes 25 — H3 y el `/odom` cruzado · *frente A*
 
