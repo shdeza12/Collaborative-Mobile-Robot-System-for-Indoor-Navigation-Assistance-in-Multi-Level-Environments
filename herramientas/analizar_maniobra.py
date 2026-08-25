@@ -8,7 +8,9 @@ posicion real. Este script mide contra `/odom`, que en esta simulacion es la
 pose verdadera de Gazebo (`model_->WorldPose()` en el plugin Ackermann), de modo
 que el error de llegada y el error de localizacion quedan separados.
 
-Se espera un bag con /odom, /cmd_vel, /plan y /amcl_pose.
+Se espera un bag con /odom, /cmd_vel, /plan y /amcl_pose, con o sin espacio de
+nombres: el prefijo se deduce del propio bag. Un bag por robot, nunca los dos
+mezclados.
 
 Uso:
     python3 herramientas/analizar_maniobra.py <dir_bag> <meta_x> <meta_y> [etiqueta]
@@ -142,14 +144,36 @@ def deriva_en_reposo(odom, t0, hasta):
     return math.degrees(abs(dy)) / dt, dt
 
 
+def prefijo_de(tid, directorio):
+    """Deduce el espacio de nombres mirando quien publica la odometria.
+
+    Desde que los dos agentes corren bajo namespace, el bag no trae `/odom`
+    sino `/robot1/odom`. Sin esto, `leer` devolvia lista vacia y el script
+    abortaba con «sin mensajes en /odom», que senala al bag cuando el
+    problema es el nombre: la receta de GUIA_EJECUCION.md graba con prefijo
+    y este script lo buscaba sin el.
+    """
+    candidatos = [n for n in tid if n == "/odom" or n.endswith("/odom")]
+    if not candidatos:
+        raise SystemExit(f"{directorio}: el bag no trae ningun topico de odometria.\n"
+                         f"       topicos grabados: {', '.join(sorted(tid)) or '(ninguno)'}")
+    if len(candidatos) > 1:
+        raise SystemExit(f"{directorio}: hay {len(candidatos)} odometrias en el mismo bag "
+                         f"({', '.join(sorted(candidatos))}).\n"
+                         f"       Graba un bag por robot: mezclarlos impide saber "
+                         f"cual llego a la meta.")
+    return candidatos[0][: -len("/odom")]
+
+
 def analizar(directorio, meta, etiqueta):
     con, tid = abrir(directorio)
-    odom = leer(con, tid, "/odom", Odometry)
-    cmd = leer(con, tid, "/cmd_vel", Twist)
-    planes = leer(con, tid, "/plan", PathMsg)
-    amcl = leer(con, tid, "/amcl_pose", PoseWithCovarianceStamped)
+    ns = prefijo_de(tid, directorio)
+    odom = leer(con, tid, f"{ns}/odom", Odometry)
+    cmd = leer(con, tid, f"{ns}/cmd_vel", Twist)
+    planes = leer(con, tid, f"{ns}/plan", PathMsg)
+    amcl = leer(con, tid, f"{ns}/amcl_pose", PoseWithCovarianceStamped)
     if not odom:
-        raise SystemExit(f"{directorio}: sin mensajes en /odom")
+        raise SystemExit(f"{directorio}: {ns}/odom existe pero no tiene ni un mensaje")
     t0 = odom[0][0]
 
     tramos, ini, fin = tramos_de_marcha(cmd, t0)
@@ -185,6 +209,7 @@ def analizar(directorio, meta, etiqueta):
 
     print(f"=== {etiqueta} ===")
     print(f"  bag                   : {directorio}")
+    print(f"  espacio de nombres    : {ns or '(ninguno)'}")
     print(f"  meta                  : ({meta[0]:.2f}, {meta[1]:.2f})")
     print(f"  tiempo en movimiento  : {fin - ini:.1f} s")
     print(f"  recorrido             : {recorrido:.2f} m")
