@@ -150,13 +150,45 @@
 # certifica que el mundo esta cerrado. El detalle esta en herramientas/
 # buscar_vanos.py y en la cabecera de mundo_definitivo_piso2/model.sdf.
 #
-# Lo que sigue faltando son los NOMBRES de las salas, que todavia no estan
-# decididos. Un destino sin nombre real no es un destino, es una coordenada, asi
-# que los quince o dieciseis destinos del piso 2 no se pueden escribir todavia.
+# Los NOMBRES de las salas del piso 2 los dio el autor el 2026-08-25, y con
+# ellos los dieciseis destinos ya estan escritos abajo. El recorrido con el que
+# se dictaron -desde la escalera, ida por la pared norte de oeste a este y
+# vuelta por la sur- es el que fija cual es cual, y esta reproducido en el orden
+# de las entradas y en la tabla de la seccion PISO 2 de
+# Documentos/mapa_destinos.txt. Eran dieciocho vanos: el 1 es la escalera y el I
+# mide 0.36 m, por donde el vehiculo no cabe.
 #
-# Se llevan en la seccion PISO 2 de Documentos/mapa_destinos.txt, y son
-# prerrequisito de la condicion B de la campana de OE4 (seccion 10 de
-# Documentos/PROTOCOLO_EXPERIMENTAL.md).
+# Con esto queda cubierta la condicion B de la campana de OE4 (seccion 10 de
+# Documentos/PROTOCOLO_EXPERIMENTAL.md), que los tenia como prerrequisito.
+#
+# DOS DESVIACIONES DE LA REGLA, DECIDIDAS EL 2026-08-25
+# ----------------------------------------------------
+# La regla de arriba -conservar la abscisa del vano y arrimarse a la pared
+# propia hasta 0.70 m de holgura- no se puede cumplir entera en dos puertas,
+# porque las dos estan en esquina, con una pared perpendicular a unos 0.3 m de
+# la abscisa de su vano:
+#
+#   Lab. Sistemas 313  conservando la abscisa, el primer punto con 0.70 m cae a
+#                      3 m de la puerta, ya en el pasillo principal.
+#   IEEE               conservando la abscisa es imposible: la holgura maxima
+#                      es 0.26 m, por debajo del minimo de 0.284 m que exige
+#                      herramientas/verificar_pose_spawn.py.
+#
+# En las dos se conserva la HOLGURA y se cede la abscisa, que es lo contrario de
+# lo que hacen las otras catorce: la parada es el punto libre mas cercano al
+# vano con 0.70 m. Queda a 0.86 m de la puerta en Lab. Sistemas 313 y a 1.02 m
+# en IEEE. Se eligio asi porque la holgura protege al vehiculo y la abscisa solo
+# separa destinos, y aqui no hay ningun destino enfrentado del que separarse.
+#
+# LA PAREJA MAS JUNTA DEL PISO 2 QUEDA A 0.38 m
+# ---------------------------------------------
+# Aula 307 y Sala de Docentes. Esta por encima de la xy_goal_tolerance de 0.25 m
+# -el planificador las distingue- pero por debajo de su doble, que es el liston
+# que usa el resto de este archivo. No es una parada mal puesta: ahi el pasillo
+# se estrecha a 1.80 m, y con 0.70 m de holgura a cada lado no quedan mas que
+# 0.40 m entre paradas. Separarlas mas exige bajar la holgura, y se decidio no
+# hacerlo. Si alguna vez se ve que la HRI las confunde, ese es el precio a
+# revisar, no la geometria.
 #
 # Los nombres ETM van del 1 al 13 sin ETM12: no es un olvido de numeracion, es
 # que ese vano no existe en la planta.
@@ -380,3 +412,147 @@ puntos:
     lado_pared: fondo        # se llega de frente contra Barrera_Escalera
     pose: {x: -21.50, y: -9.03, yaw: 3.1416}
     holgura_m: 1.50
+
+  # --------------------------------------------------- PISO 2 - ALA NOROESTE --
+  # Las dos primeras saliendo de la escalera. Ninguna esta en el pasillo largo:
+  # la Division da a una pared que mira al oeste, y Lab. Sistemas 313 esta en
+  # esquina (ver DOS DESVIACIONES en la cabecera).
+
+  - id: piso2_division_ing_arq
+    nombre: "División de Ing. y Arq."
+    nivel: 2
+    es_transferencia: false
+    lado_pared: oeste        # vano de 1.32 m, centro en (-17.42, -1.70)
+    pose: {x: -16.58, y: -1.70, yaw: 1.5708}
+    holgura_m: 0.71
+
+  - id: piso2_lab_313
+    nombre: "Lab. Sistemas 313"
+    nivel: 2
+    es_transferencia: false
+    lado_pared: norte        # vano de 0.60 m, centro en (-14.51, -0.95)
+    pose: {x: -14.87, y: -1.73, yaw: 0.0}
+    holgura_m: 0.71          # abscisa cedida: la parada queda a 0.86 m del vano
+
+  # ------------------------------------------- PISO 2 - PASILLO LARGO (norte) --
+  # De oeste a este, la ida del recorrido. Todas con yaw = 0, alineadas con el
+  # pasillo, nunca apuntando a la puerta.
+
+  - id: piso2_lab_312
+    nombre: "Lab. Sistemas 312"
+    nivel: 2
+    es_transferencia: false
+    lado_pared: norte        # vano de 0.90 m, centro en (-8.96, -3.29)
+    pose: {x: -8.96, y: -4.01, yaw: 0.0}
+    holgura_m: 0.74
+
+  - id: piso2_aula_311
+    nombre: "Aula 311"
+    nivel: 2
+    es_transferencia: false
+    lado_pared: norte        # vano de 0.84 m, centro en (-7.49, -3.29)
+    pose: {x: -7.49, y: -4.01, yaw: 0.0}
+    holgura_m: 0.74
+
+  - id: piso2_aula_310
+    nombre: "Aula 310"
+    nivel: 2
+    es_transferencia: false
+    lado_pared: norte        # vano de 0.84 m, centro en (-1.85, -3.29)
+    pose: {x: -1.85, y: -4.01, yaw: 0.0}
+    holgura_m: 0.74
+
+  - id: piso2_aula_309
+    nombre: "Aula 309"
+    nivel: 2
+    es_transferencia: false
+    lado_pared: norte        # vano de 0.96 m, centro en (+3.85, -3.29)
+    pose: {x: 3.85, y: -4.01, yaw: 0.0}
+    holgura_m: 0.74
+
+  - id: piso2_aula_308
+    nombre: "Aula 308"
+    nivel: 2
+    es_transferencia: false
+    lado_pared: norte        # vano de 0.96 m, centro en (+9.97, -3.77)
+    pose: {x: 9.97, y: -4.61, yaw: 0.0}
+    holgura_m: 0.74
+
+  - id: piso2_aula_307
+    nombre: "Aula 307"
+    nivel: 2
+    es_transferencia: false
+    lado_pared: norte        # vano de 0.90 m, centro en (+15.46, -3.77)
+    pose: {x: 15.46, y: -4.61, yaw: 0.0}
+    holgura_m: 0.74          # a 0.38 m de Sala de Docentes: ver la cabecera
+
+  - id: piso2_aula_306
+    nombre: "Aula 306"
+    nivel: 2
+    es_transferencia: false
+    lado_pared: norte        # vano de 0.66 m, centro en (+22.00, -3.41)
+    pose: {x: 22.00, y: -4.61, yaw: 0.0}
+    holgura_m: 0.74
+
+  # --------------------------------------------- PISO 2 - PASILLO LARGO (sur) --
+  # De este a oeste, la vuelta del recorrido.
+
+  - id: piso2_sala_docentes_civil
+    nombre: "Sala de Docentes Fac. Ing. Civil"
+    nivel: 2
+    es_transferencia: false
+    lado_pared: sur          # vano de 0.78 m, centro en (+15.22, -5.69)
+    pose: {x: 15.22, y: -4.91, yaw: 0.0}
+    holgura_m: 0.76          # a 0.38 m de Aula 307: ver la cabecera
+
+  - id: piso2_aula_305
+    nombre: "Aula 305"
+    nivel: 2
+    es_transferencia: false
+    lado_pared: sur          # vano de 0.90 m, centro en (+10.84, -5.69)
+    pose: {x: 10.84, y: -4.91, yaw: 0.0}
+    holgura_m: 0.76
+
+  - id: piso2_aula_304
+    nombre: "Aula 304"
+    nivel: 2
+    es_transferencia: false
+    lado_pared: sur          # vano de 0.96 m, centro en (+3.85, -5.69)
+    pose: {x: 3.85, y: -4.91, yaw: 0.0}
+    holgura_m: 0.76
+
+  - id: piso2_aula_303
+    nombre: "Aula 303"
+    nivel: 2
+    es_transferencia: false
+    lado_pared: sur          # vano de 0.84 m, centro en (-1.85, -5.69)
+    pose: {x: -1.85, y: -4.91, yaw: 0.0}
+    holgura_m: 0.76
+
+  - id: piso2_aula_302
+    nombre: "Aula 302"
+    nivel: 2
+    es_transferencia: false
+    lado_pared: sur          # vano de 0.90 m, centro en (-7.52, -5.69)
+    pose: {x: -7.52, y: -4.97, yaw: 0.0}
+    holgura_m: 0.76
+
+  - id: piso2_aula_301
+    nombre: "Aula 301"
+    nivel: 2
+    es_transferencia: false
+    lado_pared: sur          # vano de 0.90 m, centro en (-8.96, -5.69)
+    pose: {x: -8.96, y: -4.91, yaw: 0.0}
+    holgura_m: 0.76
+
+  # --------------------------------------------------- PISO 2 - APENDICE SUR --
+  # Lo ultimo del recorrido antes de volver a la escalera. En esquina, como
+  # Lab. Sistemas 313: ver DOS DESVIACIONES en la cabecera.
+
+  - id: piso2_ieee
+    nombre: "IEEE"
+    nivel: 2
+    es_transferencia: false
+    lado_pared: sur          # vano de 0.78 m, centro en (-14.48, -11.27)
+    pose: {x: -14.96, y: -10.37, yaw: 0.0}
+    holgura_m: 0.74          # abscisa cedida: la parada queda a 1.02 m del vano
