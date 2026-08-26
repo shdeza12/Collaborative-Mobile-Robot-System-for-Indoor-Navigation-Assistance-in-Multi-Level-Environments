@@ -151,12 +151,14 @@
 # buscar_vanos.py y en la cabecera de mundo_definitivo_piso2/model.sdf.
 #
 # Los NOMBRES de las salas del piso 2 los dio el autor el 2026-08-25, y con
-# ellos los dieciseis destinos ya estan escritos abajo. El recorrido con el que
-# se dictaron -desde la escalera, ida por la pared norte de oeste a este y
-# vuelta por la sur- es el que fija cual es cual, y esta reproducido en el orden
-# de las entradas y en la tabla de la seccion PISO 2 de
-# Documentos/mapa_destinos.txt. Eran dieciocho vanos: el 1 es la escalera y el I
-# mide 0.36 m, por donde el vehiculo no cabe.
+# ellos los quince destinos ya estan escritos abajo. El recorrido con el que se
+# dictaron -desde la escalera, ida por la pared norte de oeste a este y vuelta
+# por la sur- es el que fija cual es cual, y esta reproducido en el orden de las
+# entradas y en la tabla de la seccion PISO 2 de Documentos/mapa_destinos.txt.
+#
+# Eran dieciocho vanos y quedan quince destinos. Los tres que faltan: el 1 es la
+# escalera -que es punto de transferencia, no destino-, el I mide 0.36 m y por
+# ahi el vehiculo no cabe, y el 2 se descarto a mano (ver ALA NOROESTE abajo).
 #
 # Con esto queda cubierta la condicion B de la campana de OE4 (seccion 10 de
 # Documentos/PROTOCOLO_EXPERIMENTAL.md), que los tenia como prerrequisito.
@@ -180,15 +182,38 @@
 # en IEEE. Se eligio asi porque la holgura protege al vehiculo y la abscisa solo
 # separa destinos, y aqui no hay ningun destino enfrentado del que separarse.
 #
-# LA PAREJA MAS JUNTA DEL PISO 2 QUEDA A 0.38 m
-# ---------------------------------------------
-# Aula 307 y Sala de Docentes. Esta por encima de la xy_goal_tolerance de 0.25 m
-# -el planificador las distingue- pero por debajo de su doble, que es el liston
-# que usa el resto de este archivo. No es una parada mal puesta: ahi el pasillo
-# se estrecha a 1.80 m, y con 0.70 m de holgura a cada lado no quedan mas que
-# 0.40 m entre paradas. Separarlas mas exige bajar la holgura, y se decidio no
-# hacerlo. Si alguna vez se ve que la HRI las confunde, ese es el precio a
-# revisar, no la geometria.
+# AULA 307 Y SALA DE DOCENTES: SE CEDE HOLGURA PARA SEPARARLAS
+# ------------------------------------------------------------
+# Es la pareja mas apretada del piso 2. Sus puertas estan enfrentadas y a solo
+# 0.24 m en abscisa, justo donde el pasillo se estrecha a 1.80 m, asi que con
+# 0.70 m de holgura a cada lado no quedan mas que 0.38 m entre paradas.
+#
+# El 2026-08-25 se escribieron asi, conservando la holgura, con este argumento:
+# 0.38 m esta por encima de la xy_goal_tolerance de 0.25 m, luego el planificador
+# las distingue. El argumento es correcto sobre el papel y se revierte el
+# 2026-08-26 por un dato que no estaba a la vista cuando se escribio:
+#
+#   la llegada real medida contra /odom el 2026-08-25 -la del hito H3, en
+#   Documentos/Evidencia/S20_hito_h3_dos_agentes.md- erro 0.281 m.
+#
+# Que el planificador distinga dos objetivos no es lo mismo que que el vehiculo
+# acabe en el correcto. Con 0.38 m de separacion y 0.281 m de error tipico de
+# llegada, basta que ese error apunte hacia la otra puerta para que el robot
+# aparque mas cerca del destino que NO se pidio. La HRI diria 'ha llegado al Aula
+# 307' con el vehiculo delante de la Sala de Docentes. Es el fallo silencioso que
+# la regla del doble de la tolerancia existe para impedir, y aqui no se evitaba.
+#
+# Asi que se cede lo otro: el retiro baja de 0.70 a 0.40 m, que es lo que el
+# tramo admite. Quedan a 0.91 m -3.6 veces la tolerancia- con holguras de 0.42 y
+# 0.48 m. Las dos siguen por encima del minimo de 0.284 m que exige
+# herramientas/verificar_pose_spawn.py, y muy por encima del radio letal de
+# 0.17 m del vehiculo.
+#
+# Lo que se pierde es comodidad, no seguridad: las dos paradas entran mas adentro
+# del inflation_radius de 0.55 m y el Smac, con cost_penalty 1.3, encarecera el
+# paso por ellas. Once de las quince paradas del piso 1 ya estan en esa
+# situacion. Encarecer el paso no lo prohibe; aparcar en el destino equivocado si
+# invalida la mision.
 #
 # Los nombres ETM van del 1 al 13 sin ETM12: no es un olvido de numeracion, es
 # que ese vano no existe en la planta.
@@ -414,17 +439,18 @@ puntos:
     holgura_m: 1.50
 
   # --------------------------------------------------- PISO 2 - ALA NOROESTE --
-  # Las dos primeras saliendo de la escalera. Ninguna esta en el pasillo largo:
-  # la Division da a una pared que mira al oeste, y Lab. Sistemas 313 esta en
+  # Una sola parada, y no esta en el pasillo largo: Lab. Sistemas 313 esta en
   # esquina (ver DOS DESVIACIONES en la cabecera).
-
-  - id: piso2_division_ing_arq
-    nombre: "División de Ing. y Arq."
-    nivel: 2
-    es_transferencia: false
-    lado_pared: oeste        # vano de 1.32 m, centro en (-17.42, -1.70)
-    pose: {x: -16.58, y: -1.70, yaw: 1.5708}
-    holgura_m: 0.71
+  #
+  # EL VANO 2 NO ESTA AQUI, Y NO ES UN OLVIDO
+  # -----------------------------------------
+  # El vano de 1.32 m en (-17.42, -1.70) llego a escribirse como
+  # 'piso2_division_ing_arq', con parada en (-16.58, -1.70) y holgura 0.71.
+  # Santiago lo habia marcado 'N' en Documentos/mapa_destinos.txt y confirmo el
+  # descarte el 2026-08-25; se retira el 2026-08-26. La geometria estaba bien: lo
+  # que se descarta es que ese hueco sea un destino al que la HRI deba poder
+  # llevar a nadie. Si se decide reponerlo, las cuatro cifras estan en esta nota
+  # y en el commit 2800f76, y no hay que volver a medirlas.
 
   - id: piso2_lab_313
     nombre: "Lab. Sistemas 313"
@@ -483,8 +509,8 @@ puntos:
     nivel: 2
     es_transferencia: false
     lado_pared: norte        # vano de 0.90 m, centro en (+15.46, -3.77)
-    pose: {x: 15.46, y: -4.61, yaw: 0.0}
-    holgura_m: 0.74          # a 0.38 m de Sala de Docentes: ver la cabecera
+    pose: {x: 15.46, y: -4.36, yaw: 0.0}
+    holgura_m: 0.48          # holgura cedida para separarse: ver la cabecera
 
   - id: piso2_aula_306
     nombre: "Aula 306"
@@ -502,8 +528,8 @@ puntos:
     nivel: 2
     es_transferencia: false
     lado_pared: sur          # vano de 0.78 m, centro en (+15.22, -5.69)
-    pose: {x: 15.22, y: -4.91, yaw: 0.0}
-    holgura_m: 0.76          # a 0.38 m de Aula 307: ver la cabecera
+    pose: {x: 15.22, y: -5.24, yaw: 0.0}
+    holgura_m: 0.42          # holgura cedida para separarse: ver la cabecera
 
   - id: piso2_aula_305
     nombre: "Aula 305"
