@@ -52,13 +52,41 @@ CONTROLADORES = [
 ]
 
 
-def cargar_controlador(nombre, namespace):
-    """Un 'ros2 control load_controller' apuntando al controller_manager correcto.
+# Espera del cliente por cada respuesta del controller_manager, en segundos.
+# El defecto que arregla esto es un REINTENTO SOBRE UNA OPERACION QUE NO ES
+# IDEMPOTENTE: 'controller_manager/controller_manager_services.py' espera
+# 'call_timeout' -10 s por defecto- y, si no hay respuesta, repite la MISMA
+# peticion hasta tres veces. Si la primera llego y solo tardo, la segunda
+# recibe "was already loaded" y el cliente aborta con codigo 1 ANTES de
+# configurar y activar. El controlador queda CARGADO -por eso sigue saliendo
+# en la lista- pero en 'unconfigured'.
+#
+# Con dos Gazebo y dos pilas Nav2 en la misma maquina, el controller_manager
+# tarda mas de 10 s en contestar cada cierto arranque, y entonces se pierde una
+# activacion. Medido: 2 fallos de 8 arranques dobles.
+#
+# 60 s no es un numero magico: es "muy por encima del peor caso observado".
+# Si algun dia el controller_manager tarda mas que esto, el sintoma vuelve.
+ESPERA_SERVICIO_S = '60.0'
 
-    Sin namespace no se pasa '-c': el valor por defecto ya es
-    /controller_manager y asi la orden queda igual que en el original.
+
+def cargar_controladores(nombres, namespace):
+    """Un solo 'spawner' para toda la lista, en vez de un proceso por controlador.
+
+    Se cambio de 'ros2 control load_controller' a 'controller_manager spawner'
+    por una razon y no por estilo: el CLI de 'ros2 control' NO expone el
+    timeout de llamada -su --help solo ofrece --spin-time, que ademas solo
+    aplica sin daemon-, asi que con el no hay forma de subir los 10 s que
+    provocan el reintento. El spawner si: --service-call-timeout y
+    --switch-timeout.
+
+    De paso acepta la lista entera, con lo que seis procesos pasan a ser uno.
+    Sin '-u' el spawner termina al acabar, que es lo que necesitan los
+    OnProcessExit de abajo.
     """
-    cmd = ['ros2', 'control', 'load_controller', '--set-state', 'active', nombre]
+    cmd = ['ros2', 'run', 'controller_manager', 'spawner', *nombres,
+           '--service-call-timeout', ESPERA_SERVICIO_S,
+           '--switch-timeout', ESPERA_SERVICIO_S]
     if namespace:
         cmd += ['-c', f'/{namespace}/controller_manager']
     return ExecuteProcess(cmd=cmd, output='screen')
@@ -120,8 +148,8 @@ def acciones(context, *args, **kwargs):
         output='screen',
     )
 
-    cargar_broadcaster = cargar_controlador(BROADCASTER, ns)
-    cargar_resto = [cargar_controlador(c, ns) for c in CONTROLADORES]
+    cargar_broadcaster = cargar_controladores([BROADCASTER], ns)
+    cargar_resto = [cargar_controladores(CONTROLADORES, ns)]
 
     return [
         RegisterEventHandler(
