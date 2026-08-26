@@ -337,17 +337,22 @@ En orden. Nada de esto existe hoy.
 **La campaña no puede empezar mientras alguno siga abierto.** Se listan porque un protocolo que
 calla sus condiciones previas se ejecuta igual y produce números que no valen.
 
-| Prerrequisito | Estado al 2026-08-22 |
+| Prerrequisito | Estado al 2026-08-26 |
 |---|---|
-| **`/odom` cruzado** — una lectura devolvió la posición del otro agente | 🔴 ABIERTO. Las cuatro métricas salen de odometría; con esto abierto, ninguna es fiable. Entretanto, leer con `--no-daemon` |
-| **Carrera al cargar controladores** — un controlador puede quedar `unconfigured` | 🔴 ABIERTA. Hoy es causa de descarte (§8); si es frecuente, se come la cuota del 20 % |
-| **Mapa del piso 2** | 🟢 CERRADO el 2026-08-23. `maps/mundo_definitivo_piso2.{pgm,yaml}`, generado contra `mundo_definitivo_piso2.world` y `ACEPTADO`: 0 de 6096 obstáculos sin pared real, 0,1 % de celdas desconocidas dentro de sus cinco regiones |
-| **Destinos del piso 2 en `puntos_interes.yaml`** | 🔴 Los 18 vanos están detectados pero sin nombrar. Ver la sección PISO 2 de [`mapa_destinos.txt`](mapa_destinos.txt) |
-| **Los dos agentes navegando simultáneamente** (H3) | 🔴 Arrastre de S19 a S20 |
+| **`/odom` cruzado** — una lectura devolvió la posición del otro agente | 🟢 CERRADO el 2026-08-25 **con causa, no por no reproducirse**: el dominio 0 no lista ningún tópico `/robot2/*` ni el 2 ninguno `/robot1/*`, así que la publicación bajo espacio de nombres queda descartada y lo que quedaba era el daemon de `ros2cli`. La regla pasa a matarlo con `pkill -9` al cambiar de dominio; las métricas se calculan sobre bags, que no pasan por él ([`S20_hito_h3_dos_agentes.md`](Evidencia/S20_hito_h3_dos_agentes.md)) |
+| **Carrera al cargar controladores** — un controlador puede quedar `unconfigured` | 🟢 CERRADO el 2026-08-26. La causa **no** era el arranque en paralelo sino un reintento sobre una operación no idempotente: `controller_manager_services.py` repite la petición tras 10 s sin respuesta y la segunda recibe `was already loaded`. Se pasa a `controller_manager spawner` con `--service-call-timeout 60`. Medido: de **2 fallos en 8** arranques dobles a **0 en 18**, con el arranque bajando de 37–39 s a 28–35 s. **Sigue siendo obligatorio comprobar «7 de 7» antes de medir**: cero en 18 no es garantía y el fallo es silencioso |
+| **Mapa del piso 2** | 🟢 CERRADO el 2026-08-23, y **rehecho el 2026-08-26** al quitar seis paneles redundantes y redimensionar los dos del testero este: 40 760 celdas libres, 0 de frontera, cobertura 100,2 % × 100,9 %, `ACEPTADO` |
+| **Destinos del piso 2 en `puntos_interes.yaml`** | 🟢 CERRADO el 2026-08-26. Los dieciséis, con nombre y parada derivada de la regla; el catálogo pasa a 32 destinos y la prueba del planificador a 992 planes |
+| **Los dos agentes navegando simultáneamente** (H3) | 🟢 CERRADO el 2026-08-25 ([`S20_hito_h3_dos_agentes.md`](Evidencia/S20_hito_h3_dos_agentes.md)) |
 | **Segundo vehículo físico** (R11) | 🔴 Administrativo. Bloquea solo la campaña física (RF-27), no la de simulación |
 
-**La condición A se puede pilotar en cuanto se cierren los dos primeros.** A la condición B ya solo
-le faltan los **nombres** del piso 2: el mapa se cerró el 23-ago.
+**Cinco de seis cerrados: la campaña de simulación ya no tiene bloqueos técnicos.** Las condiciones
+A y B se pueden ejecutar. El único abierto, R11, es administrativo y afecta solo a la campaña
+física.
+
+**Lo que sigue faltando no es un prerrequisito de este documento sino instrumentación:** no existe
+el registrador de misión (RF-25) ni el analizador de campaña, y sin ellos no hay de dónde sacar las
+cuatro métricas.
 
 ---
 
