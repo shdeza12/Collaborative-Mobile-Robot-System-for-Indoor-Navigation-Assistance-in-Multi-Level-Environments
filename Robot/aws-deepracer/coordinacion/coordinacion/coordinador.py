@@ -38,6 +38,7 @@ from rclpy.qos import DurabilityPolicy, HistoryPolicy, QoSProfile
 
 from coordinacion_msgs.action import GuiarUsuario
 from coordinacion_msgs.msg import EstadoMision, ListaPuntosInteres, PuntoInteres
+from coordinacion.registrador import RegistroMision, entorno_simulacion
 
 from coordinacion.planificador import (
     ASIGNACION_POR_DEFECTO, COMPLETADA, ErrorPlanificacion, FALLIDA, INACTIVA,
@@ -59,12 +60,19 @@ class Coordinador(Node):
         self.declare_parameter("robot_nivel_1", ASIGNACION_POR_DEFECTO[1])
         self.declare_parameter("robot_nivel_2", ASIGNACION_POR_DEFECTO[2])
         self.declare_parameter("espera_servidor_s", 20.0)
+        # RF-25. Carpeta vacia = no registrar, para poder usar el
+        # coordinador en una demostracion sin ensuciar el disco.
+        self.declare_parameter("ruta_registros", "")
+        self.declare_parameter("condicion", "simulacion")
 
         self.asignacion = {
             1: self.get_parameter("robot_nivel_1").value,
             2: self.get_parameter("robot_nivel_2").value,
         }
         self.espera_servidor = self.get_parameter("espera_servidor_s").value
+        self.ruta_registros = self.get_parameter("ruta_registros").value
+        self.condicion = self.get_parameter("condicion").value
+        self.registro = None   # RegistroMision de la mision en curso
 
         self.catalogo = self._cargar_catalogo()
         self.grupo = ReentrantCallbackGroup()
@@ -94,7 +102,7 @@ class Coordinador(Node):
                 callback_group=self.grupo)
             self.create_subscription(
                 Odometry, f"/{ns}/odom",
-                lambda msg, n=ns: self.ultimo_odom.__setitem__(n, msg), 10,
+                lambda msg, n=ns: self._odom(msg, n), 10,
                 callback_group=self.grupo)
 
         self.servidor = ActionServer(
@@ -152,8 +160,17 @@ class Coordinador(Node):
 
     def _ejecutar(self, goal_handle):
         pet = goal_handle.request
-        t0 = time.time()
+        # t0 es t_solicitud del §3.1: el instante en que el servidor ACEPTA el
+        # goal, no en que la HRI lo envia. La latencia del navegador no es del
+        # sistema robotico y no se puede medir desde dentro.
+        t0 = self._ahora()
         res = GuiarUsuario.Result()
+
+        mision_id = f"{pet.origen_id}__{pet.destino_id}__{int(t0 * 1000)}"
+        self.registro = RegistroMision(
+            mision_id, pet.origen_id, pet.destino_id,
+            {str(k): v for k, v in self.asignacion.items()},
+            t_solicitud=t0, condicion=self.condicion) if self.ruta_registros else None
 
         self.get_logger().info(
             f"Mision: {pet.origen_id} -> {pet.destino_id}")
@@ -167,15 +184,15 @@ class Coordinador(Node):
             self._marcar(FALLIDA, "", None, str(e), pet.origen_id)
             goal_handle.abort()
             res.exito, res.motivo_fallo = False, str(e)
-            res.tiempo_total_s = time.time() - t0
-            return res
+            res.tiempo_total_s = self._ahora() - t0
+            return self._cerrar_registro(res, None)
 
         for i, tramo in enumerate(tramos, 1):
             if goal_handle.is_cancel_requested:
                 goal_handle.canceled()
                 res.exito, res.motivo_fallo = False, "Cancelada por el usuario"
-                res.tiempo_total_s = time.time() - t0
-                return res
+                res.tiempo_total_s = self._ahora() - t0
+                return self._cerrar_registro(res, tramos[-1].punto)
 
             self._marcar(tramo.etapa, tramo.robot, tramo.punto,
                          tramo.mensaje_usuario, pet.origen_id)
@@ -192,9 +209,9 @@ class Coordinador(Node):
                 self._feedback(goal_handle)
                 goal_handle.abort()
                 res.exito, res.motivo_fallo = False, motivo
-                res.tiempo_total_s = time.time() - t0
+                res.tiempo_total_s = self._ahora() - t0
                 res.num_relevos = relevos
-                return res
+                return self._cerrar_registro(res, tramo.punto)
 
         destino = next(p for p in self.catalogo if p["id"] == pet.destino_id)
         self._marcar(COMPLETADA, tramos[-1].robot, destino,
@@ -202,13 +219,66 @@ class Coordinador(Node):
         self._feedback(goal_handle)
         goal_handle.succeed()
         res.exito = True
-        res.tiempo_total_s = time.time() - t0
+        res.tiempo_total_s = self._ahora() - t0
         res.num_relevos = relevos
         res.motivo_fallo = ""
         self.get_logger().info(
             f"Mision completada en {res.tiempo_total_s:.1f} s, "
             f"{relevos} relevo(s)")
+        return self._cerrar_registro(res, destino)
+
+    def _cerrar_registro(self, res, punto):
+        """Cierra el registro de la mision y lo escribe. Devuelve 'res' tal cual.
+
+        Va en TODAS las salidas de _ejecutar, incluidas las de fallo y
+        cancelacion, y a proposito: una campana que solo guarda las misiones que
+        salieron bien no puede calcular una tasa de exito. El §8 del protocolo
+        dice que una corrida fallida cuenta como fallo salvo que su causa este
+        en la lista cerrada de descartes, y para poder decidir eso hace falta el
+        archivo.
+        """
+        if self.registro is None:
+            return res
+        try:
+            self.registro.cerrar(
+                self._ahora(), res.exito, res.motivo_fallo, res.num_relevos,
+                punto["pose"] if punto else {"x": 0.0, "y": 0.0, "yaw": 0.0})
+            self.registro.entorno = entorno_simulacion(
+                mundo=None, mapa=None, rtf=None,
+                controladores={})   # los rellena quien lance la campana
+            ruta = self.registro.guardar(self.ruta_registros)
+            self.get_logger().info(f"Registro de mision escrito: {ruta}")
+        except Exception as e:                      # noqa: BLE001
+            # Que falle el registro NO puede tumbar una mision: el registrador
+            # observa, no manda.
+            self.get_logger().error(f"No se pudo escribir el registro: {e}")
+        finally:
+            self.registro = None
         return res
+
+    def _ahora(self):
+        """Segundos del reloj del NODO, no de pared.
+
+        Con use_sim_time:=true esto sale de /clock, que es lo que exige el §3
+        del protocolo: todas las marcas del mismo reloj. Aqui habia time.time(),
+        y con el simulador corriendo a RTF distinto de 1 eso produce metricas
+        sesgadas sin dar ningun error -que es el peor tipo de error que puede
+        tener un instrumento de medida-.
+        """
+        return self.get_clock().now().nanoseconds / 1e9
+
+    def _odom(self, msg, ns):
+        """Ultima pose de cada robot, y muestra para la traza si hay mision."""
+        self.ultimo_odom[ns] = msg
+        if self.registro is None:
+            return
+        v = msg.twist.twist.linear
+        q = msg.pose.pose.orientation
+        yaw = math.atan2(2.0 * (q.w * q.z + q.x * q.y),
+                         1.0 - 2.0 * (q.y * q.y + q.z * q.z))
+        pos = msg.pose.pose.position
+        self.registro.muestra(self._ahora(), ns, pos.x, pos.y, pos.z,
+                              math.hypot(v.x, v.y), yaw)
 
     def _marcar(self, etapa, robot, punto, mensaje, mision_id):
         self.estado.mision_id = mision_id
@@ -217,6 +287,17 @@ class Coordinador(Node):
         self.estado.destino_actual = self._a_msg(punto) if punto else PuntoInteres()
         self.estado.mensaje_usuario = mensaje
         self.estado.distancia_restante = self._distancia(robot, punto) if punto else 0.0
+
+        # PUBLICACION EXTRAORDINARIA, en el instante del cambio y no en el
+        # siguiente tick. Lo pide el §3.2 del protocolo y no es un detalle:
+        # 'estado_mision' va a 1 Hz, asi que sin esto t_asignacion -que se
+        # espera en milisegundos- tendria resolucion de un segundo, y la
+        # metrica no distinguiria una asignacion instantanea de una que tardo
+        # medio segundo.
+        self.pub_mision.publish(self.estado)
+        if self.registro is not None:
+            self.registro.marca(self._ahora(), etapa, robot,
+                                punto["id"] if punto else None)
 
     def _feedback(self, goal_handle):
         fb = GuiarUsuario.Feedback()
@@ -287,7 +368,15 @@ class Coordinador(Node):
         return True, ""
 
     def _esperar(self, futuro, timeout=120.0):
-        """Espera un futuro sin bloquear el executor (es multihilo)."""
+        """Espera un futuro sin bloquear el executor (es multihilo).
+
+        AQUI SI se usa time.time() y no self._ahora(), a proposito. Este timeout
+        es un perro guardian contra un proceso colgado, no una marca temporal de
+        ninguna metrica. Si se midiera con el reloj de simulacion y Gazebo
+        muriera, /clock se detendria y el timeout NO venceria nunca: el
+        coordinador se quedaria esperando para siempre justo en el caso para el
+        que existe. Las marcas de las metricas van todas por self._ahora().
+        """
         t0 = time.time()
         while not futuro.done():
             if timeout is not None and time.time() - t0 > timeout:
