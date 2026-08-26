@@ -50,6 +50,11 @@ from coordinacion.planificador import (
 TOLERANCIA_LLEGADA_M = 0.25
 
 
+def _normalizar(a):
+    """Lleva un angulo al intervalo (-pi, pi]."""
+    return math.atan2(math.sin(a), math.cos(a))
+
+
 class Coordinador(Node):
 
     def __init__(self):
@@ -232,6 +237,60 @@ class Coordinador(Node):
 
     # ------------------------------------------------------------- navegacion
 
+    def _yaw_de_llegada(self, robot, punto):
+        """Elige el rumbo con el que pedir la llegada: el del catalogo o el opuesto.
+
+        POR QUE ESTO EXISTE. El 2026-08-26, yendo de ETM10 a ETM1, el robot dio
+        media vuelta al llegar y se quedo pegado a la puerta. La causa NO es el
+        comprobador de meta: ese ya esta relajado desde R12 (yaw_goal_tolerance
+        3.15, o sea cualquier rumbo). La causa es el planificador, que es
+        SmacPlannerHybrid: Hybrid-A* busca en SE(2), no busca un punto sino una
+        POSE, y con motion_model REEDS_SHEPP tiene primitivas de marcha atras
+        para conseguir el rumbo pedido. La maniobra viene cosida DENTRO del
+        camino, asi que el robot no entra en los 0.25 m hasta haberla terminado
+        y el comprobador ni llega a opinar. Se confirmo en el bag: el plan del
+        tramo 2 termina en (-15.93, 10.61) con yaw final 0.0 grados yendo hacia
+        el OESTE.
+
+        En Nav2 de Jazzy esto se arregla con goal_heading_mode: BIDIRECTIONAL,
+        pero ese parametro no existe en Humble, que es lo que corre el PC. Y
+        cambiar a un planificador 2D no es opcion: ignoraria tambien el radio
+        minimo de giro de 0.35 m, que es justo por lo que se puso el Hybrid.
+
+        QUE HACE. Un carro puede ocupar el mismo sitio fisico en dos sentidos.
+        Se eligen los dos candidatos del eje que puso el humano en el YAML
+        -yaw y yaw+pi- y se coge el mas cercano al rumbo de aproximacion real,
+        medido con /odom. Elegir entre esos dos NUNCA anade una maniobra: solo
+        puede quitarla. No se usa el rumbo de aproximacion crudo porque en una
+        ruta en L la recta origen-destino puede ser diagonal y acabariamos
+        pidiendo un rumbo que tampoco es el de llegada.
+
+        Contexto que justifica no respetar el YAML a rajatabla: de los 31 puntos
+        del catalogo, 28 tienen yaw: 0.0. Ese valor no lo eligio nadie, es el
+        que quedo por defecto. Para los puntos donde la orientacion SI signifique
+        algo -las escaleras, donde el robot deberia quedar senalando por donde
+        sube el usuario- se respeta el YAML poniendoles yaw_estricto: true.
+        """
+        yaml_yaw = float(punto["pose"].get("yaw", 0.0))
+        if punto.get("yaw_estricto", False):
+            return yaml_yaw, "yaw_estricto en el catalogo"
+
+        od = self.ultimo_odom.get(robot)
+        if od is None:
+            return yaml_yaw, "sin /odom, no se puede medir la aproximacion"
+
+        dx = float(punto["pose"]["x"]) - od.pose.pose.position.x
+        dy = float(punto["pose"]["y"]) - od.pose.pose.position.y
+        if math.hypot(dx, dy) < TOLERANCIA_LLEGADA_M:
+            # Demasiado cerca: el rumbo de aproximacion es ruido.
+            return yaml_yaw, "el robot ya esta sobre el punto"
+
+        rumbo = math.atan2(dy, dx)
+        opuesto = _normalizar(yaml_yaw + math.pi)
+        if abs(_normalizar(rumbo - yaml_yaw)) <= abs(_normalizar(rumbo - opuesto)):
+            return yaml_yaw, f"rumbo de aproximacion {math.degrees(rumbo):.0f} grados"
+        return opuesto, f"rumbo de aproximacion {math.degrees(rumbo):.0f} grados"
+
     def _navegar(self, tramo):
         """Manda un goal y espera. Devuelve (ok, motivo).
 
@@ -257,6 +316,17 @@ class Coordinador(Node):
         objetivo.pose.header.frame_id = f"{tramo.robot}/map"
         objetivo.pose.header.stamp = self.get_clock().now().to_msg()
         objetivo.pose.pose = self._a_msg(tramo.punto).pose
+
+        # El punto (x, y) es sagrado; el rumbo no. Ver _yaw_de_llegada.
+        yaw, motivo_yaw = self._yaw_de_llegada(tramo.robot, tramo.punto)
+        _, _, qz, qw = yaw_a_cuaternion(yaw)
+        objetivo.pose.pose.orientation.z, objetivo.pose.pose.orientation.w = qz, qw
+        yaml_yaw = float(tramo.punto["pose"].get("yaw", 0.0))
+        if abs(_normalizar(yaw - yaml_yaw)) > 1e-6:
+            self.get_logger().info(
+                f"    rumbo de llegada invertido respecto al catalogo: "
+                f"{math.degrees(yaml_yaw):.0f} -> {math.degrees(yaw):.0f} grados "
+                f"({motivo_yaw}). Evita la media vuelta de Hybrid-A*")
 
         fut = cliente.send_goal_async(objetivo)
         gh = self._esperar(fut)
