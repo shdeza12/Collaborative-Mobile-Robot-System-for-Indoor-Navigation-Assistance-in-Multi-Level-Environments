@@ -178,12 +178,19 @@ class CmdvelToServoNode(Node):
         Returns:
             (float): Throttle value mapped wrt DeepRacer.
         """
+        # DE UMBRAL MAYOR A MENOR. Estaba al reves: se comparaba primero contra
+        # MAX_THROTTLE_RATIO, que vale 0.1 y es el umbral MAS BAJO de los tres,
+        # asi que la primera rama se tragaba todo lo que pasara de 0.1 y las dos
+        # 'elif' eran codigo muerto. El resultado era un mapeo de dos valores
+        # -tope o nada- en vez de los cuatro escalones que declaran las
+        # constantes. Los nombres enganan: MIN_THROTTLE_RATIO es el umbral mas
+        # ALTO, el que da tope de traccion.
         target_linear_pct = abs(target_linear_clamped / constants.VehicleNav2Dynamics.MAX_SPEED)
-        if target_linear_pct >= constants.VehicleNav2Dynamics.MAX_THROTTLE_RATIO:
+        if target_linear_pct >= constants.VehicleNav2Dynamics.MIN_THROTTLE_RATIO:
             return constants.ActionValues.MAX_THROTTLE_OUTPUT
         elif target_linear_pct >= constants.VehicleNav2Dynamics.MID_THROTTLE_RATIO:
             return constants.ActionValues.MID_THROTTLE_OUTPUT
-        elif target_linear_pct >= constants.VehicleNav2Dynamics.MIN_THROTTLE_RATIO:
+        elif target_linear_pct >= constants.VehicleNav2Dynamics.MAX_THROTTLE_RATIO:
             return constants.ActionValues.MIN_THROTTLE_OUTPUT
         else:
             return constants.ActionValues.DEFAULT_OUTPUT
@@ -196,12 +203,16 @@ class CmdvelToServoNode(Node):
         Returns:
             (float): Angle value mapped wrt DeepRacer.
         """
+        # El mismo defecto que en la traccion, y con peor efecto: comparando
+        # primero contra MAX_STEERING_RATIO = 0.2, CUALQUIER giro de mas de 6
+        # grados daba tope de volante y por debajo no daba nada. El vehiculo iba
+        # recto o a tope, sin nada en medio.
         target_rot_pct = abs(target_rot_clamped / constants.VehicleNav2Dynamics.MAX_STEER)
-        if target_rot_pct >= constants.VehicleNav2Dynamics.MAX_STEERING_RATIO:
+        if target_rot_pct >= constants.VehicleNav2Dynamics.MIN_STEERING_RATIO:
             return constants.ActionValues.MAX_STEERING_OUTPUT
         elif target_rot_pct >= constants.VehicleNav2Dynamics.MID_STEERING_RATIO:
             return constants.ActionValues.MID_STEERING_OUTPUT
-        elif target_rot_pct >= constants.VehicleNav2Dynamics.MIN_STEERING_RATIO:
+        elif target_rot_pct >= constants.VehicleNav2Dynamics.MAX_STEERING_RATIO:
             return constants.ActionValues.MIN_STEERING_OUTPUT
         else:
             return constants.ActionValues.DEFAULT_OUTPUT

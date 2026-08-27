@@ -70,7 +70,12 @@ def generate_launch_description():
             namespace='servo_pkg',
             executable='servo_node',
             name='servo_node',
-            remappings=[('/ctrl_pkg/servo_msg', '/cmdvel_to_servo_pkg/servo_msg')]
+            # Sin remapeo: desde que cmdvel_to_servo_node publica en el nombre
+            # absoluto /ctrl_pkg/servo_msg, servo_pkg lo recibe en el suyo de
+            # siempre. El remapeo que habia aqui movia la suscripcion de
+            # servo_pkg al topico de nuestro nodo, y solo funcionaba cuando
+            # servo_pkg lo lanzabamos nosotros -no en el vehiculo, donde lo
+            # arranca deepracer-core-.
             ),
 
         launch_ros.actions.Node(

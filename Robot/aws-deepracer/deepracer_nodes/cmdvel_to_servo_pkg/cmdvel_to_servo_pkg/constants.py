@@ -14,7 +14,19 @@
 #   limitations under the License.                                              #
 #################################################################################
 
-ACTION_PUBLISH_TOPIC = "servo_msg"
+# ABSOLUTO, y no "servo_msg" a secas. Con el nombre relativo, el
+# namespace='cmdvel_to_servo_pkg' del launch lo convertia en
+# /cmdvel_to_servo_pkg/servo_msg, y el servo_pkg del vehiculo escucha en
+# /ctrl_pkg/servo_msg: la cadena de mando quedaba rota sin dar ningun error.
+#
+# deepracer.launch.py lo tapaba remapeando la SUSCRIPCION de servo_pkg, pero eso
+# solo vale cuando arrancamos nosotros servo_pkg. En el vehiculo real lo arranca
+# el servicio deepracer-core de AWS, sin remapeo, y entonces nadie escucha lo que
+# publicamos. Publicar en el nombre absoluto funciona en los dos casos.
+#
+# Notese que CMDVEL_TOPIC, ahi arriba, ya era absoluto. La asimetria entre los
+# dos era el defecto.
+ACTION_PUBLISH_TOPIC = "/ctrl_pkg/servo_msg"
 SET_MAX_SPEED_SERVICE_NAME = "set_max_speed"
 
 CMDVEL_TOPIC = "/cmd_vel"
