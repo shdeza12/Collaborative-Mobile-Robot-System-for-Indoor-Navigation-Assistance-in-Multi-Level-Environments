@@ -844,3 +844,54 @@ que apartarlas hacia su propia pared— está en la cabecera del propio `puntos_
    carga el mapa de `primer_piso`, que no es el de este mundo.
 3. Probar la llegada a **ETM10**, la más apretada del archivo: es el único destino al que se
    llega de frente, porque su vano está en el muro del fondo del pasillo.
+
+---
+
+## 10. El vehículo físico: arrancar el LiDAR sin tumbar el control
+
+**El problema.** Con el LiDAR de fábrica conectado, `deepracer-core` se queda en `failed` y el
+vehículo se queda **sin ningún nodo de control**. La causa está medida el 2026-08-21
+([`S19_lidar_original_evo.md`](Evidencia/S19_lidar_original_evo.md)): el lanzador de AWS invoca el
+ejecutable `rplidar_node`, y en `/opt/ros/jazzy/lib/rplidar_ros/` lo único que existe es
+`rplidar_composition`. El binario está instalado y funciona; **lo que no existe es el nombre que el
+launch llama**.
+
+**La salida que se adopta: no tocar el sistema.** En vez de enlazar o editar ficheros bajo
+`/opt/`, se deja que `deepracer-core` arranque **sin** el LiDAR y se arranca el sensor aparte:
+
+```bash
+ros2 launch deepracer_bringup lidar_vehiculo.launch.py
+```
+
+Tres razones, y la primera es la que importa:
+
+1. **`deepracer-core` queda sano**, y es de donde sale el mando de los servos. Con el arreglo por
+   enlace, si el nodo del LiDAR falla se lleva por delante el control del vehículo; así no.
+2. No se modifican ficheros del sistema en **hardware compartido**, ni hay nada que revertir.
+3. El sensor publica **directamente en `/scan`**, que es donde miran Nav2 y `slam_toolbox`. Bajo el
+   espacio de nombres de AWS publicaría en `/rplidar_ros/scan` y haría falta además un remapeo.
+
+**Comprobar que publica de verdad**, y no solo que el tópico aparece:
+
+```bash
+ros2 topic info /scan --verbose
+```
+
+> `/scan` **aparece en `ros2 topic list` con el sensor desenchufado**, así que verlo listado no
+> significa nada. Lo que no miente es el número de publicadores y la frecuencia. Esperado sobre el
+> A1M8-R5 de fábrica: **360 muestras sobre 360°, a 6,80 Hz**, alcance 12,0 m.
+
+### Las direcciones IP no se escriben en ningún sitio
+
+En el repositorio **no hay ni una IP**: ni en código ni en configuración, solo en los informes de
+evidencia, que son registros fechados. Y no hace falta que las haya — en la misma red local, el
+descubrimiento de DDS es por multidifusión y **no necesita direcciones**. Solo hacen falta para
+`ssh`, y ahí se escriben en el momento.
+
+Aun así conviene una **reserva DHCP** para el vehículo y el portátil: el 19-ago el portátil era
+`192.168.0.101` y el 21-ago ya era `.102`. No rompe ROS, pero sí rompe el `ssh` de la sesión y hace
+perder tiempo de vehículo, que es el recurso caro.
+
+Si algún día el multicast está bloqueado en la red —es lo normal en wifi con aislamiento de
+clientes—, la salida **no** es escribir IP en los launch, sino levantar un servidor de
+descubrimiento de Fast DDS y apuntar los dos equipos a él con `ROS_DISCOVERY_SERVER`.
