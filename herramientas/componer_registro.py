@@ -12,7 +12,11 @@ agotan con pytest en milisegundos, y quien analice los datos en octubre no
 deberia necesitar el workspace compilado para releerlos.
 """
 
+import argparse
+import json
 import math
+import os
+import sys
 
 # Constantes de EstadoMision.msg. Se copian a proposito en vez de importar
 # coordinacion_msgs: esta herramienta tiene que poder correr sobre un bag sin
@@ -159,3 +163,383 @@ def veredicto_de(marcas, estados, error_posicion_m, condicion, num_relevos):
 
     return {"exito": exito, "c1_posicion": c1, "c2_completada_sin_fallida": c2,
             "c3_relevo": c3, "motivo_fallo": motivo}
+
+
+# --- Lectura del bag --------------------------------------------------------
+
+def leer_bag(ruta):
+    """{topico: [(t_segundos, mensaje), ...]} de todo el bag.
+
+    Levanta excepcion si el bag no se puede abrir. No devuelve un diccionario
+    vacio: un bag ilegible y una mision sin eventos se verian igual, y §4.2 dice
+    que el compositor falla ruidosamente antes que inventar.
+
+    Los import de ROS estan DENTRO de la funcion, no arriba: asi las pruebas de
+    las marcas y del esquema siguen corriendo sin el workspace sourceado.
+    """
+    import rclpy.serialization
+    import rosbag2_py
+    from rosidl_runtime_py.utilities import get_message
+
+    lector = rosbag2_py.SequentialReader()
+    lector.open(rosbag2_py.StorageOptions(uri=ruta, storage_id="sqlite3"),
+                rosbag2_py.ConverterOptions("", ""))
+    tipos = {t.name: t.type for t in lector.get_all_topics_and_types()}
+
+    salida = {}
+    while lector.has_next():
+        topico, datos, t_ns = lector.read_next()
+        msg = rclpy.serialization.deserialize_message(
+            datos, get_message(tipos[topico]))
+        salida.setdefault(topico, []).append((t_ns * 1e-9, msg))
+    return salida
+
+
+def _condicion(nivel_origen, nivel_destino, etapas):
+    """'A' dentro de un nivel, 'B' entre niveles. Es la §3.1.
+
+    Sale de los NIVELES del catalogo, no de las etapas que llegaron a ocurrir.
+    Una mision entre pisos que falla antes de planificar no tiene TRANSFERENCIA
+    ni TRAMO_2 en el bag: clasificarla por etapas la contaria como una A
+    fallida, y eso falsea las DOS tasas de exito a la vez -A pierde una que no
+    era suya, B se guarda su peor caso-. La condicion es la variable
+    independiente del experimento; se decide por lo que se PIDIO.
+
+    Las etapas quedan de reserva para cuando alguno de los dos puntos no este en
+    el catalogo, que es el unico caso en el que no hay niveles que comparar.
+    """
+    if nivel_origen is not None and nivel_destino is not None:
+        return "B" if nivel_origen != nivel_destino else "A"
+    return "B" if (TRANSFERENCIA in etapas or TRAMO_2 in etapas) else "A"
+
+
+def componer(ruta_bag, banco, campana, error_posicion_m=None, rtf=None,
+             semilla=None, es_piloto=False, medido_por="automatico",
+             distro=None):
+    """Construye el registro completo. Ver la §3 del esquema."""
+    topicos = leer_bag(ruta_bag)
+
+    crudos = topicos.get("/coordinacion/estado_mision", [])
+    if not crudos:
+        raise SystemExit(
+            f"{ruta_bag} no contiene /coordinacion/estado_mision. Sin el no hay "
+            f"marcas, y un registro con marcas en null seria indistinguible de "
+            f"una mision que fallo. Grabar con herramientas/grabar_mision.sh.")
+
+    ids = {m.mision_id for _, m in crudos if m.mision_id}
+    if len(ids) > 1:
+        raise SystemExit(
+            f"{ruta_bag} contiene {len(ids)} misiones: {sorted(ids)}. El §6.4 del "
+            f"protocolo manda un gzserver por corrida, asi que esto significa que "
+            f"el procedimiento no se siguio.")
+
+    if banco == "simulacion" and "/clock" not in topicos:
+        raise SystemExit(f"{ruta_bag} no trae /clock y el banco es simulacion.")
+
+    estados = [(t, m.etapa, m.robot_activo, m.mision_id) for t, m in crudos]
+    etapas = {e for _, e, _, _ in estados}
+
+    niveles = _niveles_del_catalogo()
+    origen = next((m.origen_id for _, m in crudos if m.origen_id), "")
+    destino = next((m.destino_id for _, m in crudos if m.destino_id), "")
+    condicion = _condicion(niveles.get(origen), niveles.get(destino), etapas)
+
+    # Dos vistas del mismo /odom: 'movimientos' es lo que decide las marcas y
+    # 'poses' lo que va a la verdad de terreno y a la traza.
+    movimientos, poses = {}, {}
+    for topico, muestras in topicos.items():
+        if topico.endswith("/odom"):
+            ns = topico.strip("/").split("/")[0]
+            movimientos[ns] = [(t, m.twist.twist.linear.x, m.twist.twist.linear.y)
+                               for t, m in muestras]
+            poses[ns] = [(t, m.pose.pose.position.x, m.pose.pose.position.y,
+                          _yaw_de(m.pose.pose.orientation)) for t, m in muestras]
+
+    marcas = marcas_de(estados, movimientos, condicion)
+    # 'is not None' y no truthiness: un t_inicio_tramo2 de 0,0 s es una marca
+    # valida, y con 'if marcas[...]' contaria como que no hubo relevo.
+    relevos = 1 if condicion == "B" and marcas["t_inicio_tramo2"] is not None else 0
+    veredicto = veredicto_de(marcas, estados, error_posicion_m, condicion, relevos)
+
+    return {
+        "esquema_version": ESQUEMA_VERSION,
+        "mision": {
+            "mision_id": ids.pop() if ids else os.path.basename(ruta_bag),
+            "campana": campana, "banco": banco, "condicion": condicion,
+            "semilla": semilla, "es_piloto": es_piloto,
+        },
+        "procedencia": _procedencia(ruta_bag, distro),
+        "solicitud": _solicitud(crudos, condicion, niveles, origen, destino),
+        "marcas": marcas,
+        "verdad_de_terreno": _verdad(banco, error_posicion_m, poses, medido_por),
+        "veredicto": veredicto,
+        "descriptivas": _descriptivas(banco, topicos, poses, marcas),
+        "salud_del_banco": _salud(banco, rtf),
+        "traza": _traza(ruta_bag, poses),
+    }
+
+
+def _yaw_de(q):
+    return math.atan2(2.0 * (q.w * q.z + q.x * q.y),
+                      1.0 - 2.0 * (q.y * q.y + q.z * q.z))
+
+
+# --- Los bloques del registro, uno por funcion ------------------------------
+
+def _raiz():
+    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def _catalogo():
+    return os.path.join(_raiz(), "Robot", "aws-deepracer", "deepracer_bringup",
+                        "config", "puntos_interes.yaml")
+
+
+def _git(*args):
+    import subprocess
+    try:
+        return subprocess.run(("git", "-C", _raiz()) + args, check=True,
+                              capture_output=True, text=True).stdout.strip()
+    except Exception:
+        return ""
+
+
+def _procedencia(ruta_bag, distro=None):
+    """De donde salio esta medida. Sin esto no se puede reproducir en S26."""
+    import hashlib
+    with open(_catalogo(), "rb") as f:
+        sha = hashlib.sha256(f.read()).hexdigest()
+
+    # El bag NO guarda la distro: metadata.yaml de rosbag2 en Humble va por la
+    # version 5 y no trae ese campo. Asi que se toma del entorno, con la trampa
+    # de que el entorno es el de QUIEN COMPONE, no el de quien grabo: un bag del
+    # carro -Jazzy- compuesto en el PC saldria etiquetado 'humble'. Para eso
+    # esta --distro. Y si no hay ninguna, se para: el §4.2 dice que antes que
+    # inventar, el compositor falla.
+    distro = distro or os.environ.get("ROS_DISTRO", "")
+    if distro not in ("humble", "jazzy"):
+        raise SystemExit(
+            f"ROS_DISTRO vale '{distro}', y el esquema solo admite humble o "
+            f"jazzy. Sourcear ROS, o pasar --distro si se esta componiendo en "
+            f"el PC un bag grabado en el carro.")
+
+    return {
+        "commit": _git("rev-parse", "--short", "HEAD"),
+        "etiqueta": _git("describe", "--tags", "--exact-match"),
+        # Una medida tomada con cambios sin comitear no se puede reproducir. Que
+        # lo diga el registro es mejor que descubrirlo en S26.
+        "repositorio_limpio": _git("status", "--porcelain") == "",
+        "distro": distro,
+        "mundo": os.environ.get("TESIS_MUNDO", ""),
+        "mapa": os.environ.get("TESIS_MAPA", ""),
+        "catalogo_puntos": "puntos_interes.yaml",
+        # Las poses del catalogo se movieron tres veces en agosto. Un registro
+        # que no lo fije no se puede comparar con otro: 'ETM1' puede no ser el
+        # mismo punto.
+        "catalogo_sha256": sha,
+        "bag": os.path.basename(os.path.normpath(ruta_bag)),
+        "fecha_utc": _fecha_del_bag(ruta_bag),
+    }
+
+
+def _fecha_del_bag(ruta_bag):
+    import datetime
+    t = os.path.getmtime(ruta_bag)
+    return datetime.datetime.utcfromtimestamp(t).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _niveles_del_catalogo():
+    import yaml
+    with open(_catalogo(), encoding="utf-8") as f:
+        return {p["id"]: int(p["nivel"]) for p in yaml.safe_load(f)["puntos"]}
+
+
+def _solicitud(crudos, condicion, niveles, origen, destino):
+    """Que se pidio. Sale de EstadoMision, no del goal: los goals no se graban."""
+    tramos = []
+    vistos = set()
+    for _, m in crudos:
+        clave = (m.etapa, m.destino_actual.id)
+        if m.etapa in (TRAMO_1, TRAMO_2) and clave not in vistos:
+            vistos.add(clave)
+            tramos.append({"orden": len(tramos) + 1, "robot": m.robot_activo,
+                           "punto_id": m.destino_actual.id, "etapa": int(m.etapa)})
+    return {
+        "origen_id": origen, "destino_id": destino,
+        "nivel_origen": niveles.get(origen), "nivel_destino": niveles.get(destino),
+        # Derivable de los dos niveles, y se guarda igual: el analizador no debe
+        # rederivar la variable independiente del experimento.
+        "entre_niveles": condicion == "B",
+        "tramos": tramos,
+    }
+
+
+def _verdad(banco, error_posicion_m, poses, medido_por):
+    """De donde sale la verdad de terreno, que NO es la misma en los dos bancos.
+
+    En simulacion /odom es la pose exacta del motor de Gazebo -WorldPose(), ver
+    gazebo_ros_deepracer_drive.cpp:229-, asi que es un oraculo y la
+    incertidumbre es cero. En el carro la unica odometria es rf2o, que el 26-ago
+    registro el 5,7 % del desplazamiento real: rellenar pose_final con ella
+    seria volver a llamar verdad de terreno a rf2o.
+    """
+    if banco == "fisico":
+        return {"fuente": "cinta_metrica", "error_posicion_m": error_posicion_m,
+                "pose_final": None, "incertidumbre_m": 0.01,
+                "medido_por": medido_por, "nota": ""}
+    ultima = None
+    for muestras in poses.values():
+        if muestras and (ultima is None or muestras[-1][0] > ultima[0]):
+            ultima = muestras[-1]
+    return {
+        "fuente": "gazebo_worldpose_via_odom",
+        "error_posicion_m": error_posicion_m,
+        "pose_final": None if ultima is None else
+                      {"x": ultima[1], "y": ultima[2], "yaw": ultima[3]},
+        "incertidumbre_m": 0.0, "medido_por": "automatico", "nota": "",
+    }
+
+
+def _descriptivas(banco, topicos, poses, marcas):
+    """Se miden y se reportan; no deciden el exito. Ver §3.8 del esquema."""
+    recorrido = 0.0
+    desviacion = {}
+    for ns, muestras in poses.items():
+        for (_, x0, y0, _), (_, x1, y1, _) in zip(muestras, muestras[1:]):
+            recorrido += math.hypot(x1 - x0, y1 - y0)
+        # RNF-01: ningun robot cruza de nivel, lo que cruza es el mensaje.
+        desviacion[ns] = max((abs(z) for z in _zetas(topicos, ns)), default=0.0)
+
+    # R12: una cuspide es un cambio de sentido de la marcha. Se cuentan los
+    # cambios de signo de cmd_vel.linear.x, ignorando el cero.
+    cuspides = 0
+    for topico, muestras in topicos.items():
+        if topico.endswith("/cmd_vel"):
+            signos = [_signo(m.linear.x) for _, m in muestras if _signo(m.linear.x)]
+            cuspides += sum(1 for a, b in zip(signos, signos[1:]) if a != b)
+
+    total = None
+    if marcas["t_completada"] is not None and marcas["t_solicitud"] is not None:
+        total = marcas["t_completada"] - marcas["t_solicitud"]
+
+    return {
+        # Presente y sin llenar en 1.0.0 a proposito: para calcularlo hace falta
+        # el yaw del punto del catalogo, y el §3.7 dice que el rumbo NO decide
+        # mientras R12 siga abierto. Llenarlo despues es una version menor.
+        "error_rumbo_rad": None,
+        "desviacion_z_m": desviacion,
+        "distancia_recorrida_m": recorrido,
+        "num_cuspides": cuspides,
+        "tiempo_total_s": total,
+        # La cifra que el 26-ago delato a AMCL. Con /odom publicado desde
+        # WorldPose(), map->odom deberia ser CONSTANTE; derivo 1,977 m. Grabarla
+        # en cada mision hace que la campana cuantifique R3 en vez de padecerlo.
+        # En fisico va null: alli map->odom no es un error medible contra nada.
+        "deriva_map_odom_m": None if banco == "fisico"
+                             else _deriva_map_odom(topicos),
+    }
+
+
+def _signo(v):
+    return 0 if abs(v) < 1e-3 else (1 if v > 0 else -1)
+
+
+def _zetas(topicos, ns):
+    return [m.pose.pose.position.z for _, m in topicos.get(f"/{ns}/odom", [])]
+
+
+def _deriva_map_odom(topicos):
+    """Cuanto se movio la transformada map->odom entre el principio y el final."""
+    puntos = []
+    for _, msg in topicos.get("/tf", []):
+        for tr in msg.transforms:
+            if tr.header.frame_id.endswith("map") and tr.child_frame_id.endswith("odom"):
+                puntos.append((tr.transform.translation.x, tr.transform.translation.y))
+    if len(puntos) < 2:
+        return None
+    return math.hypot(puntos[-1][0] - puntos[0][0], puntos[-1][1] - puntos[0][1])
+
+
+def _salud(banco, rtf):
+    """Para que un descarte sea demostrable. La causa la pone una persona
+    despues, y solo puede ser una de las cuatro del §8 del protocolo: el esquema
+    rechaza cualquier otra."""
+    if banco == "fisico":
+        return {"rtf": None, "controladores_activos": {},
+                "gzserver_vivo_al_final": None, "descartada": False,
+                "causa_descarte": None}
+    return {"rtf": rtf, "controladores_activos": {},
+            "gzserver_vivo_al_final": True, "descartada": False,
+            "causa_descarte": None}
+
+
+def _traza(ruta_bag, poses, hz=5.0):
+    """Copia de conveniencia para graficar sin reabrir el bag. El bag sigue
+    siendo la fuente: el 26-ago la medicion de rf2o se obtuvo metiendole el
+    /scan de mision3 a un nodo que nunca corrio en esa mision, y ninguna traza
+    diezmada habria permitido eso."""
+    paso = 1.0 / hz
+    puntos = []
+    for ns, muestras in poses.items():
+        siguiente = None
+        for t, x, y, yaw in muestras:
+            if siguiente is None or t >= siguiente:
+                puntos.append({"t": t, "robot": ns, "x": x, "y": y, "yaw": yaw})
+                # 't + paso' y no 'siguiente + paso': si el robot deja un hueco
+                # de 30 s -esperando el relevo-, la segunda forma se queda
+                # atrasada y luego cuela 150 muestras seguidas para recuperarlo.
+                siguiente = t + paso
+    puntos.sort(key=lambda p: p["t"])
+    return {"bag": os.path.basename(os.path.normpath(ruta_bag)),
+            "decimada_hz": hz, "puntos": puntos}
+
+
+# --- Linea de ordenes -------------------------------------------------------
+
+def main():
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument("bag")
+    p.add_argument("--banco", choices=["simulacion", "fisico"], required=True)
+    p.add_argument("--campana", required=True)
+    p.add_argument("--error-posicion-m", type=float, default=None,
+                   help="En fisico, la lectura de cinta. Sin el, el registro "
+                        "queda pendiente de medir (§4.4) y el analizador lo "
+                        "rechaza hasta que se rellene.")
+    p.add_argument("--rtf", type=float, default=None)
+    p.add_argument("--semilla", type=int, default=None)
+    p.add_argument("--piloto", action="store_true")
+    p.add_argument("--medido-por", default="automatico")
+    p.add_argument("--distro", choices=["humble", "jazzy"], default=None,
+                   help="Por omision, ROS_DISTRO. Hace falta al componer en el "
+                        "PC un bag grabado en el carro.")
+    p.add_argument("--salida", required=True)
+    a = p.parse_args()
+
+    registro = componer(a.bag, a.banco, a.campana, a.error_posicion_m, a.rtf,
+                        a.semilla, a.piloto, a.medido_por, a.distro)
+
+    # Validar ANTES de escribir. Sin esto, 'congelado' es una promesa.
+    import jsonschema
+    with open(os.path.join(_raiz(), "Documentos",
+                           "esquema_registro_mision.json"), encoding="utf-8") as f:
+        jsonschema.validate(registro, json.load(f))
+
+    # Y la parte de la §4.3 que el esquema NO puede comprobar, porque draft-07 no
+    # sabe comparar dos campos entre si. Si no se llama aqui, marcas_en_orden()
+    # existe para nada y un hueco de relevo negativo se escribe a disco tan
+    # tranquilo, con el esquema dando el visto bueno.
+    if not marcas_en_orden(registro["marcas"]):
+        raise SystemExit(
+            f"Las marcas no van en orden creciente: {registro['marcas']}\n"
+            f"Un t_respuesta o un hueco de relevo negativos no son una medida, "
+            f"son un sintoma. Revisar el bag antes de escribir el registro.")
+
+    os.makedirs(os.path.dirname(os.path.abspath(a.salida)), exist_ok=True)
+    with open(a.salida, "w", encoding="utf-8") as f:
+        json.dump(registro, f, indent=2, ensure_ascii=False)
+    print(f"Registro escrito en {a.salida}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

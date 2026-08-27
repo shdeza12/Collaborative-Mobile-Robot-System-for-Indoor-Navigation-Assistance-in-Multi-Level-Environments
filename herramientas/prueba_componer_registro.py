@@ -1,11 +1,18 @@
 #!/usr/bin/env python3
-"""Prueba del compositor de registros de mision. Sin ROS corriendo y sin Gazebo.
+"""Prueba del compositor de registros de mision. Sin Gazebo y sin nodos vivos.
 
+    source /opt/ros/humble/setup.bash
+    source ~/deepracer_sim_ws/install/setup.bash
     python3 herramientas/prueba_componer_registro.py
 
 Comprueba las restricciones cruzadas de la §4.3 de
-Documentos/ESQUEMA_REGISTRO_MISION.md. Tarda segundos, asi que no hay excusa
-para no correrlo antes de cada campana.
+Documentos/ESQUEMA_REGISTRO_MISION.md y compone un registro completo a partir de
+un bag sintetico que se escribe aqui mismo. Tarda segundos, asi que no hay
+excusa para no correrlo antes de cada campana.
+
+Hace falta el workspace sourceado -no un ROS corriendo- porque el lector de bags
+y coordinacion_msgs viven ahi. Solo la ultima tanda lo necesita: el modulo
+componer_registro se importa sin ROS a proposito.
 """
 
 import json
@@ -308,6 +315,154 @@ def pruebas_de_marcas():
           and v["exito"] is None)
 
 
+def bag_sintetico(ruta):
+    """Escribe un bag minimo de condicion B. Sin Gazebo y sin simulacion.
+
+    Es lo que permite probar el compositor de forma determinista: los bags de
+    ~/tesis_evidencia/S20_localizacion/ no traen /clock ni estado_mision, asi
+    que no sirven de banco completo.
+    """
+    import rclpy.serialization
+    import rosbag2_py
+    from coordinacion_msgs.msg import EstadoMision
+    from nav_msgs.msg import Odometry
+    from rosgraph_msgs.msg import Clock
+
+    escritor = rosbag2_py.SequentialWriter()
+    escritor.open(
+        rosbag2_py.StorageOptions(uri=ruta, storage_id="sqlite3"),
+        rosbag2_py.ConverterOptions("", ""))
+    for nombre, tipo in [("/coordinacion/estado_mision", "coordinacion_msgs/msg/EstadoMision"),
+                         ("/clock", "rosgraph_msgs/msg/Clock"),
+                         ("/robot1/odom", "nav_msgs/msg/Odometry"),
+                         ("/robot2/odom", "nav_msgs/msg/Odometry")]:
+        escritor.create_topic(rosbag2_py.TopicMetadata(
+            name=nombre, type=tipo, serialization_format="cdr"))
+
+    def estado(t, etapa, robot):
+        m = EstadoMision()
+        m.mision_id, m.etapa, m.robot_activo = "S24_B_prueba", etapa, robot
+        # Los dos ids que ros2 bag no podria sacar del goal. Han de ser puntos
+        # REALES del catalogo: _solicitud les busca el nivel alli.
+        m.origen_id, m.destino_id = "piso1_escalera", "piso2_escalera"
+        escritor.write("/coordinacion/estado_mision",
+                       rclpy.serialization.serialize_message(m), int(t * 1e9))
+
+    def odom(topico, t, vx):
+        m = Odometry()
+        m.twist.twist.linear.x = vx
+        escritor.write(topico, rclpy.serialization.serialize_message(m),
+                       int(t * 1e9))
+
+    escritor.write("/clock", rclpy.serialization.serialize_message(Clock()), 0)
+    estado(10.0, INACTIVA, "")
+    estado(10.2, TRAMO_1, "robot1")
+    for i in range(6):
+        odom("/robot1/odom", 10.3 + i * 0.1, 0.0 if i < 6 - 3 else 0.3)
+    estado(40.0, TRANSFERENCIA, "robot1")
+    estado(41.0, TRAMO_2, "robot2")
+    for i in range(3):
+        odom("/robot2/odom", 41.5 + i * 0.1, 0.3)
+    estado(95.0, COMPLETADA, "robot2")
+    del escritor
+
+
+def pruebas_de_bag(esquema):
+    import shutil
+    import tempfile
+    from componer_registro import componer, leer_bag
+
+    tmp = tempfile.mkdtemp(prefix="prueba_rf25_")
+    try:
+        ruta = os.path.join(tmp, "bag_b")
+        bag_sintetico(ruta)
+
+        topicos = leer_bag(ruta)
+        check("el bag sintetico trae estado_mision",
+              len(topicos.get("/coordinacion/estado_mision", [])) == 5)
+
+        reg = componer(ruta, banco="simulacion", campana="prueba",
+                       error_posicion_m=0.19, rtf=0.995)
+        check("el registro compuesto valida contra el esquema",
+              valida(reg, esquema), _por_que(reg, esquema))
+        check("saca la condicion B del propio bag",
+              reg["mision"]["condicion"] == "B")
+        check("t_inicio_tramo2 sale del odom del segundo robot",
+              abs(reg["marcas"]["t_inicio_tramo2"] - 41.5) < 1e-6,
+              f"-> {reg['marcas']['t_inicio_tramo2']}")
+        check("el mision_id sale del bag, no del nombre del directorio",
+              reg["mision"]["mision_id"] == "S24_B_prueba")
+        check("origen y destino salen de EstadoMision, que el goal no graba",
+              reg["solicitud"]["origen_id"] == "piso1_escalera"
+              and reg["solicitud"]["nivel_destino"] == 2)
+
+        # La condicion es la variable independiente del experimento y NO puede
+        # salir de las etapas que llegaron a ocurrir: una mision entre pisos que
+        # falla antes de planificar no tiene TRANSFERENCIA ni TRAMO_2 en el bag,
+        # y contarla como A fallida falsea las dos tasas de exito a la vez.
+        ruta_corta = os.path.join(tmp, "bag_b_truncado")
+        bag_sintetico_truncado(ruta_corta)
+        corto = componer(ruta_corta, banco="simulacion", campana="prueba",
+                         error_posicion_m=None, rtf=0.995)
+        check("una B que falla antes del relevo sigue siendo B",
+              corto["mision"]["condicion"] == "B",
+              f"-> {corto['mision']['condicion']}")
+        check("y su registro tambien valida", valida(corto, esquema),
+              _por_que(corto, esquema))
+
+        # §4.2: el compositor falla ruidosamente, nunca inventa. Un bag ilegible
+        # y una mision sin eventos NO pueden verse igual.
+        vacio = os.path.join(tmp, "no_es_un_bag")
+        os.makedirs(vacio)
+        try:
+            leer_bag(vacio)
+            ok = False
+        except Exception:
+            ok = True
+        check("un bag ilegible levanta excepcion en vez de devolver vacio", ok)
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+def bag_sintetico_truncado(ruta):
+    """La misma mision entre pisos, cortada en el tramo 1 por un FALLIDA.
+
+    Nunca llega a TRANSFERENCIA ni a TRAMO_2, que es justo el caso en el que
+    clasificar por etapas la llamaria condicion A.
+    """
+    import rclpy.serialization
+    import rosbag2_py
+    from coordinacion_msgs.msg import EstadoMision
+    from rosgraph_msgs.msg import Clock
+
+    escritor = rosbag2_py.SequentialWriter()
+    escritor.open(
+        rosbag2_py.StorageOptions(uri=ruta, storage_id="sqlite3"),
+        rosbag2_py.ConverterOptions("", ""))
+    for nombre, tipo in [("/coordinacion/estado_mision", "coordinacion_msgs/msg/EstadoMision"),
+                         ("/clock", "rosgraph_msgs/msg/Clock")]:
+        escritor.create_topic(rosbag2_py.TopicMetadata(
+            name=nombre, type=tipo, serialization_format="cdr"))
+    escritor.write("/clock", rclpy.serialization.serialize_message(Clock()), 0)
+    for t, etapa, robot in [(10.0, INACTIVA, ""), (10.2, TRAMO_1, "robot1"),
+                            (22.0, FALLIDA, "robot1")]:
+        m = EstadoMision()
+        m.mision_id, m.etapa, m.robot_activo = "S24_B_truncada", etapa, robot
+        m.origen_id, m.destino_id = "piso1_escalera", "piso2_escalera"
+        escritor.write("/coordinacion/estado_mision",
+                       rclpy.serialization.serialize_message(m), int(t * 1e9))
+    del escritor
+
+
+def _por_que(registro, esquema):
+    """El motivo del rechazo, para no tener que adivinarlo desde un 'FALLA'."""
+    try:
+        jsonschema.validate(registro, esquema)
+        return ""
+    except jsonschema.ValidationError as e:
+        return f"-> {'/'.join(str(p) for p in e.absolute_path)}: {e.message}"
+
+
 def main():
     with open(ESQUEMA, encoding="utf-8") as f:
         esquema = json.load(f)
@@ -317,6 +472,8 @@ def main():
     pruebas_de_orden()
     print("Marcas y veredicto")
     pruebas_de_marcas()
+    print("Lectura del bag y ensamblado (necesita el workspace sourceado)")
+    pruebas_de_bag(esquema)
     print(f"\n{len(fallos)} fallo(s).")
     return 1 if fallos else 0
 
