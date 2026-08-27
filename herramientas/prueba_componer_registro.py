@@ -24,6 +24,12 @@ AQUI = os.path.dirname(os.path.abspath(__file__))
 RAIZ = os.path.dirname(AQUI)
 ESQUEMA = os.path.join(RAIZ, "Documentos", "esquema_registro_mision.json")
 
+sys.path.insert(0, AQUI)
+from componer_registro import (  # noqa: E402
+    marcas_de, marcas_en_orden, primer_movimiento, veredicto_de,
+    INACTIVA, TRAMO_1, TRANSFERENCIA, TRAMO_2, COMPLETADA, FALLIDA,
+)
+
 fallos = []
 
 
@@ -93,26 +99,6 @@ def valida(registro, esquema):
         return True
     except jsonschema.ValidationError:
         return False
-
-
-def marcas_en_orden(registro):
-    """True si las marcas presentes van en orden creciente.
-
-    JSON Schema draft-07 NO puede comparar dos campos entre si, asi que esta
-    regla de la §4.3 -'t_fin_tramo1 <= t_inicio_tramo2'- no cabe en el esquema y
-    hay que comprobarla aparte. No es un detalle: el hueco de relevo es
-    't_inicio_tramo2 - t_fin_tramo1', y si el orden se invierte OE4 reporta un
-    tiempo negativo sin que nada chille.
-
-    La tarea 4 mueve esta funcion a componer_registro.py, que es quien la
-    necesita en produccion; aqui vive mientras tanto para que la regla no quede
-    sin comprobar entre una tarea y la siguiente.
-    """
-    m = registro["marcas"]
-    secuencia = ["t_solicitud", "t_robot_activo", "t_primer_movimiento",
-                 "t_fin_tramo1", "t_inicio_tramo2", "t_completada"]
-    vistos = [m[k] for k in secuencia if m[k] is not None]
-    return all(a <= b for a, b in zip(vistos, vistos[1:]))
 
 
 def pruebas_de_esquema(esquema):
@@ -227,18 +213,99 @@ def pruebas_de_esquema(esquema):
 
 def pruebas_de_orden():
     check("el registro de referencia tiene las marcas en orden",
-          marcas_en_orden(registro_valido()))
+          marcas_en_orden(registro_valido()["marcas"]))
 
-    r = registro_valido()
-    r["marcas"]["t_inicio_tramo2"] = 39.0     # antes de t_fin_tramo1 = 40.0
-    check("un hueco de relevo negativo se detecta", not marcas_en_orden(r))
+    m = registro_valido()["marcas"]
+    m["t_inicio_tramo2"] = 39.0     # antes de t_fin_tramo1 = 40.0
+    check("un hueco de relevo negativo se detecta", not marcas_en_orden(m))
 
     # Las marcas ausentes no rompen el orden: se saltan, no se comparan contra
     # None. Una condicion A valida tiene dos huecos en mitad de la secuencia.
-    r = registro_valido()
-    r["marcas"]["t_fin_tramo1"] = None
-    r["marcas"]["t_inicio_tramo2"] = None
-    check("las marcas null no cuentan como desorden", marcas_en_orden(r))
+    m = registro_valido()["marcas"]
+    m["t_fin_tramo1"] = None
+    m["t_inicio_tramo2"] = None
+    check("las marcas null no cuentan como desorden", marcas_en_orden(m))
+
+
+def pruebas_de_marcas():
+    # §3.5: |v| >= 0,02 m/s en TRES muestras consecutivas. Un pico aislado de
+    # ruido del estimador no puede disparar t_primer_movimiento: adelantaria la
+    # marca y t_respuesta saldria mas corto de lo real.
+    ruido = [(0.0, 0.0, 0.0), (0.1, 0.5, 0.0), (0.2, 0.0, 0.0),
+             (0.3, 0.0, 0.0), (0.4, 0.1, 0.0), (0.5, 0.1, 0.0),
+             (0.6, 0.1, 0.0)]
+    check("un pico aislado NO dispara el primer movimiento",
+          primer_movimiento(ruido) == 0.4, f"-> {primer_movimiento(ruido)}")
+    check("robot quieto no tiene primer movimiento",
+          primer_movimiento([(0.0, 0.0, 0.0), (0.1, 0.001, 0.0)]) is None)
+    check("velocidad puramente lateral tambien cuenta",
+          primer_movimiento([(0.0, 0.0, 0.1)] * 3) == 0.0)
+
+    # Condicion B completa.
+    estados_b = [
+        (10.0, INACTIVA, "", "m1"), (10.2, TRAMO_1, "robot1", "m1"),
+        (40.0, TRANSFERENCIA, "robot1", "m1"), (41.0, TRAMO_2, "robot2", "m1"),
+        (95.0, COMPLETADA, "robot2", "m1"),
+    ]
+    mov = {
+        "robot1": [(10.9, 0.3, 0.0), (11.0, 0.3, 0.0), (11.1, 0.3, 0.0)],
+        "robot2": [(41.5, 0.3, 0.0), (41.6, 0.3, 0.0), (41.7, 0.3, 0.0)],
+    }
+    m = marcas_de(estados_b, mov, "B")
+    check("t_solicitud es el primer estado no INACTIVA", m["t_solicitud"] == 10.2)
+    check("t_fin_tramo1 es el primer TRANSFERENCIA", m["t_fin_tramo1"] == 40.0)
+    check("t_inicio_tramo2 es el primer movimiento del segundo robot",
+          m["t_inicio_tramo2"] == 41.5)
+    check("t_completada es el primer COMPLETADA", m["t_completada"] == 95.0)
+
+    # El bag empieza a grabar ANTES de que se pida la mision. Si el robot se
+    # movio durante la puesta a punto, ese movimiento no es la respuesta a nada:
+    # contarlo daria t_respuesta negativo. Ver desde() en componer_registro.py.
+    mov_antes = dict(mov)
+    mov_antes["robot1"] = ([(2.0, 0.4, 0.0), (2.1, 0.4, 0.0), (2.2, 0.4, 0.0)]
+                           + mov["robot1"])
+    m2 = marcas_de(estados_b, mov_antes, "B")
+    check("el movimiento anterior a la solicitud no cuenta",
+          m2["t_primer_movimiento"] == 10.9, f"-> {m2['t_primer_movimiento']}")
+    check("y por tanto t_respuesta no sale negativo",
+          m2["t_primer_movimiento"] - m2["t_solicitud"] > 0)
+
+    # Lo mismo con el segundo robot: sus muestras se graban durante todo el
+    # tramo 1, y un empujon o ruido de rf2o daria un hueco de relevo negativo.
+    mov_ruido2 = dict(mov)
+    mov_ruido2["robot2"] = ([(12.0, 0.3, 0.0), (12.1, 0.3, 0.0), (12.2, 0.3, 0.0)]
+                            + mov["robot2"])
+    m3 = marcas_de(estados_b, mov_ruido2, "B")
+    check("el movimiento del segundo robot antes del relevo no cuenta",
+          m3["t_inicio_tramo2"] == 41.5, f"-> {m3['t_inicio_tramo2']}")
+    check("y el hueco de relevo no sale negativo", marcas_en_orden(m3))
+
+    # Condicion A: los campos de relevo van null, no cero.
+    estados_a = [(5.0, TRAMO_1, "robot1", "m2"), (30.0, COMPLETADA, "robot1", "m2")]
+    ma = marcas_de(estados_a, {"robot1": [(5.5, 0.3, 0.0)] * 3}, "A")
+    check("condicion A deja las dos marcas de relevo en null",
+          ma["t_fin_tramo1"] is None and ma["t_inicio_tramo2"] is None)
+
+    # Una mision que pasa por FALLIDA no es exito, aunque despues llegue
+    # COMPLETADA: es el caso del reintento manual.
+    estados_f = estados_b[:3] + [(50.0, FALLIDA, "robot1", "m1"),
+                                 (95.0, COMPLETADA, "robot2", "m1")]
+    v = veredicto_de(marcas_de(estados_f, mov, "B"), estados_f, 0.19, "B", 1)
+    check("pasar por FALLIDA pone c2 en false", v["c2_completada_sin_fallida"] is False)
+    check("y el exito es false aunque c1 y c3 esten en verde", v["exito"] is False)
+
+    # R3: fallar por posicion tiene que quedar distinguible de fallar por otra cosa.
+    v = veredicto_de(marcas_de(estados_b, mov, "B"), estados_b, 1.98, "B", 1)
+    check("llegada fuera de tolerancia pone c1 en false y solo c1",
+          v["c1_posicion"] is False and v["c2_completada_sin_fallida"] is True
+          and v["c3_relevo"] is True)
+    check("y el motivo_fallo dice la cifra, no solo que fallo",
+          "1.980" in v["motivo_fallo"], f"-> {v['motivo_fallo']}")
+
+    # Sin medida de cinta todavia (§4.4): el veredicto no se inventa.
+    v = veredicto_de(marcas_de(estados_b, mov, "B"), estados_b, None, "B", 1)
+    check("sin error medido, c1 y exito van null", v["c1_posicion"] is None
+          and v["exito"] is None)
 
 
 def main():
@@ -248,6 +315,8 @@ def main():
     pruebas_de_esquema(esquema)
     print("Orden de las marcas (no cabe en draft-07)")
     pruebas_de_orden()
+    print("Marcas y veredicto")
+    pruebas_de_marcas()
     print(f"\n{len(fallos)} fallo(s).")
     return 1 if fallos else 0
 
