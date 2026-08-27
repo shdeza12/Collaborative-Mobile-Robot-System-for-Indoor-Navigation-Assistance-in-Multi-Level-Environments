@@ -348,9 +348,11 @@ def bag_sintetico(ruta):
         escritor.write("/coordinacion/estado_mision",
                        rclpy.serialization.serialize_message(m), int(t * 1e9))
 
-    def odom(topico, t, vx):
+    def odom(topico, t, vx, x=0.0, y=0.0):
         m = Odometry()
         m.twist.twist.linear.x = vx
+        m.pose.pose.position.x = x
+        m.pose.pose.position.y = y
         escritor.write(topico, rclpy.serialization.serialize_message(m),
                        int(t * 1e9))
 
@@ -361,9 +363,21 @@ def bag_sintetico(ruta):
         odom("/robot1/odom", 10.3 + i * 0.1, 0.0 if i < 6 - 3 else 0.3)
     estado(40.0, TRANSFERENCIA, "robot1")
     estado(41.0, TRAMO_2, "robot2")
+    # El destino de la mision es 'piso2_escalera', que el catalogo pone en
+    # (-21.5, -9.03). El robot para a 0,19 m de el: es la cifra que la prueba
+    # espera ver calculada sola, sin pasarla por la linea de ordenes.
     for i in range(3):
-        odom("/robot2/odom", 41.5 + i * 0.1, 0.3)
+        odom("/robot2/odom", 41.5 + i * 0.1, 0.3, -21.31, -9.03)
     estado(95.0, COMPLETADA, "robot2")
+    # Una muestra DESPUES de COMPLETADA y lejos del punto. El bag sigue grabando
+    # hasta que el operador corta, asi que la ultima muestra no es la llegada: si
+    # el error se midiera con ella saldria 5 m y dependeria de cuando se pulso
+    # Ctrl-C, que es justo lo que no puede pasar entre las 30 corridas de S24.
+    odom("/robot2/odom", 120.0, 0.0, -16.31, -9.03)
+    # Y robot1 sigue publicando desde el punto de transferencia del piso 1, mas
+    # tarde que la ultima muestra buena de robot2. Quien llego es el robot ACTIVO
+    # al final, no el que publico el ultimo mensaje del bag.
+    odom("/robot1/odom", 121.0, 0.0, -19.43, 5.91)
     del escritor
 
 
@@ -395,6 +409,46 @@ def pruebas_de_bag(esquema):
         check("origen y destino salen de EstadoMision, que el goal no graba",
               reg["solicitud"]["origen_id"] == "piso1_escalera"
               and reg["solicitud"]["nivel_destino"] == 2)
+
+        # --- El error de llegada se calcula solo en simulacion --------------
+        # En simulacion hay oraculo: /odom es la WorldPose de Gazebo. Dejar este
+        # campo en null obligaba a teclear a mano la cifra que el bag ya trae, y
+        # sin el campo el veredicto entero sale null: c1_posicion es el criterio
+        # que decide el exito de la mision (§3.3 del protocolo).
+        auto = componer(ruta, banco="simulacion", campana="prueba", rtf=0.995)
+        e = auto["verdad_de_terreno"]["error_posicion_m"]
+        check("en simulacion el error de llegada se calcula sin pasarlo",
+              e is not None and abs(e - 0.19) < 1e-6, f"-> {e}")
+        check("y con el, el veredicto deja de salir en null",
+              auto["veredicto"]["c1_posicion"] is True
+              and auto["veredicto"]["exito"] is True,
+              f"-> {auto['veredicto']}")
+        check("la pose de llegada es la del instante de COMPLETADA, "
+              "no la ultima muestra del bag",
+              abs(auto["verdad_de_terreno"]["pose_final"]["x"] + 21.31) < 1e-6,
+              f"-> {auto['verdad_de_terreno']['pose_final']}")
+        check("y es la del robot ACTIVO al final, no la del que publico ultimo",
+              abs(auto["verdad_de_terreno"]["pose_final"]["y"] + 9.03) < 1e-6,
+              f"-> {auto['verdad_de_terreno']['pose_final']}")
+        check("el registro con el error calculado sigue validando",
+              valida(auto, esquema), _por_que(auto, esquema))
+
+        # Pasarlo a mano gana: permite rehacer un registro con una medida
+        # revisada sin tocar el bag.
+        manual = componer(ruta, banco="simulacion", campana="prueba",
+                          error_posicion_m=1.5, rtf=0.995)
+        check("un error pasado a mano no lo pisa el calculado",
+              manual["verdad_de_terreno"]["error_posicion_m"] == 1.5,
+              f"-> {manual['verdad_de_terreno']['error_posicion_m']}")
+
+        # En el carro NO hay oraculo: la unica odometria es rf2o, que el 26-ago
+        # registro el 5,7 % del desplazamiento real. Calcular el error con ella
+        # seria llamar verdad de terreno a rf2o, que es lo que §4.4 prohibe.
+        fisico = componer(ruta, banco="fisico", campana="prueba", rtf=0.995)
+        check("en fisico el error sigue pendiente de cinta",
+              fisico["verdad_de_terreno"]["error_posicion_m"] is None
+              and fisico["veredicto"]["c1_posicion"] is None,
+              f"-> {fisico['verdad_de_terreno']['error_posicion_m']}")
 
         # La condicion es la variable independiente del experimento y NO puede
         # salir de las etapas que llegaron a ocurrir: una mision entre pisos que

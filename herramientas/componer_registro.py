@@ -259,6 +259,21 @@ def componer(ruta_bag, banco, campana, error_posicion_m=None, rtf=None,
     # 'is not None' y no truthiness: un t_inicio_tramo2 de 0,0 s es una marca
     # valida, y con 'if marcas[...]' contaria como que no hubo relevo.
     relevos = 1 if condicion == "B" and marcas["t_inicio_tramo2"] is not None else 0
+
+    # En simulacion el error de llegada NO se teclea: /odom es la WorldPose de
+    # Gazebo y el catalogo da el punto, asi que el bag ya lo contiene. Dejarlo en
+    # null obligaba a copiarlo a mano de la consola del coordinador -o a
+    # olvidarlo, que es lo que paso con S20_piloto_03- y sin el campo el
+    # veredicto entero sale null: c1_posicion es el criterio que decide el exito.
+    #
+    # Se respeta el valor pasado a mano. En el banco fisico es la lectura de
+    # cinta y no hay alternativa; en simulacion permite rehacer un registro con
+    # una medida revisada sin tener que tocar el bag.
+    pose_llegada, nota = _pose_llegada(poses, _robot_final(estados),
+                                       marcas["t_completada"])
+    if banco == "simulacion" and error_posicion_m is None:
+        error_posicion_m = _error_de_llegada(pose_llegada, destino)
+
     veredicto = veredicto_de(marcas, estados, error_posicion_m, condicion, relevos)
 
     return {
@@ -271,7 +286,8 @@ def componer(ruta_bag, banco, campana, error_posicion_m=None, rtf=None,
         "procedencia": _procedencia(ruta_bag, distro),
         "solicitud": _solicitud(crudos, condicion, niveles, origen, destino),
         "marcas": marcas,
-        "verdad_de_terreno": _verdad(banco, error_posicion_m, poses, medido_por),
+        "verdad_de_terreno": _verdad(banco, error_posicion_m, pose_llegada,
+                                     medido_por, nota),
         "veredicto": veredicto,
         "descriptivas": _descriptivas(banco, topicos, poses, marcas),
         "salud_del_banco": _salud(banco, rtf),
@@ -348,10 +364,77 @@ def _fecha_del_bag(ruta_bag):
     return datetime.datetime.utcfromtimestamp(t).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def _niveles_del_catalogo():
+def _puntos_del_catalogo():
     import yaml
     with open(_catalogo(), encoding="utf-8") as f:
-        return {p["id"]: int(p["nivel"]) for p in yaml.safe_load(f)["puntos"]}
+        return yaml.safe_load(f)["puntos"]
+
+
+def _niveles_del_catalogo():
+    return {p["id"]: int(p["nivel"]) for p in _puntos_del_catalogo()}
+
+
+def _poses_del_catalogo():
+    return {p["id"]: (float(p["pose"]["x"]), float(p["pose"]["y"]))
+            for p in _puntos_del_catalogo()}
+
+
+def _robot_final(estados):
+    """Quien llevaba al usuario al final de la mision.
+
+    En condicion B NO es el mismo que al principio, y esa es toda la razon de que
+    esto exista: robot1 se queda parado en el punto de transferencia publicando
+    /odom hasta que el operador corta el bag, asi que puede perfectamente ser el
+    ultimo en publicar. Preguntar 'que muestra de /odom es la mas tardia' devuelve
+    entonces la pose de un robot que no llego a ningun sitio.
+    """
+    for _, _, robot, _ in reversed(estados):
+        if robot:
+            return robot
+    return ""
+
+
+def _pose_llegada(poses, robot, t_completada):
+    """La pose con la que se juzga la llegada, y el instante del que sale.
+
+    Se toma en t_completada y NO al final del bag. El bag sigue grabando hasta
+    que alguien pulsa Ctrl-C, asi que la ultima muestra puede estar minutos
+    despues de la llegada y a metros de ella -si al robot lo movieron, o si
+    siguio corrigiendo-. Medir alli haria que el error de llegada dependiera de
+    la mano del operador, y con 15 corridas por condicion en S24 eso no es un
+    detalle: es una fuente de dispersion que no esta en el experimento.
+
+    Sin t_completada -mision fallida- no hay instante de llegada, y entonces si
+    se usa la ultima muestra: es cuanto se acerco antes de rendirse.
+    """
+    muestras = poses.get(robot) or []
+    if not muestras:
+        return None, ""
+    if t_completada is None:
+        t, x, y, yaw = muestras[-1]
+        return ({"x": x, "y": y, "yaw": yaw},
+                f"mision sin t_completada: pose de la ultima muestra de {robot} "
+                f"(t={t:.3f} s)")
+    previas = [m for m in muestras if m[0] <= t_completada]
+    t, x, y, yaw = (previas or muestras)[-1]
+    return ({"x": x, "y": y, "yaw": yaw},
+            f"pose de {robot} en t={t:.3f} s, la ultima antes de "
+            f"t_completada={t_completada:.3f} s")
+
+
+def _error_de_llegada(pose_llegada, destino_id):
+    """A cuantos metros del punto pedido se quedo el robot.
+
+    Solo tiene sentido en simulacion, donde /odom es la WorldPose de Gazebo. El
+    catalogo da las coordenadas del punto en el mismo marco.
+    """
+    if pose_llegada is None:
+        return None
+    objetivo = _poses_del_catalogo().get(destino_id)
+    if objetivo is None:
+        return None
+    return math.hypot(pose_llegada["x"] - objetivo[0],
+                      pose_llegada["y"] - objetivo[1])
 
 
 def _solicitud(crudos, condicion, niveles, origen, destino):
@@ -374,7 +457,7 @@ def _solicitud(crudos, condicion, niveles, origen, destino):
     }
 
 
-def _verdad(banco, error_posicion_m, poses, medido_por):
+def _verdad(banco, error_posicion_m, pose_llegada, medido_por, nota):
     """De donde sale la verdad de terreno, que NO es la misma en los dos bancos.
 
     En simulacion /odom es la pose exacta del motor de Gazebo -WorldPose(), ver
@@ -382,21 +465,20 @@ def _verdad(banco, error_posicion_m, poses, medido_por):
     incertidumbre es cero. En el carro la unica odometria es rf2o, que el 26-ago
     registro el 5,7 % del desplazamiento real: rellenar pose_final con ella
     seria volver a llamar verdad de terreno a rf2o.
+
+    'nota' dice de que instante y de que robot sale la pose. Sin eso, quien lea
+    el registro en octubre no puede distinguir una llegada medida en
+    t_completada de una medida al final del bag, y son cifras distintas.
     """
     if banco == "fisico":
         return {"fuente": "cinta_metrica", "error_posicion_m": error_posicion_m,
                 "pose_final": None, "incertidumbre_m": 0.01,
                 "medido_por": medido_por, "nota": ""}
-    ultima = None
-    for muestras in poses.values():
-        if muestras and (ultima is None or muestras[-1][0] > ultima[0]):
-            ultima = muestras[-1]
     return {
         "fuente": "gazebo_worldpose_via_odom",
         "error_posicion_m": error_posicion_m,
-        "pose_final": None if ultima is None else
-                      {"x": ultima[1], "y": ultima[2], "yaw": ultima[3]},
-        "incertidumbre_m": 0.0, "medido_por": "automatico", "nota": "",
+        "pose_final": pose_llegada,
+        "incertidumbre_m": 0.0, "medido_por": "automatico", "nota": nota,
     }
 
 
