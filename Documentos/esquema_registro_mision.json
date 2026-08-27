@@ -1,0 +1,303 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Registro de mision (RF-25), version 1.0.0",
+  "comentario": "Transcripcion campo por campo de la §3 de ESQUEMA_REGISTRO_MISION.md, y de las restricciones cruzadas de la §4.3. El documento manda: si los dos discrepan, el que esta mal es este archivo. 'additionalProperties': false en todos los bloques a proposito -un campo con el nombre mal escrito tiene que reventar, no colarse-.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["esquema_version", "mision", "procedencia", "solicitud", "marcas",
+               "verdad_de_terreno", "veredicto", "descriptivas",
+               "salud_del_banco", "traza"],
+  "properties": {
+    "esquema_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+
+    "mision": {
+      "type": "object", "additionalProperties": false,
+      "required": ["mision_id", "campana", "banco", "condicion", "semilla", "es_piloto"],
+      "properties": {
+        "mision_id": {"type": "string", "minLength": 1},
+        "campana": {"type": "string"},
+        "banco": {"enum": ["simulacion", "fisico"]},
+        "condicion": {"enum": ["A", "B"]},
+        "semilla": {"type": ["integer", "null"]},
+        "es_piloto": {
+          "comentario": "Booleano y no deducido del nombre de la campana: la §7 del protocolo excluye los datos del pilotaje, y una exclusion que depende de leer bien una cadena se equivoca alguna vez.",
+          "type": "boolean"
+        }
+      }
+    },
+
+    "procedencia": {
+      "type": "object", "additionalProperties": false,
+      "required": ["commit", "etiqueta", "repositorio_limpio", "distro", "mundo",
+                   "mapa", "catalogo_puntos", "catalogo_sha256", "bag", "fecha_utc"],
+      "properties": {
+        "commit": {"type": "string", "minLength": 1},
+        "etiqueta": {
+          "comentario": "Cadena vacia si el commit no tiene etiqueta, no null.",
+          "type": "string"
+        },
+        "repositorio_limpio": {"type": "boolean"},
+        "distro": {"enum": ["humble", "jazzy"]},
+        "mundo": {"type": "string"},
+        "mapa": {"type": "string"},
+        "catalogo_puntos": {"type": "string"},
+        "catalogo_sha256": {
+          "comentario": "Las poses de puntos_interes.yaml se movieron tres veces en agosto. Un registro que no fije el catalogo no se puede comparar con otro, porque 'ETM1' puede no ser el mismo punto.",
+          "type": "string", "pattern": "^[0-9a-f]{64}$"
+        },
+        "bag": {"type": "string"},
+        "fecha_utc": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+        }
+      }
+    },
+
+    "solicitud": {
+      "type": "object", "additionalProperties": false,
+      "required": ["origen_id", "destino_id", "nivel_origen", "nivel_destino",
+                   "entre_niveles", "tramos"],
+      "properties": {
+        "origen_id": {"type": "string"},
+        "destino_id": {"type": "string"},
+        "nivel_origen": {"type": ["integer", "null"]},
+        "nivel_destino": {"type": ["integer", "null"]},
+        "entre_niveles": {
+          "comentario": "Derivable de los dos niveles y se guarda igual: el analizador no debe rederivar la variable independiente del experimento.",
+          "type": "boolean"
+        },
+        "tramos": {
+          "type": "array",
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["orden", "robot", "punto_id", "etapa"],
+            "properties": {
+              "orden": {"type": "integer"},
+              "robot": {"type": "string"},
+              "punto_id": {"type": "string"},
+              "etapa": {"type": "integer"}
+            }
+          }
+        }
+      }
+    },
+
+    "marcas": {
+      "comentario": "Todas en segundos y del MISMO reloj. Las cuatro metricas de OE4 no se guardan: son derivables de estas marcas, y guardar el dato y su derivada invita a que se contradigan.",
+      "type": "object", "additionalProperties": false,
+      "required": ["reloj", "t_solicitud", "t_robot_activo", "t_primer_movimiento",
+                   "t_fin_tramo1", "t_inicio_tramo2", "t_completada"],
+      "properties": {
+        "reloj": {
+          "comentario": "Se graba precisamente porque el valor correcto es uno solo. Si alguien lanza el coordinador sin use_sim_time, el registro lo delata en vez de producir numeros sesgados en silencio.",
+          "enum": ["/clock", "pared"]
+        },
+        "t_solicitud": {"type": ["number", "null"]},
+        "t_robot_activo": {"type": ["number", "null"]},
+        "t_primer_movimiento": {"type": ["number", "null"]},
+        "t_fin_tramo1": {"type": ["number", "null"]},
+        "t_inicio_tramo2": {"type": ["number", "null"]},
+        "t_completada": {"type": ["number", "null"]}
+      }
+    },
+
+    "verdad_de_terreno": {
+      "type": "object", "additionalProperties": false,
+      "required": ["fuente", "error_posicion_m", "pose_final", "incertidumbre_m",
+                   "medido_por", "nota"],
+      "properties": {
+        "fuente": {"enum": ["gazebo_worldpose_via_odom", "cinta_metrica"]},
+        "error_posicion_m": {
+          "comentario": "El unico campo que decide el exito, y se llena igual en los dos bancos. null significa 'pendiente de medir' (§4.4): valido como captura, NO listo para analisis.",
+          "type": ["number", "null"]
+        },
+        "pose_final": {
+          "comentario": "null en fisico: la cinta da una DISTANCIA, no una pose. Rellenarla con /odom seria volver a llamar verdad de terreno a rf2o.",
+          "type": ["object", "null"], "additionalProperties": false,
+          "required": ["x", "y", "yaw"],
+          "properties": {
+            "x": {"type": "number"}, "y": {"type": "number"}, "yaw": {"type": "number"}
+          }
+        },
+        "incertidumbre_m": {
+          "comentario": "0.0 en simulacion porque es un oraculo, ~0.01 en fisico porque es una cinta leida por una persona.",
+          "type": "number"
+        },
+        "medido_por": {
+          "comentario": "Admite null porque la §4.4 compone el registro fisico con este campo pendiente y lo rellena en una segunda pasada.",
+          "type": ["string", "null"]
+        },
+        "nota": {"type": "string"}
+      }
+    },
+
+    "veredicto": {
+      "comentario": "Las tres condiciones de la §3.3 del protocolo por separado. No basta con guardar el AND: si la tasa de exito sale baja hay que poder decir CUAL condicion fallo. En R3 fallaria c1 con c2 y c3 en verde, y eso es un diagnostico.",
+      "type": "object", "additionalProperties": false,
+      "required": ["exito", "c1_posicion", "c2_completada_sin_fallida", "c3_relevo",
+                   "motivo_fallo"],
+      "properties": {
+        "exito": {"type": ["boolean", "null"]},
+        "c1_posicion": {
+          "comentario": "error_posicion_m <= 0.25 m. null si no hay medida: sin medida no hay veredicto, y no se inventa.",
+          "type": ["boolean", "null"]
+        },
+        "c2_completada_sin_fallida": {
+          "comentario": "Siempre se puede decidir desde el bag, asi que no admite null.",
+          "type": "boolean"
+        },
+        "c3_relevo": {"type": ["boolean", "null"]},
+        "motivo_fallo": {"type": "string"}
+      }
+    },
+
+    "descriptivas": {
+      "comentario": "Se miden y se reportan, no deciden. El rumbo de llegada esta aqui y no en el veredicto, por la §4 del protocolo y R12.",
+      "type": "object", "additionalProperties": false,
+      "required": ["error_rumbo_rad", "desviacion_z_m", "distancia_recorrida_m",
+                   "num_cuspides", "tiempo_total_s", "deriva_map_odom_m"],
+      "properties": {
+        "error_rumbo_rad": {"type": ["number", "null"]},
+        "desviacion_z_m": {
+          "comentario": "Por robot. Verifica RNF-01 en la misma corrida: ningun robot cruza de nivel, lo que cruza es el mensaje. En S18 fue de 1.9 um.",
+          "type": "object", "additionalProperties": {"type": "number"}
+        },
+        "distancia_recorrida_m": {"type": "number"},
+        "num_cuspides": {
+          "comentario": "Convierte en rutina la comparacion que R12 lleva pendiente desde el 18-ago. Siempre sale del bag, aunque sea cero.",
+          "type": "integer"
+        },
+        "tiempo_total_s": {"type": ["number", "null"]},
+        "deriva_map_odom_m": {
+          "comentario": "La cifra que el 26-ago delato a AMCL: 1.977 m en una transformada que, con /odom publicado desde WorldPose(), deberia ser constante. Hace que la campana CUANTIFIQUE R3 en vez de solo padecerlo. null en fisico.",
+          "type": ["number", "null"]
+        }
+      }
+    },
+
+    "salud_del_banco": {
+      "type": "object", "additionalProperties": false,
+      "required": ["rtf", "controladores_activos", "gzserver_vivo_al_final",
+                   "descartada", "causa_descarte"],
+      "properties": {
+        "rtf": {"type": ["number", "null"]},
+        "controladores_activos": {
+          "comentario": "'7/7' o lo que hubiera, por robot. Sigue siendo obligatorio comprobarlo antes de medir: la carrera del controller_manager se cerro el 26-ago, pero cero fallos en 18 arranques no es una garantia y el fallo es silencioso.",
+          "type": "object", "additionalProperties": {"type": "string"}
+        },
+        "gzserver_vivo_al_final": {"type": ["boolean", "null"]},
+        "descartada": {"type": "boolean"},
+        "causa_descarte": {
+          "comentario": "Lista CERRADA del §8 del protocolo. 'AMCL se perdio' y 'no encontro ruta' NO estan, y no es un olvido: son precisamente los modos de fallo que el experimento existe para cuantificar. Aqui 'la lista es cerrada' deja de ser una frase del documento y pasa a ser algo que el archivo no permite violar.",
+          "enum": ["caida_gazebo", "controladores_incompletos", "rtf_bajo",
+                   "fallo_anfitrion", null]
+        }
+      }
+    },
+
+    "traza": {
+      "comentario": "Copia de conveniencia para graficar sin reabrir el bag. EL BAG SIGUE SIENDO LA FUENTE: cuando alguien pregunte en octubre algo que hoy no previmos, la respuesta esta en el bag.",
+      "type": "object", "additionalProperties": false,
+      "required": ["bag", "decimada_hz", "puntos"],
+      "properties": {
+        "bag": {"type": "string"},
+        "decimada_hz": {"type": "number"},
+        "puntos": {
+          "type": "array",
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["t", "robot", "x", "y", "yaw"],
+            "properties": {
+              "t": {"type": "number"}, "robot": {"type": "string"},
+              "x": {"type": "number"}, "y": {"type": "number"},
+              "yaw": {"type": "number"}
+            }
+          }
+        }
+      }
+    }
+  },
+
+  "allOf": [
+    {
+      "comentario": "§4.3, restriccion 1: banco = simulacion exige /clock, oraculo y RTF.",
+      "if": {"properties": {"mision": {"properties": {"banco": {"const": "simulacion"}}}}},
+      "then": {
+        "properties": {
+          "marcas": {"properties": {"reloj": {"const": "/clock"}}},
+          "verdad_de_terreno": {
+            "properties": {"fuente": {"const": "gazebo_worldpose_via_odom"}}},
+          "salud_del_banco": {"properties": {"rtf": {"type": "number"}}}
+        }
+      }
+    },
+    {
+      "comentario": "§4.3, restriccion 2: el banco fisico no tiene oraculo ni RTF.",
+      "if": {"properties": {"mision": {"properties": {"banco": {"const": "fisico"}}}}},
+      "then": {
+        "properties": {
+          "verdad_de_terreno": {
+            "properties": {"fuente": {"const": "cinta_metrica"},
+                           "pose_final": {"type": "null"}}},
+          "salud_del_banco": {"properties": {"rtf": {"type": "null"}}},
+          "descriptivas": {"properties": {"deriva_map_odom_m": {"type": "null"}}}
+        }
+      }
+    },
+    {
+      "comentario": "§4.3, restriccion 3: condicion A no tiene relevo.",
+      "if": {"properties": {"mision": {"properties": {"condicion": {"const": "A"}}}}},
+      "then": {
+        "properties": {
+          "marcas": {"properties": {"t_fin_tramo1": {"type": "null"},
+                                    "t_inicio_tramo2": {"type": "null"}}},
+          "veredicto": {"properties": {"c3_relevo": {"type": "null"}}}
+        }
+      }
+    },
+    {
+      "comentario": "§4.3, restriccion 4: condicion B exige c3_relevo decidido. Las DOS MARCAS de relevo si pueden ir null -una mision inter-nivel que falla antes de llegar a la transferencia nunca las produce, y exigirlas obligaria a inventar un numero-.",
+      "if": {"properties": {"mision": {"properties": {"condicion": {"const": "B"}}}}},
+      "then": {"properties": {"veredicto": {"properties": {"c3_relevo": {"type": "boolean"}}}}}
+    },
+    {
+      "comentario": "§4.3, restriccion 4 (segunda mitad): si hay t_inicio_tramo2 tiene que haber t_fin_tramo1. El orden t_fin_tramo1 <= t_inicio_tramo2 NO se puede expresar en draft-07 -no hay comparacion entre campos- y lo comprueba prueba_componer_registro.py.",
+      "if": {
+        "required": ["marcas"],
+        "properties": {"marcas": {"required": ["t_inicio_tramo2"],
+                                  "properties": {"t_inicio_tramo2": {"type": "number"}}}}
+      },
+      "then": {"properties": {"marcas": {"properties": {"t_fin_tramo1": {"type": "number"}}}}}
+    },
+    {
+      "comentario": "§4.3, restriccion 5: un exito con marcas incompletas es un error del compositor, no un dato.",
+      "if": {"properties": {"veredicto": {"properties": {"exito": {"const": true}}}}},
+      "then": {"properties": {"marcas": {"properties": {"t_completada": {"type": "number"}}}}}
+    },
+    {
+      "comentario": "§4.3, restriccion 5 (segunda mitad): un exito en condicion B tampoco puede tener las marcas de relevo vacias.",
+      "if": {
+        "allOf": [
+          {"properties": {"veredicto": {"properties": {"exito": {"const": true}}}}},
+          {"properties": {"mision": {"properties": {"condicion": {"const": "B"}}}}}
+        ]
+      },
+      "then": {
+        "properties": {
+          "marcas": {"properties": {"t_fin_tramo1": {"type": "number"},
+                                    "t_inicio_tramo2": {"type": "number"}}}
+        }
+      }
+    },
+    {
+      "comentario": "§4.3, restriccion 6: descartada = true <=> causa_descarte no es null. Son dos if, uno por sentido de la equivalencia.",
+      "if": {"properties": {"salud_del_banco": {"properties": {"descartada": {"const": true}}}}},
+      "then": {"properties": {"salud_del_banco": {"properties": {"causa_descarte": {"type": "string"}}}}}
+    },
+    {
+      "comentario": "§4.3, restriccion 6, el otro sentido: una corrida NO descartada no puede llevar causa de descarte.",
+      "if": {"properties": {"salud_del_banco": {"properties": {"descartada": {"const": false}}}}},
+      "then": {"properties": {"salud_del_banco": {"properties": {"causa_descarte": {"type": "null"}}}}}
+    }
+  ]
+}
