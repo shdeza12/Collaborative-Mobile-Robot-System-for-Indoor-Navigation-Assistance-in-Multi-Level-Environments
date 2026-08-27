@@ -108,6 +108,41 @@ def _transferencia_de(catalogo, nivel):
     return candidatos[0]
 
 
+def condicion_de(catalogo, origen_id, destino_id):
+    """La condicion experimental de una mision: 'A' intra-nivel, 'B' inter-nivel.
+
+    Devuelve 'X' si alguno de los dos ids no esta en el catalogo, en vez de
+    lanzar: esta funcion se llama al ACEPTAR el goal, antes de planificar, y un
+    identificador de mision tiene que salir siempre -tambien para la mision que
+    va a fallar, que es justamente la que la tasa de exito necesita contar-.
+
+    Ver §3.2 de Documentos/ESQUEMA_REGISTRO_MISION.md.
+    """
+    niveles = {p["id"]: int(p["nivel"]) for p in catalogo}
+    if origen_id not in niveles or destino_id not in niveles:
+        return "X"
+    return "A" if niveles[origen_id] == niveles[destino_id] else "B"
+
+
+def generar_mision_id(prefijo, condicion, ahora):
+    """Identificador unico de mision. Ver §2.1 del esquema de registro (RF-25).
+
+    Lleva marca de tiempo y no un consecutivo porque la §6.4 del protocolo manda
+    un gzserver nuevo por corrida: un contador en memoria se reiniciaria en cada
+    una y las treinta misiones de S24 se llamarian todas igual.
+
+    Hasta el 2026-08-26 el coordinador publicaba pet.origen_id como mision_id,
+    o sea el ID del punto de PARTIDA. Dos misiones que salieran del mismo sitio
+    llevaban el mismo identificador, y con N = 30 y pares sorteados eso hace
+    imposible saber que registro es de que corrida.
+
+    'ahora' entra como argumento y no se lee aqui dentro para que la prueba sea
+    determinista.
+    """
+    sello = ahora.strftime("%Y%m%d_%H%M%S")
+    return f"{prefijo}_{condicion}_{sello}" if prefijo else f"manual_{sello}"
+
+
 def _colapsar(tramos):
     """Funde tramos consecutivos del mismo robot al mismo punto.
 

@@ -21,6 +21,7 @@ de error. El mismo codigo fuente sirve para los dos destinos, pero no a la vez.
 Si un tramo se queda esperando servidor para siempre, mirar esto primero.
 """
 
+import datetime
 import math
 import os
 import time
@@ -41,7 +42,7 @@ from coordinacion_msgs.msg import EstadoMision, ListaPuntosInteres, PuntoInteres
 
 from coordinacion.planificador import (
     ASIGNACION_POR_DEFECTO, COMPLETADA, ErrorPlanificacion, FALLIDA, INACTIVA,
-    planificar, yaw_a_cuaternion,
+    condicion_de, generar_mision_id, planificar, yaw_a_cuaternion,
 )
 
 # Tolerancia de llegada. Es la misma que xy_goal_tolerance de Nav2 y la que fija
@@ -64,12 +65,16 @@ class Coordinador(Node):
         self.declare_parameter("robot_nivel_1", ASIGNACION_POR_DEFECTO[1])
         self.declare_parameter("robot_nivel_2", ASIGNACION_POR_DEFECTO[2])
         self.declare_parameter("espera_servidor_s", 20.0)
+        # Prefijo del identificador de mision. Lo pone quien lanza la campana;
+        # vacio significa corrida suelta. Ver §2.1 de ESQUEMA_REGISTRO_MISION.md.
+        self.declare_parameter("prefijo_mision", "")
 
         self.asignacion = {
             1: self.get_parameter("robot_nivel_1").value,
             2: self.get_parameter("robot_nivel_2").value,
         }
         self.espera_servidor = self.get_parameter("espera_servidor_s").value
+        self.prefijo_mision = self.get_parameter("prefijo_mision").value
 
         self.catalogo = self._cargar_catalogo()
         self.grupo = ReentrantCallbackGroup()
@@ -157,7 +162,17 @@ class Coordinador(Node):
 
     def _ejecutar(self, goal_handle):
         pet = goal_handle.request
-        t0 = time.time()
+        # El mismo reloj que /clock cuando use_sim_time esta puesto. time.time()
+        # lo ignora, y con RTF >= 0,99 las dos formas difieren hasta un 1 %:
+        # sobre t_respuesta eso no es ruido, es sesgo. Ver §3 del protocolo.
+        t0 = self.get_clock().now()
+        condicion = condicion_de(self.catalogo, pet.origen_id, pet.destino_id)
+        mision_id = generar_mision_id(
+            self.prefijo_mision, condicion, datetime.datetime.now())
+        # Se fijan una vez y no cambian en toda la mision. El destino ACTUAL si
+        # cambia, y lo pone _marcar; estos dos son lo que se pidio.
+        self.estado.origen_id = pet.origen_id
+        self.estado.destino_id = pet.destino_id
         res = GuiarUsuario.Result()
 
         self.get_logger().info(
@@ -169,21 +184,21 @@ class Coordinador(Node):
         except ErrorPlanificacion as e:
             # Falla antes de mover un solo robot, y el motivo ya viene redactado.
             self.get_logger().error(f"No se puede planificar: {e}")
-            self._marcar(FALLIDA, "", None, str(e), pet.origen_id)
+            self._marcar(FALLIDA, "", None, str(e), mision_id)
             goal_handle.abort()
             res.exito, res.motivo_fallo = False, str(e)
-            res.tiempo_total_s = time.time() - t0
+            res.tiempo_total_s = (self.get_clock().now() - t0).nanoseconds * 1e-9
             return res
 
         for i, tramo in enumerate(tramos, 1):
             if goal_handle.is_cancel_requested:
                 goal_handle.canceled()
                 res.exito, res.motivo_fallo = False, "Cancelada por el usuario"
-                res.tiempo_total_s = time.time() - t0
+                res.tiempo_total_s = (self.get_clock().now() - t0).nanoseconds * 1e-9
                 return res
 
             self._marcar(tramo.etapa, tramo.robot, tramo.punto,
-                         tramo.mensaje_usuario, pet.origen_id)
+                         tramo.mensaje_usuario, mision_id)
             self._feedback(goal_handle)
             self.get_logger().info(
                 f"  tramo {i}/{len(tramos)}: {tramo.robot} -> {tramo.punto['id']}")
@@ -193,21 +208,21 @@ class Coordinador(Node):
                 self.get_logger().error(f"  tramo {i} fallo: {motivo}")
                 self._marcar(FALLIDA, tramo.robot, tramo.punto,
                              f"No se pudo completar el trayecto: {motivo}",
-                             pet.origen_id)
+                             mision_id)
                 self._feedback(goal_handle)
                 goal_handle.abort()
                 res.exito, res.motivo_fallo = False, motivo
-                res.tiempo_total_s = time.time() - t0
+                res.tiempo_total_s = (self.get_clock().now() - t0).nanoseconds * 1e-9
                 res.num_relevos = relevos
                 return res
 
         destino = next(p for p in self.catalogo if p["id"] == pet.destino_id)
         self._marcar(COMPLETADA, tramos[-1].robot, destino,
-                     f"Ha llegado a {destino['nombre']}.", pet.origen_id)
+                     f"Ha llegado a {destino['nombre']}.", mision_id)
         self._feedback(goal_handle)
         goal_handle.succeed()
         res.exito = True
-        res.tiempo_total_s = time.time() - t0
+        res.tiempo_total_s = (self.get_clock().now() - t0).nanoseconds * 1e-9
         res.num_relevos = relevos
         res.motivo_fallo = ""
         self.get_logger().info(
@@ -222,6 +237,11 @@ class Coordinador(Node):
         self.estado.destino_actual = self._a_msg(punto) if punto else PuntoInteres()
         self.estado.mensaje_usuario = mensaje
         self.estado.distancia_restante = self._distancia(robot, punto) if punto else 0.0
+        # Marca extraordinaria: el latido de 1 Hz sigue vivo para la HRI, pero el
+        # cambio de etapa se publica en el instante en que ocurre. El §3.2 del
+        # protocolo lo exige: 1 s de resolucion es demasiado grosero para el
+        # hueco de relevo, que se espera en milisegundos.
+        self._publicar_estado()
 
     def _feedback(self, goal_handle):
         fb = GuiarUsuario.Feedback()

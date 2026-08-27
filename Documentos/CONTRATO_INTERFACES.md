@@ -145,12 +145,21 @@ PuntoInteres[] puntos
 ```
 # EstadoMision.msg
 string mision_id
+string origen_id                # el punto de partida que pidio el usuario
+string destino_id               # el destino FINAL, no el del tramo en curso
 uint8 etapa                     # INACTIVA=0 TRAMO_1=1 TRANSFERENCIA=2 TRAMO_2=3 COMPLETADA=4 FALLIDA=5
 string robot_activo
 PuntoInteres destino_actual
 float32 distancia_restante
 string mensaje_usuario          # texto ya redactado en español para mostrar tal cual
 ```
+
+> **`origen_id` y `destino_id` se añadieron el 2026-08-26**, y no son un duplicado de los del goal
+> de `GuiarUsuario.action`: un goal de acción viaja por un **servicio**, y `ros2 bag` no graba
+> servicios. Sin ellos, el bloque `solicitud` del registro de misión (**RF-25**) no se puede componer
+> desde el bag. `destino_actual` no sirve de sustituto porque durante el tramo 1 de una misión
+> inter-nivel apunta al punto de transferencia, no al destino. Ver §3.4 de
+> [`ESQUEMA_REGISTRO_MISION.md`](ESQUEMA_REGISTRO_MISION.md).
 
 ```
 # GuiarUsuario.action

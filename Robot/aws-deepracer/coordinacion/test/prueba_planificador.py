@@ -206,6 +206,32 @@ def main():
     check("yaw pi da (z=1, w=0)", abs(z - 1.0) < 1e-12 and abs(w) < 1e-12,
           f"z={z:.6f} w={w:.6f}")
 
+    print("\n11. identificador de mision y condicion experimental")
+    # Ver Documentos/ESQUEMA_REGISTRO_MISION.md §2.1 y §3.2.
+    from coordinacion.planificador import condicion_de, generar_mision_id
+    import datetime
+
+    check("condicion_de: intra-nivel es A",
+          condicion_de(catalogo, "piso1_escalera", "piso1_representacion") == "A")
+    check("condicion_de: inter-nivel es B",
+          condicion_de(catalogo, "piso1_escalera", "piso2_escalera") == "B")
+    check("condicion_de: id desconocido no revienta, devuelve X",
+          condicion_de(catalogo, "no_existe", "piso1_representacion") == "X")
+
+    t = datetime.datetime(2026, 8, 27, 14, 30, 52)
+    check("mision_id con prefijo lleva campana, condicion y sello",
+          generar_mision_id("S24", "B", t) == "S24_B_20260827_143052",
+          f"-> {generar_mision_id('S24', 'B', t)}")
+    check("mision_id sin prefijo es una corrida suelta",
+          generar_mision_id("", "A", t) == "manual_20260827_143052")
+
+    # El invariante que de verdad importa: dos misiones del mismo par origen /
+    # destino en corridas distintas NO comparten identificador. Es justo lo que
+    # fallaba al publicar pet.origen_id.
+    t2 = datetime.datetime(2026, 8, 27, 14, 30, 53)
+    check("dos misiones del mismo par no comparten id",
+          generar_mision_id("S24", "B", t) != generar_mision_id("S24", "B", t2))
+
     print("\n" + "=" * 62)
     if fallos:
         print(f"FALLAN {len(fallos)}: {fallos}")
