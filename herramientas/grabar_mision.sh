@@ -129,4 +129,19 @@ echo "Grabando en $DESTINO"
 echo "Robots: ${ROBOTS[*]}   Topicos: ${#TOPICOS[@]}"
 echo "Ctrl-C para cerrar el bag."
 mkdir -p "$(dirname "$DESTINO")"
-exec ros2 bag record -o "$DESTINO" "${TOPICOS[@]}"
+
+# '--use-sim-time' NO es opcional, y no es lo mismo que el use_sim_time de los
+# nodos. Sin el, 'ros2 bag record' sella cada mensaje con el reloj de PARED, y
+# de esos sellos salen TODAS las marcas de RF-25: componer_registro.py lee el
+# tiempo del bag, no la cabecera del mensaje.
+#
+# Se comprobo el 2026-08-27 sobre ~/tesis_evidencia/S20_localizacion/mision3:
+# el primer mensaje esta sellado en 1787769550 s, que es epoca Unix, no tiempo
+# de simulacion. Un registro compuesto de ahi diria 'reloj: /clock' llevando
+# segundos de pared, y con RNF-06 pidiendo solo RTF >= 0,99 las dos escalas
+# difieren hasta un 1 %: sobre t_respuesta eso no es ruido, es sesgo.
+#
+# El precio de la bandera es que hasta que no llegue el primer /clock no se
+# escribe nada en el bag. Aqui eso no es un riesgo anadido: la guarda 1 ya se
+# nego a grabar si nadie publica /clock.
+exec ros2 bag record --use-sim-time -o "$DESTINO" "${TOPICOS[@]}"
