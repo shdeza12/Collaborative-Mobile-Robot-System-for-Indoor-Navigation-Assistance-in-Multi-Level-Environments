@@ -64,6 +64,33 @@ case "$robot" in
   *) echo "ERROR: robot desconocido '$robot' (robot1 o robot2)" >&2; uso ;;
 esac
 
+# UN DOMINIO POR ROBOT ES LO CORRECTO EN UN SOLO EQUIPO, Y LO EQUIVOCADO EN DOS.
+#
+# Con los dos robots en la misma maquina, dominios distintos es lo que los aisla:
+# cada grafo ROS ve solo lo suyo, que es lo que exige el §3 del contrato. Pero
+# ese mismo aislamiento impide que el coordinador hable con los dos, porque un
+# nodo esta en un dominio y solo en uno. Por eso el relevo no se puede demostrar
+# de extremo a extremo en un solo equipo.
+#
+# Repartiendo los robots en dos maquinas la cosa se da la vuelta: la separacion
+# la da la red -cada Gazebo en su host, con su propio GAZEBO_MASTER_URI- y
+# entonces interesa que los dos compartan dominio para que el coordinador los
+# alcance. Ademas devuelve el RTF a ~0,99, que con los dos en un portatil cae a
+# 0,955 y 0,811 (medido el 2026-08-26), por debajo del minimo de RNF-06.
+#
+#   Maquina A:  DOMINIO_FORZADO=7 herramientas/robot.sh robot1 nav2
+#   Maquina B:  DOMINIO_FORZADO=7 herramientas/robot.sh robot2 nav2
+#   Coordinador en cualquiera de las dos, con ROS_DOMAIN_ID=7
+#
+# NO ESTA PROBADO EN DOS MAQUINAS: aqui solo hay una. Lo que si esta comprobado
+# es que la variable cambia el dominio de verdad. Falta que el descubrimiento
+# DDS funcione entre los dos hosts, que suele fallar por multicast bloqueado en
+# la red o por aislamiento de clientes en el punto de acceso wifi.
+if [[ -n "${DOMINIO_FORZADO:-}" ]]; then
+  DOMINIO="$DOMINIO_FORZADO"
+  echo "   AVISO: dominio forzado a $DOMINIO (despliegue en varias maquinas)"
+fi
+
 # 'python3' a secas basta: el modulo no importa nada de ROS, asi que se lee antes
 # de hacer 'source' de nada. Si falla, el mensaje del propio modulo dice que
 # robots conoce, y se corta aqui en vez de lanzar Gazebo con una pose vacia.
