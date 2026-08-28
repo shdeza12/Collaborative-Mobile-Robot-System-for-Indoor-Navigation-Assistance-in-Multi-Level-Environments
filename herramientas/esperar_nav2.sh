@@ -85,15 +85,28 @@ while true; do
         # '|| true' obligatorio: 'ros2 lifecycle get' sale con codigo distinto
         # de cero cuando el nodo aun no existe, que es justo el caso normal
         # mientras se espera. Sin esto la compuerta se mata a si misma.
-        ESTADO="$(ros2 lifecycle get "/$ROBOT/$N" 2>/dev/null || true)"
+        #
+        # 'timeout' tambien es obligatorio, y no es precaucion: el 2026-08-27 la
+        # compuerta de robot2 se colgo 138 s en '/robot2/controller_server'
+        # mientras ese mismo comando respondia 'active' al instante desde otra
+        # terminal. Un cliente creado mientras el servidor levanta su servicio
+        # puede no emparejar nunca, y 'wait_for_service' no tiene plazo: la
+        # espera queda DENTRO de la sustitucion, antes de la linea que evalua el
+        # plazo de la compuerta, asi que ni siquiera se rendia a los 120 s.
+        # Acotar cada llamada hace que la vuelta siguiente cree un cliente nuevo,
+        # que es lo que rompe la carrera. El bucle de reintento ya estaba.
+        ESTADO="$(timeout 10 ros2 lifecycle get "/$ROBOT/$N" 2>/dev/null || true)"
         [[ "$ESTADO" == active* ]] || FALTAN+=("$N")
     done
 
     # Los controladores solo se miran cuando Nav2 ya esta entero: antes, el
     # controller_manager puede no haber arrancado y la salida seria ruido.
     if [ ${#FALTAN[@]} -eq 0 ]; then
-        LISTA="$(ros2 control list_controllers -c "/$ROBOT/controller_manager" \
-                 2>/dev/null | sed "$ANSI" || true)"
+        # Acotada por el mismo motivo que 'lifecycle get': este comando avisa por
+        # stderr con 'waiting for service ... to become available' y espera sin
+        # plazo. Aqui son 20 s porque la llamada trae siete controladores.
+        LISTA="$(timeout 20 ros2 control list_controllers \
+                 -c "/$ROBOT/controller_manager" 2>/dev/null | sed "$ANSI" || true)"
         for C in "${CONTROLADORES[@]}"; do
             grep -qE "^$C .*active" <<< "$LISTA" || FALTAN+=("ctrl:$C")
         done

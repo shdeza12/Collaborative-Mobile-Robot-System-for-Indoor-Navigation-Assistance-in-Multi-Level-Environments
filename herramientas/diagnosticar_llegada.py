@@ -65,9 +65,19 @@ from nav_msgs.msg import Odometry, Path
 from rclpy.serialization import deserialize_message
 from tf2_msgs.msg import TFMessage
 
+sys.path.insert(0, os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "Robot", "aws-deepracer", "deepracer_bringup", "launch"))
+from deepracer_raiz_repo import pose_por_defecto  # noqa: E402
+
 # El criterio de llegada del protocolo. NO se toca desde aqui: se fijo en
 # PROTOCOLO_EXPERIMENTAL.md antes de instrumentar, justamente para que ningun
 # umbral se eligiera despues de ver resultados.
+#
+# NO es la 'xy_goal_tolerance' de Nav2, aunque hasta el 2026-08-27 valian lo
+# mismo. La tolerancia dice cuando Nav2 PARA, y se midio contra el /odom del
+# bag; este numero dice cuando la llegada se acepta. Separarlos fue el arreglo
+# de ese dia: parar en 0.15 es lo que deja margen para cumplir 0.25.
 TOLERANCIA_LLEGADA_M = 0.25
 
 
@@ -198,10 +208,18 @@ def main():
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("bag")
     ap.add_argument("--robot", default="robot1")
+    # Sin '--spawn' se toma la fila del robot pedido, no una constante. Estuvo
+    # fijada a la de robot1 hasta el 2026-08-27, y con '--robot robot2' el
+    # informe acusaba 15.868 m de desvio en una corrida que arranco a 0.039 m de
+    # su pose declarada: la pieza 1 comparaba contra el spawn del otro robot.
     ap.add_argument("--spawn", nargs=2, type=float, metavar=("X", "Y"),
-                    default=[-19.165, 7.292],
-                    help="pose declarada de spawn, para la pieza 1")
+                    default=None,
+                    help="pose declarada de spawn, para la pieza 1; por defecto "
+                         "la de POSE_INICIAL para --robot")
     args = ap.parse_args()
+    if args.spawn is None:
+        fila = pose_por_defecto(args.robot)
+        args.spawn = [fila["x"], fila["y"]]
 
     if not os.path.exists(os.path.join(args.bag, "metadata.yaml")):
         print(f"No parece un bag: {args.bag}")
