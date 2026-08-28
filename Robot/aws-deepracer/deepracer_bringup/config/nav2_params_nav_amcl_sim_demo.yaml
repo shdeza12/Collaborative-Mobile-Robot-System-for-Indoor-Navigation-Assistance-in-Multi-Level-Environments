@@ -89,9 +89,37 @@ controller_server:
     # se cambia lo que se le PIDE a Nav2, no el listón con el que se le mide. El
     # protocolo se escribio antes de instrumentar justamente para que un umbral no
     # se elija viendo los resultados; ese umbral sigue intacto.
+    # POR QUE 0.15 Y NO 0.25 (medido el 2026-08-27, bag S20_rutas_01).
+    #
+    # Estaba en 0.25, el MISMO numero con el que el coordinador decide si la
+    # llegada vale. Eso deja margen cero, y el fallo es aritmetico: Nav2 para en
+    # cuanto SU ESTIMACION baja de 0.25, o sea tipicamente a 0.24, y el
+    # coordinador mide contra /odom, que es la verdad. Cualquier error de
+    # localizacion en ese instante hace fallar la mision.
+    #
+    # Capturado en el instante exacto de la decision:
+    #
+    #     t+23.0 s  Nav2 se creia en (-18.875, 6.167) -> 0.240 m, DENTRO
+    #               estaba de verdad en (-18.866, 6.225) -> 0.297 m, FUERA
+    #               error de localizacion en ese instante: 0.058 m
+    #
+    # Y no es mala suerte: es lo que ese diseno produce siempre. El acercamiento
+    # maximo fue 0.296 m, el mismo numero del ETM13 del 21-ago que se cita mas
+    # arriba, y el mismo patron del 0.316 m con el que se cerro esta mision.
+    #
+    # El presupuesto, con los alpha ya corregidos (ver la nota de amcl):
+    #     0.150  parada
+    #   + 0.065  error de AMCL previsto a 42.17 m
+    #   + 0.023  desfase del fin del plan por resolucion de rejilla
+    #   = 0.238  por debajo de los 0.25 del criterio
+    #
+    # Otra vez: se cambia lo que se le PIDE a Nav2, no el liston con el que se
+    # le mide. Si 0.15 resulta inalcanzable para un Ackermann, el
+    # SimpleProgressChecker abortara a los 10 s sin moverse 0.5 m; eso seria un
+    # fallo honesto y no un falso exito, y el siguiente escalon seria 0.18.
     goal_checker:
       plugin: "nav2_controller::SimpleGoalChecker"
-      xy_goal_tolerance: 0.25
+      xy_goal_tolerance: 0.15
       yaw_goal_tolerance: 3.15
       stateful: False
     FollowPath:
@@ -322,11 +350,43 @@ amcl:
       y: 0.0
       z: 0.0
       yaw: 0.0
-    alpha1: 0.2
-    alpha2: 0.2
-    alpha3: 0.2
-    alpha4: 0.2
-    alpha5: 0.2
+    # RUIDO DEL MODELO DE MOVIMIENTO (medido el 2026-08-27, S20_localizacion).
+    #
+    # Estaban en 0.2, o sea declarandole a AMCL un 20 % de ruido de odometria.
+    # En SIMULACION eso es falso por construccion: /odom no es odometria, es la
+    # pose del mundo de Gazebo (gazebo_ros_deepracer_drive.cpp:229). Comprobado
+    # muestreando a la vez 'gz model -m robot1 -p' y /robot1/odom: coinciden en
+    # ~1 mm, y ese milimetro es el propio deslizamiento entre una muestra y la
+    # siguiente. El ruido real es CERO.
+    #
+    # Lo que costaba. En un pasillo recto el laser ve dos paredes paralelas:
+    # fija la posicion lateral y no dice NADA de la longitudinal, porque el
+    # pasillo es identico a lo largo. Sin esa correccion, el ruido que
+    # inyectaban los alpha se acumulaba en un paseo aleatorio sobre X. Medido en
+    # las tres misiones de S20_localizacion, que arrancaron limpias (error
+    # inicial 0.008-0.020 m) y terminaron a 1.03, 1.43 y 1.03 m:
+    #
+    #     error casi todo en X (hasta 1.4 m), Y siempre en 0.01-0.04 m
+    #     crecimiento 0.024, 0.036 y 0.033 m por metro recorrido (media 0.031)
+    #     desplome a ~0.09 m a los 42 m en las tres, al llegar al extremo del
+    #       pasillo y ver por fin geometria distinta
+    #
+    # A 0.031 m/m, la mision mas larga del piso 1 (42.17 m) acumulaba 1.30 m de
+    # error: era imposible de aprobar contra el criterio de 0.25 m antes de
+    # empezar. Con alpha 0.01 la prediccion baja a 0.065 m.
+    #
+    # ESTO NO ES AJUSTAR EL LISTON A LOS RESULTADOS. El criterio de exito sigue
+    # siendo 0.25 m contra /odom. Aqui se corrige un parametro que describia MAL
+    # el sistema -20 % de ruido en una fuente medida exacta al milimetro-, y esa
+    # correccion se justifica sola, sin mirar ningun resultado de llegada.
+    #
+    # EN EL CARRO FISICO NO VALEN. Alli /odom si es odometria de encoders y los
+    # alpha hay que medirlos sobre el carro. Este fichero es el _sim_demo.
+    alpha1: 0.01
+    alpha2: 0.01
+    alpha3: 0.01
+    alpha4: 0.01
+    alpha5: 0.01
     base_frame_id: "base_link"
     beam_skip_distance: 0.5
     beam_skip_error_threshold: 0.9
