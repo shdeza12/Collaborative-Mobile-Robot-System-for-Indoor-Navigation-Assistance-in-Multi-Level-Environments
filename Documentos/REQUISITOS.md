@@ -139,17 +139,22 @@ presente antes de invertir tiempo en un mapa interactivo.
 
 | ID | Requisito | Prueba | Estado | Semana |
 |---|---|---|---|---|
-| **RF-21** | El sistema registra el **tiempo de respuesta**: desde la solicitud hasta que el agente inicia el movimiento | El registro de la misión contiene la marca temporal de ambos eventos | 🔴 | S20 |
-| **RF-22** | El sistema registra el **tiempo de asignación de robot**: desde la solicitud hasta que un agente queda asignado | Ídem | 🔴 | S20 |
+| **RF-21** | El sistema registra el **tiempo de respuesta**: desde la solicitud hasta que el agente inicia el movimiento | El registro de la misión contiene la marca temporal de ambos eventos | 🟢 **Verificado el 2026-08-27.** El registro de `S20_rutas_03` trae `t_solicitud: 87.9` y `t_primer_movimiento: 88.1`, ambas leídas de `/clock` | S20 |
+| **RF-22** | El sistema registra el **tiempo de asignación de robot**: desde la solicitud hasta que un agente queda asignado | Ídem | 🟢 **Verificado el 2026-08-27.** `t_solicitud` y `t_robot_activo` en el mismo registro | S20 |
 | **RF-23** | El sistema registra el **éxito o fallo** de cada misión, con el motivo | `result.exito` y `result.motivo_fallo` quedan en el registro | 🔴 | S21 |
 | **RF-24** | El sistema registra la **continuidad del servicio entre niveles**: que la misión atraviesa el relevo sin interrupción del guiado | Ninguna etapa queda sin agente activo entre `TRAMO_1` y `TRAMO_2` | 🔴 | S21 |
-| **RF-25** | Las métricas se obtienen de un **registro estructurado y automático**, no de observación manual | Un archivo por misión, procesable sin intervención | 🔴 | S20 |
+| **RF-25** | Las métricas se obtienen de un **registro estructurado y automático**, no de observación manual | Un archivo por misión, procesable sin intervención | 🟡 **Verificado el 2026-08-27 en condición A.** Esquema JSON versionado y comprobable; `herramientas/componer_registro.py` compone el registro desde el bag y lo valida contra el esquema; el veredicto se calcula contra `/odom` y nunca contra el `SUCCEEDED` de Nav2. **Falta** cerrar cuatro campos que hoy salen vacíos o escritos a mano —los dos marcadores de cambio de tramo, el RTF, la procedencia del mundo y del mapa, y los controladores activos— y probarlo en condición B | S20 |
 | **RF-26** | La campaña en simulación alcanza **N = 30 repeticiones** (decisión D1) | Treinta registros válidos | 🔴 | S24–S25 |
 | **RF-27** | La demostración física ejecuta el protocolo completo con **N entre 5 y 10** (decisión D1) | Registros de las corridas físicas | 🔴 | S24–S25 |
 
-**Lectura de OE4.** Nada iniciado, y hay tres condiciones previas que no son requisitos sino
-defectos abiertos (§7). **RF-24 es la variable de respuesta principal** del proyecto: es la que
-responde la pregunta de investigación.
+**Lectura de OE4, revisada el 2026-08-27.** La mitad instrumental está construida y verificada:
+RF-21, RF-22 y RF-25 sobre misiones de condición A. Lo que sigue en rojo depende todo de lo mismo,
+**el relevo**, y el relevo está escrito y probado como función pura pero **no se puede ejecutar**:
+`robot1` y `robot2` corren en dominios DDS distintos con un `gzserver` cada uno —impuesto por
+`gazebo_ros` de Humble— y un nodo de ROS 2 vive en un solo dominio, así que el coordinador no
+alcanza a los dos. **RF-24 es la variable de respuesta principal** del proyecto —es la que responde
+la pregunta de investigación— y hoy su único bloqueo es ese. Está anotado como séptimo
+prerrequisito en el §10 de [`PROTOCOLO_EXPERIMENTAL.md`](PROTOCOLO_EXPERIMENTAL.md).
 
 ---
 

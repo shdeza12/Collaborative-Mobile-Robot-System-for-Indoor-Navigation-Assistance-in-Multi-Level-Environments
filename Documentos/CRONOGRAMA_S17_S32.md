@@ -297,6 +297,30 @@ guardado y verificado con `herramientas/verificar_mapa.py`.
 > necesita (ver G2 en S21), y porque en S25 el código lleva congelado desde S23. Es la última
 > ventana en la que un resultado malo todavía se puede corregir.
 
+**Avance al jueves 2026-08-27 por la noche.** El frente A está **cumplido a medias y con una razón
+escrita**, no por falta de trabajo. El servidor de coordinación existe desde el 24-ago con las 992
+combinaciones del catálogo verificadas sin simulador, y la instrumentación de las dos métricas se
+construyó el 27-ago: `herramientas/componer_registro.py` compone desde un bag un registro validado
+contra el esquema de RF-25, con `t_solicitud` y `t_robot_activo` dentro y el veredicto calculado
+contra `/odom`. Se ejecutaron **dos misiones completas de dos tramos** que lo demuestran de punta a
+punta (`S20_rutas_03` y `S20_rutas_04`, cuatro llegadas entre 0,117 y 0,204 m contra un criterio de
+0,25 m). **Lo que falta del criterio de cierre son dos cosas concretas:**
+
+1. **Probar la asignación con destino en el nivel 2**, que es lo que hace que asignar signifique
+   algo. Hoy es imposible: `robot1` y `robot2` corren en dominios DDS distintos con un `gzserver`
+   cada uno —impuesto por `gazebo_ros` de Humble, §8 del contrato— y un nodo de ROS 2 vive en un
+   solo dominio, así que **el coordinador no puede ver a los dos**. Anotado como séptimo
+   prerrequisito en el §10 del protocolo experimental; es lo primero de S21.
+2. **El mapa del laboratorio y la recta de ≥ 20 m** del frente B, que es la salida del viernes 28.
+
+**Lo que se hizo y no estaba planeado.** La primera misión instrumentada salió fuera de tolerancia,
+y perseguirlo destapó dos defectos de configuración que habrían contaminado la campaña entera:
+los cinco `alpha` de AMCL declaraban un 20 % de ruido sobre una fuente exacta al milímetro, y
+`xy_goal_tolerance` valía el mismo número con el que se juzga la llegada, o sea margen cero.
+Corregidos y validados con medida (tasa de deriva de 0,0343 a 0,0046 m por metro recorrido). Va
+escrito aquí porque explica por qué el jueves no cerró: **el trabajo no se aplazó, se gastó en algo
+que el plan daba por hecho.**
+
 ### S21 · 31 ago – 6 sep — Protocolo de relevo · **punto de decisión**
 
 | Frente | Actividad |
@@ -462,14 +486,14 @@ por requisito.
 
 ## 8. Hitos
 
-| # | Hito | Semana | Habilita | Estado (2026-08-14) |
+| # | Hito | Semana | Habilita | Estado (**2026-08-27**) |
 |---|---|---|---|---|
 | H1 | Contrato de interfaces ROS 2 definido | S17 | Todo el desarrollo posterior | ✅ Verificado en simulación el 14-ago |
-| H2 | Riesgos de hardware caracterizados (spike) | ~~S18~~ **S19** | Planificación realista del bring-up | 🔴 El spike no se corrió en S18 |
-| H2b | **Entorno de dos niveles construido y navegado** | S18 | Campaña experimental en simulación | ✅ Cerrado el 14-ago |
-| H3 | Dos agentes navegando en niveles separados | S19 | Nodo de coordinación | 🟡 Por separado, sí; falta simultáneo |
-| H4 | Asignación dinámica de tareas funcionando | S20 | Protocolo de relevo | 🔴 No iniciado |
-| H5 | Relevo completo con métricas en simulación | S21 | Campaña experimental | 🔴 No iniciado |
+| H2 | Riesgos de hardware caracterizados (spike) | ~~S18~~ **S19** | Planificación realista del bring-up | 🟡 Preguntas 1, 2 y 4 respondidas (18 y 19-ago); la 3 —latencia entre vehículos— sigue bloqueada por **R11** |
+| H2b | **Entorno de dos niveles construido y navegado** | S18 | Campaña experimental en simulación | ✅ Cerrado el 14-ago; entorno sustituido el 20-ago por `mundo_definitivo`, partido por piso el 23-ago y sellado el 24 |
+| H3 | Dos agentes navegando en niveles separados | S19 | Nodo de coordinación | ✅ **Cerrado el 25-ago**, simultáneo y a los dos puntos de transferencia: 0,281 m y 0,143 m contra `/odom` |
+| H4 | Asignación dinámica de tareas funcionando | S20 | Protocolo de relevo | 🟡 **El coordinador asigna y el registrador mide (24 y 27-ago).** El planificador agota las **992** combinaciones del catálogo real sin simulador, y una misión de condición A produce un registro validado con sus marcas. **Falta probarlo con destino en el nivel 2**, que hoy no se puede: ver el séptimo prerrequisito del §10 del protocolo |
+| H5 | Relevo completo con métricas en simulación | S21 | Campaña experimental | 🔴 **Bloqueado, no sin empezar.** El relevo está escrito y probado como función pura; lo que falta es un coordinador que alcance a los dos robots, que viven en dominios DDS distintos |
 | H6 | Sistema integrado de extremo a extremo | S22 | Verificación | 🔴 No iniciado |
 | H7 | Implementación congelada | S23 | Campañas experimentales | 🔴 No iniciado |
 | H8 | Conjunto de datos completo | S25 | Análisis | 🔴 No iniciado |

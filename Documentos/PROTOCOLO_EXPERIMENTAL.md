@@ -348,14 +348,30 @@ calla sus condiciones previas se ejecuta igual y produce números que no valen.
 | **Destinos del piso 2 en `puntos_interes.yaml`** | 🟢 CERRADO el 2026-08-26. Los dieciséis, con nombre y parada derivada de la regla; el catálogo pasa a 32 destinos y la prueba del planificador a 992 planes |
 | **Los dos agentes navegando simultáneamente** (H3) | 🟢 CERRADO el 2026-08-25 ([`S20_hito_h3_dos_agentes.md`](Evidencia/S20_hito_h3_dos_agentes.md)) |
 | **Segundo vehículo físico** (R11) | 🔴 Administrativo. Bloquea solo la campaña física (RF-27), no la de simulación |
+| **Un coordinador que alcance a los dos robots** *(añadido el 2026-08-27)* | 🔴 **ABIERTO, y bloquea la condición B entera.** `robot1` corre en `ROS_DOMAIN_ID=0` y `robot2` en el 2 (`herramientas/robot.sh:62`), con un `gzserver` cada uno. La separación no es una preferencia: `gazebo_ros` de Humble aplica a todos los plugins el namespace del **primer** modelo cargado, así que un solo `gzserver` no puede llevar dos robots (§8 de [`CONTRATO_INTERFACES.md`](CONTRATO_INTERFACES.md)). Un nodo de ROS 2 vive en **un** dominio, luego el coordinador ve a uno de los dos y nunca a los dos. El relevo está escrito y probado como función pura —992 planes— pero **no se puede ejecutar** hasta resolver esto |
 
-**Cinco de seis cerrados: la campaña de simulación ya no tiene bloqueos técnicos.** Las condiciones
-A y B se pueden ejecutar. El único abierto, R11, es administrativo y afecta solo a la campaña
-física.
+**Cinco de siete cerrados.** La **condición A** —misión de dos tramos dentro de un nivel— se puede
+ejecutar, y se ejecutó el 2026-08-27 (`S20_rutas_03` y `S20_rutas_04`, cuatro llegadas entre 0,117
+y 0,204 m). La **condición B** no, y lo que la bloquea es la fila nueva de arriba, no R11. R11 sigue
+siendo administrativo y afecta solo a la campaña física.
 
-**Lo que sigue faltando no es un prerrequisito de este documento sino instrumentación:** no existe
-el registrador de misión (RF-25) ni el analizador de campaña, y sin ellos no hay de dónde sacar las
-cuatro métricas.
+**Instrumentación al 2026-08-27.** El registrador de misión (RF-25) **existe**: esquema versionado
+y comprobable, `herramientas/grabar_mision.sh` sellando el bag con tiempo de simulación,
+`herramientas/componer_registro.py` componiendo un registro validado contra el esquema, y
+`herramientas/diagnosticar_llegada.py` dictaminando la llegada contra `/odom` y nunca contra el
+`SUCCEEDED` de Nav2. **Falta el analizador de campaña**, y quedan **cuatro huecos medidos** sobre el
+primer registro real:
+
+1. `t_fin_tramo1` y `t_inicio_tramo2` salen `null` en **toda** misión de condición A, porque los dos
+   tramos comparten `etapa: 1` y lo único que cambia es `destino_actual`. Hay que detectar el cambio
+   de tramo por el `id` del destino, no por la etapa.
+2. El **RTF no se puede recuperar** de un bag sellado con tiempo de simulación: no sobrevive
+   ninguna referencia de reloj de pared. Hay que muestrearlo *durante* la corrida.
+3. `procedencia.mundo` y `procedencia.mapa` se quedan vacíos.
+4. `controladores_activos` sale `{}` y `gzserver_vivo_al_final` va escrito a mano.
+
+Los cuatro se cierran con lo mismo: que `grabar_mision.sh` deje junto al bag un `condiciones.json`
+con lo que solo se sabe mientras la misión corre.
 
 ---
 
