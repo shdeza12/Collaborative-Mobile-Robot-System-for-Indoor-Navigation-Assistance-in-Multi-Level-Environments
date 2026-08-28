@@ -234,10 +234,12 @@ delante y los comandos del informe, no desde el repositorio.
 |---|---|---|
 | [`S20_marco_map_prefijado.md`](S20_marco_map_prefijado.md) | Que `map` se prefija con el namespace, como pedía el §3 del contrato, y que no hacerlo dejaba las misiones del coordinador en `ABORTED` sin nombrar nunca al marco | [`ESTADO.md`](../../ESTADO.md) §bitácora (2026-08-24), los tres launch de `deepracer_bringup` |
 | [`S20_hito_h3_dos_agentes.md`](S20_hito_h3_dos_agentes.md) | Que los dos agentes navegan en simultáneo, cada uno en su piso, con 0,281 m y 0,143 m de error contra `/odom`, y que el `/odom` cruzado venía del demonio de `ros2cli` | [`ESTADO.md`](../../ESTADO.md) §bitácora (2026-08-25), cronograma act. 15 e hito H3 |
+| [`S20_rutas_largas_y_concurrencia.md`](S20_rutas_largas_y_concurrencia.md) | Que `robot2` queda medido con la configuración nueva —0,124 m en 90,81 m— y que la concurrencia tampoco degrada a 84 y 90 m, veinte veces la escala de H3; y que el RTF bajo carga sigue sin medirse | [`ESTADO.md`](../../ESTADO.md) §bitácora (2026-08-27), §3.3 y §5 de [`PROTOCOLO_EXPERIMENTAL.md`](../PROTOCOLO_EXPERIMENTAL.md) |
 
-**Van en este orden y no en el cronológico:** el primero es requisito del segundo. Mientras `map`
-estuvo sin prefijar, ninguna misión del coordinador podía completarse, así que el hito no era
-alcanzable aunque todo lo demás estuviera en su sitio.
+**Los dos primeros van en este orden y no en el cronológico:** el primero es requisito del segundo.
+Mientras `map` estuvo sin prefijar, ninguna misión del coordinador podía completarse, así que el
+hito no era alcanzable aunque todo lo demás estuviera en su sitio. El tercero repite la pregunta del
+segundo a la escala de la campaña: H3 la respondió sobre 1,7 m, y las rutas reales son de 90.
 
 ## Diagrama
 
@@ -269,8 +271,8 @@ Los `.md` de esta carpeta son el análisis, no la evidencia: explican qué se hi
 y por qué. `S17_nav2_namespaces.md`, `S17_aplicacion_contrato.md`, `S17_dos_simuladores.md`,
 `S17_linea_base.md`, `S18_entorno_dos_niveles.md`, `S19_spike_p4_humble_jazzy.md`,
 `S19_spike_p1_p2_hardware.md`, `S19_conversion_cmdvel_ackermann.md`,
-`S19_lidar_original_evo.md`, `S20_marco_map_prefijado.md` y
-`S20_hito_h3_dos_agentes.md`.
+`S19_lidar_original_evo.md`, `S20_marco_map_prefijado.md`, `S20_hito_h3_dos_agentes.md` y
+`S20_rutas_largas_y_concurrencia.md`.
 
 ---
 
