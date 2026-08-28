@@ -326,6 +326,9 @@ En orden. Nada de esto existe hoy.
    incluida la marca extraordinaria de cambio de etapa (§3.2).
 4. **Registrador de misión** (RF-25): un archivo por misión, estructurado, con todas las marcas
    temporales, la traza de `/odom` de cada robot y el RTF. Procesable sin intervención manual.
+   El esquema quedó congelado el 2026-08-26 en
+   [`ESQUEMA_REGISTRO_MISION.md`](ESQUEMA_REGISTRO_MISION.md), anclado a §3 y §8 de este
+   protocolo, con los campos del banco físico previstos aunque en simulación vayan vacíos.
 5. **`herramientas/sortear_misiones.py`** (§6.3).
 6. **Analizador de campaña**: lee los N registros y produce las cuatro métricas con sus intervalos
    de confianza.

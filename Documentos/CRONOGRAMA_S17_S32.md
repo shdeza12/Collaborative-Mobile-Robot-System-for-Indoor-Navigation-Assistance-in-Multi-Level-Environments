@@ -285,11 +285,17 @@ sobre la demostración física: es el momento de mirar el punto de decisión GO 
 | A | Servidor de coordinación: registro de agentes, recepción de solicitud, asignación por nivel |
 | A | Instrumentar desde el inicio el tiempo de respuesta y el tiempo de asignación |
 | B | Mapear el laboratorio real con el DeepRacer físico — primera evidencia del LiDAR real |
+| B | **Añadido el 2026-08-26:** en la misma salida, corrida recta de **≥ 20 m** con bag, para medir la odometría del carro contra un desplazamiento medido con cinta (prueba de aceptación de **RF-13**). Ver el GO / NO-GO de S21 |
 | T | Emitir el entregable S19 |
 
 **Criterio de cierre:** una solicitud origen–destino produce la asignación del agente correcto y
 deja registrados los dos tiempos en un log estructurado. El mapa real del laboratorio queda
 guardado y verificado con `herramientas/verificar_mapa.py`.
+
+> **La corrida de 20 m no es trabajo nuevo: es la misma salida con el bag grabado.** Se añade aquí
+> y no en S21 porque el laboratorio GED mide 16 m² y **no da la distancia** que la medición
+> necesita (ver G2 en S21), y porque en S25 el código lleva congelado desde S23. Es la última
+> ventana en la que un resultado malo todavía se puede corregir.
 
 ### S21 · 31 ago – 6 sep — Protocolo de relevo · **punto de decisión**
 
@@ -303,10 +309,55 @@ guardado y verificado con `herramientas/verificar_mapa.py`.
 **Criterio de cierre:** en simulación, una solicitud que cruza niveles se completa de extremo a
 extremo con relevo, y el log arroja las cuatro métricas de OE4.
 
-> **GO / NO-GO:** ¿el DeepRacer físico navega de forma autónoma en el laboratorio?
+> **GO / NO-GO — enmendado el 2026-08-26.** La redacción anterior era una sola pregunta:
+> *«¿el DeepRacer físico navega de forma autónoma en el laboratorio?»*. Se descompone en dos,
+> **porque el laboratorio no puede responder la mitad de ella** y responderla igual produce un GO
+> falso. El motivo está en la nota de abajo.
+>
+> **G1 — lo que el laboratorio sí decide.** ¿El DeepRacer físico arranca la pila, recibe mando por
+> `/cmd_vel` desde ROS 2, publica `/scan`, planifica y ejecuta una trayectoria Ackermann sin
+> intervención manual, y para donde se le pide?
 > **Sí** → bring-up del segundo vehículo en S22; demostración con dos robots reales.
 > **No** → la demostración física baja a un robot real más uno simulado, y se documenta como
 > limitación. El cronograma **no** se renegocia.
+>
+> **G2 — lo que el laboratorio NO decide, y por tanto no se declara con él.** La **localización
+> longitudinal en pasillo largo** queda **explícitamente fuera** del alcance de G1. Un GO en G1 no
+> autoriza a marcar la localización como verificada, ni en `REQUISITOS.md` ni en el documento
+> final.
+>
+> Se decide con una medición aparte, que es la prueba de aceptación que **RF-13** ya tenía escrita
+> —*«lectura antes y después de un desplazamiento conocido»*— aplicada sobre una recta de
+> **≥ 20 m**, no sobre los 4 m que da el laboratorio. De un solo bag salen las dos cifras:
+>
+> | | Qué se mide | Umbral |
+> |---|---|---|
+> | **M1** | Desplazamiento que registra `/odom` ÷ desplazamiento real medido con cinta, sobre la recta | **≥ 0,90** |
+> | **M2** | Error de `/amcl_pose` contra la marca de cinta al final de la recta | **≤ 0,50 m** |
+>
+> **El umbral de M1 es una decisión, no una derivación, y se fija antes de ver el dato** —misma
+> disciplina que el §7 del protocolo experimental—. Se justifica así: la tolerancia de llegada del
+> proyecto es 0,25 m, y por debajo de 0,90 la odometría sola pierde más de 2 m en la recta, que el
+> DeepRacer **no tiene con qué corregir** —no lleva encoders de rueda, así que la única fuente de
+> odometría es `rf2o_laser_odometry`, y falla en el mismo eje que AMCL—.
+>
+> **Por qué se enmienda.** El laboratorio GED mide 4 × 4 m y `ENTORNO_DE_EVALUACION.md` §5 ya lo
+> descartó como entorno de evaluación por eso mismo. La geometría no permite acumular error
+> longitudinal: cualquier método razonable pasa en 4 m. Medido el **2026-08-26** en simulación
+> sobre `mundo_definitivo` —bag `~/tesis_evidencia/S20_localizacion/mision3`, rf2o corrido fuera de
+> línea contra la verdad de terreno de Gazebo—: en los primeros 10,4 m desde el spawn el error es
+> de 0,79 m, aceptable; en el pasillo largo rf2o registra **1,71 m de 29,94 m reales (5,7 %)** en
+> sentido este y **0,33 m de 24,98 m (1,3 %)** en sentido oeste. No deriva: **se congela**. El
+> `yaw` sigue bien todo el trayecto (2,8° de error final), o sea que el nodo no está roto: en un
+> tubo uniforme de 2,10 m la rotación y la traslación lateral son observables y la longitudinal no
+> lo es. AMCL fabrica el mismo fallo sobre el mismo eje: en la misma corrida `map→odom` derivó
+> **1,977 m**, con σx = 1,325 m contra σy = 0,213 m.
+>
+> **Lo que esa medición no dice.** Se tomó sobre un pasillo simulado, que es una extrusión perfecta
+> sin marcos de puerta, mobiliario ni gente. El pasillo real tiene textura que ese modelo no tiene,
+> así que **5,7 % es un piso, no una estimación**: rf2o real debería rendir mejor. Cuánto mejor no
+> lo sabe nadie hasta la corrida de 20 m, y esa es exactamente la razón de tomarla antes de la
+> congelación de S23 en vez de descubrirlo en la campaña de S25.
 
 ### S22 · 7 – 13 sep — Interfaz HRI e integración
 

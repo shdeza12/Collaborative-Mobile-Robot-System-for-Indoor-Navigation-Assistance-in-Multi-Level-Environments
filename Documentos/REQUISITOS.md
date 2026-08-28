@@ -82,7 +82,7 @@ declarado del proyecto.**
 |---|---|---|---|---|
 | **RF-11** | Cada vehículo ejecuta **locomoción** comandada por `/<ns>/cmd_vel`, con cinemática Ackermann | El vehículo se desplaza; recorrido medido contra `/odom` | 🟡 sim ✅ / físico vía web | S19–S21 |
 | **RF-12** | Cada vehículo publica **`/<ns>/scan`** utilizable para localización y evasión | El LiDAR publica a su frecuencia nominal y el mapa de costos local registra los obstáculos | 🟡 sim ✅ / físico 🔴 | **S19** (spike, pregunta 1) |
-| **RF-13** | Cada vehículo publica **odometría** en `/<ns>/odom` | Lectura antes y después de un desplazamiento conocido | 🟡 sim ✅ con salvedad (ver §7) / físico 🔴 | S19 |
+| **RF-13** | Cada vehículo publica **odometría** en `/<ns>/odom` | Lectura antes y después de un desplazamiento conocido | 🟡 sim ✅ **contra un oráculo**, no verificado (ver §7.4) / físico 🔴, se mide en la corrida de ≥ 20 m de S20 | S19 |
 | **RF-14** | Cada vehículo se comanda **desde ROS 2**, sin pasar por la interfaz web del fabricante | Publicar en `/<ns>/cmd_vel` desde otra máquina de la red mueve el vehículo | 🔴 | **S19** (spike, pregunta 2) |
 | **RF-15** | Los dos vehículos y el coordinador se **alcanzan por red** con latencia acotada | Medida de ida y vuelta entre los dos vehículos | 🔴 bloqueado por **R11** | S19+ |
 | **RF-16** | El **mismo código fuente** se despliega en los dos destinos, simulado y físico (decisión D6) | Compilar el coordinador sin cambios en las dos distribuciones y completar una misión **en cada mundo por separado** | 🟡 **verificado con resultado condicionado** (2026-08-18) | S22 |
@@ -195,6 +195,33 @@ Escribir los requisitos obliga a mirar los huecos. Tres cosas aparecen y no esta
    Es trabajo de escritorio, se hace sobre la geometría del mundo ya construido, y bloquea RF-04,
    RF-17 y toda la campaña de OE4 —porque los orígenes y destinos de las 30 repeticiones salen de
    ahí—. **Conviene resolverlo esta semana**, junto con el protocolo experimental.
+
+4. **El `sim ✅` de RF-13 se obtuvo contra un oráculo, y eso no es una verificación**
+   *(añadido el 2026-08-26)*. En simulación, `/odom` no es una estimación: el plugin lo publica
+   desde `model_->WorldPose()` —`deepracer_gazebo/src/gazebo_ros_deepracer_drive.cpp:229`—, o sea
+   la pose exacta que Gazebo tiene en su motor, sin ruido ni deslizamiento. Y como
+   `publish_odom_tf: true`, la transformada `odom → base_link` también es verdad de terreno.
+   Comprobar «lectura antes y después de un desplazamiento conocido» sobre ese tópico es comparar
+   el oráculo consigo mismo: **da bien siempre y no puede fallar**, así que no aporta información.
+
+   El requisito solo queda verificado sobre el vehículo físico, y ahí la única fuente de odometría
+   es `rf2o_laser_odometry` —`deepracer_bringup/launch/deepracer.launch.py:90`—, porque **el
+   DeepRacer no lleva encoders de rueda**: su sensado es dos cámaras RGB, un LiDAR plano y una IMU.
+   Medido fuera de línea el 2026-08-26, rf2o registra el **5,7 %** y el **1,3 %** del
+   desplazamiento real en los dos tramos del pasillo simulado. La medición que sí verifica RF-13
+   es la corrida recta de ≥ 20 m añadida al frente B de S20, con los umbrales M1 y M2 del GO / NO-GO
+   de S21.
+
+   Consecuencia sobre lo ya medido: **todo error de llegada calculado «contra `/odom`»** —los
+   0,190 m de `piso2_escalera`, los 0,281 m y 0,143 m del hito H3— **es válido como verdad de
+   terreno en simulación**, y de hecho es la mejor referencia posible ahí. Lo que no es válido es
+   citarlos como evidencia de que *la odometría funciona*: miden el control y la localización, no
+   el odómetro.
+
+> **Los puntos 2 y 3 están caducados y se corrigen en el corte del 2026-08-28:** `coordinacion_msgs`
+> existe y hace round-trip por DDS desde el 24-ago, y `puntos_interes.yaml` tiene 31 puntos —15 de
+> nivel 1, 16 de nivel 2— con sus dos puntos de transferencia. Del punto 1, la lectura cruzada de
+> `/odom` se declaró **no reproducible** el 25-ago y la causa era la herramienta.
 
 ---
 
