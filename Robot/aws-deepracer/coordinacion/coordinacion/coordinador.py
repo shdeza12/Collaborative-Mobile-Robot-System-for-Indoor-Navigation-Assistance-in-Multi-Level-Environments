@@ -45,9 +45,18 @@ from coordinacion.planificador import (
     condicion_de, generar_mision_id, planificar, yaw_a_cuaternion,
 )
 
-# Tolerancia de llegada. Es la misma que xy_goal_tolerance de Nav2 y la que fija
-# el §5 de PROTOCOLO_EXPERIMENTAL.md como criterio de exito. No inventar otra
-# aqui: si se cambia, se cambia en el protocolo primero.
+# Criterio de llegada del §3.3 de PROTOCOLO_EXPERIMENTAL.md, medido contra
+# /<ns>/odom. No inventar otro aqui: si se cambia, se cambia en el protocolo
+# primero, y entonces las corridas anteriores dejan de ser comparables.
+#
+# YA NO ES la 'xy_goal_tolerance' de Nav2, aunque lo fue hasta el 2026-08-27.
+# Son dos numeros distintos y conviene que lo sean: la tolerancia dice cuando
+# Nav2 PARA -segun lo que CREE AMCL-, y este dice cuando la llegada se ACEPTA
+# -segun la verdad de terreno-. Igualarlos dejaba margen cero, y por eso el
+# 27-ago una etapa paro creyendose a 0.240 m, dentro, estando a 0.297 m, fuera.
+# La tolerancia bajo a 0.15 justamente para comprar ese margen: 0.150 de parada
+# + 0.065 de error previsto de AMCL + 0.023 de desfase del fin del plan = 0.238,
+# que cabe en estos 0.25. Bajar este numero a 0.15 destruiria ese presupuesto.
 TOLERANCIA_LLEGADA_M = 0.25
 
 

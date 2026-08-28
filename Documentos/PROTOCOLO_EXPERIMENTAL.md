@@ -127,8 +127,19 @@ Una misión es **exitosa** si y solo si se cumplen las tres:
 **El rumbo de llegada NO es criterio de éxito.** Se mide y se reporta siempre, como variable
 descriptiva, pero no decide. La razón está en §4.
 
-Los 0,25 m son la `xy_goal_tolerance` configurada en Nav2. Se usa el mismo número a propósito: el
-criterio de éxito es «el sistema hizo lo que se le pidió con la precisión que declara tener».
+**Los 0,25 m no se tocan, y desde el 2026-08-27 ya no coinciden con la `xy_goal_tolerance` de
+Nav2.** Hasta ese día eran el mismo número, con esta justificación: «el sistema hizo lo que se le
+pidió con la precisión que declara tener». La justificación era buena; igualar los números, no,
+porque los dos umbrales miden cosas distintas. La tolerancia decide cuándo Nav2 **para**, y lo hace
+contra lo que **cree** AMCL; este criterio decide cuándo la llegada se **acepta**, y se mide contra
+`/<ns>/odom`, que es la verdad. Igualarlos dejaba margen cero para el error de localización, y eso
+costó una llegada medida: el vehículo paró creyéndose a 0,240 m —dentro— estando a 0,297 m —fuera—.
+
+La tolerancia de parada bajó entonces a 0,15 m, y el presupuesto que la sostiene está escrito en
+`nav2_params_nav_amcl_sim_demo.yaml`: 0,150 de parada + 0,065 de error de AMCL previsto a 42 m +
+0,023 de desfase del fin del plan = 0,238 m, que cabe en estos 0,25. **El criterio de éxito no
+cambió**, ni debe cambiar: bajarlo a 0,15 destruiría ese presupuesto y declararía fallidas llegadas
+que el protocolo aceptaba antes de que hubiera resultados a la vista.
 
 ### 3.4 Continuidad entre niveles (RF-24)
 
@@ -195,9 +206,10 @@ son comparables con las posteriores y la campaña se reinicia.
 
 | Parámetro | Valor | Dónde |
 |---|---|---|
-| `xy_goal_tolerance` | 0,25 m | `nav2_params_nav_amcl_sim_demo.yaml` |
-| `yaw_goal_tolerance` | 0,25 rad (14,32°) | ídem |
-| `stateful` | **False** (hoy `True`, ver §4) | ídem |
+| `xy_goal_tolerance` | **0,15 m** (era 0,25 hasta el 2026-08-27, ver §3.3) | `nav2_params_nav_amcl_sim_demo.yaml` |
+| `yaw_goal_tolerance` | **3,15 rad (~π)** — el rumbo final no se impone, ver §4 | ídem |
+| `alpha1`…`alpha5` de AMCL | **0,01** (eran 0,2 hasta el 2026-08-27) | ídem |
+| `stateful` | **False** | ídem |
 | `desired_linear_vel` | 0,5 m/s | ídem |
 | `required_movement_radius` | 0,5 m | progress checker |
 | `movement_time_allowance` | 10,0 s | progress checker |
@@ -208,6 +220,15 @@ son comparables con las posteriores y la campaña se reinicia.
 | Mapa piso 2 | `mundo_definitivo_piso2.yaml` | ídem |
 | Radio mínimo de giro | 0,284 m (derivado: `max_steer` 0,5236 rad, batalla 0,164 m) | URDF |
 | Factor de tiempo real | ≥ 0,99 (RNF-06) | se verifica en cada corrida |
+
+**Tres de estos valores cambiaron el 2026-08-27, y la regla de arriba se aplica.** La
+`xy_goal_tolerance` y los cinco `alpha` de AMCL se movieron después de medir por qué fallaban las
+llegadas (§3.3), y el `yaw_goal_tolerance` de la tabla estaba desactualizado desde antes. La
+consecuencia es la que anuncia el párrafo de entrada, sin excepción: **la campaña de la condición A
+empieza el 2026-08-27**, y los bags anteriores a esa fecha —`S20_piloto_*`, `S20_rutas_01`,
+`S20_rutas_02`, `S20_localizacion`— no son comparables con los posteriores. Se conservan, y se usan,
+pero solo como **control de la configuración vieja**: es contra ellos como se atribuye la mejora.
+Los primeros de la campaña nueva son `S20_rutas_03`, `S20_rutas_04` y `S20_p2_01`.
 
 **El RTF se comprueba en cada corrida y no es un adorno.** Con las dos pilas activas se midió 0,996
 en S18. Si en una corrida baja de 0,99, sus tiempos no son válidos: esa corrida se descarta por
