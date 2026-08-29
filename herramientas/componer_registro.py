@@ -8,8 +8,18 @@ equipo. El bag sigue siendo la fuente; esto solo lo lee.
 
 Este archivo no importa rclpy ni coordinacion_msgs a proposito, por la misma
 razon que planificador.py: las reglas que convierten un bag en un veredicto se
-agotan con pytest en milisegundos, y quien analice los datos en octubre no
-deberia necesitar el workspace compilado para releerlos.
+agotan con pytest en milisegundos.
+
+PERO OJO, Y AQUI ESTE ENCABEZADO MENTIA: no importarlos ARRIBA no es lo mismo
+que no necesitarlos. Deserializar el bag pasa por rosidl_runtime_py, que
+importa coordinacion_msgs de forma dinamica, asi que EJECUTAR esto si exige el
+workspace compilado y sourceado aunque LEER el codigo no lo sugiera. Se
+comprobo el 2026-08-29: con solo /opt/ros/humble sourceado, la herramienta
+muere con 'ModuleNotFoundError: No module named coordinacion_msgs'. Lo que si
+es cierto es que las funciones puras -las que deciden marcas y veredicto- se
+prueban sin nada de eso, y eso es lo que cubre prueba_componer_registro.py.
+
+    source ~/deepracer_sim_ws/install/setup.bash
 """
 
 import argparse
@@ -147,7 +157,28 @@ def veredicto_de(marcas, estados, error_posicion_m, condicion, num_relevos):
     c3 = (num_relevos == 1) if condicion == "B" else None
 
     condiciones = [c1, c2] + ([c3] if condicion == "B" else [])
-    exito = None if c1 is None else all(condiciones)
+
+    # Logica de tres valores, no 'si c1 es None todo es None'. La version
+    # anterior colapsaba dos situaciones que no son la misma:
+    #
+    #   - banco fisico, falta pasar la cinta -> c1 desconocido, y el veredicto
+    #     tiene que esperar. Ese es el caso que la §4.4 quiere proteger.
+    #   - la mision nunca llego -> c1 es None porque NO HAY pose de llegada que
+    #     medir, no porque este pendiente. Aqui c2 ya es False.
+    #
+    # En el segundo caso 'None' es un veredicto equivocado: falso Y desconocido
+    # es falso, se mida lo que se mida despues. Salio el 2026-08-29 con la
+    # mision S20_A_M2, que aborto sin moverse: el coordinador devolvio
+    # exito=false y el registro decia null, que es peor que un error, porque un
+    # fallo limpio se contaba como dato incompleto.
+    #
+    # Un desconocido solo sobrevive si NADA es falso.
+    if any(c is False for c in condiciones):
+        exito = False
+    elif any(c is None for c in condiciones):
+        exito = None
+    else:
+        exito = True
 
     motivo = ""
     if exito is False:
@@ -189,8 +220,20 @@ def leer_bag(ruta):
     salida = {}
     while lector.has_next():
         topico, datos, t_ns = lector.read_next()
-        msg = rclpy.serialization.deserialize_message(
-            datos, get_message(tipos[topico]))
+        try:
+            clase = get_message(tipos[topico])
+        except (ImportError, ModuleNotFoundError) as e:
+            # El traceback crudo de aqui apunta a importlib y no dice nada util:
+            # el lector cree que su bag esta corrupto cuando lo unico que pasa
+            # es que falta el overlay. Los tipos propios del proyecto no estan
+            # en /opt/ros, asi que este es el fallo mas probable de todos.
+            raise SystemExit(
+                f"No se puede resolver el tipo '{tipos[topico]}' del topico "
+                f"{topico} ({e}).\n"
+                f"El bag esta bien; lo que falta es el workspace donde vive ese "
+                f"mensaje. Sourcearlo y repetir:\n"
+                f"  source ~/deepracer_sim_ws/install/setup.bash")
+        msg = rclpy.serialization.deserialize_message(datos, clase)
         salida.setdefault(topico, []).append((t_ns * 1e-9, msg))
     return salida
 
@@ -215,7 +258,7 @@ def _condicion(nivel_origen, nivel_destino, etapas):
 
 def componer(ruta_bag, banco, campana, error_posicion_m=None, rtf=None,
              semilla=None, es_piloto=False, medido_por="automatico",
-             distro=None):
+             distro=None, mundo=None, mapa=None):
     """Construye el registro completo. Ver la §3 del esquema."""
     topicos = leer_bag(ruta_bag)
 
@@ -226,12 +269,52 @@ def componer(ruta_bag, banco, campana, error_posicion_m=None, rtf=None,
             f"marcas, y un registro con marcas en null seria indistinguible de "
             f"una mision que fallo. Grabar con herramientas/grabar_mision.sh.")
 
+    # --- De que mision es este bag ------------------------------------------
+    # Un bag puede traer mensajes de DOS misiones sin que el procedimiento se
+    # haya roto. El coordinador no se calla al terminar: sigue publicando el
+    # estado terminal de la mision anterior hasta que llega una nueva
+    # solicitud, asi que si dos misiones comparten sesion, el bag de la segunda
+    # arranca con la cola de la primera. Medido el 2026-08-29 en S20_A_M2: 11
+    # mensajes de la mision de las 18:13, TODOS en etapa COMPLETADA, antes de
+    # los 34 propios.
+    #
+    # Y NO ES COSMETICO. Esos 11 mensajes van PRIMERO en el tiempo, asi que sin
+    # filtrar se llevaban por delante el registro entero: 'origen' y 'destino'
+    # se resuelven con el primer mensaje que los traiga -habrian salido los de
+    # la mision anterior- y t_solicitud es el primer estado distinto de
+    # INACTIVA, que habria caido diez segundos antes de que esta mision
+    # existiera. El registro habria validado contra el esquema y habria sido
+    # falso.
+    #
+    # La distincion que se usa: una mision de la que solo hay estados
+    # TERMINALES no ocurrio dentro de este bag, es un residuo. Una con algun
+    # estado en curso si. Dos en curso siguen siendo un procedimiento roto.
+    TERMINALES = (COMPLETADA, FALLIDA)
+    en_curso = {m.mision_id for _, m in crudos
+                if m.mision_id and m.etapa not in TERMINALES}
     ids = {m.mision_id for _, m in crudos if m.mision_id}
-    if len(ids) > 1:
+
+    if len(en_curso) > 1:
         raise SystemExit(
-            f"{ruta_bag} contiene {len(ids)} misiones: {sorted(ids)}. El §6.4 del "
-            f"protocolo manda un gzserver por corrida, asi que esto significa que "
-            f"el procedimiento no se siguio.")
+            f"{ruta_bag} contiene {len(en_curso)} misiones en curso: "
+            f"{sorted(en_curso)}. El §6.4 del protocolo manda un gzserver por "
+            f"corrida, asi que esto significa que el procedimiento no se siguio.")
+    if not en_curso and len(ids) > 1:
+        raise SystemExit(
+            f"{ruta_bag} solo trae estados terminales, de {len(ids)} misiones: "
+            f"{sorted(ids)}. La grabacion empezo despues de que terminaran y no "
+            f"hay ninguna marca que componer.")
+
+    mision_del_bag = next(iter(en_curso), next(iter(ids), ""))
+    residuo = sorted(ids - {mision_del_bag})
+    if residuo:
+        print(f"AVISO: se descartan los estados residuales de {residuo}, que "
+              f"terminaron antes de que empezara este bag. La mision de "
+              f"{ruta_bag} es {mision_del_bag}.", file=sys.stderr)
+        # El mision_id vacio es el preludio INACTIVA del coordinador, y se
+        # conserva: de el sale que la mision no empezo antes de la solicitud.
+        crudos = [(t, m) for t, m in crudos
+                  if m.mision_id in ("", mision_del_bag)]
 
     if banco == "simulacion" and "/clock" not in topicos:
         raise SystemExit(f"{ruta_bag} no trae /clock y el banco es simulacion.")
@@ -283,7 +366,7 @@ def componer(ruta_bag, banco, campana, error_posicion_m=None, rtf=None,
             "campana": campana, "banco": banco, "condicion": condicion,
             "semilla": semilla, "es_piloto": es_piloto,
         },
-        "procedencia": _procedencia(ruta_bag, distro),
+        "procedencia": _procedencia(ruta_bag, distro, mundo, mapa),
         "solicitud": _solicitud(crudos, condicion, niveles, origen, destino),
         "marcas": marcas,
         "verdad_de_terreno": _verdad(banco, error_posicion_m, pose_llegada,
@@ -320,7 +403,7 @@ def _git(*args):
         return ""
 
 
-def _procedencia(ruta_bag, distro=None):
+def _procedencia(ruta_bag, distro=None, mundo=None, mapa=None):
     """De donde salio esta medida. Sin esto no se puede reproducir en S26."""
     import hashlib
     with open(_catalogo(), "rb") as f:
@@ -346,8 +429,16 @@ def _procedencia(ruta_bag, distro=None):
         # lo diga el registro es mejor que descubrirlo en S26.
         "repositorio_limpio": _git("status", "--porcelain") == "",
         "distro": distro,
-        "mundo": os.environ.get("TESIS_MUNDO", ""),
-        "mapa": os.environ.get("TESIS_MAPA", ""),
+        # Nadie exportaba TESIS_MUNDO ni TESIS_MAPA, asi que estos dos campos
+        # salian en blanco y el esquema los daba por buenos: son 'string' sin
+        # minLength. Un registro sin mundo ni mapa no se puede reproducir en
+        # S26, que es justo para lo que existe esta seccion. Ahora se avisa, y
+        # se pueden pasar por --mundo/--mapa. Los dos primeros registros, los
+        # del 2026-08-29, se compusieron leyendolos del sistema vivo:
+        # 'pgrep -a gzserver' para el mundo y 'ros2 param get /<ns>/map_server
+        # yaml_filename' para el mapa.
+        "mundo": mundo or os.environ.get("TESIS_MUNDO", ""),
+        "mapa": mapa or os.environ.get("TESIS_MAPA", ""),
         "catalogo_puntos": "puntos_interes.yaml",
         # Las poses del catalogo se movieron tres veces en agosto. Un registro
         # que no lo fije no se puede comparar con otro: 'ETM1' puede no ser el
@@ -587,18 +678,68 @@ def main():
                    help="En fisico, la lectura de cinta. Sin el, el registro "
                         "queda pendiente de medir (§4.4) y el analizador lo "
                         "rechaza hasta que se rellene.")
-    p.add_argument("--rtf", type=float, default=None)
+    p.add_argument("--rtf", type=float, default=None,
+                   help="Por omision se lee <bag>/rtf.json, que escribe "
+                        "grabar_mision.sh midiendo /clock alrededor de la "
+                        "ventana grabada. Pasarlo a mano solo deberia hacer "
+                        "falta con bags anteriores al 2026-08-29, que no lo "
+                        "traen; en ese caso el numero es de OTRA ventana y hay "
+                        "que decirlo en el informe de evidencia, porque el "
+                        "esquema no tiene campo para anotarlo.")
     p.add_argument("--semilla", type=int, default=None)
     p.add_argument("--piloto", action="store_true")
     p.add_argument("--medido-por", default="automatico")
     p.add_argument("--distro", choices=["humble", "jazzy"], default=None,
                    help="Por omision, ROS_DISTRO. Hace falta al componer en el "
                         "PC un bag grabado en el carro.")
+    p.add_argument("--mundo", default=None,
+                   help="Ruta del .world. Si se omite se usa TESIS_MUNDO, y si "
+                        "tampoco esta, el campo queda vacio y se avisa. Del "
+                        "sistema vivo sale con 'pgrep -a gzserver'.")
+    p.add_argument("--mapa", default=None,
+                   help="Ruta del .yaml del mapa. Del sistema vivo sale con "
+                        "'ros2 param get /<ns>/map_server yaml_filename'.")
     p.add_argument("--salida", required=True)
     a = p.parse_args()
 
-    registro = componer(a.bag, a.banco, a.campana, a.error_posicion_m, a.rtf,
-                        a.semilla, a.piloto, a.medido_por, a.distro)
+    # El RTF sale del bag si esta ahi. Se prefiere lo medido durante la mision
+    # sobre lo que se escriba en la linea de ordenes: el numero de rtf.json
+    # cubre exactamente la ventana grabada, y uno tecleado a mano casi siempre
+    # es de otro momento.
+    rtf = a.rtf
+    ruta_rtf = os.path.join(a.bag, "rtf.json")
+    if os.path.exists(ruta_rtf):
+        with open(ruta_rtf, encoding="utf-8") as f:
+            medido = json.load(f)["rtf"]
+        if a.rtf is not None and abs(a.rtf - medido) > 1e-6:
+            print(f"AVISO: se ignora --rtf {a.rtf} y se usa el medido durante "
+                  f"la mision, {medido} ({ruta_rtf}).", file=sys.stderr)
+        rtf = medido
+    elif a.banco == "simulacion" and a.rtf is None:
+        raise SystemExit(
+            f"Falta el RTF y el banco es 'simulacion', que el esquema exige con "
+            f"RTF numerico (RNF-06 pide >= 0,99).\n"
+            f"No hay {ruta_rtf}, y el bag NO puede darlo: con --use-sim-time "
+            f"todos sus sellos son de tiempo de simulacion, incluidos "
+            f"'starting_time' y 'duration', asi que sim/pared vale 1 por "
+            f"construccion.\n"
+            f"Si la simulacion que grabo este bag sigue viva, medirlo ahora con "
+            f"'python3 herramientas/medir_rtf.py --segundos 20' y pasarlo con "
+            f"--rtf, anotando en el informe que es posterior a la mision. "
+            f"Si ya se cerro, el RTF de esa corrida se perdio.")
+
+    registro = componer(a.bag, a.banco, a.campana, a.error_posicion_m, rtf,
+                        a.semilla, a.piloto, a.medido_por, a.distro,
+                        a.mundo, a.mapa)
+
+    # El esquema acepta cadena vacia en estos dos -son 'string' a secas-, asi
+    # que si no se avisa aqui el hueco no lo detecta nadie hasta S26, cuando ya
+    # no se puede reconstruir de que mundo salio la medida.
+    for campo in ("mundo", "mapa"):
+        if not registro["procedencia"][campo]:
+            print(f"AVISO: procedencia.{campo} queda vacio. El registro valida "
+                  f"igual, pero no se podra reproducir. Pasarlo con --{campo}.",
+                  file=sys.stderr)
 
     # Validar ANTES de escribir. Sin esto, 'congelado' es una promesa.
     import jsonschema

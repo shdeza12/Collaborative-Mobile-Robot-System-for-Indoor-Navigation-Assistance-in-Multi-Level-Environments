@@ -130,6 +130,22 @@ echo "Robots: ${ROBOTS[*]}   Topicos: ${#TOPICOS[@]}"
 echo "Ctrl-C para cerrar el bag."
 mkdir -p "$(dirname "$DESTINO")"
 
+# --- Marca de RTF, antes de grabar ------------------------------------------
+# EL BAG NO PUEDE DAR EL RTF, y por eso se mide aqui. Con '--use-sim-time'
+# 'ros2 bag record' sella en tiempo de simulacion tanto los mensajes como el
+# 'starting_time' y la 'duration' del metadata.yaml, asi que sim/pared vale 1
+# por construccion y no queda ningun ancla de reloj de pared dentro del bag.
+# Se comprobo el 2026-08-29 sobre S20_A_M1 y S20_A_M2: las dos misiones se
+# grabaron sin RTF y el esquema lo exige -banco simulacion => rtf numerico-,
+# asi que hubo que medirlo DESPUES, sobre la sesion todavia viva. Eso salio
+# bien por suerte: si el gzserver se hubiera cerrado, las dos corridas no se
+# habrian podido registrar y habria que repetirlas.
+#
+# Medirlo aqui no compite con la simulacion: son dos lecturas de /clock, una
+# antes y otra despues, no un muestreo continuo.
+MARCA_DIR="$(dirname "$0")"
+MARCA_INI="$(python3 "$MARCA_DIR/medir_rtf.py" --marca 2>/dev/null || true)"
+
 # '--use-sim-time' NO es opcional, y no es lo mismo que el use_sim_time de los
 # nodos. Sin el, 'ros2 bag record' sella cada mensaje con el reloj de PARED, y
 # de esos sellos salen TODAS las marcas de RF-25: componer_registro.py lee el
@@ -144,4 +160,51 @@ mkdir -p "$(dirname "$DESTINO")"
 # El precio de la bandera es que hasta que no llegue el primer /clock no se
 # escribe nada en el bag. Aqui eso no es un riesgo anadido: la guarda 1 ya se
 # nego a grabar si nadie publica /clock.
-exec ros2 bag record --use-sim-time -o "$DESTINO" "${TOPICOS[@]}"
+#
+# YA NO ES 'exec'. Lo era, y tenia que dejar de serlo: con exec este proceso se
+# reemplaza por el grabador y no queda nadie que tome la segunda marca de RTF
+# al cerrar el bag. El trap de INT es lo que permite que Ctrl-C cierre la
+# grabacion sin matar tambien el calculo: bash aplaza el trap hasta que el
+# comando en primer plano termina, asi que el grabador recibe su SIGINT, cierra
+# el bag ordenadamente, y solo entonces se sigue aqui.
+trap 'echo "" ' INT
+set +e
+ros2 bag record --use-sim-time -o "$DESTINO" "${TOPICOS[@]}"
+ESTADO_GRABACION=$?
+set -e
+trap - INT
+
+# --- Marca de RTF, al cerrar ------------------------------------------------
+MARCA_FIN="$(python3 "$MARCA_DIR/medir_rtf.py" --marca 2>/dev/null || true)"
+
+if [ -n "$MARCA_INI" ] && [ -n "$MARCA_FIN" ]; then
+    python3 - "$DESTINO" "$MARCA_INI" "$MARCA_FIN" <<'PY'
+import json, sys
+destino, ini, fin = sys.argv[1], sys.argv[2].split(), sys.argv[3].split()
+sim0, pared0 = float(ini[0]), float(ini[1])
+sim1, pared1 = float(fin[0]), float(fin[1])
+d_sim, d_pared = sim1 - sim0, pared1 - pared0
+if d_pared <= 0:
+    print("AVISO: ventana de pared no positiva, no se escribe rtf.json",
+          file=sys.stderr)
+    raise SystemExit(0)
+rtf = d_sim / d_pared
+datos = {"rtf": round(rtf, 4), "sim_s": round(d_sim, 3),
+         "pared_s": round(d_pared, 3), "metodo": "marcas_clock_alrededor_del_bag"}
+with open(f"{destino}/rtf.json", "w") as f:
+    json.dump(datos, f, indent=2)
+    f.write("\n")
+print(f"RTF de la ventana grabada: {rtf:.4f} "
+      f"(sim {d_sim:.1f} s / pared {d_pared:.1f} s) -> {destino}/rtf.json")
+if rtf < 0.99:
+    # No se aborta ni se borra nada: la decision de descartar es del §8 del
+    # protocolo y se toma al componer el registro, no aqui.
+    print("AVISO: RTF < 0,99. RNF-06 no se cumple y la corrida es candidata "
+          "a 'rtf_bajo' en causa_descarte.", file=sys.stderr)
+PY
+else
+    echo "AVISO: no se pudo medir el RTF (falta alguna marca de /clock)." >&2
+    echo "El registro tendra que componerse pasando --rtf a mano." >&2
+fi
+
+exit "$ESTADO_GRABACION"
