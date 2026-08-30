@@ -370,24 +370,48 @@ en una misión puede haber un solo robot, o el otro puede caerse. Se probó mata
 **El robot del piso 2 no depende del simulador del piso 1.** La asimetría del §5.3 no introduce un
 punto único de fallo.
 
-## 7. Lo que estas pruebas NO demuestran
+## 7. Lo que estas pruebas NO demostraban — y qué pasó con cada punto
 
-Se dice explícitamente para que nadie cite este documento de más:
+Esta sección se escribió el 30-ago por la mañana, antes de implementar nada. **Se conserva su
+redacción original** y se anota debajo de cada punto qué ocurrió después, en vez de reescribirla:
+una lista de límites que se edita cuando dejan de doler no sirve para nada.
 
 1. **No se probó Nav2 ni AMCL.** Y son el caso que queda: corren **fuera** de gzserver, así que no
    heredan ningún remapeo y necesitan el `-r /clock:=/robot2/clock` explícito.
    `nav_amcl_demo_sim.launch.py` hoy **no tiene por dónde recibirlo**.
+
+   → **CERRADO el mismo día.** El launch tiene ahora un argumento `clock_topic`, cableado a los
+   tres sitios que lo necesitan, y la corrida del §7.1 llevó los dos Nav2 arriba a la vez.
+   Pendiente hermano: el `clock_topic` de `slam_toolbox.launch.py` está escrito y **nunca se ha
+   ejecutado**.
+
 2. **No se midieron los sellos de `/tf`.** El `robot_state_publisher` corrió sin `use_sim_time` y
    copia la marca de `joint_states`, así que debería estar bien. *Debería* no es *medido*.
+
+   → **MEDIDO.** Sobre el bag entero: de **94.981 transformadas, 0 tienen marco hijo sin prefijo**.
+   Los dos árboles comparten `/tf` sin colisionar.
+
 3. **No se ha ejecutado ni un solo relevo.** Quitar el bloqueo es condición necesaria y no
    suficiente: el hito 5 sigue en 🟡 hasta que haya una misión de dos tramos con relevo medida
    contra `/odom`.
 
-**La opción B queda verificada hasta donde se puede verificar sin tocar código.** Lo que falta ya
-no es prueba sino implementación, y P4-a dejó claro que no son dos líneas: hay que cambiar el
-arranque de gzserver por un `ExecuteProcess` propio, pasar `-gazebo_namespace` al spawn y abrir un
-argumento de reloj en el launch de Nav2. **C** —`domain_bridge`— deja de hacer falta y se queda en
-reserva; **D** sigue verificada y es el plan de repliegue si la implementación de B se atasca.
+   → **EJECUTADO.** `piso1_representacion → piso2_lab_313`, un relevo, `exito: true`, 47,6 s, con
+   las dos llegadas medidas contra `/odom` (0,128 m y 0,077 m contra un criterio de 0,25 m).
+   Documentado aparte en [`S21_relevo_ejecutado.md`](S21_relevo_ejecutado.md), que es donde hay que
+   mirar los números. **Y sigue sin cerrar la condición B**, porque una corrida no es una campaña:
+   el protocolo pide N = 30 con sorteo, y esto es n = 1.
+
+### 7.1 El resultado
+
+**La opción B queda implementada y ejercitada, no solo verificada.** Lo que el 30-ago por la mañana
+era «falta implementación, y no son dos líneas» —`ExecuteProcess` propio para gzserver,
+`-gazebo_namespace` en el spawn, argumento de reloj en el launch de Nav2— está hecho y corrido.
+
+**C** —`domain_bridge`— deja de hacer falta y se queda en reserva. **D** —dos contextos `rclpy` en
+un proceso— sigue verificada y ya no es plan de repliegue de nada, porque B no se atascó.
+
+Lo que queda del bloqueo no es técnico sino de registro: a fecha de este documento todavía hay
+archivos del repositorio que explican `ROS_DOMAIN_ID=2` como si fuera lo vigente.
 
 ## 8. Cómo se reproduce
 
