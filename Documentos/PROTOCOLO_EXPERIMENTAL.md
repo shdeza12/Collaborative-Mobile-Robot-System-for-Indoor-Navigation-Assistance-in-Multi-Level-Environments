@@ -382,6 +382,16 @@ estado que se arrastra, y un arrastre sistemático es exactamente lo que una cam
 
 El procedimiento de limpieza es el de la [guía de ejecución](GUIA_EJECUCION.md) §0.
 
+**El procedimiento completo de una corrida —los seis comandos, lo que tiene que salir en cada uno,
+qué hacer si no sale y las cinco condiciones que la hacen válida— está en
+[`RUNBOOK_CAMPANA.md`](RUNBOOK_CAMPANA.md)**, escrito el 2026-08-30 para repetirse una vez por
+misión sin tener que releer este documento.
+
+Ahí se toma además una decisión que este protocolo no fijaba: **las dos pilas se levantan también
+en las misiones de condición A**, aunque el `robot2` no participe. Si A corriera con un `gzserver`
+y B con dos, la diferencia de tiempos entre condiciones llevaría dentro la diferencia de carga de
+la máquina, y A dejaría de ser una línea base comparable.
+
 ---
 
 ## 7. Pilotaje antes de la campaña

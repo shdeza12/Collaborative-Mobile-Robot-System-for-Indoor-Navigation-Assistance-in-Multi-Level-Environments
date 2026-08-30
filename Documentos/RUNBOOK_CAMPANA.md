@@ -1,0 +1,250 @@
+# Runbook de una corrida — cómo se ejecuta una misión del listado sorteado
+
+**Escrito el 2026-08-30.** Es el procedimiento que hay que repetir **una vez por misión** del
+[listado sorteado](Evidencia/campana_oe4_misiones.csv), y está escrito para ejecutarse sin pensar:
+cada paso trae su comando, lo que tiene que salir, qué hacer si no sale, y cuándo se da por
+cerrado.
+
+Está separado de [`GUIA_EJECUCION.md`](GUIA_EJECUCION.md) a propósito. Aquella explica cómo
+levantar y depurar el sistema; ésta es una lista de verificación que se sigue con la simulación ya
+entendida. Mezclarlas haría que el día de la campaña haya que leer treinta páginas para ejecutar
+seis comandos.
+
+El listado y su semilla salen de la §6.3 del [protocolo](PROTOCOLO_EXPERIMENTAL.md); el
+aislamiento entre corridas, de la §6.4; el pilotaje, de la §7.
+
+---
+
+## 0. Qué es la primera corrida, y qué NO es
+
+**La primera corrida es un PILOTO, no la misión 1 de la campaña.** Conviene decirlo porque el
+2026-08-30 se afirmó lo contrario en una conversación y era falso: la §7 del protocolo exige cinco
+corridas de pilotaje **antes** de la campaña, y sus datos **no forman parte de ella**.
+
+Las tres razones por las que ésta no puede contar como corrida de campaña:
+
+1. **El analizador de campaña no existe todavía.** Una de las cuatro preguntas que la §7 manda
+   responder en el pilotaje es *«¿el registro se escribe completo y es procesable sin tocarlo a
+   mano?»*, y sin analizador esa pregunta no se puede contestar.
+2. **La campaña es S24.** Ejecutarla antes de tener el instrumento validado es exactamente lo que
+   el pilotaje existe para evitar.
+3. **Hay dos productores del mismo registro y nadie los ha comparado nunca** (§6 de aquí abajo).
+
+Que sea un piloto **no** lo hace desechable: usa el par sorteado de verdad, se compone con
+`--piloto`, y si todo pasa, la misión 1 se vuelve a correr en S24 como corrida de campaña. Repetir
+el par no es un problema; los datos de piloto se guardan aparte y marcados.
+
+**Misión de esta primera corrida**, fila 1 del listado:
+
+| | |
+|---|---|
+| Condición | **A** (intra-nivel, entera en el piso 1) |
+| Origen | `piso1_etm2` — ETM2 |
+| Destino | `piso1_etm11` — ETM11 |
+| Relevos esperados | **0** |
+| Robot que la ejecuta | `robot1` |
+
+---
+
+## 1. Las dos pilas se levantan siempre, también en condición A
+
+Aunque la condición A no toca al `robot2`, **se levantan las dos**. No es celo:
+
+La condición A es el **control** contra el que se compara la B (§6.2 del protocolo). Si las
+misiones de A corrieran con un `gzserver` y las de B con dos, la diferencia de tiempos entre
+condiciones llevaría dentro la diferencia de carga de la máquina, y no habría forma de separarlas
+después. La comparación quedaría confundida justo en la variable que la tesis quiere medir.
+
+El coste es real —arrancar la segunda pila— y se paga. El RTF con las dos pilas y los dos Nav2
+arriba se midió en **0,9981** el 2026-08-30, por encima del 0,99 que exige RNF-06, así que la
+carga extra no invalida nada ([`S21_relevo_ejecutado.md`](Evidencia/S21_relevo_ejecutado.md) §2.2).
+
+> **Salvedad honesta:** esa medida de RTF **contradice** otra del 26-ago que dio 0,955 y 0,811 con
+> las dos pilas. Las dos no se han conciliado y la sospecha —sin anotar en ninguna de las dos— es
+> la GUI de Gazebo. Por eso el paso 5 de abajo manda mirar el RTF de **cada** corrida y descartarla
+> si baja de 0,99, en vez de dar por buena la cifra del 30-ago.
+
+---
+
+## 2. Limpieza y arranque
+
+Un `gzserver` **nuevo** por misión, sin excepción (§6.4). Encadenar misiones sobre la misma
+simulación ya costó una corrida: `S20_piloto_02` arrancó a (−17,097, 10,452) por reusar el
+`gzserver` anterior y salió FALLIDA a 0,573 m.
+
+Cuatro terminales. **Ninguna exporta `ROS_DOMAIN_ID`**: desde el 2026-08-30 los dos robots viven en
+el dominio 0, y exportar algo es lo que rompe.
+
+**Terminal 1 y 2 — parar lo anterior y levantar las dos pilas:**
+
+```bash
+cd "$TESIS" && herramientas/robot.sh robot1 parar && herramientas/robot.sh robot1 nav2
+```
+
+```bash
+cd "$TESIS" && herramientas/robot.sh robot2 parar && herramientas/robot.sh robot2 nav2
+```
+
+**Esperado:** cada uno termina anunciando su puerto libre y arranca Gazebo y Nav2. Tardan 28–35 s.
+
+**Si falla:** si `parar` avisa de procesos «que no lanzó `robot.sh`», mátalos a mano con `kill -9`
+y repite — no los toca a propósito, porque no sabe de quién son. Si el puerto sigue ocupado tras
+10 s, el script sale con error y no hay que seguir adelante.
+
+---
+
+## 3. La compuerta: nada se mide sobre una pila que no está lista
+
+Estos dos comandos existen porque las dos comprobaciones se venían haciendo a ojo y un día no se
+hicieron: el bag `S20_piloto_01` tiene **cero** mensajes en `cmd_vel`, `amcl_pose` y `plan`. Se
+grabó una misión entera contra una pila muerta y no se notó hasta abrir el bag.
+
+```bash
+cd "$TESIS" && herramientas/esperar_nav2.sh robot1 && herramientas/esperar_nav2.sh robot2
+```
+
+**Esperado:** `LISTA. Nav2, controladores, parametros y condicion inicial.` dos veces, y código de
+salida 0. Comprueba los siete nodos de ciclo de vida en `active` y los siete controladores.
+
+**Si falla:** el propio script dice cuál de las dos cosas falta. Si faltan **controladores**, suele
+ser el spawner corriendo antes que `gazebo_ros2_control`: relanzar esa pila. Si faltan **nodos de
+Nav2**, es la carrera entre los dos `lifecycle_manager`: relanzar suele bastar.
+
+```bash
+cd "$TESIS" && python3 herramientas/verificar_condicion_inicial.py robot1 && python3 herramientas/verificar_condicion_inicial.py robot2
+```
+
+**Esperado:** los dos dentro de **0,15 m** de su pose declarada.
+
+**Si falla:** relanzar la pila que se salga. **No se corrige a mano y no se sigue igualmente.** Las
+pilas derivan ~17 mm/min en reposo, así que una simulación que lleva rato encendida arranca
+contaminada: la corrida del 30-ago empezó con **0,535 m y 0,745 m** de error inicial hasta que se
+relanzaron las dos, que las dejó en 0,020 m. Medir un error de llegada sobre una pose contaminada
+mide el tiempo que el simulador llevaba encendido, no el sistema.
+
+---
+
+## 4. El coordinador
+
+**Terminal 3:**
+
+```bash
+cd ~/deepracer_sim_ws && source install/setup.bash && mkdir -p /tmp/registro_vivo && ros2 run coordinacion coordinador --ros-args -p use_sim_time:=true -p prefijo_mision:=S21P -p ruta_registros:=/tmp/registro_vivo
+```
+
+`ruta_registros` **solo va en el piloto**, y es para la comparación del §6: enciende el registrador
+en vivo del coordinador además del bag. En la campaña se quita, porque escribir en vivo compite por
+CPU con dos Gazebo justo donde RNF-06 exige RTF ≥ 0,99.
+
+**Esperado:** `Coordinador listo. 31 puntos, asignacion {...}`. Los 31 puntos son el catálogo con
+el que se sorteó — si dice otro número, el sorteo y la corrida no son del mismo catálogo y hay que
+parar.
+
+**`use_sim_time:=true` no es opcional.** El §3 del protocolo define `t_solicitud` sobre el reloj de
+simulación, que es el mismo que sella el bag. Sin él, el coordinador marcaría con reloj de pared y
+con RTF ≥ 0,99 las dos formas difieren hasta un 1 %: sobre `t_respuesta` eso no es ruido, es sesgo.
+
+---
+
+## 5. Grabar
+
+**Terminal 4.** El nombre del bag lleva el piloto, la condición y el número de la fila del listado:
+
+```bash
+cd "$TESIS" && source ~/deepracer_sim_ws/install/setup.bash && herramientas/grabar_mision.sh S21_piloto_A_01 robot1 robot2
+```
+
+**Esperado:** `Grabando en ...` con el recuento de tópicos, y ni un `AVISO`.
+
+**Si falla:** el script se niega a grabar antes que grabar mal, y dice por qué. Los dos casos
+frecuentes: nadie publica `/clock` o `/coordinacion/estado_mision` —de ahí salen **todas** las
+marcas temporales—, o la terminal no tiene el workspace sourceado y `ros2 bag record` descartaría
+`coordinacion_msgs` en silencio dejando un bag con pinta de bueno. Los dos se han dado.
+
+El script deja también el `rtf.json` junto al bag, con marcas de `/clock` antes y después. Eso es lo
+único que puede dar el RTF: con `--use-sim-time` el bag sella *todo* en tiempo de simulación,
+incluidos `starting_time` y `duration`, así que sim/pared vale 1 por construcción.
+
+---
+
+## 6. Lanzar la misión, y la comprobación que nadie ha hecho nunca
+
+```bash
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso1_etm2', destino_id: 'piso1_etm11'}"
+```
+
+**Esperado:** `exito: true`, **`relevos: 0`** por ser condición A, y la secuencia de etapas
+`RECIBIDA → TRAMO_1 → TRAMO_1 → COMPLETADA`. La segunda `TRAMO_1` no es un error: los dos tramos de
+una misión intra-nivel comparten etapa y lo único que cambia es el destino.
+
+Cuando termine, **Ctrl-C en la terminal 4** para cerrar el bag. En ese orden: cortar antes deja la
+misión sin su última marca.
+
+> **La comprobación nueva.** Desde la fusión del 2026-08-30 hay **dos** productores del mismo
+> registro: `registrador.py`, que lo escribe en vivo dentro del coordinador, y
+> `componer_registro.py`, que lo compone desde el bag después. Los dos declaran el mismo esquema
+> congelado y **nadie los ha comparado nunca**. Si difieren, la campaña tendría dos verdades y
+> ninguna forma de elegir. Este piloto existe en buena medida para eso: por ese motivo el paso 4
+> lleva `ruta_registros`. Al terminar hay que comparar el archivo de `/tmp/registro_vivo` con el que
+> componga el paso 7:
+>
+> ```bash
+> diff <(python3 -m json.tool /tmp/registro_vivo/*.json) <(python3 -m json.tool Documentos/Evidencia/registros/S21_piloto_A_01.json)
+> ```
+>
+> Si coinciden salvo en los campos que solo el bag puede dar —el RTF, entre ellos—, se declara
+> autoritativo el del bag, que sobrevive a un coordinador caído, y se anota. Si difieren en una
+> marca temporal o en el veredicto, hay que resolverlo **antes de S24**: la campaña no puede tener
+> dos verdades.
+
+---
+
+## 7. Componer el registro y dictaminar la llegada
+
+```bash
+cd "$TESIS" && source ~/deepracer_sim_ws/install/setup.bash && python3 herramientas/diagnosticar_llegada.py ~/tesis_evidencia/S21_piloto_A_01 --robot robot1
+```
+
+**El veredicto de llegada se juzga contra `/odom`, nunca contra el `SUCCEEDED` de Nav2.** Es la
+regla del 12-ago y la razón de que exista el riesgo R12. Criterio: **≤ 0,25 m**.
+
+**Cuidado con `--spawn`:** su valor por defecto es la pose de `robot1`. Pasarlo mal con
+`--robot robot2` acusó **15,868 m** de desvío en una corrida que había arrancado a 0,039 m.
+
+```bash
+cd "$TESIS" && source ~/deepracer_sim_ws/install/setup.bash && python3 herramientas/componer_registro.py ~/tesis_evidencia/S21_piloto_A_01 --banco simulacion --campana OE4_simulacion --piloto --semilla 20260822 --salida Documentos/Evidencia/registros/S21_piloto_A_01.json
+```
+
+**Esperado:** un JSON validado contra el esquema, sin ningún campo que haya que rellenar a mano.
+`--piloto` es obligatorio aquí: sin él el registro entraría como dato de campaña.
+
+---
+
+## 8. Cuándo la corrida vale
+
+Las cinco condiciones. **Si falla una, la corrida se descarta y se repite** (§8 del protocolo), y
+el descarte se anota — el techo es el 20 %.
+
+| | criterio | de dónde sale |
+|---|---|---|
+| 1 | pose inicial de los dos dentro de **0,15 m** | paso 3 |
+| 2 | **RTF ≥ 0,99** | `rtf.json` del bag |
+| 3 | error de llegada **≤ 0,25 m** contra `/odom` | paso 7 |
+| 4 | el registro se compone **sin tocar un campo a mano** | paso 7 |
+| 5 | número de relevos = **0** en condición A, **1** en B | resultado de la acción |
+
+**Criterio de cierre del piloto:** las cinco pasan, y los dos registros del §6 coinciden o se sabe
+por qué no.
+
+---
+
+## 9. Lo que este runbook todavía no cubre
+
+1. **La comprobación 4 no se puede cerrar hasta que exista el analizador de campaña.** «Procesable
+   sin intervención manual» significa que un programa lo agrega, y ese programa es el pendiente 6
+   de la §9 del protocolo.
+2. **No dice nada del banco físico.** Es el procedimiento de simulación. La campaña de hardware
+   (RF-27) tiene otras condiciones iniciales y otra verdad de terreno, y su runbook no está escrito.
+3. **Las cinco corridas de pilotaje que pide la §7 no están planificadas una por una.** Ésta es la
+   primera; las otras cuatro deberían cubrir al menos una misión de condición B, para no validar el
+   instrumento sobre media función.
