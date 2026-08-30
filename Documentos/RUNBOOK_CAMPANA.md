@@ -44,6 +44,42 @@ el par no es un problema; los datos de piloto se guardan aparte y marcados.
 | Relevos esperados | **0** |
 | Robot que la ejecuta | `robot1` |
 
+### 0.1 De dónde se ejecuta cada comando
+
+Una corrida abre **cuatro terminales**, y cada una empieza en tu carpeta personal. Antes del primer
+comando de cada terminal hay que dejarla donde toca. Sólo hay dos sitios:
+
+| Comandos que empiezan por… | Se ejecutan desde |
+|---|---|
+| `herramientas/…`, `python3 herramientas/…` | la **raíz del repositorio** (tu clon) |
+| `ros2 …` a secas | `~/deepracer_sim_ws`, con `source install/setup.bash` hecho |
+
+Este runbook no escribe la ruta de tu clon en ningún sitio, porque no la sabe: puede colgar de
+`~`, de `~/Documents` o de un disco externo. Para confirmar que la terminal está en el sitio antes
+de empezar:
+
+```bash
+ls herramientas/robot.sh
+```
+
+**Esperado:** imprime `herramientas/robot.sh`.
+
+**Si falla** con `No such file or directory`, no estás en el repositorio: `cd` a tu clon y repite.
+Ese mensaje es el diagnóstico correcto y no hay que buscar más lejos.
+
+> **Por qué se dice esto y no «define una variable con la ruta».** Del 22 al 30 de agosto este
+> proyecto pedía exactamente eso: una variable `TESIS`, y los comandos escritos como
+> `cd "$TESIS" && herramientas/…`. El 2026-08-30 la primera orden de este runbook murió así:
+>
+> ```
+> bash: herramientas/robot.sh: No such file or directory
+> ```
+>
+> `TESIS` no estaba definida, y `cd ""` **no es un error para bash**: devuelve 0 sin moverse. La
+> terminal se quedó en su sitio y el fallo salió un eslabón más tarde, acusando a un script que
+> estaba perfectamente. Quitar la variable no es un rodeo: es lo que hace que ese mensaje vuelva a
+> decir la verdad. Es además la forma que usa el resto del repositorio.
+
 ---
 
 ## 1. Las dos pilas se levantan siempre, también en condición A
@@ -75,14 +111,15 @@ simulación ya costó una corrida: `S20_piloto_02` arrancó a (−17,097, 10,452
 Cuatro terminales. **Ninguna exporta `ROS_DOMAIN_ID`**: desde el 2026-08-30 los dos robots viven en
 el dominio 0, y exportar algo es lo que rompe.
 
-**Terminal 1 y 2 — parar lo anterior y levantar las dos pilas:**
+**Terminal 1 y 2 — parar lo anterior y levantar las dos pilas.** Las dos, **desde la raíz del
+repositorio** (§0.1):
 
 ```bash
-cd "$TESIS" && herramientas/robot.sh robot1 parar && herramientas/robot.sh robot1 nav2
+herramientas/robot.sh robot1 parar && herramientas/robot.sh robot1 nav2
 ```
 
 ```bash
-cd "$TESIS" && herramientas/robot.sh robot2 parar && herramientas/robot.sh robot2 nav2
+herramientas/robot.sh robot2 parar && herramientas/robot.sh robot2 nav2
 ```
 
 **Esperado:** cada uno termina anunciando su puerto libre y arranca Gazebo y Nav2. Tardan 28–35 s.
@@ -99,8 +136,10 @@ Estos dos comandos existen porque las dos comprobaciones se venían haciendo a o
 hicieron: el bag `S20_piloto_01` tiene **cero** mensajes en `cmd_vel`, `amcl_pose` y `plan`. Se
 grabó una misión entera contra una pila muerta y no se notó hasta abrir el bag.
 
+**Terminal 4, desde la raíz del repositorio:**
+
 ```bash
-cd "$TESIS" && herramientas/esperar_nav2.sh robot1 && herramientas/esperar_nav2.sh robot2
+source ~/deepracer_sim_ws/install/setup.bash && herramientas/esperar_nav2.sh robot1 && herramientas/esperar_nav2.sh robot2
 ```
 
 **Esperado:** `LISTA. Nav2, controladores, parametros y condicion inicial.` dos veces, y código de
@@ -110,8 +149,10 @@ salida 0. Comprueba los siete nodos de ciclo de vida en `active` y los siete con
 ser el spawner corriendo antes que `gazebo_ros2_control`: relanzar esa pila. Si faltan **nodos de
 Nav2**, es la carrera entre los dos `lifecycle_manager`: relanzar suele bastar.
 
+**Terminal 4, desde la raíz del repositorio:**
+
 ```bash
-cd "$TESIS" && python3 herramientas/verificar_condicion_inicial.py robot1 && python3 herramientas/verificar_condicion_inicial.py robot2
+source ~/deepracer_sim_ws/install/setup.bash && python3 herramientas/verificar_condicion_inicial.py robot1 && python3 herramientas/verificar_condicion_inicial.py robot2
 ```
 
 **Esperado:** los dos dentro de **0,15 m** de su pose declarada.
@@ -126,7 +167,7 @@ mide el tiempo que el simulador llevaba encendido, no el sistema.
 
 ## 4. El coordinador
 
-**Terminal 3:**
+**Terminal 3.** Es la única que trabaja desde el workspace, y el propio comando hace ese `cd`:
 
 ```bash
 cd ~/deepracer_sim_ws && source install/setup.bash && mkdir -p /tmp/registro_vivo && ros2 run coordinacion coordinador --ros-args -p use_sim_time:=true -p prefijo_mision:=S21P -p ruta_registros:=/tmp/registro_vivo
@@ -148,10 +189,10 @@ con RTF ≥ 0,99 las dos formas difieren hasta un 1 %: sobre `t_respuesta` eso n
 
 ## 5. Grabar
 
-**Terminal 4.** El nombre del bag lleva el piloto, la condición y el número de la fila del listado:
+**Terminal 4, desde la raíz del repositorio.** El nombre del bag lleva el piloto, la condición y el número de la fila del listado:
 
 ```bash
-cd "$TESIS" && source ~/deepracer_sim_ws/install/setup.bash && herramientas/grabar_mision.sh S21_piloto_A_01 robot1 robot2
+source ~/deepracer_sim_ws/install/setup.bash && herramientas/grabar_mision.sh S21_piloto_A_01 robot1 robot2
 ```
 
 **Esperado:** `Grabando en ...` con el recuento de tópicos, y ni un `AVISO`.
@@ -168,6 +209,9 @@ incluidos `starting_time` y `duration`, así que sim/pared vale 1 por construcci
 ---
 
 ## 6. Lanzar la misión, y la comprobación que nadie ha hecho nunca
+
+**Terminal 5** —o la 4 cuando el grabador ya esté corriendo en segundo plano—. Trabaja desde el
+workspace, y el comando hace el `cd`:
 
 ```bash
 cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso1_etm2', destino_id: 'piso1_etm11'}"
@@ -201,8 +245,10 @@ misión sin su última marca.
 
 ## 7. Componer el registro y dictaminar la llegada
 
+**Terminal 4, desde la raíz del repositorio:**
+
 ```bash
-cd "$TESIS" && source ~/deepracer_sim_ws/install/setup.bash && python3 herramientas/diagnosticar_llegada.py ~/tesis_evidencia/S21_piloto_A_01 --robot robot1
+source ~/deepracer_sim_ws/install/setup.bash && python3 herramientas/diagnosticar_llegada.py ~/tesis_evidencia/S21_piloto_A_01 --robot robot1
 ```
 
 **El veredicto de llegada se juzga contra `/odom`, nunca contra el `SUCCEEDED` de Nav2.** Es la
@@ -211,8 +257,10 @@ regla del 12-ago y la razón de que exista el riesgo R12. Criterio: **≤ 0,25 m
 **Cuidado con `--spawn`:** su valor por defecto es la pose de `robot1`. Pasarlo mal con
 `--robot robot2` acusó **15,868 m** de desvío en una corrida que había arrancado a 0,039 m.
 
+**Terminal 4, desde la raíz del repositorio** —la ruta de `--salida` es relativa a ella:
+
 ```bash
-cd "$TESIS" && source ~/deepracer_sim_ws/install/setup.bash && python3 herramientas/componer_registro.py ~/tesis_evidencia/S21_piloto_A_01 --banco simulacion --campana OE4_simulacion --piloto --semilla 20260822 --salida Documentos/Evidencia/registros/S21_piloto_A_01.json
+source ~/deepracer_sim_ws/install/setup.bash && python3 herramientas/componer_registro.py ~/tesis_evidencia/S21_piloto_A_01 --banco simulacion --campana OE4_simulacion --piloto --semilla 20260822 --salida Documentos/Evidencia/registros/S21_piloto_A_01.json
 ```
 
 **Esperado:** un JSON validado contra el esquema, sin ningún campo que haya que rellenar a mano.

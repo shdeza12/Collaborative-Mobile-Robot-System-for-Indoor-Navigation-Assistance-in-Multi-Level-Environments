@@ -9,31 +9,40 @@ para el recorrido de mapeo y la verificación de cobertura del mapa,
 [`guia_simulacion_slam.md`](guia_simulacion_slam.md); para el detalle de la pila Nav2,
 [`guia_navegacion_nav2.md`](guia_navegacion_nav2.md).
 
-**Regla que se aplica a todos los comandos:** cada terminal nueva necesita su propio
-`cd ~/deepracer_sim_ws && source install/setup.bash`. El workspace no se sourcea solo.
+**Primera regla:** cada terminal nueva necesita su propio
+`cd ~/deepracer_sim_ws && source install/setup.bash`. El workspace no se sourcea solo. Ésa sí es
+una ruta fija del proyecto, porque el `README.md` manda crear el workspace ahí.
 
-**Dónde está el repositorio.** Los comandos que llaman a `herramientas/…` empiezan por
-`cd "$TESIS"`. Define esa variable una vez por terminal, con la ruta de **tu** clon:
+**Segunda regla:** los comandos que empiezan por `herramientas/…` se ejecutan **desde la raíz del
+repositorio**, la carpeta que te dejó el `git clone`. La guía no dice dónde está esa carpeta
+porque no lo sabe: puede colgar de `~`, de `~/Documents`, de un disco externo. Lo único que hace
+falta es que la terminal esté dentro antes de teclear el comando.
+
+Comprobación de una línea, si tienes dudas de dónde estás:
 
 ```bash
-echo 'export TESIS=$HOME/Tesis' >> ~/.bashrc && source ~/.bashrc        # ← cámbialo si clonaste en otro sitio
+ls herramientas/robot.sh
 ```
 
-Se escribe en `~/.bashrc`, y no sólo en la terminal actual, porque esta guía abre **tres o
-cuatro terminales a la vez** y la variable no se hereda entre ellas. Si en una terminal se
-queda sin definir, `cd "$TESIS"` no va a ninguna parte —`cd ""` no es un error para bash— y lo
-que falla es el `herramientas/…` siguiente, con un `No such file or directory` que señala al
-script y no a la variable. Ante esa duda, `echo $TESIS`: si sale una línea vacía, es esto.
+Si imprime la ruta, estás en el sitio. Si imprime `No such file or directory`, no lo estás: haz
+`cd` a tu clon y repite. **Ese mensaje es el diagnóstico correcto**, no un misterio, y conviene
+saber por qué se insiste tanto:
 
-Es la única ruta del proyecto que depende de tu equipo. Va como variable, y no escrita en cada
-comando, por dos motivos: así solo hay un sitio que corregir, y así la guía no afirma dónde
-clonaste. Aquí hubo una **ruta fija** con el `Documents/` de un equipo concreto incrustado, que
-es la forma más traicionera del error porque lleva `$HOME` y parece portable;
-`herramientas/verificar_repositorio.sh` la rechaza por eso.
+> Entre el 22 y el 30 de agosto aquí se pedía definir una variable `TESIS` con la ruta del clon, y
+> los comandos empezaban por `cd "$TESIS" && …`. Falló de la peor forma posible el 2026-08-30:
+> `TESIS` no estaba definida, y `cd ""` **no es un error para bash** —devuelve 0 y no se mueve—,
+> así que la terminal se quedaba donde estaba y el fallo aparecía un eslabón más tarde, con un
+> `No such file or directory` que **señalaba al script**, que estaba perfectamente. Se quitó la
+> variable entera. Sin el `cd` de por medio, el mismo mensaje pasa a decir la verdad: no estás en
+> el repositorio.
 
-El `cd` sí hace falta, aunque parezca ruido: `herramientas/…` a secas solo funciona si ya
-estabas dentro del repositorio, y el error que da —`No such file or directory`— no dice cuál
-era el problema.
+Es la forma que usa el resto del proyecto —los informes de evidencia escriben
+`herramientas/robot.sh robot1 nav2` a secas— y la que exige
+[`herramientas/verificar_repositorio.sh`](../herramientas/verificar_repositorio.sh): ninguna ruta
+de una máquina concreta en un archivo versionado, y cada script deduciendo su propia raíz con
+`REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"`. Por eso los scripts funcionan aunque
+clones en otro sitio: **lo único que hay que acertar es el directorio desde el que llamas**, no
+una ruta escrita en ninguna parte.
 
 **Atajo:** [`herramientas/robot.sh`](../herramientas/robot.sh) hace todo eso —el `source`, el
 dominio, el puerto de Gazebo, la pose de spawn y el `GAZEBO_MODEL_PATH`— desde una sola tabla,
@@ -51,15 +60,17 @@ que no se parece a un conflicto de puertos. Comprobar y, si hay algo vivo, cerra
 pgrep -af "gzserver|gzclient|rviz2"
 ```
 
-La forma recomendada es dejar que el script lo haga, una vez por robot. Filtra por
-`ROS_DOMAIN_ID` y se salta los shells, así que no puede cerrarte la terminal:
+La forma recomendada es dejar que el script lo haga, una vez por robot. Filtra por la marca
+`DEEPRACER_ROBOT` que él mismo exporta antes de lanzar nada, y se salta los shells, así que no
+puede cerrarte la terminal ni tumbar al otro robot. (Hasta el 2026-08-30 filtraba por
+`ROS_DOMAIN_ID`; con los dos robots en el dominio 0 ese criterio ya no distingue nada.)
 
 ```bash
-cd "$TESIS" && herramientas/robot.sh robot1 parar && herramientas/robot.sh robot2 parar
+herramientas/robot.sh robot1 parar && herramientas/robot.sh robot2 parar
 ```
 
-A mano, si hace falta —mata **los dos** dominios de golpe, no lo uses con un compañero
-trabajando en el otro robot:
+A mano, si hace falta —mata **todo** lo que huela a ROS o Gazebo en el equipo, los dos robots
+incluidos; no lo uses con un compañero trabajando en el otro robot:
 
 ```bash
 pkill -f "ros2 launch deepracer_bringup" ; pkill -x gzserver ; pkill -x gzclient ; pkill -x rviz2 ; sleep 4 ; ros2 daemon stop ; ros2 daemon start
@@ -200,7 +211,7 @@ invisible o reducido a los ejes. El URDF publicado referencia cinco mallas
 `zed_camera_link.STL`— y la comprobación de que todas resuelven en disco está automatizada:
 
 ```bash
-cd "$TESIS" && bash herramientas/verificar_instalacion.sh
+bash herramientas/verificar_instalacion.sh
 ```
 
 **Esperado: `32 comprobaciones pasan, 0 fallan`.**
@@ -287,8 +298,10 @@ El marco es **`robot1/map`, con prefijo**. Aquí estuvo escrito lo contrario —
 sin prefijo, es el ancla común a los dos robots, con `robot1/map` la meta se rechaza»— y era
 falso en las dos mitades: el 2026-08-24 se prefijó también `map`, y con la meta en `map` a secas
 el marco no existe, el planificador no puede transformarla y Nav2 acaba en `ABORTED`. `map` no
-era un ancla común sino **dos mapas distintos con el mismo nombre**, que hoy no chocan solo
-porque cada robot vive en su propio dominio DDS. El razonamiento completo está en el comentario
+era un ancla común sino **dos mapas distintos con el mismo nombre**. Aquí se decía a continuación
+que no chocaban «porque cada robot vive en su propio dominio DDS»; desde el 2026-08-30 comparten
+el dominio 0 y lo único que los separa es el prefijo: `robot1/map` y `robot2/map`. El aislamiento
+lo da el nombre, no el dominio. El razonamiento completo está en el comentario
 de `deepracer_localization_sim.launch.py`. Sin namespace —un solo robot— el marco sí es `map` a
 secas, que es el caso de los ejemplos del `README.md`.
 
@@ -365,7 +378,7 @@ tiempo, la deriva en reposo introduce un desvío inicial que confunde el diagnó
 Medir después:
 
 ```bash
-cd "$TESIS" && python3 herramientas/analizar_maniobra.py /tmp/v_p1 -19.43 5.91
+python3 herramientas/analizar_maniobra.py /tmp/v_p1 -19.43 5.91
 ```
 
 > Las seis corridas de referencia del 18-ago se grabaron **sin namespace** y contra el mundo
@@ -595,7 +608,7 @@ ningún cambio en el código ni en los `.xacro`.
 > pueden quedarse viejas sin que nadie avise. Antes de fiarte de ellas, contrástalas:
 >
 > ```bash
-> cd "$TESIS" && herramientas/robot.sh robot2 sim
+> herramientas/robot.sh robot2 sim
 > ```
 >
 > hace exactamente esto mismo, leyendo la pose de la tabla, y no hay nada que teclear.
@@ -700,10 +713,10 @@ Es el mismo procedimiento del §0 y por el mismo motivo, así que se usan los mi
 comandos. Por robot:
 
 ```bash
-cd "$TESIS" && herramientas/robot.sh robot1 parar && herramientas/robot.sh robot2 parar
+herramientas/robot.sh robot1 parar && herramientas/robot.sh robot2 parar
 ```
 
-O a mano, matando los dos dominios de golpe:
+O a mano, matando de golpe todo lo de ROS y Gazebo del equipo:
 
 ```bash
 pkill -f "ros2 launch deepracer_bringup" ; pkill -x gzserver ; pkill -x gzclient ; pkill -x rviz2 ; sleep 4 ; ros2 daemon stop ; ros2 daemon start
@@ -736,7 +749,7 @@ ROS, el puerto de Gazebo, la pose de spawn, la ruta absoluta del mundo y el
 `Service /spawn_entity unavailable`, que apunta al sitio equivocado.
 
 ```bash
-cd "$TESIS" && herramientas/robot.sh robot1 sim
+herramientas/robot.sh robot1 sim
 ```
 
 Las acciones son `sim`, `rviz`, `slam`, `nav2`, `teleop`, `lidar`, `estado` y `parar`. Todo

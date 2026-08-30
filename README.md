@@ -42,8 +42,13 @@ sudo apt update && sudo apt install -y \
 ## Instalación
 
 Seis pasos. El último comprueba los cinco anteriores, así que no hay que fiarse de que
-"pareció funcionar". Las rutas de ejemplo son `~/Tesis` para el repositorio y
-`~/deepracer_sim_ws` para el workspace; si se usan otras, ajustarlas en todos los pasos.
+"pareció funcionar".
+
+**Dónde puede ir cada cosa.** El repositorio va **donde quieras**: ningún comando del proyecto
+lleva su ruta escrita, y los scripts de `herramientas/` deducen la raíz de su propia ubicación. El
+paso 1 clona en `~/Tesis` sólo porque hay que poner algo; si eliges otro sitio, el resto de los
+pasos siguen valiendo tal cual. El **workspace** sí es `~/deepracer_sim_ws` para todo el proyecto:
+esa ruta sí aparece escrita en las guías, y cambiarla obliga a ajustarlas todas.
 
 ### 1. Clonar el repositorio
 
@@ -111,10 +116,17 @@ de él antes que de la instalación.
 Los paquetes ROS 2 viven en `Robot/aws-deepracer/`, pero se compilan desde un workspace de
 colcon aparte, que **enlaza** esa carpeta:
 
+Desde **dentro del repositorio recién clonado** —la ruta la pone `pwd`, así que da igual dónde
+lo hayas puesto:
+
 ```bash
-mkdir -p ~/deepracer_sim_ws/src
-ln -s ~/Tesis/Robot/aws-deepracer ~/deepracer_sim_ws/src/aws-deepracer
+mkdir -p ~/deepracer_sim_ws/src && ln -s "$(pwd)/Robot/aws-deepracer" ~/deepracer_sim_ws/src/aws-deepracer && ls -l ~/deepracer_sim_ws/src/aws-deepracer
 ```
+
+El `ls -l` final no es adorno: **`ln -s` no comprueba que el destino exista**, así que una ruta
+equivocada crea un enlace roto sin decir nada y el error aparece tres pasos después, en el
+`colcon build`, como un workspace sin paquetes. Si el `ls -l` muestra la flecha apuntando a tu
+clon, el enlace está bien.
 
 > **Un enlace, nunca una copia.** Con `cp -r` el código que se ejecuta deja de ser el que
 > está bajo control de versiones, y ambos divergen sin avisar. En este proyecto eso ya pasó
@@ -215,8 +227,10 @@ el código que se está ejecutando.
 
 ### 6. Verificar la instalación
 
+Desde la raíz del repositorio, donde terminó el paso 5:
+
 ```bash
-~/Tesis/herramientas/verificar_instalacion.sh
+herramientas/verificar_instalacion.sh
 ```
 
 Comprueba entorno, workspace, los seis paquetes, los recursos instalados, el URDF y sus

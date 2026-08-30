@@ -6,8 +6,9 @@ El proyecto ya instalado y verificado segun los seis pasos del
 [`README`](../README.md#instalación). Esta guia da por hecho que
 `herramientas/verificar_instalacion.sh` termina en `0 fallan`.
 
-Las rutas de ejemplo son las del README: `~/Tesis` para el repositorio y
-`~/deepracer_sim_ws` para el workspace.
+Los comandos que empiezan por `herramientas/…` se ejecutan **desde la raíz del repositorio**, esté
+donde esté tu clon; los que empiezan por `ros2 …`, desde `~/deepracer_sim_ws` con el
+`source install/setup.bash` hecho.
 
 ```bash
 # Compilar (solo la primera vez o despues de cambios)

@@ -3,8 +3,9 @@
 Procedimiento para mapear un mundo Gazebo con `slam_toolbox` sobre la sim del DeepRacer y prepararlo para AMCL/Nav2. Cuatro terminales independientes. **Cada terminal nueva** necesita sourcear `~/deepracer_sim_ws/install/setup.bash`.
 
 Requiere el proyecto instalado y verificado según los seis pasos del
-[`README`](../README.md#instalación); las rutas de ejemplo son las de ahí (`~/Tesis`
-para el repositorio, `~/deepracer_sim_ws` para el workspace).
+[`README`](../README.md#instalación). Los comandos que empiezan por `herramientas/…` se ejecutan
+**desde la raíz del repositorio**, esté donde esté tu clon; los que empiezan por `ros2 …`, desde
+`~/deepracer_sim_ws` con el `source install/setup.bash` hecho.
 
 > Mundo vigente: `primer_piso_v2.world`, el que declara el README y el que cargan los
 > launch por defecto —de este mismo repositorio—. Para otro mundo: `world:=<ruta>`.
@@ -160,11 +161,17 @@ Si los 4 dan resultados sanos pero RViz se ve vacío, el problema es de visualiz
 Guardar primero a un archivo temporal y validarlo. **Con Gazebo y slam_toolbox todavía
 corriendo**, para poder completar el recorrido sin perder la sesión si el mapa no pasa:
 
+Desde la terminal del workspace:
+
 ```bash
 ros2 run nav2_map_server map_saver_cli -f /tmp/mapa_candidato --ros-args -p use_sim_time:=true
-python3 ~/Tesis/herramientas/verificar_mapa.py \
-    /tmp/mapa_candidato.yaml \
-    ~/Tesis/primer_piso_v2.world
+```
+
+Y desde la **raíz del repositorio** —las dos rutas van relativas a ella, así que el comando
+funciona clones donde clones:
+
+```bash
+python3 herramientas/verificar_mapa.py /tmp/mapa_candidato.yaml primer_piso_v2.world
 ```
 
 El script compara la extensión realmente mapeada contra la geometría del `.world` y rechaza
