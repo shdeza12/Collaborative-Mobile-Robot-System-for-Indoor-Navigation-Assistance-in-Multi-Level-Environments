@@ -99,6 +99,9 @@ t_respuesta = t_primer_movimiento − t_solicitud
 t_asignacion = t_robot_activo − t_solicitud
 ```
 
+- **`t_solicitud`**: primer mensaje en `/coordinacion/estado_mision` con `etapa = RECIBIDA`, que el
+  coordinador publica al aceptar el goal y **antes de planificar**, con `robot_activo` vacío. Es la
+  §3.1 literal —«el instante en que el servidor acepta el goal»— hecha observable.
 - **`t_robot_activo`**: primer mensaje en `/coordinacion/estado_mision` con `etapa = TRAMO_1` y
   `robot_activo` no vacío.
 
@@ -106,10 +109,73 @@ Se espera que sea mucho menor que el tiempo de respuesta, porque asignar es una 
 escritorio del coordinador y moverse no. **Si sale del mismo orden, es un hallazgo**, no un error de
 medida: significaría que el coordinador está esperando algo.
 
-> `estado_mision` se publica a 1 Hz, así que esta métrica tiene una **resolución de 1 s** y eso es
-> demasiado grosero para un evento que se espera en milisegundos. La instrumentación debe publicar
-> un mensaje **extraordinario** en el instante del cambio de etapa, además del periódico. Queda
-> anotado aquí porque es un requisito sobre el coordinador que sale del protocolo, no al revés.
+**Esta métrica no se reporta como un valor por misión. Se reporta como una cota superior por misión
+más una caracterización única en banco.** Lo que sigue dice por qué, y es una enmienda del
+2026-08-29 a un documento congelado el 22-ago.
+
+#### 3.2.1 Por qué el bag no puede dar este número
+
+Dos defectos distintos, encontrados en ese orden, y solo el primero era de software.
+
+**El primero era estructural.** Hasta el 2026-08-29 el coordinador fijaba `etapa` y `robot_activo` en
+la misma llamada y publicaba **una** vez, así que no existía ningún mensaje entre «llegó la
+solicitud» y «ya hay agente»: las dos marcas caían sobre el mismo mensaje y la resta valía cero
+fuera cual fuera la corrida. Corregido con `EstadoMision/RECIBIDA`, verificado en
+`Evidencia/registros/S20_RECIBIDA_01.json`.
+
+**El segundo no lo es, y no tiene arreglo dentro del banco.** Corregido lo anterior, las dos marcas
+siguen cayendo en el **mismo instante**: 247,6000 s las dos en la traza del bag de esa misma misión.
+`/clock` lo publica `gazebo_ros_init` a **10 Hz**, y `ros2 bag record --use-sim-time` sella cada
+mensaje con ese reloj, así que **todo sello del bag está cuantizado a 100 ms**. La asignación es una
+búsqueda en una lista de 31 puntos y dura tres órdenes de magnitud menos que un tick. La resta de
+dos sellos que caen en el mismo tick vale 0,0 s, y eso no es una medida del evento: es una medida
+del reloj.
+
+Subir la frecuencia de `/clock` no es la salida. Para resolver un evento de esa duración en dos
+dígitos harían falta unos 10 kHz, y publicar `/clock` a 10 kHz compite con la simulación por CPU
+justo donde RNF-06 exige RTF ≥ 0,99. Se cambiaría una métrica inmedible por dos métricas sesgadas.
+
+#### 3.2.2 Lo que sí se reporta
+
+**En la campaña (§6), por misión:** `t_solicitud` y `t_robot_activo` se registran igual que hasta
+ahora, y de ellas se reporta la afirmación que los datos sí sostienen:
+
+> el tiempo de asignación es **menor que un tick de `/clock`, es decir < 100 ms**, en las N misiones.
+
+Una cota superior verificada en las 30 corridas es un resultado legítimo de OE4. Un cero repetido 30
+veces no lo es. **Si alguna misión diera `t_asignacion > 0`, eso sí es un dato**, y de los graves:
+significaría que la asignación tardó más de 100 ms, y hay que investigarlo antes de agregarlo.
+
+**Una sola vez, en banco, fuera de la campaña:** el valor puntual se caracteriza con el coordinador
+solo, **sin Gazebo y sobre reloj de pared**, que tiene resolución de nanosegundos. Es válido porque
+las dos marcas se publican antes de tocar ningún robot: la asignación no depende de que la
+simulación exista. La misión aborta después, al no encontrar `navigate_to_pose`, y eso no afecta a
+lo medido.
+
+Condiciones del banco, que hay que declarar al reportarlo:
+
+| | |
+|---|---|
+| Reloj | de pared, `time.perf_counter_ns()`, dentro del proceso del coordinador |
+| Entorno | coordinador aislado, sin Gazebo ni Nav2; `use_sim_time: false` |
+| Catálogo | el `puntos_interes.yaml` vigente, con su SHA-256 anotado |
+| Repeticiones | ≥ 30 invocaciones, alternando pares intra-nivel e inter-nivel |
+| Se reporta | mediana y máximo, no la media: la distribución tiene cola por el planificador de Python |
+
+El resultado va a `Documentos/Evidencia/`, **no a este documento**: aquí se fija el método, no la
+cifra.
+
+> **Qué se pierde al hacerlo así, dicho sin adornos.** El tiempo de asignación deja de ser una
+> variable medida en cada corrida y pasa a ser una constante caracterizada aparte. Se pierde toda
+> posibilidad de estudiar cómo varía con la condición, con el par origen–destino o con la carga del
+> equipo. Es una degradación real frente a lo que este protocolo prometía el 22-ago, y se acepta
+> porque la alternativa —reportar treinta ceros— es peor.
+
+> **Nota histórica.** La versión congelada el 22-ago ya anticipaba una parte de esto: advertía de que
+> `estado_mision` va a 1 Hz y exigía un mensaje **extraordinario** en cada cambio de etapa. Ese
+> mensaje se construyó y funciona; es lo que hace que hoy la resolución sea de 100 ms y no de 1 s.
+> Lo que la nota no vio es que por debajo del mensaje extraordinario sigue habiendo un reloj
+> cuantizado, y que ese es el suelo de verdad.
 
 ### 3.3 Tasa de éxito (RF-23)
 
@@ -336,23 +402,29 @@ cinco veces no mide.
 
 ## 9. Instrumentación: lo que hay que construir
 
-En orden. Nada de esto existe hoy.
+En orden. **Escrito el 22-ago, cuando nada de esto existía; el estado es del 2026-08-29.**
 
-1. **`stateful: False`** en el YAML, y **repetir los tres destinos del 21-ago** comparando el número
-   de cúspides contra el registro de aquella corrida. Sin esa comparación el cambio es una creencia.
-2. **Paquete `coordinacion_msgs`** con sus cuatro definiciones
+1. **PENDIENTE — `stateful: False`** en el YAML, y **repetir los tres destinos del 21-ago**
+   comparando el número de cúspides contra el registro de aquella corrida. Sin esa comparación el
+   cambio es una creencia. Es el riesgo R12 y sigue abierto.
+2. **HECHO — Paquete `coordinacion_msgs`** con sus cuatro definiciones
    ([`CONTRATO_INTERFACES.md`](CONTRATO_INTERFACES.md) §5). Sin él no hay `estado_mision`, y sin
-   `estado_mision` no hay RF-22 ni RF-24.
-3. **Nodo de coordinación** que sirva `/coordinacion/guiar_usuario` y publique `estado_mision`,
-   incluida la marca extraordinaria de cambio de etapa (§3.2).
-4. **Registrador de misión** (RF-25): un archivo por misión, estructurado, con todas las marcas
-   temporales, la traza de `/odom` de cada robot y el RTF. Procesable sin intervención manual.
-   El esquema quedó congelado el 2026-08-26 en
+   `estado_mision` no hay RF-22 ni RF-24. Falta compilarlo en la tarjeta Jazzy del carro.
+3. **HECHO — Nodo de coordinación** que sirva `/coordinacion/guiar_usuario` y publique
+   `estado_mision`, incluida la marca extraordinaria de cambio de etapa (§3.2), y desde el 29-ago
+   la marca `RECIBIDA` que abre la ventana de asignación (§3.2.1).
+4. **HECHO — Registrador de misión** (RF-25): un archivo por misión, estructurado, con todas las
+   marcas temporales, la traza de `/odom` de cada robot y el RTF. Procesable sin intervención
+   manual. El esquema quedó congelado el 2026-08-26 en
    [`ESQUEMA_REGISTRO_MISION.md`](ESQUEMA_REGISTRO_MISION.md), anclado a §3 y §8 de este
    protocolo, con los campos del banco físico previstos aunque en simulación vayan vacíos.
-5. **`herramientas/sortear_misiones.py`** (§6.3).
-6. **Analizador de campaña**: lee los N registros y produce las cuatro métricas con sus intervalos
-   de confianza.
+   Es `herramientas/componer_registro.py`, y compone desde el bag, después de la corrida.
+5. **PENDIENTE — `herramientas/sortear_misiones.py`** (§6.3).
+6. **PENDIENTE — Analizador de campaña**: lee los N registros y produce las cuatro métricas con sus
+   intervalos de confianza.
+7. **PENDIENTE — Banco del tiempo de asignación** (§3.2.2). Corre el coordinador aislado, sin
+   Gazebo, mide sobre reloj de pared y reporta mediana y máximo. Es lo único que puede dar la cifra
+   de RF-22, y no depende de la campaña: puede hacerse en cualquier momento antes del informe.
 
 ---
 
@@ -421,6 +493,12 @@ Lo que puede hacer que estos números signifiquen otra cosa de la que parecen.
   Afecta sobre todo a los destinos que se abordan de frente, que hoy es solo `ETM10`. Mientras no
   se iguale el sensor —decisión abierta y ligada a la del número de muestras—, las dos condiciones
   se reportan por separado, como ya exige el punto anterior sobre Humble y Jazzy.
+- **Una de las cuatro métricas de OE4 no la resuelve el instrumento.** El tiempo de asignación es
+  ~10³ veces más corto que el tick de `/clock` (§3.2.1), así que en la campaña solo se puede acotar,
+  no medir. La cifra sale de un banco aparte, sobre reloj de pared y **sin la simulación corriendo**:
+  no es la misma condición experimental que el resto de las métricas y no debe presentarse junto a
+  ellas como si lo fuera. En particular, el banco no incluye la contención de CPU de dos Gazebo, que
+  es justo lo que podría alargar una asignación en la campaña real.
 - **El operador conoce la hipótesis.** Las corridas son automáticas de principio a fin
   precisamente por eso: el sorteo con semilla y el registro sin intervención manual (RF-25) quitan
   al operador toda decisión durante la medida.
