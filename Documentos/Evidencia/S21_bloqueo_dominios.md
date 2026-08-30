@@ -282,18 +282,26 @@ concatenan. **La objeción más cara contra la opción B se cae.**
 
 ### 6.2 Dos trampas nuevas, las dos silenciosas
 
-**`extra_gazebo_args` no sirve para pasar remapeos.** Es el camino natural —reenviarlo desde
-`deepracer_sim.launch.py` a `gzserver.launch.py`— y **no funciona**. Es un único
-`LaunchConfiguration` dentro de la lista `cmd`, así que `"--remap __ns:=/robot1"` llega a gzserver
-como **un solo argumento**. Verificado leyendo `/proc/<pid>/cmdline` separado por NUL: un token, no
-dos. Gazebo lo descarta sin decir nada y el nodo se queda en `/gazebo`.
+**`extra_gazebo_args` transporta exactamente UN remapeo, y solo en la forma desnuda.** Es el camino
+natural —reenviarlo desde `deepracer_sim.launch.py` a `gzserver.launch.py`— y falla de una manera
+que cuesta ver: es un único `LaunchConfiguration` dentro de la lista `cmd`, así que **todo su valor
+llega a gzserver como un solo argumento**. Verificado leyendo `/proc/<pid>/cmdline` separado por
+NUL, contando tokens:
 
-Contraste, misma bandera:
+| Forma | Tokens | Nodo resultante |
+|---|---|---|
+| `extra_gazebo_args:="--remap __ns:=/x"` | 1 | `/gazebo` ❌ **descartado sin un solo aviso** |
+| `extra_gazebo_args:="__ns:=/x"` | 1 | `/x/gazebo` ✅ |
+| `--remap` `__ns:=/x` (gzserver a mano) | 2 | `/x/gazebo` ✅ |
 
-| Forma | Nodo resultante |
-|---|---|
-| `extra_gazebo_args:="--remap __ns:=/robot1"` (un token) | `/gazebo` ❌ **sin aviso** |
-| `--remap` `__ns:=/robot1` (dos tokens, gzserver a mano) | `/robot1/gazebo` ✅ |
+O sea: la bandera `--remap` necesita **dos** tokens y por ahí no cabe, pero una **regla de remapeo
+desnuda** cabe entera en uno y funciona. La primera fila es la trampa: es la escritura que uno pone
+por analogía con la línea de comando, y Gazebo la tira en silencio.
+
+Aun así **no alcanza**, y por una razón distinta de la que parecía: `extra_gazebo_args` es **un**
+elemento de la lista, luego transporta **una** regla. `robot1` necesita una (`__ns:=/robot1`) y
+cabría; `robot2` necesita **dos** (`__ns:=` y `/clock:=`) y no cabe. Montar la mitad por un
+mecanismo y la mitad por otro sería peor que no usarlo.
 
 Consecuencia de diseño: hay que **sustituir el `IncludeLaunchDescription` de `gzserver.launch.py`
 por un `ExecuteProcess` propio**, con los remapeos como elementos separados de la lista.
