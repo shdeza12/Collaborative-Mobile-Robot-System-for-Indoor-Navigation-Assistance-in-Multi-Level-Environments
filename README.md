@@ -303,25 +303,39 @@ ros2 action send_goal /navigate_to_pose nav2_msgs/action/NavigateToPose \
   "{pose: {header: {frame_id: map}, pose: {position: {x: 2.0, y: 0.0}, orientation: {w: 1.0}}}}"
 ```
 
-### Dos robots (en desarrollo)
+### Dos robots
 
-El argumento `namespace` permite correr dos agentes aislados, cada uno con su propia pila
-Nav2 y sus marcos TF prefijados (`robot1/base_link`). Requiere además separar el simulador
-y el grafo DDS de cada instancia:
+La forma corta, que es la que se usa a diario:
 
 ```bash
-# Terminal 1
-GAZEBO_MASTER_URI=http://localhost:11345 ROS_DOMAIN_ID=1 \
-  ros2 launch deepracer_bringup nav_amcl_demo_sim.launch.py namespace:=robot1
-
-# Terminal 2
-GAZEBO_MASTER_URI=http://localhost:11346 ROS_DOMAIN_ID=2 \
-  ros2 launch deepracer_bringup nav_amcl_demo_sim.launch.py namespace:=robot2 y:=2.0
+herramientas/robot.sh robot1 nav2   # terminal 1
+herramientas/robot.sh robot2 nav2   # terminal 2
 ```
+
+**Sin exportar ningún dominio, y ése es el punto.** Los dos robots corren en el **dominio 0** —el
+defecto de ROS 2—, así que una tercera terminal sin configurar nada ve la misión entera. Lo que
+separa a las dos pilas no es el dominio sino los **nombres**: namespace por robot, prefijo en cada
+marco TF —incluido `map`—, y puerto de `gzserver` y reloj propios. Sigue haciendo falta un
+`gzserver` por robot, porque `gazebo_ros` de Humble aplica a todos los plugins el namespace del
+primer modelo cargado; `robot.sh` se encarga de los puertos.
+
+Cada `gzserver` publica su propio reloj y la asimetría es deliberada: `robot1` se queda con
+`/clock` —el reloj de referencia de la misión— y `robot2` usa `/robot2/clock`. El motivo es que
+`ros2 bag record --use-sim-time` está cableado a `/clock` y rechaza `--ros-args`; remapear los dos
+produce un bag con **cero mensajes y ningún error**.
+
+**Hasta el 2026-08-29 esto era distinto** y conviene saberlo, porque hay bitácoras y evidencia que
+lo dan por vigente: cada robot corría en su propio `ROS_DOMAIN_ID` (0 y 2). Aislaba bien y ése era
+el problema, porque un nodo de ROS 2 vive en **un** dominio y el coordinador nunca alcanzaba a los
+dos a la vez — es decir, el relevo entre pisos no se podía ejecutar. Se cambió el 30-ago y el
+relevo corrió el mismo día
+([`Documentos/Evidencia/S21_relevo_ejecutado.md`](Documentos/Evidencia/S21_relevo_ejecutado.md)).
 
 Con `namespace` vacío (el valor por defecto) el comportamiento es exactamente el de un solo
 robot, sin prefijos. El estado y las limitaciones de este modo están en
-[`Documentos/Evidencia/S17_nav2_namespaces.md`](Documentos/Evidencia/S17_nav2_namespaces.md).
+[`Documentos/Evidencia/S17_nav2_namespaces.md`](Documentos/Evidencia/S17_nav2_namespaces.md), y el
+levantamiento del bloqueo de dominios en
+[`Documentos/Evidencia/S21_bloqueo_dominios.md`](Documentos/Evidencia/S21_bloqueo_dominios.md).
 
 ---
 

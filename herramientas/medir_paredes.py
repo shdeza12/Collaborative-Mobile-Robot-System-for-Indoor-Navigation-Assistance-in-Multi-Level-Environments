@@ -34,7 +34,13 @@ Que hay que mirar en la salida
 
 Uso:
     python3 herramientas/medir_paredes.py robot1
-    ROS_DOMAIN_ID=2 python3 herramientas/medir_paredes.py robot2
+    python3 herramientas/medir_paredes.py robot2
+
+    Sin exportar ningun dominio. Hasta el 2026-08-29 la segunda linea llevaba
+    delante 'ROS_DOMAIN_ID=2', porque cada robot corria en su dominio DDS. Desde
+    el 30-ago los dos viven en el dominio 0 -el defecto de ROS 2- y lo que los
+    separa son los nombres: namespace, prefijo de TF y puerto de gzserver
+    propios. Ver el comentario de DOMINIO en herramientas/robot.sh.
 """
 
 import math

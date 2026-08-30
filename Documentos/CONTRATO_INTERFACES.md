@@ -237,6 +237,22 @@ Para que quede escrito y no se reabra:
 > anteproyecto —cada robot dedicado a un nivel, coordinación por servidor— y mapea 1:1 al
 > despliegue final, una Raspberry Pi por vehículo. Las comprobaciones se reescriben en
 > consecuencia: **cada una se ejecuta dos veces, una por dominio.**
+>
+> **Revisado otra vez el 2026-08-30, y la mitad de lo anterior ya no vale.** Lo del `gzserver` por
+> robot sigue en pie y por las razones dichas. Lo del **dominio** por robot no: se cambió a **un
+> solo dominio, el 0, para los dos**. El motivo es este contrato: el coordinador del §4 tiene que
+> hablar con los dos robots, y un nodo de ROS 2 vive en **un** dominio, así que a través de un
+> límite de dominio no alcanzaba nunca a los dos. Con dominios separados el relevo —el aporte
+> declarado del proyecto— **no se podía ejecutar**, y ejecutado quedó el 30-ago
+> ([`Evidencia/S21_relevo_ejecutado.md`](Evidencia/S21_relevo_ejecutado.md)).
+>
+> Lo que separa hoy a las dos pilas son los **nombres**: namespace por robot, prefijo en cada marco
+> TF —incluido `map`—, y puerto y reloj propios de cada `gzserver`. Medido, no supuesto: de 94.981
+> transformadas de `/tf`, **cero** llevan marco hijo sin prefijar.
+>
+> En consecuencia, **las comprobaciones ya no se ejecutan dos veces**: una sola terminal, sin
+> exportar nada, ve la misión entera. Donde abajo se lea «una por dominio», entiéndase «una por
+> robot, distinguidas por el namespace».
 
 El contrato se declara cumplido cuando, en simulación:
 

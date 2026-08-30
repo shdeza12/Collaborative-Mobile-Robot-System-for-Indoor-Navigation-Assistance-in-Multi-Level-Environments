@@ -500,16 +500,22 @@ con `herramientas/verificar_mapa.py` antes de dar por bueno cualquier mapa nuevo
 
 ### Los dos robots a la vez
 
-Igual que en el escenario F: el segundo robot va en su propio `GAZEBO_MASTER_URI` y su
-propio `ROS_DOMAIN_ID`, y cada uno lleva su `slam_toolbox`.
+Igual que en el escenario F: el segundo robot va en su propio `GAZEBO_MASTER_URI` —**pero en el
+mismo dominio**, ver el aviso del final de esta sección— y cada uno lleva su `slam_toolbox`.
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && GAZEBO_MASTER_URI=http://localhost:11346 ROS_DOMAIN_ID=2 ros2 launch deepracer_bringup deepracer_sim.launch.py namespace:=robot2 x:=-21.889 y:=-8.379 yaw:=0
+cd ~/deepracer_sim_ws && source install/setup.bash && GAZEBO_MASTER_URI=http://localhost:11346 ros2 launch deepracer_bringup deepracer_sim.launch.py namespace:=robot2 x:=-21.889 y:=-8.379 yaw:=0
 ```
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && ROS_DOMAIN_ID=2 ros2 launch deepracer_bringup slam_toolbox.launch.py namespace:=robot2
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 launch deepracer_bringup slam_toolbox.launch.py namespace:=robot2 clock_topic:=/robot2/clock
 ```
+
+**El `clock_topic` no es opcional aquí.** `slam_toolbox` se suscribe a `/clock` con nombre absoluto;
+mientras cada robot tuvo su dominio daba igual, porque en cada dominio solo había un `/clock`. Ahora
+comparten dominio, así que sin ese argumento el SLAM de `robot2` marcaría sus poses con el reloj del
+simulador de `robot1`. **Aviso honesto: esta ruta está escrita y no se ha ejecutado nunca**; si algo
+falla en esta sección, es el primer sitio donde mirar.
 
 Comprobado el 2026-08-20 con los dos SLAM simultáneos: moviendo **solo** robot2, este
 avanzó 7,34 m y robot1 se desplazó 4,9 mm, del mismo orden que los 6 mm de deriva numérica
@@ -559,22 +565,26 @@ vehículo dentro.
 No hace falta `world:=`: cada robot toma el mundo de su fila en `POSE_INICIAL`, y sale del mismo
 repositorio del que se compiló el código.
 
-### Terminal 1 — robot1, piso 1, dominio 0
+### Terminal 1 — robot1, piso 1
 
 ```bash
 cd ~/deepracer_sim_ws && source install/setup.bash && ros2 launch deepracer_bringup deepracer_sim.launch.py namespace:=robot1
 ```
 
-### Terminal 2 — robot2, piso 2, dominio 2
+### Terminal 2 — robot2, piso 2
 
-Lo único que cambia son las dos variables de entorno y la **ordenada** de nacimiento:
+Ninguna de las dos terminales exporta dominio: desde el 2026-08-30 los dos robots viven en el 0,
+que es el defecto de ROS 2. Lo único que cambia aquí es **una** variable de entorno —hasta esa
+fecha eran dos— y la **ordenada** de nacimiento:
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && GAZEBO_MASTER_URI=http://localhost:11346 ROS_DOMAIN_ID=2 ros2 launch deepracer_bringup deepracer_sim.launch.py namespace:=robot2 x:=-21.889 y:=-8.379 yaw:=0
+cd ~/deepracer_sim_ws && source install/setup.bash && GAZEBO_MASTER_URI=http://localhost:11346 ros2 launch deepracer_bringup deepracer_sim.launch.py namespace:=robot2 x:=-21.889 y:=-8.379 yaw:=0
 ```
 
-`GAZEBO_MASTER_URI` separa los dos Gazebo; `ROS_DOMAIN_ID` separa los dos grafos ROS. No
-hace falta ningún cambio en el código ni en los `.xacro`.
+`GAZEBO_MASTER_URI` separa los dos Gazebo. **Los dos grafos ROS ya no se separan**, y es a
+propósito: comparten el dominio 0 para que el coordinador alcance a los dos. Lo que evita que se
+pisen son los nombres —`namespace` prefija tópicos y marcos TF, incluido `map`—. No hace falta
+ningún cambio en el código ni en los `.xacro`.
 
 > **Estas poses no se teclean a ojo, y escritas aquí son una copia.** La original es
 > `POSE_INICIAL`, en
@@ -602,15 +612,18 @@ En Gazebo deben aparecer tres modelos: `ground_plane`, `mundo_definitivo_piso1` 
 ### RViz de cada uno
 
 Cada robot tiene su propia configuración, con todos los tópicos prefijados con su namespace.
-La de robot2 **hay que abrirla con `ROS_DOMAIN_ID=2`**: sin eso RViz se conecta al dominio 0,
-no encuentra nada y se queda con los displays en gris, sin decir por qué.
+**Ninguna de las dos lleva `ROS_DOMAIN_ID`, y esto se invirtió el 2026-08-30.** Hasta esa fecha la
+de robot2 había que abrirla con `ROS_DOMAIN_ID=2` o se quedaba con los displays en gris sin decir
+por qué. Hoy es al revés: exportarlo es lo que la deja en gris, porque los dos robots viven en el
+dominio 0. Si abres RViz y no ves nada, comprueba antes que nada que no tengas `ROS_DOMAIN_ID`
+exportado de una sesión anterior.
 
 ```bash
 cd ~/deepracer_sim_ws && source install/setup.bash && rviz2 -d $(ros2 pkg prefix deepracer_description)/share/deepracer_description/rviz/robot1_completo.rviz --ros-args -r __ns:=/robot1 -p use_sim_time:=true
 ```
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && export ROS_DOMAIN_ID=2 && rviz2 -d $(ros2 pkg prefix deepracer_description)/share/deepracer_description/rviz/robot2_completo.rviz --ros-args -r __ns:=/robot2 -p use_sim_time:=true
+cd ~/deepracer_sim_ws && source install/setup.bash && rviz2 -d $(ros2 pkg prefix deepracer_description)/share/deepracer_description/rviz/robot2_completo.rviz --ros-args -r __ns:=/robot2 -p use_sim_time:=true
 ```
 
 ### Teleop de cada uno
@@ -620,15 +633,18 @@ cd ~/deepracer_sim_ws && source install/setup.bash && ros2 run teleop_twist_keyb
 ```
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && export ROS_DOMAIN_ID=2 && ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -r /cmd_vel:=/robot2/cmd_vel
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -r /cmd_vel:=/robot2/cmd_vel
 ```
 
 ### Demostrar que están aislados
 
-Mover **solo** robot1 y leer la odometría del otro:
+Mover **solo** robot1 y leer la odometría del otro. **Desde el 30-ago esta comprobación vale más
+que antes**, no menos: cuando cada robot tenía su dominio, el aislamiento lo garantizaba el
+transporte y la prueba era casi una formalidad. Ahora comparten grafo y lo único que los separa son
+los nombres, así que esto comprueba de verdad que no se pisan.
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && ROS_DOMAIN_ID=2 ros2 topic echo /robot2/odom --once
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 topic echo /robot2/odom --once
 ```
 
 Lo medido en S17: el robot comandado avanzó 3,34 m y el testigo se movió 6 mm, que es deriva
@@ -732,17 +748,27 @@ El `cd` de delante hace falta: la ruta es relativa al repositorio y sin él sale
 
 No reemplaza a `lanzar_sim.sh`: aquel mata **todo** lo que huela a ROS o Gazebo antes de
 arrancar, lo que con dos robots simultáneos tumba al compañero. Éste limita la limpieza a los
-procesos cuyo `ROS_DOMAIN_ID` coincide con el del robot pedido.
+procesos que llevan la marca `DEEPRACER_ROBOT` del robot pedido, que el propio script exporta
+antes de lanzar nada.
+
+Hasta el 2026-08-29 el filtro leía el `ROS_DOMAIN_ID` de `/proc/<pid>/environ`, y bastaba
+porque cada robot tenía el suyo. Con los dos en el dominio 0 ese criterio ya no distingue nada:
+`robot2 parar` habría matado a `robot1` y a su Gazebo, sin preguntar y sin dar error. El modo de
+fallo se movió de sitio y hacia el lado bueno — un proceso lanzado a mano no lleva la marca y
+**no** se mata, así que ahora el error es matar de menos, y eso se nota enseguida porque el
+puerto sigue ocupado. Aun así el script lo avisa por nombre en vez de callarse.
 
 **De dónde saca la pose.** No la lleva escrita: la lee de `POSE_INICIAL`, en
 [`deepracer_raiz_repo.py`](../Robot/aws-deepracer/deepracer_bringup/launch/deepracer_raiz_repo.py),
 que es la única tabla de poses del proyecto y la misma que usan los launch. Antes del
 2026-08-22 había tres copias y una se quedó vieja al cambiar de mundo. Lo único que el script
-sigue guardando por su cuenta son el `ROS_DOMAIN_ID` y el puerto de Gazebo, que son transporte
-y no los comparte con nadie.
+sigue guardando por su cuenta es el **puerto de Gazebo**, que es transporte y no lo comparte con
+nadie. El dominio ya no es una tabla: es la constante `DOMINIO=0` para los dos, con la variable
+de entorno `DOMINIO_FORZADO` como única forma de cambiarlo, pensada para repartir los robots en
+dos máquinas.
 
-Para añadir un `robot3` se toca `POSE_INICIAL` —pose, nivel y mapa— y la tabla de dominios de
-`robot.sh`. En ningún launch.
+Para añadir un `robot3` se toca `POSE_INICIAL` —pose, nivel y mapa— y la tabla de puertos de
+`robot.sh`. En ningún launch, y ya no hay dominio que asignarle.
 
 ### Los mundos y los mapas
 
