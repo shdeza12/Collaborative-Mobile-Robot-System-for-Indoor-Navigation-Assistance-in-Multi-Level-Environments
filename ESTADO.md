@@ -8,12 +8,12 @@
 
 | | |
 |---|---|
-| **Semana del cronograma** | S20 de 32 |
-| **Fecha de corte** | 2026-08-27 |
+| **Semana del cronograma** | S20 de 32 — **cerrada** |
+| **Fecha de corte** | 2026-08-29 |
 | **Fases activas** | Fase 5 — Integración (S18–S23) |
-| **Semanas restantes** | 14 (sustentación S28–S29, documento final S29–S32) |
-| **Último entregable formal** | Semana 18 |
-| **Entregables pendientes** | Ninguno |
+| **Semanas restantes** | 12 (sustentación S28–S29, documento final S29–S32) |
+| **Último entregable formal** | Semana 20 |
+| **Entregables pendientes** | Ninguno. El atraso de dos cortes seguidos —S19 se cerró 4 de 4 el 25-ago sin documento y S20 cerró el 29-ago— quedó saldado en el corte del 29-ago: `Entregable_semana_19.pdf` y `Entregable_semana_20.pdf` emitidos |
 | **Acta de directores** | ✅ *Actividad 1 – Corte 1* revisada y firmada por **Armando Mateus** el 2026-08-14 ([PDF](Documentos/Entregables/Actividad_1_Corte_1_Cronograma_2026-2_firmado.pdf)) |
 | **Planificación vigente** | [`Documentos/CRONOGRAMA_S17_S32.md`](Documentos/CRONOGRAMA_S17_S32.md) |
 
@@ -24,9 +24,9 @@
 | ID | Objetivo específico (anteproyecto §4.2) | Avance | Evidencia verificable | Responsable |
 |----|------------------------------------------|--------|------------------------|-------------|
 | **OE1** | Modelar arquitectura funcional: requisitos, escenarios multipiso, asignación de tareas, esquema de comunicación | 🟡 55 % | `Documentos/Evidencia/arquitectura.png` (diagrama completo con protocolo de relevo); [`Documentos/REQUISITOS.md`](Documentos/REQUISITOS.md) — matriz RF ↔ OE ↔ prueba con 34 requisitos (RF-01…RF-27, RNF-01…RNF-07), ningún OE huérfano; [`CONTRATO_INTERFACES.md`](Documentos/CONTRATO_INTERFACES.md) verificado en simulación; `puntos_interes.yaml` con **15 destinos del piso 1** derivados de los vanos sobre el mapa (2026-08-20) más el **punto de transferencia del piso 2** (2026-08-23); **`coordinacion_msgs` existe y funciona** (2026-08-24): las **cinco** definiciones del §5 del contrato, compiladas en Humble y con **round-trip real por DDS** —`test/prueba_round_trip.py`, 18 de 18 sobre los 16 puntos reales del YAML—, no solo compilación. El **nodo de coordinación** existe desde ese mismo día (`Robot/aws-deepracer/coordinacion/`), con el relevo escrito como función pura y **240 planes verificados sin simulador**. **Falta:** probarlo de extremo a extremo con los dos robots vivos; compilar `coordinacion_msgs` en la tarjeta Jazzy del carro; y **destinos reales en el piso 2** —hoy solo tiene la escalera, lo que colapsa las 30 misiones con relevo a tres tramos y **impide demostrar el protocolo completo**: dejó de ser un pendiente menor y es prerrequisito de OE4 | — |
-| **OE2** | Plataforma robótica con **dos** vehículos: locomoción, sensado, procesamiento y **comunicación** | 🟡 50 % | Un robot en Gazebo, `deepracer_sim.launch.py`, stack de sensores validado (S14), SLAM 2D (S15). **Hardware (2026-08-05):** `deepracer-custom-car` instalado en Raspberry Pi 4 y en la tarjeta original del DeepRacer, **ambas sobre Ubuntu Server 24.04 con ROS 2 Jazzy** (confirmado 2026-08-14); acceso por red a ambas; locomoción verificada desde la interfaz web. **Sensado y control medidos sobre el vehículo, no declarados (2026-08-19 y 2026-08-21):** el LiDAR real repite una pared con 2,8 mm de dispersión ([`S19_spike_p1_p2_hardware.md`](Documentos/Evidencia/S19_spike_p1_p2_hardware.md)) y el LiDAR de fábrica publica `/scan` a 6,80 Hz con 360 muestras sobre 360° ([`S19_lidar_original_evo.md`](Documentos/Evidencia/S19_lidar_original_evo.md)); `/ctrl_pkg/servo_msg` responde de forma proporcional en dirección y tracción. **La simulación es Humble: el desajuste de distribución es un hecho, no una hipótesis — ver R8.** **Falta:** que el LiDAR conviva con la pila del vehículo (un solo defecto, §4 del informe del 21-ago), control desde ROS 2 en vez de la web, namespaces, servidor de coordinación, comunicación inter-robot | — |
+| **OE2** | Plataforma robótica con **dos** vehículos: locomoción, sensado, procesamiento y **comunicación** | 🟡 50 % | Un robot en Gazebo, `deepracer_sim.launch.py`, stack de sensores validado (S14), SLAM 2D (S15). **Hardware (2026-08-05):** `deepracer-custom-car` instalado en Raspberry Pi 4 y en la tarjeta original del DeepRacer, **ambas sobre Ubuntu Server 24.04 con ROS 2 Jazzy** (confirmado 2026-08-14); acceso por red a ambas; locomoción verificada desde la interfaz web. **Sensado y control medidos sobre el vehículo, no declarados (2026-08-19 y 2026-08-21):** el LiDAR real repite una pared con 2,8 mm de dispersión ([`S19_spike_p1_p2_hardware.md`](Documentos/Evidencia/S19_spike_p1_p2_hardware.md)) y el LiDAR de fábrica publica `/scan` a 6,80 Hz con 360 muestras sobre 360° ([`S19_lidar_original_evo.md`](Documentos/Evidencia/S19_lidar_original_evo.md)); `/ctrl_pkg/servo_msg` responde de forma proporcional en dirección y tracción. **La simulación es Humble: el desajuste de distribución es un hecho, no una hipótesis — ver R8.** **Dos pendientes cerrados el 2026-08-28** ([`S20_frente_b_hardware.md`](Documentos/Evidencia/S20_frente_b_hardware.md)): el **LiDAR ya convive con la pila** del vehículo —enlace simbólico `rplidar_node` → `rplidar_composition`, elegido sobre editar `/opt/aws/deepracer/` para que una actualización de AWS no lo revierta en silencio—, a un coste medido de **−6,6 % de frecuencia de barrido** (6,80 → 6,35 Hz); y hay **control desde ROS 2 en vez de la web**, teleoperando por `/ctrl_pkg/servo_msg` con hombre muerto de 0,6 s. Es un **puente**, no un arreglo: la cadena `/cmd_vel` sigue con sus dos defectos. **Falta:** namespaces, servidor de coordinación, comunicación inter-robot, el segundo vehículo (R11), y comprobar que las cámaras publiquen en ROS | — |
 | **OE3** | Interfaz HRI web responsiva (selección origen–destino) | 🔴 0 % | Ninguna | — |
-| **OE4** | Evaluación con métricas: tiempo de respuesta, tiempo de asignación, tasa de éxito, continuidad entre niveles | 🟡 25 % | [`PROTOCOLO_EXPERIMENTAL.md`](Documentos/PROTOCOLO_EXPERIMENTAL.md) (2026-08-22): las cuatro métricas con definiciones operativas medibles por máquina, criterio de éxito contra `/odom`, N = 30 en simulación con sorteo por semilla, y una **lista cerrada** de causas de descarte con techo del 20 %. Escrito **antes** de instrumentar, a propósito. **Instrumentación construida (2026-08-27):** esquema de RF-25 versionado y comprobable, `herramientas/grabar_mision.sh` sella el bag con tiempo de simulación, `herramientas/componer_registro.py` compone un registro validado contra el esquema, y `herramientas/diagnosticar_llegada.py` dictamina la llegada sin usar el `SUCCEEDED` de Nav2. **Dos misiones de dos tramos grabadas y aprobadas** (`S20_rutas_03` y `_04`, cuatro llegadas entre 0,117 y 0,204 m contra un criterio de 0,25 m). De los **seis prerrequisitos del §10**, cinco están cerrados. **Falta:** el analizador de campaña, los cuatro huecos del registrador medidos el 27-ago (bitácora), y la condición B, que no se puede correr porque `robot1` y `robot2` viven en dominios DDS distintos | — |
+| **OE4** | Evaluación con métricas: tiempo de respuesta, tiempo de asignación, tasa de éxito, continuidad entre niveles | 🟡 25 % | [`PROTOCOLO_EXPERIMENTAL.md`](Documentos/PROTOCOLO_EXPERIMENTAL.md) (2026-08-22): las cuatro métricas con definiciones operativas medibles por máquina, criterio de éxito contra `/odom`, N = 30 en simulación con sorteo por semilla, y una **lista cerrada** de causas de descarte con techo del 20 %. Escrito **antes** de instrumentar, a propósito. **Instrumentación construida (2026-08-27):** esquema de RF-25 versionado y comprobable, `herramientas/grabar_mision.sh` sella el bag con tiempo de simulación, `herramientas/componer_registro.py` compone un registro validado contra el esquema, y `herramientas/diagnosticar_llegada.py` dictamina la llegada sin usar el `SUCCEEDED` de Nav2. **Dos misiones de dos tramos grabadas y aprobadas** (`S20_rutas_03` y `_04`, cuatro llegadas entre 0,117 y 0,204 m contra un criterio de 0,25 m). De los **seis prerrequisitos del §10**, cinco están cerrados. **Cadena ejercitada de extremo a extremo el 2026-08-29** ([`S20_asignacion_por_nivel.md`](Documentos/Evidencia/S20_asignacion_por_nivel.md)): dos solicitudes con destinos en **niveles distintos** produjeron dos agentes distintos y dos registros validados, `S20_A_M1` con éxito a **0,036 m** contra `/odom` y `S20_A_M2` como control negativo. Las dos marcadas `es_piloto` (§7 del protocolo). **El piloto destapó lo que no se ve leyendo código:** el **tiempo de asignación —una de las cuatro métricas— es hoy estructuralmente inmedible**, porque `_marcar()` publica etapa y agente en el mismo mensaje y la marca vale cero siempre; y el **bag no puede dar el RTF** con `--use-sim-time`, ya corregido en `grabar_mision.sh`. **Falta:** el analizador de campaña, corregir el tiempo de asignación **antes de S24**, los cuatro huecos del registrador medidos el 27-ago (bitácora), y la condición B, que no se puede correr porque `robot1` y `robot2` viven en dominios DDS distintos | — |
 
 **Lectura:** a S19 de 32 (59 % del calendario) el avance técnico agregado está cerca del 25 %. El aporte declarado del proyecto —coordinación inter-robot y protocolo de relevo— aún no tiene implementación. La planificación de S17–S32 lo sitúa entre S20 y S22.
 
@@ -349,8 +349,12 @@ porque son prerrequisito de lo que sí nombra. Tres cosas que conviene tener pre
 
 1. **El piso 2 bloquea el propio criterio de cierre de S20.** El criterio pide que una solicitud
    produzca «la asignación del **agente correcto**», y eso solo se puede *probar* si hay algo a lo
-   que mandar al agente del nivel 2. Hoy los 15 destinos están los 15 en `nivel: 1`, así que la
-   asignación acertaría por no tener alternativa. Y de los 18 puntos del piso 2, **solo uno está en
+   que mandar al agente del nivel 2. ~~Hoy los 15 destinos están los 15 en `nivel: 1`, así que la
+   asignación acertaría por no tener alternativa.~~ **Cierto al escribir el plan el 22-ago, falso
+   desde el 24-ago**, cuando `puntos_interes.yaml` incorporó destinos de `nivel: 2`. Se deja tachado
+   y no borrado porque es lo que explica el diseño de la prueba del 29-ago: se lanzaron **dos**
+   solicitudes de niveles distintos, precisamente para que la asignación no pudiera acertar por no
+   tener alternativa. Y de los 18 puntos del piso 2, **solo uno está en
    la ruta crítica** —su punto de transferencia, sin el cual no hay relevo ni RF-24—; los nombres
    de las salas, que siguen aparcados a la espera de confirmarlos, hacen falta en S24 y no antes.
 2. **La congelación de código es del 14 al 20 de septiembre: cuatro semanas** para el coordinador,
@@ -371,7 +375,8 @@ real del laboratorio queda guardado y verificado con `herramientas/verificar_map
 | Mar 25 | H3 —los dos agentes a la vez— y cerrar el `/odom` cruzado | ✅ Las dos. H3 con 0,281 y 0,143 m contra `/odom`; el cruce cerrado **con causa** (el daemon de `ros2cli`), no por no reproducirse |
 | Mié 26 | `coordinacion_msgs` en las dos distribuciones · congelar el esquema de RF-25 · aplicar `stateful: False` comparando cúspides | 🟡 **2 de 3.** El esquema quedó congelado y `stateful: False` está aplicado desde el 24-ago. **`coordinacion_msgs` no se ha compilado en la tarjeta Jazzy**, que era la mitad que daba valor a la tarea (§2.2 del plan), y **la comparación de cúspides contra el registro del 21-ago sigue sin hacerse**, que es lo que cierra R12 |
 | Jue 27 | El nodo de coordinación con los dos tiempos instrumentados, probado con destino en el nivel 2 | 🟡 **Cumplido a medias, y por un motivo que no es pereza.** El nodo existe desde el 24-ago y **el registrador se construyó hoy**: una solicitud real produce un registro validado con `t_solicitud` y `t_robot_activo` dentro. Lo que **no** se hizo es probarlo con destino en el nivel 2, y ahí apareció el bloqueo estructural de la fila de abajo |
-| Vie 28 | Frente B por la mañana (mapa del laboratorio + recta de ≥ 20 m) · corte semanal por la noche | ⬜ Pendiente, es mañana |
+| Vie 28 | Frente B por la mañana (mapa del laboratorio + recta de ≥ 20 m) · corte semanal por la noche | 🟡 **Frente B hecho y de más; el corte no.** [`S20_frente_b_hardware.md`](Documentos/Evidencia/S20_frente_b_hardware.md): mapa guardado, odometría láser calibrada contra flexómetro, el LiDAR ya convive con la pila, y **teleoperación del vehículo desde ROS 2**, que no estaba en el plan. El corte semanal se pasó al sábado |
+| Sáb 29 | *No estaba en el plan* | ✅ **Primera ejecución completa de RF-25.** [`S20_asignacion_por_nivel.md`](Documentos/Evidencia/S20_asignacion_por_nivel.md): dos misiones con destinos de niveles distintos, dos agentes asignados correctamente, dos registros JSON validados contra el esquema. Es la mitad de software del criterio de cierre |
 
 **Lo que el jueves añadió sobre lo planeado, y ocupó la tarde entera.** Al correr la primera misión
 instrumentada el error de llegada salió fuera de tolerancia, y perseguirlo destapó dos defectos de
@@ -389,3 +394,37 @@ relevo está escrito y probado como función pura —992 planes verificados— y
 ejecutarse**. Ya estaba anotado el 24-ago que el aislamiento por dominio *«no hacía correcto el
 marco sin prefijar, solo aplazaba la colisión al punto del proyecto donde más caro sale»*; el punto
 es este. Queda registrado como séptimo prerrequisito en el §10 del protocolo.
+
+#### Cierre de S20 al sábado 2026-08-29
+
+El criterio tiene **dos mitades**, y no cierran igual. Conviene decirlo así y no promediarlas.
+
+| Mitad del criterio | Estado |
+|---|---|
+| «Una solicitud origen–destino produce la asignación del **agente correcto** y deja registrados los dos tiempos en un log estructurado» | ✅ **Cumplida, y por encima de lo pedido.** El criterio pedía *una* solicitud; se ejecutaron **dos**, con destinos en niveles distintos, porque una sola no distingue «eligió bien» de «siempre responde lo mismo». Dos agentes distintos asignados correctamente y dos registros validados contra el esquema congelado ([`S20_asignacion_por_nivel.md`](Documentos/Evidencia/S20_asignacion_por_nivel.md)) |
+| «El mapa real del laboratorio queda guardado **y verificado con `herramientas/verificar_mapa.py`**» | 🟡 **Guardado sí; verificado no, y no por omisión.** La herramienta exige un `.world` contra el que comparar las paredes, y un laboratorio físico no tiene `.world`. Se corrió a mano la mitad que no depende del mundo. **El criterio, tal como está redactado, no es aplicable al banco físico** ([`S20_frente_b_hardware.md`](Documentos/Evidencia/S20_frente_b_hardware.md) §5) |
+
+**No se declara cumplida la segunda mitad por analogía, ni se bajan los umbrales para que pase.** El
+umbral de frontera de la herramienta es del 1 % y el mapa del laboratorio da 15,00 %; esa diferencia
+no dice que el mapa esté mal, dice que el 1 % está calibrado sobre mundos simulados cuyos vanos se
+sellaron a propósito. Ajustarlo para que el criterio pasara convertiría la verificación en un
+trámite. **Lo que corresponde es reescribir el criterio para el banco físico**, y eso es una decisión
+de protocolo que se lleva a S21.
+
+**Los tres hallazgos de la semana que cambian trabajo futuro:**
+
+1. **El *tiempo de asignación* es hoy estructuralmente inmedible.** `_marcar()` en `coordinador.py`
+   fija `etapa` y `robot_activo` en la misma llamada y publica una sola vez, así que nunca hay estado
+   intermedio y la métrica vale exactamente cero siempre. Es **una de las cuatro métricas de OE4** y
+   la corrección tiene que entrar **antes de S24**, no después.
+2. **El bag no puede dar el RTF.** Con `--use-sim-time` todos los sellos son de simulación,
+   incluidos los del `metadata.yaml`. Se corrigió el mismo día: `grabar_mision.sh` mide `/clock`
+   alrededor de la ventana grabada y escribe `rtf.json` junto al bag.
+3. **Repetibilidad no es calibración.** La odometría láser del vehículo cierra un circuito de 18,4 m
+   con 0,18 % de deriva y aun así estima **+2,9 % largo** contra flexómetro: el error de escala se
+   cancela entre ida y vuelta. Sin la referencia externa, el dato habría pasado por una validación
+   exitosa.
+
+**Arrastre declarado a S21:** la verificación del mapa físico (decisión de protocolo), la corrección
+del tiempo de asignación, `coordinacion_msgs` en la tarjeta Jazzy, y la comparación de cúspides que
+cierra R12. El bloqueo de dominios sigue siendo el que manda.

@@ -1,0 +1,675 @@
+\documentclass[12pt,letterpaper]{article}
+
+% --- Paquetes Requeridos ---
+\usepackage[utf8]{inputenc}
+\usepackage[spanish,es-tabla]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{titlesec}
+\usepackage{setspace}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{xcolor}
+
+% --- Configuración de Párrafo ---
+\onehalfspacing
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1em}
+
+% --- Rutas de búsqueda de imágenes ---
+% Permite compilar tanto desde Documentos/Entregables/ como con todas las
+% imágenes en una sola carpeta plana.
+\graphicspath{{./}{../Evidencia/}{Evidencia/}{imagenes/}}
+
+% --- Configuración de listings ---
+\lstset{
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,
+    frame=single,
+    captionpos=b,
+    showstringspaces=false
+}
+
+% --- Inicio del Documento ---
+\begin{document}
+
+% --- PORTADA ---
+\begin{titlepage}
+    \centering
+
+    {\Large \textbf{UNIVERSIDAD SANTO TOMÁS}} \\[1cm]
+
+    {\Large \textbf{Sistema colaborativo de robots móviles para asistencia de orientación en entornos interiores con múltiples pisos}} \\[2cm]
+
+    {\large \textbf{Realizado por:}} \\
+    {\large Santiago Hernández Ávila} \\
+    {\large Jonny Alejandro Mejía León} \\[1cm]
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.6\textwidth]{Logos Uni.png}
+        \label{Logo Universidad Santo Tomas y facultad de ingenieria electronica}
+    \end{figure}
+
+    \vfill
+
+    {\large \textbf{Informe de Avance --- Semana 20}} \\
+    {\large Fase 5: Integración del sistema y realización de pruebas --- Nodo de coordinación, asignación de agente por nivel e instrumentación de métricas} \\[1.5cm]
+
+    \textbf{Dirigido por:} \\
+    Ing. Armando Mateus Rojas, Msc. \\
+    Ing. Nestor Ivan Ospina, Msc. \\
+    Ing. Oscar Mauricio Gélvez Lizarazo, Msc. \\[1.0cm]
+
+    \vfill
+
+    {\large GED (Grupo de Estudio y Desarrollo en Robótica)} \\
+    {\large Facultad de Ingeniería Electrónica} \\
+    {\large División de Ingenierías} \\
+    {\large Bogotá, agosto de 2026}
+\end{titlepage}
+
+% --- CONTENIDO ---
+
+\section{Introducción}
+
+El presente informe documenta el avance correspondiente a la \textbf{Semana 20} del cronograma de actividades (24 al 30 de agosto de 2026), dentro de la \textbf{Fase 5 (Integración del sistema y realización de pruebas)}.
+
+Es la semana en la que el proyecto pasa de tener agentes que navegan a tener un \textbf{sistema que decide}. Se construyó el nodo de coordinación, se le dio un lenguaje propio de mensajes, se le dio un nivel superior al que enviar un agente, y se construyó la instrumentación que convierte una misión en un registro medible. Al cierre de la semana, una solicitud de origen y destino produce la asignación del agente correcto y deja un archivo estructurado con las marcas temporales y el veredicto calculado contra la odometría del simulador.
+
+El criterio de cierre de la semana tiene \textbf{dos mitades} y no cierran igual. La mitad de software se cumplió por encima de lo pedido; la mitad de hardware quedó cumplida a medias, y el motivo no es una omisión sino que \textbf{el criterio, tal como está redactado, no es aplicable al banco físico}. Se expone en la Sección \ref{sec:cronograma} sin promediar las dos mitades y sin declarar cumplida la segunda por analogía.
+
+La semana produjo además tres hallazgos que cambian trabajo futuro, y uno de ellos afecta directamente a una de las cuatro métricas del objetivo específico 4. Se exponen en la Sección \ref{sec:hallazgos}, y se consideran el producto más valioso de la semana: son la clase de defecto que solo aparece al ejecutar.
+
+\section{Objetivos de la Semana}
+
+El cronograma fija para esta semana el siguiente criterio de cierre:
+
+\begin{quote}
+\textit{Una solicitud origen--destino produce la asignación del agente correcto y deja registrados los dos tiempos en un log estructurado. El mapa real del laboratorio queda guardado y verificado con la herramienta de verificación de mapas.}
+\end{quote}
+
+De ese criterio se derivaron las actividades de la semana, y a ellas se añadieron dos que el cronograma no nombra pero que son prerrequisito de las que sí nombra: la construcción del mapa y de los destinos del nivel superior, y la congelación del esquema de datos del registro de misión. Sin el primero no hay a dónde enviar al segundo agente, con lo cual la asignación acertaría por no tener alternativa; sin el segundo, el registro estructurado no sería verificable.
+
+\section{Desbloqueo del nivel superior}
+\label{sec:piso2}
+
+\subsection{El mapa del nivel inferior declaraba libre medio edificio}
+
+El trabajo de la semana comenzó con un defecto que apareció al ejecutar la primera misión del coordinador: el planificador trazó una diagonal de 38 m atravesando paredes, hacia fuera del mapa. La causa fueron \textbf{dos defectos que se tapaban entre sí}.
+
+\begin{itemize}
+    \item El relleno de espacio libre se escapaba por los \textbf{dieciséis vanos} del pasillo ---las puertas no tienen hoja en el modelo del entorno--- e inundaba el exterior del edificio. Esto se venía ocultando con una opción de recorte por regiones, que corrige el resultado sin corregir la fuga.
+    \item El umbral de espacio libre del archivo de mapa clasificaba como \textbf{libre} el valor que la convención de ROS reserva para \emph{desconocido}. Todo aquello que el generador escribía para decir «aquí no sé» era leído como «aquí se puede pasar».
+\end{itemize}
+
+La corrección de fondo fue \textbf{cerrar los vanos con geometría y no con incógnita}. La razón es técnica y no estética: el planificador infla los obstáculos letales pero no infla las celdas sin información, de modo que una pared regala el colchón de seguridad de 0,55 m del radio de inflado y un hueco desconocido no regala nada; además el sensor observa el panel y la localización no se degrada frente a cada puerta.
+
+El criterio de aceptación se fijó \textbf{antes} de regenerar: si el entorno está sellado de verdad, el relleno se contiene solo, sin recorte por regiones. Se contuvo.
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Verificación de los mapas de ambos niveles tras el sellado.}
+    \label{tab:mapas}
+    \begin{tabular}{@{}lcc@{}}
+        \toprule
+        \textbf{Indicador} & \textbf{Nivel 1} & \textbf{Nivel 2} \\ \midrule
+        Celdas libres              & 25\,946 & 40\,573 \\
+        Celdas de frontera libre--desconocido & \textbf{0} & \textbf{0} \\
+        Obstáculos sin correspondencia en el entorno & \textbf{0} de 6\,044 & \textbf{0} de 7\,977 \\
+        Coherencia de umbrales     & Correcta & Correcta \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\textbf{Consecuencia que debe asumirse por escrito:} toda medida de navegación anterior al 24 de agosto se tomó sobre mapas con espacio libre inventado. Se declara aquí porque afecta a resultados ya informados en semanas previas.
+
+\subsection{Distinguir una puerta de un pasillo}
+
+El nivel superior no es un pasillo recto sino una planta en forma de \textbf{S} con treinta y cinco paredes, de modo que sus vanos no podían enumerarse a la vista como los dieciséis del nivel inferior. El problema real no era encontrar huecos sino \textbf{distinguir una puerta de una sección de pasillo}: emparejar extremos sueltos de pared produce también la sección transversal del corredor, que es un hueco entre dos paredes tan legítimo como una puerta.
+
+La separación limpia resultó ser la \textbf{colinealidad}: un vano real prolonga el eje de la pared que lo abre, mientras que una sección de pasillo es perpendicular a ella. La separación salió tajante, sin zona gris: todo vano real dio un coseno de al menos 0,92 en valor absoluto, y toda sección transversal 0,71 o menos. Se identificaron \textbf{27 vanos}, de los cuales quedaron 4 pasos y 23 paneles de cierre.
+
+Se documentan \textbf{tres defectos del buscador de vanos} que el criterio de cierre no habría delatado, porque los tres borran vanos en silencio y un vano borrado es una zona incomunicada sin mensaje de error: conservar únicamente el vecino más cercano de cada extremo oculta todo empalme en T ---y uno de esos empalmes habría sellado la boca oeste del pasillo, de 2,393 m, dejando al segundo agente encerrado en su ala---; medir la línea de visión contra el eje de la pared declara bloqueado todo vano en T; y medirla sin acotar deja pasar rayos a lo largo del cuerpo de la propia pared. Se detectaron comparando contra huecos verificados manualmente, no contra el mapa.
+
+\subsection{Los destinos del nivel superior}
+
+Con el entorno sellado se escribieron los \textbf{dieciséis destinos} del nivel superior. Los nombres de las salas y el recorrido que fija cuál es cuál los aportó el segundo autor. De los dieciocho vanos identificados, uno es la escalera y otro mide 0,36 m, por donde el vehículo no cabe.
+
+Las paradas no son la posición cruda del vano: se aplicó la regla de retirada declarada en el catálogo, cuya implementación se validó primero contra el nivel inferior reproduciendo las posiciones que esa regla predice. Se declaran por escrito \textbf{dos desviaciones} en salas de esquina, donde conservar la abscisa del vano obligaría a detenerse a 3 m de la puerta en un caso y sería imposible en el otro; en ambas se cede la abscisa y se conserva la holgura al obstáculo.
+
+El catálogo pasa de 16 a \textbf{32 destinos}, y con ellos cae el cuarto de los prerrequisitos declarados de la campaña experimental.
+
+\section{Infraestructura de coordinación}
+\label{sec:coordinacion}
+
+\subsection{El paquete de mensajes propios}
+
+El aporte declarado del proyecto ---coordinación entre robots y protocolo de relevo--- no podía escribirse hasta que existieran los tipos de mensaje que lo expresan. Se construyó el paquete correspondiente con las definiciones que el contrato de interfaces exige: estado de robot, punto de interés, estado de misión y la acción de guiado, más un quinto tipo envoltorio explicado más abajo. Las constantes se declararon dentro de los mensajes en lugar de dejar números sueltos en los nodos.
+
+\textbf{No se aceptó «compila» como evidencia.} Se escribió una prueba que publica y recibe cada tipo por el middleware de comunicaciones y compara campo a campo, incluidos el mensaje anidado, los flotantes sin pérdida y el ciclo completo de la acción. La prueba existe porque el paquete debe ejecutarse en \textbf{dos distribuciones de ROS 2}, y generar los encabezados no demuestra que el middleware transporte igual en ambas.
+
+\textbf{Un defecto del contrato apareció al construir el paquete, no al escribirlo.} El contrato declaraba un tópico cuyo tipo era un arreglo de puntos de interés, pero un tópico de ROS 2 transporta un solo mensaje y no un arreglo: esa sintaxis es válida para un \emph{campo}, no para un tipo publicable. Se cerró el mismo día con un mensaje envoltorio y se corrigieron las dos secciones del contrato afectadas. La prueba correspondiente no comprueba que el arreglo viaje ---eso es lo fácil--- sino el caso real: que \textbf{un suscriptor que se conecta después de la única publicación} reciba igualmente los puntos del catálogo. Si esa retención fallara, la interfaz de usuario mostraría desplegables vacíos y no se sabría hasta la demostración.
+
+\subsection{El nodo de coordinación, partido en dos a propósito}
+
+El nodo se escribió en dos piezas. La primera decide \textbf{qué} hacer ---qué robot, cuántos tramos, cuántos relevos--- y \textbf{no importa la biblioteca de ROS}. La segunda es únicamente el cableado: atiende la acción de guiado, publica el catálogo y ordena la navegación de cada robot.
+
+El motivo de partirlo es de verificabilidad: si la lógica de relevo viviera dentro del nodo, la única forma de comprobarla sería levantar dos simuladores. Separada, se agotan todas las combinaciones de origen y destino del catálogo real en milisegundos. Con el catálogo completo son \textbf{992 planes verificados}, todos ellos sin simulador.
+
+La comprobación que más importa es que la decisión de que \textbf{ningún robot recibe jamás un objetivo en un nivel que no es el suyo} pasa a ser verificable. Si alguien rompiera esa condición, la prueba lo diría; la simulación no, porque el robot obedecería el objetivo y se iría contra una pared.
+
+El nodo \textbf{verifica cada llegada contra la odometría} y no contra el resultado que informa la pila de navegación, y rechaza el tramo si el robot declara haber llegado pero no publica odometría. Las dos rutas de fallo se probaron sin ningún robot vivo: un origen inexistente aborta en 2,8 ms con el motivo redactado en español, y una misión válida sin robots aborta a los 20 s.
+
+\subsection{Una prueba exhaustiva que pasaba con treinta planes mal}
+
+Se documenta como advertencia metodológica. Las combinaciones del catálogo pasaban diecisiete comprobaciones ---número de tramos, robots implicados, número de relevos--- y aun así \textbf{los treinta planes con relevo enviaban al mismo robot dos veces seguidas al mismo punto}. El texto llegaba a indicarle a una persona que siguiera al robot hasta las escaleras cuando ya estaba en las escaleras.
+
+Se descubrió \textbf{imprimiendo un plan a mano}, no con la prueba. La pila de navegación tampoco lo habría delatado: un objetivo de cero metros devuelve resultado satisfactorio de inmediato. La prueba comprobaba la forma y no el significado.
+
+Lo que no se arregla con código, y quedó registrado como consecuencia: mientras el nivel superior tuviera un solo punto, ninguna misión con relevo ejercitaría los cuatro tramos del protocolo. Esa observación es la que ascendió los destinos del nivel superior de pendiente menor a \textbf{prerrequisito de la campaña experimental}, y motivó el trabajo de la Sección \ref{sec:piso2}.
+
+\subsection{El marco de referencia global se prefija con el espacio de nombres}
+
+El contrato de interfaces establece desde el 5 de agosto que \emph{todos} los marcos de cada robot llevan el prefijo de su espacio de nombres, incluido el marco global del mapa. Los archivos de lanzamiento prefijaban los marcos de odometría y de base pero dejaban el del mapa sin prefijo, \textbf{y lo justificaban por escrito} con dos argumentos: que el marco del mapa es «el ancla común», y que como cada robot vive en su propio dominio de comunicaciones, dos marcos con el mismo nombre no colisionan.
+
+\textbf{Las dos justificaciones son falsas.} No hay un ancla común, sino \textbf{dos mapas distintos con el mismo nombre}: dos plantas con geometrías diferentes publicadas por dos servidores independientes. Y el aislamiento por dominio es temporal, porque el protocolo de relevo exige que ambos agentes compartan grafo; ese día habría dos servidores publicando el mismo nombre de marco con geometrías distintas. El aislamiento no hacía correcto el marco sin prefijar: solo \textbf{aplazaba la colisión} al punto del proyecto donde más caro sale.
+
+El síntoma del defecto merece registro porque es del tipo que este proyecto persigue: el objetivo llegaba al árbol de comportamiento con el marco prefijado, el planificador no podía transformarlo, y la pila entraba en comportamientos de recuperación hasta abortar. \textbf{En ningún punto de esa cadena aparece la palabra «marco»}: el único rastro es un vehículo que se recupera en el sitio sin haber avanzado nunca. Había un segundo fallo aún más silencioso: con el servidor de mapas sellando su rejilla en un marco y el mapa de costos esperando otro, \textbf{la capa estática queda vacía y nadie protesta}; el robot navegaría sobre un mapa en blanco.
+
+Se corrigió en los tres archivos de lanzamiento, en el evaluador de navegación, en las vistas del visualizador y en el verificador de contrato, donde la comprobación pasó de aviso tranquilizador a \textbf{fallo declarado}. Ese aviso ---«normal si no hay localización levantada»--- se imprimía igual con la localización levantada, y fue el que ocultó el defecto.
+
+\section{Hito H3: los dos agentes navegando de forma simultánea}
+\label{sec:h3}
+
+El 25 de agosto se ejecutó la corrida que cierra la cuarta condición de la Semana 19. Las dos metas fueron \textbf{los dos puntos de transferencia}, es decir el escenario del relevo y no dos destinos de conveniencia, y se enviaron en paralelo desde una sola orden para que los vehículos se movieran a la vez y no uno detrás de otro.
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Hito H3: resultado de las dos navegaciones simultáneas.}
+    \label{tab:h3}
+    \begin{tabular}{@{}lcc@{}}
+        \toprule
+        \textbf{Magnitud} & \textbf{Agente del nivel 1} & \textbf{Agente del nivel 2} \\ \midrule
+        Error real de llegada contra odometría & 0,281 m & \textbf{0,143 m} \\
+        Recorrido / tiempo en movimiento & 1,67 m / 7,6 s & 1,75 m / 6,9 s \\
+        Seguimiento de giro (RMS) & 0,178 rad/s & 0,140 rad/s \\
+        Deriva en reposo & 0,0412 \textdegree/s & 0,0176 \textdegree/s \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+La comparación que decide el hito es la del agente del nivel 2 contra su propia corrida en solitario del día anterior, que arrojó 0,190 m: \textbf{ejecutar dos simuladores, dos pilas de navegación y dos filtros de localización en la misma máquina no degradó la navegación}. Con una corrida por condición esto no es una medida de efecto ---la diferencia cabe holgadamente en la variación entre corridas--- pero descarta la degradación gruesa, que era la preocupación.
+
+\textbf{Se cerró con causa un hallazgo abierto desde la Semana 17}, que era la única razón por la que este hito estaba bloqueado: una lectura de odometría que devolvió el desplazamiento del otro robot. Se comprobó que el dominio de un robot no lista ningún tópico del otro, en ninguno de los dos sentidos, de modo que \textbf{ninguna lectura correcta puede devolver datos del otro robot}. La publicación bajo espacio de nombres queda descartada como causa y lo que quedaba era la capa de herramienta de línea de órdenes. Importa porque las cuatro métricas del objetivo 4 salen de odometría, y se calculan sobre archivos de registro que no pasan por esa capa.
+
+\textbf{Tres defectos nuevos, los tres silenciosos}, aparecieron al medir la corrida:
+
+\begin{enumerate}
+    \item \textbf{El vehículo sale de tolerancia después de haber llegado.} El agente del nivel 1 estaba a 0,243 m cuando la acción devolvió resultado satisfactorio y a 0,281 m al cerrar el registro, con 93 s y \emph{ni un solo comando de velocidad} entre ambas lecturas, durante los cuales recorrió 4,0 cm. Con una tolerancia de 0,25 m, el instante de la medición cambia el veredicto, de modo que \textbf{la tasa de éxito no está bien definida} hasta fijar cuándo se lee la pose de llegada. Es una decisión de protocolo, y debe tomarse antes de la campaña.
+    \item \textbf{El filtro de localización se vuelve más confiado y más equivocado a la vez.} En la aproximación final del agente del nivel 2, el error converge hasta 0,022 m a media ruta y desde ahí \emph{crece} hasta 0,152 m mientras la covarianza sigue cayendo. Ocurre exactamente en la entrada de frente a la barrera de la escalera, que es donde apunta el cono ciego del sensor simulado.
+    \item \textbf{La activación de los controladores es una carrera.} Un agente levantó con seis de siete controladores; el faltante aparecía en la lista pero sin configurar. Se recupera en caliente respetando el ciclo de vida, lo que confirma el diagnóstico. La causa real se determinó dos días después y se expone en la Sección \ref{sec:hallazgos}.
+\end{enumerate}
+
+Se registra además una advertencia de método derivada de esta corrida: \textbf{la mediana del error de localización no sirve} para esta magnitud. La herramienta de análisis imprimió 0,101 y 0,102 m para los dos robots, dos cifras casi idénticas que sugieren un error común y no lo hay, porque una serie es decreciente y la otra tiene forma de U. Para la campaña debe reportarse el error \emph{en la llegada}, no la mediana del trayecto.
+
+\section{Corrección de defectos de llegada y de localización}
+\label{sec:llegada}
+
+\subsection{El rumbo final dejaba la llegada fuera de tolerancia}
+
+El riesgo R12 se apoyaba desde el 18 de agosto en dos corridas con las cúspides contadas pero sin las dos cifras de la misma llegada. Una misión real del coordinador lo cerró: con resultado satisfactorio informado por la pila, la lectura de odometría con el vehículo detenido dio \textbf{0,413 m de posición} ---fuera de los 0,25 m--- y \textbf{11,4\textdegree{} de rumbo} ---dentro de tolerancia.
+
+El mecanismo queda establecido sin hipótesis: el verificador de meta operaba en modo persistente, de modo que una vez cumplida la tolerancia de posición dejaba de comprobarla y solo exigía el rumbo; el vehículo Ackermann maniobró los 180\textdegree{} necesarios y \textbf{la maniobra lo apartó del punto}.
+
+Se relajó la exigencia de rumbo final, y el razonamiento de por qué esto es legítimo debe quedar escrito: \textbf{se cambió lo que se le pide a la pila de navegación, no el listón con el que se la mide}. El criterio de éxito sigue siendo 0,25 m contra odometría, el mismo de antes de ver estos datos. La orientación declarada en el catálogo pasa a ser \textbf{orientativa}, y así queda escrito, en lugar de dejarla como una garantía falsa.
+
+\subsection{La media vuelta estaba en el plan, no en el verificador de meta}
+
+Relajado el rumbo, el vehículo \emph{seguía} dando media vuelta al llegar. La explicación anterior era incompleta: el planificador empleado busca una \textbf{pose} y no un punto, y dispone de primitivas de marcha atrás para satisfacer el rumbo pedido. \textbf{La maniobra va cosida dentro del camino}, de manera que el vehículo no entra en la tolerancia hasta haberla terminado y el verificador nunca llega a opinar.
+
+Lo que corregiría esto en el planificador es una opción que \textbf{existe a partir de la distribución Jazzy}, y el equipo de simulación corre Humble; descender a un planificador bidimensional no es alternativa, porque ignoraría el radio mínimo de giro que es la razón de haber elegido este planificador. \textbf{Se corrigió donde sí se puede, en el coordinador}: se elige entre la orientación del catálogo y su opuesta según el rumbo de aproximación medido, y se le entrega a la pila el que el vehículo ya trae. La regla escrita es que \textbf{el punto es sagrado y el rumbo no}.
+
+\subsection{Los parámetros de localización y una tolerancia con margen cero}
+
+Al ejecutar las primeras misiones instrumentadas el error de llegada salió fuera de tolerancia. Perseguirlo destapó dos defectos de configuración, y ambos se corrigen con un argumento que \textbf{no mira ningún resultado de llegada}, que es lo que hace legítima la corrección.
+
+\begin{itemize}
+    \item \textbf{El ruido de odometría declarado al filtro} estaba en 0,2, es decir un 20 \% de ruido sobre una odometría que en simulación es la pose exacta del motor físico. En un pasillo recto el láser fija la posición lateral y no dice nada de la longitudinal, de modo que ese ruido inventado se acumulaba en el eje del pasillo.
+    \item \textbf{La tolerancia de parada} valía exactamente el mismo número con el que el coordinador juzga la llegada: margen cero. La pila detiene el vehículo cuando \emph{su estimación} baja del umbral, y el veredicto se mide contra la verdad de terreno. El instante quedó capturado: el vehículo se creía a 0,240 m y estaba a 0,297 m.
+\end{itemize}
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Efecto de las dos correcciones sobre misiones completas de dos tramos.}
+    \label{tab:alphas}
+    \begin{tabular}{@{}lccc@{}}
+        \toprule
+        \textbf{Magnitud} & \textbf{Config. anterior} & \textbf{Misión A} & \textbf{Misión B} \\ \midrule
+        Error de llegada, tramo 1 & 0,429 m & 0,204 m & 0,153 m \\
+        Error de llegada, tramo 2 & Abortada & 0,117 m & 0,129 m \\
+        Tasa de deriva de localización & 0,0343 m/m & \textbf{0,0049} m/m & \textbf{0,0044} m/m \\
+        Peor error de localización & 1,473 m & 0,407 m & 0,374 m \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\textbf{El crédito se reparte por argumento y no por corazonada:} la tolerancia de parada no toca al filtro de localización, de modo que la caída de aproximadamente siete veces en la tasa de deriva solo pueden explicarla los parámetros de ruido; y el primer tramo de la misión A ---donde la pila creía estar a 0,124 m y estaba a 0,204 m--- es el que muestra el efecto de la tolerancia, porque con el valor anterior habría detenido el vehículo hacia los 0,33 m y la misión habría resultado fallida.
+
+\subsection{Un resultado verificado contra un oráculo}
+
+Se registra un hallazgo incómodo y se declara como tal. Persiguiendo por qué el vehículo no se detenía en un destino concreto, la causa no resultó ser el control ni la planificación sino el \textbf{filtro de localización}: en el instante del resultado satisfactorio había \textbf{1,473 m de desfase, íntegramente en el eje longitudinal} del pasillo, con un pico de 1,977 m en la serie completa. La propia covarianza del filtro lo confirma, con una relación de seis a uno entre los dos ejes.
+
+Lo que convierte esto en un hallazgo y no en un número desfavorable es lo siguiente: \textbf{en simulación la odometría no es una estimación}. El complemento la publica desde la pose verdadera del motor físico, de modo que la transformada que el filtro produce \emph{debería} ser constante, y derivó casi dos metros. El filtro \textbf{fabricó} el error a partir de una entrada sin ruido, por ambigüedad perceptual: en un tubo uniforme de 2,10 m la posición lateral está perfectamente restringida y la longitudinal no lo está.
+
+\textbf{Y de ahí lo que de verdad importa, que es de transferencia a la realidad.} El vehículo real no lleva encoders de rueda, de modo que su única odometría proviene del registro de barridos láser, que falla en el \textbf{mismo eje} que el filtro y sin ninguna medida independiente que lo delate. Se midió, no se supuso: ejecutando ese estimador fuera de línea sobre un registro grabado, sin tocar la simulación, se obtuvo \textbf{1,71 m de error sobre 29,94 m reales (5,7 \%)} en un tramo y 0,33 m sobre 24,98 m (1,3 \%) en otro. No deriva: se congela. Y no es un componente averiado, porque siguió correctamente los primeros 10,4 m y la orientación es excelente durante todo el trayecto: la rotación y la traslación lateral son observables, la longitudinal no.
+
+\textbf{La decisión adoptada, y es la parte discutible: no se construye la solución ahora.} El pasillo simulado es una extrusión perfecta sin marcos de puerta, mobiliario ni personas, más pobre que el real, de modo que el 5,7 \% es un piso y no una estimación; diseñar contra esa cifra sería ingeniería contra una magnitud desconocida, y las tres vías posibles ---unidad inercial, odometría visual, aproximación relativa a referencias--- son cada una un proyecto.
+
+\textbf{Lo que sí se decidió es cómo se mide}, que es lo que tenía fecha de caducidad. El punto de decisión de la Semana 21 estaba planteado para ejecutarse en el laboratorio, 16 m\textsuperscript{2} donde cualquier método pasa, y tal como estaba redactado habría devuelto una autorización falsa, con el fallo apareciendo en la campaña de la Semana 25 y el código ya congelado. Se partió en dos: lo que el laboratorio sí decide, y una comprobación de localización longitudinal sobre una recta de al menos 20 m, con umbrales fijados antes de ver el dato.
+
+\section{Instrumentación de métricas: el registro de misión}
+\label{sec:registro}
+
+\subsection{Las cuatro piezas}
+
+El requisito funcional del registro de misión pasó de documento a herramienta ejecutable, en cuatro piezas:
+
+\begin{enumerate}
+    \item El \textbf{esquema de datos} deja de ser prosa y pasa a ser comprobable por máquina, versionado y con su propia prueba.
+    \item Las \textbf{marcas temporales y el veredicto} se escriben como funciones puras. Al probarlas aparecieron \textbf{dos métricas del objetivo 4 en valor negativo}, un caso que nadie habría detectado sobre datos reales.
+    \item La grabación \textbf{sella el registro con tiempo de simulación} y no con reloj de pared, como exige el protocolo.
+    \item El \textbf{error de llegada se calcula solo}, contra odometría y sobre el robot que efectivamente llegó, no contra el resultado que informa la pila de navegación.
+\end{enumerate}
+
+\subsection{Tres registros perdidos, tres causas distintas, y la compuerta de pre-misión}
+
+Se documenta porque ninguna de las tres causas era visible mientras se grababa:
+
+\begin{itemize}
+    \item Un registro se grabó entero contra una \textbf{pila muerta}: cero mensajes en los tres tópicos que importan, y no se advirtió hasta abrir el archivo.
+    \item Otro arrancó desde una \textbf{condición inicial distinta de la declarada}, por reutilizar un simulador de una corrida anterior.
+    \item Un tercero se perdió por \textbf{parámetros obsoletos}: se editó la configuración, se corrió y se analizó el registro como si midiera el cambio, cuando el simulador llevaba más de veinte minutos vivo. Los nodos leen su configuración una sola vez, al arrancar; un archivo nuevo con una pila vieja se ve exactamente igual desde la terminal.
+\end{itemize}
+
+Las tres comprobaciones se hacían a mano, o no se hacían. Ahora son una sola orden encadenada antes de grabar, que se niega a continuar si falta algo: los nodos de navegación y los siete controladores activos, los parámetros vivos iguales a los del repositorio, y el vehículo en la pose declarada.
+
+\textbf{La tercera comprobación destapó un hecho que condiciona la planificación de una jornada de medidas.} El modelo se desplaza aproximadamente 17 mm y 1,4\textdegree{} por minuto con los siete controladores activos y \emph{cero} comandos de velocidad. Con la pila unos 48 minutos en reposo se midieron \textbf{0,643 m} de discrepancia con el vehículo parado. La condición inicial no depende de la misión: depende del \textbf{tiempo que la pila lleva quieta}, y sale de tolerancia en siete a nueve minutos. Dos misiones «idénticas» lanzadas con diez minutos de diferencia no parten de lo mismo.
+
+\subsection{Un instrumento que medía una constante}
+
+Se registra un defecto de \emph{instrumento}, que es la clase que produce conclusiones falsas con aspecto de medida. La pieza que informaba a qué distancia se creía la pila de navegación imprimía el mismo valor en los tres registros disponibles: no era una medida sino la longitud del último tramo de rejilla del planificador, idéntica siempre. Reescrita contra una fuente continua ---2\,019 mensajes frente a 305 de la anterior en el mismo registro--- y contra el instante real de parada, la misma llegada arroja \textbf{0,032 m} en lugar de 0,390 m.
+
+Estuvo a punto de reportarse además un truncamiento del planificador que no existía: el plan de una misión terminaba a 0,556 m de un punto, pero esa misión había abortado en su primer tramo y su meta era otra, contra la cual el plan termina a 0,023 m. Lo evitó ejecutar la herramienta completa antes de escribir.
+
+\section{Primera ejecución completa: la asignación por nivel}
+\label{sec:asignacion}
+
+El 29 de agosto se ejecutó por primera vez la cadena completa de extremo a extremo: una solicitud de origen y destino entra por la acción de guiado, el coordinador elige agente, se graba un registro por misión y la herramienta de composición produce un archivo estructurado validado contra el esquema congelado.
+
+\subsection{Dos misiones, y la segunda es el control}
+
+\textbf{Una sola misión exitosa no demuestra que la asignación discrimine.} Si solo se lanza una petición del nivel 2 y el coordinador responde con el agente del nivel 2, no puede distinguirse entre «eligió bien» y «siempre responde lo mismo». Por eso se lanzaron dos peticiones en la misma sesión, contra el mismo nodo, con destinos en niveles distintos.
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Las dos solicitudes y los agentes asignados.}
+    \label{tab:asignacion}
+    \begin{tabular}{@{}clcc@{}}
+        \toprule
+        \textbf{Misión} & \textbf{Origen $\rightarrow$ destino} & \textbf{Nivel} & \textbf{Agente asignado} \\ \midrule
+        M1 & Sala IEEE $\rightarrow$ Lab. Sistemas 313 & 2 & \textbf{Agente 2} \\
+        M2 & Representación $\rightarrow$ ETM2 & 1 & \textbf{Agente 1} \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+Las dos asignaciones son correctas y son \textbf{distintas}. Eso es lo que convierte a la primera en evidencia. Esta comprobación solo es posible desde que el catálogo dejó de tener todos sus destinos en el nivel 1; con un solo nivel poblado, la asignación habría acertado por no tener alternativa.
+
+\subsection{Resultado de la primera misión}
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Registro de la misión M1, medido contra odometría.}
+    \label{tab:m1}
+    \begin{tabular}{@{}lc@{}}
+        \toprule
+        \textbf{Magnitud} & \textbf{Valor} \\ \midrule
+        Veredicto & \textbf{Éxito} \\
+        Error de llegada contra odometría & \textbf{0,036 m} (tolerancia 0,25 m) \\
+        Tiempo de respuesta (solicitud $\rightarrow$ primer movimiento) & 0,1 s \\
+        Tiempo total & 38,9 s \\
+        Distancia recorrida & 16,55 m \\
+        Cúspides & 8 \\
+        Deriva de la transformada de localización & 0,457 m \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+El veredicto \textbf{no} usa el resultado que informa la pila de navegación: se calcula contra odometría, como exige el protocolo, por el defecto medido el 21 de agosto en el que la pila declaró éxito estando a 0,296 m del destino.
+
+Los 0,457 m de deriva de la transformada de localización merecen atención: es la corrección acumulada que el filtro aplica sobre la odometría; no invalida el resultado, porque el veredicto se toma contra odometría, pero es un orden de magnitud mayor que el error de llegada y conviene vigilarlo durante la campaña.
+
+\subsection{La segunda misión es un fallo limpio, y es información}
+
+El agente del nivel 1 fue asignado correctamente pero \textbf{no estaba alcanzable}: reside en un dominio de comunicaciones distinto del de la sesión. El servidor de acción nunca apareció, la misión abortó a los 20 s y el vehículo recorrió 0,023 m, es decir, no se movió. El veredicto es fallo, con el motivo redactado.
+
+\textbf{No es una corrida perdida.} Es el control descrito más arriba y, además, es la primera manifestación \emph{medida} del bloqueo de dominios que gobierna las semanas siguientes.
+
+Ambas misiones van marcadas como \textbf{piloto} en su registro. Son el primer ejercicio de la cadena, no corridas de campaña, y el protocolo excluye el pilotaje del análisis. Marcarlo es lo que impide que en octubre se mezclen con los datos válidos.
+
+\section{Concurrencia a escala de campaña}
+\label{sec:concurrencia}
+
+El hito H3 estableció que dos pilas simultáneas no degradan la navegación, pero lo estableció sobre trayectos de 1,67 m y 1,75 m. La pregunta se repitió a \textbf{84 y 90 m}, que es la escala de la campaña.
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Comparación de cada agente contra su propio control en solitario.}
+    \label{tab:concurrencia}
+    \begin{tabular}{@{}lccc@{}}
+        \toprule
+        \textbf{Magnitud} & \textbf{Solo (control 1)} & \textbf{Solo (control 2)} & \textbf{Concurrente} \\ \midrule
+        \multicolumn{4}{@{}l}{\textit{Agente del nivel 1, recorrido de 83,9 m}} \\ \addlinespace
+        Error de llegada        & 0,117 m & 0,129 m & 0,151 m \\
+        Tasa de deriva          & 0,0049 m/m & 0,0044 m/m & \textbf{0,0040} m/m \\ \addlinespace
+        \multicolumn{4}{@{}l}{\textit{Agente del nivel 2, recorrido de 90,5 m}} \\ \addlinespace
+        Error de llegada        & 0,124 m & --- & \textbf{0,078} m \\
+        Tasa de deriva          & 0,0039 m/m & --- & \textbf{0,0023} m/m \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+Las cinco misiones cumplen el criterio de 0,25 m contra odometría y ninguna se acercó a incumplirlo. Con una corrida por condición esto no es una medida de efecto; lo que queda descartada, ahora a 90 m y no a 1,7 m, es la degradación gruesa.
+
+\textbf{Un dato que parece concluyente y no lo es.} El agente del nivel 2 tardó 186,7 s las dos veces, sola y concurrente, idéntico a la décima de segundo. La lectura tentadora ---«la concurrencia no cuesta nada»--- es incorrecta: ese tiempo sale del reloj de \emph{simulación}, y el reloj de simulación se frena junto con el simulador. Dos corridas idénticas en tiempo simulado prueban que la trayectoria es \textbf{determinista}, que es un resultado útil, pero no dicen nada sobre contención de recursos. Esta solo aparece en el factor de tiempo real, que \textbf{no se muestreó durante la corrida}. La pregunta de la concurrencia queda, por tanto, medio respondida: la calidad de navegación no se degrada a 90 m; el coste en reloj de pared sigue sin medir.
+
+\section{Frente de hardware: el vehículo real}
+\label{sec:hardware}
+
+La jornada del 28 de agosto se ejecutó en el laboratorio con \textbf{un solo} vehículo, ya que el riesgo R11 sigue vivo.
+
+\subsection{El sensor ya convive con la pila del vehículo}
+
+Se aplicó la corrección de una línea que la Semana 19 había identificado, mediante enlace simbólico entre el nombre invocado y el binario instalado. El motivo de elegir esa vía y no editar el archivo de lanzamiento del fabricante no es comodidad: un archivo dentro del árbol del proveedor queda expuesto a que cualquier actualización lo sobrescriba sin aviso, y el fallo reaparecería semanas después sin relación aparente con nada que se hubiera tocado.
+
+\textbf{Convivir cuesta un 6,6 \%} de frecuencia de barrido, de 6,80 Hz aislado a 6,35 Hz bajo la pila completa. No invalida nada de lo medido después, pero es una cifra que debe tenerse presente al comparar el banco físico con el simulado, porque el sensor simulado no tiene ese efecto.
+
+\subsection{Odometría láser: repetibilidad no es calibración}
+
+Se recorrió una recta del laboratorio de ida y vuelta tres veces, contrastando la estimación contra \textbf{flexómetro}. Esa referencia externa es lo único que convierte el ejercicio en una calibración en vez de en una comprobación de consistencia interna.
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Calibración de la odometría láser contra referencia métrica.}
+    \label{tab:odom_laser}
+    \begin{tabular}{@{}lc@{}}
+        \toprule
+        \textbf{Magnitud} & \textbf{Valor} \\ \midrule
+        Recta real medida con flexómetro & 3,000 m \\
+        Media de cinco estimaciones & \textbf{3,088 m} \\
+        Desviación típica & 0,025 m \\
+        Error contra la referencia & \textbf{+0,088 m = +2,9 \%} \\
+        Deriva de cierre sobre 18,4 m recorridos & 0,033 m = \textbf{0,18 \%} \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\textbf{El error es sistemático y no ruido:} la estimación más baja de las cinco sigue estando a 2,2 desviaciones típicas por encima del valor real, y ninguna queda por debajo. Un error aleatorio repartiría las estimaciones a ambos lados.
+
+\textbf{Y una deriva de cierre excelente no lo detecta, lo cual es contraintuitivo y conviene tener claro.} Un error de escala multiplica la distancia estimada por un factor constante: al ir la sobreestima y al volver la sobreestima igual pero en sentido contrario, de modo que ambas se \emph{cancelan} al cerrar el circuito. La deriva de cierre mide la consistencia del sistema consigo mismo, no su acuerdo con el mundo. De ahí la lección de método: \textbf{repetibilidad sin referencia externa no es calibración}. Sin el flexómetro, estos datos habrían pasado por una validación exitosa de la odometría.
+
+Quedan dos causas candidatas sin discriminar ---error de escala del propio sensor, o desfase en la colocación del vehículo en cada extremo--- y una prueba que las separa: medir con flexómetro un tramo de pared y compararlo contra el mismo tramo medido sobre la imagen del mapa, comparación que no involucra la colocación del vehículo.
+
+\subsection{Primer control del vehículo desde ROS 2}
+
+La cadena entre el comando de velocidad y el servo tiene los dos defectos independientes documentados en la Semana 19. Arreglar ambos era el camino largo; para teleoperar basta publicar directamente en el tópico donde el vehículo realmente escucha.
+
+\textbf{Funcionó.} El vehículo se conduce con el teclado, y es el \textbf{primer control del vehículo desde ROS 2} sin la interfaz web. Se incorporaron dos decisiones de seguridad que no son adorno: un \textbf{hombre muerto} que anula la tracción tras 0,6 s sin tecla, y la ejecución \textbf{en el propio vehículo y nunca desde el portátil}, porque si se corriera por red y la conexión cayera, el vehículo se quedaría con el último valor recibido, acelerando sin nadie al mando.
+
+Se registra el fallo que no era software: a mitad de sesión el teleoperador dejó de responder, se plantearon tres causas informáticas plausibles, y \textbf{las tres eran falsas: se estaban descargando las baterías}. Queda anotado como patrón, porque un fallo de alimentación se manifiesta como software que se degrada progresivamente.
+
+\subsection{El mapa del laboratorio}
+
+Se generó y guardó el mapa del laboratorio sobre el vehículo. Medido sobre la imagen: rejilla de 247 por 311 celdas a 0,05 m por celda, con un contenido de 8,45 por 6,90 m, 27,6 m\textsuperscript{2} de espacio libre y una frontera entre espacio libre y desconocido del \textbf{15,00 \%}.
+
+\textbf{La verificación, tal como está escrita, no es aplicable a un banco físico}, y se expone en la Sección \ref{sec:cronograma}.
+
+\section{Los tres hallazgos que cambian trabajo futuro}
+\label{sec:hallazgos}
+
+\subsection{El tiempo de asignación es hoy estructuralmente inmedible}
+
+Es el hallazgo más grave de la semana. En la primera ejecución completa, las marcas de llegada de la solicitud y de agente asignado salieron \textbf{idénticas}. No es falta de resolución temporal: el coordinador fija la etapa y el agente activo en la misma llamada y publica una sola vez, de modo que \textbf{nunca existe un estado intermedio}.
+
+La consecuencia es que el \emph{tiempo de asignación}, que es \textbf{una de las cuatro métricas del objetivo específico 4}, valdría exactamente cero en las treinta corridas de la campaña, se ejecute lo que se ejecute. Un cero no es una medida.
+
+La corrección es acotada ---publicar el estado al recibir la solicitud, antes de planificar, y otra vez al tener el agente--- pero debe entrar \textbf{antes de la Semana 24}, no después. Solo se descubrió al ejecutar: leyendo el código, las dos marcas parecen correctas.
+
+\subsection{El archivo de registro no puede dar el factor de tiempo real}
+
+Con el reloj de simulación activo, todos los sellos temporales del archivo de registro son de simulación, incluidos los de su metadato, de modo que la razón entre tiempo simulado y tiempo de pared vale uno por construcción. La medición del factor de tiempo real de la semana ---0,999, contra un requisito no funcional de 0,99--- se tomó \textbf{después} de las misiones, sobre el mismo proceso simulador y bajo carga real de navegación, y esa procedencia queda declarada porque el esquema no tiene campo para anotarla.
+
+Se corrigió el mismo día: la herramienta de grabación toma ahora una marca del reloj de simulación antes de grabar y otra al cerrar, y escribe el factor junto al archivo.
+
+\subsection{La carrera de controladores no era lo que parecía}
+
+La cura que el informe del hito H3 había anotado ---secuenciar los seis cargadores de controlador--- \textbf{se midió antes de aplicarla y no cura}. La línea base, lanzando ambos robots con navegación a la vez, dio \textbf{2 fallos de 8} arranques dobles; encadenados dio 1 de 6, y el arranque subió de 37--39 s a 51--57 s. Que el encadenado funcione y aun así falle \textbf{descarta la concurrencia entre los seis como causa}.
+
+La causa real está en el cliente del gestor de controladores: espera un plazo de 10 s y, si no llega respuesta, \textbf{repite la misma petición}. La operación de carga no es idempotente, de modo que si la primera petición llegó y solo tardó, la segunda recibe un error de «ya cargado» y el cliente aborta antes de configurar y activar. Por eso el orden es indiferente: un solo cliente también puede superar los 10 s con dos simuladores y dos pilas en el mismo equipo.
+
+Se cambió al mecanismo que sí expone ese plazo, elevado a 60 s. Resultado: \textbf{18 arranques dobles, 0 fallos}, y el arranque \emph{baja} a 28--35 s. \textbf{No se levanta la obligación de comprobar los siete controladores antes de medir}: cero de 18 no es garantía, y el fallo sigue siendo silencioso.
+
+\section{El bloqueo que gobierna las semanas siguientes}
+\label{sec:bloqueo}
+
+La condición experimental con relevo ---la misión que cruza de nivel, que es el aporte declarado del proyecto--- \textbf{no se puede ejecutar hoy, y no por falta de código}.
+
+Cada agente corre en su propio dominio de comunicaciones, con un simulador cada uno, porque la capa de integración entre Gazebo y ROS 2 en la distribución Humble aplica a todos los complementos el espacio de nombres del primer modelo cargado. Esa fue la solución de topología adoptada en la Semana 18 y sigue siendo correcta. Pero \textbf{un nodo de ROS 2 vive en un dominio}, luego el coordinador alcanza a uno de los dos agentes y nunca a los dos.
+
+El protocolo de relevo está escrito y probado como función pura, con 992 planes verificados, y \textbf{no tiene por dónde ejecutarse}. Quedó registrado como séptimo prerrequisito de la campaña experimental, y es el trabajo que abre la Semana 21.
+
+Se observa que este bloqueo estaba anticipado por escrito el 24 de agosto, al corregir el marco de referencia global: se dejó dicho que el aislamiento por dominio no hacía correcto el marco sin prefijar, sino que solo \textbf{aplazaba la colisión al punto del proyecto donde más caro sale}. Ese punto es este.
+
+\section{Aporte de la semana a los objetivos específicos}
+\label{sec:aporte}
+
+\subsection{Relación entre actividades y objetivos}
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Trazabilidad entre las actividades ejecutadas y los objetivos específicos.}
+    \label{tab:trazabilidad}
+    \begin{tabular}{@{}p{4.0cm}cp{7.6cm}@{}}
+        \toprule
+        \textbf{Actividad} & \textbf{Objetivo} & \textbf{Contribución} \\ \midrule
+        Paquete de mensajes de coordinación & OE1 & Es el esquema de comunicación que el objetivo exige, verificado por transporte real y no por compilación \\ \addlinespace
+        Nodo de coordinación con asignación por nivel & OE1 & Es la estrategia de asignación de tareas del objetivo, con 992 planes verificados sin simulador \\ \addlinespace
+        Destinos y mapa del nivel superior & OE1, OE4 & Convierte la asignación en discriminable y desbloquea la campaña con relevo \\ \addlinespace
+        Sensor conviviendo con la pila y teleoperación desde ROS 2 & OE2 & Cierra dos pendientes de sensado y control sobre el vehículo real \\ \addlinespace
+        Calibración de la odometría láser contra flexómetro & OE2, OE4 & Cuantifica el error de escala que la campaña física tendría que absorber \\ \addlinespace
+        Registro de misión instrumentado & OE4 & Es la instrumentación de las cuatro métricas, con veredicto contra odometría \\ \addlinespace
+        Ejecución completa de la asignación por nivel & OE1, OE4 & Primera evidencia de extremo a extremo, con dos registros validados \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Estado de los objetivos específicos}
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Avance por objetivo específico al cierre de la Semana 20.}
+    \label{tab:objetivos}
+    \begin{tabular}{@{}cp{2.6cm}p{4.2cm}p{4.8cm}@{}}
+        \toprule
+        \textbf{ID} & \textbf{Avance} & \textbf{Cubierto esta semana} & \textbf{Componente que lo mantiene detenido} \\ \midrule
+        OE1 & 55 \% & Mensajes, nodo de coordinación y asignación por nivel & El relevo ejecutado de extremo a extremo, bloqueado por la separación de dominios \\ \addlinespace
+        OE2 & 50 \% & Sensor bajo la pila; control desde ROS 2 & Segundo vehículo (R11) y comunicación entre robots \\ \addlinespace
+        OE3 & 0 \% & --- & Programado para la Semana 22 \\ \addlinespace
+        OE4 & 5 \% $\rightarrow$ \textbf{25 \%} & Instrumentación operativa y primera cadena completa medida & Analizador de campaña y el tiempo de asignación, hoy inmedible \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\textbf{Los objetivos 1 y 2 no desplazaron su porcentaje pese al volumen de trabajo, y conviene explicarlo.} El indicador se define sobre producto entregado. En el objetivo 1, el componente que falta no es la asignación ---que ya existe y está verificada--- sino su ejecución completa con relevo, que está bloqueada por causa ajena al código escrito esta semana. En el objetivo 2, el componente que falta es el segundo vehículo y la comunicación entre ambos, y ninguno de los dos avanzó. La evidencia de ambos objetivos se hizo notablemente más sólida; el producto pendiente sigue siendo el mismo.
+
+\textbf{El objetivo 4 sí avanzó, de 5 \% a 25 \%}, porque pasó de tener únicamente un protocolo escrito a tener instrumentación que produce registros validados, con cinco misiones de campaña grabadas y aprobadas y una cadena completa ejercitada de extremo a extremo. No avanza más porque una de sus cuatro métricas es hoy inmedible.
+
+\section{Estado del cronograma y trabajo previsto}
+\label{sec:cronograma}
+
+\subsection{Cumplimiento del criterio de cierre}
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Criterio de cierre de la Semana 20, por mitades.}
+    \label{tab:cierre}
+    \begin{tabular}{@{}p{6.6cm}p{6.6cm}@{}}
+        \toprule
+        \textbf{Mitad del criterio} & \textbf{Resultado} \\ \midrule
+        Una solicitud origen--destino produce la asignación del agente correcto y deja los dos tiempos en un registro estructurado & \textbf{Cumplida, y por encima de lo pedido.} El criterio pedía \emph{una} solicitud; se ejecutaron dos, con destinos en niveles distintos, porque una sola no distingue «eligió bien» de «siempre responde lo mismo» \\ \addlinespace
+        El mapa real del laboratorio queda guardado \textbf{y verificado} con la herramienta de verificación & \textbf{Guardado sí; verificado no}, y no por omisión: la herramienta exige un modelo de entorno contra el que comparar las paredes, y un laboratorio físico no lo tiene \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\textbf{No se declara cumplida la segunda mitad por analogía, ni se ajustan los umbrales para que pase.} El umbral de frontera de la herramienta es del 1 \% y el mapa del laboratorio arroja 15,00 \%. Esa diferencia \textbf{no dice que el mapa esté mal}: dice que el 1 \% está calibrado sobre entornos simulados cuyos vanos se sellaron a propósito, mientras que un laboratorio real es una sala abierta con puertas y mobiliario, cuya frontera es abierta por construcción. Lo confirma la distribución: las celdas de frontera se reparten en 782 sitios distintos, que es la firma de un recinto abierto y no la de un mapa al que le falta una zona.
+
+Ajustar el umbral para que el criterio pasara convertiría la verificación en un trámite. Lo que corresponde es \textbf{reescribir el criterio para el banco físico}, y esa es una decisión de protocolo que se lleva a la Semana 21.
+
+\subsection{Planeado contra hecho}
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Reparto diario planificado y su cumplimiento.}
+    \label{tab:dias}
+    \begin{tabular}{@{}lp{5.6cm}p{5.0cm}@{}}
+        \toprule
+        \textbf{Día} & \textbf{Planificado} & \textbf{Resultado} \\ \midrule
+        Lun 24 & Desbloquear el nivel superior: entorno, mapa y punto de transferencia & Cumplido, y además el sellado de ambos entornos \\ \addlinespace
+        Mar 25 & Hito H3 y cierre del hallazgo de odometría cruzada & Cumplido, ambos, con causa determinada \\ \addlinespace
+        Mié 26 & Mensajes en las dos distribuciones, congelar el esquema del registro, aplicar la corrección de R12 & \textbf{Dos de tres}: falta compilar los mensajes en la tarjeta del vehículo \\ \addlinespace
+        Jue 27 & Coordinación con los dos tiempos instrumentados, probada con destino en el nivel superior & \textbf{A medias}: el registrador quedó operativo; la prueba con destino en el nivel superior destapó el bloqueo de dominios \\ \addlinespace
+        Vie 28 & Frente de hardware y corte semanal & Frente cumplido y ampliado; el corte se pasó al sábado \\ \addlinespace
+        Sáb 29 & \emph{No estaba planificado} & Primera ejecución completa de la cadena de registro \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\textbf{Lo que el jueves añadió sobre lo planeado ocupó la tarde entera y no es una desviación:} al ejecutar la primera misión instrumentada el error de llegada salió fuera de tolerancia, y perseguirlo destapó dos defectos de configuración más un defecto en la propia herramienta de diagnóstico. \textbf{Es el trabajo que el plan daba por hecho.} Sin él, las treinta corridas de la campaña se habrían grabado sobre una configuración que no llega.
+
+\subsection{Estado de actividades del anteproyecto}
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Estado de actividades --- Semana 20 (Fase 5).}
+    \label{tab:estado_s20}
+    \begin{tabular}{@{}p{6.3cm}ll@{}}
+        \toprule
+        \textbf{Actividad (anteproyecto)} & \textbf{Estado} & \textbf{Observación} \\ \midrule
+        Integración de los módulos del sistema & En curso & Coordinador integrado con ambos agentes \\ \addlinespace
+        Ajuste progresivo de los elementos desarrollados & En curso & Localización y tolerancias corregidas \\ \addlinespace
+        Análisis del entorno de evaluación & Concluida & Ambos niveles sellados y verificados \\ \addlinespace
+        Registro de avances del proyecto & En curso & Presente entregable \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Arrastre declarado y trabajo previsto para la Semana 21}
+
+Se declara como arrastre a la Semana 21: la verificación del mapa físico, que es una decisión de protocolo; la corrección del tiempo de asignación; la compilación del paquete de mensajes en la tarjeta del vehículo; y la comparación de cúspides que cierra el riesgo R12.
+
+El trabajo previsto es:
+
+\begin{itemize}
+    \item \textbf{Resolver el bloqueo de dominios} para que un solo coordinador alcance a ambos agentes. Es la condición del protocolo de relevo, que es el aporte declarado del proyecto.
+    \item \textbf{Ejecutar el protocolo de relevo} de extremo a extremo con los dos agentes vivos.
+    \item \textbf{Corregir el tiempo de asignación} en el coordinador, publicando el estado en dos momentos distintos.
+    \item \textbf{Reescribir el criterio de verificación de mapa} para el banco físico.
+\end{itemize}
+
+Se recuerda que la congelación de código está fijada entre el 14 y el 20 de septiembre. Restan tres semanas para el protocolo de relevo, la interfaz de usuario, el analizador de campaña y el despliegue físico.
+
+\section{Conclusiones de la Semana}
+
+La Semana 20 cumplió la mitad de software de su criterio de cierre por encima de lo pedido. El criterio exigía que una solicitud produjera la asignación del agente correcto con sus tiempos registrados; se ejecutaron dos solicitudes con destinos en niveles distintos, porque una sola no permite distinguir una asignación correcta de una respuesta constante. Los dos agentes asignados fueron distintos y correctos, y ambos registros quedaron validados contra un esquema de datos congelado, con el veredicto calculado contra la odometría del simulador y no contra el resultado que informa la pila de navegación.
+
+La mitad de hardware quedó cumplida a medias, y se declara sin promediarla con la anterior. El mapa del laboratorio está guardado; la verificación, tal como está redactada, no es aplicable a un banco físico, porque la herramienta compara contra un modelo del entorno que un laboratorio real no tiene. No se ajustaron los umbrales para que el criterio pasara: eso convertiría la verificación en un trámite, y lo que corresponde es reescribir el criterio.
+
+El proyecto pasó de tener agentes que navegan a tener un sistema que decide. Existe el lenguaje de mensajes propio, verificado por transporte real entre nodos y no por compilación; existe el nodo de coordinación, con la lógica de relevo separada del cableado de forma que sus 992 planes se verifican sin levantar un solo simulador; y existe el nivel superior con sus dieciséis destinos, sin el cual la asignación habría acertado por no tener alternativa.
+
+Se cerró el hito H3 con los dos agentes navegando de forma simultánea a sus respectivos puntos de transferencia, con errores de 0,281 m y 0,143 m contra odometría, y la ausencia de degradación por concurrencia se volvió a comprobar a escala de campaña, sobre recorridos de 84 y 90 m. Se advierte de forma explícita que el coste de la concurrencia en reloj de pared no se midió, y que dos corridas de idéntica duración en tiempo simulado no prueban ausencia de contención.
+
+La semana produjo tres hallazgos que cambian trabajo futuro. El más grave es que el \emph{tiempo de asignación}, una de las cuatro métricas del objetivo específico 4, es hoy estructuralmente inmedible, porque el coordinador publica la etapa y el agente en el mismo mensaje y no existe estado intermedio: la métrica valdría cero en las treinta corridas de la campaña. La corrección es acotada y debe entrar antes de la Semana 24. El segundo es que el archivo de registro no puede aportar el factor de tiempo real cuando se sella con reloj de simulación, ya corregido en la herramienta de grabación. El tercero proviene del vehículo real: su odometría láser cierra un circuito de 18,4 m con un 0,18 \% de deriva y aun así estima un 2,9 \% largo contra flexómetro, porque el error de escala se cancela entre ida y vuelta. Sin la referencia externa, ese dato habría pasado por una validación exitosa.
+
+Queda un bloqueo que gobierna lo que sigue y que no es de código: la misión con relevo no puede ejecutarse porque cada agente vive en un dominio de comunicaciones distinto y un nodo de ROS 2 vive en uno solo. El protocolo de relevo está escrito y verificado como función pura, y no tiene por dónde ejecutarse. Es el trabajo que abre la Semana 21, y estaba anticipado por escrito cinco días antes, al advertir que el aislamiento por dominio no resolvía el problema del marco de referencia sino que aplazaba la colisión al punto del proyecto donde más caro sale.
+
+\begin{thebibliography}{99}
+
+\bibitem{entregable19}
+S. Hernández Ávila y J. A. Mejía León,
+``Informe de Avance --- Semana 19,''
+Universidad Santo Tomás, Facultad de Ingeniería Electrónica, Bogotá, agosto de 2026.
+
+\bibitem{cronograma}
+S. Hernández Ávila y J. A. Mejía León,
+``Cronograma de actividades --- Semanas 17 a 32,''
+Universidad Santo Tomás, Facultad de Ingeniería Electrónica, Bogotá, agosto de 2026.
+
+\bibitem{anteproyecto}
+S. Hernández Ávila y J. A. Mejía León,
+``Sistema colaborativo de robots móviles para asistencia de orientación en entornos interiores con múltiples pisos --- Anteproyecto,''
+Universidad Santo Tomás, Facultad de Ingeniería Electrónica, Bogotá, 2026.
+
+\bibitem{protocolo}
+S. Hernández Ávila y J. A. Mejía León,
+``Protocolo experimental del objetivo específico 4,''
+Universidad Santo Tomás, Facultad de Ingeniería Electrónica, Bogotá, agosto de 2026.
+
+\bibitem{contrato}
+S. Hernández Ávila y J. A. Mejía León,
+``Contrato de interfaces del sistema colaborativo,''
+Universidad Santo Tomás, Facultad de Ingeniería Electrónica, Bogotá, agosto de 2026.
+
+\bibitem{ros2_humble_docs}
+Open Robotics,
+``ROS 2 Humble Hawksbill Documentation,''
+[Online]. Available: \url{https://docs.ros.org/en/humble/}
+
+\bibitem{nav2_docs}
+Open Robotics,
+``Nav2 Documentation,''
+[Online]. Available: \url{https://docs.nav2.org/}
+
+\bibitem{amcl}
+D. Fox, W. Burgard, F. Dellaert, and S. Thrun,
+``Monte Carlo Localization: Efficient Position Estimation for Mobile Robots,''
+in Proc. AAAI National Conference on Artificial Intelligence, 1999, pp. 343--349.
+
+\bibitem{smac}
+S. Macenski, M. Booker, and J. Wallace,
+``Open-Source, Cost-Aware Kinematically Feasible Planning for Mobile and Surface Robotics,''
+arXiv preprint arXiv:2401.13078, 2024.
+
+\bibitem{reeds_shepp}
+J. A. Reeds and L. A. Shepp,
+``Optimal Paths for a Car That Goes Both Forwards and Backwards,''
+Pacific Journal of Mathematics, vol. 145, no. 2, pp. 367--393, 1990.
+
+\bibitem{rf2o}
+M. Jaimez, J. G. Monroy, and J. Gonzalez-Jimenez,
+``Planar Odometry from a Radial Laser Scanner. A Range Flow-based Approach,''
+in Proc. IEEE International Conference on Robotics and Automation (ICRA), 2016, pp. 4479--4485.
+
+\bibitem{gazebo}
+Open Robotics,
+``Gazebo Classic Documentation,''
+[Online]. Available: \url{https://classic.gazebosim.org/tutorials}
+
+\end{thebibliography}
+
+\end{document}

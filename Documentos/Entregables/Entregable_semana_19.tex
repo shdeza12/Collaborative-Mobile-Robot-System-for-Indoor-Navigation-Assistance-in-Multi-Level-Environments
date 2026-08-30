@@ -1,0 +1,614 @@
+\documentclass[12pt,letterpaper]{article}
+
+% --- Paquetes Requeridos ---
+\usepackage[utf8]{inputenc}
+\usepackage[spanish,es-tabla]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{titlesec}
+\usepackage{setspace}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{xcolor}
+
+% --- Configuración de Párrafo ---
+\onehalfspacing
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1em}
+
+% --- Rutas de búsqueda de imágenes ---
+% Permite compilar tanto desde Documentos/Entregables/ como con todas las
+% imágenes en una sola carpeta plana.
+\graphicspath{{./}{../Evidencia/}{Evidencia/}{imagenes/}}
+
+% --- Configuración de listings ---
+\lstset{
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,
+    frame=single,
+    captionpos=b,
+    showstringspaces=false
+}
+
+% --- Inicio del Documento ---
+\begin{document}
+
+% --- PORTADA ---
+\begin{titlepage}
+    \centering
+
+    {\Large \textbf{UNIVERSIDAD SANTO TOMÁS}} \\[1cm]
+
+    {\Large \textbf{Sistema colaborativo de robots móviles para asistencia de orientación en entornos interiores con múltiples pisos}} \\[2cm]
+
+    {\large \textbf{Realizado por:}} \\
+    {\large Santiago Hernández Ávila} \\
+    {\large Jonny Alejandro Mejía León} \\[1cm]
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.6\textwidth]{Logos Uni.png}
+        \label{Logo Universidad Santo Tomas y facultad de ingenieria electronica}
+    \end{figure}
+
+    \vfill
+
+    {\large \textbf{Informe de Avance --- Semana 19}} \\
+    {\large Fase 5: Integración del sistema y realización de pruebas --- Diagnóstico del vehículo físico, matriz de requisitos y protocolo experimental} \\[1.5cm]
+
+    \textbf{Dirigido por:} \\
+    Ing. Armando Mateus Rojas, Msc. \\
+    Ing. Nestor Ivan Ospina, Msc. \\
+    Ing. Oscar Mauricio Gélvez Lizarazo, Msc. \\[1.0cm]
+
+    \vfill
+
+    {\large GED (Grupo de Estudio y Desarrollo en Robótica)} \\
+    {\large Facultad de Ingeniería Electrónica} \\
+    {\large División de Ingenierías} \\
+    {\large Bogotá, agosto de 2026}
+\end{titlepage}
+
+% --- CONTENIDO ---
+
+\section{Introducción}
+
+El presente informe documenta el avance correspondiente a la \textbf{Semana 19} del cronograma de actividades (17 al 21 de agosto de 2026), dentro de la \textbf{Fase 5 (Integración del sistema y realización de pruebas)}.
+
+La Semana 18 cerró los dos hitos que bloqueaban el desarrollo posterior y dejó, en cambio, dos actividades sin ejecutar: el diagnóstico del hardware y la matriz de requisitos. La Semana 19 se organizó alrededor de esas dos deudas y de dos artefactos adicionales que el cronograma sitúa aquí: el protocolo experimental del objetivo específico 4 y la corrida conjunta de los dos agentes.
+
+El carácter de la semana es distinto al de la anterior. La Semana 18 construyó; la Semana 19 \textbf{midió y desmintió}. Cuatro afirmaciones que el proyecto arrastraba escritas resultaron falsas al comprobarse sobre el vehículo real o sobre el código: la conversión entre el comando de velocidad y el ángulo de dirección era dimensionalmente incorrecta, la capa de control del vehículo no era el cuello de botella que se le atribuía, el sensor que bloqueaba la semana siguiente no era el sensor que se había diagnosticado, y la interoperabilidad entre las dos distribuciones de ROS 2 del proyecto es cierta a nivel de código fuente pero no a nivel de grafo. Cada una de las cuatro se corrigió con medición, no con opinión.
+
+Se declara desde el comienzo que \textbf{tres de las cuatro condiciones de cierre se cumplieron dentro de la semana} y la cuarta se cumplió el 25 de agosto, tres días después del corte. La razón por la que se desplazó, y el hecho de que la evidencia obtenida al cerrarla fue superior a la exigida, se exponen en la Sección \ref{sec:h3}.
+
+\section{Objetivos de la Semana}
+
+El cronograma fija para esta semana cuatro condiciones de cierre:
+
+\begin{itemize}
+    \item \textbf{Diagnóstico acotado del hardware}, con las preguntas 1, 2 y 4 respondidas y con su impacto sobre el plan escrito. La pregunta 3, relativa a la latencia de comunicación entre los dos vehículos, permanece fuera del criterio por depender del riesgo R11: uno de los dos vehículos se encuentra en intervención técnica.
+    \item \textbf{Matriz de requisitos} funcionales y no funcionales, con trazabilidad a objetivos específicos y a pruebas de verificación.
+    \item \textbf{Protocolo experimental del objetivo específico 4}, redactado \emph{antes} de instrumentar nada.
+    \item \textbf{Los dos agentes navegando de forma simultánea}, cada uno en su nivel: el hito H3.
+\end{itemize}
+
+Adicionalmente, y sin estar en el criterio de cierre, se atendieron los tres hallazgos que la Semana 18 dejó abiertos y que bloqueaban cualquier instrumentación posterior.
+
+\section{Diagnóstico del vehículo físico: sensado y mando}
+\label{sec:hardware}
+
+Las preguntas 1 y 2 del diagnóstico se responden con un solo vehículo, de modo que el riesgo R11 no las bloquea. Se ejecutaron sobre la tarjeta de cómputo original del DeepRacer, con Ubuntu Server 24.04 y ROS 2 Jazzy.
+
+\subsection{Pregunta 1: el sensor LiDAR, ¿publica una medida utilizable?}
+
+\subsubsection{Por qué no se aceptó la respuesta fácil}
+
+La respuesta inmediata sería leer el campo de alcance máximo del propio mensaje del sensor. \textbf{No es una medida}: ese campo es un filtro que el controlador copia de su archivo de configuración. En la unidad examinada, el mensaje declaraba 16 m mientras su propio archivo de configuración declaraba 64 m. Ninguna de las dos cifras se obtuvo midiendo.
+
+Se descartaron dos métodos adicionales, y se deja constancia de ambos porque el descarte es la parte del trabajo que no puede reconstruirse después:
+
+\begin{itemize}
+    \item \textbf{Tomar el punto más cercano del barrido como «la pared».} Con el sensor situado a 1,00 m de un muro plano, la lectura mínima fue de \textbf{0,166 m}, y correspondía a su propio soporte de montaje. Informar esa cifra como medida de la pared habría producido un \textbf{83 \% de error}.
+    \item \textbf{Buscar lecturas «cercanas a un metro».} Es circular: encontrar aquello cuya posición ya se conoce no demuestra exactitud, demuestra saber aplicar un filtro.
+\end{itemize}
+
+\textbf{Método adoptado: buscar superficies por su forma.} Se extraen tres rectas por barrido mediante ajuste robusto sobre conjuntos de puntos colineales, sin proporcionar al procedimiento la distancia esperada. La comparación con la cinta métrica se realiza únicamente al final. Un primer intento con una sola recta por barrido arrojó 222,4 mm de desviación entre barridos; no era ruido del sensor, sino que el ajuste seleccionaba una superficie distinta en cada barrido. Con tres rectas la misma pared descendió a 2,8 mm. \textbf{El defecto estaba en el método de análisis, no en el instrumento}, y esa distinción es la que justifica haber invertido el tiempo en el método.
+
+\subsubsection{Resultado}
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Verificación instrumentada del sensor LiDAR contra referencia métrica.}
+    \label{tab:lidar}
+    \begin{tabular}{@{}lcp{6.2cm}@{}}
+        \toprule
+        \textbf{Magnitud} & \textbf{Valor} & \textbf{Interpretación} \\ \midrule
+        Distancia hallada a la pared & 1,0228 m & Contra 1,000 m medidos con cinta métrica \\ \addlinespace
+        Diferencia & \textbf{+23 mm (2,3 \%)} & \textbf{Cota superior} del error, no el error \\ \addlinespace
+        Presencia de la superficie & 10 de 10 barridos & Una superficie real aparece siempre; el ruido no \\ \addlinespace
+        Dispersión entre barridos & \textbf{2,8 mm} & Repetibilidad \\ \addlinespace
+        Error cuadrático medio de los residuos & 2 -- 11 mm & Planitud: una pared recta se observa recta \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\textbf{Los 23 mm son una cota superior y no pueden afinarse con este montaje.} El sensor mide desde su centro óptico, situado dentro de la carcasa, mientras que la cinta se apoya en un punto exterior. Esa diferencia de origen es de orden centimétrico y no puede separarse de la exactitud del instrumento sin un banco de calibración. Afirmar que «el sensor tiene 2,3 \% de error» sería indefendible ante el jurado, y por eso no se afirma.
+
+Lo que sí queda demostrado, y es precisamente lo que exige el algoritmo de localización, es que la misma pared devuelve el mismo número con 2,8 mm de dispersión y que las superficies planas se observan planas.
+
+\subsection{Pregunta 2: ¿se puede comandar el vehículo desde ROS 2?}
+
+\textbf{Sí.} Publicando sobre el tópico de control de servos del vehículo, con las cuatro ruedas suspendidas, se observó:
+
+\begin{itemize}
+    \item \textbf{Dirección proporcional.} Consignas de 0,2, 0,4 y 0,6 produjeron tres posiciones angulares distintas, y el signo invierte el sentido.
+    \item \textbf{Tracción proporcional.} El movimiento comienza alrededor de 0,42 sin carga ---cota inferior--- y la velocidad crece de forma progresiva con la consigna.
+    \item \textbf{Diferencial sano.} Con las ruedas en el aire giraba una sola. Se comprobó manualmente que al girar una rueda trasera la otra contragira: es un diferencial abierto, no una avería.
+\end{itemize}
+
+\subsubsection{Consecuencia: la cuantización es un defecto propio}
+
+Al resultar proporcional la capa de servos del vehículo, la cuantización que produce el nodo de traducción del proyecto queda establecida como \textbf{defecto reparable de software y no como limitación del hardware}. Se midió ejecutando el código real del repositorio sobre un barrido de comandos de velocidad, no una reimplementación.
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Valores que el nodo de traducción puede emitir en su estado actual.}
+    \label{tab:cuantizacion}
+    \begin{tabular}{@{}lll@{}}
+        \toprule
+        \textbf{Salida} & \textbf{Valores posibles} & \textbf{Carácter} \\ \midrule
+        Tracción  & $\{0 \cdot 0{,}7341\}$          & Binaria  \\
+        Dirección & $\{-1 \cdot 0 \cdot +1\}$       & Ternaria \\
+        Umbral de arranque & $v = 0{,}400$ m/s      & --- \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+La causa es el orden de comparación dentro de las dos funciones de mapeo: la constante de razón máxima se evalúa primero y la de razón mínima al final, de modo que la primera rama absorbe todos los casos y las dos ramas siguientes son código inalcanzable.
+
+\textbf{Esto colisiona directamente con el planificador de navegación.} Con los parámetros configurados en el proyecto:
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Efecto de la cuantización sobre las velocidades que emite Nav2.}
+    \label{tab:colision}
+    \begin{tabular}{@{}p{6.0cm}cl@{}}
+        \toprule
+        \textbf{Situación} & \textbf{Velocidad} & \textbf{Tracción resultante} \\ \midrule
+        Velocidad deseada en recta        & 0,50 m/s & 0,7341 $\rightarrow$ \textbf{avanza} \\
+        Velocidad regulada en curva       & 0,25 m/s & 0 $\rightarrow$ \textbf{no se mueve} \\
+        Velocidad de aproximación a meta  & 0,05 m/s & 0 $\rightarrow$ \textbf{no se mueve} \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+El vehículo físico se detendría en cada curva y antes de cada meta, sin emitir error alguno. Es el patrón de fallo silencioso que este proyecto ya ha pagado en tres ocasiones anteriores, y su detección antes del despliegue es el principal producto de esta pregunta.
+
+\subsubsection{Dos hallazgos adicionales encontrados leyendo el código}
+
+\textbf{La cadena de tópicos está desconectada.} El paquete de servos del vehículo escucha en un tópico y el archivo de lanzamiento del nodo del proyecto lo publica bajo un espacio de nombres distinto. Nadie escucha en el destino real. La cadena entre el comando de velocidad y el servo está rota en un punto que no guarda relación con la conversión. Se detectó por lectura, sin consumir sesión de hardware.
+
+\textbf{La definición del mensaje de control no es idéntica en el repositorio y en el vehículo.} La versión instalada en el vehículo añade un campo de marca temporal que la del repositorio no tiene. No estorba, porque el nodo del proyecto solo escribe los dos campos de ángulo y tracción, y en consecuencia el paquete se compila sobre el vehículo sin migrar código. \textbf{La condición es compilar contra la definición del vehículo}: subir la del repositorio crearía dos definiciones distintas del mismo tipo, y ese fallo sería silencioso.
+
+\section{El sensor del kit: el bloqueo de la Semana 20 era un nombre mal escrito}
+\label{sec:lidar}
+
+\subsection{Son dos sensores distintos, y esto obliga a releer el diagnóstico}
+
+El diagnóstico del 19 de agosto se realizó sobre una unidad LiDAR \textbf{externa}. La sesión del 21 de agosto se realizó con el kit original del vehículo completamente montado, y su sensor de fábrica es un modelo \textbf{diferente}. No hay error en ninguno de los dos informes: miden aparatos distintos.
+
+Se registra de forma explícita porque la consecuencia no es menor: \textbf{cada conclusión del primer informe relativa al LiDAR debe releerse preguntando de qué sensor hablaba}. En particular, la corrección del modelo geométrico de simulación cambia por completo, según se detalla más abajo.
+
+\subsection{Causa raíz: una capa, no tres}
+
+Con el sensor conectado, el servicio de control del vehículo entraba en un ciclo de reinicio. El registro del sistema muestra, cinco veces consecutivas, que el archivo de lanzamiento invoca un ejecutable cuyo nombre no coincide con el del binario instalado por el paquete del controlador. El diagnóstico previo había atribuido el fallo a tres causas apiladas; \textbf{es una sola, y es un nombre}.
+
+\textbf{Consecuencia sobre la planificación: la Semana 20 deja de estar bloqueada por el sensor.} La corrección admite dos vías ---un enlace simbólico entre ambos nombres, o la edición del archivo de lanzamiento del fabricante--- y se optó por el enlace simbólico, para que una actualización del proveedor no revierta el cambio en silencio.
+
+\subsection{Un servicio que informa estar activo sin estarlo}
+
+Se documenta una firma de fallo especialmente engañosa. El gestor de servicios informaba el estado \emph{activo y en ejecución} mientras el sistema estaba caído. La distinción solo aparece al comparar la carga del proceso:
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{El mismo estado declarado, dos situaciones opuestas.}
+    \label{tab:mentira}
+    \begin{tabular}{@{}lcc@{}}
+        \toprule
+        \textbf{Indicador} & \textbf{Servicio sano} & \textbf{Servicio caído} \\ \midrule
+        Estado declarado por el gestor & activo (en ejecución) & activo (en ejecución) \\
+        Tareas del proceso   & 292      & 109 \\
+        Memoria residente    & 496,5 MB & 147,9 MB \\
+        Tópicos publicados   & 19       & 2 \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+Se registran además \textbf{dos falsos positivos} que cualquier verificación posterior debe conocer. El primero: el listado de tópicos incluye aquellos que alguien únicamente \emph{escucha}, de modo que el tópico del sensor aparece incluso con el sensor desconectado; la comprobación que no miente es consultar el número de publicadores. El segundo: un intento de publicar sobre el tópico de control respondió que el tipo de mensaje era inválido, y la causa no era el vehículo sino una terminal sin la capa del fabricante cargada. Ambos síntomas apuntan al lugar equivocado.
+
+\subsection{Corrección del modelo geométrico de simulación}
+
+El sensor de fábrica se caracterizó de forma instrumentada: apertura de 360\textdegree, incremento angular de 1,000\textdegree{} exacto, \textbf{360 muestras} por barrido, alcance declarado de 0,15 a 12,0 m y frecuencia observada de \textbf{6,80 Hz} con desviación de 3,9 ms sobre una ventana de 50 barridos.
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Divergencia entre el sensor simulado y el sensor real del kit.}
+    \label{tab:urdf}
+    \begin{tabular}{@{}lcc@{}}
+        \toprule
+        \textbf{Campo} & \textbf{Modelo de simulación} & \textbf{Sensor real} \\ \midrule
+        Apertura            & 300\textdegree & \textbf{360\textdegree} \\
+        Muestras por barrido & 600           & \textbf{360} \\
+        Alcance máximo       & 10 m          & \textbf{12 m} \\
+        Resolución angular   & 0,5\textdegree & \textbf{1,0\textdegree} \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\textbf{La divergencia va en el sentido contrario al esperado}: la simulación observa \emph{más} rayos que el vehículo, no menos. La campaña experimental del objetivo específico 4 compara simulación contra hardware; si el sensor simulado observa un sector distinto con casi el doble de muestras, la comparación mediría además la diferencia entre modelos de sensor. La alineación del modelo geométrico entra en el trabajo previo a la instrumentación.
+
+Se deja constancia por escrito de una \textbf{predicción fallida}: antes de medir se anticipó un barrido de 720 muestras con resolución de 0,5\textdegree. El sensor devolvió la mitad. Se conserva porque una predicción retirada del registro convierte cualquier método en infalible a posteriori.
+
+\section{Diferencia entre las distribuciones de ROS 2 del proyecto}
+\label{sec:jazzy}
+
+La simulación opera sobre la distribución Humble y las unidades de cómputo de los vehículos operan sobre Jazzy. La pregunta 4 del diagnóstico caracteriza la magnitud de esa diferencia. Se resolvió de forma documental, sin requerir hardware encendido, y se contrastó después sobre el vehículo.
+
+\subsection{Interfaces: cinco tipos idénticos y uno que no lo es}
+
+Cinco tipos de mensaje de uso general ---los empleados por el proyecto para odometría, escaneo láser y comandos de velocidad--- resultaron \textbf{idénticos byte a byte} entre ambas distribuciones. El tipo de acción de navegación hacia una pose \textbf{no lo es}: en Humble el resultado es un mensaje vacío y en Jazzy incorpora un código y un mensaje de error. La diferencia proviene de dos cambios aguas arriba en el repositorio de navegación, ambos identificados y citados en el informe correspondiente.
+
+La consecuencia es concreta: un nodo de Humble no puede invocar la acción de navegación de un nodo de Jazzy dentro del mismo grafo, porque el contrato de la acción difiere.
+
+\subsection{Configuración: seis diferencias, treinta y siete líneas y dos archivos}
+
+La migración de la configuración de navegación entre ambas distribuciones se acotó a seis diferencias, de las cuales \textbf{tres son silenciosas}, es decir, no producen error al arrancar y alteran el comportamiento:
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Diferencias de configuración entre Humble y Jazzy, y su carácter.}
+    \label{tab:diferencias}
+    \begin{tabular}{@{}p{7.2cm}cc@{}}
+        \toprule
+        \textbf{Diferencia} & \textbf{Alcance} & \textbf{Carácter} \\ \midrule
+        Separador en los nombres de los complementos & 17 líneas & Ruidosa \\ \addlinespace
+        El verificador de progreso pasa a admitir lista & 4 líneas & \textbf{Silenciosa} \\ \addlinespace
+        Doble registro de bibliotecas del árbol de comportamiento & 4 listas & Ruidosa \\ \addlinespace
+        Parámetros de monitorización que dejan de existir & 12 líneas & \textbf{Silenciosa} \\ \addlinespace
+        El servidor de comportamientos separa marco global y local & 4 líneas & \textbf{Silenciosa} \\ \addlinespace
+        Cambio de versión mayor del árbol de comportamiento & 2 archivos & Requiere conversión \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+Las tres silenciosas son el resultado relevante: una migración que arranca sin errores no es una migración correcta, y sin este inventario la comprobación habría consistido en observar que el sistema levanta.
+
+\subsection{La simulación no puede migrar, y esto cierra la discusión}
+
+Se comprobó que \textbf{la simulación no puede trasladarse a Jazzy}. El paquete que integra el simulador con la capa de control no está publicado para esa distribución, y el conjunto de paquetes de integración con el simulador es, en Jazzy, de una versión \emph{anterior} a la disponible en Humble. La convivencia de ambas distribuciones no es una situación transitoria a resolver, sino una \textbf{condición permanente del proyecto} que la arquitectura debe absorber.
+
+\textbf{Consecuencia sobre la declaración D6.} La afirmación de que el código del proyecto es portable entre ambas distribuciones se sostiene \textbf{como portabilidad de código fuente} ---y se confirmó en la Sección \ref{sec:hardware}, al compilar el paquete de traducción sobre el vehículo sin modificarlo--- y \textbf{es falsa como interoperabilidad dentro de un mismo grafo}. La distinción no es retórica: determina que el nodo de coordinación no pueda invocar directamente la acción de navegación del vehículo físico, y por tanto condiciona el diseño de la Semana 20.
+
+\subsection{Comprobación sobre el vehículo}
+
+Con nodos lanzados manualmente en ambas máquinas se verificó que la difusión en multidifusión funciona en los dos sentidos, que los mensajes de tipo común cruzan en ambas direcciones y que el listado de tópicos de una máquina observa lo publicado en la otra. El requisito funcional relativo a la comunicación entre distribuciones queda \textbf{verificado con resultado condicionado}, no verificado sin más.
+
+Se registra un obstáculo de red que consumió tiempo y cuya firma es engañosa: el cortafuegos activo en el vehículo permitía las respuestas de eco pero denegaba el resto del tráfico, de modo que la conectividad aparentaba ser perfecta mientras el grafo se observaba vacío. Se abrió por dirección de origen y no por rango de puertos, porque los puertos del middleware se calculan a partir del identificador de dominio y del índice de participante, y no son fijos.
+
+\section{Corrección de la conversión entre comando de velocidad y ángulo de dirección}
+\label{sec:ackermann}
+
+\subsection{El defecto}
+
+El mensaje estándar de comando de velocidad define su componente angular como una \textbf{velocidad angular, en radianes por segundo}. El complemento de simulación del vehículo la tomaba como un \textbf{ángulo de dirección, en radianes}: la asignaba directamente al ángulo objetivo, la saturaba contra el máximo mecánico y la introducía en la función tangente. El propio código se contradecía, pues el comentario del campo declaraba la unidad correcta.
+
+\textbf{El código no se aceptó como prueba.} Se midió. Tomando únicamente las muestras con la dirección al tope mecánico ---donde la componente angular comandada apenas varía--- y comparando la rotación real contra la que predice cada interpretación:
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Discriminación entre las dos interpretaciones posibles de la componente angular.}
+    \label{tab:discriminacion}
+    \begin{tabular}{@{}lcccc@{}}
+        \toprule
+        \textbf{Velocidad} & \textbf{Muestras} & \textbf{Giro real} & \textbf{Si fuese rad/s} & \textbf{Si fuese ángulo} \\ \midrule
+        0,12 m/s & 41  & 0,42 rad/s & 0,74 & \textbf{0,43} \\
+        0,20 m/s & 116 & 0,66 rad/s & 0,76 & \textbf{0,70} \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+Lo decisivo no son los residuos sino la \textbf{dependencia con la velocidad}. Con el volante fijo al tope, la componente angular comandada apenas se movió, de 0,74 a 0,76, mientras la rotación real subió de 0,42 a 0,66 siguiendo a la velocidad. Si la componente fuese una velocidad angular, la rotación no habría cambiado.
+
+\textbf{Consecuencia cuantificada.} El planificador de navegación desea imponer una curvatura y publica el producto de esa curvatura por la velocidad. El complemento dirigía ese producto como si fuese un ángulo, con lo que la ganancia efectiva del volante resultaba proporcional a la velocidad dividida por la distancia entre ejes:
+
+\begin{itemize}
+    \item a 0,50 m/s el vehículo giraba \textbf{3,05 veces más cerrado} de lo solicitado, produciendo un serpenteo de $\pm 6^\circ$ en recta;
+    \item a 0,164 m/s coincidía por casualidad;
+    \item a 0,12 m/s giraba un \textbf{27 \% menos} de lo solicitado, y no lograba alinearse al estacionar.
+\end{itemize}
+
+La ganancia variaba por un factor de cuatro a lo largo del rango de velocidad, y el controlador no lo sabía. \textbf{El mismo defecto estaba presente en el nodo del vehículo físico}, con idéntica convención: que estuviera igual en ambos lugares es lo único afortunado, pues no existía divergencia entre simulación y hardware que reconciliar.
+
+\subsection{La corrección y su validación}
+
+La corrección es el modelo de bicicleta despejado: el ángulo de dirección es el arcotangente del producto de la velocidad angular por la distancia entre ejes, dividido por la velocidad lineal. Se aplicó en el complemento de simulación y en el nodo del vehículo real. El criterio de aceptación se fijó \textbf{antes} de tocar el código, tomando como línea base dos corridas ya grabadas.
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Validación de la corrección sobre dos corridas de maniobra.}
+    \label{tab:validacion}
+    \begin{tabular}{@{}p{6.4cm}cc@{}}
+        \toprule
+        \textbf{Métrica} & \textbf{Prueba 1} & \textbf{Prueba 2} \\ \midrule
+        Giro real contra comandado (RMS, sin saturación) & $0{,}298 \rightarrow \mathbf{0{,}111}$ rad/s & $0{,}256 \rightarrow \mathbf{0{,}130}$ rad/s \\ \addlinespace
+        Error real de llegada & $0{,}255 \rightarrow \mathbf{0{,}091}$ m & $0{,}152 \rightarrow \mathbf{0{,}124}$ m \\ \addlinespace
+        Error de localización (mediana) & $0{,}224 \rightarrow \mathbf{0{,}121}$ m & $0{,}090 \rightarrow \mathbf{0{,}045}$ m \\ \addlinespace
+        Cúspides ejecutadas contra planificadas & 4 vs 2 $\rightarrow$ 4 vs 2 & 6 vs 2 $\rightarrow$ \textbf{0 vs 0} \\ \addlinespace
+        Tiempo en movimiento & $37{,}1 \rightarrow 38{,}9$ s & $17{,}6 \rightarrow \mathbf{13{,}6}$ s \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+El renglón decisivo es el primero: el vehículo gira ahora aproximadamente a la velocidad angular que el planificador le pide, con la mitad de error en ambas corridas. Todo lo demás se deriva de ese hecho.
+
+\textbf{La desviación en reposo era el mismo defecto.} La Semana 18 dejó anotado, sin cuantificar, que los vehículos se desviaban hasta 18\textdegree{} bajo un comando puramente lineal. Con el vehículo detenido, una componente angular residual seguía torciendo el volante; corregido esto, por debajo de 1 mm/s la dirección se fuerza a cero. \textbf{El mecanismo se da por explicado; la cifra de mejora se retiró}, porque una corrida posterior midió la desviación sobre una ventana tres veces más larga y la comparación dejó de estar hecha en igualdad de condiciones. Se prefiere un hallazgo sin número a un número sin condiciones.
+
+\subsection{Confirmación independiente, y un defecto nuevo}
+
+La maniobra se repitió con la meta orientada al oeste en lugar de al este. El cambio no es cosmético: con la meta al este el vehículo debe entrar en reversa para alinearse, mientras que al oeste el volteo sigue siendo obligatorio pero la llegada es de frente.
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Corrida de confirmación en un escenario distinto al de validación.}
+    \label{tab:confirmacion}
+    \begin{tabular}{@{}lcc@{}}
+        \toprule
+        \textbf{Métrica} & \textbf{Valor} & \textbf{Criterio} \\ \midrule
+        Giro real contra comandado (RMS) & \textbf{0,082 rad/s} & $< 0{,}15$ \\
+        Volante al tope & 7 \% & --- \\
+        Rumbo de llegada & $-179{,}7^\circ$ contra $180^\circ$ & 0,3\textdegree{} de error \\
+        Error real de llegada & 0,383 m & Fuera de los 0,25 m declarados \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+Es el mejor seguimiento de las seis corridas y confirma la corrección \textbf{en un escenario que no es el empleado para validarla}, que es la única forma de que la validación no sea circular.
+
+\textbf{El defecto que apareció.} Dos corridas de la misma tanda terminaron abortadas, con un patrón inconfundible: \textbf{80 cúspides ejecutadas contra 2 planificadas}, y una llegada 15,6\textdegree{} fuera de una tolerancia de rumbo de 14,32\textdegree. Queda registrado como riesgo R12 y es directamente relevante para el objetivo específico 4, porque la \emph{tasa de éxito} es una de sus cuatro métricas y hoy se mediría mal.
+
+\section{Matriz de requisitos}
+\label{sec:requisitos}
+
+Se publicó la matriz que relaciona cada requisito con el objetivo específico al que sirve y con la prueba que lo verifica. Contiene \textbf{34 requisitos}: 27 funcionales y 7 no funcionales. \textbf{Ningún objetivo específico queda huérfano} de requisitos y ningún requisito queda sin prueba asignada.
+
+Se declara de forma explícita, y consta así en el propio documento, que la matriz es una \textbf{reconstrucción y no una recuperación}: el anteproyecto no incluía una matriz de requisitos formal, de modo que los requisitos se derivaron de tres fuentes citables ---el anteproyecto, el contrato de interfaces y el estado verificado del sistema--- y no de un documento previo extraviado. Presentarla como recuperación de algo que existía sería falso.
+
+Este artefacto era el que mantenía detenido el objetivo específico 1 y cierra el riesgo R5.
+
+\section{Protocolo experimental del objetivo específico 4}
+\label{sec:protocolo}
+
+Se redactó el protocolo experimental \textbf{antes de instrumentar nada}, y el orden es deliberado: un protocolo escrito después de ver los datos es una racionalización.
+
+El documento define las cuatro métricas del objetivo específico 4 ---tiempo de respuesta, tiempo de asignación, tasa de éxito y continuidad entre niveles--- con definiciones operativas medibles por máquina; fija un tamaño de muestra de 30 corridas en simulación con sorteo por semilla; y establece una \textbf{lista cerrada} de causas de descarte con un techo del 20 \%, de manera que no sea posible descartar una corrida por un motivo inventado después de verla.
+
+Su \textbf{regla de oro} es la consecuencia metodológica de un hallazgo de la Semana 18, y es la aportación más importante del documento:
+
+\begin{quote}
+\textit{La verdad del desplazamiento es la odometría del simulador. Un resultado satisfactorio informado por la propia pila de navegación no constituye evidencia.}
+\end{quote}
+
+La regla no es una precaución teórica. El 21 de agosto, un destino del pasillo devolvió resultado satisfactorio hallándose a \textbf{0,296 m} de la meta, por encima de la tolerancia de 0,25 m configurada, porque el controlador mide contra su propia estimación de localización y no contra la verdad del simulador.
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Contraste entre el resultado informado por la pila y el error medido contra odometría.}
+    \label{tab:regla}
+    \begin{tabular}{@{}lccc@{}}
+        \toprule
+        \textbf{Destino} & \textbf{Resultado informado} & \textbf{Error contra odometría} & \textbf{Veredicto real} \\ \midrule
+        Punto 1  & Satisfactorio & 0,2092 m & Dentro de tolerancia \\
+        Punto 13 & Satisfactorio & \textbf{0,2960 m} & \textbf{Fuera de tolerancia} \\
+        Escaleras & Satisfactorio & 0,1769 m & Dentro de tolerancia \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+Un tercio de las corridas habría entrado en la campaña como éxito sin serlo.
+
+\section{Cierre del hito H3: los dos agentes navegando de forma simultánea}
+\label{sec:h3}
+
+Esta condición \textbf{no se cumplió dentro de la semana} y se cerró el 25 de agosto. Se declara el desplazamiento y se expone su motivo, por ser el único incumplimiento del criterio de cierre.
+
+\textbf{Lo que no era el problema.} El 21 de agosto se navegó por primera vez sobre el entorno de dos niveles y se alcanzaron los tres destinos propuestos, de modo que la sospecha de que la geometría de los pasillos no admitiera el radio de giro del vehículo \textbf{queda descartada con medida y no con opinión}.
+
+\textbf{Lo que sí bloqueaba} eran tres condiciones, y las tres se resolvieron entre el 23 y el 25 de agosto: existía únicamente el mapa del nivel inferior; los quince destinos del inventario se hallaban todos en el nivel 1, con lo cual no había adónde enviar al segundo agente; y permanecían abiertos defectos que habrían contaminado la medida.
+
+\textbf{Por qué no se forzó la corrida.} Ejecutarla en esas condiciones habría producido una captura de pantalla con dos simuladores abiertos, que es exactamente el tipo de evidencia que este proyecto dejó de aceptar el 12 de agosto. Se prefirió declarar el arrastre.
+
+\textbf{La evidencia obtenida al cerrarla es superior a la exigida.} No se produjo una captura, sino dos registros de navegación medidos contra la odometría del simulador: ambos agentes alcanzaron simultáneamente sus puntos de transferencia respectivos con errores de \textbf{0,281 m} y \textbf{0,143 m}. Con ello \textbf{la Semana 19 queda en 4 de 4}.
+
+\section{Aporte de la semana a los objetivos específicos}
+\label{sec:aporte}
+
+\subsection{Relación entre actividades y objetivos}
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Trazabilidad entre las actividades ejecutadas y los objetivos específicos.}
+    \label{tab:trazabilidad}
+    \begin{tabular}{@{}p{4.0cm}cp{7.6cm}@{}}
+        \toprule
+        \textbf{Actividad} & \textbf{Objetivo} & \textbf{Contribución} \\ \midrule
+        Matriz de requisitos con trazabilidad a pruebas & OE1 & Es el componente formal que el objetivo exige y el que lo mantenía detenido. Cierra el riesgo R5 \\ \addlinespace
+        Verificación instrumentada del sensor LiDAR & OE2 & Convierte el sensado en magnitud medida y no declarada: 2,8 mm de repetibilidad sobre una superficie real \\ \addlinespace
+        Verificación del mando por ROS 2 sobre el vehículo & OE2 & Demuestra que el control es posible sin la interfaz web, y localiza la cuantización como defecto propio y reparable \\ \addlinespace
+        Caracterización de la diferencia entre distribuciones & OE1, OE2 & Determina el diseño del esquema de comunicación: la interoperabilidad de grafo no está disponible y la arquitectura debe absorberlo \\ \addlinespace
+        Corrección de la conversión de velocidad angular & OE2, OE4 & Sin ella, toda métrica de trayectoria de la campaña habría estado falseada por una ganancia variable con la velocidad \\ \addlinespace
+        Protocolo experimental & OE4 & Define qué se mide, con qué procedimiento, con cuántas repeticiones y bajo qué criterio, antes de instrumentar \\ \addlinespace
+        Hito H3, dos agentes simultáneos & OE2, OE4 & Es la demostración de operación concurrente sobre la que se apoya la asignación por nivel \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Estado de los objetivos específicos}
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Avance por objetivo específico al cierre de la Semana 19.}
+    \label{tab:objetivos}
+    \begin{tabular}{@{}cp{2.6cm}p{4.2cm}p{4.8cm}@{}}
+        \toprule
+        \textbf{ID} & \textbf{Avance} & \textbf{Cubierto esta semana} & \textbf{Componente que lo mantiene detenido} \\ \midrule
+        OE1 & 40 \% $\rightarrow$ \textbf{55 \%} & Matriz de 34 requisitos con trazabilidad a pruebas & Asignación de tareas implementada y destinos del nivel superior \\ \addlinespace
+        OE2 & 40 \% $\rightarrow$ \textbf{50 \%} & Sensado y mando medidos sobre el vehículo, no declarados & Convivencia del sensor con la pila del vehículo; segundo vehículo (R11) \\ \addlinespace
+        OE3 & 0 \% & --- & Programado para la Semana 22 \\ \addlinespace
+        OE4 & 0 \% $\rightarrow$ \textbf{5 \%} & Protocolo experimental con las cuatro métricas definidas & Instrumentación: registrador de misión y analizador de campaña \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+A diferencia de la Semana 18, esta semana \textbf{sí desplazó porcentajes}, y conviene decir por qué. El indicador se define sobre producto entregado: la matriz de requisitos y el protocolo experimental son documentos terminados y verificables, no habilitadores. El incremento de OE2 corresponde a mediciones sobre hardware que sustituyen afirmaciones previas sin respaldo.
+
+\textbf{El avance de OE4 es deliberadamente pequeño.} Un protocolo escrito no es una métrica obtenida. Cinco puntos porcentuales reflejan que existe la definición de qué medir, y nada más.
+
+\section{Estado del cronograma y trabajo previsto}
+\label{sec:cronograma}
+
+\subsection{Cumplimiento del criterio de cierre}
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Criterio de cierre de la Semana 19.}
+    \label{tab:cierre}
+    \begin{tabular}{@{}p{7.6cm}p{5.6cm}@{}}
+        \toprule
+        \textbf{Condición} & \textbf{Resultado} \\ \midrule
+        Informe del diagnóstico con las preguntas 1, 2 y 4 respondidas & Cumplido \\ \addlinespace
+        Matriz de requisitos publicada & Cumplido \\ \addlinespace
+        Protocolo experimental de OE4, escrito antes de instrumentar & Cumplido \\ \addlinespace
+        Los dos agentes navegando simultáneamente, cada uno en su nivel & Cumplido \textbf{el 25 de agosto}, fuera de la semana \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+Tres de cuatro dentro del plazo; la cuarta con tres días de desplazamiento y con evidencia superior a la exigida. \textbf{La semana queda 4 de 4}, con el arrastre declarado.
+
+\subsection{Desviación registrada durante la ejecución}
+
+Se registra una desviación de método, no de resultado. El miércoles de la semana se adelantó la comprobación sobre hardware de la pregunta 4, que el cronograma marca de forma explícita como una actividad que \emph{no requiere el vehículo encendido}. Con el vehículo encendido, el recurso escaso era el vehículo, y esa sesión se empleó parcialmente en trabajo que podía haberse hecho sin él. Queda anotado para no repetirlo.
+
+Se registra igualmente que los dos primeros días de la semana se trabajaron sin plan escrito, lo que impide reconstruir si un día se desvió. El plan de la semana se redactó a mitad de ella, y desde entonces la práctica se mantiene.
+
+\subsection{Estado de actividades del anteproyecto}
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Estado de actividades --- Semana 19 (Fase 5).}
+    \label{tab:estado_s19}
+    \begin{tabular}{@{}p{6.3cm}ll@{}}
+        \toprule
+        \textbf{Actividad (anteproyecto)} & \textbf{Estado} & \textbf{Observación} \\ \midrule
+        Ajuste progresivo de los elementos desarrollados & En curso & Conversión de dirección corregida y validada \\ \addlinespace
+        Integración de los módulos del sistema & En curso & Falta el nodo de coordinación \\ \addlinespace
+        Análisis del entorno de evaluación & Concluida & Protocolo experimental publicado \\ \addlinespace
+        Registro de avances del proyecto & En curso & Presente entregable \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Trabajo previsto para la Semana 20}
+
+\begin{itemize}
+    \item \textbf{Nodo de coordinación} con asignación de agente por nivel: dada una solicitud de origen y destino, elegir el vehículo que corresponde al nivel del destino.
+    \item \textbf{Registrador de misión}, con esquema de datos versionado y verificable, que deje en un archivo estructurado las marcas temporales de las cuatro métricas y calcule el veredicto contra odometría.
+    \item \textbf{Mapa y destinos del nivel superior}, prerrequisito de la campaña experimental.
+    \item \textbf{Convivencia del sensor con la pila del vehículo}, mediante el enlace simbólico ya decidido, y comprobación de que las cámaras publican en ROS y no solo enumeran en el bus.
+\end{itemize}
+
+Se advierte que la congelación de código está fijada entre el 14 y el 20 de septiembre. Restan cuatro semanas para el coordinador, el protocolo de relevo, la interfaz de usuario, la instrumentación y el despliegue físico.
+
+\section{Conclusiones de la Semana}
+
+La Semana 19 cumplió tres de sus cuatro condiciones de cierre dentro del plazo y la cuarta tres días después, quedando en 4 de 4 con el arrastre declarado. Se publicaron los dos artefactos documentales que el proyecto debía al cronograma: la matriz de 34 requisitos con trazabilidad a objetivos y pruebas, que cierra el riesgo R5 y desbloquea el objetivo específico 1, y el protocolo experimental del objetivo específico 4, redactado antes de instrumentar cualquier cosa.
+
+El diagnóstico del vehículo físico sustituyó afirmaciones por mediciones. El sensor LiDAR repite una misma pared con 2,8 mm de dispersión y observa planas las superficies planas, que es lo que exige el algoritmo de localización; la diferencia de 23 mm contra la cinta métrica se informa como cota superior y no como error del instrumento, porque el montaje no permite separar la exactitud del desplazamiento del origen de medida. La capa de servos del vehículo respondió de forma proporcional en dirección y tracción, con lo cual la cuantización binaria observada quedó localizada como defecto propio y reparable, y no como limitación del hardware.
+
+Se corrigió un defecto dimensional que habría falseado la campaña experimental completa. La componente angular del comando de velocidad se interpretaba como un ángulo de dirección en lugar de como una velocidad angular, produciendo una ganancia de volante que variaba por un factor de cuatro a lo largo del rango de velocidad. El error de seguimiento se redujo a la mitad en las dos corridas de validación y se confirmó en un escenario distinto del empleado para validar, obteniendo el mejor seguimiento de las seis corridas disponibles.
+
+Dos afirmaciones previas del proyecto resultaron incorrectas y se rectificaron. El sensor diagnosticado el 19 de agosto no es el sensor del kit del vehículo, de modo que la corrección del modelo geométrico de simulación va en sentido contrario al que se había escrito: la simulación observa más rayos que el vehículo, no menos. Y el fallo que bloqueaba la Semana 20 no tenía tres causas apiladas sino una sola, un nombre de ejecutable, con lo que esa semana dejó de estar bloqueada por el sensado.
+
+Se estableció que la convivencia de dos distribuciones de ROS 2 es una condición permanente y no transitoria, porque la simulación no puede migrar: el paquete que la integra con la capa de control no está publicado para la distribución del vehículo. En consecuencia, la portabilidad declarada del proyecto se sostiene como portabilidad de código fuente y es falsa como interoperabilidad dentro de un mismo grafo, distinción que condiciona el diseño del nodo de coordinación.
+
+Los objetivos específicos 1, 2 y 4 avanzaron a 55 \%, 50 \% y 5 \% respectivamente. El avance del objetivo 4 es deliberadamente pequeño: existe la definición de qué medir y no existe todavía ninguna medida.
+
+\begin{thebibliography}{99}
+
+\bibitem{entregable18}
+S. Hernández Ávila y J. A. Mejía León,
+``Informe de Avance --- Semana 18,''
+Universidad Santo Tomás, Facultad de Ingeniería Electrónica, Bogotá, agosto de 2026.
+
+\bibitem{cronograma}
+S. Hernández Ávila y J. A. Mejía León,
+``Cronograma de actividades --- Semanas 17 a 32,''
+Universidad Santo Tomás, Facultad de Ingeniería Electrónica, Bogotá, agosto de 2026.
+
+\bibitem{anteproyecto}
+S. Hernández Ávila y J. A. Mejía León,
+``Sistema colaborativo de robots móviles para asistencia de orientación en entornos interiores con múltiples pisos --- Anteproyecto,''
+Universidad Santo Tomás, Facultad de Ingeniería Electrónica, Bogotá, 2026.
+
+\bibitem{requisitos}
+S. Hernández Ávila y J. A. Mejía León,
+``Matriz de requisitos: requisitos funcionales, objetivos específicos y pruebas de verificación,''
+Universidad Santo Tomás, Facultad de Ingeniería Electrónica, Bogotá, agosto de 2026.
+
+\bibitem{protocolo}
+S. Hernández Ávila y J. A. Mejía León,
+``Protocolo experimental del objetivo específico 4,''
+Universidad Santo Tomás, Facultad de Ingeniería Electrónica, Bogotá, agosto de 2026.
+
+\bibitem{ros2_humble_docs}
+Open Robotics,
+``ROS 2 Humble Hawksbill Documentation,''
+[Online]. Available: \url{https://docs.ros.org/en/humble/}
+
+\bibitem{ros2_jazzy_docs}
+Open Robotics,
+``ROS 2 Jazzy Jalisco Documentation,''
+[Online]. Available: \url{https://docs.ros.org/en/jazzy/}
+
+\bibitem{nav2_docs}
+Open Robotics,
+``Nav2 Documentation,''
+[Online]. Available: \url{https://docs.nav2.org/}
+
+\bibitem{gazebo}
+Open Robotics,
+``Gazebo Classic Documentation,''
+[Online]. Available: \url{https://classic.gazebosim.org/tutorials}
+
+\bibitem{fischler_ransac}
+M. A. Fischler and R. C. Bolles,
+``Random Sample Consensus: A Paradigm for Model Fitting with Applications to Image Analysis and Automated Cartography,''
+Communications of the ACM, vol. 24, no. 6, pp. 381--395, 1981.
+
+\bibitem{rajamani}
+R. Rajamani,
+\textit{Vehicle Dynamics and Control}, 2nd ed.
+New York: Springer, 2012.
+
+\bibitem{deepracer}
+Amazon Web Services,
+``AWS DeepRacer --- Developer Documentation,''
+[Online]. Available: \url{https://docs.aws.amazon.com/deepracer/}
+
+\end{thebibliography}
+
+\end{document}
