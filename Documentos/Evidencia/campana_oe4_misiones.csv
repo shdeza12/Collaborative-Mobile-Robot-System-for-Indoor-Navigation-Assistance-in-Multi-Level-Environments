@@ -1,0 +1,39 @@
+# campana: OE4 - simulacion (RF-26)
+# protocolo: Documentos/PROTOCOLO_EXPERIMENTAL.md §6.2 y §6.3
+# sorteado: 2026-08-30
+# semilla: 20260822
+# n: 30
+# catalogo: Robot/aws-deepracer/deepracer_bringup/config/puntos_interes.yaml
+# catalogo_sha256: 849ecee96258f753eac3316efac6a157540648dccde2d390aaba4c17c8d82dcd
+# orden: el de este archivo, sin reordenar (§6.3)
+n,condicion,origen_id,destino_id,origen_nombre,destino_nombre
+1,A,piso1_etm2,piso1_etm11,ETM2,ETM11
+2,B,piso1_etm7,piso2_aula_306,ETM7,Aula 306
+3,A,piso1_etm9,piso1_etm6,ETM9,ETM6
+4,B,piso1_etm6,piso2_ieee,ETM6,IEEE
+5,A,piso1_etm6,piso1_representacion,ETM6,Representación
+6,B,piso1_etm10,piso2_aula_303,ETM10,Aula 303
+7,B,piso1_etm8,piso2_aula_309,ETM8,Aula 309
+8,B,piso1_etm2,piso2_lab_312,ETM2,Lab. Sistemas 312
+9,B,piso1_etm3,piso2_aula_302,ETM3,Aula 302
+10,A,piso1_etm8,piso1_etm11,ETM8,ETM11
+11,B,piso1_almacen,piso2_ieee,Almacén ETM,IEEE
+12,B,piso1_etm5,piso2_aula_311,ETM5,Aula 311
+13,B,piso1_etm7,piso2_sala_docentes_civil,ETM7,Sala de Docentes Fac. Ing. Civil
+14,B,piso1_etm13,piso2_aula_305,ETM13,Aula 305
+15,A,piso1_etm3,piso1_etm7,ETM3,ETM7
+16,A,piso1_etm10,piso1_etm4,ETM10,ETM4
+17,B,piso1_etm1,piso2_ieee,ETM1,IEEE
+18,A,piso1_representacion,piso1_etm6,Representación,ETM6
+19,A,piso1_etm9,piso1_etm2,ETM9,ETM2
+20,B,piso1_almacen,piso2_aula_306,Almacén ETM,Aula 306
+21,A,piso1_etm1,piso1_etm3,ETM1,ETM3
+22,A,piso1_almacen,piso1_etm1,Almacén ETM,ETM1
+23,B,piso1_etm3,piso2_aula_307,ETM3,Aula 307
+24,A,piso1_etm10,piso1_etm8,ETM10,ETM8
+25,A,piso1_etm10,piso1_etm1,ETM10,ETM1
+26,B,piso1_representacion,piso2_sala_docentes_civil,Representación,Sala de Docentes Fac. Ing. Civil
+27,A,piso1_etm13,piso1_etm4,ETM13,ETM4
+28,B,piso1_representacion,piso2_aula_311,Representación,Aula 311
+29,A,piso1_etm6,piso1_etm7,ETM6,ETM7
+30,A,piso1_etm7,piso1_etm2,ETM7,ETM2

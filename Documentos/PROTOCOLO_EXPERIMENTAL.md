@@ -336,12 +336,43 @@ Los pares salen de `puntos_interes.yaml`, que es la fuente de verdad de los dest
 cd "$TESIS" && python3 herramientas/sortear_misiones.py --semilla 20260822 --n 30 --salida Documentos/Evidencia/campana_oe4_misiones.csv
 ```
 
-> Esa herramienta **todavía no existe**; es parte de la instrumentación (§9). Se nombra aquí para
-> fijar que el sorteo es del protocolo y no del operador: elegir los pares a mano el día de la
-> campaña es la puerta de entrada al sesgo de selección.
+> Se nombra aquí para fijar que el sorteo es del protocolo y no del operador: elegir los pares a
+> mano el día de la campaña es la puerta de entrada al sesgo de selección.
+>
+> **Existe desde el 2026-08-30**, y hasta esa fecha esta nota decía «todavía no existe». Ese
+> mismo día se ejecutó el comando de arriba tal cual está escrito y el listado quedó versionado en
+> [`campana_oe4_misiones.csv`](Evidencia/campana_oe4_misiones.csv).
 
 El listado sorteado se versiona **antes** de ejecutar la primera corrida. El orden de ejecución es
 el del archivo, sin reordenar.
+
+**Cuatro decisiones que este documento no fijaba y hubo que tomar al escribir la herramienta.** Se
+listan aquí, y no solo en el código, porque son de diseño experimental:
+
+1. **Los puntos de transferencia no se sortean**, ni como origen ni como destino. Una misión de
+   condición B con destino `piso2_escalera` tendría un segundo tramo de longitud cero —el relevo
+   ocurre justo ahí—, contaría como éxito sin haber navegado y tiraría del tiempo total de la
+   condición B hacia abajo. Quedan **14 puntos elegibles en el piso 1 y 15 en el piso 2**.
+2. **Sin reposición:** las 30 misiones son 30 pares distintos. Hay 182 pares posibles de condición A
+   y 210 de condición B, así que no hace falta repetir, y una repetición gastaría una de las 30
+   corridas sin cubrir un destino nuevo.
+3. **El orden del archivo mezcla las dos condiciones.** Como el orden del archivo *es* el orden
+   temporal de la campaña, ejecutar 15 de A y luego 15 de B confundiría cualquier deriva de la
+   sesión con la diferencia entre condiciones, que es lo que se quiere medir.
+4. **La herramienta se niega a sobrescribir un listado existente**, y comprueba antes de sortear.
+   Pisar el listado a mitad de campaña dejaría unas corridas contra un listado y otras contra otro
+   sin que nada en los registros lo delatara.
+
+> **El sorteo no cubre el catálogo entero, y no pretende hacerlo.** Con la semilla 20260822 quedan
+> cubiertos 10 de los 15 destinos del piso 2 y 9 de los 14 del piso 1. Es lo que da un sorteo
+> aleatorio de 30 sobre 392 pares posibles. Si algún día se quiere cobertura garantizada, eso es un
+> diseño **estratificado** y hay que decidirlo aquí antes de ejecutar, no ajustando la semilla
+> hasta que salga bonito.
+
+> **La misión del 2026-08-30 —`piso1_representacion → piso2_lab_313`— no está en el listado**, y
+> por tanto no es la corrida 1 de la campaña ni puede agregarse a ella. Sigue siendo lo que dice
+> [`S21_relevo_ejecutado.md`](Evidencia/S21_relevo_ejecutado.md): una demostración de que el
+> relevo se ejecuta, con n = 1.
 
 ### 6.4 Aislamiento entre corridas
 
@@ -419,7 +450,14 @@ En orden. **Escrito el 22-ago, cuando nada de esto existía; el estado es del 20
    [`ESQUEMA_REGISTRO_MISION.md`](ESQUEMA_REGISTRO_MISION.md), anclado a §3 y §8 de este
    protocolo, con los campos del banco físico previstos aunque en simulación vayan vacíos.
    Es `herramientas/componer_registro.py`, y compone desde el bag, después de la corrida.
-5. **PENDIENTE — `herramientas/sortear_misiones.py`** (§6.3).
+5. **HECHO — `herramientas/sortear_misiones.py`** (§6.3), con su prueba en
+   `herramientas/prueba_sortear_misiones.py`. Ejecutado el 2026-08-30 con semilla **20260822**
+   sobre el catálogo de 31 puntos (SHA-256 `849ecee96258f753…8dcd`): las 30 misiones de la campaña
+   están sorteadas y versionadas en
+   [`Evidencia/campana_oe4_misiones.csv`](Evidencia/campana_oe4_misiones.csv), 15 de condición A y
+   15 de B. La prueba comprueba, sobre el catálogo real, que **las 30 se pueden planificar** y que
+   la condición que escribe el CSV es la misma que `condicion_de()` calculará en el coordinador; un
+   listado con una misión implanificable no daría error hasta quemar una corrida.
 6. **PENDIENTE — Analizador de campaña**: lee los N registros y produce las cuatro métricas con sus
    intervalos de confianza.
 7. **HECHO — Banco del tiempo de asignación** (§3.2.2). Corre el coordinador aislado, sin
