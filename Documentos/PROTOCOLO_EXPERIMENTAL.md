@@ -422,9 +422,13 @@ En orden. **Escrito el 22-ago, cuando nada de esto existía; el estado es del 20
 5. **PENDIENTE — `herramientas/sortear_misiones.py`** (§6.3).
 6. **PENDIENTE — Analizador de campaña**: lee los N registros y produce las cuatro métricas con sus
    intervalos de confianza.
-7. **PENDIENTE — Banco del tiempo de asignación** (§3.2.2). Corre el coordinador aislado, sin
+7. **HECHO — Banco del tiempo de asignación** (§3.2.2). Corre el coordinador aislado, sin
    Gazebo, mide sobre reloj de pared y reporta mediana y máximo. Es lo único que puede dar la cifra
-   de RF-22, y no depende de la campaña: puede hacerse en cualquier momento antes del informe.
+   de RF-22, y no depende de la campaña. Es `herramientas/banco_tiempo_asignacion.py`, con su prueba
+   en `herramientas/prueba_banco_tiempo_asignacion.py`. Ejecutado el 2026-08-30 sobre el catálogo de
+   31 puntos: **mediana 154–173 µs, máximo 283,8 µs en tres corridas de 30 misiones**, es decir 352
+   veces por debajo de un tick de `/clock`. Resultados y límites en
+   [`Evidencia/S21_banco_tiempo_asignacion.md`](Evidencia/S21_banco_tiempo_asignacion.md).
 
 ---
 
