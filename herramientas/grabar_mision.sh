@@ -42,8 +42,50 @@ fi
 # uno de los dos, el registro no se puede componer y la corrida no vale.
 IMPRESCINDIBLES=(/clock /coordinacion/estado_mision)
 TOPICOS=("${IMPRESCINDIBLES[@]}" /coordinacion/puntos_interes /tf /tf_static)
+
+# HAY QUE GRABAR EL RELOJ DE CADA ROBOT, no solo '/clock'.
+#
+# Desde el 2026-08-30 los dos robots comparten ROS_DOMAIN_ID y cada gzserver
+# publica su reloj con nombre propio: robot1 en '/clock' -es el de referencia,
+# porque 'ros2 bag record --use-sim-time' esta cableado ahi- y robot2 en
+# '/robot2/clock'.
+#
+# Sin esta linea el bag quedaria asi: los mensajes de robot2 sellados en la
+# hora de SU simulador, los del bag sellados en la de robot1, y ni una sola
+# pista de cuanto se llevan. Y se llevan mucho: los dos gzserver arrancan en
+# momentos distintos, y en las corridas del 2026-08-30 el desfase medido fue de
+# 16 s en un caso y de 143 s en otro. No es un sesgo constante que se pueda
+# despejar despues; depende de cuando se lanzo cada pila. Grabando los dos
+# relojes, la correspondencia entre las dos lineas de tiempo queda en el bag y
+# se reconstruye; sin ellos, los datos de robot2 no se pueden situar en la
+# mision y la corrida solo sirve para mirar trayectorias sueltas.
+#
+# La tabla de relojes vive en deepracer_raiz_repo.py, junto a las poses, y NO se
+# copia aqui: es el mismo motivo por el que la pose dejo de estar en tres sitios.
+RAIZ="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+LAUNCH_DIR="$RAIZ/Robot/aws-deepracer/deepracer_bringup/launch"
+
 for NS in "${ROBOTS[@]}"; do
     TOPICOS+=("/$NS/odom" "/$NS/amcl_pose" "/$NS/scan" "/$NS/cmd_vel" "/$NS/plan")
+
+    # Si el robot no tiene reloj declarado se corta aqui. Grabar una mision con
+    # un robot cuya base de tiempo se desconoce es grabar datos inservibles, y
+    # eso se descubriria al analizar, con la simulacion ya apagada.
+    if ! RELOJ=$(python3 -c "
+import sys
+sys.path.insert(0, '$LAUNCH_DIR')
+from deepracer_raiz_repo import reloj_de
+print(reloj_de('$NS'))
+" 2>&1); then
+        echo "No se graba: no hay reloj declarado para '$NS'." >&2
+        printf '%s\n' "$RELOJ" | sed 's/^/  /' >&2
+        exit 1
+    fi
+    # '/clock' ya esta en IMPRESCINDIBLES; 'ros2 bag record' con el topico
+    # repetido avisa, y el aviso confunde mas que ayuda.
+    if [ "$RELOJ" != "/clock" ]; then
+        TOPICOS+=("$RELOJ")
+    fi
 done
 
 # Se avisa de los que no aparecen todavia, pero solo se aborta por los dos

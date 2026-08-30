@@ -99,6 +99,33 @@ POSE_INICIAL = {
     },
 }
 
+# El topico de reloj de cada robot. Desde el 2026-08-30 los dos comparten el
+# ROS_DOMAIN_ID 0 -para que el coordinador pueda hablar con los dos-, y lo que
+# separa a los dos simuladores ya no es el dominio sino el nombre del reloj.
+#
+# EL REPARTO ES ASIMETRICO A PROPOSITO. robot1 se queda en '/clock' y hace de
+# reloj de referencia de la mision. No es una preferencia: 'ros2 bag record
+# --use-sim-time' esta cableado a '/clock' y ni siquiera acepta '--ros-args',
+# asi que si se remapean los DOS relojes el bag sale con cero mensajes y sin un
+# error visible (Evidencia/S21_bloqueo_dominios.md §5.1). Alguien tiene que
+# quedarse en '/clock'.
+#
+# ESTO VIVE AQUI Y NO EN robot.sh porque dejo de ser transporte. Mientras solo
+# lo usaba el lanzador podia quedarse alli; ahora lo necesitan tambien el
+# grabador -que tiene que guardar el reloj de cada robot para poder situar sus
+# datos en el tiempo despues- y quien analice los bags. En cuanto un dato lo
+# comparten dos herramientas, tiene una sola casa: es la leccion de la pose que
+# vivio en tres sitios y se quedo vieja en uno (cabecera de este archivo).
+#
+# Sin el reloj de robot2 en el bag, sus mensajes quedan sellados en una base de
+# tiempo que no aparece en ningun sitio del registro: se han medido desfases de
+# mas de 140 s entre los dos simuladores, y esa diferencia no se puede
+# reconstruir a posteriori.
+RELOJ = {
+    'robot1': '/clock',
+    'robot2': '/robot2/clock',
+}
+
 # Con 'namespace' vacio -un solo robot- se usa esta fila. Es la que ven los
 # launch cuando nadie pasa x:=/y:=/yaw:=.
 ROBOT_POR_DEFECTO = 'robot1'
@@ -121,6 +148,21 @@ def pose_por_defecto(robot=ROBOT_POR_DEFECTO):
             'este archivo, nunca en el launch.'.format(
                 robot, ', '.join(sorted(POSE_INICIAL))))
     return POSE_INICIAL[robot]
+
+
+def reloj_de(robot=ROBOT_POR_DEFECTO):
+    """Topico de reloj de un robot. Falla ruidosamente si no esta declarado.
+
+    No devuelve '/clock' por defecto a proposito. Un robot nuevo sin fila en
+    RELOJ acabaria compartiendo reloj con robot1 y el sintoma seria una
+    localizacion que deriva, no un error: mejor que no arranque.
+    """
+    if robot not in RELOJ:
+        raise KeyError(
+            "No hay reloj declarado para '{}'. Conocidos: {}. Anadirlo a RELOJ "
+            'en este archivo, nunca en el lanzador.'.format(
+                robot, ', '.join(sorted(RELOJ))))
+    return RELOJ[robot]
 
 
 def pose_texto(clave, robot=ROBOT_POR_DEFECTO):

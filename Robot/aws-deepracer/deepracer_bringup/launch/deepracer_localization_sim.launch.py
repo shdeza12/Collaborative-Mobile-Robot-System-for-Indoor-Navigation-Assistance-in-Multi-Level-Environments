@@ -16,10 +16,12 @@
 #      que robot_state_publisher y Gazebo publican en /tf absoluto. El arbol TF
 #      quedaria partido en dos.
 #
-# Aqui cada robot vive en su propio ROS_DOMAIN_ID y su propio gzserver (ver
-# Documentos/Evidencia/S17_dos_simuladores.md), asi que el /tf de cada dominio
-# ya esta aislado y no hay nada que remapear. Los marcos si van prefijados
-# ('robot1/base_link'), porque asi los publica el URDF.
+# Aqui NO hay nada que remapear en /tf, pero el motivo cambio el 2026-08-30.
+# Antes era el aislamiento por ROS_DOMAIN_ID; hoy los dos robots comparten el
+# dominio 0 y comparten el topico /tf. Lo que los mantiene separados es que
+# TODOS los marcos van prefijados ('robot1/base_link', 'robot1/odom' y tambien
+# 'robot1/map' desde el 2026-08-24), asi que los dos arboles no comparten ni un
+# solo nombre y conviven en el mismo topico sin tocarse.
 
 from launch import LaunchDescription
 from launch.actions import (DeclareLaunchArgument, OpaqueFunction,
@@ -101,10 +103,11 @@ def acciones(context, *args, **kwargs):
         # en Evidencia/S20_marco_map_prefijado.md.
         #
         # 'map' no es un ancla comun sino DOS mapas distintos con el mismo
-        # nombre. Hoy no chocan porque cada robot vive en su dominio DDS; en
-        # cuanto compartan uno -que es lo que exige el relevo H3- habria dos
-        # map_server publicando el mismo marco con geometrias distintas, que es
-        # justo el fallo silencioso que el §3 existe para impedir.
+        # nombre. Cuando esto se escribio no chocaban porque cada robot vivia en
+        # su dominio DDS, y se advertia que en cuanto compartieran uno -lo que
+        # exige el relevo H3- habria dos map_server publicando el mismo marco con
+        # geometrias distintas. Comparten dominio desde el 2026-08-30, y no
+        # chocaron: la advertencia se cumplio y el prefijo la desactivo.
         #
         # Se usan rutas completas por coherencia con el launch de navegacion,
         # donde la clave suelta seria ambigua.
@@ -126,8 +129,24 @@ def acciones(context, *args, **kwargs):
         param_rewrites=param_substitutions,
         convert_types=True)
 
+    # EL RELOJ SI HAY QUE REMAPEARLO. Estos nodos corren fuera de gzserver, de
+    # modo que no heredan su '--remap', y con use_sim_time rclcpp se suscribe a
+    # '/clock' con nombre absoluto, de modo que el namespace tampoco los alcanza.
+    # Con los dos robots en el mismo dominio, un AMCL escuchando el reloj del
+    # OTRO simulador no da error: da avisos de extrapolacion de TF y una nube de
+    # particulas que deriva, que es un sintoma facil de confundir con un mapa
+    # malo o con odometria mala.
+    #
+    # Solo se remapea cuando no es '/clock', para dejar al robot de referencia
+    # exactamente como estaba (Evidencia/S21_bloqueo_dominios.md §5.3).
+    remapeos = []
+    reloj = LaunchConfiguration('clock_topic').perform(context).strip()
+    if reloj and reloj != '/clock':
+        remapeos.append(('/clock', reloj))
+
     comunes = dict(output='screen',
                    namespace=ns_nodo,
+                   remappings=remapeos,
                    parameters=[configured_params])
 
     return [
@@ -135,9 +154,11 @@ def acciones(context, *args, **kwargs):
              name='map_server', **comunes),
         Node(package='nav2_amcl', executable='amcl',
              name='amcl', **comunes),
+        # Tambien declara use_sim_time, luego tambien se suscribe a '/clock'.
         Node(package='nav2_lifecycle_manager', executable='lifecycle_manager',
              name='lifecycle_manager_localization', output='screen',
              namespace=ns_nodo,
+             remappings=remapeos,
              parameters=[{'use_sim_time': use_sim_time},
                          {'autostart': autostart},
                          {'node_names': LIFECYCLE_NODES}]),
@@ -162,6 +183,12 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'use_sim_time', default_value='true',
             description='Usar el reloj de Gazebo'),
+
+        DeclareLaunchArgument(
+            'clock_topic', default_value='/clock',
+            description='Topico de reloj del gzserver de este robot. Con dos '
+                        'simuladores en el mismo dominio, uno se queda en '
+                        "/clock -el de referencia- y el otro usa '/robotN/clock'."),
 
         DeclareLaunchArgument(
             'autostart', default_value='true',

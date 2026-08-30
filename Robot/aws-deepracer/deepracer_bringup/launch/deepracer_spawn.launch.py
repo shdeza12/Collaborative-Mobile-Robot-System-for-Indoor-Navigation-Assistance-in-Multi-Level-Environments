@@ -131,20 +131,38 @@ def acciones(context, *args, **kwargs):
         }],
     )
 
+    # El servicio de spawn NO se resuelve por el namespace del nodo.
+    # 'spawn_entity.py' lo compone a mano con su propio '-gazebo_namespace',
+    # cuyo defecto es la cadena vacia, y con eso pide '/spawn_entity' ABSOLUTO
+    # aunque el nodo viva en '/robot1'. Mientras los dos gzserver estuvieron en
+    # dominios distintos daba igual: en cada dominio solo habia un
+    # '/spawn_entity'. Al pasar los dos al mismo dominio hay que decirle a que
+    # simulador va, y decirselo POR AQUI.
+    #
+    # Si se omite, el sintoma es una espera de 30 s y luego:
+    #   'Service /spawn_entity unavailable. Was Gazebo started with
+    #    GazeboRosFactory?'
+    # que apunta al sitio equivocado -el factory SI estaba cargado- y manda a
+    # revisar los plugins de Gazebo durante un buen rato. Medido el 2026-08-30,
+    # Evidencia/S21_bloqueo_dominios.md §6.2.
+    args_spawn = [
+        # Nombre relativo: con namespace se resuelve a /robot1/robot_description.
+        '-topic', 'robot_description',
+        # Gazebo exige nombres de modelo unicos: dos 'deepracer' no coexisten.
+        '-entity', ns if ns else 'deepracer',
+        '-x', LaunchConfiguration('x'),
+        '-y', LaunchConfiguration('y'),
+        '-z', LaunchConfiguration('z'),
+        '-Y', LaunchConfiguration('yaw'),
+    ]
+    if ns:
+        args_spawn += ['-gazebo_namespace', f'/{ns}']
+
     spawn_entity = Node(
         package='gazebo_ros',
         executable='spawn_entity.py',
         namespace=ns_nodo,
-        arguments=[
-            # Nombre relativo: con namespace se resuelve a /robot1/robot_description.
-            '-topic', 'robot_description',
-            # Gazebo exige nombres de modelo unicos: dos 'deepracer' no coexisten.
-            '-entity', ns if ns else 'deepracer',
-            '-x', LaunchConfiguration('x'),
-            '-y', LaunchConfiguration('y'),
-            '-z', LaunchConfiguration('z'),
-            '-Y', LaunchConfiguration('yaw'),
-        ],
+        arguments=args_spawn,
         output='screen',
     )
 

@@ -163,11 +163,38 @@ def acciones(context, *args, **kwargs):
         convert_types=True)
 
     # NO se remapea /tf ni /tf_static, a diferencia de lo que hace nav2_bringup
-    # para multi-robot. Aqui cada robot vive en su propio ROS_DOMAIN_ID y en su
-    # propio gzserver (ver Documentos/Evidencia/S17_dos_simuladores.md), asi que
-    # el arbol TF global de cada dominio ya esta aislado. Remapear ademas
-    # obligaria a tocar el robot_state_publisher, que publica en /tf absoluto.
+    # para multi-robot.
+    #
+    # OJO AL MOTIVO, QUE CAMBIO EL 2026-08-30. Hasta esa fecha aqui decia que
+    # cada robot vivia en su propio ROS_DOMAIN_ID y que por eso el arbol TF ya
+    # estaba aislado. Eso ya no es cierto: los dos robots comparten el dominio 0
+    # y comparten, por tanto, el topico /tf.
+    #
+    # La conclusion sobrevive pero por otra razon, y es una que ya estaba pagada:
+    # TODOS los marcos van prefijados con el namespace, incluido 'map' desde el
+    # 2026-08-24 (Evidencia/S20_marco_map_prefijado.md). Dos arboles con marcos
+    # 'robot1/...' y 'robot2/...' conviven en un mismo /tf sin tocarse, porque no
+    # comparten ni un solo nombre de marco. Lo que se comparte es el topico, no
+    # el arbol.
+    #
+    # Lo que se paga es ancho de banda y memoria: el buffer TF de cada robot
+    # guarda tambien las transformadas del otro. Es el precio de no remapear, y
+    # remapear costaria tocar el robot_state_publisher y los plugins de Gazebo,
+    # que publican en /tf absoluto.
     remappings = []
+
+    # El reloj SI hay que remapearlo, y aqui esta la parte que Gazebo no cubre:
+    # estos nodos corren FUERA de gzserver, asi que no heredan su '--remap'. Con
+    # use_sim_time, rclcpp se suscribe a '/clock' con nombre absoluto, de modo
+    # que el namespace tampoco los alcanza. Sin esta linea, la pila de robot2
+    # planifica y controla con el tiempo del simulador de robot1: no hay error,
+    # hay extrapolacion de TF y una trayectoria que no corresponde a lo medido.
+    #
+    # Solo se remapea cuando no es '/clock', para dejar al robot de referencia
+    # exactamente como estaba (Evidencia/S21_bloqueo_dominios.md §5.3).
+    reloj = LaunchConfiguration('clock_topic').perform(context).strip()
+    if reloj and reloj != '/clock':
+        remappings.append(('/clock', reloj))
 
     comunes = dict(output='screen',
                    namespace=ns_nodo,
@@ -188,9 +215,15 @@ def acciones(context, *args, **kwargs):
 
         # El gestor de ciclo de vida no lee el YAML: sus nombres de nodo son
         # relativos y se resuelven dentro del mismo namespace.
+        #
+        # Lleva 'remappings' aunque no use 'comunes' porque tambien declara
+        # use_sim_time, y por tanto tambien se suscribe a '/clock'. Sin el
+        # remapeo se quedaria esperando el reloj del otro simulador y sus
+        # temporizadores de transicion contarian mal.
         Node(package='nav2_lifecycle_manager', executable='lifecycle_manager',
              name='lifecycle_manager_navigation', output='screen',
              namespace=ns_nodo,
+             remappings=remappings,
              parameters=[{'use_sim_time': use_sim_time},
                          {'autostart': autostart},
                          {'node_names': LIFECYCLE_NODES}]),
@@ -212,6 +245,12 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'use_sim_time', default_value='false',
             description='Use simulation (Gazebo) clock if true'),
+
+        DeclareLaunchArgument(
+            'clock_topic', default_value='/clock',
+            description='Topico de reloj del gzserver de este robot. Con dos '
+                        'simuladores en el mismo dominio, uno se queda en '
+                        "/clock -el de referencia- y el otro usa '/robotN/clock'."),
 
         DeclareLaunchArgument(
             'autostart', default_value='true',

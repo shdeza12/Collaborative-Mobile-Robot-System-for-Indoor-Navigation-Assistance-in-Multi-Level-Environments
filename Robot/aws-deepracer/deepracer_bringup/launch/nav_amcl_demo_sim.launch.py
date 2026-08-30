@@ -63,6 +63,12 @@ def generate_launch_description():
     # (x, y, yaw) y el nivel se elige con el mapa, no con la altura. Hace falta
     # para el entorno de dos niveles, donde el nivel 2 esta a z=3.0.
     z_cfg = LaunchConfiguration('z')
+    # A que reloj obedece ESTA pila. Va a los TRES launches incluidos y no solo a
+    # Gazebo: Nav2 y AMCL corren FUERA de gzserver, asi que no heredan nada de el
+    # y hay que decirselo aparte. Con los dos robots en el mismo dominio, una
+    # pila que escuche el reloj del otro simulador no da ningun error; da
+    # extrapolaciones de TF y una localizacion que deriva.
+    reloj_cfg = LaunchConfiguration('clock_topic')
 
     declare_world_arg = DeclareLaunchArgument('world', default_value=default_world, description='SDF world file')
     declare_map_arg = DeclareLaunchArgument('map', default_value=default_map, description='map file')
@@ -70,6 +76,12 @@ def generate_launch_description():
     declare_ns_arg = DeclareLaunchArgument(
         'namespace', default_value='',
         description="Namespace del robot, p.ej. 'robot1'. Vacio = un solo robot.")
+    declare_reloj_arg = DeclareLaunchArgument(
+        'clock_topic', default_value='/clock',
+        description='Topico de reloj del gzserver de este robot. Con dos '
+                    'simuladores en el mismo dominio, uno se queda en /clock '
+                    "-el de referencia de la mision- y el otro usa "
+                    "'/robotN/clock'.")
     # Los defectos salen de POSE_INICIAL, en 'deepracer_raiz_repo.py', que es la
     # unica tabla de poses del proyecto.
     #
@@ -92,6 +104,7 @@ def generate_launch_description():
             PythonLaunchDescriptionSource([deepracer_bringup_dir, '/launch/deepracer_sim.launch.py']),
             launch_arguments = {'world': world_cfg,
                                 'namespace': ns_cfg,
+                                'clock_topic': reloj_cfg,
                                 'x': x_cfg,
                                 'y': y_cfg,
                                 'z': z_cfg,
@@ -102,6 +115,7 @@ def generate_launch_description():
             PythonLaunchDescriptionSource([deepracer_bringup_dir, '/launch/deepracer_navigation_sim.launch.py']),
             launch_arguments = {'params': params_cfg,
                                 'namespace': ns_cfg,
+                                'clock_topic': reloj_cfg,
                                 'use_sim_time': 'true'}.items()
         ),
         # start localization (amcl) and map_server
@@ -115,6 +129,7 @@ def generate_launch_description():
             launch_arguments={'map': map_cfg,
                               'params': params_cfg,
                               'namespace': ns_cfg,
+                              'clock_topic': reloj_cfg,
                               'x': x_cfg,
                               'y': y_cfg,
                               'yaw': yaw_cfg,
@@ -126,6 +141,7 @@ def generate_launch_description():
     ld.add_action(declare_map_arg)
     ld.add_action(declare_params_arg)
     ld.add_action(declare_ns_arg)
+    ld.add_action(declare_reloj_arg)
     ld.add_action(declare_x_arg)
     ld.add_action(declare_y_arg)
     ld.add_action(declare_yaw_arg)

@@ -129,7 +129,21 @@ def leer_odom(robot, segundos=5.0):
         rclpy.spin_once(nodo, timeout_sec=0.1)
         if len(muestras) > 20:
             break
-    hay_clock = nodo.count_publishers("/clock") > 0
+    # EL RELOJ DE ESTE ROBOT PUEDE NO SER '/clock'. Desde el 2026-08-30 los dos
+    # robots comparten dominio y se distinguen por el topico de reloj: robot1 se
+    # queda en '/clock' -es el de referencia de la mision- y robot2 publica en
+    # '/robot2/clock'. Mirar solo '/clock' daria dos veredictos falsos:
+    #
+    #   - con solo robot2 arriba, diria "esto no parece simulacion" y se callaria
+    #     teniendo delante una simulacion perfectamente valida;
+    #   - con los dos arriba, diria que si hay reloj aunque el de robot2 estuviera
+    #     muerto, porque estaria viendo el de robot1.
+    #
+    # Por eso se pregunta primero por el propio y solo despues por el comun.
+    reloj = f"/{robot}/clock"
+    if nodo.count_publishers(reloj) == 0:
+        reloj = "/clock"
+    hay_clock = nodo.count_publishers(reloj) > 0
     nodo.destroy_node()
     rclpy.shutdown()
     return (muestras[-1] if muestras else None), hay_clock
@@ -148,14 +162,17 @@ def main():
     if od is None:
         print(f"No llego ni una muestra de /{robot}/odom.")
         print("O la simulacion no esta arriba, o este proceso esta en otro "
-              "ROS_DOMAIN_ID. robot.sh pone robot1 en el 0 y robot2 en el 2.")
+              "ROS_DOMAIN_ID. Desde el 2026-08-30 los dos robots comparten el "
+              "dominio 0, que es el defecto de ROS 2: una terminal sin exportar "
+              "nada deberia verlos a los dos.")
         return 1
 
     # Sin /clock esto no es simulacion, y entonces /odom SI es odometria: lleva
     # deriva acumulada y comparar su valor absoluto contra una pose de mundo no
     # significa nada. El script prefiere callarse a dar un veredicto falso.
     if not hay_clock:
-        print("Nadie publica /clock: esto no parece simulacion.")
+        print(f"Nadie publica /{robot}/clock ni /clock: esto no parece "
+              "simulacion.")
         print(f"En el carro fisico /{robot}/odom es odometria de verdad, con "
               "deriva acumulada,")
         print("y compararla contra una pose de mundo no mide la condicion "

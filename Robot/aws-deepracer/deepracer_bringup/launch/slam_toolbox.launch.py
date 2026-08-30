@@ -36,6 +36,10 @@
 # temporal: el relevo H3 exige que los dos robots compartan grafo, y ese dia dos
 # 'map' con geometrias distintas SI colisionan. El mismo parrafo en el launch de
 # localizacion costo una mision abortada (Evidencia/S20_marco_map_prefijado.md).
+#
+# Ese dia llego el 2026-08-30: los dos robots comparten ya el dominio 0. Que el
+# cambio no rompiera nada es consecuencia directa de haber prefijado 'map' seis
+# dias antes; sin eso, los dos arboles TF se habrian fundido en uno.
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
@@ -84,6 +88,20 @@ def acciones(context, *args, **kwargs):
         remapeos = [('/map', f'/{prefijo}map'),
                     ('/map_metadata', f'/{prefijo}map_metadata')]
 
+    # El reloj tampoco lo alcanza el namespace: con use_sim_time, rclcpp se
+    # suscribe a '/clock' con nombre absoluto. Mientras cada robot tuvo su
+    # ROS_DOMAIN_ID daba igual, porque en cada dominio solo habia un '/clock'.
+    # Con los dos en el dominio 0 hay que decirle a este nodo cual de los dos
+    # simuladores le marca el tiempo; si no, slam_toolbox mapea con el reloj del
+    # OTRO robot. No da error: da un mapa mal registrado.
+    #
+    # Solo se remapea cuando el topico no es '/clock', para que el robot de
+    # referencia quede exactamente como estaba (ver el porque del diseno
+    # asimetrico en Evidencia/S21_bloqueo_dominios.md §5.3).
+    reloj = LaunchConfiguration('clock_topic').perform(context).strip()
+    if reloj and reloj != '/clock':
+        remapeos.append(('/clock', reloj))
+
     return [
         Node(package='slam_toolbox',
              executable='sync_slam_toolbox_node',
@@ -112,6 +130,12 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'use_sim_time', default_value='true',
             description='Usar el reloj de Gazebo'),
+
+        DeclareLaunchArgument(
+            'clock_topic', default_value='/clock',
+            description='Topico de reloj del gzserver de ESTE robot. Con dos '
+                        'simuladores en el mismo dominio, uno se queda en '
+                        "/clock -el de referencia- y el otro usa '/robotN/clock'."),
 
         OpaqueFunction(function=acciones),
     ])
