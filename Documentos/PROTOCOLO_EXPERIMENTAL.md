@@ -437,7 +437,7 @@ En orden. **Escrito el 22-ago, cuando nada de esto existía; el estado es del 20
 **La campaña no puede empezar mientras alguno siga abierto.** Se listan porque un protocolo que
 calla sus condiciones previas se ejecuta igual y produce números que no valen.
 
-| Prerrequisito | Estado al 2026-08-26 |
+| Prerrequisito | Estado al 2026-08-30 |
 |---|---|
 | **`/odom` cruzado** — una lectura devolvió la posición del otro agente | 🟢 CERRADO el 2026-08-25 **con causa, no por no reproducirse**: el dominio 0 no lista ningún tópico `/robot2/*` ni el 2 ninguno `/robot1/*`, así que la publicación bajo espacio de nombres queda descartada y lo que quedaba era el daemon de `ros2cli`. La regla pasa a matarlo con `pkill -9` al cambiar de dominio; las métricas se calculan sobre bags, que no pasan por él ([`S20_hito_h3_dos_agentes.md`](Evidencia/S20_hito_h3_dos_agentes.md)) |
 | **Carrera al cargar controladores** — un controlador puede quedar `unconfigured` | 🟢 CERRADO el 2026-08-26. La causa **no** era el arranque en paralelo sino un reintento sobre una operación no idempotente: `controller_manager_services.py` repite la petición tras 10 s sin respuesta y la segunda recibe `was already loaded`. Se pasa a `controller_manager spawner` con `--service-call-timeout 60`. Medido: de **2 fallos en 8** arranques dobles a **0 en 18**, con el arranque bajando de 37–39 s a 28–35 s. **Sigue siendo obligatorio comprobar «7 de 7» antes de medir**: cero en 18 no es garantía y el fallo es silencioso |
@@ -445,12 +445,19 @@ calla sus condiciones previas se ejecuta igual y produce números que no valen.
 | **Destinos del piso 2 en `puntos_interes.yaml`** | 🟢 CERRADO el 2026-08-26. Los dieciséis, con nombre y parada derivada de la regla; el catálogo pasa a 32 destinos y la prueba del planificador a 992 planes |
 | **Los dos agentes navegando simultáneamente** (H3) | 🟢 CERRADO el 2026-08-25 ([`S20_hito_h3_dos_agentes.md`](Evidencia/S20_hito_h3_dos_agentes.md)) |
 | **Segundo vehículo físico** (R11) | 🔴 Administrativo. Bloquea solo la campaña física (RF-27), no la de simulación |
-| **Un coordinador que alcance a los dos robots** *(añadido el 2026-08-27)* | 🔴 **ABIERTO, y bloquea la condición B entera.** `robot1` corre en `ROS_DOMAIN_ID=0` y `robot2` en el 2 (`herramientas/robot.sh:62`), con un `gzserver` cada uno. La separación no es una preferencia: `gazebo_ros` de Humble aplica a todos los plugins el namespace del **primer** modelo cargado, así que un solo `gzserver` no puede llevar dos robots (§8 de [`CONTRATO_INTERFACES.md`](CONTRATO_INTERFACES.md)). Un nodo de ROS 2 vive en **un** dominio, luego el coordinador ve a uno de los dos y nunca a los dos. El relevo está escrito y probado como función pura —992 planes— pero **no se puede ejecutar** hasta resolver esto |
+| **Un coordinador que alcance a los dos robots** *(añadido el 2026-08-27)* | 🟢 **CERRADO el 2026-08-30.** *Diagnóstico original, que se conserva porque sigue siendo correcto salvo en su conclusión:* «`robot1` corre en `ROS_DOMAIN_ID=0` y `robot2` en el 2 (`herramientas/robot.sh:62`), con un `gzserver` cada uno. La separación no es una preferencia: `gazebo_ros` de Humble aplica a todos los plugins el namespace del **primer** modelo cargado, así que un solo `gzserver` no puede llevar dos robots (§8 de [`CONTRATO_INTERFACES.md`](CONTRATO_INTERFACES.md)). Un nodo de ROS 2 vive en **un** dominio, luego el coordinador ve a uno de los dos y nunca a los dos.» **Lo que falló fue el último paso:** de «un nodo vive en un dominio» no se sigue que los robots necesiten dominios distintos. Lo que obliga a un `gzserver` por robot es el namespace de los plugins, no el DDS; los dos pueden compartir el dominio 0 y separarse por **nombres** —namespace, prefijo de TF incluido `map`, puerto de Gazebo y reloj propios—. Verificado con las dos pilas vivas: 94 981 transformadas y **cero** con marco hijo sin prefijo ([`S21_bloqueo_dominios.md`](Evidencia/S21_bloqueo_dominios.md)) |
 
-**Cinco de siete cerrados.** La **condición A** —misión de dos tramos dentro de un nivel— se puede
+**Seis de siete cerrados.** La **condición A** —misión de dos tramos dentro de un nivel— se puede
 ejecutar, y se ejecutó el 2026-08-27 (`S20_rutas_03` y `S20_rutas_04`, cuatro llegadas entre 0,117
-y 0,204 m). La **condición B** no, y lo que la bloquea es la fila nueva de arriba, no R11. R11 sigue
-siendo administrativo y afecta solo a la campaña física.
+y 0,204 m). La **condición B** también, desde el 2026-08-30: la misión `piso1_representacion →
+piso2_lab_313` se completó con **un relevo**, `exito: true` en 47,6 s, con llegadas de 0,128 m y
+0,077 m contra `/odom` ([`S21_relevo_ejecutado.md`](Evidencia/S21_relevo_ejecutado.md)). El único
+prerrequisito que queda abierto es **R11**, que es administrativo y afecta solo a la campaña física.
+
+> **Esto NO significa que la campaña pueda empezar.** Los prerrequisitos son condiciones
+> necesarias, no suficientes: la condición B tiene hoy **n = 1**, sin sorteo y sin registro
+> compuesto. Lo que falta para arrancar está en el §9 —el sorteo de misiones y el analizador—, no
+> en esta tabla.
 
 **Instrumentación al 2026-08-27.** El registrador de misión (RF-25) **existe**: esquema versionado
 y comprobable, `herramientas/grabar_mision.sh` sellando el bag con tiempo de simulación,
