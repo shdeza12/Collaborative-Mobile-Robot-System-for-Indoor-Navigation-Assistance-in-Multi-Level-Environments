@@ -66,8 +66,11 @@ MUESTRAS_CONSECUTIVAS = 3
 # sistema hizo lo que se le pidio con la precision que dice tener".
 TOLERANCIA_LLEGADA_M = 0.25
 
+# RECIBIDA es la 6 y no la 1 porque se anadio despues, el 2026-08-29, para que
+# el tiempo de asignacion del §3.2 dejara de valer cero. Va al final para no
+# renumerar las cinco etapas que ya estaban escritas en los bags anteriores.
 ETAPAS = {0: "INACTIVA", 1: "TRAMO_1", 2: "TRANSFERENCIA", 3: "TRAMO_2",
-          4: "COMPLETADA", 5: "FALLIDA"}
+          4: "COMPLETADA", 5: "FALLIDA", 6: "RECIBIDA"}
 
 
 class RegistroMision:
@@ -180,12 +183,20 @@ class RegistroMision:
             pm2 = self._primer_movimiento(tramo2["robot"], desde=transferencia["t"])
             if pm2 is not None:
                 m["hueco_relevo_s"] = round(pm2 - transferencia["t"], 4)
-            # continuidad: ninguna marca INACTIVA ni robot vacio en el intervalo
+            # continuidad: ninguna marca INACTIVA ni robot vacio en el intervalo.
+            #
+            # Se excluyen COMPLETADA y RECIBIDA. RECIBIDA lleva el robot vacio A
+            # PROPOSITO -es el instante en que hay solicitud y aun no hay a quien
+            # asignarsela- asi que exigirle robot la convierte en una
+            # discontinuidad que no existe. Sin esta exclusion, 'continuidad'
+            # valia False en TODA mision entre niveles desde que la marca se
+            # anadio el 2026-08-29: el arreglo de una metrica del OE4 rompia
+            # otra, y lo destapo el piloto B del 2026-08-30.
             m["continuidad"] = all(
                 x["etapa_num"] != 0 and x["robot"]
                 for x in self.marcas
                 if self.t_solicitud <= x["t"] <= (self.cierre or {}).get("t", math.inf)
-                and x["etapa_num"] not in (4,)
+                and x["etapa_num"] not in (4, 6)
             )
 
         if self.cierre:

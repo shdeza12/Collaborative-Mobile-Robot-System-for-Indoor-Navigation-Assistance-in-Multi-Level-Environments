@@ -47,6 +47,11 @@ def traza(reg, robot, t0, dt, velocidades, x0=0.0):
 print("\n1. Mision entre niveles: las cuatro metricas")
 reg = RegistroMision("m001", "piso1_etm1", "piso2_aula_307",
                      {"1": "robot1", "2": "robot2"}, t_solicitud=100.0)
+# El coordinador publica RECIBIDA antes de planificar, con el robot todavia
+# vacio: es el unico instante en que hay solicitud y aun no se sabe a quien
+# asignarsela. Sin esta marca el escenario no reproduce lo que ocurre de verdad,
+# y por eso hasta el 2026-08-30 la prueba no vio que rompia 'continuidad'.
+reg.marca(100.0, 6, "", None)
 reg.marca(100.25, 1, "robot1", "piso1_etm1")          # asignacion a 0.25 s
 # robot1 quieto medio segundo y luego arranca: el primer movimiento es 100.6
 traza(reg, "robot1", 100.0, 0.02, [0.0] * 30 + [0.3] * 200)
@@ -70,6 +75,10 @@ comprueba("t_asignacion es mucho menor que t_respuesta (§3.2)",
           met["t_asignacion_s"] < met["t_respuesta_s"])
 comprueba("la mision entre niveles con un relevo es exitosa", met["exito"] is True)
 comprueba("continuidad cumplida", met["continuidad"] is True)
+comprueba("la marca RECIBIDA no rompe la continuidad pese a no llevar robot",
+          met["continuidad"] is True)
+comprueba("RECIBIDA se serializa con su nombre, no con su numero",
+          reg.marcas[0]["etapa"] == "RECIBIDA", reg.marcas[0]["etapa"])
 
 # ---------------------------------------------- 2. el ruido no dispara nada
 print("\n2. El ruido en reposo no cuenta como movimiento")
