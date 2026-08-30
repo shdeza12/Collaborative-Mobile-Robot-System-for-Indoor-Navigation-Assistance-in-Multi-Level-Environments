@@ -1,0 +1,240 @@
+{
+  "banco": "tiempo de asignacion (RF-22), protocolo §3.2.2",
+  "fecha": "2026-08-30 13:43:59",
+  "reloj": "time.perf_counter_ns(), dentro del proceso del coordinador",
+  "entorno": "coordinador aislado, sin Gazebo ni Nav2, use_sim_time=false",
+  "catalogo": "$HOME/deepracer_sim_ws/install/deepracer_bringup/share/deepracer_bringup/config/puntos_interes.yaml",
+  "catalogo_sha256": "849ecee96258f753eac3316efac6a157540648dccde2d390aaba4c17c8d82dcd",
+  "puntos_en_catalogo": 31,
+  "semilla": 555,
+  "resumen_us": {
+    "n": 30,
+    "mediana_us": 175.25900000000001,
+    "maximo_us": 306.375,
+    "minimo_us": 129.072
+  },
+  "por_tipo_us": {
+    "intra": {
+      "n": 15,
+      "mediana_us": 156.523,
+      "maximo_us": 306.375
+    },
+    "inter": {
+      "n": 15,
+      "mediana_us": 178.926,
+      "maximo_us": 269.846
+    }
+  },
+  "misiones": [
+    {
+      "i": 1,
+      "origen": "piso1_etm2",
+      "destino": "piso1_etm13",
+      "tipo": "intra",
+      "t_asignacion_us": 222.628
+    },
+    {
+      "i": 2,
+      "origen": "piso1_etm6",
+      "destino": "piso2_aula_311",
+      "tipo": "inter",
+      "t_asignacion_us": 178.926
+    },
+    {
+      "i": 3,
+      "origen": "piso2_aula_310",
+      "destino": "piso2_ieee",
+      "tipo": "intra",
+      "t_asignacion_us": 306.375
+    },
+    {
+      "i": 4,
+      "origen": "piso2_sala_docentes_civil",
+      "destino": "piso1_etm11",
+      "tipo": "inter",
+      "t_asignacion_us": 175.68
+    },
+    {
+      "i": 5,
+      "origen": "piso1_etm5",
+      "destino": "piso1_escalera",
+      "tipo": "intra",
+      "t_asignacion_us": 149.441
+    },
+    {
+      "i": 6,
+      "origen": "piso1_etm10",
+      "destino": "piso2_ieee",
+      "tipo": "inter",
+      "t_asignacion_us": 194.685
+    },
+    {
+      "i": 7,
+      "origen": "piso2_aula_301",
+      "destino": "piso2_escalera",
+      "tipo": "intra",
+      "t_asignacion_us": 160.912
+    },
+    {
+      "i": 8,
+      "origen": "piso1_representacion",
+      "destino": "piso2_aula_305",
+      "tipo": "inter",
+      "t_asignacion_us": 188.534
+    },
+    {
+      "i": 9,
+      "origen": "piso1_etm11",
+      "destino": "piso1_etm10",
+      "tipo": "intra",
+      "t_asignacion_us": 180.799
+    },
+    {
+      "i": 10,
+      "origen": "piso2_aula_305",
+      "destino": "piso1_etm1",
+      "tipo": "inter",
+      "t_asignacion_us": 269.846
+    },
+    {
+      "i": 11,
+      "origen": "piso2_aula_311",
+      "destino": "piso2_aula_303",
+      "tipo": "intra",
+      "t_asignacion_us": 297.649
+    },
+    {
+      "i": 12,
+      "origen": "piso1_etm13",
+      "destino": "piso2_sala_docentes_civil",
+      "tipo": "inter",
+      "t_asignacion_us": 152.466
+    },
+    {
+      "i": 13,
+      "origen": "piso1_etm9",
+      "destino": "piso1_etm3",
+      "tipo": "intra",
+      "t_asignacion_us": 146.806
+    },
+    {
+      "i": 14,
+      "origen": "piso1_almacen",
+      "destino": "piso2_sala_docentes_civil",
+      "tipo": "inter",
+      "t_asignacion_us": 185.027
+    },
+    {
+      "i": 15,
+      "origen": "piso2_lab_312",
+      "destino": "piso2_aula_311",
+      "tipo": "intra",
+      "t_asignacion_us": 149.18
+    },
+    {
+      "i": 16,
+      "origen": "piso1_etm13",
+      "destino": "piso2_sala_docentes_civil",
+      "tipo": "inter",
+      "t_asignacion_us": 166.482
+    },
+    {
+      "i": 17,
+      "origen": "piso1_etm13",
+      "destino": "piso1_etm4",
+      "tipo": "intra",
+      "t_asignacion_us": 152.476
+    },
+    {
+      "i": 18,
+      "origen": "piso1_etm13",
+      "destino": "piso2_aula_306",
+      "tipo": "inter",
+      "t_asignacion_us": 184.326
+    },
+    {
+      "i": 19,
+      "origen": "piso2_ieee",
+      "destino": "piso2_aula_306",
+      "tipo": "intra",
+      "t_asignacion_us": 129.072
+    },
+    {
+      "i": 20,
+      "origen": "piso1_representacion",
+      "destino": "piso2_aula_305",
+      "tipo": "inter",
+      "t_asignacion_us": 165.801
+    },
+    {
+      "i": 21,
+      "origen": "piso1_etm7",
+      "destino": "piso1_etm11",
+      "tipo": "intra",
+      "t_asignacion_us": 152.386
+    },
+    {
+      "i": 22,
+      "origen": "piso2_aula_302",
+      "destino": "piso1_escalera",
+      "tipo": "inter",
+      "t_asignacion_us": 184.647
+    },
+    {
+      "i": 23,
+      "origen": "piso2_ieee",
+      "destino": "piso2_aula_304",
+      "tipo": "intra",
+      "t_asignacion_us": 230.763
+    },
+    {
+      "i": 24,
+      "origen": "piso2_aula_308",
+      "destino": "piso1_etm13",
+      "tipo": "inter",
+      "t_asignacion_us": 151.765
+    },
+    {
+      "i": 25,
+      "origen": "piso1_etm13",
+      "destino": "piso1_almacen",
+      "tipo": "intra",
+      "t_asignacion_us": 156.523
+    },
+    {
+      "i": 26,
+      "origen": "piso2_aula_303",
+      "destino": "piso1_etm4",
+      "tipo": "inter",
+      "t_asignacion_us": 143.639
+    },
+    {
+      "i": 27,
+      "origen": "piso2_aula_309",
+      "destino": "piso2_aula_304",
+      "tipo": "intra",
+      "t_asignacion_us": 223.8
+    },
+    {
+      "i": 28,
+      "origen": "piso1_etm2",
+      "destino": "piso2_aula_311",
+      "tipo": "inter",
+      "t_asignacion_us": 174.838
+    },
+    {
+      "i": 29,
+      "origen": "piso1_etm7",
+      "destino": "piso1_etm4",
+      "tipo": "intra",
+      "t_asignacion_us": 152.507
+    },
+    {
+      "i": 30,
+      "origen": "piso1_etm10",
+      "destino": "piso2_lab_312",
+      "tipo": "inter",
+      "t_asignacion_us": 208.922
+    }
+  ]
+}

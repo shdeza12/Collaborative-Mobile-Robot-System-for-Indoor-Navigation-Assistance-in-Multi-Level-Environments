@@ -3,7 +3,7 @@
   "fecha": "2026-08-30 13:28:32",
   "reloj": "time.perf_counter_ns(), dentro del proceso del coordinador",
   "entorno": "coordinador aislado, sin Gazebo ni Nav2, use_sim_time=false",
-  "catalogo": "/home/santiago/deepracer_sim_ws/install/deepracer_bringup/share/deepracer_bringup/config/puntos_interes.yaml",
+  "catalogo": "$HOME/deepracer_sim_ws/install/deepracer_bringup/share/deepracer_bringup/config/puntos_interes.yaml",
   "catalogo_sha256": "849ecee96258f753eac3316efac6a157540648dccde2d390aaba4c17c8d82dcd",
   "puntos_en_catalogo": 31,
   "semilla": 20260830,

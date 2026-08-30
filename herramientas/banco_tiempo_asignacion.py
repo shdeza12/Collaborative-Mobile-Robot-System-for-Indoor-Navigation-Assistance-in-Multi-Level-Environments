@@ -284,7 +284,13 @@ def main():
         "fecha": time.strftime("%Y-%m-%d %H:%M:%S"),
         "reloj": "time.perf_counter_ns(), dentro del proceso del coordinador",
         "entorno": "coordinador aislado, sin Gazebo ni Nav2, use_sim_time=false",
-        "catalogo": coordinador.ruta_puntos,
+        # Con $HOME colapsado. La ruta importa -dice que se leyo la copia de
+        # install/ y no la del repositorio, que pueden diferir- pero escrita
+        # entera mete el nombre de usuario de esta maquina en un archivo
+        # versionado, y verificar_repositorio.sh lo rechaza con razon. Lo que
+        # de verdad ancla la medida es el sha256 de la linea siguiente.
+        "catalogo": coordinador.ruta_puntos.replace(
+            os.path.expanduser("~"), "$HOME", 1),
         "catalogo_sha256": sha256_de(coordinador.ruta_puntos),
         "puntos_en_catalogo": len(catalogo),
         "semilla": semilla,

@@ -7,8 +7,11 @@ forma de reportarse.
 
 Herramienta: [`herramientas/banco_tiempo_asignacion.py`](../../herramientas/banco_tiempo_asignacion.py).
 Prueba de su parte pura: [`herramientas/prueba_banco_tiempo_asignacion.py`](../../herramientas/prueba_banco_tiempo_asignacion.py).
-Registros: [`registros/S21_banco_asignacion_s20260830.json`](registros/S21_banco_asignacion_s20260830.json)
-y [`registros/S21_banco_asignacion_s99.json`](registros/S21_banco_asignacion_s99.json).
+Registros: [`s20260830`](registros/S21_banco_asignacion_s20260830.json),
+[`s99`](registros/S21_banco_asignacion_s99.json),
+[`s7`](registros/S21_banco_asignacion_s7.json) y
+[`s555`](registros/S21_banco_asignacion_s555.json) —este último posterior a la fusión de las ramas
+de Jonny, ver §3.
 
 ---
 
@@ -93,19 +96,23 @@ marcas se publican antes de tocar ningún robot.
 
 ## 3. Resultado
 
-Tres corridas de 30 misiones, con semillas distintas, sobre el mismo catálogo.
+Cuatro corridas de 30 misiones, con semillas distintas, sobre el mismo catálogo.
 
-| | semilla 20260830 | semilla 99 | semilla 7 |
-|---|---|---|---|
-| n | 30 | 30 | 30 |
-| **mediana** | **160,9 µs** | **154,3 µs** | **173,4 µs** |
-| **máximo** | **283,8 µs** | **223,8 µs** | **272,0 µs** |
-| mínimo | 127,5 µs | 127,2 µs | 143,3 µs |
-| intra-nivel (n=15) | mediana 157,6 · máx 235,1 | mediana 150,5 · máx 223,8 | mediana 180,4 · máx 246,5 |
-| inter-nivel (n=15) | mediana 168,8 · máx 283,8 | mediana 168,6 · máx 186,4 | mediana 166,7 · máx 272,0 |
+| | semilla 20260830 | semilla 99 | semilla 7 | semilla 555 |
+|---|---|---|---|---|
+| n | 30 | 30 | 30 | 30 |
+| **mediana** | **160,9 µs** | **154,3 µs** | **173,4 µs** | **175,3 µs** |
+| **máximo** | **283,8 µs** | **223,8 µs** | **272,0 µs** | **306,4 µs** |
+| mínimo | 127,5 µs | 127,2 µs | 143,3 µs | 129,1 µs |
+| intra-nivel (n=15) | mediana 157,6 · máx 235,1 | mediana 150,5 · máx 223,8 | mediana 180,4 · máx 246,5 | mediana 156,5 · máx 306,4 |
+| inter-nivel (n=15) | mediana 168,8 · máx 283,8 | mediana 168,6 · máx 186,4 | mediana 166,7 · máx 272,0 | mediana 178,9 · máx 269,8 |
 
-**La cota del protocolo se cumple con holgura de dos órdenes y medio.** El máximo de las tres
-corridas, 283,8 µs, es **352 veces menor que un tick de `/clock`**. La afirmación que la campaña
+La cuarta se corrió el mismo día, **después de fusionar la rama `registrador-mision`**, y ese era su
+motivo: el banco envuelve `_marcar` del coordinador, así que una fusión que tocara ese método lo
+dejaría midiendo otra cosa sin avisar. Sigue midiendo, y en el mismo rango.
+
+**La cota del protocolo se cumple con holgura de dos órdenes y medio.** El máximo de las cuatro
+corridas, 306,4 µs, es **326 veces menor que un tick de `/clock`**. La afirmación que la campaña
 puede sostener —*«el tiempo de asignación es menor que 100 ms en las N misiones»*— no solo es cierta:
 lo es por un margen que hace imposible que una corrida la incumpla por ruido.
 
@@ -120,15 +127,15 @@ y 4 en la inter-nivel, además de buscar los dos puntos de transferencia. Se lle
 mismo documento que el coste medido «sigue a la estructura del código».
 
 **La corrida con semilla 7 lo desmiente**: intra 180,4 µs contra inter 166,7 µs, invertido. El
-recuento honesto es 4 de 5 corridas a favor y una en contra, que no es un efecto, es una moneda con
+recuento honesto es 5 de 6 corridas a favor y una en contra, que no es un efecto, es una moneda con
 sesgo sin demostrar.
 
 La razón de fondo se ve comparando las dos escalas:
 
 | | rango |
 |---|---|
-| diferencia intra↔inter dentro de una corrida | ~10 µs |
-| variación de la mediana global **entre** corridas | 154,3 → 173,4 µs, es decir ~19 µs |
+| diferencia intra↔inter dentro de una corrida | ~10 µs, salvo la semilla 555 con ~22 µs |
+| variación de la mediana global **entre** corridas | 154,3 → 175,3 µs, es decir ~21 µs |
 
 **La variación entre corridas es mayor que el efecto que se pretendía medir.** Este banco corre sobre
 un PC con planificador de propósito general y sin fijar afinidad de CPU ni prioridad; la carga de la
@@ -159,8 +166,8 @@ Corregido en dos pasos, y el primero estaba mal:
 2. La comprobación se movió **antes de levantar ROS**. Ahora falla en 0,43 s y sin volcado.
 
 Las cifras de las dos corridas perdidas —medianas 154,8 µs y 153,5 µs— se anotan aquí solo como
-testigo de reproducibilidad. Contando las cinco corridas del día, **las medianas caen entre 153,5 y
-173,4 µs**, un rango del 13 %, que es la variabilidad que hay que tener en mente al leer la §3.1.
+testigo de reproducibilidad. Contando las seis corridas del día, **las medianas caen entre 153,5 y
+175,3 µs**, un rango del 14 %, que es la variabilidad que hay que tener en mente al leer la §3.1.
 
 ---
 
@@ -184,7 +191,7 @@ habría que investigarlo antes de agregarlo.
 1. **No prueba nada sobre el carro físico.** Está medido en el PC, con Humble y con este catálogo. La
    tarjeta del vehículo corre Jazzy y ni siquiera tiene `coordinacion_msgs` compilado todavía.
 2. **No caracteriza el crecimiento con el tamaño del catálogo.** Los 31 puntos son los de hoy. Si el
-   catálogo creciera un orden de magnitud habría que repetirlo; el margen de 352× deja sitio de
+   catálogo creciera un orden de magnitud habría que repetirlo; el margen de 326× deja sitio de
    sobra, pero eso es una previsión, no una medida.
 3. **No mide la latencia extremo a extremo que percibe el usuario.** Deja fuera el transporte DDS a
    propósito (§2). Quien quiera esa cifra necesita otra medición, y no es RF-22.

@@ -426,7 +426,7 @@ En orden. **Escrito el 22-ago, cuando nada de esto existía; el estado es del 20
    Gazebo, mide sobre reloj de pared y reporta mediana y máximo. Es lo único que puede dar la cifra
    de RF-22, y no depende de la campaña. Es `herramientas/banco_tiempo_asignacion.py`, con su prueba
    en `herramientas/prueba_banco_tiempo_asignacion.py`. Ejecutado el 2026-08-30 sobre el catálogo de
-   31 puntos: **mediana 154–173 µs, máximo 283,8 µs en tres corridas de 30 misiones**, es decir 352
+   31 puntos: **mediana 154–175 µs, máximo 306,4 µs en cuatro corridas de 30 misiones**, es decir 326
    veces por debajo de un tick de `/clock`. Resultados y límites en
    [`Evidencia/S21_banco_tiempo_asignacion.md`](Evidencia/S21_banco_tiempo_asignacion.md).
 
