@@ -9,12 +9,12 @@
     "es_piloto": true
   },
   "procedencia": {
-    "commit": "1c73239",
+    "commit": "f753be4",
     "etiqueta": "",
     "repositorio_limpio": false,
     "distro": "humble",
-    "mundo": "/home/santiago/Documents/Tesis/mundo_definitivo_piso2.world",
-    "mapa": "/home/santiago/Documents/Tesis/Robot/aws-deepracer/deepracer_bringup/maps/mundo_definitivo_piso2.yaml",
+    "mundo": "mundo_definitivo_piso2.world",
+    "mapa": "Robot/aws-deepracer/deepracer_bringup/maps/mundo_definitivo_piso2.yaml",
     "catalogo_puntos": "puntos_interes.yaml",
     "catalogo_sha256": "849ecee96258f753eac3316efac6a157540648dccde2d390aaba4c17c8d82dcd",
     "bag": "S20_A_M2",

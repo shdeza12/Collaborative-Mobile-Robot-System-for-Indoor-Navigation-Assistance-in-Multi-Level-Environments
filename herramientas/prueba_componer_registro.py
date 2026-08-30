@@ -464,6 +464,41 @@ def pruebas_de_bag(esquema):
         check("y su registro tambien valida", valida(corto, esquema),
               _por_que(corto, esquema))
 
+        # --- El residuo de la mision anterior no puede firmar este registro ---
+        # El coordinador republica a 1 Hz el estado TERMINAL de la mision previa
+        # hasta que llega una solicitud nueva, asi que el bag de una mision
+        # empieza legitimamente con mensajes de OTRA. Esos van PRIMEROS en el
+        # tiempo, que es de donde el compositor saca origen, destino y
+        # t_solicitud.
+        #
+        # Esta prueba existe por dos defectos reales, no por precaucion:
+        #   - 2026-08-29, componiendo S20_A_M2: sin filtrar, el registro se
+        #     llevaba el origen y el destino de M1 y habria VALIDADO siendo
+        #     falso.
+        #   - 2026-08-29, recomponiendo el mismo bag: el mision_id salia de
+        #     'ids.pop()' sobre el conjunto sin filtrar, y '.pop()' de un set
+        #     devuelve un elemento ARBITRARIO. La misma orden escribia un id u
+        #     otro segun el orden de iteracion, con las marcas siempre las de
+        #     M2: un registro incoherente, no repetible, y que validaba.
+        ruta_res = os.path.join(tmp, "bag_con_residuo")
+        bag_con_residuo(ruta_res)
+        res = componer(ruta_res, banco="simulacion", campana="prueba",
+                       rtf=0.995)
+        check("el mision_id es el de la mision del bag, no el del residuo",
+              res["mision"]["mision_id"] == "S20_actual",
+              f"-> {res['mision']['mision_id']}")
+        check("origen y destino tampoco los pone el residuo",
+              res["solicitud"]["origen_id"] == "piso1_representacion"
+              and res["solicitud"]["destino_id"] == "piso1_etm2",
+              f"-> {res['solicitud']['origen_id']} -> "
+              f"{res['solicitud']['destino_id']}")
+        check("t_solicitud es de esta mision, no de la anterior",
+              res["marcas"]["t_solicitud"] is not None
+              and res["marcas"]["t_solicitud"] > 100.0,
+              f"-> {res['marcas']['t_solicitud']}")
+        check("y el registro con residuo valida", valida(res, esquema),
+              _por_que(res, esquema))
+
         # §4.2: el compositor falla ruidosamente, nunca inventa. Un bag ilegible
         # y una mision sin eventos NO pueden verse igual.
         vacio = os.path.join(tmp, "no_es_un_bag")
@@ -505,6 +540,49 @@ def bag_sintetico_truncado(ruta):
         m.origen_id, m.destino_id = "piso1_escalera", "piso2_escalera"
         escritor.write("/coordinacion/estado_mision",
                        rclpy.serialization.serialize_message(m), int(t * 1e9))
+    del escritor
+
+
+def bag_con_residuo(ruta):
+    """Un bag que empieza con la cola TERMINAL de la mision anterior.
+
+    Reproduce la forma exacta de S20_A_M2: once republicaciones de una
+    'S20_previa' ya COMPLETADA, con SU origen y SU destino, y solo despues la
+    mision que este bag si contiene. Los dos pares origen/destino son distintos
+    a proposito: si el residuo se colara, se veria en el campo, no solo en el id.
+    """
+    import rclpy.serialization
+    import rosbag2_py
+    from coordinacion_msgs.msg import EstadoMision
+    from rosgraph_msgs.msg import Clock
+
+    escritor = rosbag2_py.SequentialWriter()
+    escritor.open(
+        rosbag2_py.StorageOptions(uri=ruta, storage_id="sqlite3"),
+        rosbag2_py.ConverterOptions("", ""))
+    for nombre, tipo in [("/coordinacion/estado_mision", "coordinacion_msgs/msg/EstadoMision"),
+                         ("/clock", "rosgraph_msgs/msg/Clock")]:
+        escritor.create_topic(rosbag2_py.TopicMetadata(
+            name=nombre, type=tipo, serialization_format="cdr"))
+    escritor.write("/clock", rclpy.serialization.serialize_message(Clock()), 0)
+
+    def estado(t, mid, etapa, robot, origen, destino):
+        m = EstadoMision()
+        m.mision_id, m.etapa, m.robot_activo = mid, etapa, robot
+        m.origen_id, m.destino_id = origen, destino
+        escritor.write("/coordinacion/estado_mision",
+                       rclpy.serialization.serialize_message(m), int(t * 1e9))
+
+    # El residuo: la mision anterior, ya terminada, republicada a 1 Hz.
+    for i in range(11):
+        estado(10.0 + i, "S20_previa", COMPLETADA, "robot2",
+               "piso2_ieee", "piso2_lab_313")
+    # Y la mision de este bag, con otro origen, otro destino y otro robot.
+    estado(120.0, "", INACTIVA, "", "", "")
+    estado(120.5, "S20_actual", TRAMO_1, "robot1",
+           "piso1_representacion", "piso1_etm2")
+    estado(140.0, "S20_actual", FALLIDA, "robot1",
+           "piso1_representacion", "piso1_etm2")
     del escritor
 
 

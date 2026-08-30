@@ -362,7 +362,16 @@ def componer(ruta_bag, banco, campana, error_posicion_m=None, rtf=None,
     return {
         "esquema_version": ESQUEMA_VERSION,
         "mision": {
-            "mision_id": ids.pop() if ids else os.path.basename(ruta_bag),
+            # 'mision_del_bag', NO 'ids.pop()'. Lo era, y era un volado: 'ids'
+            # es el conjunto SIN filtrar, y '.pop()' de un set devuelve un
+            # elemento arbitrario, asi que con el residuo de la mision anterior
+            # dentro el registro se quedaba con uno de los dos segun el orden de
+            # iteracion. Se vio el 2026-08-29 recomponiendo S20_A_M2: la misma
+            # orden que la vispera habia escrito el id correcto escribio el de
+            # M1. Peor que un campo mal: un campo mal DE FORMA NO REPETIBLE, y
+            # las marcas del registro sí eran las de M2, asi que el resultado
+            # era un registro internamente incoherente que validaba igual.
+            "mision_id": mision_del_bag or os.path.basename(ruta_bag),
             "campana": campana, "banco": banco, "condicion": condicion,
             "semilla": semilla, "es_piloto": es_piloto,
         },
@@ -392,6 +401,40 @@ def _raiz():
 def _catalogo():
     return os.path.join(_raiz(), "Robot", "aws-deepracer", "deepracer_bringup",
                         "config", "puntos_interes.yaml")
+
+
+def _relativa(ruta):
+    """Quita de una ruta lo que solo vale en ESTA maquina.
+
+    No es cosmetica. El §1 de verificar_repositorio.sh rechaza cualquier archivo
+    del repositorio que lleve la carpeta personal de alguien, y con razon: un
+    registro que diga que el mundo estaba en la casa de un usuario concreto no
+    se puede reproducir en la maquina de Jonny ni en la del jurado, que es justo
+    lo que el bloque 'procedencia' existe para permitir en S26.
+
+    Se comprobo el 2026-08-29: los dos primeros registros se compusieron
+    pasando --mundo y --mapa leidos del sistema vivo -'pgrep -a gzserver' y
+    'ros2 param get'-, que los dan SIEMPRE absolutos, y el verificador los
+    marco. Normalizar aqui es lo durable; acordarse de teclearlas relativas, no.
+
+    Tres casos, en orden:
+      - dentro del repositorio  -> relativa a la raiz  ('mundo_x.world')
+      - fuera pero bajo $HOME   -> con '$HOME' literal ('$HOME/deepracer_sim_ws')
+      - cualquier otra cosa     -> se devuelve tal cual, porque una ruta de
+        sistema ('/opt/ros/humble/...') SI es igual en todas las maquinas y
+        borrarla seria perder informacion.
+    Una cadena vacia pasa de largo: el campo opcional sigue siendo opcional.
+    """
+    if not ruta:
+        return ""
+    absoluta = os.path.abspath(os.path.expanduser(ruta))
+    raiz = _raiz()
+    if absoluta == raiz or absoluta.startswith(raiz + os.sep):
+        return os.path.relpath(absoluta, raiz)
+    casa = os.path.expanduser("~")
+    if absoluta.startswith(casa + os.sep):
+        return "$HOME/" + os.path.relpath(absoluta, casa)
+    return ruta
 
 
 def _git(*args):
@@ -437,8 +480,8 @@ def _procedencia(ruta_bag, distro=None, mundo=None, mapa=None):
         # del 2026-08-29, se compusieron leyendolos del sistema vivo:
         # 'pgrep -a gzserver' para el mundo y 'ros2 param get /<ns>/map_server
         # yaml_filename' para el mapa.
-        "mundo": mundo or os.environ.get("TESIS_MUNDO", ""),
-        "mapa": mapa or os.environ.get("TESIS_MAPA", ""),
+        "mundo": _relativa(mundo or os.environ.get("TESIS_MUNDO", "")),
+        "mapa": _relativa(mapa or os.environ.get("TESIS_MAPA", "")),
         "catalogo_puntos": "puntos_interes.yaml",
         # Las poses del catalogo se movieron tres veces en agosto. Un registro
         # que no lo fije no se puede comparar con otro: 'ETM1' puede no ser el
