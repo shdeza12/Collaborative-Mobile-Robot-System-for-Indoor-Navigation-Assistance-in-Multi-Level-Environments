@@ -2,8 +2,9 @@
 
 **S21 · trabajo adelantado al domingo 2026-08-30.** El bloqueo que impide ejecutar la condición B
 —la misión con relevo, que es el aporte declarado del proyecto— queda **acotado con medida** y con
-dos caminos verificados en banco. Ninguna prueba de este documento necesitó tocar código de
-producción.
+dos caminos verificados en banco, uno de ellos hasta la pila real montada sobre los mundos del
+proyecto. **Ninguna prueba de este documento necesitó tocar código de producción**, y eso es
+deliberado: el punto de retorno queda limpio.
 
 El bloqueo, tal como estaba escrito el 27-ago: `robot1` corre en `ROS_DOMAIN_ID=0` y `robot2` en el
 2, con un `gzserver` cada uno; un nodo de ROS 2 vive en **un** dominio, luego el coordinador alcanza
@@ -47,9 +48,9 @@ sola escena hacen que el LiDAR de 10 m de `robot1` mida paredes del piso 2, que 
 | | Qué es | Estado tras las pruebas |
 |---|---|---|
 | **A** | Un solo `gzserver` con los dos modelos | **Descartada.** Obligaría a reseparar los mundos en Y para que el LiDAR no cruce, y eso **invalida los mapas y las poses de spawn**. A tres semanas de la congelación no se paga |
-| **B** | **Un dominio, dos `gzserver`, reloj remapeado** | **Viable, verificada en §4.** Estado final más limpio: un grafo, un grabador, un bag |
-| **C** | `domain_bridge` (paquete apt Humble, 0.5.0 disponible) | En reserva. Puentea tópicos bien; una **acción** habría que armarla a mano con sus cinco primitivas |
-| **D** | **Coordinador de dos contextos** `rclpy` | **Viable, verificada en §3.** Solo cambia `coordinador.py`; robots, mundos, mapas y poses intactos |
+| **B** | **Un dominio, dos `gzserver`, reloj remapeado** | **Elegida.** Verificada en §4 y hasta la pila real en §6. Estado final más limpio: un grafo, un grabador, un bag |
+| **C** | `domain_bridge` (paquete apt Humble, 0.5.0 disponible) | **Ya no hace falta.** Queda en reserva. Puentea tópicos bien; una **acción** habría que armarla a mano con sus cinco primitivas |
+| **D** | **Coordinador de dos contextos** `rclpy` | **Viable, verificada en §3.** Solo cambia `coordinador.py`; robots, mundos, mapas y poses intactos. Es el **plan de repliegue** si la implementación de B se atasca |
 
 ## 3. P1 y P1b — la opción D queda verificada
 
@@ -251,29 +252,139 @@ reloj** — que es exactamente la regla que imponían los 98 s del §4.3.
 **La asimetría no es un parche estético: es lo que obliga la restricción del grabador.** Conviene
 decirlo así en la sustentación, porque un diseño asimétrico sin justificación parece descuido.
 
-## 6. Lo que estas pruebas NO demuestran
+## 6. P4 — la pila real, montada, con el mundo real
+
+Hasta aquí todo era mundo vacío y servidores falsos. P4 monta el vehículo entero —URDF,
+`gazebo_ros2_control`, los siete controladores, LiDAR y cámara— sobre los mundos de verdad
+(`mundo_definitivo_piso1.world` y `..._piso2.world`) y las poses reales de `POSE_INICIAL`.
+
+Se hizo **sin editar ni un launch**, descomponiendo lo que hace `robot.sh`: `gzserver` a mano con
+los remapeos, y `deepracer_spawn.launch.py` aparte.
+
+### 6.1 P4-a — la sospecha del namespace duplicado era falsa
+
+El §6 anterior de este documento daba por probable que `gazebo_ros2_control`, al correr **dentro**
+de gzserver, heredara su `__ns:=/robot1` **además** del que el propio modelo aplica por
+`<ros><namespace>`, y saliera `/robot1/robot1/...`. Se midió y **no ocurre**:
+
+| Comprobación | Resultado |
+|---|---|
+| Nodos | 14, todos bajo `/robot1/…`; **`/robot1/controller_manager`**, no `/robot1/robot1/…` |
+| Controladores | **7 de 7 `active`** |
+| `/robot1/odom` | 14,90 Hz · `frame_id: robot1/odom` · `child_frame_id: robot1/base_link` |
+| `/robot1/scan` | 9,98 Hz |
+| `/clock` | 1 publicador, **13 suscriptores** — la pila entera colgada del reloj |
+| Sello de `odom` | `sec: 671` — tiempo simulado, no de pared |
+
+La razón es de `rclcpp` y conviene dejarla escrita: el `<ros><namespace>` del plugin llega como
+**argumento local del nodo**, y los argumentos locales **ganan** a los globales del proceso. No se
+concatenan. **La objeción más cara contra la opción B se cae.**
+
+### 6.2 Dos trampas nuevas, las dos silenciosas
+
+**`extra_gazebo_args` no sirve para pasar remapeos.** Es el camino natural —reenviarlo desde
+`deepracer_sim.launch.py` a `gzserver.launch.py`— y **no funciona**. Es un único
+`LaunchConfiguration` dentro de la lista `cmd`, así que `"--remap __ns:=/robot1"` llega a gzserver
+como **un solo argumento**. Verificado leyendo `/proc/<pid>/cmdline` separado por NUL: un token, no
+dos. Gazebo lo descarta sin decir nada y el nodo se queda en `/gazebo`.
+
+Contraste, misma bandera:
+
+| Forma | Nodo resultante |
+|---|---|
+| `extra_gazebo_args:="--remap __ns:=/robot1"` (un token) | `/gazebo` ❌ **sin aviso** |
+| `--remap` `__ns:=/robot1` (dos tokens, gzserver a mano) | `/robot1/gazebo` ✅ |
+
+Consecuencia de diseño: hay que **sustituir el `IncludeLaunchDescription` de `gzserver.launch.py`
+por un `ExecuteProcess` propio**, con los remapeos como elementos separados de la lista.
+
+**`spawn_entity.py` pide `/spawn_entity` absoluto.** No lo relativiza al namespace de su nodo: lo
+compone con su propio argumento `-gazebo_namespace`, cuyo defecto es la cadena vacía. Con el
+gzserver remapeado el spawn muere a los 30 s con
+
+```
+Service /spawn_entity unavailable. Was Gazebo started with GazeboRosFactory?
+```
+
+que apunta al sitio equivocado —Gazebo **sí** tenía el factory cargado— y es exactamente el patrón
+que ya denuncia la cabecera de `robot.sh`. Con `-gazebo_namespace /robotN` spawnea a la primera.
+
+### 6.3 P4-b — las dos pilas completas en un solo dominio
+
+La prueba que decide. Dominio 0 para los dos, puertos 11345 y 11346, mundos y poses reales:
+
+| | `robot1` | `robot2` |
+|---|---|---|
+| `gzserver` | `--remap __ns:=/robot1` | `--remap __ns:=/robot2 --remap /clock:=/robot2/clock` |
+| Controladores | **7/7 `active`** | **7/7 `active`** |
+| Reloj | `/clock`, 1 pub | `/robot2/clock`, 1 pub |
+| `odom` | 14,90 Hz | 14,90 Hz |
+| `scan` | — | 9,99 Hz |
+| Sello de `odom` **contra su reloj** | 929,9 vs 926,8 | 77,6 vs 74,9 |
+
+**Catorce controladores activos en un solo dominio, y cada pila sellando contra su propio reloj.**
+El desfase entre los dos volvió a salir grande —unos 852 s— y otra vez solo por orden de arranque,
+lo que confirma los 98 s del §4.3 como fenómeno y no como número.
+
+### 6.4 Una falsa alarma que valió la pena perseguir
+
+En el grafo, el `controller_manager` de `robot2` y sus **siete** controladores aparecen suscritos a
+`/clock` —el de robot1— y no a `/robot2/clock`. Parece contaminación grave. En los datos no lo es:
+
+| Tópico | Sello |
+|---|---|
+| `/robot2/joint_states` | **242** |
+| `/robot2/clock` | 244 |
+| `/clock` | 1096 |
+
+Los controladores toman el tiempo del argumento que `gazebo_ros2_control` les pasa en `update()`,
+que sale directo del motor de Gazebo. La suscripción es solo el `TimeSource` que crea
+`use_sim_time`, y está **inerte**.
+
+**Esto invierte el criterio del §5.2 y hay que anotarlo.** Allí el conteo de suscripciones fue la
+prueba decisiva; aquí habría dado un **falso positivo**. La regla que queda: el conteo de
+suscripciones prueba que **un remapeo se aplicó**; no prueba **de dónde sale un sello**. Para eso
+hay que mirar el sello.
+
+### 6.5 La dependencia latente también resultó inerte
+
+Si esos ocho nodos escuchan `/clock`, ¿qué pasa cuando `robot1` no existe? Es una pregunta real:
+en una misión puede haber un solo robot, o el otro puede caerse. Se probó matando el `gzserver` de
+`robot1` con `robot2` corriendo. `/clock` se queda sin publicadores y `robot2` **sigue entero**:
+
+| | Valor |
+|---|---|
+| Controladores | 7/7 `active` |
+| `/robot2/odom` | 14,906 Hz |
+| `/robot2/scan` | 9,986 Hz |
+| Línea de tiempo | `odom` 451 · `joint_states` 452 · `/robot2/clock` 453 |
+
+**El robot del piso 2 no depende del simulador del piso 1.** La asimetría del §5.3 no introduce un
+punto único de fallo.
+
+## 7. Lo que estas pruebas NO demuestran
 
 Se dice explícitamente para que nadie cite este documento de más:
 
-1. **P3 probó el remapeo en un nodo C++ suelto, no en la pila montada.** `static_transform_publisher`
-   es un ejecutable de una sola suscripción; Nav2 y AMCL son varios nodos con ciclo de vida, y
-   `gazebo_ros2_control` corre **dentro** de gzserver, así que hereda su `__ns:=/robot2` además del
-   que el propio modelo ya aplica. El namespace duplicado —`/robot2/robot2/...`— es la sospecha
-   concreta que queda abierta, y comprobarla exige **editar los launch**, o sea cruzar de probar a
-   implementar.
-2. **Ninguna prueba usó el mundo real ni la pila real.** Mundo vacío y servidores falsos, a
-   propósito, para aislar la pregunta. Un `SUCCEEDED` de un servidor falso no es navegación.
+1. **No se probó Nav2 ni AMCL.** Y son el caso que queda: corren **fuera** de gzserver, así que no
+   heredan ningún remapeo y necesitan el `-r /clock:=/robot2/clock` explícito.
+   `nav_amcl_demo_sim.launch.py` hoy **no tiene por dónde recibirlo**.
+2. **No se midieron los sellos de `/tf`.** El `robot_state_publisher` corrió sin `use_sim_time` y
+   copia la marca de `joint_states`, así que debería estar bien. *Debería* no es *medido*.
 3. **No se ha ejecutado ni un solo relevo.** Quitar el bloqueo es condición necesaria y no
    suficiente: el hito 5 sigue en 🟡 hasta que haya una misión de dos tramos con relevo medida
    contra `/odom`.
 
-Con P1, P1b, P2 y las dos mitades baratas de P3 medidas, **B y D están las dos verificadas** en lo
-que se podía verificar sin tocar código. Lo que queda por decidir no es cuál es posible sino cuál
-sale más barata: **B** resuelve control y medida a la vez pero obliga a pasar el reloj remapeado
-por toda la pila de `robot2`; **D + C** deja las dos pilas intactas y paga un puente aparte para
-los tópicos de observación. La pila montada es la que rompe el empate.
+**La opción B queda verificada hasta donde se puede verificar sin tocar código.** Lo que falta ya
+no es prueba sino implementación, y P4-a dejó claro que no son dos líneas: hay que cambiar el
+arranque de gzserver por un `ExecuteProcess` propio, pasar `-gazebo_namespace` al spawn y abrir un
+argumento de reloj en el launch de Nav2. **C** —`domain_bridge`— deja de hacer falta y se queda en
+reserva; **D** sigue verificada y es el plan de repliegue si la implementación de B se atasca.
 
-## 7. Cómo se reproduce
+## 8. Cómo se reproduce
+
+Las dos pruebas baratas son un solo comando y no necesitan Gazebo, Nav2 ni el workspace compilado.
+Salen con código 0 si pasan:
 
 ```
 source /opt/ros/humble/setup.bash
@@ -281,5 +392,24 @@ herramientas/prueba_dos_dominios.py            # P1  — pub/sub y fuga cruzada
 herramientas/prueba_dos_dominios_accion.py     # P1b — acciones en dos dominios
 ```
 
-Las dos salen con código 0 si pasan y no necesitan Gazebo, Nav2 ni el workspace compilado. P2 se
-reproduce a mano con la línea de la variante **c** de la tabla del §4.
+P2 se reproduce a mano con la línea de la variante **c** de la tabla del §4. P4 se reproduce en
+tres pasos, con el workspace compilado y `ROS_DOMAIN_ID=0` en las tres terminales:
+
+```
+# 1. gzserver a mano. OJO: --remap en tokens separados, nunca por extra_gazebo_args.
+gzserver <repo>/mundo_definitivo_piso1.world \
+  -s libgazebo_ros_init.so -s libgazebo_ros_factory.so -s libgazebo_ros_force_system.so \
+  --remap __ns:=/robot1
+
+# 2. robot_state_publisher y la cadena de controladores
+ros2 launch deepracer_bringup deepracer_spawn.launch.py \
+  namespace:=robot1 x:=-19.165 y:=7.292 z:=0.03 yaw:=1.5708
+
+# 3. el spawn, que el launch NO consigue hacer solo mientras no lleve -gazebo_namespace
+ros2 run gazebo_ros spawn_entity.py -topic robot_description -entity robot1 \
+  -x -19.165 -y 7.292 -z 0.03 -Y 1.5708 -gazebo_namespace /robot1 \
+  --ros-args -r __ns:=/robot1
+```
+
+Para `robot2` es igual con el mundo del piso 2, la pose de `POSE_INICIAL`,
+`GAZEBO_MASTER_URI=http://localhost:11346` y el remapeo de reloj añadido en el paso 1.
