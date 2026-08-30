@@ -52,10 +52,19 @@ def generate_launch_description():
             ),
 
         launch_ros.actions.Node(
-            package='rplidar_ros2',
+            # 'rplidar_ros2' / 'rplidar_scan_publisher' NO existen en la tarjeta
+            # del vehiculo: ahi el paquete es 'rplidar_ros' y su unico ejecutable
+            # es 'rplidar_composition' (comprobado con 'ls' el 2026-08-21). Es el
+            # mismo tipo de fallo que tiene el lanzador de AWS, que pide
+            # 'rplidar_node', con la diferencia de que aquel deja el servicio
+            # 'deepracer-core' en 'failed' y este solo mata este launch.
+            #
+            # Para arrancar SOLO el sensor, sin duplicar los nodos que ya levanta
+            # deepracer-core, usar lidar_vehiculo.launch.py.
+            package='rplidar_ros',
             namespace='',
-            executable='rplidar_scan_publisher',
-            name='rplidar_scan_publisher',
+            executable='rplidar_composition',
+            name='rplidar_composition',
             parameters=[{
                     'serial_port': '/dev/ttyUSB0',
                     'serial_baudrate': 115200,
@@ -70,7 +79,12 @@ def generate_launch_description():
             namespace='servo_pkg',
             executable='servo_node',
             name='servo_node',
-            remappings=[('/ctrl_pkg/servo_msg', '/cmdvel_to_servo_pkg/servo_msg')]
+            # Sin remapeo: desde que cmdvel_to_servo_node publica en el nombre
+            # absoluto /ctrl_pkg/servo_msg, servo_pkg lo recibe en el suyo de
+            # siempre. El remapeo que habia aqui movia la suscripcion de
+            # servo_pkg al topico de nuestro nodo, y solo funcionaba cuando
+            # servo_pkg lo lanzabamos nosotros -no en el vehiculo, donde lo
+            # arranca deepracer-core-.
             ),
 
         launch_ros.actions.Node(
