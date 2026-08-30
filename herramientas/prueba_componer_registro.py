@@ -34,7 +34,7 @@ ESQUEMA = os.path.join(RAIZ, "Documentos", "esquema_registro_mision.json")
 sys.path.insert(0, AQUI)
 from componer_registro import (  # noqa: E402
     marcas_de, marcas_en_orden, primer_movimiento, veredicto_de,
-    INACTIVA, TRAMO_1, TRANSFERENCIA, TRAMO_2, COMPLETADA, FALLIDA,
+    INACTIVA, TRAMO_1, TRANSFERENCIA, TRAMO_2, COMPLETADA, FALLIDA, RECIBIDA,
 )
 
 fallos = []
@@ -286,6 +286,38 @@ def pruebas_de_marcas():
     check("el movimiento del segundo robot antes del relevo no cuenta",
           m3["t_inicio_tramo2"] == 41.5, f"-> {m3['t_inicio_tramo2']}")
     check("y el hueco de relevo no sale negativo", marcas_en_orden(m3))
+
+    # El defecto que destapo el piloto del 2026-08-29, escrito como prueba para
+    # que no pueda volver sin avisar. Si el coordinador no publica nada entre
+    # 'llego la solicitud' y 'ya hay agente elegido', las dos marcas caen en el
+    # MISMO mensaje y el tiempo de asignacion -una de las cuatro metricas de
+    # OE4- vale cero se ejecute lo que se ejecute. No es falta de resolucion:
+    # es que el estado intermedio no existia.
+    quieto_y_luego_anda = {"robot1": [(11.0, 0.3, 0.0)] * 3}
+    sin_recibida = [(10.0, INACTIVA, "", ""), (10.2, TRAMO_1, "robot1", "m3"),
+                    (60.0, COMPLETADA, "robot1", "m3")]
+    msr = marcas_de(sin_recibida, quieto_y_luego_anda, "A")
+    check("sin RECIBIDA el tiempo de asignacion vale cero: es el defecto",
+          msr["t_robot_activo"] - msr["t_solicitud"] == 0.0,
+          f"-> {msr['t_solicitud']} y {msr['t_robot_activo']}")
+
+    # Con el estado intermedio, t_solicitud pasa a ser lo que la §3.5 del
+    # esquema siempre dijo -el instante en que el servidor ACEPTA el goal- y la
+    # metrica deja de ser identicamente cero.
+    con_recibida = [(10.0, INACTIVA, "", ""), (10.15, RECIBIDA, "", "m3"),
+                    (10.2, TRAMO_1, "robot1", "m3"),
+                    (60.0, COMPLETADA, "robot1", "m3")]
+    mcr = marcas_de(con_recibida, quieto_y_luego_anda, "A")
+    check("t_solicitud es el RECIBIDA y no el TRAMO_1",
+          abs(mcr["t_solicitud"] - 10.15) < 1e-9, f"-> {mcr['t_solicitud']}")
+    check("el tiempo de asignacion es positivo y medible",
+          mcr["t_robot_activo"] - mcr["t_solicitud"] > 0,
+          f"-> {mcr['t_robot_activo'] - mcr['t_solicitud']:.3f} s")
+    check("las marcas siguen en orden creciente", marcas_en_orden(mcr))
+    # Los bags viejos -los dos pilotos de S20- no traen RECIBIDA y tienen que
+    # seguir componiendose: la constante es nueva, el formato del mensaje no.
+    check("un bag sin RECIBIDA se sigue componiendo",
+          msr["t_solicitud"] == 10.2 and msr["t_completada"] == 60.0)
 
     # Condicion A: los campos de relevo van null, no cero.
     estados_a = [(5.0, TRAMO_1, "robot1", "m2"), (30.0, COMPLETADA, "robot1", "m2")]

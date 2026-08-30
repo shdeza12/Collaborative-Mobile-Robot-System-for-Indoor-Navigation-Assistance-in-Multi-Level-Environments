@@ -147,7 +147,7 @@ PuntoInteres[] puntos
 string mision_id
 string origen_id                # el punto de partida que pidio el usuario
 string destino_id               # el destino FINAL, no el del tramo en curso
-uint8 etapa                     # INACTIVA=0 TRAMO_1=1 TRANSFERENCIA=2 TRAMO_2=3 COMPLETADA=4 FALLIDA=5
+uint8 etapa                     # INACTIVA=0 TRAMO_1=1 TRANSFERENCIA=2 TRAMO_2=3 COMPLETADA=4 FALLIDA=5 RECIBIDA=6
 string robot_activo
 PuntoInteres destino_actual
 float32 distancia_restante
@@ -160,6 +160,18 @@ string mensaje_usuario          # texto ya redactado en español para mostrar ta
 > desde el bag. `destino_actual` no sirve de sustituto porque durante el tramo 1 de una misión
 > inter-nivel apunta al punto de transferencia, no al destino. Ver §3.4 de
 > [`ESQUEMA_REGISTRO_MISION.md`](ESQUEMA_REGISTRO_MISION.md).
+
+> **`RECIBIDA=6` se añadió el 2026-08-29**, después del primer piloto de RF-25, y es el estado que
+> va entre *«llegó la solicitud»* y *«ya hay agente elegido»*. **Ese hueco no existía:** `_marcar()`
+> fijaba `etapa` y `robot_activo` en la misma llamada y publicaba una sola vez, así que las dos
+> marcas de la §3.5 del esquema caían en el mismo mensaje y el **tiempo de asignación —una de las
+> cuatro métricas de OE4— valía exactamente cero**, se ejecutara lo que se ejecutara.
+>
+> Va **al final y con número nuevo**, no intercalada: renumerar habría cambiado el significado de
+> los valores ya grabados en los bags de S20. Las constantes no viajan por el cable —no son campos—,
+> de modo que **el formato de serialización no cambia** y un suscriptor ya compilado sigue
+> deserializando; solo verá un valor de `etapa` que no conoce. **La HRI de S22 debe tratar
+> `RECIBIDA` como *preparando***, con el robot todavía sin asignar y `distancia_restante` en cero.
 
 ```
 # GuiarUsuario.action

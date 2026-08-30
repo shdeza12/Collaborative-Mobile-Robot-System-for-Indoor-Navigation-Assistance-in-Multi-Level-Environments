@@ -63,6 +63,9 @@ TRANSFERENCIA = 2
 TRAMO_2 = 3
 COMPLETADA = 4
 FALLIDA = 5
+# El estado entre 'llego la solicitud' y 'ya hay agente'. Sin el, el tiempo de
+# asignacion vale cero por construccion. Ver el comentario de EstadoMision.msg.
+RECIBIDA = 6
 
 
 def yaw_a_cuaternion(yaw):

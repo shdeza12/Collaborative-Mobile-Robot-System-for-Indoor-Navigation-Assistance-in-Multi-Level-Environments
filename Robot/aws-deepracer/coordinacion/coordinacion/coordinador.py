@@ -42,7 +42,7 @@ from coordinacion_msgs.msg import EstadoMision, ListaPuntosInteres, PuntoInteres
 
 from coordinacion.planificador import (
     ASIGNACION_POR_DEFECTO, COMPLETADA, ErrorPlanificacion, FALLIDA, INACTIVA,
-    condicion_de, generar_mision_id, planificar, yaw_a_cuaternion,
+    RECIBIDA, condicion_de, generar_mision_id, planificar, yaw_a_cuaternion,
 )
 
 # Criterio de llegada del §3.3 de PROTOCOLO_EXPERIMENTAL.md, medido contra
@@ -186,6 +186,18 @@ class Coordinador(Node):
 
         self.get_logger().info(
             f"Mision: {pet.origen_id} -> {pet.destino_id}")
+
+        # AQUI empieza a contar el tiempo de asignacion. Se publica ANTES de
+        # planificar y con robot_activo todavia vacio: es el unico instante en
+        # que el sistema sabe que hay una solicitud y aun no sabe a quien se la
+        # dara. Hasta el 2026-08-29 esta publicacion no existia -_marcar fijaba
+        # etapa y agente en la misma llamada- y las dos marcas de la §3.5 caian
+        # en el mismo mensaje, con lo que el tiempo de asignacion, que es una de
+        # las cuatro metricas de OE4, valia cero se ejecutara lo que se
+        # ejecutara. Lo destapo el primer piloto de RF-25.
+        self._marcar(RECIBIDA, "", None,
+                     "Recibida la solicitud; asignando el robot.", mision_id)
+        self._feedback(goal_handle)
 
         try:
             tramos, relevos = planificar(

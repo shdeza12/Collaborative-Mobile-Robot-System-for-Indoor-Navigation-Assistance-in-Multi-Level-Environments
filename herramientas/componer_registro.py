@@ -32,6 +32,10 @@ import sys
 # coordinacion_msgs: esta herramienta tiene que poder correr sobre un bag sin
 # el workspace compilado.
 INACTIVA, TRAMO_1, TRANSFERENCIA, TRAMO_2, COMPLETADA, FALLIDA = 0, 1, 2, 3, 4, 5
+# Anadida el 2026-08-29. Los bags anteriores no la traen y se siguen componiendo
+# igual: t_solicitud cae entonces sobre el TRAMO_1, que es exactamente lo que
+# hacia que el tiempo de asignacion valiera cero.
+RECIBIDA = 6
 
 UMBRAL_MOVIMIENTO_MS = 0.02
 MUESTRAS_CONSECUTIVAS = 3
@@ -98,6 +102,11 @@ def marcas_de(estados, movimientos, condicion):
     contempla o porque la mision termino antes de llegar a el. Los dos casos se
     distinguen leyendo 'condicion' y el veredicto, no la marca.
     """
+    # El primer estado que no es el reposo del coordinador. Desde el 29-ago eso
+    # es RECIBIDA, que es la §3.5 literal: el instante en que el servidor ACEPTA
+    # el goal, antes de planificar. En un bag anterior a esa fecha cae sobre el
+    # TRAMO_1 y coincide con t_robot_activo; el registro sigue siendo valido,
+    # pero su tiempo de asignacion es cero por construccion y no es una medida.
     t_solicitud = _primero(estados, lambda e, r: e != INACTIVA)
     t_robot_activo = _primero(estados, lambda e, r: e == TRAMO_1 and r)
 

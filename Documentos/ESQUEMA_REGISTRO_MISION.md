@@ -174,7 +174,12 @@ la variable independiente del experimento.
 Definiciones operativas, literales del §3 del protocolo:
 
 - **`t_solicitud`** — instante en que el servidor de `/coordinacion/guiar_usuario` **acepta** el
-  goal. No cuando la HRI lo envía: la latencia del navegador no es del sistema robótico.
+  goal. No cuando la HRI lo envía: la latencia del navegador no es del sistema robótico. Su
+  observable en el bag es el primer `estado_mision` con `etapa = RECIBIDA`, que el coordinador
+  publica antes de planificar y con `robot_activo` vacío. **Hasta el 2026-08-29 ese mensaje no se
+  emitía**, y la marca caía sobre el `TRAMO_1`, es decir, sobre el mismo mensaje que
+  `t_robot_activo`: el tiempo de asignación valía cero por construcción. Los bags anteriores a esa
+  fecha se siguen componiendo, pero su tiempo de asignación **no es una medida**.
 - **`t_primer_movimiento`** — primera muestra de `/<ns>/odom` del robot asignado con
   `|v| ≥ 0,02 m/s` **y las dos siguientes también**.
 - **`t_robot_activo`** — primer `estado_mision` con `etapa = TRAMO_1` y `robot_activo` no vacío.

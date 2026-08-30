@@ -73,6 +73,11 @@ def main():
           (EstadoMision.INACTIVA, EstadoMision.TRAMO_1, EstadoMision.TRANSFERENCIA,
            EstadoMision.TRAMO_2, EstadoMision.COMPLETADA, EstadoMision.FALLIDA)
           == (0, 1, 2, 3, 4, 5))
+    # Anadida el 2026-08-29 para que el tiempo de asignacion sea medible. Va
+    # despues de FALLIDA y no intercalada: renumerar habria cambiado el
+    # significado de los valores ya grabados en los bags de S20.
+    check("EstadoMision RECIBIDA = 6, sin renumerar las anteriores",
+          EstadoMision.RECIBIDA == 6)
 
     print("\n2. EstadoRobot por DDS")
     recibido = {}

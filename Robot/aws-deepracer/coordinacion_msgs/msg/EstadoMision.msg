@@ -13,6 +13,20 @@ uint8 TRANSFERENCIA=2
 uint8 TRAMO_2=3
 uint8 COMPLETADA=4
 uint8 FALLIDA=5
+# RECIBIDA es el estado que existe entre 'llego la solicitud' y 'ya hay agente
+# elegido'. Se anade el 2026-08-29, despues del primer piloto de RF-25, porque
+# ese hueco NO EXISTIA: el coordinador fijaba etapa y robot_activo en la misma
+# llamada y publicaba una vez, asi que t_solicitud y t_robot_activo caian en el
+# mismo mensaje y el TIEMPO DE ASIGNACION -una de las cuatro metricas de OE4-
+# valia exactamente cero, se ejecutara lo que se ejecutara. Un cero no es una
+# medida. La §3.5 del esquema ya definia t_solicitud como el instante en que el
+# servidor ACEPTA el goal; lo que faltaba era publicarlo.
+#
+# Va al final y con numero nuevo a proposito: las constantes no viajan por el
+# cable -no son campos-, asi que el formato de serializacion no cambia y un
+# suscriptor ya compilado sigue deserializando. Solo vera un valor de etapa que
+# no conoce, y por eso la HRI de S22 debe tratar RECIBIDA como 'preparando'.
+uint8 RECIBIDA=6
 
 string mision_id
 string origen_id                # el punto de partida que pidio el usuario
