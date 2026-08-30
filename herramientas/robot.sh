@@ -88,6 +88,40 @@ esac
 # sin exportar nada ve la mision entera.
 DOMINIO=0
 
+# DESPLIEGUE EN DOS MAQUINAS. La variable viene de la rama camara-y-dominio y se
+# conserva porque la idea de fondo sigue en pie: repartiendo un robot por host,
+# la separacion la da la red -cada Gazebo con su GAZEBO_MASTER_URI- y sigue
+# interesando que los dos compartan dominio para que el coordinador los alcance.
+#
+#   Maquina A:  DOMINIO_FORZADO=7 herramientas/robot.sh robot1 nav2
+#   Maquina B:  DOMINIO_FORZADO=7 herramientas/robot.sh robot2 nav2
+#   Coordinador en cualquiera de las dos, con ROS_DOMAIN_ID=7
+#
+# DOS COSAS QUE DECIA ESTA NOTA Y HAY QUE CORREGIR, porque se escribio el 26-ago
+# cuando cada robot iba en su dominio:
+#
+# 1. Decia que "el relevo no se puede demostrar de extremo a extremo en un solo
+#    equipo". Ya no es cierto, y no por un argumento sino por una corrida: el
+#    2026-08-30 la mision piso1_representacion -> piso2_lab_313 se completo en
+#    un solo PC con un relevo, exito true, 47,6 s (Evidencia/S21_bloqueo_
+#    dominios.md). Dos maquinas es una MEJORA de holgura, no un requisito.
+#
+# 2. Decia que con los dos robots en un portatil el RTF cae a 0,955 y 0,811, por
+#    debajo del minimo de RNF-06. Esa misma corrida del 30-ago midio RTF 0,9981
+#    con las dos pilas y Nav2 arriba. Las dos medidas no se han conciliado; la
+#    sospecha es que la de agosto llevaba la GUI de Gazebo abierta y esta no,
+#    pero NADIE lo anoto, asi que es una sospecha. Hasta que se repita con la
+#    GUI declarada, ninguna de las dos cifras sirve para justificar el reparto.
+#
+# NO ESTA PROBADO EN DOS MAQUINAS: aqui solo hay una. Lo que si esta comprobado
+# es que la variable cambia el dominio de verdad. Falta que el descubrimiento
+# DDS funcione entre los dos hosts, que suele fallar por multicast bloqueado en
+# la red o por aislamiento de clientes en el punto de acceso wifi.
+if [[ -n "${DOMINIO_FORZADO:-}" ]]; then
+  DOMINIO="$DOMINIO_FORZADO"
+  echo "   AVISO: dominio forzado a $DOMINIO (despliegue en varias maquinas)"
+fi
+
 # 'python3' a secas basta: el modulo no importa nada de ROS, asi que se lee antes
 # de hacer 'source' de nada. Si falla, el mensaje del propio modulo dice que
 # robots conoce, y se corta aqui en vez de lanzar Gazebo con una pose vacia.
