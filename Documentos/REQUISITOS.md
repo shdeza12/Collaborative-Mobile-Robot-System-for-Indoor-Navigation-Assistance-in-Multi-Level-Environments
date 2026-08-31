@@ -70,6 +70,13 @@ una de esas tres fuentes, sobra y se elimina.
 de coordinación (RF-04 a RF-06, RF-08) y el protocolo de relevo (RF-07). **RF-07 es el aporte
 declarado del proyecto.**
 
+**Qué algoritmo de coordinación implementan RF-05 y RF-07** está clasificado formalmente en
+[`ANEXO_ALGORITMO_COORDINACION.md`](ANEXO_ALGORITMO_COORDINACION.md): la asignación es ST–SR–IA
+en la taxonomía de Gerkey y Matarić (2004) y coincide con el óptimo del método húngaro porque
+la restricción de nivel deja un solo candidato admisible por tarea; el relevo, en cambio, tiene
+dependencias entre agendas y cae en la categoría XD de la taxonomía de Korsah, Stentz y Dias
+(2013). El anexo incluye las alternativas descartadas y por qué.
+
 ---
 
 ## 3. OE2 — Plataforma robótica
