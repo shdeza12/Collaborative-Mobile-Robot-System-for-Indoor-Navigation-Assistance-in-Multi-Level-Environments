@@ -17,3 +17,14 @@ __pycache__/
 # Sistema
 .DS_Store
 Thumbs.db
+
+# Bags de ROS 2 — basura de trabajo, no evidencia
+#
+# De una corrida se conserva el registro JSON que compone
+# `herramientas/componer_registro.py`, no el bag del que salió. Ningún bag ha
+# estado nunca versionado y los guiones los graban a /tmp o al destino que se
+# les pase. Los `mapas/bag_mapa_*` son restos de corridas de mapeo; el mapa que
+# sí cuenta (`mapa_laboratorio.pgm` y su `.yaml`) está versionado al lado.
+*.mcap
+*.db3
+mapas/bag_mapa_*/
