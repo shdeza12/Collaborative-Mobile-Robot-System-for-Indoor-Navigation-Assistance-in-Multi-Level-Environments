@@ -33,7 +33,7 @@
 Dos matices que la cifra sola no dice, y que importan más que la cifra:
 
 - **El aporte declarado ya está ejecutado, y lo que falta ahora es reportarlo.** El relevo entre pisos corrió el 30-ago con los dos robots vivos (`exito: true`, llegadas a 0,128 y 0,077 m contra `/odom`), así que el riesgo de quedarse sin resultado central **se cerró**. El riesgo que lo sustituye es distinto y menor: hay **n = 1 y sin sortear** contra los N = 30 que pide el protocolo, o sea que existe el resultado pero no la **evidencia estadística** para afirmarlo. La instrumentación para producirla quedó completa el 31-ago; ejecutar la campaña es S24.
-- **OE3 sigue en 0 % y es la barra más larga que queda entera.** Es una semana completa (S22) que no admite compresión, porque de ella dependen RF-01 a RF-05 y la demostración ante el jurado.
+- **OE3 sigue en 0 % y es la barra más larga que queda entera.** Es una semana completa (S22) que no admite compresión, porque de ella dependen **RF-17 a RF-20** y la demostración ante el jurado. *Corregido el 2026-08-31: esta línea decía «RF-01 a RF-05», que son de **OE1** y de los cuales tres ya están verificados. El §9 de [`REQUISITOS.md`](Documentos/REQUISITOS.md) es la trazabilidad buena: OE3 = RF-17 a RF-20, los cuatro pendientes.* **Se reparte el 2026-08-31:** Jonny toma la HRI en paralelo, que es la paralelización más segura disponible porque **RF-19 obliga a que hable sólo con `/coordinacion`, nunca con los agentes** — la frontera ya está declarada y no se cruza con la campaña de OE4.
 
 ---
 
