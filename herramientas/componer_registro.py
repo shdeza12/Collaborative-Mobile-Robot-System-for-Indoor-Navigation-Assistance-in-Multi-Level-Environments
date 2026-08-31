@@ -40,7 +40,15 @@ RECIBIDA = 6
 UMBRAL_MOVIMIENTO_MS = 0.02
 MUESTRAS_CONSECUTIVAS = 3
 TOLERANCIA_LLEGADA_M = 0.25   # la misma de coordinador.py y del §5 del protocolo
-ESQUEMA_VERSION = "1.0.0"
+
+# 1.1.0 el 2026-08-31: se anade veredicto.continuidad (RF-24). Sube la MENOR y
+# no la MAYOR porque el cambio es aditivo: un lector de 1.1.0 entiende los
+# registros 1.0.0 -les falta un campo y lo sabe- y ninguno de los campos
+# anteriores cambia de forma ni de significado. Los dos pilotos de S20 se quedan
+# en 1.0.0 y no se recomponen: eran condicion A, donde la continuidad es null de
+# todas formas, asi que recomponerlos anadiria un campo vacio y perderia la
+# trazabilidad de con que version se escribieron.
+ESQUEMA_VERSION = "1.1.0"
 
 
 def primer_movimiento(muestras, umbral=UMBRAL_MOVIMIENTO_MS,
@@ -205,6 +213,81 @@ def veredicto_de(marcas, estados, error_posicion_m, condicion, num_relevos):
             "c3_relevo": c3, "motivo_fallo": motivo}
 
 
+def continuidad_de(estados, marcas, condicion):
+    """RF-24, la continuidad entre niveles del §3.4. Anadida el 2026-08-31.
+
+    El §3.4 dice que la continuidad se cumple si 'durante todo el intervalo
+    [t_solicitud, t_completada] el campo etapa nunca vale INACTIVA, y
+    robot_activo nunca queda vacio'. Es decir: en ningun momento la mision se
+    queda sin nadie a cargo.
+
+    NO decide el exito. El §3.3 lista tres condiciones y esta no es ninguna: es
+    la variable de RESPUESTA del experimento, que es otra cosa. Una mision puede
+    llegar a 4 cm del destino, sin FALLIDA y con un relevo, y aun asi haber
+    tenido un bache de coordinacion en medio. Eso es exactamente lo que RF-24
+    existe para detectar, y meterlo en el veredicto lo escondaria dentro de un
+    'exito: false' que ya vendria dado por otra causa.
+
+    **La ventana empieza en t_robot_activo y no en t_solicitud, y esto es una
+    precision necesaria del §3.4, no una licencia.** Entre las dos marcas esta
+    el estado RECIBIDA, que el §3.2 obliga a publicar con robot_activo VACIO
+    -es el instante en que el servidor acepta el goal y todavia no ha
+    planificado-. Aplicando el intervalo literal, ese vacio deliberado haria que
+    TODA mision saliera discontinua, incluida una perfecta, y RF-24 valdria 0 %
+    por construccion. Es el mismo defecto estructural que tuvo el tiempo de
+    asignacion hasta el 2026-08-29: una definicion que da siempre el mismo
+    numero no esta midiendo el sistema, esta midiendo la definicion. El tramo
+    excluido no queda sin vigilar: es justo lo que mide RF-22, acotado a menos
+    de un tick de /clock.
+
+    El cierre es t_completada INCLUSIVE. Despues el coordinador vuelve a
+    INACTIVA -es su reposo normal- y contarlo seria el mismo error por el otro
+    extremo.
+
+    Devuelve 'continua' None, y no False, cuando la ventana no se puede cerrar.
+    'No termino' y 'se quedo sin agente' son dos fallos distintos; el primero ya
+    lo cuenta c2_completada_sin_fallida y duplicarlo aqui inflaria el recuento
+    de discontinuidades con misiones que nunca llegaron a relevar.
+    """
+    vacia = {"continua": None, "ventana": None, "instantes_inactiva": [],
+             "instantes_sin_agente": [], "motivo": ""}
+
+    if condicion != "B":
+        vacia["motivo"] = ("no aplica: la mision es intra-nivel y el §3.4 solo "
+                           "la define entre niveles distintos")
+        return vacia
+
+    t0 = marcas.get("t_robot_activo")
+    t1 = marcas.get("t_completada")
+    if t0 is None or t1 is None:
+        falta = "t_robot_activo" if t0 is None else "t_completada"
+        vacia["motivo"] = (f"ventana abierta: falta {falta}, asi que no hay "
+                           "intervalo que recorrer. La mision no llego a "
+                           "COMPLETADA o nunca se asigno agente, y eso lo "
+                           "cuenta el veredicto, no esta metrica")
+        return vacia
+
+    dentro = [(t, e, r) for t, e, r, _ in estados if t0 <= t <= t1]
+    inactiva = [t for t, e, r in dentro if e == INACTIVA]
+    sin_agente = [t for t, e, r in dentro if not r]
+
+    motivo = ""
+    if inactiva or sin_agente:
+        partes = []
+        if inactiva:
+            partes.append(f"etapa INACTIVA en t={', '.join(f'{t:.3f}' for t in inactiva)}")
+        if sin_agente:
+            partes.append("robot_activo vacio en t="
+                          f"{', '.join(f'{t:.3f}' for t in sin_agente)}")
+        motivo = "la mision se quedo sin nadie a cargo: " + "; ".join(partes)
+
+    return {"continua": not (inactiva or sin_agente),
+            "ventana": [t0, t1],
+            "instantes_inactiva": inactiva,
+            "instantes_sin_agente": sin_agente,
+            "motivo": motivo}
+
+
 # --- Lectura del bag --------------------------------------------------------
 
 def leer_bag(ruta):
@@ -367,6 +450,9 @@ def componer(ruta_bag, banco, campana, error_posicion_m=None, rtf=None,
         error_posicion_m = _error_de_llegada(pose_llegada, destino)
 
     veredicto = veredicto_de(marcas, estados, error_posicion_m, condicion, relevos)
+    # RF-24 va DENTRO de veredicto pero FUERA del AND que decide el exito. Ver
+    # continuidad_de(): es la variable de respuesta, no un criterio del §3.3.
+    veredicto["continuidad"] = continuidad_de(estados, marcas, condicion)
 
     return {
         "esquema_version": ESQUEMA_VERSION,

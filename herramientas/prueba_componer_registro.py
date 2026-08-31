@@ -33,7 +33,7 @@ ESQUEMA = os.path.join(RAIZ, "Documentos", "esquema_registro_mision.json")
 
 sys.path.insert(0, AQUI)
 from componer_registro import (  # noqa: E402
-    marcas_de, marcas_en_orden, primer_movimiento, veredicto_de,
+    continuidad_de, marcas_de, marcas_en_orden, primer_movimiento, veredicto_de,
     INACTIVA, TRAMO_1, TRANSFERENCIA, TRAMO_2, COMPLETADA, FALLIDA, RECIBIDA,
 )
 
@@ -49,7 +49,7 @@ def check(nombre, ok, detalle=""):
 def registro_valido():
     """Un registro de condicion B en simulacion, con exito. Base de los casos."""
     return {
-        "esquema_version": "1.0.0",
+        "esquema_version": "1.1.0",
         "mision": {
             "mision_id": "S24_B_20260827_143052",
             "campana": "S24_simulacion",
@@ -84,6 +84,11 @@ def registro_valido():
             "exito": True, "c1_posicion": True,
             "c2_completada_sin_fallida": True, "c3_relevo": True,
             "motivo_fallo": "",
+            "continuidad": {
+                "continua": True, "ventana": [10.2, 95.0],
+                "instantes_inactiva": [], "instantes_sin_agente": [],
+                "motivo": "",
+            },
         },
         "descriptivas": {
             "error_rumbo_rad": 0.05, "desviacion_z_m": {"robot1": 1.9e-06},
@@ -110,6 +115,43 @@ def valida(registro, esquema):
 
 def pruebas_de_esquema(esquema):
     check("el registro de referencia es valido", valida(registro_valido(), esquema))
+
+    # Versionado del esquema. 1.1.0 anadio veredicto.continuidad el 2026-08-31 y
+    # el cambio tiene que cortar en los dos sentidos: obligatorio en adelante,
+    # inofensivo hacia atras. Si solo se comprobara lo primero, exigirlo en el
+    # 'required' base habria invalidado los tres registros de S20, que son
+    # evidencia ya entregada; si solo lo segundo, RF-24 -la variable de
+    # respuesta principal- podria volver a quedarse sin medir por un olvido.
+    r = registro_valido(); del r["veredicto"]["continuidad"]
+    check("un registro 1.1.0 SIN continuidad se rechaza", not valida(r, esquema),
+          _por_que(r, esquema))
+    r["esquema_version"] = "1.0.0"
+    check("el mismo registro marcado 1.0.0 sigue siendo valido",
+          valida(r, esquema), _por_que(r, esquema))
+
+    # La continuidad NO puede entrar en el AND del exito. Si alguien la anade a
+    # las condiciones del §3.3 mas adelante, esta prueba lo delata: un registro
+    # discontinuo y exitoso a la vez tiene que ser representable, porque es
+    # justo el caso interesante -relevo con bache pero mision cumplida-.
+    r = registro_valido()
+    r["veredicto"]["continuidad"] = {
+        "continua": False, "ventana": [10.2, 95.0], "instantes_inactiva": [],
+        "instantes_sin_agente": [40.5],
+        "motivo": "la mision se quedo sin nadie a cargo: robot_activo vacio en t=40.500"}
+    check("exito true con continuidad false es representable",
+          valida(r, esquema), _por_que(r, esquema))
+
+    # En condicion A el §3.4 no define la metrica: null, no un false inventado.
+    r = registro_valido()
+    r["veredicto"]["continuidad"] = {
+        "continua": None, "ventana": None, "instantes_inactiva": [],
+        "instantes_sin_agente": [], "motivo": "no aplica: la mision es intra-nivel"}
+    check("continuidad null con ventana null es valida",
+          valida(r, esquema), _por_que(r, esquema))
+
+    r = registro_valido()
+    r["veredicto"]["continuidad"]["ventana"] = [10.2]
+    check("una ventana de un solo extremo se rechaza", not valida(r, esquema))
 
     # Un campo mal escrito tiene que reventar, no colarse: si 'additionalProperties'
     # se quedara en true, un typo del compositor produciria registros que validan y
@@ -413,6 +455,85 @@ def bag_sintetico(ruta):
     del escritor
 
 
+def pruebas_de_continuidad():
+    """RF-24, la variable de respuesta principal del §2 del protocolo.
+
+    Anadida el 2026-08-31. Hasta entonces el esquema no tenia el campo y la
+    metrica no se podia calcular desde el registro: el analizador la declaraba
+    NO MEDIBLE, que para la variable principal del experimento no es una
+    situacion en la que se pueda llegar a S24.
+    """
+    # Un relevo limpio: nunca falta agente ni se cae a INACTIVA.
+    limpia = [
+        (10.0, INACTIVA, "", ""), (10.15, RECIBIDA, "", "m1"),
+        (10.2, TRAMO_1, "robot1", "m1"), (40.0, TRANSFERENCIA, "robot1", "m1"),
+        (41.0, TRAMO_2, "robot2", "m1"), (95.0, COMPLETADA, "robot2", "m1"),
+        (105.0, INACTIVA, "", ""),
+    ]
+    marcas = {"t_solicitud": 10.15, "t_robot_activo": 10.2, "t_completada": 95.0}
+    c = continuidad_de(limpia, marcas, "B")
+    check("un relevo limpio da continuidad true", c["continua"] is True, f"-> {c}")
+    check("la ventana evaluada es [t_robot_activo, t_completada]",
+          c["ventana"] == [10.2, 95.0], f"-> {c['ventana']}")
+
+    # El INACTIVA posterior a COMPLETADA es el reposo normal del coordinador y
+    # NO puede contar como discontinuidad: si contara, ninguna mision del mundo
+    # seria continua.
+    check("el INACTIVA posterior a COMPLETADA no cuenta",
+          c["instantes_inactiva"] == [], f"-> {c['instantes_inactiva']}")
+
+    # Y el preludio RECIBIDA tiene robot_activo vacio POR DISENO -§3.2 lo exige
+    # asi-, de modo que evaluar desde t_solicitud haria que toda mision saliera
+    # discontinua por construccion. Es el mismo defecto estructural que tuvo el
+    # tiempo de asignacion en agosto, y se evita empezando en t_robot_activo.
+    check("el preludio RECIBIDA, con robot_activo vacio, no cuenta",
+          c["instantes_sin_agente"] == [], f"-> {c['instantes_sin_agente']}")
+
+    # La discontinuidad que RF-24 existe para detectar: la mision se queda sin
+    # nadie a cargo en mitad del relevo.
+    rota = [
+        (10.15, RECIBIDA, "", "m1"), (10.2, TRAMO_1, "robot1", "m1"),
+        (40.0, TRANSFERENCIA, "robot1", "m1"), (40.5, TRANSFERENCIA, "", "m1"),
+        (41.0, TRAMO_2, "robot2", "m1"), (95.0, COMPLETADA, "robot2", "m1"),
+    ]
+    c = continuidad_de(rota, marcas, "B")
+    check("quedarse sin agente en mitad del relevo rompe la continuidad",
+          c["continua"] is False and c["instantes_sin_agente"] == [40.5],
+          f"-> {c}")
+
+    # Caerse a INACTIVA dentro de la ventana tambien la rompe, aunque haya
+    # agente: la mision dejo de estar en curso.
+    caida = [
+        (10.15, RECIBIDA, "", "m1"), (10.2, TRAMO_1, "robot1", "m1"),
+        (50.0, INACTIVA, "robot1", "m1"), (60.0, TRAMO_2, "robot2", "m1"),
+        (95.0, COMPLETADA, "robot2", "m1"),
+    ]
+    c = continuidad_de(caida, marcas, "B")
+    check("caer a INACTIVA dentro de la ventana rompe la continuidad",
+          c["continua"] is False and c["instantes_inactiva"] == [50.0], f"-> {c}")
+
+    # Sin COMPLETADA la ventana no esta cerrada. Decir 'false' seria confundir
+    # 'se quedo sin agente' con 'no termino', que son dos fallos distintos y el
+    # segundo ya lo cuenta c2.
+    c = continuidad_de(limpia[:4], {"t_solicitud": 10.15, "t_robot_activo": 10.2,
+                                    "t_completada": None}, "B")
+    check("sin t_completada la continuidad es null, no false",
+          c["continua"] is None and "ventana" in c["motivo"], f"-> {c}")
+
+    # §3.4: "Solo aplica a misiones cuyo origen y destino estan en niveles
+    # distintos".
+    c = continuidad_de(limpia, marcas, "A")
+    check("en condicion A la continuidad es null y lo dice",
+          c["continua"] is None and "intra-nivel" in c["motivo"], f"-> {c}")
+
+    # La continuidad NO decide el exito: el §3.3 lista tres condiciones y esta
+    # no es una de ellas. Es la variable de respuesta, que es otra cosa.
+    mov = {"robot1": [(10.9, 0.3, 0.0)] * 3, "robot2": [(41.5, 0.3, 0.0)] * 3}
+    v = veredicto_de(marcas_de(rota, mov, "B"), rota, 0.19, "B", 1)
+    check("una mision discontinua puede seguir siendo un exito del §3.3",
+          v["exito"] is True, f"-> {v}")
+
+
 def pruebas_de_bag(esquema):
     import shutil
     import tempfile
@@ -495,6 +616,26 @@ def pruebas_de_bag(esquema):
               f"-> {corto['mision']['condicion']}")
         check("y su registro tambien valida", valida(corto, esquema),
               _por_que(corto, esquema))
+
+        # RF-24 de extremo a extremo: del bag al campo del registro, sin que
+        # nadie lo rellene a mano. Es lo que el esquema 1.0.0 no tenia.
+        c = auto["veredicto"]["continuidad"]
+        check("el registro compuesto trae la continuidad calculada",
+              c["continua"] is True and c["ventana"] is not None, f"-> {c}")
+        check("la continuidad no toco el exito, que se decide con el §3.3",
+              auto["veredicto"]["exito"] is True)
+        check("el compositor escribe la version 1.1.0",
+              auto["esquema_version"] == "1.1.0",
+              f"-> {auto['esquema_version']}")
+        # La B truncada no llega a COMPLETADA: la ventana no se cierra y la
+        # continuidad es null. Es el caso que distingue 'no termino' de 'se
+        # quedo sin nadie a cargo'; el primero ya lo cuenta c2, y contarlo dos
+        # veces inflaria el recuento de discontinuidades de RF-24.
+        cc = corto["veredicto"]["continuidad"]
+        check("una B que no llega a COMPLETADA da continuidad null, no false",
+              cc["continua"] is None and cc["motivo"] != "", f"-> {cc}")
+        check("y esa mision si es un fallo por c2, que es lo que la describe",
+              corto["veredicto"]["c2_completada_sin_fallida"] is False)
 
         # --- El residuo de la mision anterior no puede firmar este registro ---
         # El coordinador republica a 1 Hz el estado TERMINAL de la mision previa
@@ -636,6 +777,8 @@ def main():
     pruebas_de_orden()
     print("Marcas y veredicto")
     pruebas_de_marcas()
+    print("Continuidad entre niveles (RF-24)")
+    pruebas_de_continuidad()
     print("Lectura del bag y ensamblado (necesita el workspace sourceado)")
     pruebas_de_bag(esquema)
     print(f"\n{len(fallos)} fallo(s).")

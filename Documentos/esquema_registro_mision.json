@@ -134,6 +134,7 @@
     "veredicto": {
       "comentario": "Las tres condiciones de la §3.3 del protocolo por separado. No basta con guardar el AND: si la tasa de exito sale baja hay que poder decir CUAL condicion fallo. En R3 fallaria c1 con c2 y c3 en verde, y eso es un diagnostico.",
       "type": "object", "additionalProperties": false,
+      "comentario_required": "'continuidad' NO va aqui: es de 1.1.0 y los tres registros de S20 son 1.0.0. Exigirlo en el required base invalidaria retroactivamente evidencia ya entregada, que es exactamente lo que un esquema versionado existe para evitar. Se exige abajo, en el allOf, solo a partir de 1.1.0.",
       "required": ["exito", "c1_posicion", "c2_completada_sin_fallida", "c3_relevo",
                    "motivo_fallo"],
       "properties": {
@@ -147,7 +148,32 @@
           "type": "boolean"
         },
         "c3_relevo": {"type": ["boolean", "null"]},
-        "motivo_fallo": {"type": "string"}
+        "motivo_fallo": {"type": "string"},
+        "continuidad": {
+          "comentario": "RF-24, la variable de RESPUESTA principal del §2 del protocolo. Anadida en 1.1.0 el 2026-08-31: hasta entonces no existia el campo y la metrica principal del experimento no se podia calcular desde el registro. Vive dentro de 'veredicto' porque es un juicio sobre la corrida, pero NO entra en el AND que decide 'exito': el §3.3 lista tres condiciones y esta no es ninguna. Una mision puede llegar a 4 cm, sin FALLIDA y con su relevo, y aun asi haber tenido un bache de coordinacion; meterla en el exito lo escondaria.",
+          "type": "object", "additionalProperties": false,
+          "required": ["continua", "ventana", "instantes_inactiva",
+                       "instantes_sin_agente", "motivo"],
+          "properties": {
+            "continua": {
+              "comentario": "null en condicion A -el §3.4 solo la define entre niveles- y null si la ventana no se puede cerrar. null NO es false: 'no termino' y 'se quedo sin agente' son fallos distintos, y el primero ya lo cuenta c2.",
+              "type": ["boolean", "null"]
+            },
+            "ventana": {
+              "comentario": "[t_robot_activo, t_completada], no [t_solicitud, t_completada]. Entre solicitud y asignacion esta el estado RECIBIDA, que la §3.2 obliga a publicar con robot_activo VACIO; con el intervalo literal toda mision saldria discontinua y RF-24 valdria 0 % por construccion. Ese tramo lo vigila RF-22, acotado a un tick de /clock.",
+              "type": ["array", "null"],
+              "items": {"type": "number"}, "minItems": 2, "maxItems": 2
+            },
+            "instantes_inactiva": {
+              "comentario": "Los t en que etapa valia INACTIVA dentro de la ventana. Se guardan los instantes y no solo el booleano para poder ir al bag por ellos: un 'false' suelto no se diagnostica.",
+              "type": "array", "items": {"type": "number"}
+            },
+            "instantes_sin_agente": {
+              "type": "array", "items": {"type": "number"}
+            },
+            "motivo": {"type": "string"}
+          }
+        }
       }
     },
 
@@ -219,6 +245,12 @@
   },
 
   "allOf": [
+    {
+      "comentario": "A partir de 1.1.0 el campo de continuidad es obligatorio. Antes no existia. Un registro nuevo sin el no valida -que es el punto: RF-24 es la variable de respuesta principal y no puede volver a quedarse sin medir por olvido-, y los tres de S20, escritos en 1.0.0, siguen validando sin tocarlos.",
+      "if": {"properties": {"esquema_version": {"const": "1.1.0"}},
+             "required": ["esquema_version"]},
+      "then": {"properties": {"veredicto": {"required": ["continuidad"]}}}
+    },
     {
       "comentario": "§4.3, restriccion 1: banco = simulacion exige /clock, oraculo y RTF.",
       "if": {"properties": {"mision": {"properties": {"banco": {"const": "simulacion"}}}}},

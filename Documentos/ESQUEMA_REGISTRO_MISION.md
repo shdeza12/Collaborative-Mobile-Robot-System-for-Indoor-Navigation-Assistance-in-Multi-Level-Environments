@@ -246,6 +246,52 @@ las calcula.
 > **El rumbo de llegada no entra aquí.** Se mide y se reporta como descriptiva (§3.8). La razón está
 > en el §4 del protocolo y en R12.
 
+#### 3.7.1 `continuidad` — RF-24, y por qué está aquí sin decidir nada
+
+*Añadido en la versión 1.1.0 del esquema, el 2026-08-31.* Hasta esa fecha el campo no existía, y la
+consecuencia salió a la luz al escribir el analizador: **RF-24, que el §2 del protocolo llama «la
+variable de respuesta principal», no se podía calcular desde el registro.** Las marcas daban el
+`hueco` del relevo, pero la condición binaria del §3.4 —que `etapa` nunca valga `INACTIVA` y
+`robot_activo` nunca quede vacío— se comprueba sobre la secuencia de `estado_mision`, que vive en el
+bag y no llegaba al JSON. Llegar a S24 así habría significado ejecutar treinta corridas sin medir la
+variable que el experimento existe para medir.
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `continua` | bool \| null | `null` en condición A y cuando la ventana no se puede cerrar |
+| `ventana` | `[t0, t1]` \| null | el intervalo realmente recorrido |
+| `instantes_inactiva` | número[] | los `t` en que `etapa` valía `INACTIVA` dentro de la ventana |
+| `instantes_sin_agente` | número[] | los `t` en que `robot_activo` estaba vacío |
+| `motivo` | string | por qué es `null`, o qué se rompió |
+
+Tres decisiones que no son obvias:
+
+**Está dentro de `veredicto` pero fuera del AND que decide `exito`.** El §3.3 del protocolo lista
+tres condiciones y ésta no es ninguna. Una misión puede llegar a 4 cm del destino, sin `FALLIDA` y
+con su único relevo, y aun así haber tenido un bache de coordinación en medio: eso es exactamente lo
+que RF-24 existe para detectar. Metiéndola en el éxito quedaría escondida dentro de un
+`exito: false` que ya vendría dado por otra causa, y RF-23 y RF-24 dejarían de ser dos variables.
+
+**La ventana es `[t_robot_activo, t_completada]`, no `[t_solicitud, t_completada]`.** Es una
+precisión necesaria del §3.4, no una licencia. Entre las dos primeras marcas está el estado
+`RECIBIDA`, que el §3.2 **obliga** a publicar con `robot_activo` vacío —es el instante en que el
+servidor acepta el goal y todavía no ha planificado—. Con el intervalo literal, ese vacío deliberado
+haría que **toda** misión saliera discontinua, incluida una perfecta, y RF-24 valdría 0 % por
+construcción. Es el mismo defecto estructural que tuvo el tiempo de asignación hasta el 2026-08-29:
+una definición que da siempre el mismo número no está midiendo el sistema, está midiendo la
+definición. El tramo excluido no queda sin vigilar —es justo lo que mide RF-22, acotado a menos de
+un tick de `/clock`—. El cierre es `t_completada` **inclusive**: después el coordinador vuelve a
+`INACTIVA`, que es su reposo normal, y contarlo sería el mismo error por el otro extremo.
+
+**`null` no es `false`.** Sin `t_completada` la ventana no se puede recorrer, y decir «discontinua»
+confundiría *no terminó* con *se quedó sin nadie a cargo*. Son dos fallos distintos, el primero ya
+lo cuenta `c2_completada_sin_fallida`, y duplicarlo aquí inflaría el recuento de discontinuidades
+con misiones que nunca llegaron a relevar. El analizador saca esas misiones del denominador y las
+lista; **lo que no hace nunca es dar por continua una misión que nadie miró.**
+
+Se guardan los instantes y no sólo el booleano porque un `false` suelto no se diagnostica: con el
+`t` exacto se va al bag y se ve qué pasó.
+
 ### 3.8 `descriptivas` — se miden y se reportan, no deciden
 
 `error_rumbo_rad` · `desviacion_z_m` (por robot) · `distancia_recorrida_m` · `num_cuspides` ·
@@ -400,6 +446,25 @@ amenaza a la validez de S26 en el §11 del protocolo, no descubrirlo en la compa
   El analizador **no mezcla mayores**: esos datos se reportan aparte o la campaña se repite.
 - **Después de ejecutar la primera corrida de S24, ningún cambio es gratis.** Si hace falta uno, se
   anota en la bitácora de `ESTADO.md` con la fecha, el motivo y qué corridas quedan afectadas.
+
+### 7.1 Cambios aplicados
+
+| Versión | Fecha | Cambio | Qué pasa con los registros anteriores |
+|---|---|---|---|
+| `1.0.0` | 2026-08-22 | versión congelada inicial | — |
+| `1.1.0` | 2026-08-31 | se añade `veredicto.continuidad` (§3.7.1) | siguen siendo válidos; el `required` del campo está condicionado a `esquema_version == "1.1.0"` en el `allOf` del esquema |
+
+**Se aprovechó la ventana correcta.** El cambio entra en S21, con S24 a tres semanas y cero corridas
+de campaña ejecutadas: no hay ninguna que quede afectada. Si el hueco lo hubiera destapado el
+analizador en S24 —que es cuando se habría notado, al ver la métrica principal en blanco— la
+elección habría sido entre repetir la campaña o entregar sin RF-24.
+
+Los tres registros de S20 (`S20_A_M1`, `S20_A_M2`, `S20_RECIBIDA_01`) **se quedan en `1.0.0` y no se
+recomponen.** Son de condición A, donde la continuidad es `null` por definición del §3.4, así que
+recomponerlos añadiría un campo vacío y perdería la trazabilidad de con qué versión se escribieron.
+Que el esquema siga aceptándolos sin tocarlos es la prueba de que el versionado del §7 funciona: una
+comprobación de `prueba_componer_registro.py` valida ese caso explícitamente, en los dos sentidos
+—obligatorio hacia delante, inofensivo hacia atrás—.
 
 ---
 

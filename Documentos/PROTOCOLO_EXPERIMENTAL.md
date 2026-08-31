@@ -219,12 +219,41 @@ hueco = t_inicio_tramo2 − t_fin_tramo1
   §3.3.1 aplicado a ese punto).
 - **`t_inicio_tramo2`**: primer movimiento del robot del segundo nivel, con el criterio de §3.1.
 
-La continuidad **se cumple** si durante todo el intervalo `[t_solicitud, t_completada]` el campo
+La continuidad **se cumple** si durante todo el intervalo `[t_robot_activo, t_completada]` el campo
 `etapa` de `estado_mision` nunca vale `INACTIVA`, y `robot_activo` nunca queda vacío. Es decir: en
 ningún momento la misión se queda sin nadie a cargo.
 
 `hueco` se reporta aunque la continuidad se cumpla: un relevo correcto pero de 40 s es un mal
 resultado que la variable binaria escondería.
+
+> **Enmienda del 2026-08-31: el intervalo empieza en `t_robot_activo`, no en `t_solicitud`.** La
+> versión congelada el 22-ago decía `[t_solicitud, t_completada]`, y con la implementación de hoy esa
+> definición es **vacuamente falsa para toda misión, incluida una perfecta**. Entre las dos primeras
+> marcas está el estado `RECIBIDA`, que la §3.2 obliga a publicar con `robot_activo` vacío —es el
+> instante en que el servidor acepta el goal y todavía no ha planificado—, así que el intervalo
+> literal encuentra siempre un vacío deliberado y RF-24 valdría 0 % por construcción.
+>
+> Es el mismo defecto estructural que tuvo el tiempo de asignación hasta el 29-ago, y se corrige con
+> el mismo criterio: **una definición que da siempre el mismo número no está midiendo el sistema,
+> está midiendo la definición.** El tramo que se excluye no queda sin vigilar; es exactamente lo que
+> mide RF-22, acotado a menos de un tick de `/clock` (§3.2.2).
+>
+> El cierre es `t_completada` **inclusive**. Después el coordinador vuelve a `INACTIVA`, que es su
+> reposo normal, y contarlo sería el mismo error por el otro extremo.
+>
+> La enmienda se hace en S21, **antes de ejecutar ninguna corrida de campaña**, así que no hay datos
+> afectados. Se descubrió al escribir el analizador, que es para lo que sirve escribirlo antes de
+> necesitarlo.
+
+**Dónde queda registrado.** Desde la versión `1.1.0` del esquema (2026-08-31), en
+`veredicto.continuidad`: el booleano, la ventana evaluada y **los instantes exactos** de cada
+incumplimiento, para poder volver al bag por ellos. Hasta esa versión el campo no existía y RF-24
+—la variable de respuesta principal— no se podía calcular desde el registro. Ver §3.7.1 de
+[`ESQUEMA_REGISTRO_MISION.md`](ESQUEMA_REGISTRO_MISION.md).
+
+**No decide el éxito.** La §3.3 lista tres condiciones y ésta no es ninguna. Una misión puede
+cumplir las tres y aun así haber tenido un bache de coordinación; si la continuidad entrara en el
+`exito`, RF-23 y RF-24 dejarían de ser dos variables y la principal se perdería dentro de la otra.
 
 > **RNF-01 se verifica en la misma corrida:** la coordenada `z` de cada agente debe permanecer
 > constante durante toda la misión. Ningún robot cruza de nivel; lo que cruza es el mensaje. Se
@@ -308,8 +337,19 @@ causa externa (§8) y se repite.
 
 **N = 30 en simulación** (RF-26), **N entre 5 y 10 en hardware** (RF-27). Sale de la decisión D1 del
 2026-08-05, y la razón es que una proporción exige N: con 5 corridas y 4 aciertos el intervalo de
-confianza del 95 % va del 38 % al 96 %, que no permite afirmar nada; con 30 y 27 va del 80 % al
-97 %.
+confianza del 95 % va del 38 % al 96 %, que no permite afirmar nada; con 30 y 27 va del **74 % al
+97 %**, que ya permite afirmar algo.
+
+**El método es el intervalo de Wilson al 95 %**, y conviene dejarlo escrito porque hasta ahora estaba
+implícito. Se deduce del propio ejemplo de arriba: 4 de 5 da 37,6–96,4 % con Wilson, y ninguna otra
+construcción habitual da eso (Clopper-Pearson daría 28–99 %, Wald 45–100 %). `analizar_campana.py`
+usa Wilson por eso, para que los números del informe cuadren con los que este documento ya tenía.
+
+> **Corregido el 2026-08-31.** Este párrafo decía «del 80 % al 97 %» para 27 de 30. Wilson da
+> **74,4–96,5 %**: el 97 salía de Wilson y el 80 de Wald, mezclados. El error se detectó al
+> implementar el analizador, comprobando que reprodujera las cifras ya escritas aquí. Es una
+> corrección de aritmética, no un cambio de criterio ni de umbral, y **el intervalo real es más ancho
+> que el que este documento prometía**, no más estrecho: nadie sale beneficiado. Ver también el §11.
 
 Los vehículos físicos ejecutan el protocolo **como demostración funcional**, no como fuente de la
 estadística. Las dos cosas se reportan por separado y nunca se agregan en una sola tasa.
@@ -468,8 +508,22 @@ En orden. **Escrito el 22-ago, cuando nada de esto existía; el estado es del 20
    15 de B. La prueba comprueba, sobre el catálogo real, que **las 30 se pueden planificar** y que
    la condición que escribe el CSV es la misma que `condicion_de()` calculará en el coordinador; un
    listado con una misión implanificable no daría error hasta quemar una corrida.
-6. **PENDIENTE — Analizador de campaña**: lee los N registros y produce las cuatro métricas con sus
-   intervalos de confianza.
+6. **HECHO — Analizador de campaña**: lee los N registros y produce las cuatro métricas con sus
+   intervalos de confianza. Es `herramientas/analizar_campana.py`, con su prueba en
+   `herramientas/prueba_analizar_campana.py` (43 comprobaciones, sin ROS y sin bags). No abre bags
+   ni necesita el workspace: si los registros existen, corre en cualquier máquina en menos de un
+   segundo. Escrito el 2026-08-31, tres semanas antes de S24 y a propósito: **encontró dos defectos
+   que en S24 habrían sido irreparables** —que RF-24 no tenía campo en el esquema (§3.4), y que el
+   intervalo de confianza citado en el §6.1 y el §11 no reproducía—.
+
+   Comprueba la integridad **antes** de calcular, porque el §8 nombra tres formas de corromper una
+   campaña y las tres son detectables desde los archivos: causa de descarte fuera del enumerado
+   cerrado, `descartada` contradiciendo `causa_descarte`, y `exito: null` sin descarte. Un registro
+   con cualquiera de ellas **no se cuenta en ningún sitio** —ni como éxito, ni como fallo, ni como
+   descarte—, de modo que el N deja de cuadrar con los archivos leídos y el error es imposible de
+   pasar por alto. Rechaza además agregar lo que el §6.1 prohíbe agregar: dos bancos o dos campañas
+   en una misma tasa. Devuelve código de salida distinto de cero si la campaña no es válida, para
+   poder encadenarlo en el runbook.
 7. **HECHO — Banco del tiempo de asignación** (§3.2.2). Corre el coordinador aislado, sin
    Gazebo, mide sobre reloj de pared y reporta mediana y máximo. Es lo único que puede dar la cifra
    de RF-22, y no depende de la campaña. Es `herramientas/banco_tiempo_asignacion.py`, con su prueba
@@ -538,9 +592,12 @@ Lo que puede hacer que estos números signifiquen otra cosa de la que parecen.
 - **La simulación es Humble y el hardware es Jazzy** (R8). `NavigateToPose` difiere entre las dos
   distribuciones. Las corridas físicas y las simuladas **no son la misma condición experimental**, y
   por eso se reportan por separado y no se agregan.
-- **N = 30 da intervalos anchos.** Con 27 aciertos, el IC del 95 % va del 80 % al 97 %. Las
-  afirmaciones del informe tienen que caber en ese ancho: «la tasa supera el 80 %» es defendible,
-  «la tasa es del 90 %» no lo es.
+- **N = 30 da intervalos anchos.** Con 27 aciertos, el IC de Wilson al 95 % va del **74 % al 97 %**.
+  Las afirmaciones del informe tienen que caber en ese ancho: «la tasa supera el 74 %» es
+  defendible, «la tasa es del 90 %» no lo es. *(Corregido el 2026-08-31: este punto decía 80 %, y
+  con 27 aciertos ese límite no se sostiene —haría falta llegar a 28—. `analizar_campana.py` imprime
+  la frase defendible calculada desde los datos reales, en vez de desde un número escrito a mano,
+  precisamente para que no vuelva a pasar.)*
 - **Un solo entorno.** Todo se mide en los dos pasillos de `mundo_definitivo_piso{1,2}.world`. Los
   resultados describen el desempeño **en ese edificio**, y así hay que enunciarlos. Generalizar a «entornos interiores» sería
   ir más allá de los datos.

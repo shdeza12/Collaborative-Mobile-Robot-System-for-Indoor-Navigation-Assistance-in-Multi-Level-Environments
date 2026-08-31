@@ -266,6 +266,36 @@ source ~/deepracer_sim_ws/install/setup.bash && python3 herramientas/componer_re
 **Esperado:** un JSON validado contra el esquema, sin ningún campo que haya que rellenar a mano.
 `--piloto` es obligatorio aquí: sin él el registro entraría como dato de campaña.
 
+**Terminal 4, sin sourcear nada** —el analizador no abre bags y no necesita ROS:
+
+```bash
+python3 herramientas/analizar_campana.py Documentos/Evidencia/registros --campana OE4_simulacion
+```
+
+**Esperado:** el informe con las cuatro métricas, y `VEREDICTO: VALIDA`. Se corre **después de cada
+corrida**, no sólo al final de las 30: es lo que convierte «el registro es procesable» de una
+afirmación en una comprobación, y es la única forma de enterarse de que algo se está registrando mal
+en la corrida 2 y no en la 30.
+
+El guion **sale con código 0 sólo si el veredicto es `VALIDA`**, así que se puede encadenar. Y `VALIDA`
+exige que quede **al menos una corrida que contar**: si el `--campana` está mal escrito o el
+directorio es el que no era, el lote queda vacío y responde `INVALIDA` diciendo de qué se compone el
+cero. Un informe con `Registros leidos: 0` y veredicto favorable sería la señal más fuerte del
+programa emitida desde ninguna evidencia; por eso no existe.
+
+**Qué mirar, en este orden:**
+
+1. **`ERRORES DE INTEGRIDAD`** — si aparece alguno, el registro se contradice y no se cuenta en
+   ningún sitio. Arreglar antes de seguir; nunca «ya lo veremos al final».
+2. **El N de la tasa de éxito** — tiene que coincidir con las corridas hechas. Si no coincide, hay
+   un registro descartado en silencio o con error.
+3. **`ALERTAS`** — cada una nombra las misiones afectadas. Una asignación por encima del tick de
+   `/clock` o una continuidad rota **no se anotan y se sigue**: son resultados, y hay que ir al bag
+   por los instantes que el registro ya guarda.
+
+Con una sola corrida los intervalos salen enormes y saltará la alerta de RF-26. Es correcto: con
+n = 1 no se afirma nada, y el analizador lo dice en vez de dejar que el número parezca un resultado.
+
 ---
 
 ## 8. Cuándo la corrida vale
@@ -278,7 +308,7 @@ el descarte se anota — el techo es el 20 %.
 | 1 | pose inicial de los dos dentro de **0,15 m** | paso 3 |
 | 2 | **RTF ≥ 0,99** | `rtf.json` del bag |
 | 3 | error de llegada **≤ 0,25 m** contra `/odom` | paso 7 |
-| 4 | el registro se compone **sin tocar un campo a mano** | paso 7 |
+| 4 | el registro se compone **sin tocar un campo a mano** y `analizar_campana.py` lo agrega sin errores de integridad | paso 7 |
 | 5 | número de relevos = **0** en condición A, **1** en B | resultado de la acción |
 
 **Criterio de cierre del piloto:** las cinco pasan, y los dos registros del §6 coinciden o se sabe
@@ -288,9 +318,16 @@ por qué no.
 
 ## 9. Lo que este runbook todavía no cubre
 
-1. **La comprobación 4 no se puede cerrar hasta que exista el analizador de campaña.** «Procesable
-   sin intervención manual» significa que un programa lo agrega, y ese programa es el pendiente 6
-   de la §9 del protocolo.
+1. ~~**La comprobación 4 no se puede cerrar hasta que exista el analizador de campaña.**~~
+   **Resuelto el 2026-08-31.** El analizador es `herramientas/analizar_campana.py` y ya está en el
+   paso 7. La comprobación 4 se cierra sola: si el registro no es procesable sin intervención
+   manual, el analizador lo dice y devuelve error.
+
+   Escribirlo destapó dos cosas que no se sabían, y las dos habrían sido irreparables en S24:
+   **RF-24 no tenía campo en el esquema** —la variable de respuesta principal del §2 del protocolo
+   no se podía calcular desde el registro—, resuelto en la versión `1.1.0`; y **el intervalo de
+   confianza citado en el §6.1 del protocolo no reproducía** (decía 80–97 % para 27 de 30, y Wilson
+   da 74–97 %). Ninguna de las dos se habría notado ejecutando corridas: sólo agregándolas.
 2. **No dice nada del banco físico.** Es el procedimiento de simulación. La campaña de hardware
    (RF-27) tiene otras condiciones iniciales y otra verdad de terreno, y su runbook no está escrito.
 3. **Las cinco corridas de pilotaje que pide la §7 no están planificadas una por una.** Ésta es la
