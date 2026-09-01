@@ -269,10 +269,10 @@ De aquí en adelante, donde ponga `<IP>` escribe esa dirección.
 
 ### Paso 3.2 — Copiar el programa
 
-**[PORTÁTIL — Terminal 2]**, desde la carpeta del proyecto:
+**[PORTÁTIL — Terminal 2]**, desde la **raíz del repositorio** —esté donde esté tu clon—:
 
 ```bash
-cd ~/Documents/Tesis && scp herramientas/teleop_mando.py deepracer@<IP>:~/
+scp herramientas/teleop_mando.py deepracer@<IP>:~/
 ```
 
 **Esperado:** te pide la contraseña del carro y luego muestra `teleop_mando.py 100%`.
