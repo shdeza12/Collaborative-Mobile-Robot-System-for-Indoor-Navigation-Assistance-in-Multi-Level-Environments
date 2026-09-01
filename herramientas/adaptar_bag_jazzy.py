@@ -36,12 +36,31 @@ almacenamiento, que no viene de serie:
 Son dos bloqueos independientes y hay que quitar los dos. Este guion quita el
 primero; el segundo pide una contrasena y no se puede automatizar aqui.
 
-LIMITACION
-----------
+LIMITACION, Y POR QUE YA NO ESTORBA
+-----------------------------------
 Un bag SIN `metadata.yaml` -- `bag_mapa_1456` es uno -- no se puede adaptar:
-toda la informacion que falta esta dentro del `.mcap` y leerla exige el propio
-lector que aun no hay. Se avisa y se sale, en vez de copiar la metadata de un
-bag hermano, que seria fabricar evidencia.
+toda la informacion que falta esta dentro del `.mcap`. Se avisa y se sale, en
+vez de copiar la metadata de un bag hermano, que seria fabricar evidencia.
+
+Puesto el plugin del apartado anterior (2026-09-01), **ese bag ya no hace falta
+adaptarlo**: se le apunta directamente al `.mcap` y rosbag2 saca los topicos del
+propio archivo.
+
+    StorageOptions(uri='mapas/bag_mapa_1456/bag_mapa_1456_0.mcap',
+                   storage_id='mcap')
+
+Asi se recuperaron sus 2649 barridos en 404,4 s. Al abrirlo avisa `no message
+indices found, falling back to reading in file order`, que es justamente la
+explicacion de la metadata ausente: el indice y la `metadata.yaml` se escriben
+al cerrar limpio, luego esa grabacion se corto de golpe.
+
+COMO SE COMPRUEBA QUE UN BAG SE LEE -- Y COMO NO
+------------------------------------------------
+`ros2 bag info` **no vale**: lee la `metadata.yaml` y no abre el `.mcap`, asi
+que con la metadata ya traducida por este guion pero sin el plugin contestaba
+"1703 mensajes" en un PC incapaz de leer un solo barrido. Hay que **leer un
+mensaje**: `SequentialReader.read_next()`, que es lo que fallaba con
+`RuntimeError: No storage could be initialized`.
 """
 
 import argparse

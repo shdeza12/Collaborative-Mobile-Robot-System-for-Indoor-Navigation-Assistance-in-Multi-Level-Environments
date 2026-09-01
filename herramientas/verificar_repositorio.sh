@@ -65,7 +65,9 @@ titulo '2. Una sola forma de montar el workspace'
 # mientras se edita el repositorio, y los arreglos nunca llegan a ejecutarse.
 # Se permiten las lineas que advierten contra la copia.
 paso 'ningun documento manda copiar el workspace'
-HITS=$(grep -n 'cp -r\|rsync' -- *.md Documentos/*.md Robot/*.md 2>/dev/null \
+# 'cp -r' con frontera de palabra: 'scp -r' es traer un archivo del vehiculo por
+# red, no copiar el workspace, y lo daba por malo (GUIA_PASADA_MAPEO.md).
+HITS=$(grep -nE '(^|[^[:alnum:]])cp -r|rsync' -- *.md Documentos/*.md Robot/*.md 2>/dev/null \
        | grep -viv 'nunca\|jamas\|jamás\|no copiar\|en vez de\|R7' | head -8)
 if [ -z "$HITS" ]; then bien
 else mal "$(printf '%s\n' "$HITS")
