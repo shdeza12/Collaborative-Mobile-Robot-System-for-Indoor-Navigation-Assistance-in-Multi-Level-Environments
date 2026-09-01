@@ -40,8 +40,23 @@ está comprobado y el de la tarjeta del DeepRacer no.
 1. **Botón de habilitación.** El carro solo se mueve mientras mantienes pulsado **ZR**.
 2. **Hombre muerto de 0,6 s.** Si `/joy` deja de llegar —mando apagado, wifi caído, `joy_node`
    muerto—, el carro para.
-3. **Diez ceros al salir**, tanto con `Ctrl-C` como si el programa revienta.
+3. **Diez ceros al salir**, con `Ctrl-C`, con `kill`, y si se cae la sesión SSH.
 4. **Límite de velocidad** al 0,35 del rango, 0,70 con turbo. El carro llega a 4 m/s.
+
+> **La protección 3 estuvo escrita y no funcionaba, hasta el 2026-09-01.** Se midió mandando la
+> señal **al proceso de Python** —no al `bash` que lo lanza, que fue el error del primer intento y
+> dio un falso «sale limpio»— y contando los mensajes publicados después: con `Ctrl-C` llegaban
+> **cero**. La causa es que `rclpy.init()` instala su propio manejador de `SIGINT` y `SIGTERM` que
+> **cierra el contexto antes** de que corra el bloque de limpieza, así que publicar los ceros
+> fallaba con `publisher's context is invalid`. El vehículo se quedaba con el último valor de
+> tracción **justo en la forma documentada de apagarlo**. Corregido pidiéndole a `rclpy` que no
+> toque las señales; ahora las tres —`SIGINT`, `SIGTERM`, `SIGHUP`— publican **exactamente 10**
+> mensajes y salen con código 0.
+>
+> **`SIGHUP` importa tanto como las otras dos y es la menos evidente:** el programa se arranca por
+> SSH, y si se cae la sesión —wifi, portátil suspendido, terminal cerrada— llega `SIGHUP`. **El
+> hombre muerto no cubre ese caso**, y esa es exactamente la razón por la que es peligroso: el
+> hombre muerto vive *dentro* del proceso, así que un proceso muerto no para nada.
 
 ### 0.4 Lo que necesitas a mano
 
@@ -49,6 +64,23 @@ está comprobado y el de la tarjeta del DeepRacer no.
 - El carro encendido y en la misma red wifi que el portátil.
 - Algo para levantar el carro y dejar **las ruedas al aire** (una caja, un libro grueso).
   No es opcional: la Parte 6 se hace así.
+
+### 0.5 Antes de tocar el carro: pasa la prueba de escritorio
+
+**[PORTÁTIL — Terminal 1]**
+
+```bash
+python3 herramientas/prueba_teleop_mando.py
+```
+
+**Esperado:** `Todas las comprobaciones pasan.` Son 30 comprobaciones de la lógica de decisión y
+del hombre muerto, y **no necesitan ROS, ni mando, ni carro** — así que también se pueden correr
+*en* el carro si hay dudas de que llegara la versión correcta.
+
+Cubren lo que la Parte 6 no puede reproducir a mano: el instante exacto del vencimiento, el
+arranque en frío antes del primer `/joy`, un mando que publica menos ejes de los pedidos, y el
+gatillo sin estrenar que lee `0.0`. **Si esto falla, no sigas:** la Parte 6 comprueba una vez el
+caso fácil, con el vehículo delante.
 
 ---
 
@@ -382,8 +414,15 @@ Cierra el `ros2 topic hz` con `Ctrl-C`. **Deja la Terminal 4 abierta**, la vas a
 
 6. **`Ctrl-C` en la Terminal 3:** las ruedas quedan quietas.
 
-> **El punto 5 es la única comprobación que de verdad importa.** Prueba el hombre muerto.
-> **Si el punto 5 falla, no bajes el carro al suelo.**
+7. **Cierra la Terminal 3 de golpe** (la `X` de la ventana, o `exit` mientras el programa corre)
+   con ZR pulsado y stick dado. Las ruedas tienen que **parar**.
+   - *Esto es la caída de la sesión SSH.* Hasta el 2026-09-01 **no paraba**, y era el único de
+     los siete puntos que fallaba.
+
+> **Los puntos 5 y 7 son las dos comprobaciones que de verdad importan**, y prueban cosas
+> distintas: el 5 es el hombre muerto —el programa sigue vivo y deja de recibir `/joy`—, el 7 es
+> la muerte del programa entero, que el hombre muerto **no** cubre.
+> **Si falla cualquiera de los dos, no bajes el carro al suelo.**
 
 Vuelve a encender el mando y a arrancar el programa antes de seguir.
 
