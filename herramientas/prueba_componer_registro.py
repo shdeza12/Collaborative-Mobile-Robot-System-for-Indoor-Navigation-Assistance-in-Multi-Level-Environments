@@ -520,6 +520,51 @@ def pruebas_de_continuidad():
     check("sin t_completada la continuidad es null, no false",
           c["continua"] is None and "ventana" in c["motivo"], f"-> {c}")
 
+    # LA COLISION DE MARCAS, que es el caso real y no un caso limite inventado.
+    #
+    # Excluir el preludio RECIBIDA comparando tiempos solo funciona si RECIBIDA
+    # y TRAMO_1 caen en instantes distintos. En el banco NO caen: /clock va a
+    # 10 Hz y la asignacion tarda entre 154 y 306 us, tres ordenes de magnitud
+    # por debajo del tick, asi que las dos transiciones se sellan con la MISMA
+    # marca. Salio en la primera corrida de condicion B, la del 2026-08-30
+    # (bag S21_dominio_unico_001), donde las dos van en t=402.400 y el registro
+    # declaraba discontinua una mision que nunca perdio la custodia.
+    #
+    # No es un caso raro: mientras la asignacion tarde microsegundos va a pasar
+    # en TODAS las misiones, y RF-24 daria 0 % de continuidad por construccion,
+    # que es justo el defecto contra el que se escribio esta funcion. La prueba
+    # del relevo limpio no lo cogio porque usa 10.15 y 10.2, dos bins distintos.
+    colision = [
+        (402.0, INACTIVA, "", ""), (402.4, RECIBIDA, "", "m1"),
+        (402.4, TRAMO_1, "robot1", "m1"), (421.0, TRANSFERENCIA, "robot1", "m1"),
+        (421.0, TRAMO_2, "robot2", "m1"), (450.0, COMPLETADA, "robot2", "m1"),
+    ]
+    m_col = {"t_solicitud": 402.4, "t_robot_activo": 402.4, "t_completada": 450.0}
+    c = continuidad_de(colision, m_col, "B")
+    check("el RECIBIDA que comparte marca con TRAMO_1 no rompe la continuidad",
+          c["continua"] is True and c["instantes_sin_agente"] == [], f"-> {c}")
+
+    # El mismo defecto por el otro extremo. El coordinador vuelve a INACTIVA al
+    # terminar -es su reposo normal- y si ese reposo cae en el mismo tick que
+    # COMPLETADA, cerrar por tiempo lo mete dentro de la ventana. En la corrida
+    # del 30-ago no paso porque el reposo tardo, pero es la misma comparacion
+    # de tiempos y falla igual.
+    cierre = colision + [(450.0, INACTIVA, "", "")]
+    c = continuidad_de(cierre, m_col, "B")
+    check("el INACTIVA que comparte marca con COMPLETADA tampoco la rompe",
+          c["continua"] is True and c["instantes_inactiva"] == [], f"-> {c}")
+
+    # Y la colision NO puede volverse una excusa para dejar de mirar: si dentro
+    # de la ventana, despues del arranque, hay un hueco real, sigue contando.
+    colision_rota = [
+        (402.4, RECIBIDA, "", "m1"), (402.4, TRAMO_1, "robot1", "m1"),
+        (421.0, TRANSFERENCIA, "", "m1"), (421.1, TRAMO_2, "robot2", "m1"),
+        (450.0, COMPLETADA, "robot2", "m1"),
+    ]
+    c = continuidad_de(colision_rota, m_col, "B")
+    check("con marcas colisionadas, un hueco real sigue rompiendo la continuidad",
+          c["continua"] is False and c["instantes_sin_agente"] == [421.0], f"-> {c}")
+
     # §3.4: "Solo aplica a misiones cuyo origen y destino estan en niveles
     # distintos".
     c = continuidad_de(limpia, marcas, "A")
@@ -532,6 +577,45 @@ def pruebas_de_continuidad():
     v = veredicto_de(marcas_de(rota, mov, "B"), rota, 0.19, "B", 1)
     check("una mision discontinua puede seguir siendo un exito del §3.3",
           v["exito"] is True, f"-> {v}")
+
+
+def pruebas_de_escenario(esquema):
+    """procedencia.escenario_por_robot, anadido el 2026-09-01.
+
+    Desde el 2026-08-23 el mundo es del NIVEL, no del proyecto: robot1 corre
+    mundo_definitivo_piso1.world y robot2 el del piso 2. Una mision de condicion
+    B usa los dos a la vez, y 'mundo'/'mapa' son cadenas sueltas que solo caben
+    uno. Como la mitad de la campana es B, la mitad de los registros estaba
+    guardando media escena.
+
+    El campo es OPCIONAL a proposito. Anadirlo como obligatorio invalidaria los
+    cuatro registros ya compuestos y obligaria a rehacerlos desde bags de 53 MiB
+    que viven fuera del repositorio; no hay razon para depender de que sigan
+    ahi.
+    """
+    r = registro_valido()
+    check("un registro SIN escenario_por_robot sigue siendo valido",
+          valida(r, esquema), "el campo es opcional, no rompe los ya compuestos")
+
+    r["procedencia"]["escenario_por_robot"] = {
+        "robot1": {"mundo": "mundo_definitivo_piso1.world",
+                   "mapa": "Robot/aws-deepracer/deepracer_bringup/maps/"
+                           "mundo_definitivo_piso1.yaml"},
+        "robot2": {"mundo": "mundo_definitivo_piso2.world",
+                   "mapa": "Robot/aws-deepracer/deepracer_bringup/maps/"
+                           "mundo_definitivo_piso2.yaml"},
+    }
+    check("un registro CON los dos escenarios es valido", valida(r, esquema))
+
+    # Media entrada es peor que ninguna: valida, se agrega, y en S26 alguien
+    # reproduce el piso 2 sin mapa creyendo que lo tiene.
+    r["procedencia"]["escenario_por_robot"]["robot2"] = {
+        "mundo": "mundo_definitivo_piso2.world"}
+    check("una entrada sin 'mapa' se rechaza", not valida(r, esquema))
+
+    r["procedencia"]["escenario_por_robot"]["robot2"] = {
+        "mundo": "m.world", "mapa": "m.yaml", "nivel": 2}
+    check("una entrada con campos de mas se rechaza", not valida(r, esquema))
 
 
 def pruebas_de_bag(esquema):
@@ -585,6 +669,39 @@ def pruebas_de_bag(esquema):
               f"-> {auto['verdad_de_terreno']['pose_final']}")
         check("el registro con el error calculado sigue validando",
               valida(auto, esquema), _por_que(auto, esquema))
+
+        # El escenario se DERIVA de los robots que corrieron, sin banderas. La
+        # version anterior lo pedia por --mundo/--mapa, y un campo de
+        # reproducibilidad que depende de acordarse de teclearlo no es un campo
+        # de reproducibilidad: el 2026-08-29 se olvido y los dos primeros
+        # registros salieron con la procedencia vacia. La fuente es
+        # pose_por_defecto(), la MISMA que usa robot.sh para lanzar.
+        esc = auto["procedencia"].get("escenario_por_robot", {})
+        check("el escenario se deriva solo, sin --mundo ni --mapa",
+              set(esc) == {"robot1", "robot2"}, f"-> {sorted(esc)}")
+        check("y cada robot lleva el mundo de SU nivel, no uno comun",
+              esc.get("robot1", {}).get("mundo") != esc.get("robot2", {}).get("mundo")
+              and "piso1" in esc.get("robot1", {}).get("mundo", ""),
+              f"-> {esc}")
+        check("las rutas del escenario son relativas a la raiz del repositorio",
+              all(not v.startswith("/") and "$HOME" not in v
+                  for e in esc.values() for v in e.values()), f"-> {esc}")
+        check("mundo y mapa sueltos son los del robot que INICIA la mision",
+              auto["procedencia"]["mundo"] == esc["robot1"]["mundo"]
+              and auto["procedencia"]["mapa"] == esc["robot1"]["mapa"],
+              f"-> {auto['procedencia']['mundo']}")
+
+        # La anulacion a mano tiene que seguir ganando: en el banco fisico no
+        # hay pose_por_defecto que valga porque no hay Gazebo.
+        forzado = componer(ruta, banco="simulacion", campana="prueba",
+                           rtf=0.995, mundo="otro.world", mapa="otro.yaml")
+        check("--mundo y --mapa siguen pisando lo derivado",
+              forzado["procedencia"]["mundo"] == "otro.world"
+              and forzado["procedencia"]["mapa"] == "otro.yaml",
+              f"-> {forzado['procedencia']['mundo']}")
+        check("pero la anulacion no borra el escenario por robot",
+              set(forzado["procedencia"].get("escenario_por_robot", {}))
+              == {"robot1", "robot2"})
 
         # Pasarlo a mano gana: permite rehacer un registro con una medida
         # revisada sin tocar el bag.
@@ -779,6 +896,8 @@ def main():
     pruebas_de_marcas()
     print("Continuidad entre niveles (RF-24)")
     pruebas_de_continuidad()
+    print("Escenario por robot (el mundo es del nivel)")
+    pruebas_de_escenario(esquema)
     print("Lectura del bag y ensamblado (necesita el workspace sourceado)")
     pruebas_de_bag(esquema)
     print(f"\n{len(fallos)} fallo(s).")

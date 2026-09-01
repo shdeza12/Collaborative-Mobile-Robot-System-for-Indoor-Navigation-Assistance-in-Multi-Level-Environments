@@ -97,9 +97,22 @@ Se dice explícitamente para que nadie la cite de más:
 
 1. **Es UNA corrida, no una campaña.** El protocolo pide **N = 30 con sorteo por semilla**. Esto es
    n = 1 y sin sortear. No sostiene ninguna afirmación sobre *tasa de éxito*.
-2. **No hay registro compuesto de esta misión.** Existe el bag; no se pasó por
-   `componer_registro.py`, así que no está en el formato que la campaña va a agregar. Hasta que lo
-   esté, no es un dato de campaña sino una demostración.
+2. ~~**No hay registro compuesto de esta misión.**~~ **Resuelto el 2026-09-01.** El registro está en
+   [`registros/S21_dominio_unico_001.json`](registros/S21_dominio_unico_001.json), validado contra
+   el esquema 1.1.0. Sigue siendo n = 1 y sin sortear —lo de arriba manda—, pero ya está en el
+   formato que la campaña agrega. Componerlo destapó dos defectos del compositor, los dos
+   arreglados antes de escribirlo:
+
+   - **RF-24 salía `continua: false` en una misión que nunca perdió la custodia.** `continuidad_de()`
+     recortaba la ventana comparando tiempos para excluir el `RECIBIDA` de agente vacío, y aquí
+     `RECIBIDA` y `TRAMO_1` comparten sello —los dos en t=402,400— porque `/clock` va a 10 Hz y la
+     asignación tarda microsegundos. Como eso pasa en toda misión, RF-24 habría dado 0 % de
+     continuidad por construcción: el mismo defecto estructural del punto 3, por otra vía. Ahora la
+     ventana se recorta por posición en la secuencia, no por tiempo.
+   - **La procedencia guardaba media escena.** Desde el 23-ago el mundo es del nivel, así que una
+     condición B usa dos mundos y dos mapas, y `procedencia.mundo`/`.mapa` son cadenas sueltas. Se
+     añadió `escenario_por_robot` al esquema —opcional, para no invalidar lo ya compuesto— y el
+     compositor lo deriva de los robots que corrieron en vez de pedirlo por bandera.
 3. **El tiempo de asignación de esta corrida no vale**, y no por esta corrida: todo sello del bag
    está cuantizado a 100 ms y la asignación tarda ~0,17 ms. Los seis intervalos entre marcas de esta
    misión son múltiplos exactos de 0,1 s, lo que lo confirma. La cifra sale del banco, no de aquí

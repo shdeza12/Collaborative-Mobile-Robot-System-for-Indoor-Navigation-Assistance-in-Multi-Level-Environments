@@ -99,6 +99,20 @@ def _primero(estados, predicado):
     return None
 
 
+def _indice(estados, predicado):
+    """Posicion del primer estado que cumple el predicado, o None.
+
+    El hermano de _primero() para cuando hace falta cortar la secuencia y no
+    solo fechar el evento. Dos estados distintos pueden compartir instante -con
+    /clock a 10 Hz pasa en cada mision, ver continuidad_de()-, asi que el
+    instante no identifica un estado y el indice si.
+    """
+    for i, (_, etapa, robot, _) in enumerate(estados):
+        if predicado(etapa, robot):
+            return i
+    return None
+
+
 def marcas_de(estados, movimientos, condicion):
     """Las siete marcas de la §3.5, en segundos del mismo reloj.
 
@@ -228,21 +242,36 @@ def continuidad_de(estados, marcas, condicion):
     existe para detectar, y meterlo en el veredicto lo escondaria dentro de un
     'exito: false' que ya vendria dado por otra causa.
 
-    **La ventana empieza en t_robot_activo y no en t_solicitud, y esto es una
-    precision necesaria del §3.4, no una licencia.** Entre las dos marcas esta
-    el estado RECIBIDA, que el §3.2 obliga a publicar con robot_activo VACIO
-    -es el instante en que el servidor acepta el goal y todavia no ha
-    planificado-. Aplicando el intervalo literal, ese vacio deliberado haria que
-    TODA mision saliera discontinua, incluida una perfecta, y RF-24 valdria 0 %
-    por construccion. Es el mismo defecto estructural que tuvo el tiempo de
-    asignacion hasta el 2026-08-29: una definicion que da siempre el mismo
-    numero no esta midiendo el sistema, esta midiendo la definicion. El tramo
-    excluido no queda sin vigilar: es justo lo que mide RF-22, acotado a menos
-    de un tick de /clock.
+    **La ventana empieza en el TRAMO_1 con agente y no en la solicitud, y esto
+    es una precision necesaria del §3.4, no una licencia.** Antes de esa
+    transicion esta el estado RECIBIDA, que el §3.2 obliga a publicar con
+    robot_activo VACIO -es el instante en que el servidor acepta el goal y
+    todavia no ha planificado-. Aplicando el intervalo literal, ese vacio
+    deliberado haria que TODA mision saliera discontinua, incluida una perfecta,
+    y RF-24 valdria 0 % por construccion. Es el mismo defecto estructural que
+    tuvo el tiempo de asignacion hasta el 2026-08-29: una definicion que da
+    siempre el mismo numero no esta midiendo el sistema, esta midiendo la
+    definicion. El tramo excluido no queda sin vigilar: es justo lo que mide
+    RF-22, acotado a menos de un tick de /clock.
 
-    El cierre es t_completada INCLUSIVE. Despues el coordinador vuelve a
-    INACTIVA -es su reposo normal- y contarlo seria el mismo error por el otro
-    extremo.
+    El cierre es COMPLETADA INCLUSIVE. Despues el coordinador vuelve a INACTIVA
+    -es su reposo normal- y contarlo seria el mismo error por el otro extremo.
+
+    **Los dos extremos se recortan por POSICION en la secuencia, no comparando
+    tiempos, y esa es la unica forma de que el recorte funcione.** Comparar
+    tiempos supone que cada evento tiene una marca propia, y en el banco no la
+    tiene: /clock va a 10 Hz y la asignacion tarda entre 154 y 306 us, tres
+    ordenes de magnitud por debajo del tick, de modo que RECIBIDA y TRAMO_1 se
+    sellan con la MISMA marca y ningun 't0 <= t' puede separarlos. Se vio en la
+    primera corrida de condicion B, la del 2026-08-30 (bag
+    S21_dominio_unico_001): las dos transiciones en t=402.400, y el registro
+    declaraba discontinua una mision que nunca perdio la custodia. Como la
+    asignacion siempre va a tardar microsegundos, el fallo no era del caso sino
+    de todos los casos, y RF-24 habria salido 0 % - exactamente el defecto que
+    el parrafo anterior dice evitar, reintroducido por la forma de evitarlo.
+    Lo mismo vale por el extremo de cierre si el reposo cae en el tick de
+    COMPLETADA. Las marcas siguen publicandose en 'ventana' porque describen el
+    intervalo; lo que ya no hacen es delimitarlo.
 
     Devuelve 'continua' None, y no False, cuando la ventana no se puede cerrar.
     'No termino' y 'se quedo sin agente' son dos fallos distintos; el primero ya
@@ -267,7 +296,29 @@ def continuidad_de(estados, marcas, condicion):
                            "cuenta el veredicto, no esta metrica")
         return vacia
 
-    dentro = [(t, e, r) for t, e, r, _ in estados if t0 <= t <= t1]
+    # Los mismos dos eventos que fijaron t_robot_activo y t_completada en
+    # marcas_de(), pero localizados por indice. Ver el docstring: con /clock a
+    # 10 Hz las marcas no son identificadores unicos y no sirven para cortar.
+    i0 = _indice(estados, lambda e, r: e == TRAMO_1 and r)
+    i1 = _indice(estados, lambda e, r: e == COMPLETADA)
+    if i0 is None or i1 is None:
+        falta = "TRAMO_1 con agente" if i0 is None else "COMPLETADA"
+        vacia["motivo"] = (f"ventana abierta: las marcas dicen que hubo "
+                           f"{falta}, pero no aparece en la secuencia de "
+                           "estados. Marcas y estados no salen del mismo bag")
+        return vacia
+    if i1 < i0:
+        # El COMPLETADA precede al arranque: es de otra mision que el filtro de
+        # residuos dejo pasar. Sin este corte el intervalo saldria vacio y la
+        # funcion devolveria 'continua: true' por no haber mirado nada, que es
+        # la peor respuesta posible - un falso positivo silencioso en la
+        # variable de respuesta principal.
+        vacia["motivo"] = ("secuencia incoherente: el COMPLETADA aparece antes "
+                           "del TRAMO_1 con agente, asi que el bag mezcla dos "
+                           "misiones y no hay una ventana que recorrer")
+        return vacia
+
+    dentro = [(t, e, r) for t, e, r, _ in estados[i0:i1 + 1]]
     inactiva = [t for t, e, r in dentro if e == INACTIVA]
     sin_agente = [t for t, e, r in dentro if not r]
 
@@ -470,7 +521,8 @@ def componer(ruta_bag, banco, campana, error_posicion_m=None, rtf=None,
             "campana": campana, "banco": banco, "condicion": condicion,
             "semilla": semilla, "es_piloto": es_piloto,
         },
-        "procedencia": _procedencia(ruta_bag, distro, mundo, mapa),
+        "procedencia": _procedencia(ruta_bag, distro, mundo, mapa,
+                                    _robots_de(estados)),
         "solicitud": _solicitud(crudos, condicion, niveles, origen, destino),
         "marcas": marcas,
         "verdad_de_terreno": _verdad(banco, error_posicion_m, pose_llegada,
@@ -491,6 +543,76 @@ def _yaw_de(q):
 
 def _raiz():
     return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def _robots_de(estados):
+    """Los robots que estuvieron a cargo, en el orden en que lo estuvieron.
+
+    Sale de robot_activo y no del catalogo de robots conocidos: interesa quien
+    CORRIO esta mision, que en una condicion A es uno solo aunque el banco tenga
+    dos pilas levantadas. Los vacios -el preludio RECIBIDA y el reposo- no son
+    robots.
+    """
+    vistos = []
+    for _, _, robot, _ in estados:
+        if robot and robot not in vistos:
+            vistos.append(robot)
+    return vistos
+
+
+def _escenario_de(robots):
+    """{robot: {mundo, mapa}} leido de la MISMA fuente que usa robot.sh.
+
+    Desde el 2026-08-23 el mundo es del nivel y no del proyecto -antes los dos
+    robots cargaban 'mundo_definitivo.world', que traia los dos pisos en la
+    misma escena y hacia que el LiDAR de robot1, con 10 m de alcance y 5,44 m
+    entre pasillos, midiera paredes del piso 2-. Asi que en una mision de
+    condicion B hay DOS mundos y DOS mapas, y no caben en dos cadenas sueltas.
+
+    Se DERIVA en vez de pedirse por bandera. Un campo de reproducibilidad que
+    depende de que alguien se acuerde de teclearlo no es un campo de
+    reproducibilidad: el 2026-08-29 se olvido y los dos primeros registros
+    salieron con la procedencia vacia, que es de donde viene el AVISO del final
+    de este archivo.
+
+    LIMITACION, y hay que tenerla presente al recomponer bags viejos: esto lee
+    el arbol de trabajo ACTUAL, no el del momento de la corrida. Componer poco
+    despues de correr es honesto; recomponer un bag de hace un mes con la
+    configuracion de hoy puede mentir. 'procedencia.commit' y
+    'repositorio_limpio' quedan en el registro justo para que el lector pueda
+    comprobarlo.
+
+    Si la configuracion no se puede leer se devuelve {} y el registro sale sin
+    el campo, que es opcional. Antes que inventar una escena, el §4.2 manda
+    quedarse callado.
+    """
+    lanzadores = os.path.join(_raiz(), "Robot", "aws-deepracer",
+                              "deepracer_bringup", "launch")
+    mapas = os.path.join("Robot", "aws-deepracer", "deepracer_bringup", "maps")
+    try:
+        if lanzadores not in sys.path:
+            sys.path.insert(0, lanzadores)
+        from deepracer_raiz_repo import pose_por_defecto
+    except Exception:
+        return {}
+
+    escenario = {}
+    for robot in robots:
+        try:
+            p = pose_por_defecto(robot)
+        except Exception:
+            continue
+        # '-' o vacio significa 'ese nivel todavia no tiene el archivo'. Media
+        # entrada es peor que ninguna: valida, se agrega, y en S26 alguien
+        # reproduce un piso sin mapa creyendo que lo tiene.
+        mundo, mapa = p.get("mundo") or "", p.get("mapa") or ""
+        if not mundo or not mapa:
+            continue
+        # Las mismas rutas que arma robot.sh: el mundo cuelga de la raiz del
+        # repositorio y el mapa de deepracer_bringup/maps.
+        escenario[robot] = {"mundo": _relativa(mundo),
+                            "mapa": _relativa(os.path.join(mapas, mapa))}
+    return escenario
 
 
 def _catalogo():
@@ -541,7 +663,7 @@ def _git(*args):
         return ""
 
 
-def _procedencia(ruta_bag, distro=None, mundo=None, mapa=None):
+def _procedencia(ruta_bag, distro=None, mundo=None, mapa=None, robots=()):
     """De donde salio esta medida. Sin esto no se puede reproducir en S26."""
     import hashlib
     with open(_catalogo(), "rb") as f:
@@ -560,6 +682,16 @@ def _procedencia(ruta_bag, distro=None, mundo=None, mapa=None):
             f"jazzy. Sourcear ROS, o pasar --distro si se esta componiendo en "
             f"el PC un bag grabado en el carro.")
 
+    # La escena completa, un mundo y un mapa por robot. Ver _escenario_de().
+    escenario = _escenario_de(robots)
+
+    # 'mundo' y 'mapa' sueltos son los del robot que INICIA. Se quedan porque el
+    # esquema los exige desde 1.0.0 y porque en condicion A -un solo robot- son
+    # la escena entera. En condicion B son media, y por eso existe el otro
+    # campo. Lo pasado a mano gana: en el banco fisico no hay pose_por_defecto
+    # que valga, porque no hay Gazebo del que sacarla.
+    primero = escenario.get(robots[0], {}) if robots else {}
+
     return {
         "commit": _git("rev-parse", "--short", "HEAD"),
         "etiqueta": _git("describe", "--tags", "--exact-match"),
@@ -575,8 +707,11 @@ def _procedencia(ruta_bag, distro=None, mundo=None, mapa=None):
         # del 2026-08-29, se compusieron leyendolos del sistema vivo:
         # 'pgrep -a gzserver' para el mundo y 'ros2 param get /<ns>/map_server
         # yaml_filename' para el mapa.
-        "mundo": _relativa(mundo or os.environ.get("TESIS_MUNDO", "")),
-        "mapa": _relativa(mapa or os.environ.get("TESIS_MAPA", "")),
+        "mundo": _relativa(mundo or os.environ.get("TESIS_MUNDO", "")
+                           or primero.get("mundo", "")),
+        "mapa": _relativa(mapa or os.environ.get("TESIS_MAPA", "")
+                          or primero.get("mapa", "")),
+        **({"escenario_por_robot": escenario} if escenario else {}),
         "catalogo_puntos": "puntos_interes.yaml",
         # Las poses del catalogo se movieron tres veces en agosto. Un registro
         # que no lo fije no se puede comparar con otro: 'ETM1' puede no ser el
@@ -831,12 +966,15 @@ def main():
                    help="Por omision, ROS_DISTRO. Hace falta al componer en el "
                         "PC un bag grabado en el carro.")
     p.add_argument("--mundo", default=None,
-                   help="Ruta del .world. Si se omite se usa TESIS_MUNDO, y si "
-                        "tampoco esta, el campo queda vacio y se avisa. Del "
-                        "sistema vivo sale con 'pgrep -a gzserver'.")
+                   help="ANULACION. Por defecto el mundo se deriva de los "
+                        "robots que corrieron, con la misma configuracion que "
+                        "usa robot.sh para lanzarlos. Pasarlo solo cuando esa "
+                        "derivacion no valga: banco fisico, o un lanzamiento "
+                        "con 'world:=' a mano.")
     p.add_argument("--mapa", default=None,
-                   help="Ruta del .yaml del mapa. Del sistema vivo sale con "
-                        "'ros2 param get /<ns>/map_server yaml_filename'.")
+                   help="ANULACION del mapa, como --mundo. Del sistema vivo "
+                        "sale con 'ros2 param get /<ns>/map_server "
+                        "yaml_filename'.")
     p.add_argument("--salida", required=True)
     a = p.parse_args()
 
@@ -872,11 +1010,27 @@ def main():
 
     # El esquema acepta cadena vacia en estos dos -son 'string' a secas-, asi
     # que si no se avisa aqui el hueco no lo detecta nadie hasta S26, cuando ya
-    # no se puede reconstruir de que mundo salio la medida.
+    # no se puede reconstruir de que mundo salio la medida. Desde el 2026-09-01
+    # se derivan solos y esto ya casi nunca salta; queda porque la derivacion
+    # puede fallar en silencio -configuracion ilegible, un robot que no esta en
+    # pose_por_defecto- y ese silencio es exactamente lo que hay que romper.
     for campo in ("mundo", "mapa"):
         if not registro["procedencia"][campo]:
             print(f"AVISO: procedencia.{campo} queda vacio. El registro valida "
-                  f"igual, pero no se podra reproducir. Pasarlo con --{campo}.",
+                  f"igual, pero no se podra reproducir. No se pudo derivar de "
+                  f"los robots de la mision; pasarlo con --{campo}.",
+                  file=sys.stderr)
+
+    # Y el caso que el bucle de arriba NO ve: una condicion B con un solo
+    # escenario. 'mundo' y 'mapa' irian llenos -son los del robot que inicia- y
+    # el registro pareceria completo llevando media escena, que es justo el
+    # defecto que se arreglo el 2026-09-01. Media entrada es peor que ninguna.
+    if registro["mision"]["condicion"] == "B":
+        escenario = registro["procedencia"].get("escenario_por_robot", {})
+        if len(escenario) < 2:
+            print(f"AVISO: la mision es de condicion B -dos niveles, dos "
+                  f"mundos- y escenario_por_robot trae {len(escenario)}. "
+                  f"El registro valida, pero no describe la escena entera.",
                   file=sys.stderr)
 
     # Validar ANTES de escribir. Sin esto, 'congelado' es una promesa.

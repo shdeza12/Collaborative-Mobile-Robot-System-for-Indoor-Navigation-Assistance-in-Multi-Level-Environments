@@ -38,8 +38,26 @@
         },
         "repositorio_limpio": {"type": "boolean"},
         "distro": {"enum": ["humble", "jazzy"]},
-        "mundo": {"type": "string"},
-        "mapa": {"type": "string"},
+        "mundo": {
+          "comentario": "El del robot que INICIA la mision. En condicion B no es toda la escena: leer escenario_por_robot.",
+          "type": "string"
+        },
+        "mapa": {
+          "comentario": "El del robot que INICIA la mision. En condicion B no es toda la escena: leer escenario_por_robot.",
+          "type": "string"
+        },
+        "escenario_por_robot": {
+          "comentario": "Desde el 2026-08-23 el mundo es del NIVEL y no del proyecto: robot1 corre el del piso 1 y robot2 el del piso 2. Una mision de condicion B usa los dos a la vez y 'mundo'/'mapa' solo caben uno, asi que la mitad de la campana guardaba media escena. Opcional a proposito: hacerlo obligatorio invalidaria los registros compuestos antes del 2026-09-01, que habria que rehacer desde bags de 53 MiB guardados fuera del repositorio.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "object", "additionalProperties": false,
+            "required": ["mundo", "mapa"],
+            "properties": {
+              "mundo": {"type": "string", "minLength": 1},
+              "mapa": {"type": "string", "minLength": 1}
+            }
+          }
+        },
         "catalogo_puntos": {"type": "string"},
         "catalogo_sha256": {
           "comentario": "Las poses de puntos_interes.yaml se movieron tres veces en agosto. Un registro que no fije el catalogo no se puede comparar con otro, porque 'ETM1' puede no ser el mismo punto.",
