@@ -28,7 +28,9 @@ Las tres razones por las que ésta no puede contar como corrida de campaña:
    mano?»*, y sin analizador esa pregunta no se puede contestar.
 2. **La campaña es S24.** Ejecutarla antes de tener el instrumento validado es exactamente lo que
    el pilotaje existe para evitar.
-3. **Hay dos productores del mismo registro y nadie los ha comparado nunca** (§6 de aquí abajo).
+3. ~~**Hay dos productores del mismo registro y nadie los ha comparado nunca**~~ **Comparados el
+   2026-09-01** (§6 de aquí abajo). No producen el mismo registro y no hay dos verdades que
+   conciliar: el del bag es el autoritativo y el vivo queda fuera de la campaña.
 
 Que sea un piloto **no** lo hace desechable: usa el par sorteado de verdad, se compone con
 `--piloto`, y si todo pasa, la misión 1 se vuelve a correr en S24 como corrida de campaña. Repetir
@@ -170,12 +172,14 @@ mide el tiempo que el simulador llevaba encendido, no el sistema.
 **Terminal 3.** Es la única que trabaja desde el workspace, y el propio comando hace ese `cd`:
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && mkdir -p /tmp/registro_vivo && ros2 run coordinacion coordinador --ros-args -p use_sim_time:=true -p prefijo_mision:=S21P -p ruta_registros:=/tmp/registro_vivo
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 run coordinacion coordinador --ros-args -p use_sim_time:=true -p prefijo_mision:=S21P
 ```
 
-`ruta_registros` **solo va en el piloto**, y es para la comparación del §6: enciende el registrador
-en vivo del coordinador además del bag. En la campaña se quita, porque escribir en vivo compite por
-CPU con dos Gazebo justo donde RNF-06 exige RTF ≥ 0,99.
+**`ruta_registros` ya no va, ni en el piloto.** Existía para la comparación del §6, que el
+2026-09-01 se hizo y se cerró: el registrador en vivo no produce el registro de la campaña, así que
+encenderlo solo gasta CPU contra dos Gazebo justo donde RNF-06 exige RTF ≥ 0,99. Si alguien lo
+enciende igual, lo que escriba no es un registro válido y no debe mezclarse con los de
+`Documentos/Evidencia/registros/`.
 
 **Esperado:** `Coordinador listo. 31 puntos, asignacion {...}`. Los 31 puntos son el catálogo con
 el que se sorteó — si dice otro número, el sorteo y la corrida no son del mismo catálogo y hay que
@@ -224,22 +228,40 @@ una misión intra-nivel comparten etapa y lo único que cambia es el destino.
 Cuando termine, **Ctrl-C en la terminal 4** para cerrar el bag. En ese orden: cortar antes deja la
 misión sin su última marca.
 
-> **La comprobación nueva.** Desde la fusión del 2026-08-30 hay **dos** productores del mismo
-> registro: `registrador.py`, que lo escribe en vivo dentro del coordinador, y
-> `componer_registro.py`, que lo compone desde el bag después. Los dos declaran el mismo esquema
-> congelado y **nadie los ha comparado nunca**. Si difieren, la campaña tendría dos verdades y
-> ninguna forma de elegir. Este piloto existe en buena medida para eso: por ese motivo el paso 4
-> lleva `ruta_registros`. Al terminar hay que comparar el archivo de `/tmp/registro_vivo` con el que
-> componga el paso 7:
+> **La comprobación que faltaba, hecha el 2026-09-01. Ya no hay nada que ejecutar aquí.**
 >
-> ```bash
-> diff <(python3 -m json.tool /tmp/registro_vivo/*.json) <(python3 -m json.tool Documentos/Evidencia/registros/S21_piloto_A_01.json)
-> ```
+> Este paso mandaba un `diff` entre el registro que `registrador.py` escribe en vivo dentro del
+> coordinador y el que `componer_registro.py` compone desde el bag, partiendo de que *«los dos
+> declaran el mismo esquema congelado»*. **Esa premisa era falsa**, y el `diff` habría impreso el
+> archivo entero sin decir nada útil. Se comprobó validando la salida de `a_dict()` contra
+> `esquema_registro_mision.json`: **15 errores**, y de las **10 claves de primer nivel que el
+> esquema exige, el vivo trae 2** (`solicitud` y `marcas`). No son dos versiones de un documento;
+> son dos documentos.
 >
-> Si coinciden salvo en los campos que solo el bag puede dar —el RTF, entre ellos—, se declara
-> autoritativo el del bag, que sobrevive a un coordinador caído, y se anota. Si difieren en una
-> marca temporal o en el veredicto, hay que resolverlo **antes de S24**: la campaña no puede tener
-> dos verdades.
+> | | registrador vivo | compositor del bag |
+> |---|---|---|
+> | versión | `esquema: "1.0"` | `esquema_version: "1.1.0"` |
+> | `condicion` | `"simulacion"` — es el **banco** | `mision.condicion` es **A/B**; el banco va en `mision.banco` |
+> | veredicto | `metricas.criterios_exito` | `veredicto.c1_posicion` / `c2_…` / `c3_relevo` |
+> | condición A/B | se **infiere** de si hubo transferencia | se **declara** desde el listado sorteado |
+> | desconocido | `bool(c1 and c2 and c3)` lo vuelve `False` | lógica de tres valores, `exito` puede ser `None` |
+> | continuidad (RF-24) | recorre las ~6 marcas de cambio de etapa | recorre los ~339 mensajes publicados |
+>
+> **La fila que decide es la última.** El coordinador publica el estado a 1 Hz, pero solo llama a
+> `registro.marca()` desde `_cambiar_etapa`. Si `robot_activo` se vaciara *entre* dos transiciones,
+> el tick lo publicaría y el bag lo guardaría, y el registrador vivo no anotaría nada. RF-24 es la
+> variable de respuesta principal del OE4 y el productor vivo es ciego, por construcción, al modo de
+> fallo que existe para detectar.
+>
+> **Decisión: autoritativo el del bag**, que además sobrevive a un coordinador caído. No se pierde
+> nada por el camino: `num_relevos` el compositor lo deriva de `t_inicio_tramo2`, la pose de destino
+> la lee de `puntos_interes.yaml`, y `punto_id` viaja en `EstadoMision.destino_actual`. El único dato
+> que solo el vivo tenía —el resultado de la acción, que va por servicio y `ros2 bag` no graba— es
+> justamente el que el §3.3 prohíbe usar como evidencia.
+>
+> **Pendiente, no bloqueante:** `metricas()` de `registrador.py` queda como código muerto que aún
+> calcula un `continuidad` y un `exito` con el mismo nombre y distinta semántica. Retirarlo es
+> limpieza, no urgencia — pero nadie debe citar esos números.
 
 ---
 
