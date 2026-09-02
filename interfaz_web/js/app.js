@@ -110,11 +110,21 @@ function refrescarBotonIr() {
 // -------------------------------------------------------------- eventos ---
 $("origen").addEventListener("change", (ev) => {
   estado.origenSel = ev.target.value;
-  if (estado.destinoSel === estado.origenSel) estado.destinoSel = null;
+  if (estado.destinoSel === estado.origenSel) {
+    estado.destinoSel = null;
+    $("destino-elegido").textContent = "";
+  }
   pintarDestinos();
 });
 
 $("buscador").addEventListener("input", (ev) => { estado.filtro = ev.target.value; pintarDestinos(); });
+
+// En el teclado de un telefono, el primer toque fuera del campo de busqueda a
+// veces solo cierra el teclado y no llega a disparar el "click" del boton que
+// hay debajo (el bug clasico de Safari/iOS en listas largas). Cerrando el
+// teclado en cuanto el dedo toca la lista, el toque que elige el destino ya
+// no tiene que competir con eso.
+$("lista-destinos").addEventListener("touchstart", () => $("buscador").blur(), { passive: true });
 
 $("lista-destinos").addEventListener("click", (ev) => {
   const b = ev.target.closest(".opcion");
@@ -123,6 +133,10 @@ $("lista-destinos").addEventListener("click", (ev) => {
   for (const el of $("lista-destinos").children) {
     if (el.setAttribute) el.setAttribute("aria-selected", el === b ? "true" : "false");
   }
+  // Confirmacion visible del toque, independiente de si el boton de abajo
+  // queda o no a la vista: sin esto, en una lista larga no hay ninguna senal
+  // inmediata de que la seleccion se registro.
+  $("destino-elegido").textContent = "Destino elegido: " + b.querySelector(".nombre").textContent;
   refrescarBotonIr();
 });
 

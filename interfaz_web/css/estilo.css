@@ -75,7 +75,7 @@ select:focus, input:focus { outline: none; border-color: var(--acento); }
   display: flex; align-items: center; justify-content: space-between; gap: 10px;
   width: 100%; background: none; border: 0; border-bottom: 1px solid var(--borde);
   color: var(--texto); font: inherit; padding: 13px 12px; text-align: left;
-  cursor: pointer; min-height: 52px;
+  cursor: pointer; min-height: 52px; touch-action: manipulation;
 }
 .opcion:last-child { border-bottom: 0; }
 .opcion:hover { background: var(--panel2); }
@@ -85,6 +85,8 @@ select:focus, input:focus { outline: none; border-color: var(--acento); }
 .etq { font-size: 11px; padding: 3px 8px; border-radius: 999px; background: var(--panel2); color: var(--suave); border: 1px solid var(--borde); }
 .etq.relevo { background: #2c1f45; color: #dcc6ff; border-color: #3d2c63; }
 .vacio { padding: 14px 12px; color: var(--tenue); font-size: 14px; }
+.elegido { margin: 10px 2px 0; font-size: 13.5px; color: var(--acento); font-weight: 600; min-height: 1px; }
+.elegido:empty { display: none; }
 
 /* ----------------------------------------------------------- acciones --- */
 .acciones { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 14px; }
