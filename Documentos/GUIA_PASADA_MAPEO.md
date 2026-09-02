@@ -273,6 +273,42 @@ razón para repetirlo teniendo el carro delante.
 
 **Criterio de cierre:** `/scan` a ~6,6 Hz con `frame_id: laser`.
 
+### Paso 2.5 — Levantar el demonio de descubrimiento **antes** de grabar
+
+**Este paso es nuevo desde el 2026-09-01 y es el más importante de la Parte 2.** No lo saltes
+porque parezca burocracia: es el candidato más fuerte a explicar por qué los bags del 28-ago
+salieron con un solo tópico y uno de ellos sin `metadata.yaml`.
+
+**[CARRITO — segunda terminal SSH]**
+
+```bash
+sudo -i bash -c 'source /opt/ros/jazzy/setup.bash && ros2 daemon start && sleep 3 && ros2 topic list | wc -l'
+```
+
+**Esperado:** `22`. Repítelo dos veces más: tiene que dar **22 las tres veces**.
+
+**Si da números distintos entre corridas, no grabes todavía.** Espera y repite hasta que se
+estabilice.
+
+> **Por qué.** El descubrimiento de ROS 2 en este carro **no es determinista para un participante
+> recién nacido**. Medido el 2026-09-01 contra un grafo que no cambiaba:
+>
+> | Comando | Corrida 1 | Corrida 2 | Corrida 3 |
+> |---|---|---|---|
+> | `ros2 topic list --no-daemon` | **2** | **10** | **17** |
+> | `ros2 topic list` (con demonio) | 22 | 22 | 22 |
+>
+> Sin demonio, el proceso nace, escucha unos milisegundos, y publica **lo que le dio tiempo a
+> oír**. Con demonio hay un participante de larga vida que ya conoce el grafo entero.
+>
+> **`ros2 bag record` es exactamente un participante recién nacido.** Si lo lanzas antes de que
+> el descubrimiento haya cuajado, se suscribe a lo que alcanzó a ver: puede grabar un subconjunto,
+> o **nada**, y en los dos casos dice `Recording...` igual de contento. Levantar el demonio antes
+> no garantiza nada por sí solo, pero al menos te da una lectura estable con la que decidir.
+
+**Criterio de cierre de la Parte 2:** `/scan` a ~6,6 Hz con `frame_id: laser`, y `ros2 topic
+list` devolviendo **el mismo número tres veces seguidas**.
+
 ---
 
 ## Parte 3. La pasada
@@ -285,14 +321,35 @@ largo del pasillo. Apunta hacia dónde mira: te hará falta para interpretar el 
 **[CARRITO — segunda terminal SSH]**
 
 ```bash
-cd ~ && source /opt/ros/jazzy/setup.bash && ros2 bag record /scan -o mapa_pasillo_$(date +%H%M)
+sudo -i bash -c "source /opt/ros/jazzy/setup.bash && cd ~deepracer && ros2 bag record /scan -o mapa_pasillo_$(date +%H%M)"
 ```
 
-**Esperado:** `Recording...` y el nombre de la carpeta. **Anótalo.**
+**Esperado:** `Recording...`, el nombre de la carpeta, y **una línea por cada tópico suscrito**.
+**Anota el nombre de la carpeta.**
+
+> **El `sudo` no es opcional, y la razón es la misma que en el teleop.** El descubrimiento de
+> este dominio pasa por `/dev/shm/fastrtps_port70NN`, buzones que `deepracer-core` crea como
+> `root` con permisos `-rw-r--r--`. Un `ros2 bag record` lanzado como usuario **puede leerlos
+> pero no escribir su anuncio**, así que para la pila no existe — y graba un fichero vacío
+> diciendo `Recording...` sin una sola queja. Medido el 2026-09-01: publicador de usuario contra
+> suscriptor de la pila, **0 mensajes**; publicador `root`, **56**.
+>
+> **Honestidad sobre el 28-ago:** el bag de aquel día sí capturó `/rplidar_ros/scan`, así que o
+> se lanzó como `root` o el mecanismo no explica *aquel* fallo entero. Se documenta como lo que
+> es: una condición necesaria comprobada, no un diagnóstico cerrado de aquel bag.
+
+> **La ruta va explícita.** Con `sudo -i` el `~` es `/root`, no el del usuario `deepracer`, y luego el
+> `scp` del Paso 4.1 no encontraría nada. El bag quedará **con dueño `root`**; si el `scp` falla
+> por permisos, `sudo chown -R deepracer:deepracer ~deepracer/mapa_pasillo_*` en el carro.
 
 **Por qué solo `/scan`:** es lo único que el carro tiene que aportar. `/odom` y la TF se generan
 después en el portátil, con `rf2o`, que es exactamente lo que haría el carro en vivo. Grabar menos
 es grabar menos cosas que pueden fallar.
+
+> **El carro no publica `/odom`, `/tf` ni `/tf_static`.** Comprobado el 2026-09-01 contra la
+> lista estable de 22 tópicos. No es una avería: es la razón por la que esta guía eligió la
+> cadena B en §0.2. **Si algún documento del proyecto te pide grabar `/odom`, `/tf` o
+> `/amcl_pose` en esta pasada, ese documento está equivocado** — no hay nada que grabar.
 
 ### Paso 3.2 — Recorrer el pasillo
 

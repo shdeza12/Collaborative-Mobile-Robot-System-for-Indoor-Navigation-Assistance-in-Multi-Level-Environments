@@ -74,6 +74,16 @@ class Ajustes(NamedTuple):
     en reposo, -1.0 pulsados a fondo. Un gatillo que no se ha tocado desde que
     arranco `joy_node` puede leerse 0.0, y con el umbral NEGATIVO eso cuenta
     como "sin pulsar", que es el lado seguro.
+
+    Los cuatro indices y las dos banderas estan MEDIDOS sobre el vehiculo el
+    2026-09-01, no supuestos: el mando por USB al carro, `joy_node` como root,
+    y un control a la vez. El gatillo sin estrenar leyendose 0.0 no es una
+    hipotesis defensiva; ocurrio en esa misma medicion.
+
+    `invertir_traccion` esta en False porque se comprobo que throttle POSITIVO
+    mueve el vehiculo hacia adelante, publicando valores conocidos sin el mando
+    de por medio y con las ruedas en el aire. Con la bandera en True el stick
+    hacia adelante daba marcha atras.
     """
 
     eje_traccion: int = 1
@@ -85,7 +95,7 @@ class Ajustes(NamedTuple):
     limite_turbo: float = 0.70
     limite_direccion: float = 1.0
     zona_muerta: float = 0.12
-    invertir_traccion: bool = True
+    invertir_traccion: bool = False
     invertir_direccion: bool = False
 
 

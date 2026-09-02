@@ -137,12 +137,13 @@ comprobar("un limite mal configurado se recorta a [-1, 1]",
 # --- decidir: inversiones ---------------------------------------------------
 print("decidir()  -- las banderas de inversion hacen lo que dicen")
 
-# No se afirma hacia donde gira la rueda: eso depende del cableado y lo resuelve
-# la Parte 6 de la guia. Lo que se comprueba es que la bandera invierte el signo,
-# que es el contrato del que depende esa correccion.
-_, _, con = decidir(ejes(traccion=1.0, zr=PULSADO), AJ)
-_, _, sin_ = decidir(ejes(traccion=1.0, zr=PULSADO),
-                     AJ._replace(invertir_traccion=False))
+# Aqui no se afirma hacia donde gira la rueda: eso es hardware. Solo se
+# comprueba que la bandera invierte el signo, que es el contrato del que depende
+# la correccion. CUAL es el valor correcto se midio el 2026-09-01 sobre el
+# vehiculo -throttle positivo = adelante- y vive en Ajustes, no en esta prueba.
+_, _, con = decidir(ejes(traccion=1.0, zr=PULSADO),
+                    AJ._replace(invertir_traccion=True))
+_, _, sin_ = decidir(ejes(traccion=1.0, zr=PULSADO), AJ)
 comprobar("invertir_traccion cambia el signo y nada mas", con == -sin_,
           f"-> {con} vs {sin_}")
 
