@@ -8,7 +8,8 @@ Escrita el **2026-09-01** tras correr la cadena entera sobre los bags del 28-ago
 los avisos de esta guía salen de esa corrida, no de la documentación.
 
 **Esta es la PRIMERA de las dos pasadas del viernes.** Produce el mapa. La segunda —conducir con
-AMCL contra ese mapa y medir M1 y M2— es otra cosa y va después. Sin el mapa, la segunda no existe.
+AMCL contra ese mapa y medir M1 y M2— es otra cosa y va después, y está en
+[`GUIA_PASADA_LOCALIZACION.md`](GUIA_PASADA_LOCALIZACION.md). Sin el mapa, la segunda no existe.
 
 ---
 
@@ -184,7 +185,12 @@ pkill -9 -f "ros2 bag play"; pkill -9 -f rf2o_laser; pkill -9 -f slam_toolbox
 
 No es de esta pasada, pero es del viernes y **hay que dejarlo escrito antes**, no después de ver
 el dato. El §6.3 del protocolo experimental lo prohíbe expresamente. Está discutido en
-[`Evidencia/S21_preparacion_G2.md`](Evidencia/S21_preparacion_G2.md) §4.
+[`Evidencia/S21_preparacion_G2.md`](Evidencia/S21_preparacion_G2.md) §4, y las tres preguntas que
+hay que llevar contestadas —y firmadas por el director— están en el **Paso 1.3** de
+[`GUIA_PASADA_LOCALIZACION.md`](GUIA_PASADA_LOCALIZACION.md).
+
+**Si no están contestadas, sal igual:** los bags de las dos pasadas valen y se pueden analizar
+después. Lo que no se puede es **declarar el G2** con unos umbrales elegidos al ver el número.
 
 ---
 
@@ -200,6 +206,23 @@ se puede reconstruir luego.
 3. Mide con el flexómetro y marca cada **5 m**, hasta el final.
 4. **Anota la longitud total con dos decimales.** Ejemplo: `22,40 m`.
 5. Mide también el **ancho** del pasillo en tres puntos y anótalos.
+6. **En los dos extremos, la marca es una cruz, no una raya.** Añade ~60 cm de cinta **a lo largo**
+   del eje del pasillo, cruzando la marca de metros. Céntrala: mide del muro a la cruz en los dos
+   extremos y **anota los dos números**.
+7. **Si la recta mide ≥ 25 m, marca además una cruz a los 20,00 m exactos** desde el 0 m.
+
+> **Por qué cruces y no rayas, y por qué se hacen ahora.** Una raya dice a cuántos metros estás;
+> M2 mide un error en **2D**, así que el carro tiene que parar en un **punto** repetible. El trazo
+> longitudinal sirve además para alinear el chasis a ojo, que es de donde sale el rumbo inicial.
+>
+> Se hacen en esta pasada porque **el pasillo no se vuelve a marcar**: cuando llegue la segunda,
+> el carro, el portátil y la silla ya están puestos y hay gente pasando. Y la cruz de los 20 m
+> permite sacar M1 y M2 **también a exactamente 20 m** del mismo bag, que es la longitud sobre la
+> que está escrito el criterio, sin dejar de correr sobre la recta entera.
+
+**Todo esto se puede hacer sin el carro y sin el portátil.** Si tienes acceso al pasillo antes del
+viernes, hazlo antes: es lo único de la mañana que no depende de nada más, y si la recta no llega
+a 20 m, saberlo el jueves vale mucho más que saberlo el viernes.
 
 **Esperado:** una longitud **≥ 20 m**. Si la recta más larga da menos de 20 m, el G2 no se puede
 tomar en ese pasillo y hay que buscar otro; anótalo y díselo al director, no lo maquilles.
@@ -315,8 +338,27 @@ list` devolviendo **el mismo número tres veces seguidas**.
 
 ### Paso 3.1 — Colocar el carro y empezar a grabar
 
-Pon el carro en el suelo, **con el centro del eje trasero sobre la marca de 0 m** y apuntando a lo
-largo del pasillo. Apunta hacia dónde mira: te hará falta para interpretar el mapa.
+Pon el carro en el suelo **con el LiDAR justo encima de la marca de 0 m**, mirando al fondo de la
+recta. Anota hacia dónde mira: te hará falta para interpretar el mapa.
+
+> **El punto de referencia es el LiDAR, y esto cambió el 2026-09-02.** Antes esta guía decía «el
+> centro del eje trasero», y está mal por dos razones que se suman.
+>
+> **Primera: son 11,1 cm de sesgo.** En el URDF, respecto a `chassis`, el eje trasero está en
+> `x = −0,081663` y el LiDAR en `x = +0,02913`. Colocar uno donde va el otro desplaza todo lo que
+> venga después **11,1 cm**, siempre en el mismo sentido. Frente al umbral de 0,50 m de M2 eso es
+> el 22 % del presupuesto, regalado por un detalle de colocación.
+>
+> **Segunda, y es la que decide: aquí nace el origen del mapa.** `slam_toolbox` pone el `(0, 0, 0)`
+> del mapa donde estaba `base_link` al arrancar el SLAM, y AMCL trae `set_initial_pose: True` con
+> `(0, 0, 0)` en `nav2_params_nav_amcl_sim_demo.yaml`. Si arrancas **aquí**, sobre la marca y
+> mirando al fondo, la pose inicial de AMCL en la segunda pasada sale correcta sin tocar un
+> parámetro. Si arrancas en otro sitio, hay que medir el desplazamiento y restarlo a mano.
+>
+> `base_link` está en `x = 0` de `chassis`, así que el LiDAR queda 2,9 cm por delante de él.
+> Despreciable: alinéalo a ojo desde arriba. Lo que no es despreciable son los 11,1 cm.
+>
+> Lo explica entero el Paso 2.2 de [`GUIA_PASADA_LOCALIZACION.md`](GUIA_PASADA_LOCALIZACION.md).
 
 **[CARRITO — segunda terminal SSH]**
 
