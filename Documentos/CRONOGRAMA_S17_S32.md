@@ -395,6 +395,13 @@ extremo con relevo, y el log arroja las cuatro métricas de OE4.
 **Criterio de cierre:** desde un teléfono se selecciona origen y destino, y el sistema completa el
 guiado con relevo en simulación sin intervención manual.
 
+> **Adelantado el 2026-09-02, cinco días antes de que abriera esta semana.** El primer ítem del
+> Frente A —interfaz web sobre `rosbridge_suite`, RF-17 a RF-20— arrancó en S21, en paralelo a la
+> campaña de OE4 de Santi. Tres de los cuatro requisitos quedaron verificados contra un
+> `coordinador` real (`interfaz_web/`, rama `interfaz-hri-web`); falta RF-20 en un teléfono físico y
+> el criterio de cierre de arriba, que exige los dos robots vivos. Detalle en la bitácora de
+> [`ESTADO.md`](../ESTADO.md) del 2026-09-02.
+
 ### S23 · 14 – 20 sep — Verificación y ensayo físico · **cierre de implementación**
 
 | Frente | Actividad |
