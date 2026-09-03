@@ -352,6 +352,34 @@ por qué no.
    da 74–97 %). Ninguna de las dos se habría notado ejecutando corridas: sólo agregándolas.
 2. **No dice nada del banco físico.** Es el procedimiento de simulación. La campaña de hardware
    (RF-27) tiene otras condiciones iniciales y otra verdad de terreno, y su runbook no está escrito.
-3. **Las cinco corridas de pilotaje que pide la §7 no están planificadas una por una.** Ésta es la
-   primera; las otras cuatro deberían cubrir al menos una misión de condición B, para no validar el
-   instrumento sobre media función.
+3. ~~**Las cinco corridas de pilotaje que pide la §7 no están planificadas una por una.**~~
+   **Parcialmente resuelto el 2026-09-03, y no ejecutando nada: mirando lo que ya había.** En
+   `~/tesis_evidencia/` había **cinco grabaciones del 30-ago** (16:35–17:45) que no se citaban en
+   ningún documento y que nunca se compusieron. Dos son aprovechables:
+
+   | bag | condición | ruta | RTF | error de llegada | veredicto |
+   |---|---|---|---|---|---|
+   | `S21_piloto_A_02` | **A** | `piso1_etm2 → piso1_etm11` | 0,9988 | **0,215 m** | `exito: true` |
+   | `S21_piloto_B_01` | **B** | `piso1_representacion → piso2_ieee` | 0,9915 | **0,120 m** | `exito: true`, `c3_relevo: true`, continuidad íntegra |
+
+   Con eso **el pilotaje ya no valida el instrumento sobre media función**: hay una condición A y
+   una condición B con relevo real de tres tramos. `S21_piloto_A_02` es además **la fila 1 del
+   listado sorteado**, así que la misión 1 no hay que volver a correrla para el piloto.
+
+   **Las otras tres (`A_01`, `C_01`, `C_02`) no son recuperables como pilotos**, y por una razón
+   que conviene no repetir: **les falta `rtf.json`**. El bag no puede suplirlo — con
+   `--use-sim-time` sella *todo* en tiempo de simulación, así que sim/pared vale 1 por
+   construcción — y la simulación que las grabó ya se cerró. El RTF de esas tres se perdió para
+   siempre. Es exactamente el criterio 2 del §8, y es la razón por la que el paso 5 deja el
+   `rtf.json` junto al bag: **si no se escribe en el momento, no se escribe nunca.**
+
+4. **El criterio 1 no sobrevive al bag, y eso afecta también a las 30 corridas de S24.** Los cinco
+   criterios del §8 se comprueban a posteriori salvo el primero: la pose inicial dentro de 0,15 m
+   es una compuerta **previa**, verificada en el paso 3 con `verificar_condicion_inicial.py`, y su
+   resultado **no queda guardado en la grabación** — `salud_del_banco.controladores_activos` sale
+   `{}` en los registros compuestos. Para las dos corridas del 30-ago es irreconstruible, así que
+   solo se pueden dar por buenos **4 de 5**.
+
+   Mientras no se arregle, la única constancia de que el criterio 1 se cumplió es **la salida del
+   paso 3 en la terminal**, que se pierde al cerrarla. Lo barato es redirigirla a un archivo junto
+   al bag antes de grabar; lo correcto es que el compositor la lea. Ninguna de las dos está hecha.
