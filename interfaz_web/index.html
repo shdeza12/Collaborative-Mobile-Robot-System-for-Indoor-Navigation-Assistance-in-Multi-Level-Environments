@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<!-- RF-20: se abre desde el navegador de un telefono, sin instalar nada. De
+     ahi el viewport, los objetivos de toque de 48 px y que no haya ningun
+     recurso de CDN: en la red del edificio puede no haber salida a internet. -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Guía DeepRacer · navegación colaborativa</title>
+<link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+
+<header class="cabecera">
+  <div class="marca">
+    <svg class="icono-auto" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect x="3" y="15" width="26" height="7" rx="3.5" fill="currentColor"/>
+      <path d="M8 15c.6-2.6 2.9-4.5 5.6-4.5h4.8c2.7 0 5 1.9 5.6 4.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <circle cx="10" cy="23" r="3" fill="var(--fondo)" stroke="currentColor" stroke-width="2.2"/>
+      <circle cx="22" cy="23" r="3" fill="var(--fondo)" stroke="currentColor" stroke-width="2.2"/>
+    </svg>
+    <h1>Guía<span>navegación colaborativa</span></h1>
+  </div>
+  <div class="estado-conexion"><span class="led" id="led"></span><span id="txt-conexion">conectando…</span></div>
+</header>
+
+<main>
+  <!-- ------------------------------------------------------------ PASO 1 -->
+  <section class="tarjeta">
+    <p class="paso">1 · ¿Desde dónde partes?</p>
+    <select id="origen" aria-label="Punto de partida"></select>
+  </section>
+
+  <!-- ------------------------------------------------------------ PASO 2 -->
+  <section class="tarjeta">
+    <p class="paso">2 · ¿A dónde quieres ir?</p>
+    <input id="buscador" type="search" inputmode="search" autocomplete="off"
+           placeholder="Escribe el nombre: aula, laboratorio…"
+           aria-label="Buscar destino por nombre">
+    <div class="lista" id="lista-destinos" role="listbox" aria-label="Destinos"></div>
+    <p class="elegido" id="destino-elegido"></p>
+  </section>
+
+  <!-- ----------------------------------------------------------- ACCIONES -->
+  <div class="acciones">
+    <button id="btn-ir" class="boton grande primario" type="button" disabled>Iniciar guiado</button>
+    <button id="btn-cancelar" class="boton grande secundario" type="button" disabled>Cancelar</button>
+  </div>
+  <p class="aviso-error" id="nota"></p>
+
+  <!-- ------------------------------------------------------------- PANEL -->
+  <section id="panel" class="panel inactiva" aria-live="polite">
+    <p class="etiqueta" id="panel-etiqueta">estado</p>
+    <h2 id="panel-titulo">Conectando…</h2>
+    <!-- RF-18: "mensaje_usuario" se muestra LITERAL. Lo redacta el coordinador. -->
+    <p class="frase" id="panel-frase">—</p>
+    <div class="chips" id="panel-datos"></div>
+    <div class="etapas" id="panel-etapas"></div>
+  </section>
+</main>
+
+<script src="js/rosbridge.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

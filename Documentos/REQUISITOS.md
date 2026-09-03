@@ -124,13 +124,16 @@ proponía justamente esa misión mixta. Ya no es una salida.
 
 | ID | Requisito | Prueba | Estado | Semana |
 |---|---|---|---|---|
-| **RF-17** | La HRI permite **seleccionar un origen y un destino** de entre las localizaciones de interés | Dos listas pobladas desde `/coordinacion/puntos_interes`; la selección lanza una misión | 🔴 | S22 |
-| **RF-18** | La HRI **muestra el estado de la misión** al usuario en texto legible | El campo `mensaje_usuario` se muestra literal y cambia en cada etapa | 🔴 | S22 |
-| **RF-19** | La HRI se comunica **solo con `/coordinacion`**, nunca con los agentes | Inspección de la superficie expuesta por `rosbridge`: ningún tópico `/robotN/*` | 🔴 | S22 |
-| **RF-20** | La HRI es accesible desde el **navegador de un teléfono**, sin instalación | Carga y operación completa desde un móvil en la misma red | 🔴 | S22 |
+| **RF-17** | La HRI permite **seleccionar un origen y un destino** de entre las localizaciones de interés | Dos listas pobladas desde `/coordinacion/puntos_interes`; la selección lanza una misión | 🟢 **Verificado el 2026-09-02.** Catálogo real de 31 puntos cargado con QoS `transient_local` explícito; seleccionar origen y destino y pulsar "Iniciar guiado" llama `/coordinacion/guiar_usuario` y el coordinador procesa la misión (`interfaz_web/`, rama `interfaz-hri-web`) | S22 |
+| **RF-18** | La HRI **muestra el estado de la misión** al usuario en texto legible | El campo `mensaje_usuario` se muestra literal y cambia en cada etapa | 🟢 **Verificado el 2026-09-02.** El panel se repinta en cada mensaje de `/coordinacion/estado_mision` (1 Hz) y muestra `mensaje_usuario` sin reescribirlo; probado hasta el ciclo RECIBIDA→TRAMO_1→FALLIDA con el motivo real del coordinador | S22 |
+| **RF-19** | La HRI se comunica **solo con `/coordinacion`**, nunca con los agentes | Inspección de la superficie expuesta por `rosbridge`: ningún tópico `/robotN/*` | 🟢 **Verificado el 2026-09-02.** El código de `interfaz_web/` no referencia ningún tópico `/robotN/*`; solo suscribe `/coordinacion/puntos_interes` y `/coordinacion/estado_mision`, y llama `/coordinacion/guiar_usuario` | S22 |
+| **RF-20** | La HRI es accesible desde el **navegador de un teléfono**, sin instalación | Carga y operación completa desde un móvil en la misma red | 🟡 Implementada sin dependencias externas ni CDN (funciona sin salida a internet) y probada en emulación móvil (375×812). **Falta** la prueba desde un teléfono físico real en la red del edificio | S22 |
 
-**Lectura de OE3.** Cuatro requisitos, ninguno iniciado, todos en S22. Es el objetivo más
-concentrado en el tiempo y el que la escalera de holgura recorta primero (§7).
+**Lectura de OE3 al 2026-09-02.** La interfaz se adelantó del S22 (7–13 sep) al final de S21: los
+cuatro requisitos tienen implementación, y tres están verificados contra un `coordinador` real (sin
+robots ni Gazebo corriendo). Sigue pendiente el criterio de cierre completo de S22 — guiado con
+relevo en simulación, de punta a punta, desde un teléfono real — porque eso exige los dos agentes
+vivos. Ver la bitácora del 2026-09-02 en [`ESTADO.md`](../ESTADO.md).
 
 **RF-17 es el núcleo de OE3 y se cumple íntegro con dos listas desplegables.** El anteproyecto
 pide selección de origen y destino, no representación gráfica del entorno. Conviene tenerlo
@@ -262,10 +265,10 @@ del proyecto: sin ellos no hay resultado que sustentar.
 |---|---|---|---|---|
 | OE1 | RF-01 a RF-10 | 5 | 5 | S20–S21 |
 | OE2 | RF-11 a RF-16 | 0 (4 parciales) | 2 | S19–S22 |
-| OE3 | RF-17 a RF-20 | 0 | 4 | S22 |
+| OE3 | RF-17 a RF-20 | 3 | 1 parcial | S22 |
 | OE4 | RF-21 a RF-27 | 0 | 7 | S20–S25 |
 | Restricciones | RNF-01 a RNF-07 | 6 | 1 parcial | — |
-| **Total** | **34** | **11** | **18 + 5 parciales** | |
+| **Total** | **34** | **14** | **14 + 6 parciales** | |
 
 **Once de treinta y cuatro requisitos están verificados**, y son los que sostienen la
 infraestructura. Los dieciocho pendientes se concentran en cuatro semanas de construcción
