@@ -126,7 +126,15 @@ ls -1 herramientas/localizar_desde_bag.sh herramientas/medir_g2.py
 **Esperado:** las dos rutas, sin `No such file`.
 
 **Si falta alguna:** no salgas al pasillo. Son las que convierten el bag en M1 y M2, y sin ellas
-vuelves con seis carpetas y ningún número. Están especificadas en el **Apéndice B** de esta guía.
+vuelves con seis carpetas y ningún número. Están descritas en el **Apéndice B** de esta guía.
+
+Aprovecha y corre la prueba pura de la segunda, que no necesita ROS ni bag y tarda un segundo:
+
+```bash
+python3 herramientas/prueba_medir_g2.py
+```
+
+**Esperado:** `Todas pasan.` tras 21 comprobaciones.
 
 ### Paso 1.2 — Comprobar la cadena de localización contra el mapa simulado
 
@@ -134,11 +142,16 @@ vuelves con seis carpetas y ningún número. Están especificadas en el **Apénd
 tienes, antes de que dependa de ella la mañana.**
 
 ```bash
-herramientas/localizar_desde_bag.sh /tmp/mapeo /tmp/mapa_pasillo/mapa.yaml /tmp/loc_prueba
+herramientas/localizar_desde_bag.sh /tmp/mapeo /tmp/mapa_pasillo/mapa.yaml /tmp/loc_prueba --topico /rplidar_ros/scan
 ```
 
 **Esperado:** termina con `Trayectoria en /tmp/loc_prueba/trayectoria.csv` y un recuento de poses
 de `/amcl_pose` mayor que cero.
+
+> **Mira en qué tópico publica tu bag antes de lanzarlo**, con
+> `ros2 bag info /tmp/mapeo | grep -i scan`. Los bags del 28-ago traen `/rplidar_ros/scan`; si el
+> tuyo trae `/scan` a secas, quita el `--topico`. Puesto al revés, rf2o se queda esperando un
+> barrido que nunca llega y la corrida sale entera sin una sola pose.
 
 **Por qué se hace con el bag de mapeo:** es el único bag real del pasillo que tendrás antes de la
 primera pasada del viernes. No sirve para el G2 —se empujó, no se condujo— pero **sirve para
@@ -412,17 +425,40 @@ for b in ida_1 ida_2 ida_3 vuelta_1 vuelta_2 vuelta_3; do scp -r deepracer@<IP>:
 
 ### Paso 5.2 — Correr la cadena sobre cada uno
 
+**Las idas y las vueltas no se lanzan igual**, y por eso son dos bucles y no uno:
+
 ```bash
-for b in ida_1 ida_2 ida_3 vuelta_1 vuelta_2 vuelta_3; do herramientas/localizar_desde_bag.sh /tmp/adap_$b /tmp/mapa_pasillo/mapa.yaml /tmp/loc_$b; done
+for b in ida_1 ida_2 ida_3; do herramientas/localizar_desde_bag.sh /tmp/adap_$b /tmp/mapa_pasillo/mapa.yaml /tmp/loc_$b; done
 ```
+
+```bash
+for b in vuelta_1 vuelta_2 vuelta_3; do herramientas/localizar_desde_bag.sh /tmp/adap_$b /tmp/mapa_pasillo/mapa.yaml /tmp/loc_$b --pose-inicial <L>,0,3.1416; done
+```
+
+> **Sustituye `<L>` por el largo real medido con cinta.** Las idas no necesitan `--pose-inicial`
+> porque el origen del mapa está en la marca de 0 m mirando al fondo, que es exactamente donde
+> arrancan: la pose inicial que el fichero de parámetros ya trae, `(0, 0, 0)`, les vale. Las
+> vueltas arrancan en el **otro extremo y mirando al revés**, así que hay que decírselo. Si se te
+> olvida, AMCL empieza convencido de estar a `L` metros de donde está y **no da error**: da un M2
+> enorme que parece un resultado.
 
 Tarda **lo que duraron las pasadas**, sumadas. Se reproduce a velocidad real a propósito: acelerar
 con `--rate` hace que AMCL vea menos actualizaciones y el resultado cambia.
 
-> **La trampa que costó una corrida el 2026-09-01 sigue viva aquí.** Si queda un `ros2 bag play`
-> de antes, hay **dos publicadores de `/clock`**, el tiempo salta hacia atrás y `tf2` vacía su
-> búfer sin parar. El guion mata los nodos antes y después, pero si ves
-> `Detected jump back in time` en `amcl.log`, **esa corrida no vale**: mátalo todo y repite.
+> **La trampa que costó una corrida el 2026-09-01 sigue viva aquí, pero cuenta los saltos antes de
+> tirar nada.** Si queda un `ros2 bag play` de antes, hay **dos publicadores de `/clock`**, el
+> tiempo salta hacia atrás y `tf2` vacía su búfer **una y otra vez** durante toda la corrida. Eso
+> sí la invalida. Lo que **no** la invalida es **un solo** `Detected jump back in time` justo al
+> arrancar la reproducción: ese es inevitable y sale siempre, porque hasta ese instante los nodos
+> van con la hora de pared y el primer `/clock` del bag los manda a la hora en que se **grabó**,
+> que es anterior. El guion ya distingue los dos casos y te lo dice; si aun así quieres mirarlo a
+> mano, lo que importa es el **recuento**, no la presencia:
+>
+> ```bash
+> grep -c "jump back in time" /tmp/loc_ida_1/*.log
+> ```
+>
+> Uno por log es sano. Decenas, no.
 >
 > ```bash
 > pkill -9 -f "ros2 bag play"; pkill -9 -f rf2o_laser; pkill -9 -f amcl; pkill -9 -f map_server
@@ -487,12 +523,15 @@ barridos consecutivos. Anótalo con el valor de `limite_normal` que usaste.
 |---|---|---|
 | `/amcl_pose` sale vacío | AMCL no arrancó su ciclo de vida, o no le llegó el mapa | Mira `amcl.log`. Si no dice `Received a X x Y map`, el `map_server` no publicó |
 | AMCL «salta» al principio y luego se estabiliza | La pose inicial `(0,0,0)` no era la cruz de 0 m | Paso 2.2. Pásala con `--pose-inicial` |
-| `Detected jump back in time` | Otro `ros2 bag play` publicando `/clock` | `pkill` y repite. **Esa corrida no vale** |
+| `Detected jump back in time` **una vez** por log, al arrancar la reproducción | **No es un fallo.** El reloj pasa de la hora de pared a la hora en que se grabó el bag, que es anterior | Nada. La corrida vale |
+| `Detected jump back in time` **repetido** durante toda la corrida | Otro `ros2 bag play` publicando `/clock` | `pkill` y repite. **Esa corrida no vale** |
 | El mapa carga girado 180° | Se compuso mal la TF `base_link → laser` | El `yaw = π` no es opcional. Apéndice de la guía de mapeo, punto 2 |
 | M1 sale ~1,00 y M2 sale enorme | Es el resultado esperado, no un fallo | La odometría acierta la **magnitud** y AMCL falla el **eje longitudinal**. Es la inobservabilidad del pasillo |
 | M2 cambia mucho entre corridas del mismo bag | El filtro de partículas no converge | Paso 5.3. **Informa el rango**: es el resultado |
 | `ros2 bag info` dice que todo está bien | **No demuestra nada.** Lee la metadata sin abrir el `.mcap` | Usa `comprobar_movimiento_bag.py` |
 | Todo arranca, ningún error, y el carro no se mueve | Te faltó el `sudo` | `GUIA_TELEOP_MANDO.md` §0.2 ter |
+| `rf2o.log` lleno de `Waiting for laser_scans....` | **No es un fallo.** El temporizador de rf2o va a 20 Hz y el LiDAR a ~10 Hz, así que la mitad de los ticks no tienen barrido nuevo y avisan | Comprueba que **también** haya líneas `Robot-base odom [x,y,yaw]=`. Si las hay, rf2o está funcionando |
+| La cadena entera corre sin quejarse y no aparece `trayectoria.csv` | El volcador murió al arrancar y nadie más lo nota | El guion ya lo caza y sale con error. Lee `volcar.log`, que es donde está el motivo |
 
 ---
 
@@ -528,20 +567,22 @@ Y una que es nueva de esta cadena:
 
 ---
 
-## Apéndice B. Las dos herramientas que faltan
+## Apéndice B. Las dos herramientas
 
-**Estado: por escribir el jueves 3.** Aquí queda fijada su interfaz para que escribirlas sea
-mecánico y para que esta guía no dependa de recordar qué se pensó.
+**Estado: escritas el miércoles 2**, un día antes de lo previsto, y probadas. No hay que escribir
+nada el jueves; el Paso 1.1 solo comprueba que siguen ahí.
 
 ### `herramientas/localizar_desde_bag.sh`
 
 ```
 USO
-    herramientas/localizar_desde_bag.sh <bag> <mapa.yaml> <salida> [--pose-inicial X,Y,YAW]
+    herramientas/localizar_desde_bag.sh <bag> <mapa.yaml> <salida> [--pose-inicial X,Y,YAW] [--topico T]
 
     <bag>       CARPETA del bag, legible por Humble (adaptada si viene de Jazzy)
     <mapa.yaml> el mapa de la primera pasada
     <salida>    se crea; ahi quedan trayectoria.csv y los cinco logs
+    --topico    por defecto '/scan'. Los bags del 28-ago publican en
+                '/rplidar_ros/scan' y sin esto la cadena sale vacia
 ```
 
 Copia estructural de `mapear_desde_bag.sh`: mismo `limpiar()`, mismo `trap EXIT`, mismo
@@ -562,11 +603,11 @@ t,fuente,x,y,yaw
 
 ```
 USO
-    python3 herramientas/medir_g2.py <trayectoria.csv> --largo L [--estacion 20.0] [--json salida.json]
+    python3 herramientas/medir_g2.py <trayectoria.csv> --largo L [--sentido auto|ida|vuelta] [--estacion 20.0] [--json salida.json]
 ```
 
-1. Detecta las **ventanas de parada** de salida y llegada con la misma heurística de
-   `comprobar_movimiento_bag.py`.
+1. Detecta las **ventanas de parada** de salida y llegada con el mismo umbral de 0,05 m que
+   `comprobar_movimiento_bag.py`, pero aplicado a **poses y no a rayos**.
 2. **M1** = |desplazamiento de `/odom` entre las medianas de las dos ventanas| ÷ `L`.
 3. **M2** = distancia 2D entre la mediana de `/amcl_pose` en la ventana de llegada y la marca, con
    sus componentes longitudinal y lateral desglosadas.
@@ -574,6 +615,20 @@ USO
 5. **Falla ruidosamente** si no encuentra dos ventanas de parada, o si `/amcl_pose` está vacío. No
    devuelve un número inventado.
 
-Prueba pura en `herramientas/prueba_medir_g2.py`, sin ROS, sobre CSV sintéticos: caso limpio, caso
-sin ventana de llegada, caso con `/amcl_pose` vacío, y el caso del sesgo +2,9 % que debe dar
-M1 = 1,029 y M2 = 0,58 m sobre 20 m.
+> **Detectar las paradas sobre `/odom` no es circular, aunque lo parezca.** El reparo obvio es que
+> M1 mide a rf2o y las ventanas también salen de rf2o, así que un rf2o congelado se declararía a sí
+> mismo quieto. No aplica, y hay dato: el 26-ago rf2o registró **28,23 m de 29,94 m reales**. Se
+> queda **corto**, no se para. Sobre una ventana de 1 s a 0,5 m/s eso son 0,47 m frente a 0,50 m,
+> diez veces por encima del umbral de 0,05 m. El fallo de rf2o es acumular de menos poco a poco;
+> nunca convierte un tramo conducido en una ventana de parada.
+
+Prueba pura en `herramientas/prueba_medir_g2.py`, sin ROS, sin bag y sin pasillo, sobre CSV
+sintéticos: **21 comprobaciones en 8 casos** —caso limpio, sentido de vuelta, sin ventana de
+llegada, con `/amcl_pose` vacío, con estación intermedia, con largo cero— y sobre todo el caso del
+sesgo +2,9 %, que debe dar **M1 = 1,029 y M2 = 0,58 m sobre 20 m**. Ese último es el que importa:
+es el número que el §4 de `S21_preparacion_G2.md` predice para el viernes, y si la herramienta no
+lo reproduce, el resultado del viernes no se puede contrastar contra nada.
+
+```bash
+python3 herramientas/prueba_medir_g2.py
+```
