@@ -68,8 +68,8 @@ Los 58 s del coordinador incluyen los 3,0 s del guardián del §5, medidos.
 
 ## 3. Las cinco terminales
 
-Las cinco desde la raíz del repositorio (`~/Documents/Tesis`), salvo donde el comando hace su
-propio `cd`. Comprobación de que estás donde toca: `ls herramientas/robot.sh`.
+Las cinco desde la raíz del repositorio, salvo donde el comando hace su propio `cd`. Comprobación
+de que estás donde toca: `ls herramientas/robot.sh`.
 
 | | para qué | trabaja desde |
 |---|---|---|
@@ -227,7 +227,15 @@ cortar T4 antes de que la misión termine deja la misión sin su última marca. 
 
 #### Piloto 2 — A · ETM9 → ETM6  ·  relevos esperados: 0
 
-Bag: `S21_piloto_A_03`
+Bag: `S21_piloto_A_04`
+
+> **Se repite.** El intento `S21_piloto_A_03` se corrió **sin T1 ni T2** — culpa de una instrucción
+> mía, no de la hoja — así que reusó la pila del Piloto 1 y violó el §6.4 del protocolo, que pide
+> `gzserver` nuevo por misión. La corrida en sí salió bien (RTF 0,9979, llegada 0,068 m, error de
+> localización 0,032 m y 0,132 m), y de hecho fue la que demostró que el criterio 1 estaba mal
+> definido; pero un piloto existe para ensayar el procedimiento completo, y uno con un paso saltado
+> no lo ensaya. **El bag se conserva como evidencia del arreglo del criterio y no se compone como
+> registro.** Aquí hay que correr los cinco pasos, T1 y T2 incluidos.
 
 **T3 — parar el coordinador de la misión anterior** (t = 0)
 
@@ -262,7 +270,7 @@ source ~/deepracer_sim_ws/install/setup.bash && (herramientas/esperar_nav2.sh ro
 **T4 — grabar** (~t+75 s)
 
 ```bash
-source ~/deepracer_sim_ws/install/setup.bash && herramientas/grabar_mision.sh S21_piloto_A_03 robot1 robot2
+source ~/deepracer_sim_ws/install/setup.bash && herramientas/grabar_mision.sh S21_piloto_A_04 robot1 robot2
 ```
 
 **T5 — lanzar** (~t+95 s)

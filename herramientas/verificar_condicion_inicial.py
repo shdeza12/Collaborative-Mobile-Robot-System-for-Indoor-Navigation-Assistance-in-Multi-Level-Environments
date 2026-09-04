@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Comprueba que el robot este AHORA MISMO donde dice la tabla de spawn.
+"""Comprueba que AMCL sepa AHORA MISMO donde esta el robot.
 
 No es lo mismo que verificar_pose_spawn.py, y la diferencia importa. Aquel
 comprueba en frio que la pose CONFIGURADA caiga en sitio libre del mapa; este
-comprueba en vivo que el vehiculo ESTE ahi. Una pose configurada impecable y un
-robot que no esta en ella son perfectamente compatibles, y es lo que pasa.
+comprueba en vivo que la CREENCIA del robot coincida con donde esta. Una pose
+configurada impecable y un robot que no sabe donde esta son perfectamente
+compatibles, y es lo que pasa.
 
 POR QUE EXISTE
 --------------
@@ -61,15 +62,49 @@ llegada de 0.25 m-. Y la x de amcl_pose era identica hasta el quinto decimal a
 la medida media hora antes: el filtro no habia publicado ni una actualizacion
 mientras el carro se deslizaba 0.6 m.
 
+QUE SE MIDE, Y POR QUE NO ES LA DISTANCIA AL SPAWN
+--------------------------------------------------
+Hasta el 2026-09-04 esta compuerta comparaba la pose real contra la TABLA DE
+SPAWN. Estaba mal, y lo demostro una corrida sana: S21_piloto_A_03 fue
+rechazada con robot1 a 1.19 m y robot2 a 43.92 m "de su pose declarada", cuando
+su error de localizacion al arrancar era de 0.032 m -mejor que el del piloto
+que si paso, 0.040 m- y llego a 0.068 m del destino, la mejor llegada del dia.
+Lo unico que pasaba es que los robots venian de una mision anterior.
+
+La magnitud que hace dano es la de arriba: que la CREENCIA de AMCL se separe de
+la VERDAD. La distancia a la tabla era un SUSTITUTO de esa magnitud, y solo
+vale mientras el robot no se haya movido a proposito, porque AMCL se siembra
+con la pose declarada. Comprobado en los bags de los dos pilotos del
+2026-09-04, leyendo /amcl_pose contra /odom:
+
+                        desvio vs tabla   error AMCL vs verdad
+  piloto 1 (pila nueva)      0.0396 m           0.040 m   <- iguales
+  piloto 2 (encadenada)      1.1919 m           0.032 m   <- divergen
+
+En pila nueva los dos numeros son el MISMO por construccion, asi que el
+criterio nuevo no afloja nada: subsume al viejo. En cuanto el robot navega, el
+sustituto pasa a medir la mision en vez del resbalon. Y hay un motivo que
+remata: en el banco fisico no se puede respawnear nada, asi que un criterio de
+"estar en la pose de spawn" es inaplicable donde esto tiene que acabar.
+
+La creencia se lee de /<robot>/amcl_pose y NO de la composicion de /tf. Se
+probaron las dos: la composicion (map->odom) o pose_odom da 0.0007 m al
+arrancar, no 0.040 m, porque AMCL todavia no ha corregido -la correccion es la
+identidad- y /odom ya es la verdad, asi que el resultado sigue a la verdad por
+construccion y la compuerta aprobaria siempre. Solo convergen las dos fuentes
+cuando el robot ya lleva rato navegando (medido: 0.0469 vs 0.0465 a los 134 s).
+
 LA CONSECUENCIA OPERATIVA, QUE ES LO QUE HAY QUE RECORDAR
 ---------------------------------------------------------
-La desviacion no depende de la mision: depende del TIEMPO QUE LA PILA LLEVA
-QUIETA. Con la tolerancia de 0.15 m de aqui abajo, una pila recien levantada la
-respeta y a los ~9 minutos ya no. Asi que esta comprobacion NO se hace una vez
-tras el lanzamiento y se da por buena para toda la tarde: se hace JUSTO ANTES
-de cada mision, y entre que la pila esta lista y la mision arranca se pierde el
-menor tiempo posible. Dos misiones "identicas" lanzadas con diez minutos de
-diferencia no parten de la misma condicion inicial.
+El error no depende de la mision: depende del TIEMPO QUE EL ROBOT LLEVA QUIETO,
+porque quieto es justo cuando resbala sin que AMCL lo corrija. Con la
+tolerancia de 0.15 m de aqui abajo, una pila recien levantada la respeta y a
+los ~9 minutos ya no. Asi que esta comprobacion NO se hace una vez tras el
+lanzamiento y se da por buena para toda la tarde: se hace JUSTO ANTES de cada
+mision. Dos misiones "identicas" lanzadas con diez minutos de diferencia no
+parten de la misma condicion inicial. Se vio en el piloto 2: robot1, que acababa
+de navegar, iba a 0.032 m, y robot2, que llevaba la mision entera parado, a
+0.132 m -dentro de tolerancia, pero cuatro veces peor-.
 
 Esto es tambien del mismo orden de magnitud que los errores de llegada que se
 venian atribuyendo a la observabilidad del pasillo (sigma_x 0.704 m contra
@@ -80,7 +115,11 @@ Uso:
     python3 herramientas/verificar_condicion_inicial.py robot1
     python3 herramientas/verificar_condicion_inicial.py --json robot1 robot2
 
-Codigo de salida: 0 si TODOS los robots estan en su pose declarada, 1 si no.
+Codigo de salida: 0 si TODOS los robots saben donde estan, 1 si no.
+
+El JSON lleva un campo "criterio": "localizacion" que los de antes del
+2026-09-04 no tienen. Sin el, un condicion_inicial.json viejo y uno nuevo son
+indistinguibles y su "dentro" no significa lo mismo.
 
 Con --json escribe el veredicto en una linea de JSON por la salida estandar y
 calla el resto. Es lo que grabar_mision.sh deja en <bag>/condicion_inicial.json
@@ -101,10 +140,7 @@ sys.path.insert(0, os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
     "Robot", "aws-deepracer", "deepracer_bringup", "launch"))
 
-import rclpy
 from deepracer_raiz_repo import pose_por_defecto
-from nav_msgs.msg import Odometry
-from rclpy.node import Node
 
 # En simulacion /odom NO es odometria: el plugin publica la pose del mundo de
 # Gazebo (gazebo_ros_deepracer_drive.cpp:229), asi que es verdad de terreno y
@@ -122,30 +158,92 @@ def _normalizar_grados(a):
     return (a + 180.0) % 360.0 - 180.0
 
 
-def leer_odom(robots, segundos=5.0):
-    """Devuelve {robot: (ultima muestra de /<robot>/odom o None, hay_clock)}.
+def evaluar_desvios(esperada, real, creida):
+    """Decide si la condicion inicial vale. Poses como (x, y, yaw_rad).
+
+    Es funcion PURA y vive separada de la lectura de topicos a proposito: el
+    criterio es lo que se equivoco el 2026-09-04, y lo que se equivoca hay que
+    poder probarlo sin levantar la simulacion. La prueba esta al lado, en
+    prueba_verificar_condicion_inicial.py.
+
+      esperada  la de la tabla de spawn. Solo informativa desde el 2026-09-04.
+      real      donde esta el robot (verdad de terreno).
+      creida    donde cree AMCL que esta. None si no se pudo leer.
+
+    'dentro' sale de la CREENCIA contra la VERDAD, no del desvio contra la
+    tabla. Con creida None sale None, que no es aprobar: significa que no se
+    pudo medir, y el §8 manda descartar cuando el criterio 1 no se cumple.
+    """
+    ex, ey, eyaw = esperada
+    rx, ry, ryaw = real
+    d = math.hypot(rx - ex, ry - ey)
+    dyaw = abs(_normalizar_grados(math.degrees(ryaw - eyaw)))
+
+    salida = {"criterio": "localizacion",
+              "desviacion_m": round(d, 4),
+              "desviacion_yaw_grados": round(dyaw, 2),
+              "error_localizacion_m": None,
+              "error_localizacion_yaw_grados": None,
+              "dentro": None}
+    if creida is None:
+        return salida
+
+    cx, cy, cyaw = creida
+    e = math.hypot(cx - rx, cy - ry)
+    eyaw_g = abs(_normalizar_grados(math.degrees(cyaw - ryaw)))
+    salida["error_localizacion_m"] = round(e, 4)
+    salida["error_localizacion_yaw_grados"] = round(eyaw_g, 2)
+    salida["dentro"] = e <= TOLERANCIA_M and eyaw_g <= TOLERANCIA_YAW_GRADOS
+    return salida
+
+
+def leer_estado(robots, segundos=5.0):
+    """Devuelve {robot: (verdad o None, creencia o None, hay_clock)}.
 
     Los robots se escuchan A LA VEZ, con un solo nodo, y no uno detras de otro.
-    No es por elegancia: la desviacion crece ~17 mm/min con la pila quieta, asi
-    que medir robot2 cinco segundos despues que robot1 seria medir dos
-    instantes distintos y llamarlos la misma condicion inicial.
+    No es por elegancia: el error crece ~17 mm/min con el robot quieto, asi que
+    medir robot2 cinco segundos despues que robot1 seria medir dos instantes
+    distintos y llamarlos la misma condicion inicial.
+
+    /amcl_pose se ofrece TRANSIENT_LOCAL y RELIABLE -leido del
+    offered_qos_profiles del bag S21_piloto_B_02: durability 1, reliability 1,
+    frente al durability 2 (VOLATILE) de /odom-. Hay que pedirlo igual por dos
+    motivos: con un perfil por defecto (volatil) el emparejamiento ni siquiera
+    se produce y no llegaria NADA, y aun emparejando, AMCL solo publica cuando
+    cruza update_min_d, asi que con el robot parado pueden pasar minutos sin un
+    mensaje nuevo. TRANSIENT_LOCAL es justo lo que hace que un suscriptor
+    tardio reciba la ultima pose publicada, que es la que interesa.
 
     'hay_clock' cuenta PUBLICADORES, no suscriptores: 'ros2 topic list' lista
     /clock aunque solo lo escuchen los nodos con use_sim_time, asi que la
     pregunta util es si alguien lo escribe. Es la misma trampa que ya se
     documento en grabar_mision.sh (guarda 1).
     """
+    import rclpy
+    from geometry_msgs.msg import PoseWithCovarianceStamped
+    from nav_msgs.msg import Odometry
+    from rclpy.node import Node
+    from rclpy.qos import (DurabilityPolicy, QoSProfile, ReliabilityPolicy)
+
+    creencia_qos = QoSProfile(depth=1,
+                              durability=DurabilityPolicy.TRANSIENT_LOCAL,
+                              reliability=ReliabilityPolicy.RELIABLE)
+
     rclpy.init()
     nodo = Node("verificador_de_condicion_inicial")
     muestras = {r: [] for r in robots}
+    creencias = {r: [] for r in robots}
     for r in robots:
         nodo.create_subscription(
             Odometry, f"/{r}/odom",
             lambda m, r=r: muestras[r].append(m), 10)
+        nodo.create_subscription(
+            PoseWithCovarianceStamped, f"/{r}/amcl_pose",
+            lambda m, r=r: creencias[r].append(m), creencia_qos)
     fin = nodo.get_clock().now().nanoseconds * 1e-9 + segundos
     while rclpy.ok() and nodo.get_clock().now().nanoseconds * 1e-9 < fin:
         rclpy.spin_once(nodo, timeout_sec=0.1)
-        if all(len(m) > 20 for m in muestras.values()):
+        if all(len(muestras[r]) > 20 and creencias[r] for r in robots):
             break
     # EL RELOJ DE ESTE ROBOT PUEDE NO SER '/clock'. Desde el 2026-08-30 los dos
     # robots comparten dominio y se distinguen por el topico de reloj: robot1 se
@@ -164,21 +262,24 @@ def leer_odom(robots, segundos=5.0):
         if nodo.count_publishers(reloj) == 0:
             reloj = "/clock"
         salida[r] = (muestras[r][-1] if muestras[r] else None,
+                     creencias[r][-1] if creencias[r] else None,
                      nodo.count_publishers(reloj) > 0)
     nodo.destroy_node()
     rclpy.shutdown()
     return salida
 
 
-def _evaluar(robot, od, hay_clock):
+def _evaluar(robot, od, am, hay_clock):
     """Devuelve (entrada del registro, lineas para la persona).
 
     'dentro' en None significa NO SE PUDO MEDIR, y no es lo mismo que estar en
     su sitio: el §8 manda descartar la corrida cuando el criterio 1 no se
     cumple, y un hueco que se leyera como aprobado la colaria.
     """
-    ni_idea = {"desviacion_m": None, "desviacion_yaw_grados": None,
-               "dentro": None}
+    ni_idea = {"criterio": "localizacion",
+               "desviacion_m": None, "desviacion_yaw_grados": None,
+               "error_localizacion_m": None,
+               "error_localizacion_yaw_grados": None, "dentro": None}
 
     try:
         esperada = pose_por_defecto(robot)
@@ -205,52 +306,74 @@ def _evaluar(robot, od, hay_clock):
             "y compararla contra una pose de mundo no mide la condicion "
             "inicial. No opino."]
 
-    real_x = od.pose.pose.position.x
-    real_y = od.pose.pose.position.y
-    real_yaw = math.degrees(_yaw(od.pose.pose.orientation))
-    esp_yaw = math.degrees(float(esperada["yaw"]))
+    real = (od.pose.pose.position.x, od.pose.pose.position.y,
+            _yaw(od.pose.pose.orientation))
+    creida = None
+    if am is not None:
+        creida = (am.pose.pose.position.x, am.pose.pose.position.y,
+                  _yaw(am.pose.pose.orientation))
 
-    d = math.hypot(real_x - float(esperada["x"]), real_y - float(esperada["y"]))
-    dyaw = abs(_normalizar_grados(real_yaw - esp_yaw))
-    dentro = d <= TOLERANCIA_M and dyaw <= TOLERANCIA_YAW_GRADOS
+    r = evaluar_desvios(
+        (float(esperada["x"]), float(esperada["y"]), float(esperada["yaw"])),
+        real, creida)
 
     lineas = [
         f"Condicion inicial de {robot}",
-        f"  declarada (POSE_INICIAL): ({esperada['x']:.3f}, "
-        f"{esperada['y']:.3f}, {esp_yaw:.1f} grados)",
-        f"  real (/{robot}/odom)     : ({real_x:.3f}, {real_y:.3f}, "
-        f"{real_yaw:.1f} grados)",
-        f"  desviacion               : {d:.3f} m, {dyaw:.1f} grados"]
+        f"  declarada (POSE_INICIAL) : ({esperada['x']:.3f}, "
+        f"{esperada['y']:.3f}, {math.degrees(float(esperada['yaw'])):.1f} "
+        f"grados)",
+        f"  real (/{robot}/odom)     : ({real[0]:.3f}, {real[1]:.3f}, "
+        f"{math.degrees(real[2]):.1f} grados)"]
 
-    if dentro:
-        lineas.append(f"\nOK: dentro de {TOLERANCIA_M} m y "
-                      f"{TOLERANCIA_YAW_GRADOS} grados. AMCL nace sembrada "
-                      f"donde el robot esta.")
+    if creida is None:
+        lineas += [
+            f"  creida (/{robot}/amcl_pose): no llego ninguna.",
+            "",
+            "NO OPINO. Sin la creencia de AMCL no se puede medir el error de",
+            "localizacion, que es lo que decide el criterio 1. Comprobar que",
+            f"amcl este vivo: ros2 topic info /{robot}/amcl_pose -v",
+            "",
+            f"Solo como dato: el robot esta a {r['desviacion_m']:.3f} m y "
+            f"{r['desviacion_yaw_grados']:.1f} grados de la tabla de spawn,",
+            "que NO es el criterio (ver la cabecera de este archivo)."]
+        return r, lineas
+
+    lineas += [
+        f"  creida (/{robot}/amcl_pose): ({creida[0]:.3f}, {creida[1]:.3f}, "
+        f"{math.degrees(creida[2]):.1f} grados)",
+        f"  error de localizacion    : {r['error_localizacion_m']:.3f} m, "
+        f"{r['error_localizacion_yaw_grados']:.1f} grados   <- el criterio",
+        f"  desvio vs tabla de spawn : {r['desviacion_m']:.3f} m, "
+        f"{r['desviacion_yaw_grados']:.1f} grados   (informativo)"]
+
+    if r["dentro"]:
+        lineas.append(f"\nOK: AMCL sabe donde esta el robot dentro de "
+                      f"{TOLERANCIA_M} m y {TOLERANCIA_YAW_GRADOS} grados.")
     else:
         lineas += [
             f"\nCONDICION INICIAL CONTAMINADA "
             f"(limite {TOLERANCIA_M} m / {TOLERANCIA_YAW_GRADOS} grados).",
-            "AMCL se siembra con la pose DECLARADA, no con la real, asi que",
-            f"nace creyendose a {d:.3f} m y {dyaw:.1f} grados de donde esta.",
-            "Cualquier error de llegada medido asi lleva dentro este sesgo y no",
-            "se puede atribuir ni al controlador ni al pasillo.",
+            f"AMCL se cree a {r['error_localizacion_m']:.3f} m y "
+            f"{r['error_localizacion_yaw_grados']:.1f} grados de donde el robot",
+            "esta de verdad. Cualquier error de llegada medido asi lleva dentro",
+            "este sesgo y no se puede atribuir ni al controlador ni al pasillo.",
             "",
             "Que mirar, en este orden:",
-            "  1. CUANTO LLEVA LA PILA LEVANTADA. Es la causa habitual: el carro",
-            "     resbala ~17 mm/min aunque nadie lo mande, asi que a los ~9 min",
-            f"     ya se sale de los {TOLERANCIA_M} m. Relanzar y correr la mision",
-            "     enseguida, sin dejar la simulacion reposando.",
-            "  2. Si acaba de arrancar y ya sale desviado, entonces si es el",
-            "     spawn: comprobar que no se reuso el gzserver de otra corrida",
-            "     (§6.4 pide uno nuevo por mision) y revisar verificar_pose_spawn.py.",
-            "",
-            f"Nota: {d:.3f} m / {dyaw:.1f} grados es la desviacion REAL del carro.",
-            "El error que ve Nav2 puede ser aun mayor, porque AMCL solo corrige",
-            "cada 0.25 m o 0.2 rad y una deriva tan lenta no cruza ese umbral."]
+            "  1. CUANTO LLEVA ESTE ROBOT QUIETO. Es la causa habitual: resbala",
+            "     ~17 mm/min aunque nadie lo mande y AMCL no lo corrige hasta",
+            "     acumular 25 cm, asi que a los ~9 min ya se sale de los "
+            f"{TOLERANCIA_M} m.",
+            "     Relanzar y correr la mision enseguida, sin dejarlo reposando.",
+            "  2. Si acaba de arrancar y ya sale desviado, entonces es el spawn:",
+            "     en pila nueva AMCL se siembra con la declarada, asi que este",
+            "     error y el desvio vs tabla son el mismo numero. Comprobar que",
+            "     no se reuso el gzserver (§6.4 pide uno nuevo por mision) y",
+            "     revisar verificar_pose_spawn.py.",
+            "  3. Si el robot viene de otra mision, esto NO es motivo de descarte",
+            "     por si solo: lo que importa es el numero de arriba, no lo lejos",
+            "     que haya acabado del spawn."]
 
-    return ({"desviacion_m": round(d, 4),
-             "desviacion_yaw_grados": round(dyaw, 2),
-             "dentro": dentro}, lineas)
+    return r, lineas
 
 
 def main():
@@ -258,13 +381,13 @@ def main():
     como_json = "--json" in sys.argv[1:]
     robots = argumentos or ["robot1"]
 
-    lecturas = leer_odom(robots)
+    lecturas = leer_estado(robots)
 
     por_robot = {}
     informe = []
     for r in robots:
-        od, hay_clock = lecturas[r]
-        por_robot[r], lineas = _evaluar(r, od, hay_clock)
+        od, am, hay_clock = lecturas[r]
+        por_robot[r], lineas = _evaluar(r, od, am, hay_clock)
         informe.append("\n".join(lineas))
 
     # El criterio 1 pide los DOS dentro. Un solo robot fuera basta para que la
@@ -272,7 +395,15 @@ def main():
     todos_dentro = all(e["dentro"] is True for e in por_robot.values())
 
     if como_json:
-        json.dump({"tolerancia_m": TOLERANCIA_M,
+        # 'criterio' describe al registro entero, no a cada robot, asi que se
+        # saca de las entradas y se escribe una sola vez. La funcion pura si lo
+        # devuelve por robot -es lo que ella aplica-, pero repetirlo N veces en
+        # el archivo seria decir N veces lo mismo, y el esquema tiene
+        # additionalProperties:false en la entrada por robot.
+        for e in por_robot.values():
+            e.pop("criterio", None)
+        json.dump({"criterio": "localizacion",
+                   "tolerancia_m": TOLERANCIA_M,
                    "tolerancia_yaw_grados": TOLERANCIA_YAW_GRADOS,
                    "por_robot": por_robot}, sys.stdout)
         sys.stdout.write("\n")

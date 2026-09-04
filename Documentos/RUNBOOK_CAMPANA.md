@@ -332,11 +332,24 @@ el descarte se anota — el techo es el 20 %.
 
 | | criterio | de dónde sale |
 |---|---|---|
-| 1 | pose inicial de los dos dentro de **0,15 m** | paso 3, y `condicion_inicial.json` que el paso 5 deja en el bag |
+| 1 | **error de localización** de los dos dentro de **0,15 m** | paso 3, y `condicion_inicial.json` que el paso 5 deja en el bag |
 | 2 | **RTF ≥ 0,99** | `rtf.json` del bag |
 | 3 | error de llegada **≤ 0,25 m** contra `/odom` | paso 7 |
 | 4 | el registro se compone **sin tocar un campo a mano** y `analizar_campana.py` lo agrega sin errores de integridad | paso 7 |
 | 5 | número de relevos = **0** en condición A, **1** en B | resultado de la acción |
+
+**El criterio 1 mide `/amcl_pose` contra `/odom`, no contra la tabla de spawn.** Hasta el
+2026-09-04 medía la distancia al spawn, y eso rechazó una corrida sana: `S21_piloto_A_03` salió a
+1,19 m y 43,92 m «de su pose declarada» sólo porque los robots venían de la misión anterior,
+cuando su error de localización era de 0,032 m — mejor que el del piloto que sí pasó, 0,040 m — y
+llegó a 0,068 m del destino. **Que un robot no esté en su spawn no es motivo de descarte:** en el
+banco físico no se puede respawnear nada, y encadenar misiones es el comportamiento que hay que
+validar. Lo que se descarta es que el robot no sepa dónde está.
+
+En pila recién levantada los dos números son idénticos por construcción, porque AMCL se siembra
+con la pose declarada (medido: 0,0401 y 0,0401 en `S21_piloto_B_02`), así que el criterio nuevo no
+afloja nada respecto del viejo. El campo `criterio: "localizacion"` del JSON distingue los
+`condicion_inicial.json` nuevos de los de antes del 2026-09-04, cuyo `dentro` no significa lo mismo.
 
 **Criterio de cierre del piloto:** las cinco pasan, y los dos registros del §6 coinciden o se sabe
 por qué no.
@@ -380,8 +393,9 @@ por qué no.
 
 4. ~~**El criterio 1 no sobrevive al bag, y eso afecta también a las 30 corridas de S24.**~~
    **Resuelto el 2026-09-04, antes de correr la campaña y no después.** Los cinco criterios del §8
-   se comprueban a posteriori salvo el primero: la pose inicial dentro de 0,15 m es una compuerta
-   **previa**, y su resultado se quedaba en la terminal del paso 3, que se pierde al cerrarla.
+   se comprueban a posteriori salvo el primero: el error de localización dentro de 0,15 m es una
+   compuerta **previa**, y su resultado se quedaba en la terminal del paso 3, que se pierde al
+   cerrarla.
 
    Ahora `grabar_mision.sh` mide la condición inicial de todos los robots **justo antes de abrir el
    bag** y deja el veredicto en `<bag>/condicion_inicial.json`; `componer_registro.py` lo recoge en

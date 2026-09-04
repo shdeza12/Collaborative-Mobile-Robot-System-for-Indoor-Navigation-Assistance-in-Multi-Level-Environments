@@ -337,31 +337,62 @@ no es una garantía y el fallo es silencioso.
 #### `condicion_inicial` — el criterio que no sobrevivía al bag (añadido el 2026-09-04)
 
 De los cinco criterios de validez del §8 del runbook, cuatro se comprueban *a posteriori* sobre el
-bag. El primero no: **la pose inicial dentro de 0,15 m es una compuerta previa**, y hasta esta fecha
-su resultado se quedaba en la terminal del paso 3 y se perdía al cerrarla. Las corridas del 30-ago
-sólo pueden darse por buenas **4 de 5**, y es irreconstruible.
+bag. El primero no: **que el robot sepa dónde está, dentro de 0,15 m, es una compuerta previa**, y
+hasta esta fecha su resultado se quedaba en la terminal del paso 3 y se perdía al cerrarla. Las
+corridas del 30-ago sólo pueden darse por buenas **4 de 5**, y es irreconstruible.
 
 ```json
 "condicion_inicial": {
+  "criterio": "localizacion",
   "tolerancia_m": 0.15, "tolerancia_yaw_grados": 10.0,
-  "por_robot": {"robot1": {"desviacion_m": 0.031, "desviacion_yaw_grados": 1.2, "dentro": true}}
+  "por_robot": {"robot1": {
+    "desviacion_m": 0.031, "desviacion_yaw_grados": 1.2,
+    "error_localizacion_m": 0.031, "error_localizacion_yaw_grados": 1.2,
+    "dentro": true}}
 }
 ```
 
 Lo escribe `grabar_mision.sh` en `<bag>/condicion_inicial.json` **justo antes de abrir el bag**, y de
-ahí lo lee el compositor. El momento no es negociable: la desviación no depende de la misión sino
-del tiempo que la pila lleve quieta —el carro resbala ~17 mm/min aunque nadie lo mande—, así que
-medirla en otro instante mide otra cosa.
+ahí lo lee el compositor. El momento no es negociable: el error no depende de la misión sino del
+tiempo que el robot lleve **quieto** —resbala ~17 mm/min aunque nadie lo mande y AMCL no lo corrige
+hasta acumular 25 cm—, así que medirlo en otro instante mide otra cosa.
 
-Se guarda **la desviación medida además del sí/no**, para poder rehacer el veredicto si la
-tolerancia cambia y para poder mirar la distribución de las 30 corridas. `dentro: null` significa
-**no se pudo medir**, que no es lo mismo que estar en su sitio: el §8 manda descartar la corrida
-cuando el criterio 1 no se cumple, y un hueco silencioso la colaría.
+**Qué decide `dentro`: `error_localizacion_m`, no `desviacion_m`.** Es el cambio del 2026-09-04 y
+tiene una razón medida. `desviacion_m` es la distancia a la tabla de spawn, y como criterio rechazó
+una corrida sana: `S21_piloto_A_03` salió a 1,19 m y 43,92 m «de su pose declarada» sólo porque los
+robots venían de la misión anterior, cuando su error de localización era de 0,032 m —mejor que el
+del piloto que sí pasó, 0,040 m— y llegó a 0,068 m del destino, la mejor llegada del día. La
+magnitud que hace daño es que la **creencia** de AMCL se separe de la **verdad**; la distancia al
+spawn sólo era un sustituto de ella, válido mientras el robot no se hubiese movido a propósito.
+Y en el banco físico no se puede respawnear nada, así que un criterio de «estar en la pose de
+spawn» es inaplicable donde esto tiene que acabar.
+
+`desviacion_m` se sigue guardando porque en pila recién levantada **coincide** con el error de
+localización —AMCL se siembra con la pose declarada, así que son el mismo número por construcción:
+0,0401 y 0,0401 en `S21_piloto_B_02`—, y esa coincidencia es la prueba de que el criterio nuevo
+subsume al viejo en vez de aflojarlo.
+
+La creencia se lee de `/<robot>/amcl_pose` y **no** de la composición de `/tf`. Se probaron las dos:
+la composición `(map→odom) ∘ pose_odom` da 0,0007 m al arrancar en vez de 0,040 m, porque AMCL aún
+no ha corregido y `/odom` ya es la verdad, de modo que sigue a la verdad por construcción y la
+compuerta aprobaría siempre. `/amcl_pose` se ofrece TRANSIENT_LOCAL —`durability: 1` en el
+`offered_qos_profiles` del bag, frente al `2` (VOLATILE) de `/odom`—, así que un suscriptor tardío
+recibe la última pose aunque AMCL lleve minutos sin publicar. Hay que pedirlo con ese perfil: con el
+de por defecto el emparejamiento ni siquiera se produce.
+
+Se guarda **la medida además del sí/no**, para poder rehacer el veredicto si la tolerancia cambia y
+para poder mirar la distribución de las 30 corridas. `dentro: null` significa **no se pudo medir**,
+que no es lo mismo que estar en su sitio: el §8 manda descartar la corrida cuando el criterio 1 no
+se cumple, y un hueco silencioso la colaría.
 
 > El campo es **opcional**, igual que `escenario_por_robot`: los registros compuestos antes del
 > 2026-09-04 —entre ellos los dos pilotos del §9.3 del runbook, que son evidencia entregada— no
 > pueden invalidarse por un campo que no existía cuando se grabaron. Por eso no hay salto de versión
 > del esquema.
+>
+> Por el mismo motivo `criterio` tampoco es obligatorio, y **su ausencia es informativa**: un
+> `condicion_inicial` sin él es del criterio viejo y su `dentro` no significa lo mismo. Sin ese
+> campo, un registro de antes y uno de después serían indistinguibles.
 
 ### 3.10 `traza`
 

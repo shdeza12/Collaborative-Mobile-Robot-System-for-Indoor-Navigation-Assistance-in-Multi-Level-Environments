@@ -176,16 +176,21 @@ MARCA_DIR="$(dirname "$0")"
 
 # --- Criterio 1 del §8, antes de grabar -------------------------------------
 # De los cinco criterios de validez del §8 del runbook, cuatro se comprueban
-# sobre el bag y este NO: la pose inicial dentro de 0,15 m es una compuerta
-# PREVIA. Hasta el 2026-09-04 su unico rastro era la salida del paso 3 en la
-# terminal, que se pierde al cerrarla, asi que los registros compuestos solo
-# podian dar por buenos 4 de 5. Es el mismo modo de fallo que ya destruyo el
-# RTF de A_01, C_01 y C_02 el 30-ago.
+# sobre el bag y este NO: que AMCL sepa donde esta el robot dentro de 0,15 m es
+# una compuerta PREVIA. Hasta el 2026-09-04 su unico rastro era la salida del
+# paso 3 en la terminal, que se pierde al cerrarla, asi que los registros
+# compuestos solo podian dar por buenos 4 de 5. Es el mismo modo de fallo que
+# ya destruyo el RTF de A_01, C_01 y C_02 el 30-ago.
 #
-# Se mide AQUI y no en el paso 3 porque la desviacion no depende de la mision
-# sino del tiempo que la pila lleve quieta -el carro resbala ~17 mm/min aunque
-# nadie lo mande-, de modo que la unica medida que describe esta corrida es la
-# tomada justo antes de abrirle el bag.
+# Se mide AQUI y no en el paso 3 porque el error no depende de la mision sino
+# del tiempo que el robot lleve quieto -resbala ~17 mm/min aunque nadie lo
+# mande y AMCL no lo corrige hasta acumular 25 cm-, de modo que la unica medida
+# que describe esta corrida es la tomada justo antes de abrirle el bag.
+#
+# Lo que se compara es /amcl_pose contra /odom, NO contra la tabla de spawn.
+# Un robot que viene de otra mision no esta en su spawn y no pasa nada: el
+# 2026-09-04 el criterio viejo rechazo S21_piloto_A_03 por 1,19 m y 43,92 m
+# "de su pose declarada" cuando su error de localizacion era de 0,032 m.
 #
 # Va antes de la marca de RTF para no meterle 5 s de ventana muerta.
 set +e
@@ -197,8 +202,8 @@ if [ "$COND_ESTADO" -ne 0 ]; then
     # No se aborta, por el mismo motivo que con el RTF bajo: descartar una
     # corrida es una decision del §8 del protocolo y se toma al componer el
     # registro, con la cifra delante, no aqui.
-    echo "AVISO: el criterio 1 del §8 NO se cumple (pose inicial fuera de" >&2
-    echo "0,15 m). La corrida es candidata a descarte. Para verlo con detalle:" >&2
+    echo "AVISO: el criterio 1 del §8 NO se cumple (AMCL no sabe donde esta" >&2
+    echo "el robot, >0,15 m). Candidata a descarte. Para verlo con detalle:" >&2
     echo "  python3 herramientas/verificar_condicion_inicial.py ${ROBOTS[*]}" >&2
 fi
 

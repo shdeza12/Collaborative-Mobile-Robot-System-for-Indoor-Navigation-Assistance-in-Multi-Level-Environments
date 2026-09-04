@@ -170,8 +170,8 @@ Los 58 s del coordinador incluyen los 3,0 s del guardián del §5, medidos.
 
 ## 3. Las cinco terminales
 
-Las cinco desde la raíz del repositorio (`~/Documents/Tesis`), salvo donde el comando hace su
-propio `cd`. Comprobación de que estás donde toca: `ls herramientas/robot.sh`.
+Las cinco desde la raíz del repositorio, salvo donde el comando hace su propio `cd`. Comprobación
+de que estás donde toca: `ls herramientas/robot.sh`.
 
 | | para qué | trabaja desde |
 |---|---|---|

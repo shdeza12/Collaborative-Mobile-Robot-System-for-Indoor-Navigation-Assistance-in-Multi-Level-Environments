@@ -234,6 +234,10 @@
           "type": "object", "additionalProperties": false,
           "required": ["tolerancia_m", "tolerancia_yaw_grados", "por_robot"],
           "properties": {
+            "criterio": {
+              "comentario": "QUE se midio para decidir 'dentro'. 'localizacion' es /amcl_pose contra /odom, que es lo unico que hace dano. Su AUSENCIA significa el criterio viejo, el de aparcamiento: hasta el 2026-09-04 se medaa la distancia a la tabla de spawn, y eso rechazaba corridas sanas encadenadas -S21_piloto_A_03 salio a 1,19 m y 43,92 m del spawn con 0,032 m de error de localizacion y la mejor llegada del dia-. No esta en 'required' porque los registros anteriores no lo llevan y no pueden invalidarse, pero su 'dentro' NO significa lo mismo y este campo es lo unico que los distingue.",
+              "type": "string", "enum": ["localizacion"]
+            },
             "tolerancia_m": {"type": "number"},
             "tolerancia_yaw_grados": {"type": "number"},
             "por_robot": {
@@ -243,8 +247,16 @@
                 "type": "object", "additionalProperties": false,
                 "required": ["desviacion_m", "desviacion_yaw_grados", "dentro"],
                 "properties": {
-                  "desviacion_m": {"type": ["number", "null"]},
+                  "desviacion_m": {
+                    "comentario": "Distancia a la tabla de spawn. Desde el 2026-09-04 es INFORMATIVA y no decide nada: un robot que viene de otra mision no esta en su spawn, y en el banco fisico no se puede respawnear nada. Se sigue guardando porque en pila recien levantada coincide con el error de localizacion -AMCL se siembra con la declarada- y esa coincidencia (0,0401 y 0,0401 en S21_piloto_B_02) es la que demuestra que el criterio nuevo no afloja el viejo.",
+                    "type": ["number", "null"]
+                  },
                   "desviacion_yaw_grados": {"type": ["number", "null"]},
+                  "error_localizacion_m": {
+                    "comentario": "|/amcl_pose - /odom| al arrancar: lo que decide 'dentro' desde el 2026-09-04. Ausente en los registros anteriores, donde decidia desviacion_m.",
+                    "type": ["number", "null"]
+                  },
+                  "error_localizacion_yaw_grados": {"type": ["number", "null"]},
                   "dentro": {
                     "comentario": "null es 'no se pudo medir', que NO es lo mismo que 'estaba en su sitio': el §8 manda descartar la corrida cuando el criterio 1 no se cumple, y un hueco silencioso la colaria.",
                     "type": ["boolean", "null"]
