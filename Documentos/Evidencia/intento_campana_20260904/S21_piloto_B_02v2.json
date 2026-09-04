@@ -1,0 +1,1 @@
+{"tolerancia_m": 0.15, "tolerancia_yaw_grados": 10.0, "por_robot": {"robot1": {"desviacion_m": 0.0286, "desviacion_yaw_grados": 2.07, "dentro": true}, "robot2": {"desviacion_m": 0.0166, "desviacion_yaw_grados": 0.9, "dentro": true}}}

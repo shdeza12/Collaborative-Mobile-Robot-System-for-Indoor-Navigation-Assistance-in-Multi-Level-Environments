@@ -24,6 +24,7 @@ Si un tramo se queda esperando servidor para siempre, mirar esto primero.
 import datetime
 import math
 import os
+import sys
 import time
 
 import rclpy
@@ -497,8 +498,72 @@ class Coordinador(Node):
         return futuro.result()
 
 
+def _ya_hay_coordinador(espera_s):
+    """¿Hay ya alguien sirviendo /coordinacion/guiar_usuario?
+
+    EL FALLO QUE ESTO IMPIDE, medido el 2026-09-04. Ese dia se perdio la campana
+    de OE4 con dos misiones caidas en 'Nav2 termino con estado 6'. El estado 6 es
+    ABORTED, y no lo causo Nav2: 20 goals directos en limpio dieron 0 abortos,
+    mientras que 8 pares de goals seguidos al mismo servidor dieron 8 abortos del
+    goal desplazado, entre 9 y 13 ms. navigate_to_pose atiende un goal a la vez y
+    al desplazado lo termina en ABORTED. Aquel dia habia dos coordinadores vivos
+    -lo dejo escrito ROS 2 con 'There may be more than one action server'- y cada
+    uno mandaba el suyo al mismo Nav2.
+
+    Se sondea ANTES de construir el nodo, no dentro, para que el que llega tarde
+    no alcance a publicar su catalogo retenido ni a montar un segundo servidor.
+
+    LIMITACION, y conviene saberla: esto ve al que ya esta sirviendo, no al que
+    arranca en el mismo instante. Cubre el caso real -lanzar uno con otro vivo-,
+    no una carrera de dos arranques simultaneos.
+
+    wait_for_server no necesita girar el nodo: consulta el grafo.
+    """
+    nodo = rclpy.create_node("guardian_coordinador")
+    try:
+        cliente = ActionClient(nodo, GuiarUsuario, "/coordinacion/guiar_usuario")
+        try:
+            return cliente.wait_for_server(timeout_sec=espera_s)
+        finally:
+            cliente.destroy()
+    finally:
+        nodo.destroy_node()
+
+
 def main(args=None):
     rclpy.init(args=args)
+
+    # Segundos que se le dan al descubrimiento para delatar a un coordinador
+    # anterior. En 0 el guardian queda desactivado.
+    sonda = rclpy.create_node("guardian_parametros")
+    sonda.declare_parameter("espera_guardian_s", 3.0)
+    espera_guardian = float(sonda.get_parameter("espera_guardian_s").value)
+    sonda.destroy_node()
+
+    if espera_guardian > 0.0 and _ya_hay_coordinador(espera_guardian):
+        print(
+            "GUARDIAN: ya hay un coordinador sirviendo /coordinacion/guiar_usuario.\n"
+            "\n"
+            "No se arranca un segundo. Dos coordinadores mandan sus goals al mismo\n"
+            "navigate_to_pose, que atiende uno a la vez, y el desplazado vuelve como\n"
+            "ABORTED: es el 'Nav2 termino con estado 6' que costo la campana del\n"
+            "2026-09-04.\n"
+            "\n"
+            "Para al anterior y vuelve a intentarlo:\n"
+            "    pkill -f \"coordinacion[/]coordinador\"\n"
+            "\n"
+            "El patron va con BARRA, no con espacio. 'ros2 run' hace exec a la ruta\n"
+            "instalada, asi que el proceso vivo se llama\n"
+            "'.../lib/coordinacion/coordinador --ros-args ...': un patron con espacio\n"
+            "no encuentra nada y parece que ya no hay nadie. Asi sobrevivio el\n"
+            "coordinador de las 14:10 del 2026-09-04.\n"
+            "\n"
+            "Y los corchetes tampoco sobran: sin ellos pkill encuentra la propia\n"
+            "orden que lo invoca y se mata a si mismo.",
+            file=sys.stderr)
+        rclpy.shutdown()
+        return 1
+
     nodo = Coordinador()
     ejecutor = rclpy.executors.MultiThreadedExecutor()
     ejecutor.add_node(nodo)
