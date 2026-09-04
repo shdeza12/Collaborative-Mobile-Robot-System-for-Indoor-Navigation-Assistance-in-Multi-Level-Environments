@@ -187,7 +187,7 @@ arrastre ya declarado *«verificación del mapa físico»*.
    `sync_slam_toolbox_node` directamente, no `slam_toolbox.launch.py`, así que el argumento
    `clock_topic` de ese launch **sigue escrito, comiteado y nunca corrido**.
 4. Decidir los umbrales del §4 **antes** de salir al pasillo. Fijarlos después de ver el dato es lo
-   que el §6.3 del protocolo prohíbe.
+   que el §7 del protocolo prohíbe.
 5. Planificar la mañana como **dos pasadas**: primero el mapa, luego localización con AMCL. La
    primera está escrita paso a paso en [`GUIA_PASADA_MAPEO.md`](../GUIA_PASADA_MAPEO.md).
 6. En la pasada de mapeo, **comprobar en el sitio que el sensor se movió**, con

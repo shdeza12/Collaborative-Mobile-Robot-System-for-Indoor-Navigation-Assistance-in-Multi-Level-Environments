@@ -4,7 +4,7 @@ Guía de principio a fin para producir las **dos cifras que deciden el G2**: M1 
 desplazamiento registra la odometría frente al que mide la cinta— y M2 —cuánto se equivoca AMCL
 en la marca de llegada—.
 
-Escrita el **2026-09-02**, antes de salir al pasillo, y a propósito: el §6.3 del protocolo
+Escrita el **2026-09-02**, antes de salir al pasillo, y a propósito: el §7 del protocolo
 experimental prohíbe fijar el procedimiento y los umbrales después de ver el dato.
 
 **Esta es la SEGUNDA de las dos pasadas.** La primera —[`GUIA_PASADA_MAPEO.md`](GUIA_PASADA_MAPEO.md)—
@@ -60,8 +60,15 @@ a 6,6 Hz, empujando a 0,5 m/s hay ~7 cm entre barridos consecutivos, y conducien
 ~21 cm. **Más solape es más fácil para el algoritmo.** Si esta pasada se empujara, M1 y M2 no
 dirían nada del vehículo: dirían lo que rinde el algoritmo con un sensor movido a mano.
 
-Se conduce con el mando por USB, siguiendo [`GUIA_TELEOP_MANDO.md`](GUIA_TELEOP_MANDO.md). Todo
-como `root`, por lo del `/dev/shm` que esa guía explica en su §0.2 ter.
+Se conduce con el mando por USB, siguiendo [`GUIA_TELEOP_MANDO.md`](GUIA_TELEOP_MANDO.md). **El
+teleop entero como `root`**, por lo del `/dev/shm` que esa guía explica en su §0.2 ter: tiene que
+hablar con `deepracer-core`, que es de `root`.
+
+> **Y el grabador NO.** Es la misma regla aplicada a otro par de procesos, y da el resultado
+> contrario. El grabador no habla con `deepracer-core`: habla con el LiDAR, que en esta guía se
+> arranca a mano y por tanto es del usuario `deepracer`. La regla es **«los dos extremos con el
+> mismo dueño»**, no «todo con `sudo`». Confundirlas cuesta un bag vacío que dice `Recording...`;
+> pasó el 2026-09-03. El Paso 3.2 lo resuelve comprobando el dueño antes de grabar.
 
 ### 0.4 Por qué van los dos sentidos, y no uno
 
@@ -162,7 +169,7 @@ comprobar que la cadena no aborta**, que es de lo que trata este paso.
 
 ### Paso 1.3 — Dejar decididos M1 y M2 **por escrito**
 
-**Este paso no es opcional y no es de código.** El §6.3 del protocolo prohíbe fijar umbrales
+**Este paso no es opcional y no es de código.** El §7 del protocolo prohíbe fijar umbrales
 después de ver el dato, y en este caso el dato ya se puede predecir, lo que agrava la cosa. El §4
 de [`Evidencia/S21_preparacion_G2.md`](Evidencia/S21_preparacion_G2.md) demuestra dos cosas:
 
@@ -285,6 +292,25 @@ del rumbo inicial.
 
 **[CARRITO — SSH]**
 
+**El grabador va con el mismo usuario que publica `/scan`.** Compruébalo primero, y **no con
+`pgrep ... | head -1`**: en este carro hay varios procesos con `rplidar` en la línea de comandos y
+el más viejo es el de AWS, que no publica `/scan`. Filtra y lee las líneas:
+
+```bash
+pgrep -af rplidar | grep -v "__ns:=/rplidar_ros" | grep -v "deepracer_launcher"
+```
+
+Coge el PID del `rplidar_composition` —el hijo, no el `python3 .../ros2 run`— y pregúntale el
+dueño con `ps -o user= -p <PID>`.
+
+Si dice `deepracer` —el caso normal, porque el LiDAR se arranca a mano y sin `sudo`:
+
+```bash
+source /opt/ros/jazzy/setup.bash && cd ~ && ros2 bag record /scan -o g2_SENTIDO_N
+```
+
+Si dice `root` —el LiDAR viene de `deepracer-core`:
+
 ```bash
 sudo -i bash -c "source /opt/ros/jazzy/setup.bash && cd ~deepracer && ros2 bag record /scan -o g2_SENTIDO_N"
 ```
@@ -293,9 +319,19 @@ Sustituye `SENTIDO` por `ida` o `vuelta` y `N` por 1, 2 o 3. Anota el nombre.
 
 **Esperado:** `Recording...` y `Subscribed to topic '/scan'`.
 
-**Con el `sudo` no se negocia**, y no es la misma razón que en el teleop: es que sin él el
-participante no puede escribir en `/dev/shm/fastrtps_port700*`, nunca existe para el resto del
-grafo, y `ros2 bag record` imprime `Recording...` igual mientras graba un fichero vacío.
+**Con el usuario no se negocia, y no es la misma razón que en el teleop.** El transporte pasa por
+los buzones `/dev/shm/fastrtps_port700*`, con permisos `-rw-r--r--`, y el publicador tiene que
+poder escribir en el buzón del suscriptor. Si los dueños no coinciden, `ros2 bag record` imprime
+`Recording...` **y hasta `Subscribed to topic '/scan'`**, y graba un fichero vacío. Medido el
+2026-09-03 en el pasillo: publicador `deepracer` con grabador `root`, **0 mensajes**; los dos como
+`deepracer`, **60 en 9 s**. El mando sí necesita `sudo` siempre, porque tiene que hablar con
+`deepracer-core`, que es de `root`: son dos cosas distintas y no se deducen la una de la otra.
+
+> **La regla general.** En este carro **ninguna comprobación de datos vale si quien mira no tiene
+> el mismo dueño que quien publica** — ni `bag record`, ni `topic hz`, ni `topic echo`. El fallo
+> es siempre **silencio, no error**: el tópico aparece en `ros2 topic list` y luego no llega un
+> dato. El 2026-09-03 engañó dos veces en tres horas. Si un tópico parece mudo, **repite la medida
+> con el dueño correcto antes de creértelo**.
 
 **Ahora espera 5 segundos con el carro completamente quieto.** No es una formalidad:
 
@@ -331,6 +367,16 @@ Con el gatillo, hasta la cruz del otro extremo.
 > `bag_mapa_1456`, del 28-ago, le falta la metadata entera por esto, y sin ella el bag no se puede
 > reproducir. Un segundo `Ctrl-C` mata el proceso antes de que termine de escribirla.
 
+4. **Comprueba que no está vacío, antes de dar la pasada por hecha:**
+
+```bash
+grep message_count ~/g2_*/metadata.yaml
+```
+
+**Esperado:** varios cientos por bag. **Si alguno dice `0`, esa pasada no existe**: vuelve al
+Paso 3.2 y comprueba el usuario del publicador. Un `.mcap` vacío pesa 5123 bytes exactos,
+independientemente de cuánto duró la grabación.
+
 ### Paso 3.5 — Anotar la pasada
 
 En papel o en el móvil, según se hace. Una línea por pasada:
@@ -359,12 +405,12 @@ descubres con dos bags perdidos y no con seis.
 scp -r deepracer@<IP>:~/g2_ida_1 deepracer@<IP>:~/g2_vuelta_1 /tmp/
 ```
 
-> **El bag lo escribió `root`, y lo copia el usuario `deepracer`.** Funciona porque `root` crea la
-> carpeta con permisos `755`, legibles por todos — es el mismo mecanismo que hizo que los buzones
-> de `/dev/shm` fueran legibles pero no escribibles, visto del otro lado. **Si `scp` responde
-> `Permission denied`**, no pelees con los permisos en el pasillo: en el carro,
-> `sudo chown -R deepracer ~deepracer/g2_ida_1` y vuelve a intentarlo. Cambia el dueño en sitio, sin
-> copiar nada.
+> **Si grabaste por la rama `root` del Paso 3.2, el bag es de `root` y lo copia `deepracer`.**
+> Suele funcionar porque `root` crea la carpeta con permisos `755`, legibles por todos — es el
+> mismo mecanismo que hace que los buzones de `/dev/shm` sean legibles pero no escribibles, visto
+> del otro lado. **Si `scp` responde `Permission denied`**, no pelees con los permisos en el
+> pasillo: en el carro, `sudo chown -R deepracer ~deepracer/g2_ida_1` y vuelve a intentarlo.
+> Cambia el dueño en sitio, sin copiar nada. Si grabaste como usuario, esto no aplica.
 
 ```bash
 python3 herramientas/adaptar_bag_jazzy.py /tmp/g2_ida_1 -o /tmp/g2i1 && python3 herramientas/adaptar_bag_jazzy.py /tmp/g2_vuelta_1 -o /tmp/g2v1
@@ -513,7 +559,7 @@ barridos consecutivos. Anótalo con el valor de `limite_normal` que usaste.
 > **Si M2 falla, se escribe que falla.** Está previsto: el §4 de `S21_preparacion_G2.md` lo
 > anticipa desde el 1 de septiembre, R3 está documentado, y ya se decidió no construir la
 > corrección ahora. Lo que **no** se puede hacer es mover el umbral al ver el número. Un G2 que
-> pasa porque se le movió la vara no informa nada y el §6.3 lo prohíbe.
+> pasa porque se le movió la vara no informa nada y el §7 lo prohíbe.
 
 ---
 

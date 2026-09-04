@@ -133,8 +133,12 @@ python3 herramientas/adaptar_bag_jazzy.py mapas/bag_mapa_1447 -o /tmp/prueba_map
 **Esperado:** `Adaptado en /tmp/prueba_mapeo` y una línea `-> enlace al original (no se copió)`.
 
 ```bash
-python3 herramientas/comprobar_movimiento_bag.py /tmp/prueba_mapeo
+source /opt/ros/humble/setup.bash && python3 herramientas/comprobar_movimiento_bag.py /tmp/prueba_mapeo
 ```
+
+**El `source` no sobra.** La herramienta importa `rclpy`, que no está en el Python del sistema; sin
+él muere con `ModuleNotFoundError: No module named 'rclpy'`. Pasó el 2026-09-03 y la guía no lo
+decía.
 
 **Esperado, y esto es lo importante: tiene que decir `NO SIRVE`.**
 
@@ -159,11 +163,16 @@ python3 herramientas/comprobar_movimiento_bag.py /tmp/prueba_mapeo
 **[PORTÁTIL]**
 
 ```bash
-herramientas/mapear_desde_bag.sh /tmp/prueba_mapeo /tmp/prueba_mapa /rplidar_ros/scan
+source /opt/ros/humble/setup.bash; bash herramientas/mapear_desde_bag.sh /tmp/prueba_mapeo /tmp/prueba_mapa /rplidar_ros/scan > /tmp/mapeo.log 2>&1; echo "codigo: $?"
 ```
 
-**Esperado:** cinco líneas `==`, y al final `Mapa en /tmp/prueba_mapa/mapa.pgm`. Tarda **lo que
-dure el bag** —88 s aquí— porque se reproduce a velocidad real a propósito.
+**Esperado:** `codigo: 0`. El detalle queda en `/tmp/mapeo.log`: cinco líneas `==` y al final
+`Mapa en /tmp/prueba_mapa/mapa.pgm`. Tarda **lo que dure el bag** —88 s aquí— porque se reproduce
+a velocidad real a propósito.
+
+**Se invoca con `bash` explícito y con la salida a fichero, no con `| tail`.** Con una tubería, el
+`$?` que lees es el de `tail`, no el del guion: el 2026-09-03 esto dio un falso rojo —código 1 sin
+una línea de salida— que se aclaró solo al repetirlo así.
 
 ```bash
 eog /tmp/prueba_mapa/mapa.pgm
@@ -184,7 +193,7 @@ pkill -9 -f "ros2 bag play"; pkill -9 -f rf2o_laser; pkill -9 -f slam_toolbox
 ### Paso 1.4 — Decidir los umbrales de M1 y M2 antes de salir
 
 No es de esta pasada, pero es del viernes y **hay que dejarlo escrito antes**, no después de ver
-el dato. El §6.3 del protocolo experimental lo prohíbe expresamente. Está discutido en
+el dato. El §7 del protocolo experimental lo prohíbe expresamente. Está discutido en
 [`Evidencia/S21_preparacion_G2.md`](Evidencia/S21_preparacion_G2.md) §4, y las tres preguntas que
 hay que llevar contestadas —y firmadas por el director— están en el **Paso 1.3** de
 [`GUIA_PASADA_LOCALIZACION.md`](GUIA_PASADA_LOCALIZACION.md).
@@ -362,6 +371,31 @@ recta. Anota hacia dónde mira: te hará falta para interpretar el mapa.
 
 **[CARRITO — segunda terminal SSH]**
 
+**Antes de grabar, mira con qué usuario está publicando `/scan`.** De esto depende el comando
+siguiente, y equivocarse cuesta un bag vacío:
+
+```bash
+pgrep -af rplidar | grep -v "__ns:=/rplidar_ros" | grep -v "deepracer_launcher"
+```
+
+**Esperado:** una o dos líneas, todas del `rplidar_composition` que arrancaste en el Paso 2.3.
+Coge el PID de la que **no** sea el proceso `python3 .../ros2 run` —es el hijo real— y pregúntale
+el dueño:
+
+```bash
+ps -o user= -p <PID>
+```
+
+**Esperado:** `deepracer`, porque el Paso 2.3 no lleva `sudo`. Entonces el grabador también va
+**como usuario**:
+
+```bash
+source /opt/ros/jazzy/setup.bash && cd ~ && ros2 bag record /scan -o mapa_pasillo_$(date +%H%M)
+```
+
+**Si en cambio dice `root`** —el LiDAR viene de `deepracer-core`, no del Paso 2.3— entonces el
+grabador va como `root`:
+
 ```bash
 sudo -i bash -c "source /opt/ros/jazzy/setup.bash && cd ~deepracer && ros2 bag record /scan -o mapa_pasillo_$(date +%H%M)"
 ```
@@ -369,20 +403,60 @@ sudo -i bash -c "source /opt/ros/jazzy/setup.bash && cd ~deepracer && ros2 bag r
 **Esperado:** `Recording...`, el nombre de la carpeta, y **una línea por cada tópico suscrito**.
 **Anota el nombre de la carpeta.**
 
-> **El `sudo` no es opcional, y la razón es la misma que en el teleop.** El descubrimiento de
-> este dominio pasa por `/dev/shm/fastrtps_port70NN`, buzones que `deepracer-core` crea como
-> `root` con permisos `-rw-r--r--`. Un `ros2 bag record` lanzado como usuario **puede leerlos
-> pero no escribir su anuncio**, así que para la pila no existe — y graba un fichero vacío
-> diciendo `Recording...` sin una sola queja. Medido el 2026-09-01: publicador de usuario contra
-> suscriptor de la pila, **0 mensajes**; publicador `root`, **56**.
+> **La regla es «el mismo dueño a los dos lados», no «graba como root».** Esto se corrigió el
+> 2026-09-03 después de perder dos bags en el pasillo, y la versión anterior de esta guía decía
+> «el `sudo` no es opcional».
 >
-> **Honestidad sobre el 28-ago:** el bag de aquel día sí capturó `/rplidar_ros/scan`, así que o
-> se lanzó como `root` o el mecanismo no explica *aquel* fallo entero. Se documenta como lo que
-> es: una condición necesaria comprobada, no un diagnóstico cerrado de aquel bag.
+> El mecanismo que decía era correcto: el transporte de este dominio pasa por
+> `/dev/shm/fastrtps_port70NN`, buzones con permisos `-rw-r--r--`, y **el publicador tiene que
+> poder escribir en el buzón del suscriptor**. Lo que estaba mal era darlo por hecho en un solo
+> sentido. Medido:
+>
+> | Publicador de `/scan` | Grabador | Mensajes en el bag |
+> |---|---|---|
+> | `root` (`deepracer-core`) | usuario | **0** |
+> | `deepracer` (Paso 2.3) | `root` (`sudo -i`) | **0** |
+> | `deepracer` (Paso 2.3) | usuario | **60 en 9 s** |
+>
+> Las dos primeras filas fallan **en silencio**: el log dice `Recording...` y hasta
+> `Subscribed to topic '/scan'`, y el `.mcap` sale de 5123 bytes tanto a los 22 s como a los 166 s.
+> El descubrimiento sí funciona; lo que no llega son los datos.
+>
+> **Honestidad sobre el 28-ago:** el bag de aquel día sí capturó `/rplidar_ros/scan`, así que el
+> mecanismo no explica *aquel* fallo entero. Se documenta como lo que es: una condición necesaria
+> comprobada, no un diagnóstico cerrado de aquel bag.
 
-> **La ruta va explícita.** Con `sudo -i` el `~` es `/root`, no el del usuario `deepracer`, y luego el
-> `scp` del Paso 4.1 no encontraría nada. El bag quedará **con dueño `root`**; si el `scp` falla
-> por permisos, `sudo chown -R deepracer:deepracer ~deepracer/mapa_pasillo_*` en el carro.
+> **La regla general, que es más grande que este paso.** En este carro **ninguna comprobación de
+> datos vale si quien mira no tiene el mismo dueño que quien publica.** Vale para `ros2 bag
+> record`, para `ros2 topic hz` y para `ros2 topic echo`, y en los tres casos el fallo es el mismo:
+> **silencio, no error**. El tópico aparece en `ros2 topic list` —el descubrimiento sí cruza— y
+> luego no llega un dato.
+>
+> El 2026-09-03 esto engañó dos veces en tres horas: primero grabando, y después midiendo con
+> `ros2 topic hz /rplidar_ros/scan` desde el usuario contra un publicador de `root`, lo que dio un
+> falso «no publica». **Antes de creerte un tópico mudo, repite la medida con el dueño correcto.**
+
+> **Por qué el `grep -v` en el `pgrep`.** En este carro hay **más de un proceso con `rplidar` en
+> la línea de comandos**, y `pgrep ... | head -1` devuelve el más viejo, que es el que no te
+> interesa. Medido el 2026-09-04 con el carro recién arrancado:
+>
+> | Proceso | Espacio de nombres | Publica |
+> |---|---|---|
+> | `deepracer_launcher.py ... rplidar:=True` | — | nada, es el lanzador |
+> | `rplidar_node -r __ns:=/rplidar_ros` (de `deepracer-core`, `root`) | `/rplidar_ros` | **nada** |
+> | `rplidar_composition` (el del Paso 2.3) | ninguno | **`/scan`** |
+>
+> Y hay una rareza que conviene conocer aunque no bloquee: **el nodo de AWS tiene
+> `/dev/ttyUSB0` abierto y aun así no publica**. Comprobado como `root`, así que el negativo es
+> válido. Los dos drivers acaban con el mismo puerto serie abierto a la vez —comprobado en
+> `/proc/<pid>/fd`—, lo que es feo pero no impide grabar: el del Paso 2.3 arranca, anuncia
+> `current scan mode: Express` y publica a ~6 Hz. **No intentes grabar `/rplidar_ros/scan`: está
+> vacío.**
+
+> **Si grabas por la rama `root`, la ruta va explícita.** Con `sudo -i` el `~` es `/root`, no el
+> del usuario `deepracer`, y luego el `scp` del Paso 4.1 no encontraría nada. El bag quedará **con
+> dueño `root`**; si el `scp` falla por permisos,
+> `sudo chown -R deepracer:deepracer ~deepracer/mapa_pasillo_*` en el carro.
 
 **Por qué solo `/scan`:** es lo único que el carro tiene que aportar. `/odom` y la TF se generan
 después en el portátil, con `rf2o`, que es exactamente lo que haría el carro en vivo. Grabar menos
@@ -429,6 +503,25 @@ ls -la ~/mapa_pasillo_*/
 **Esperado:** dos archivos, `metadata.yaml` **y** un `.mcap`.
 **Si falta `metadata.yaml`:** la grabación se cortó de golpe. **Repite la pasada.** El bag se
 puede leer con la API, pero **no se puede reproducir**, y sin reproducirlo no hay mapa.
+
+**Y ahora la comprobación de cinco segundos que el 2026-09-03 costó una mañana:**
+
+```bash
+grep message_count ~/mapa_pasillo_*/metadata.yaml
+```
+
+**Esperado:** un número de **tres cifras o más**. A 6,6 Hz durante 90 s van ~600 mensajes.
+
+**Si dice `message_count: 0`, el bag está vacío.** No sigas: vuelve al Paso 3.1 y comprueba el
+usuario del publicador. Un `.mcap` vacío pesa **5123 bytes exactos** y los pesa igual a los 22 s
+que a los 166 s: si ves dos bags de duraciones distintas con el mismo tamaño al byte, están los
+dos vacíos.
+
+> **Esto no contradice el §1.2, que dice que `ros2 bag info` no sirve como comprobación.** Son
+> dos cosas distintas. `ros2 bag info` **no puede confirmar que el bag esté bien**, porque lee la
+> `metadata.yaml` sin abrir el `.mcap`. Pero **sí puede confirmar que está vacío**, porque el
+> `message_count` lo escribe el propio grabador. Verde aquí no prueba nada; rojo aquí es
+> definitivo. Por eso esta comprobación va **además** del Paso 4.3, no en su lugar.
 
 ---
 
