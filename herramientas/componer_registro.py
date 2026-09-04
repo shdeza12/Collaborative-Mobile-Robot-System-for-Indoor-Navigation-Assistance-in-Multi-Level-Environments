@@ -529,7 +529,7 @@ def componer(ruta_bag, banco, campana, error_posicion_m=None, rtf=None,
                                      medido_por, nota),
         "veredicto": veredicto,
         "descriptivas": _descriptivas(banco, topicos, poses, marcas),
-        "salud_del_banco": _salud(banco, rtf),
+        "salud_del_banco": _salud(banco, rtf, _condicion_inicial(ruta_bag)),
         "traza": _traza(ruta_bag, poses),
     }
 
@@ -906,17 +906,38 @@ def _deriva_map_odom(topicos):
     return math.hypot(puntos[-1][0] - puntos[0][0], puntos[-1][1] - puntos[0][1])
 
 
-def _salud(banco, rtf):
+def _condicion_inicial(ruta_bag):
+    """Lo que grabar_mision.sh midio justo antes de abrir el bag, o None.
+
+    Es el criterio 1 de los cinco del §8 del runbook y el unico que no se puede
+    reconstruir despues: la pose inicial es una compuerta PREVIA. Se lee de
+    junto al bag por el mismo motivo que rtf.json -si no se escribe en el
+    momento, no se escribe nunca- y devolver None cuando falta es lo correcto:
+    los registros anteriores al 2026-09-04, entre ellos los dos pilotos del
+    §9.3, se compusieron sin el campo y siguen siendo validos.
+    """
+    ruta = os.path.join(ruta_bag, "condicion_inicial.json")
+    if not os.path.exists(ruta):
+        return None
+    with open(ruta, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def _salud(banco, rtf, condicion_inicial=None):
     """Para que un descarte sea demostrable. La causa la pone una persona
     despues, y solo puede ser una de las cuatro del §8 del protocolo: el esquema
     rechaza cualquier otra."""
     if banco == "fisico":
-        return {"rtf": None, "controladores_activos": {},
-                "gzserver_vivo_al_final": None, "descartada": False,
-                "causa_descarte": None}
-    return {"rtf": rtf, "controladores_activos": {},
-            "gzserver_vivo_al_final": True, "descartada": False,
-            "causa_descarte": None}
+        salud = {"rtf": None, "controladores_activos": {},
+                 "gzserver_vivo_al_final": None, "descartada": False,
+                 "causa_descarte": None}
+    else:
+        salud = {"rtf": rtf, "controladores_activos": {},
+                 "gzserver_vivo_al_final": True, "descartada": False,
+                 "causa_descarte": None}
+    if condicion_inicial is not None:
+        salud["condicion_inicial"] = condicion_inicial
+    return salud
 
 
 def _traza(ruta_bag, poses, hz=5.0):

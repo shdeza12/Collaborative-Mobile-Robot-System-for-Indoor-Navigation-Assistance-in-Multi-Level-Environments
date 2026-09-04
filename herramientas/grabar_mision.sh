@@ -172,6 +172,36 @@ echo "Robots: ${ROBOTS[*]}   Topicos: ${#TOPICOS[@]}"
 echo "Ctrl-C para cerrar el bag."
 mkdir -p "$(dirname "$DESTINO")"
 
+MARCA_DIR="$(dirname "$0")"
+
+# --- Criterio 1 del §8, antes de grabar -------------------------------------
+# De los cinco criterios de validez del §8 del runbook, cuatro se comprueban
+# sobre el bag y este NO: la pose inicial dentro de 0,15 m es una compuerta
+# PREVIA. Hasta el 2026-09-04 su unico rastro era la salida del paso 3 en la
+# terminal, que se pierde al cerrarla, asi que los registros compuestos solo
+# podian dar por buenos 4 de 5. Es el mismo modo de fallo que ya destruyo el
+# RTF de A_01, C_01 y C_02 el 30-ago.
+#
+# Se mide AQUI y no en el paso 3 porque la desviacion no depende de la mision
+# sino del tiempo que la pila lleve quieta -el carro resbala ~17 mm/min aunque
+# nadie lo mande-, de modo que la unica medida que describe esta corrida es la
+# tomada justo antes de abrirle el bag.
+#
+# Va antes de la marca de RTF para no meterle 5 s de ventana muerta.
+set +e
+COND_INICIAL="$(python3 "$MARCA_DIR/verificar_condicion_inicial.py" --json "${ROBOTS[@]}")"
+COND_ESTADO=$?
+set -e
+
+if [ "$COND_ESTADO" -ne 0 ]; then
+    # No se aborta, por el mismo motivo que con el RTF bajo: descartar una
+    # corrida es una decision del §8 del protocolo y se toma al componer el
+    # registro, con la cifra delante, no aqui.
+    echo "AVISO: el criterio 1 del §8 NO se cumple (pose inicial fuera de" >&2
+    echo "0,15 m). La corrida es candidata a descarte. Para verlo con detalle:" >&2
+    echo "  python3 herramientas/verificar_condicion_inicial.py ${ROBOTS[*]}" >&2
+fi
+
 # --- Marca de RTF, antes de grabar ------------------------------------------
 # EL BAG NO PUEDE DAR EL RTF, y por eso se mide aqui. Con '--use-sim-time'
 # 'ros2 bag record' sella en tiempo de simulacion tanto los mensajes como el
@@ -185,7 +215,6 @@ mkdir -p "$(dirname "$DESTINO")"
 #
 # Medirlo aqui no compite con la simulacion: son dos lecturas de /clock, una
 # antes y otra despues, no un muestreo continuo.
-MARCA_DIR="$(dirname "$0")"
 MARCA_INI="$(python3 "$MARCA_DIR/medir_rtf.py" --marca 2>/dev/null || true)"
 
 # '--use-sim-time' NO es opcional, y no es lo mismo que el use_sim_time de los
@@ -215,6 +244,18 @@ ros2 bag record --use-sim-time -o "$DESTINO" "${TOPICOS[@]}"
 ESTADO_GRABACION=$?
 set -e
 trap - INT
+
+# --- La condicion inicial, junto al bag -------------------------------------
+# Se escribe ahora y no antes porque hasta que 'ros2 bag record' no crea el
+# directorio no hay donde ponerla. La MEDIDA es la de antes de grabar; esto
+# solo la deja en disco. De aqui la recoge componer_registro.py.
+if [ -n "$COND_INICIAL" ] && [ -d "$DESTINO" ]; then
+    printf '%s\n' "$COND_INICIAL" > "$DESTINO/condicion_inicial.json"
+    echo "Condicion inicial -> $DESTINO/condicion_inicial.json"
+elif [ -z "$COND_INICIAL" ]; then
+    echo "AVISO: no se pudo medir la condicion inicial. El registro saldra sin" >&2
+    echo "el criterio 1 del §8, y ese criterio NO se puede reconstruir despues." >&2
+fi
 
 # --- Marca de RTF, al cerrar ------------------------------------------------
 MARCA_FIN="$(python3 "$MARCA_DIR/medir_rtf.py" --marca 2>/dev/null || true)"

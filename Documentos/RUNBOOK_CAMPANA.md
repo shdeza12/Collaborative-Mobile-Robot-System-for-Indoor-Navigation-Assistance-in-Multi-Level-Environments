@@ -210,6 +210,11 @@ El script deja también el `rtf.json` junto al bag, con marcas de `/clock` antes
 único que puede dar el RTF: con `--use-sim-time` el bag sella *todo* en tiempo de simulación,
 incluidos `starting_time` y `duration`, así que sim/pared vale 1 por construcción.
 
+Y deja el `condicion_inicial.json`, que es el **criterio 1** del §8 medido en el instante en que
+empieza la corrida —los otros cuatro salen del bag; éste no puede—. El grabador avisa si la pose
+está fuera de tolerancia, pero no aborta: la decisión de descartar se toma al componer el registro.
+Los dos archivos existen por la misma razón: **si no se escribe en el momento, no se escribe nunca.**
+
 ---
 
 ## 6. Lanzar la misión, y la comprobación que nadie ha hecho nunca
@@ -327,7 +332,7 @@ el descarte se anota — el techo es el 20 %.
 
 | | criterio | de dónde sale |
 |---|---|---|
-| 1 | pose inicial de los dos dentro de **0,15 m** | paso 3 |
+| 1 | pose inicial de los dos dentro de **0,15 m** | paso 3, y `condicion_inicial.json` que el paso 5 deja en el bag |
 | 2 | **RTF ≥ 0,99** | `rtf.json` del bag |
 | 3 | error de llegada **≤ 0,25 m** contra `/odom` | paso 7 |
 | 4 | el registro se compone **sin tocar un campo a mano** y `analizar_campana.py` lo agrega sin errores de integridad | paso 7 |
@@ -373,13 +378,25 @@ por qué no.
    siempre. Es exactamente el criterio 2 del §8, y es la razón por la que el paso 5 deja el
    `rtf.json` junto al bag: **si no se escribe en el momento, no se escribe nunca.**
 
-4. **El criterio 1 no sobrevive al bag, y eso afecta también a las 30 corridas de S24.** Los cinco
-   criterios del §8 se comprueban a posteriori salvo el primero: la pose inicial dentro de 0,15 m
-   es una compuerta **previa**, verificada en el paso 3 con `verificar_condicion_inicial.py`, y su
-   resultado **no queda guardado en la grabación** — `salud_del_banco.controladores_activos` sale
-   `{}` en los registros compuestos. Para las dos corridas del 30-ago es irreconstruible, así que
-   solo se pueden dar por buenos **4 de 5**.
+4. ~~**El criterio 1 no sobrevive al bag, y eso afecta también a las 30 corridas de S24.**~~
+   **Resuelto el 2026-09-04, antes de correr la campaña y no después.** Los cinco criterios del §8
+   se comprueban a posteriori salvo el primero: la pose inicial dentro de 0,15 m es una compuerta
+   **previa**, y su resultado se quedaba en la terminal del paso 3, que se pierde al cerrarla.
 
-   Mientras no se arregle, la única constancia de que el criterio 1 se cumplió es **la salida del
-   paso 3 en la terminal**, que se pierde al cerrarla. Lo barato es redirigirla a un archivo junto
-   al bag antes de grabar; lo correcto es que el compositor la lea. Ninguna de las dos está hecha.
+   Ahora `grabar_mision.sh` mide la condición inicial de todos los robots **justo antes de abrir el
+   bag** y deja el veredicto en `<bag>/condicion_inicial.json`; `componer_registro.py` lo recoge en
+   `salud_del_banco.condicion_inicial`. Se guarda la desviación medida, no sólo el sí/no, para poder
+   rehacer el veredicto si la tolerancia cambia. El campo es opcional en el esquema a propósito: los
+   registros ya compuestos —entre ellos los dos pilotos del §9.3— siguen siendo válidos.
+
+   **Se mide dentro del grabador y no en el paso 3** porque la desviación no depende de la misión
+   sino del tiempo que la pila lleve quieta (~17 mm/min de deslizamiento), así que la única medida
+   que describe la corrida es la tomada en el instante en que empieza. El paso 3 sigue siendo la
+   compuerta que decide si se lanza; esto es la constancia de que se cumplió.
+
+   Como con el RTF bajo, **el grabador avisa pero no aborta**: descartar una corrida es una decisión
+   del §8 del protocolo y se toma al componer el registro, con la cifra delante.
+
+   **Lo que no arregla:** las dos corridas del 30-ago siguen siendo irreconstruibles —sólo se pueden
+   dar por buenas **4 de 5**—, y `salud_del_banco.controladores_activos` sigue saliendo `{}`, que es
+   la causa de descarte `controladores_incompletos` sin instrumentar.

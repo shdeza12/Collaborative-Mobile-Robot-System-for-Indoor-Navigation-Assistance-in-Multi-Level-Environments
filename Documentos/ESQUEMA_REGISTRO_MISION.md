@@ -312,8 +312,8 @@ Se guardan los instantes y no sólo el booleano porque un `false` suelto no se d
 
 ### 3.9 `salud_del_banco` — para que un descarte sea demostrable
 
-`rtf` (`null` en físico) · `controladores_activos` por robot · `gzserver_vivo_al_final` (`null` en
-físico) · `descartada` (bool) · `causa_descarte`
+`rtf` (`null` en físico) · `controladores_activos` por robot · `condicion_inicial` (opcional) ·
+`gzserver_vivo_al_final` (`null` en físico) · `descartada` (bool) · `causa_descarte`
 
 **`causa_descarte` es un enumerado cerrado**, y son exactamente las cuatro causas admitidas del §8:
 
@@ -333,6 +333,35 @@ físico) · `descartada` (bool) · `causa_descarte`
 `controladores_activos` guarda `"7/7"` o lo que hubiera. Sigue siendo obligatorio comprobarlo antes
 de medir: la carrera del `controller_manager` se cerró el 26-ago, pero cero fallos en 18 arranques
 no es una garantía y el fallo es silencioso.
+
+#### `condicion_inicial` — el criterio que no sobrevivía al bag (añadido el 2026-09-04)
+
+De los cinco criterios de validez del §8 del runbook, cuatro se comprueban *a posteriori* sobre el
+bag. El primero no: **la pose inicial dentro de 0,15 m es una compuerta previa**, y hasta esta fecha
+su resultado se quedaba en la terminal del paso 3 y se perdía al cerrarla. Las corridas del 30-ago
+sólo pueden darse por buenas **4 de 5**, y es irreconstruible.
+
+```json
+"condicion_inicial": {
+  "tolerancia_m": 0.15, "tolerancia_yaw_grados": 10.0,
+  "por_robot": {"robot1": {"desviacion_m": 0.031, "desviacion_yaw_grados": 1.2, "dentro": true}}
+}
+```
+
+Lo escribe `grabar_mision.sh` en `<bag>/condicion_inicial.json` **justo antes de abrir el bag**, y de
+ahí lo lee el compositor. El momento no es negociable: la desviación no depende de la misión sino
+del tiempo que la pila lleve quieta —el carro resbala ~17 mm/min aunque nadie lo mande—, así que
+medirla en otro instante mide otra cosa.
+
+Se guarda **la desviación medida además del sí/no**, para poder rehacer el veredicto si la
+tolerancia cambia y para poder mirar la distribución de las 30 corridas. `dentro: null` significa
+**no se pudo medir**, que no es lo mismo que estar en su sitio: el §8 manda descartar la corrida
+cuando el criterio 1 no se cumple, y un hueco silencioso la colaría.
+
+> El campo es **opcional**, igual que `escenario_por_robot`: los registros compuestos antes del
+> 2026-09-04 —entre ellos los dos pilotos del §9.3 del runbook, que son evidencia entregada— no
+> pueden invalidarse por un campo que no existía cuando se grabaron. Por eso no hay salto de versión
+> del esquema.
 
 ### 3.10 `traza`
 

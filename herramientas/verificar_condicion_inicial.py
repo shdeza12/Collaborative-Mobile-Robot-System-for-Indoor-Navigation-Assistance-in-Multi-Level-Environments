@@ -78,10 +78,21 @@ las dos causas manda.
 
 Uso:
     python3 herramientas/verificar_condicion_inicial.py robot1
+    python3 herramientas/verificar_condicion_inicial.py --json robot1 robot2
 
-Codigo de salida: 0 si el robot esta en su pose declarada, 1 si no.
+Codigo de salida: 0 si TODOS los robots estan en su pose declarada, 1 si no.
+
+Con --json escribe el veredicto en una linea de JSON por la salida estandar y
+calla el resto. Es lo que grabar_mision.sh deja en <bag>/condicion_inicial.json
+justo antes de abrir el bag, y de ahi lo recoge componer_registro.py. Existe
+porque el criterio 1 de los cinco del §8 del runbook es el unico que NO se
+puede comprobar a posteriori -es una compuerta previa- y hasta el 2026-09-04 su
+unico rastro era esta salida en la terminal, que se pierde al cerrarla. Es el
+mismo modo de fallo que ya destruyo el RTF de tres corridas del 30-ago: si no
+se escribe en el momento, no se escribe nunca.
 """
 
+import json
 import math
 import os
 import sys
@@ -111,8 +122,13 @@ def _normalizar_grados(a):
     return (a + 180.0) % 360.0 - 180.0
 
 
-def leer_odom(robot, segundos=5.0):
-    """Devuelve (ultima muestra de /<robot>/odom o None, hay_clock).
+def leer_odom(robots, segundos=5.0):
+    """Devuelve {robot: (ultima muestra de /<robot>/odom o None, hay_clock)}.
+
+    Los robots se escuchan A LA VEZ, con un solo nodo, y no uno detras de otro.
+    No es por elegancia: la desviacion crece ~17 mm/min con la pila quieta, asi
+    que medir robot2 cinco segundos despues que robot1 seria medir dos
+    instantes distintos y llamarlos la misma condicion inicial.
 
     'hay_clock' cuenta PUBLICADORES, no suscriptores: 'ros2 topic list' lista
     /clock aunque solo lo escuchen los nodos con use_sim_time, asi que la
@@ -121,13 +137,15 @@ def leer_odom(robot, segundos=5.0):
     """
     rclpy.init()
     nodo = Node("verificador_de_condicion_inicial")
-    muestras = []
-    nodo.create_subscription(
-        Odometry, f"/{robot}/odom", lambda m: muestras.append(m), 10)
+    muestras = {r: [] for r in robots}
+    for r in robots:
+        nodo.create_subscription(
+            Odometry, f"/{r}/odom",
+            lambda m, r=r: muestras[r].append(m), 10)
     fin = nodo.get_clock().now().nanoseconds * 1e-9 + segundos
     while rclpy.ok() and nodo.get_clock().now().nanoseconds * 1e-9 < fin:
         rclpy.spin_once(nodo, timeout_sec=0.1)
-        if len(muestras) > 20:
+        if all(len(m) > 20 for m in muestras.values()):
             break
     # EL RELOJ DE ESTE ROBOT PUEDE NO SER '/clock'. Desde el 2026-08-30 los dos
     # robots comparten dominio y se distinguen por el topico de reloj: robot1 se
@@ -140,44 +158,52 @@ def leer_odom(robot, segundos=5.0):
     #     muerto, porque estaria viendo el de robot1.
     #
     # Por eso se pregunta primero por el propio y solo despues por el comun.
-    reloj = f"/{robot}/clock"
-    if nodo.count_publishers(reloj) == 0:
-        reloj = "/clock"
-    hay_clock = nodo.count_publishers(reloj) > 0
+    salida = {}
+    for r in robots:
+        reloj = f"/{r}/clock"
+        if nodo.count_publishers(reloj) == 0:
+            reloj = "/clock"
+        salida[r] = (muestras[r][-1] if muestras[r] else None,
+                     nodo.count_publishers(reloj) > 0)
     nodo.destroy_node()
     rclpy.shutdown()
-    return (muestras[-1] if muestras else None), hay_clock
+    return salida
 
 
-def main():
-    robot = sys.argv[1] if len(sys.argv) > 1 else "robot1"
+def _evaluar(robot, od, hay_clock):
+    """Devuelve (entrada del registro, lineas para la persona).
+
+    'dentro' en None significa NO SE PUDO MEDIR, y no es lo mismo que estar en
+    su sitio: el §8 manda descartar la corrida cuando el criterio 1 no se
+    cumple, y un hueco que se leyera como aprobado la colaria.
+    """
+    ni_idea = {"desviacion_m": None, "desviacion_yaw_grados": None,
+               "dentro": None}
 
     try:
         esperada = pose_por_defecto(robot)
     except Exception as e:
-        print(f"No hay pose declarada para '{robot}': {e}")
-        return 1
+        return ni_idea, [f"No hay pose declarada para '{robot}': {e}"]
 
-    od, hay_clock = leer_odom(robot)
     if od is None:
-        print(f"No llego ni una muestra de /{robot}/odom.")
-        print("O la simulacion no esta arriba, o este proceso esta en otro "
-              "ROS_DOMAIN_ID. Desde el 2026-08-30 los dos robots comparten el "
-              "dominio 0, que es el defecto de ROS 2: una terminal sin exportar "
-              "nada deberia verlos a los dos.")
-        return 1
+        return ni_idea, [
+            f"No llego ni una muestra de /{robot}/odom.",
+            "O la simulacion no esta arriba, o este proceso esta en otro "
+            "ROS_DOMAIN_ID. Desde el 2026-08-30 los dos robots comparten el "
+            "dominio 0, que es el defecto de ROS 2: una terminal sin exportar "
+            "nada deberia verlos a los dos."]
 
     # Sin /clock esto no es simulacion, y entonces /odom SI es odometria: lleva
     # deriva acumulada y comparar su valor absoluto contra una pose de mundo no
     # significa nada. El script prefiere callarse a dar un veredicto falso.
     if not hay_clock:
-        print(f"Nadie publica /{robot}/clock ni /clock: esto no parece "
-              "simulacion.")
-        print(f"En el carro fisico /{robot}/odom es odometria de verdad, con "
-              "deriva acumulada,")
-        print("y compararla contra una pose de mundo no mide la condicion "
-              "inicial. No opino.")
-        return 1
+        return ni_idea, [
+            f"Nadie publica /{robot}/clock ni /clock: esto no parece "
+            "simulacion.",
+            f"En el carro fisico /{robot}/odom es odometria de verdad, con "
+            "deriva acumulada,",
+            "y compararla contra una pose de mundo no mide la condicion "
+            "inicial. No opino."]
 
     real_x = od.pose.pose.position.x
     real_y = od.pose.pose.position.y
@@ -186,41 +212,74 @@ def main():
 
     d = math.hypot(real_x - float(esperada["x"]), real_y - float(esperada["y"]))
     dyaw = abs(_normalizar_grados(real_yaw - esp_yaw))
+    dentro = d <= TOLERANCIA_M and dyaw <= TOLERANCIA_YAW_GRADOS
 
-    print(f"Condicion inicial de {robot}")
-    print(f"  declarada (POSE_INICIAL): ({esperada['x']:.3f}, "
-          f"{esperada['y']:.3f}, {esp_yaw:.1f} grados)")
-    print(f"  real (/{robot}/odom)     : ({real_x:.3f}, {real_y:.3f}, "
-          f"{real_yaw:.1f} grados)")
-    print(f"  desviacion               : {d:.3f} m, {dyaw:.1f} grados")
+    lineas = [
+        f"Condicion inicial de {robot}",
+        f"  declarada (POSE_INICIAL): ({esperada['x']:.3f}, "
+        f"{esperada['y']:.3f}, {esp_yaw:.1f} grados)",
+        f"  real (/{robot}/odom)     : ({real_x:.3f}, {real_y:.3f}, "
+        f"{real_yaw:.1f} grados)",
+        f"  desviacion               : {d:.3f} m, {dyaw:.1f} grados"]
 
-    ok_pos = d <= TOLERANCIA_M
-    ok_yaw = dyaw <= TOLERANCIA_YAW_GRADOS
-    if ok_pos and ok_yaw:
-        print(f"\nOK: dentro de {TOLERANCIA_M} m y {TOLERANCIA_YAW_GRADOS} "
-              f"grados. AMCL nace sembrada donde el robot esta.")
-        return 0
+    if dentro:
+        lineas.append(f"\nOK: dentro de {TOLERANCIA_M} m y "
+                      f"{TOLERANCIA_YAW_GRADOS} grados. AMCL nace sembrada "
+                      f"donde el robot esta.")
+    else:
+        lineas += [
+            f"\nCONDICION INICIAL CONTAMINADA "
+            f"(limite {TOLERANCIA_M} m / {TOLERANCIA_YAW_GRADOS} grados).",
+            "AMCL se siembra con la pose DECLARADA, no con la real, asi que",
+            f"nace creyendose a {d:.3f} m y {dyaw:.1f} grados de donde esta.",
+            "Cualquier error de llegada medido asi lleva dentro este sesgo y no",
+            "se puede atribuir ni al controlador ni al pasillo.",
+            "",
+            "Que mirar, en este orden:",
+            "  1. CUANTO LLEVA LA PILA LEVANTADA. Es la causa habitual: el carro",
+            "     resbala ~17 mm/min aunque nadie lo mande, asi que a los ~9 min",
+            f"     ya se sale de los {TOLERANCIA_M} m. Relanzar y correr la mision",
+            "     enseguida, sin dejar la simulacion reposando.",
+            "  2. Si acaba de arrancar y ya sale desviado, entonces si es el",
+            "     spawn: comprobar que no se reuso el gzserver de otra corrida",
+            "     (§6.4 pide uno nuevo por mision) y revisar verificar_pose_spawn.py.",
+            "",
+            f"Nota: {d:.3f} m / {dyaw:.1f} grados es la desviacion REAL del carro.",
+            "El error que ve Nav2 puede ser aun mayor, porque AMCL solo corrige",
+            "cada 0.25 m o 0.2 rad y una deriva tan lenta no cruza ese umbral."]
 
-    print(f"\nCONDICION INICIAL CONTAMINADA "
-          f"(limite {TOLERANCIA_M} m / {TOLERANCIA_YAW_GRADOS} grados).")
-    print("AMCL se siembra con la pose DECLARADA, no con la real, asi que")
-    print(f"nace creyendose a {d:.3f} m y {dyaw:.1f} grados de donde esta.")
-    print("Cualquier error de llegada medido asi lleva dentro este sesgo y no")
-    print("se puede atribuir ni al controlador ni al pasillo.")
-    print("")
-    print("Que mirar, en este orden:")
-    print("  1. CUANTO LLEVA LA PILA LEVANTADA. Es la causa habitual: el carro")
-    print(f"     resbala ~17 mm/min aunque nadie lo mande, asi que a los ~9 min")
-    print(f"     ya se sale de los {TOLERANCIA_M} m. Relanzar y correr la mision")
-    print("     enseguida, sin dejar la simulacion reposando.")
-    print("  2. Si acaba de arrancar y ya sale desviado, entonces si es el")
-    print("     spawn: comprobar que no se reuso el gzserver de otra corrida")
-    print("     (§6.4 pide uno nuevo por mision) y revisar verificar_pose_spawn.py.")
-    print("")
-    print(f"Nota: {d:.3f} m / {dyaw:.1f} grados es la desviacion REAL del carro.")
-    print("El error que ve Nav2 puede ser aun mayor, porque AMCL solo corrige")
-    print("cada 0.25 m o 0.2 rad y una deriva tan lenta no cruza ese umbral.")
-    return 1
+    return ({"desviacion_m": round(d, 4),
+             "desviacion_yaw_grados": round(dyaw, 2),
+             "dentro": dentro}, lineas)
+
+
+def main():
+    argumentos = [a for a in sys.argv[1:] if a != "--json"]
+    como_json = "--json" in sys.argv[1:]
+    robots = argumentos or ["robot1"]
+
+    lecturas = leer_odom(robots)
+
+    por_robot = {}
+    informe = []
+    for r in robots:
+        od, hay_clock = lecturas[r]
+        por_robot[r], lineas = _evaluar(r, od, hay_clock)
+        informe.append("\n".join(lineas))
+
+    # El criterio 1 pide los DOS dentro. Un solo robot fuera basta para que la
+    # corrida haya que descartarla, asi que el codigo de salida es el AND.
+    todos_dentro = all(e["dentro"] is True for e in por_robot.values())
+
+    if como_json:
+        json.dump({"tolerancia_m": TOLERANCIA_M,
+                   "tolerancia_yaw_grados": TOLERANCIA_YAW_GRADOS,
+                   "por_robot": por_robot}, sys.stdout)
+        sys.stdout.write("\n")
+    else:
+        print("\n\n".join(informe))
+
+    return 0 if todos_dentro else 1
 
 
 if __name__ == "__main__":

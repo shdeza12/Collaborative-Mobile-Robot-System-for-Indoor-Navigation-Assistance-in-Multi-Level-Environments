@@ -618,6 +618,54 @@ def pruebas_de_escenario(esquema):
     check("una entrada con campos de mas se rechaza", not valida(r, esquema))
 
 
+def pruebas_de_condicion_inicial(esquema):
+    """salud_del_banco.condicion_inicial, anadido el 2026-09-04.
+
+    El §8 del runbook lista cinco criterios de validez y cuatro salen del bag.
+    El primero -pose inicial de los dos robots dentro de 0,15 m- es una
+    compuerta previa cuyo unico rastro era la terminal. Sin este campo, una
+    corrida de S24 llega al informe con 4 de 5 criterios demostrables y nadie
+    puede rehacer el quinto.
+
+    El campo es OPCIONAL, igual que escenario_por_robot: los cuatro registros ya
+    compuestos -entre ellos los dos pilotos del §9.3, que son evidencia
+    entregada- no pueden invalidarse por un campo que no existia cuando se
+    grabaron.
+    """
+    r = registro_valido()
+    check("un registro SIN condicion_inicial sigue siendo valido",
+          valida(r, esquema), "el campo es opcional")
+
+    r["salud_del_banco"]["condicion_inicial"] = {
+        "tolerancia_m": 0.15, "tolerancia_yaw_grados": 10.0,
+        "por_robot": {"robot1": {"desviacion_m": 0.031,
+                                 "desviacion_yaw_grados": 1.2, "dentro": True}}}
+    check("un registro CON condicion_inicial es valido", valida(r, esquema),
+          _por_que(r, esquema))
+
+    # Un robot que no se pudo medir se declara null, no se omite y no se da por
+    # bueno. 'no lo se' y 'estaba en su sitio' no pueden verse igual: el §8 pide
+    # descartar la corrida cuando el criterio 1 no se cumple, y un hueco
+    # silencioso la colaria.
+    r["salud_del_banco"]["condicion_inicial"]["por_robot"]["robot2"] = {
+        "desviacion_m": None, "desviacion_yaw_grados": None, "dentro": None}
+    check("un robot no medido se declara null y sigue validando",
+          valida(r, esquema), _por_que(r, esquema))
+
+    # Media entrada valida seria peor que ninguna: en S26 alguien leeria 'dentro
+    # true' sin la cifra que lo sostiene.
+    r["salud_del_banco"]["condicion_inicial"]["por_robot"]["robot2"] = {
+        "dentro": True}
+    check("una entrada sin la desviacion se rechaza", not valida(r, esquema))
+
+    r = registro_valido()
+    r["salud_del_banco"]["condicion_inicial"] = {
+        "tolerancia_m": 0.15, "tolerancia_yaw_grados": 10.0, "por_robot": {},
+        "veredicto": "ok"}
+    check("un campo de mas en condicion_inicial se rechaza",
+          not valida(r, esquema))
+
+
 def pruebas_de_bag(esquema):
     import shutil
     import tempfile
@@ -789,6 +837,41 @@ def pruebas_de_bag(esquema):
         check("y el registro con residuo valida", valida(res, esquema),
               _por_que(res, esquema))
 
+        # --- Criterio 1 del §8: la pose inicial tiene que sobrevivir al bag ---
+        # Es el unico de los cinco que NO se puede comprobar a posteriori: es una
+        # compuerta PREVIA, y hasta el 2026-09-04 su resultado se quedaba en la
+        # terminal del paso 3 y se perdia al cerrarla. Las dos corridas del
+        # 30-ago solo se pueden dar por buenas 4 de 5 por esto, y es
+        # irreconstruible. El mismo modo de fallo que ya destruyo el RTF de
+        # A_01, C_01 y C_02: si no se escribe en el momento, no se escribe nunca.
+        sin_cond = componer(ruta, banco="simulacion", campana="prueba", rtf=0.995)
+        check("sin condicion_inicial.json el registro se compone igual",
+              "condicion_inicial" not in sin_cond["salud_del_banco"]
+              and valida(sin_cond, esquema), _por_que(sin_cond, esquema))
+
+        with open(os.path.join(ruta, "condicion_inicial.json"), "w",
+                  encoding="utf-8") as f:
+            json.dump({"tolerancia_m": 0.15, "tolerancia_yaw_grados": 10.0,
+                       "por_robot": {
+                           "robot1": {"desviacion_m": 0.031,
+                                      "desviacion_yaw_grados": 1.2,
+                                      "dentro": True},
+                           "robot2": {"desviacion_m": 0.669,
+                                      "desviacion_yaw_grados": 46.4,
+                                      "dentro": False}}}, f)
+        con_cond = componer(ruta, banco="simulacion", campana="prueba", rtf=0.995)
+        ci = con_cond["salud_del_banco"].get("condicion_inicial", {})
+        check("el compositor lee condicion_inicial.json de junto al bag",
+              set(ci.get("por_robot", {})) == {"robot1", "robot2"}, f"-> {ci}")
+        r2 = ci.get("por_robot", {}).get("robot2", {})
+        check("y conserva la desviacion medida de cada robot, no solo el si/no",
+              abs((r2.get("desviacion_m") or 0.0) - 0.669) < 1e-9
+              and r2.get("dentro") is False, f"-> {r2}")
+        check("con la tolerancia, para poder rehacer el veredicto en S26",
+              ci.get("tolerancia_m") == 0.15, f"-> {ci.get('tolerancia_m')}")
+        check("y el registro con condicion inicial valida",
+              valida(con_cond, esquema), _por_que(con_cond, esquema))
+
         # §4.2: el compositor falla ruidosamente, nunca inventa. Un bag ilegible
         # y una mision sin eventos NO pueden verse igual.
         vacio = os.path.join(tmp, "no_es_un_bag")
@@ -898,6 +981,8 @@ def main():
     pruebas_de_continuidad()
     print("Escenario por robot (el mundo es del nivel)")
     pruebas_de_escenario(esquema)
+    print("Condicion inicial (criterio 1 del §8, el que no sobrevivia)")
+    pruebas_de_condicion_inicial(esquema)
     print("Lectura del bag y ensamblado (necesita el workspace sourceado)")
     pruebas_de_bag(esquema)
     print(f"\n{len(fallos)} fallo(s).")

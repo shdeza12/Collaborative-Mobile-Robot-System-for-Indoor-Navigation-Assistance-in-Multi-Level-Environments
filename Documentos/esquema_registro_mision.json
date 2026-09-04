@@ -229,6 +229,31 @@
           "comentario": "'7/7' o lo que hubiera, por robot. Sigue siendo obligatorio comprobarlo antes de medir: la carrera del controller_manager se cerro el 26-ago, pero cero fallos en 18 arranques no es una garantia y el fallo es silencioso.",
           "type": "object", "additionalProperties": {"type": "string"}
         },
+        "condicion_inicial": {
+          "comentario": "Criterio 1 de los cinco del §8 del runbook, y el unico que NO se puede comprobar a posteriori: la pose inicial dentro de 0,15 m es una compuerta PREVIA, y hasta el 2026-09-04 su resultado se quedaba en la terminal del paso 3. Lo escribe grabar_mision.sh en <bag>/condicion_inicial.json justo antes de grabar, porque la desviacion depende del tiempo que la pila lleve quieta (~17 mm/min de deslizamiento) y medirla en otro momento mide otra cosa. OPCIONAL: los registros compuestos antes de esa fecha -entre ellos los dos pilotos del §9.3, que son evidencia entregada- no pueden invalidarse por un campo que no existia cuando se grabaron.",
+          "type": "object", "additionalProperties": false,
+          "required": ["tolerancia_m", "tolerancia_yaw_grados", "por_robot"],
+          "properties": {
+            "tolerancia_m": {"type": "number"},
+            "tolerancia_yaw_grados": {"type": "number"},
+            "por_robot": {
+              "comentario": "Se guarda la desviacion medida ademas del si/no para poder rehacer el veredicto si la tolerancia cambia, y para poder mirar la distribucion de las 30 corridas.",
+              "type": "object",
+              "additionalProperties": {
+                "type": "object", "additionalProperties": false,
+                "required": ["desviacion_m", "desviacion_yaw_grados", "dentro"],
+                "properties": {
+                  "desviacion_m": {"type": ["number", "null"]},
+                  "desviacion_yaw_grados": {"type": ["number", "null"]},
+                  "dentro": {
+                    "comentario": "null es 'no se pudo medir', que NO es lo mismo que 'estaba en su sitio': el §8 manda descartar la corrida cuando el criterio 1 no se cumple, y un hueco silencioso la colaria.",
+                    "type": ["boolean", "null"]
+                  }
+                }
+              }
+            }
+          }
+        },
         "gzserver_vivo_al_final": {"type": ["boolean", "null"]},
         "descartada": {"type": "boolean"},
         "causa_descarte": {
