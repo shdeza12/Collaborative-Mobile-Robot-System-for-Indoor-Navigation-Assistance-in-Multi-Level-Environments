@@ -13,6 +13,30 @@ seis comandos.
 El listado y su semilla salen de la §6.3 del [protocolo](PROTOCOLO_EXPERIMENTAL.md); el
 aislamiento entre corridas, de la §6.4; el pilotaje, de la §7.
 
+> ## La campaña ya se ejecutó — 2026-09-05
+>
+> **Las 30 misiones están corridas, compuestas y analizadas**, con veredicto **`VALIDA`** y **0 de
+> 30 descartes**. Este runbook deja de ser un plan y pasa a ser el **registro del procedimiento que
+> se siguió**, además del procedimiento para la campaña **física** (RF-27), que sigue pendiente.
+>
+> **El §0 de aquí abajo quedó desfasado y se conserva a propósito, sin reescribirlo**, porque
+> documenta por qué la primera corrida fue un piloto y no la misión 1. Dos de sus tres razones ya
+> no valen: el analizador de campaña **existe desde el 2026-09-02**, y la campaña **no fue S24, fue
+> S21**. Precisamente porque el analizador dejó de faltar es por lo que se pudo adelantar: la
+> condición que hacía peligroso correrla antes había desaparecido.
+>
+> **Una advertencia que sí sigue viva, y ahora con más filo que cuando se escribió:** durante la
+> campaña, tres bags (misiones 13, 22 y 28) salieron **sin RTF** y `grabar_mision.sh` lo tragaba
+> saliendo con código 0, así que el operador encadenó las siguientes sin enterarse; cuando se fue a
+> componer, `gzserver` ya estaba cerrado y **el RTF era irrecuperable**. Está corregido —el guion
+> aborta antes de grabar si falla la marca inicial y sale con **código 3** si falla la de cierre—,
+> pero la lección operativa no la arregla el código: **el registro se compone al terminar cada
+> misión, no al final de la tanda.** Mientras la simulación siga viva la corrida se puede salvar;
+> cerrada, no.
+>
+> Cifras y detalle: cierre de S21 en [`ESTADO.md`](../ESTADO.md) y §11 del
+> [protocolo](PROTOCOLO_EXPERIMENTAL.md).
+
 ---
 
 ## 0. Qué es la primera corrida, y qué NO es

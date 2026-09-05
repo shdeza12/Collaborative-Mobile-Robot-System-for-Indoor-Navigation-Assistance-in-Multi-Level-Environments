@@ -715,12 +715,17 @@ Lo que puede hacer que estos números signifiquen otra cosa de la que parecen.
 - **La simulación es Humble y el hardware es Jazzy** (R8). `NavigateToPose` difiere entre las dos
   distribuciones. Las corridas físicas y las simuladas **no son la misma condición experimental**, y
   por eso se reportan por separado y no se agregan.
-- **N = 30 da intervalos anchos.** Con 27 aciertos, el IC de Wilson al 95 % va del **74 % al 97 %**.
-  Las afirmaciones del informe tienen que caber en ese ancho: «la tasa supera el 74 %» es
-  defendible, «la tasa es del 90 %» no lo es. *(Corregido el 2026-08-31: este punto decía 80 %, y
-  con 27 aciertos ese límite no se sostiene —haría falta llegar a 28—. `analizar_campana.py` imprime
-  la frase defendible calculada desde los datos reales, en vez de desde un número escrito a mano,
-  precisamente para que no vuelva a pasar.)*
+- **N = 30 da intervalos anchos.** Con los **26 aciertos** que dio la campaña ejecutada, el IC de
+  Wilson al 95 % va del **70,3 % al 94,7 %**. Las afirmaciones del informe tienen que caber en ese
+  ancho: «la tasa supera el 70 %» es defendible, «la tasa es del 87 %» no lo es. *(Este punto se ha
+  escrito mal dos veces —decía 80 % antes del 2026-08-31 y 74 % con 27 aciertos hipotéticos hasta el
+  2026-09-05—, que es exactamente por lo que `analizar_campana.py` imprime la frase defendible
+  calculada desde los datos reales y no desde un número copiado a mano.)*
+- **El contraste A−B no sostiene ninguna conclusión.** La campaña dio 80,0 % en A (IC95 54,8–93,0 %)
+  contra 93,3 % en B (IC95 70,2–98,8 %). Los intervalos se solapan casi por completo, así que la
+  diferencia **no es interpretable**, y conviene decirlo en voz alta porque apunta al revés de lo
+  intuitivo: la condición *con* relevo salió mejor. Leer eso como «el relevo ayuda» sería inventar
+  una señal donde solo hay ruido.
 - **Un solo entorno.** Todo se mide en los dos pasillos de `mundo_definitivo_piso{1,2}.world`. Los
   resultados describen el desempeño **en ese edificio**, y así hay que enunciarlos. Generalizar a «entornos interiores» sería
   ir más allá de los datos.
@@ -759,13 +764,37 @@ Lo que puede hacer que estos números signifiquen otra cosa de la que parecen.
   3. Las comparaciones **entre los cuatro estratos** son descriptivas. Con n ≈ 7 por celda el
      intervalo de Wilson es tan ancho que no sostiene inferencia; es el mismo argumento del §6.1 que
      obliga a N = 30.
-- **La bajada tiene n = 1 de pilotaje y ninguna corrida de campaña todavía.** El único descenso
-  ejecutado (`S21_piloto_bajada_01`) salió con éxito, pero recorrió 122,6 m en 259,6 s con 11
-  cúspides de velocidad frente a 103,9 m en 216,4 s y 5 cúspides de su espejo de subida. Con una
-  sola corrida eso es una **observación, no un resultado**, y se enuncia así. Si las 7 misiones B21
-  confirmaran el patrón, la condición B dejaría de ser homogénea por dentro y habría que reportar
-  B12 y B21 por separado —cosa que el punto anterior ya advierte que solo se podrá hacer de forma
-  descriptiva—.
+- **La bajada sigue sin contrastarse, aunque ya haya 7 corridas.** El piloto
+  (`S21_piloto_bajada_01`) recorrió 122,6 m en 259,6 s con 11 cúspides de velocidad frente a
+  103,9 m en 216,4 s y 5 cúspides de **su espejo de subida**, y esa comparación era limpia porque
+  era la misma ruta en los dos sentidos. Ejecutada la campaña *(2026-09-05)*, las 7 misiones B21
+  dan medianas de 76,7 m, 165,1 s y 9 cúspides contra 65,6 m, 145,0 s y 7 cúspides de las 8 B12:
+  va en la misma dirección, pero **no confirma nada**, porque B12 y B21 son pares origen–destino
+  distintos y la distancia de la ruta está dentro de la comparación. Para poner a prueba la
+  observación del piloto haría falta correr rutas espejadas, y el sorteo no las produce. Queda como
+  **observación pendiente de contraste**, no como resultado.
+  > Anomalía anotada para no perderla: una de las 8 misiones B12 registró **85 cúspides** de
+  > velocidad contra una mediana de 7 y un máximo de 13 en el resto de la campaña. No se
+  > investigó y no afecta al veredicto —la misión salió con éxito—, pero el bag está guardado.
+- **Tres corridas se perdieron por un fallo de instrumento y se repitieron** *(2026-09-05)*. Las
+  misiones 13, 22 y 28 se grabaron sin `rtf.json` porque `grabar_mision.sh` se tragaba el fallo de
+  la medida (`2>/dev/null || true`) y salía con código 0. El RTF no se reconstruye —ni del bag, que
+  con `--use-sim-time` da un cociente de 1 por construcción, ni de las marcas de tiempo de los
+  archivos, comprobado contra las 17 corridas sanas de la misma tanda— así que las tres se
+  repitieron enteras y sus bags llevan sufijo `_2`. **Repetirlas no selecciona resultados**: las
+  primeras tomas no produjeron ninguna observación, ni de éxito ni de fallo, porque el registro no
+  se podía componer. La 28 volvió a fallar en su segunda toma y **se queda como fallo**. El
+  instrumento está corregido y con prueba (`prueba_grabar_mision.py`), pero las tres corridas
+  buenas ocurrieron media hora después que el resto y eso las expone a una deriva de sesión
+  distinta.
+- **Los fallos de RF-23 no son fallos de coordinación.** Los cuatro de la campaña son el mismo
+  modo: llegadas de 0,284, 0,295, 0,311 y 0,347 m contra un criterio de 0,25 m, con la mediana del
+  error en 0,106 m. Mientras tanto RF-24 dio 14/14, RF-22 se mantuvo bajo 100 ms en las 30 y los
+  descartes del §8 fueron 0/30. Enunciar el resultado como «el sistema falla el 13 % de las veces»
+  sería atribuir a la coordinación algo que ocurre en la localización: es la inobservabilidad
+  longitudinal del pasillo, donde el criterio de 0,25 m queda por debajo de 1σ. La formulación
+  defendible es que **la coordinación cumplió en las 30 misiones y el criterio de llegada está por
+  debajo de lo que la localización resuelve en este entorno**.
 
 ---
 

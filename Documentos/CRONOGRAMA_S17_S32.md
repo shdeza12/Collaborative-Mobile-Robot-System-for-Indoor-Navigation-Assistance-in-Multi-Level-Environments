@@ -416,13 +416,28 @@ una corrida física completa. Repositorio etiquetado.
 
 ### S24 · 21 – 27 sep — Campaña experimental en simulación
 
+> **EJECUTADA POR ANTICIPADO EL 2026-09-05, en S21.** Las 30 corridas están hechas, compuestas en
+> 30 registros validados y agregadas con veredicto **`VALIDA`** y **0 de 30 descartes**. Se pudo
+> adelantar porque `sortear_misiones.py` y `analizar_campana.py` quedaron terminados y probados el
+> 2 de septiembre, o sea que la condición que hacía peligroso adelantar —analizar con un agregador
+> a medias y tener que repetir las corridas— había dejado de existir. Detalle y cifras en el cierre
+> de S21 de [`ESTADO.md`](../ESTADO.md) y en el §11 de
+> [`PROTOCOLO_EXPERIMENTAL.md`](PROTOCOLO_EXPERIMENTAL.md).
+>
+> **Lo que queda para S24, que no es poco:** consolidar y versionar el conjunto de datos como
+> entregable, redactar el capítulo de resultados sobre las cifras ya obtenidas, y emitir el
+> entregable. **No** se vuelven a correr las 30 misiones: repetir una campaña válida sin una razón
+> declarada de antemano es cocinar los datos.
+
 | Actividad |
 |---|
-| Ejecutar N = 30 repeticiones del protocolo completo con registro automático de las cuatro métricas |
+| ✅ **Hecho el 2026-09-05:** ejecutar N = 30 repeticiones del protocolo completo con registro automático de las cuatro métricas |
 | Consolidar y versionar el conjunto de datos |
+| Redactar el capítulo de resultados sobre las métricas de la campaña |
 | Emitir el entregable S23 |
 
 **Criterio de cierre:** 30 corridas registradas y conjunto de datos versionado en el repositorio.
+**Las corridas ya cumplen el criterio desde el 2026-09-05**; falta la parte de consolidación.
 
 ### S25 · 28 sep – 4 oct — Campaña experimental física
 
@@ -493,14 +508,14 @@ por requisito.
 
 ## 8. Hitos
 
-| # | Hito | Semana | Habilita | Estado (**2026-08-27**) |
+| # | Hito | Semana | Habilita | Estado (**2026-09-05**) |
 |---|---|---|---|---|
 | H1 | Contrato de interfaces ROS 2 definido | S17 | Todo el desarrollo posterior | ✅ Verificado en simulación el 14-ago |
 | H2 | Riesgos de hardware caracterizados (spike) | ~~S18~~ **S19** | Planificación realista del bring-up | 🟡 Preguntas 1, 2 y 4 respondidas (18 y 19-ago); la 3 —latencia entre vehículos— sigue bloqueada por **R11** |
 | H2b | **Entorno de dos niveles construido y navegado** | S18 | Campaña experimental en simulación | ✅ Cerrado el 14-ago; entorno sustituido el 20-ago por `mundo_definitivo`, partido por piso el 23-ago y sellado el 24 |
 | H3 | Dos agentes navegando en niveles separados | S19 | Nodo de coordinación | ✅ **Cerrado el 25-ago**, simultáneo y a los dos puntos de transferencia: 0,281 m y 0,143 m contra `/odom` |
-| H4 | Asignación dinámica de tareas funcionando | S20 | Protocolo de relevo | 🟡 **El coordinador asigna y el registrador mide (24 y 27-ago).** El planificador agota las **992** combinaciones del catálogo real sin simulador, y una misión de condición A produce un registro validado con sus marcas. **Falta probarlo con destino en el nivel 2**, que hoy no se puede: ver el séptimo prerrequisito del §10 del protocolo |
-| H5 | Relevo completo con métricas en simulación | S21 | Campaña experimental | 🔴 **Bloqueado, no sin empezar.** El relevo está escrito y probado como función pura; lo que falta es un coordinador que alcance a los dos robots, que viven en dominios DDS distintos |
+| H4 | Asignación dinámica de tareas funcionando | S20 | Protocolo de relevo | 🟡 **El coordinador asigna y el registrador mide (24 y 27-ago).** El planificador agota las **992** combinaciones del catálogo real sin simulador, y una misión de condición A produce un registro validado con sus marcas. **Probado con destino en el nivel 2 el 29-ago** —dos solicitudes a niveles distintos produjeron dos agentes distintos— y ejercitado **30 veces** en la campaña del 05-sep. ✅ **Cerrado.** |
+| H5 | Relevo completo con métricas en simulación | S21 | Campaña experimental | ✅ **Cerrado el 30-ago y medido el 05-sep.** El bloqueo de dominios DDS que lo impedía se levantó el 30-ago (un dominio, dos `gzserver`, separación por nombres) y ese mismo día corrió el relevo con los dos robots vivos. Las métricas ya no son de una corrida: **15 misiones de condición B** en la campaña sorteada, **14 aciertos (93,3 %)** y **continuidad entre niveles 14/14**, con salto de relevo de mediana 0,100 s |
 | H6 | Sistema integrado de extremo a extremo | S22 | Verificación | 🔴 No iniciado |
 | H7 | Implementación congelada | S23 | Campañas experimentales | 🔴 No iniciado |
 | H8 | Conjunto de datos completo | S25 | Análisis | 🔴 No iniciado |

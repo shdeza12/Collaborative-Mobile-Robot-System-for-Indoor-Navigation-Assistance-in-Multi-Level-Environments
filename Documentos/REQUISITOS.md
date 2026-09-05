@@ -151,20 +151,28 @@ presente antes de invertir tiempo en un mapa interactivo.
 |---|---|---|---|---|
 | **RF-21** | El sistema registra el **tiempo de respuesta**: desde la solicitud hasta que el agente inicia el movimiento | El registro de la misión contiene la marca temporal de ambos eventos | 🟢 **Verificado el 2026-08-27.** El registro de `S20_rutas_03` trae `t_solicitud: 87.9` y `t_primer_movimiento: 88.1`, ambas leídas de `/clock` | S20 |
 | **RF-22** | El sistema registra el **tiempo de asignación de robot**: desde la solicitud hasta que un agente queda asignado | Ídem | 🟢 **Verificado el 2026-08-27.** `t_solicitud` y `t_robot_activo` en el mismo registro | S20 |
-| **RF-23** | El sistema registra el **éxito o fallo** de cada misión, con el motivo | `result.exito` y `result.motivo_fallo` quedan en el registro | 🔴 | S21 |
-| **RF-24** | El sistema registra la **continuidad del servicio entre niveles**: que la misión atraviesa el relevo sin interrupción del guiado | Ninguna etapa queda sin agente activo entre `TRAMO_1` y `TRAMO_2` | 🔴 | S21 |
-| **RF-25** | Las métricas se obtienen de un **registro estructurado y automático**, no de observación manual | Un archivo por misión, procesable sin intervención | 🟡 **Verificado el 2026-08-27 en condición A.** Esquema JSON versionado y comprobable; `herramientas/componer_registro.py` compone el registro desde el bag y lo valida contra el esquema; el veredicto se calcula contra `/odom` y nunca contra el `SUCCEEDED` de Nav2. **Falta** cerrar cuatro campos que hoy salen vacíos o escritos a mano —los dos marcadores de cambio de tramo, el RTF, la procedencia del mundo y del mapa, y los controladores activos— y probarlo en condición B | S20 |
-| **RF-26** | La campaña en simulación alcanza **N = 30 repeticiones** (decisión D1) | Treinta registros válidos | 🔴 | S24–S25 |
+| **RF-23** | El sistema registra el **éxito o fallo** de cada misión, con el motivo | `result.exito` y `result.motivo_fallo` quedan en el registro | 🟢 **Verificado el 2026-09-05 sobre las 30 misiones de la campaña.** Cada registro trae su veredicto calculado contra `/odom`, no contra el `SUCCEEDED` de Nav2: **26 aciertos de 30 (86,7 %)**, IC95 de Wilson **70,3–94,7 %**. Los 4 fallos quedan con su motivo y son **un solo modo** —error de llegada de 0,284 a 0,347 m contra un criterio de 0,25 m—, o sea inobservabilidad longitudinal del pasillo, **no fallo de coordinación** | S21 |
+| **RF-24** | El sistema registra la **continuidad del servicio entre niveles**: que la misión atraviesa el relevo sin interrupción del guiado | Ninguna etapa queda sin agente activo entre `TRAMO_1` y `TRAMO_2` | 🟢 **Verificado el 2026-09-05: 14 de 14 (100 %)**, IC95 **78,5–100 %**, con salto de relevo de mediana **0,100 s** —un tic de `/clock`, o sea el suelo del instrumento—. Evalúa 14 y no 15 misiones entre niveles porque la 27 nunca llegó a `COMPLETADA`: medir continuidad sobre una misión fallida sería medir otra cosa. **Es la variable de respuesta principal del proyecto** y no tenía campo en el registro hasta el esquema 1.1.0 (31-ago) | S21 |
+| **RF-25** | Las métricas se obtienen de un **registro estructurado y automático**, no de observación manual | Un archivo por misión, procesable sin intervención | 🟡 **Verificado el 2026-08-27 en condición A.** Esquema JSON versionado y comprobable; `herramientas/componer_registro.py` compone el registro desde el bag y lo valida contra el esquema; el veredicto se calcula contra `/odom` y nunca contra el `SUCCEEDED` de Nav2. **Probado en condición B y a escala el 2026-09-05:** 30 registros compuestos sin intervención manual, 15 de ellos de condición B, todos validados contra el esquema 1.1.0. **La campaña además puso a prueba el propio registrador y encontró un fallo silencioso:** tres bags salieron sin RTF y `grabar_mision.sh` lo tragaba saliendo con código 0, así que la corrida se perdía sin que nadie se enterara; corregido de raíz —aborta antes de grabar si falla la marca inicial, código 3 si falla la de cierre— con prueba de regresión (`herramientas/prueba_grabar_mision.py`, 12 comprobaciones sin ROS). **Sigue 🟡 y no 🟢** por un solo campo: `salud_del_banco.controladores_activos` todavía sale `{}` | S20 |
+| **RF-26** | La campaña en simulación alcanza **N = 30 repeticiones** (decisión D1) | Treinta registros válidos | 🟢 **Cumplido el 2026-09-05, tres semanas antes de lo planificado.** 30 misiones sorteadas con semilla, corridas y compuestas en 30 registros validados contra el esquema; `analizar_campana.py` dictamina **`VALIDA`** con **0 de 30 descartes** contra un techo del 20 % | ~~S24~~ **S21** |
 | **RF-27** | La demostración física ejecuta el protocolo completo con **N entre 5 y 10** (decisión D1) | Registros de las corridas físicas | 🔴 | S24–S25 |
 
-**Lectura de OE4, revisada el 2026-08-27.** La mitad instrumental está construida y verificada:
-RF-21, RF-22 y RF-25 sobre misiones de condición A. Lo que sigue en rojo depende todo de lo mismo,
-**el relevo**, y el relevo está escrito y probado como función pura pero **no se puede ejecutar**:
-`robot1` y `robot2` corren en dominios DDS distintos con un `gzserver` cada uno —impuesto por
-`gazebo_ros` de Humble— y un nodo de ROS 2 vive en un solo dominio, así que el coordinador no
-alcanza a los dos. **RF-24 es la variable de respuesta principal** del proyecto —es la que responde
-la pregunta de investigación— y hoy su único bloqueo es ese. Está anotado como séptimo
-prerrequisito en el §10 de [`PROTOCOLO_EXPERIMENTAL.md`](PROTOCOLO_EXPERIMENTAL.md).
+**Lectura de OE4, revisada el 2026-09-05.** De los siete requisitos, **cinco están verificados**
+(RF-21 a RF-24 y RF-26), uno queda en amarillo por un solo campo (RF-25) y el único rojo es RF-27,
+que depende de hardware. El bloqueo que esta lectura describía el 27-ago —el relevo imposible de
+ejecutar porque `robot1` y `robot2` vivían en dominios DDS distintos— **se levantó el 30-ago**: un
+solo dominio, dos `gzserver`, separación por nombres.
+
+**RF-24, que es la variable de respuesta principal del proyecto** —la que responde la pregunta de
+investigación—, pasó de rojo a **14/14** en una campaña de N = 30 sorteada. Conviene decir de una
+vez el límite, porque es de diseño y no se arregla trabajando más: **con N = 30, «la tasa de éxito
+supera el 70 %» es defendible y «la tasa es del 86,7 %» no lo es**; y el contraste entre condiciones
+—A 80,0 % (54,8–93,0) contra B 93,3 % (70,2–98,8)— **no sostiene ninguna conclusión**, con
+intervalos solapados y apuntando además en contra de la intuición, porque la condición con relevo
+salió mejor.
+
+Lo que queda de OE4 deja de ser *producir evidencia* y pasa a ser *redactarla*, más el campo
+pendiente de RF-25 y la campaña física de RF-27.
 
 ---
 
@@ -266,13 +274,19 @@ del proyecto: sin ellos no hay resultado que sustentar.
 | OE1 | RF-01 a RF-10 | 5 | 5 | S20–S21 |
 | OE2 | RF-11 a RF-16 | 0 (4 parciales) | 2 | S19–S22 |
 | OE3 | RF-17 a RF-20 | 3 | 1 parcial | S22 |
-| OE4 | RF-21 a RF-27 | 0 | 7 | S20–S25 |
+| OE4 | RF-21 a RF-27 | **5** | 1 + 1 parcial | ~~S20–S25~~ **S21**, salvo RF-27 (física) |
 | Restricciones | RNF-01 a RNF-07 | 6 | 1 parcial | — |
-| **Total** | **34** | **14** | **14 + 6 parciales** | |
+| **Total** | **34** | **19** | **8 + 7 parciales** | |
 
-**Once de treinta y cuatro requisitos están verificados**, y son los que sostienen la
-infraestructura. Los dieciocho pendientes se concentran en cuatro semanas de construcción
-(S20–S22) más la campaña experimental (S24–S25).
+**Diecinueve de treinta y cuatro requisitos están verificados** al 2026-09-05, y ya no son solo los
+de infraestructura: los cinco que entraron el 5 de septiembre (RF-21 a RF-24 y RF-26) son **las
+cuatro métricas de OE4 más la campaña de N = 30**, o sea la evidencia del aporte. De los ocho
+pendientes, **cinco son de OE1** —nombres de salas y compilación en la tarjeta Jazzy—, dos de OE2
+(atados al segundo vehículo, R11) y uno es RF-27, la campaña física.
+
+> *Corrección aritmética, 2026-09-05:* este párrafo decía «once de treinta y cuatro» mientras su
+> propia tabla sumaba catorce. Se recalcula contra la tabla, que es la fuente. El texto llevaba
+> desde el 27-ago desfasado respecto a las filas que lo sostienen.
 
 *Actualizado el 2026-08-18: RF-16 pasa de pendiente a parcial tras la pregunta 4 del spike, y se
 registra RF-16b como requisito descartado por imposible.*

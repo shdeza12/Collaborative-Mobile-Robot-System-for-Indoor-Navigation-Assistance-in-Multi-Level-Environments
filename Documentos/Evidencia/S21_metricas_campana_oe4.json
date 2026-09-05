@@ -1,0 +1,104 @@
+{
+  "veredicto": "VALIDA",
+  "banco": "simulacion",
+  "campana": "OE4_simulacion",
+  "leidos": 36,
+  "pilotos": 6,
+  "exito": {
+    "n": 30,
+    "exitos": 26,
+    "fallos": 4,
+    "tasa": 0.8666666666666667,
+    "ic95": [
+      0.7031867331340118,
+      0.9469034451704432
+    ],
+    "metodo": "Wilson 95 %",
+    "motivos": {
+      "llegada a 0.295 m, fuera de 0.25 m; la mision no llego a COMPLETADA sin pasar por FALLIDA": 1,
+      "llegada a 0.284 m, fuera de 0.25 m; la mision no llego a COMPLETADA sin pasar por FALLIDA": 1,
+      "llegada a 0.311 m, fuera de 0.25 m; la mision no llego a COMPLETADA sin pasar por FALLIDA": 1,
+      "llegada a 0.347 m, fuera de 0.25 m; la mision no llego a COMPLETADA sin pasar por FALLIDA": 1
+    }
+  },
+  "descartes": {
+    "n": 0,
+    "sobre": 30,
+    "fraccion": 0.0,
+    "techo": 0.2,
+    "por_causa": {},
+    "valida": true
+  },
+  "respuesta": {
+    "n": 30,
+    "mediana": 0.20000000000000284,
+    "media": 0.1866666666666679,
+    "sd": 0.07760791522613505,
+    "ee": 0.014169201936767604,
+    "min": 0.09999999999999432,
+    "max": 0.3999999999999915,
+    "p90": 0.29999999999999716,
+    "ic95": [
+      0.15769064870597815,
+      0.21564268462735764
+    ],
+    "sin_marca": []
+  },
+  "asignacion": {
+    "cota_s": 0.1,
+    "media": null,
+    "mediana": null,
+    "n": 30,
+    "por_encima_del_tick": [],
+    "nota": "§3.2.2: no se reporta un valor por mision. Se afirma que la asignacion tarda menos de un tick de /clock (< 100 ms) en las N misiones. El valor puntual sale del banco de banco_tiempo_asignacion.py."
+  },
+  "continuidad": {
+    "misiones_entre_niveles": 15,
+    "hueco": {
+      "n": 15,
+      "mediana": 0.10000000000002274,
+      "media": 0.13333333333334185,
+      "sd": 0.048795003647424576,
+      "ee": 0.012598815766973703,
+      "min": 0.09999999999999432,
+      "max": 0.20000000000004547,
+      "p90": 0.20000000000001705,
+      "ic95": [
+        0.10630887351318326,
+        0.16035779315350043
+      ],
+      "sin_marca": []
+    },
+    "binaria": {
+      "medible": true,
+      "n": 14,
+      "continuas": 14,
+      "tasa": 1.0,
+      "ic95": [
+        0.7846891971830681,
+        1.0
+      ],
+      "discontinuas": [],
+      "sin_campo": [],
+      "motivo": ""
+    }
+  },
+  "llegada": {
+    "n": 30,
+    "mediana": 0.10582780156620177,
+    "media": 0.125112505369128,
+    "sd": 0.08446519078968931,
+    "ee": 0.015421163439830143,
+    "min": 0.01946344058084331,
+    "max": 0.3471299494745241,
+    "p90": 0.2837812671354832,
+    "ic95": [
+      0.09357622613467535,
+      0.15664878460358062
+    ],
+    "umbral_m": 0.25,
+    "por_encima_de_025": 4
+  },
+  "errores": [],
+  "alertas": []
+}
