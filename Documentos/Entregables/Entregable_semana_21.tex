@@ -1,0 +1,512 @@
+\documentclass[12pt,letterpaper]{article}
+
+% --- Paquetes Requeridos ---
+\usepackage[utf8]{inputenc}
+\usepackage[spanish,es-tabla]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{titlesec}
+\usepackage{setspace}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{xcolor}
+
+% --- Configuración de Párrafo ---
+\onehalfspacing
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1em}
+
+% --- Rutas de búsqueda de imágenes ---
+% Permite compilar tanto desde Documentos/Entregables/ como con todas las
+% imágenes en una sola carpeta plana.
+\graphicspath{{./}{../Evidencia/}{Evidencia/}{imagenes/}}
+
+% --- Configuración de listings ---
+\lstset{
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,
+    frame=single,
+    captionpos=b,
+    showstringspaces=false
+}
+
+% --- Inicio del Documento ---
+\begin{document}
+
+% --- PORTADA ---
+\begin{titlepage}
+    \centering
+
+    {\Large \textbf{UNIVERSIDAD SANTO TOMÁS}} \\[1cm]
+
+    {\Large \textbf{Sistema colaborativo de robots móviles para asistencia de orientación en entornos interiores con múltiples pisos}} \\[2cm]
+
+    {\large \textbf{Realizado por:}} \\
+    {\large Santiago Hernández Ávila} \\
+    {\large Jonny Alejandro Mejía León} \\[1cm]
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.6\textwidth]{Logos Uni.png}
+        \label{Logo Universidad Santo Tomas y facultad de ingenieria electronica}
+    \end{figure}
+
+    \vfill
+
+    {\large \textbf{Informe de Avance --- Semana 21}} \\
+    {\large Fase 5: Integración del sistema y realización de pruebas --- Campaña experimental de treinta misiones y medición de las cuatro métricas del objetivo 4} \\[1.5cm]
+
+    \textbf{Dirigido por:} \\
+    Ing. Armando Mateus Rojas, Msc. \\
+    Ing. Nestor Ivan Ospina, Msc. \\
+    Ing. Oscar Mauricio Gélvez Lizarazo, Msc. \\[1.0cm]
+
+    \vfill
+
+    {\large GED (Grupo de Estudio y Desarrollo en Robótica)} \\
+    {\large Facultad de Ingeniería Electrónica} \\
+    {\large División de Ingenierías} \\
+    {\large Bogotá, septiembre de 2026}
+\end{titlepage}
+
+% --- CONTENIDO ---
+
+\section{Introducción}
+
+El presente informe documenta el avance correspondiente a la \textbf{Semana 21} del cronograma de actividades (31 de agosto al 6 de septiembre de 2026), dentro de la \textbf{Fase 5 (Integración del sistema y realización de pruebas)}.
+
+Es la semana en la que el proyecto deja de tener \textbf{una} demostración del aporte y pasa a tener \textbf{evidencia estadística} de él. Se ejecutó la campaña experimental completa: treinta misiones sorteadas con semilla, corridas, registradas de forma automática y agregadas por un analizador que produce las cuatro métricas del objetivo específico 4 con su intervalo de confianza. La campaña estaba planificada para la \textbf{Semana 24} y se ejecutó tres semanas antes.
+
+Adelantar una campaña experimental no es, por sí mismo, una buena noticia: hacerlo con el instrumento a medias obliga a repetirla, y repetir una campaña es la puerta de entrada al sesgo. Se expone en la Sección \ref{sec:adelanto} por qué en este caso la condición que lo desaconsejaba había dejado de existir, y por qué la decisión se tomó antes de correr nada y no después de ver los resultados.
+
+La campaña produjo además algo que no estaba previsto y que este informe considera su hallazgo más valioso: \textbf{auditó el propio instrumento y encontró un fallo silencioso} que costó tres corridas. Se expone en la Sección \ref{sec:rtf}, junto con un intento de recuperación que se descartó con datos en lugar de publicarse como estimación.
+
+En el frente de hardware, la Semana 21 era el \textbf{punto de decisión} del cronograma. Su medición de aceptación (G2) se intentó y \textbf{no produjo veredicto}: la regla de parada escrita de antemano se activó y detuvo el procedimiento. Se expone sin maquillaje en la Sección \ref{sec:g2}, porque una regla de parada que funciona es un resultado del método, no un fracaso de la semana.
+
+\section{Objetivos de la Semana}
+
+El cronograma fija para esta semana el siguiente criterio de cierre:
+
+\begin{quote}
+\textit{En simulación, una solicitud que cruza niveles se completa de extremo a extremo con relevo, y el log arroja las cuatro métricas de OE4.}
+\end{quote}
+
+Adicionalmente, la Semana 21 está marcada en el cronograma como \textbf{punto de decisión (GO / NO-GO)} del frente de hardware, descompuesto en dos preguntas independientes desde la enmienda del 26 de agosto:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{G1} --- ¿El DeepRacer físico arranca la pila, recibe mando por \texttt{/cmd\_vel} desde ROS 2, publica \texttt{/scan}, planifica y ejecuta una trayectoria Ackermann sin intervención manual, y para donde se le pide?
+    \item \textbf{G2} --- La localización longitudinal en pasillo largo, que el laboratorio \textbf{no} puede decidir. Se mide sobre una recta de $\geq 20$ m con dos cifras: \textbf{M1} (desplazamiento registrado sobre desplazamiento real, umbral $\geq 0{,}90$) y \textbf{M2} (error de \texttt{/amcl\_pose} contra la marca al final de la recta, umbral $\leq 0{,}50$ m).
+\end{itemize}
+
+El criterio de cierre en simulación se cumplió \textbf{muy por encima} de lo pedido. El punto de decisión de hardware \textbf{queda abierto}, y la Sección \ref{sec:g2} explica por qué el resultado correcto de esta semana era precisamente no cerrarlo.
+
+\section{La campaña experimental del objetivo 4}
+\label{sec:campana}
+
+\subsection{De un dato a treinta: por qué hacía falta la campaña}
+
+Al abrir la semana, el aporte declarado del proyecto ---el relevo entre niveles--- estaba \textbf{ejecutado}: el 30 de agosto una misión cruzó de un nivel al otro con los dos robots vivos, con llegadas de 0,128 m y 0,077 m contra la odometría del simulador. Ese resultado llegó un día después de emitido el informe de la Semana 20, por lo que se documenta aquí.
+
+Una corrida, sin embargo, no es una tasa. El protocolo experimental exige $N = 30$ repeticiones sorteadas, y la diferencia entre las dos situaciones no es de grado sino de naturaleza: con una corrida existe el resultado, pero no existe la \textbf{evidencia} para afirmarlo. El trabajo de la semana consistió en cerrar esa distancia.
+
+\subsection{El sorteo, sus estratos y la restricción declarada de antemano}
+
+Las treinta misiones se sortearon del catálogo real de puntos de interés, no se eligieron. El sorteo se estructura en \textbf{cuatro estratos}, que combinan el nivel de origen con el de destino:
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Estratos del sorteo y cuotas asignadas.}
+    \label{tab:estratos}
+    \begin{tabular}{@{}clcp{5.4cm}@{}}
+        \toprule
+        \textbf{Estrato} & \textbf{Origen $\rightarrow$ destino} & \textbf{Cuota} & \textbf{Condición experimental} \\ \midrule
+        A1 & Nivel 1 $\rightarrow$ nivel 1 & 8 & A --- intra-nivel, sin relevo \\ \addlinespace
+        A2 & Nivel 2 $\rightarrow$ nivel 2 & 7 & A --- intra-nivel, sin relevo \\ \addlinespace
+        B12 & Nivel 1 $\rightarrow$ nivel 2 & 8 & B --- entre niveles, con relevo \\ \addlinespace
+        B21 & Nivel 2 $\rightarrow$ nivel 1 & 7 & B --- entre niveles, con relevo \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+Las cuotas preservan el balance de \textbf{15 misiones de condición A contra 15 de condición B}, que es el contraste que el protocolo declara. El nivel es un \textbf{control}, no un factor: las comparaciones entre estratos son descriptivas y no se usan para concluir nada, porque con $n \approx 7$ los intervalos de confianza van aproximadamente del 41 \% al 100 \%.
+
+Sobre el sorteo se impuso una \textbf{aleatorización restringida}: ninguna condición puede repetirse más de tres veces seguidas (\texttt{RACHA\_MAXIMA = 3}). La restricción se declaró \textbf{antes} de sortear y se aplica a cualquier semilla, de modo que no es un filtro sobre el resultado.
+
+\subsection{La regla de la semilla}
+
+Una semilla arbitraria es indistinguible de una semilla escogida. Si el investigador puede probar semillas hasta que el listado le guste, el sorteo pierde su función. Esta semana se cerró ese hueco con una regla que se incorporó al \S 6.3 del protocolo:
+
+\begin{quote}
+\textbf{La semilla es la fecha del sorteo en formato \texttt{AAAAMMDD}.}
+\end{quote}
+
+La regla es auditable contra el propio archivo: el listado versionado lleva el campo \texttt{sorteado:}, que tiene que coincidir con la semilla. Buscar una semilla favorable exigiría entonces falsear fechas, y solo una fecha concuerda con el archivo entregado.
+
+El listado se sorteó en dos ocasiones, y ambas semillas quedan escritas en los registros: las misiones 1 a 10 llevan \texttt{20260822}, del sorteo original, y las misiones 11 a 30 llevan \texttt{20260904}, correspondiente al re-sorteo del 4 de septiembre al ampliar el listado a los cuatro estratos. \textbf{Se documenta además una excepción}: el sorteo original usó la semilla \texttt{20260822} pero se ejecutó el 30 de agosto, porque en ese momento la regla no estaba escrita. Se declara como excepción en lugar de corregirse retroactivamente.
+
+\subsection{Por qué se adelantó la campaña tres semanas}
+\label{sec:adelanto}
+
+El plan de la Semana 21 contenía una prohibición explícita, escrita al abrir la semana:
+
+\begin{quote}
+\textit{No es haber corrido las 30 misiones: eso es S24, y adelantarlo con el analizador a medias obligaría a repetirlas.}
+\end{quote}
+
+La campaña se adelantó \textbf{porque esa condición dejó de aplicar}, no a pesar de ella. El analizador de campaña quedó terminado y probado el 2 de septiembre, con 43 comprobaciones que corren sin simulador. Con el consumidor de los datos ya escrito y verificado, el riesgo que justificaba esperar ---agregar treinta corridas y descubrir después que faltaba un campo, o que el cálculo estaba mal--- había desaparecido.
+
+Que ese riesgo era real lo demuestra lo que ocurrió al escribir el analizador, el 31 de agosto, y que se documenta como el argumento más fuerte a favor de escribir el consumidor antes que los datos:
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{RF-24 no tenía campo en el registro.} La continuidad del servicio entre niveles es, según el propio \S 2 del protocolo, \textbf{la variable de respuesta principal} del proyecto: la que responde la pregunta de investigación. El esquema del registro no la contemplaba, de modo que las treinta misiones se habrían corrido sin medir la métrica que justifica el experimento. Y no se habría notado ejecutándolas, \textbf{solo agregándolas}. Se corrigió elevando el esquema a la versión 1.1.0.
+    \item \textbf{El intervalo de confianza prometido no se reproducía.} El protocolo afirmaba que 27 aciertos de 30 dan un intervalo del «80 \% al 97 \%». El cálculo de Wilson da \textbf{74,4 \% -- 96,5 \%}, y sobre la cota equivocada se había fundado una regla de defendibilidad. Corregido en documento y código.
+\end{enumerate}
+
+\subsection{Ejecución}
+
+Las treinta misiones se corrieron en dos sesiones: \textbf{misiones 1 a 10 el viernes 4 por la tarde} y \textbf{misiones 11 a 30 el sábado 5 por la mañana}, con tres regrabaciones al mediodía por el motivo que expone la Sección \ref{sec:rtf}.
+
+\textbf{Se descartó repartir las misiones entre los dos autores}, y conviene dejar constancia porque la decisión se consideró en serio antes de correr nada. Repartir la campaña (misiones 1--15 y 16--30, un autor cada mitad) no aporta \textbf{reproducibilidad} ---misma máquina, misma semilla, mismo análisis producen el mismo resultado--- ni \textbf{replicabilidad} ---otra persona ejecuta el mismo protocolo y llega a la misma conclusión---. Lo único que introduce es al operador como variable descontrolada, y además desbalanceada respecto a los estratos: el estrato A2 habría quedado repartido 1 contra 6. Una replicación legítima, si se desea, consiste en que el segundo autor ejecute un subconjunto \textbf{ya corrido} y se contrasten ambos. \textbf{La campaña se ejecutó con un operador y una máquina.}
+
+\subsection{Resultados}
+
+El analizador dictamina \textbf{\texttt{VEREDICTO: VALIDA}} con \textbf{0 descartes de 30} frente a un techo admisible del 20 \%.
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Las cuatro métricas del objetivo específico 4 sobre $N = 30$.}
+    \label{tab:metricas}
+    \begin{tabular}{@{}llp{6.8cm}@{}}
+        \toprule
+        \textbf{Métrica} & \textbf{Req.} & \textbf{Resultado} \\ \midrule
+        Tasa de éxito & RF-23 & \textbf{26/30 = 86,7 \%}; IC 95 \% de Wilson \textbf{70,3 \% -- 94,7 \%} \\ \addlinespace
+        Continuidad entre niveles & RF-24 & \textbf{14/14 = 100 \%}; IC 95 \% \textbf{78,5 \% -- 100 \%}. Salto de relevo: mediana 0,100 s, rango 0,100--0,200 s \\ \addlinespace
+        Tiempo de respuesta & RF-21 & Mediana \textbf{0,200 s}; media 0,187 s; IC 95 \% [0,158; 0,216]; p90 0,300 s; máximo 0,400 s \\ \addlinespace
+        Tiempo de asignación & RF-22 & \textbf{Inferior a 100 ms en las 30}, reportado como cota superior. El valor puntual procede del banco: mediana 154--175 $\mu$s, máximo 306,4 $\mu$s \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+Como descriptor complementario, el \textbf{error de llegada} contra la odometría del simulador tiene mediana \textbf{0,106 m}, media 0,125 m y recorrido de 0,019 m a 0,347 m, con 4 de 30 misiones por encima del criterio de 0,25 m.
+
+\textbf{RF-24 se evalúa sobre 14 de las 15 misiones entre niveles, y esto es correcto por diseño.} La misión 27 nunca alcanzó el estado \texttt{COMPLETADA}, de modo que en ella no hay continuidad que medir. Calcular una métrica de continuidad sobre misiones fallidas mediría otra cosa.
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Tasa de éxito desagregada. Los intervalos son de Wilson al 95 \%.}
+    \label{tab:desagregada}
+    \begin{tabular}{@{}llcc@{}}
+        \toprule
+        \textbf{Corte} & \textbf{Grupo} & \textbf{Aciertos} & \textbf{Tasa (IC 95 \%)} \\ \midrule
+        Condición & A (sin relevo) & 12/15 & 80,0 \% (54,8 -- 93,0) \\
+        Condición & B (con relevo) & 14/15 & 93,3 \% (70,2 -- 98,8) \\ \addlinespace
+        Estrato & A1 & 6/8 & 75,0 \% \\
+        Estrato & A2 & 6/7 & 85,7 \% \\
+        Estrato & B12 & 8/8 & 100 \% \\
+        Estrato & B21 & 6/7 & 85,7 \% \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Lo que estos datos NO permiten afirmar}
+\label{sec:limites}
+
+Esta subsección es deliberada. El límite que sigue es de \textbf{diseño}, no de ejecución, y no se corrige trabajando más: se corrige solo aumentando $N$, lo que el cronograma no permite.
+
+\textbf{Primero: la tasa puntual no es afirmable.} Con 26 aciertos de 30, el intervalo de Wilson va del 70,3 \% al 94,7 \%. La afirmación defendible es \textbf{«la tasa de éxito supera el 70 \%»}. La afirmación \textbf{«la tasa de éxito es del 86,7 \%»} no lo es, y presentarla como valor firme en el documento final sería sobreafirmar.
+
+\textbf{Segundo: el contraste entre condiciones no sostiene ninguna conclusión.} La condición A obtuvo 80,0 \% (54,8--93,0) y la condición B 93,3 \% (70,2--98,8). Los intervalos se solapan ampliamente. Y hay una segunda razón para no interpretarlo: apunta \textbf{en contra} de la intuición, porque la condición que incluye el relevo ---la más compleja--- obtuvo mejor resultado. Ante un contraste no significativo que además va en dirección contraintuitiva, la lectura correcta es que el experimento no tiene potencia para resolver esa comparación, no que el relevo mejore el desempeño.
+
+\textbf{Tercero: la comparación entre estratos es descriptiva.} Las siete misiones de B21 (bajada) dan medianas de 76,7 m recorridos, 165,1 s y 9 cúspides, frente a 65,6 m, 145,0 s y 7 cúspides de B12 (subida). La diferencia va en la dirección esperable, pero \textbf{no confirma nada}: B12 y B21 son pares origen--destino distintos, de modo que la distancia de la ruta está dentro de la comparación y no puede separarse del sentido del recorrido.
+
+\subsection{Los cuatro fallos son un solo modo, y no es de coordinación}
+
+Las cuatro misiones fallidas ---11, 24, 27 y 28--- terminaron a 0,295 m, 0,284 m, 0,311 m y 0,347 m del destino, frente a un criterio de 0,25 m.
+
+Todas fallan \textbf{corta}. Ninguna se perdió, ninguna rompió un relevo, ninguna asignó el agente equivocado, y ninguna quedó fuera por un margen grande: el peor caso excede el criterio en 9,7 cm. Es un único modo de fallo, y está caracterizado desde el 26 de agosto: la \textbf{inobservabilidad longitudinal del pasillo}. En un corredor uniforme, la posición lateral del vehículo está perfectamente restringida por la geometría y la longitudinal no lo está, de modo que el error se concentra en el eje de avance. El criterio de 0,25 m queda \textbf{por debajo de una desviación estándar} de ese error.
+
+La formulación defendible, y la que se llevará al documento final, es: \textbf{los fallos de RF-23 no son fallos de coordinación}. El sistema decidió bien y condujo bien en las treinta; en cuatro de ellas la localización no permitió cerrar el último tramo dentro de una tolerancia que el propio entorno hace exigente.
+
+\textbf{Se deja anotada una anomalía y no se investiga.} Una misión del estrato B12 registró \textbf{85 cúspides} de maniobra, frente a una mediana de 7 y un máximo de 13 en las restantes. El bag se conserva. No se analiza dentro de la campaña porque hacerlo después de ver los datos es exactamente lo que el \S 6.3 del protocolo prohíbe; entra como pendiente del riesgo R12.
+
+\section{El instrumento se auditó a sí mismo}
+\label{sec:rtf}
+
+\subsection{El fallo}
+
+Tres bags de la campaña ---misiones 13, 22 y 28--- se grabaron \textbf{sin el factor de tiempo real} (RTF). El esquema del registro lo exige para el banco de simulación, porque RNF-06 pide un RTF $\geq 0{,}99$: sin él, el registro no se puede componer y la corrida no produce observación alguna.
+
+El fallo no estuvo en que la medición fallara, sino en que \textbf{el guion de grabación lo ocultó}. La línea responsable terminaba en \texttt{2>/dev/null || true}: descartaba el mensaje de error y forzaba el éxito. El guion imprimía un aviso al final y \textbf{salía con código 0}. En una tanda de veinte corridas seguidas, ese aviso se pierde entre la salida de las demás, y un código de salida 0 le dice al operador que puede encadenar la siguiente misión. Eso fue exactamente lo que ocurrió.
+
+Cuando se fueron a componer los registros, dos horas después, el proceso \texttt{gzserver} ya se había cerrado y \textbf{el RTF de esas tres corridas era irrecuperable}.
+
+\subsection{Una recuperación que se descartó con datos}
+
+Antes de aceptar la pérdida se intentó reconstruir el RTF a partir de las marcas de tiempo de los archivos del bag, dividiendo la duración de simulación entre el intervalo de pared entre dos ficheros escritos al inicio y al cierre.
+
+El método se \textbf{validó contra los 17 bags cuyo RTF sí se conocía}, y dio \textbf{0,0000 en los diecisiete}. La causa es que ambos ficheros se escriben al cerrar la grabación, con 0,2 s de diferencia y en orden invertido, de modo que el intervalo de pared resulta negativo.
+
+Se documenta este intento porque la decisión que se tomó a partir de él es metodológica: \textbf{se prefirió regrabar tres misiones antes que publicar una estimación}. Un método de reconstrucción que falla en los diecisiete casos donde se puede comprobar no se aplica a los tres donde no se puede.
+
+\subsection{La corrección y su prueba}
+
+El guion se corrigió \textbf{en el origen}, con dos guardas de comportamiento distinto según el momento del fallo:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Si falla la marca inicial, no se graba nada} y se aborta con código 1. Ocurre \emph{antes} de la corrida, de modo que abortar no destruye trabajo: evita gastar cuatro minutos produciendo un bag que después no podrá registrarse.
+    \item \textbf{Si falla la marca de cierre, el bag se conserva} ---ya está grabado y abortar no lo desharía--- pero el guion sale con \textbf{código 3} e imprime el comando de rescate. Ese instante es la última ventana en que la simulación sigue viva, es decir, la última oportunidad de salvar la corrida.
+\end{itemize}
+
+La corrección va acompañada de una \textbf{prueba de regresión} (\texttt{herramientas/prue\-ba\_grabar\_mision.py}) con doce comprobaciones que corren \textbf{sin ROS y sin Gazebo}: montan un \texttt{ros2} falso en el \texttt{PATH} y sustituyen el medidor de RTF por un doble que falla a voluntad. Lo que se verifica es el contrato del guion, no la simulación.
+
+\textbf{La prueba se validó contra el código anterior y falla 8 de las 12 comprobaciones}, incluidas «sale con código distinto de 0» y «no deja un bag a medias». Una prueba de regresión que pasara también con el defecto presente no probaría nada.
+
+\subsection{Fallo de instrumento contra fallo de resultado}
+
+Esta distinción es la diferencia entre un experimento y una selección de resultados favorables, y se sostuvo durante toda la campaña:
+
+\begin{itemize}[leftmargin=*]
+    \item Un bag \textbf{sin RTF} no produce observación: no es una misión fallida, es una misión \textbf{no medida}. Regrabarla es legítimo y no altera la muestra.
+    \item Una misión que llega \textbf{fuera de tolerancia} sí es una observación. Regrabarla la convertiría en sesgo de selección.
+\end{itemize}
+
+Al regrabar las tres, la \textbf{misión 28 volvió a fallar como misión} (0,347 m). \textbf{Se queda como fallo} y no se repite una tercera vez. \textbf{Ninguna misión de la campaña se repitió por su resultado.}
+
+\section{Los desbloqueos que hicieron posible la campaña}
+\label{sec:desbloqueos}
+
+La campaña no se pudo correr hasta el jueves y el viernes porque tres defectos la impedían, y los tres se diagnosticaron esta semana. Los tres comparten una característica: \textbf{fallaban en silencio}.
+
+\subsection{Las misiones morían por dos coordinadores vivos, no por Nav2}
+
+Las misiones terminaban con \texttt{estado 6} (\texttt{STATUS\_ABORTED}) y la sospecha recaía sobre Nav2. La causa real es que la acción \texttt{navigate\_to\_pose} \textbf{atiende un objetivo a la vez}: el objetivo de un segundo coordinador desplaza al del primero, que vuelve abortado en unos 10 ms. Se reprodujo \textbf{8 de 8 veces}; con un solo coordinador se lanzaron \textbf{20 objetivos con 0 abortos}.
+
+Quedaban coordinadores vivos porque la orden de terminación no mataba ninguno: \texttt{ros2 run} reemplaza su proceso por el ejecutable instalado, cuyo nombre lleva \textbf{barra}, de modo que el patrón de búsqueda escrito con espacio no encontraba nada aunque hubiera tres corriendo. Se añadió un \textbf{guardián} al arranque del coordinador, con su prueba, que impide que un segundo se registre.
+
+El resultado inmediato fue la \textbf{primera misión completa del proyecto}: RTF 0,9978, primer tramo de 59,09 m deteniéndose a 0,113 m, segundo tramo de 45,83 m llegando a 0,136 m, salto de relevo de 0,1 s y continuidad íntegra.
+
+\subsection{La compuerta previa medía aparcamiento, no localización}
+
+El criterio 1 del procedimiento de campaña ---que verifica el estado del banco antes de correr--- comparaba la pose real de los robots contra la \textbf{tabla de posiciones de aparición}. Eso rechazó una corrida sana: una misión salió a 1,19 m y 43,92 m «de su pose declarada» únicamente porque los robots venían de la misión anterior, cuando su error de localización era de \textbf{0,032 m} ---mejor que el de la corrida que sí pasó--- y llegó a 0,068 m, la mejor llegada del día.
+
+La magnitud que hace daño es que la \textbf{creencia} de la localización se separe de la \textbf{verdad}, no la distancia al punto de aparición, que solo era un sustituto válido mientras el robot no se hubiera movido a propósito. Además, en el banco físico no se puede reaparecer un vehículo, de modo que el criterio antiguo es inaplicable donde esto tiene que terminar. Ahora se compara \texttt{/amcl\_pose} contra \texttt{/odom}.
+
+\textbf{El cambio no afloja el criterio, lo subsume}: con la pila recién levantada ambos números son idénticos por construcción, y solo divergen cuando el robot ya ha navegado. Se descartó una primera versión que tomaba la creencia de la composición de transformadas, porque \textbf{habría aprobado siempre}: al arrancar da 0,0007 m en vez de 0,040 m, ya que la referencia aún no ha sido corregida y el resultado sigue a la verdad por construcción.
+
+\subsection{Un remapeo de reloj que no alcanzaba a los controladores}
+
+Se ejercitó por primera vez el argumento \texttt{clock\_topic} del lanzador de SLAM ---la única ruta de código escrita, integrada al historial y \textbf{nunca ejecutada}--- y funciona: el nodo queda suscrito al reloj de su propio robot y produce mapa con el prefijo correcto.
+
+Lo que apareció al medirlo es que el reloj global tenía \textbf{0 publicadores y 8 suscriptores}, y los ocho eran los nodos de control del segundo robot. El remapeo se aplica a la línea de comandos del simulador, de modo que alcanza a los complementos que corren dentro de ese proceso pero \textbf{no} al gestor de controladores, que se crea con sus propias opciones.
+
+\textbf{Hoy no está roto}, y conviene decir por qué para no corregir lo que no toca: el tiempo de simulación se le entrega explícitamente al gestor de controladores en cada ciclo, sin pasar por el reloj del nodo. El riesgo es \textbf{latente} y solo se manifestaría con las dos pilas arriba, donde el reloj global sí tiene publicador. Queda anotado para saber dónde mirar si algún día un controlador sella un dato por su cuenta.
+
+\section{Frente de hardware: el punto de decisión}
+\label{sec:g2}
+
+\subsection{El pasillo quedó medido y marcado}
+
+La medición de aceptación G2 exige una recta de al menos 20 m, que el laboratorio GED no proporciona. Se localizó, midió y marcó un pasillo de pruebas: recta de \textbf{20,08 m}, ancho de 2,7 m, eje longitudinal a 1,1 m del muro izquierdo ---y el mismo valor en ambos extremos, es decir trayectoria paralela al muro sin error lateral inducido--- y dos cruces de referencia en los extremos.
+
+\textbf{Se declara una salvedad del instrumento en lugar de omitirla}: los 20,08 m proceden de la aplicación de medición de un teléfono ---odometría visual-inercial---, no de flexómetro, porque no había flexómetro disponible. La incertidumbre se estima en unos 0,20 m (1 \% sobre 20 m) y \textbf{no está caracterizada}. Eso consume el 40 \% del presupuesto de error de M2.
+
+Y queda registrada una \textbf{amenaza a la validez} que merece figurar en el documento final: el instrumento de verdad de terreno \textbf{falla por el mismo mecanismo que el sujeto medido}. La aplicación del teléfono estima el avance comparando fotogramas y la odometría láser lo estima comparando barridos; ambas derivan en el \textbf{eje longitudinal} y ambas empeoran en un pasillo largo, uniforme y pobre en rasgos. Si las dos derivaran en el mismo sentido, M1 saldría bien sin significar nada. Es un error de modo común.
+
+\subsection{G2 se intentó, y la regla de parada lo detuvo}
+
+Se ejecutó la \textbf{primera pasada} del procedimiento ---la que construye el mapa contra el cual se mide la segunda---, empujando el vehículo de ida y vuelta sobre la recta medida sin girarlo, es decir con cierre de bucle perfecto por construcción. El mapa resultante:
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Mapa obtenido en la primera pasada de G2 frente a la geometría real.}
+    \label{tab:platano}
+    \begin{tabular}{@{}lcc@{}}
+        \toprule
+        \textbf{Dimensión} & \textbf{Real} & \textbf{En el mapa} \\ \midrule
+        Largo & 20,08 m & \textbf{47,50 m} \\
+        Ancho & $\sim$2,7 m & \textbf{29,05 m} \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+Un pasillo \textbf{curvado}, 2,4 veces más largo y diez veces más ancho de lo real, con las paredes dibujadas varias veces en abanico y el trayecto de vuelta sin superponerse al de ida.
+
+\textbf{La regla de parada escrita de antemano se activó}, y ese es el resultado que este informe destaca. La hoja de campo establecía: si el mapa mide más del doble, comprobar batería y repetir una vez; si vuelve a salir curvo, \textbf{parar y no ejecutar las seis pasadas de localización}. El motivo es que M1 y M2 se miden \textbf{contra ese mapa}: con un mapa que se equivoca un 240 \% en el largo, las seis pasadas no medirían la localización del vehículo sino el mapa roto, produciendo dos horas de conducción para obtener seis números sin significado.
+
+Se paró. \textbf{M1 y M2 no tienen valor, y el GO / NO-GO de la Semana 21 queda abierto.}
+
+\subsection{La causa más probable está medida, y no es de software}
+
+Se planteó interpretar el mapa curvo como la primera medición del riesgo R3 ---la ambigüedad de localización--- sobre hardware, y \textbf{se retiró esa interpretación}. La deriva de la odometría láser medida en simulación sobre este tipo de pasillo fue del 5,7 \%, no del 240 \%. Un resultado a tres órdenes de magnitud del esperado obliga a sospechar del dato de entrada antes que del algoritmo.
+
+La causa más probable es la \textbf{batería}, y no por descarte. Con el vehículo a punto de agotarse, el intervalo entre barridos del sensor daba un máximo de 0,464 s con desviación de 0,072; recargado, con el mismo sensor y los mismos procesos, daba máximo 0,177 s y desviación 0,008: \textbf{nueve veces más estable}. El bag que se mapeó se grabó entre ambas mediciones.
+
+\textbf{No se da por probado.} La comprobación está dentro del propio procedimiento de mapeo, que construye el mapa en sitio y lo contrasta contra la medición de la recta. Es \textbf{el mismo patrón del 28 de agosto}, cuando se propusieron tres causas de software y las tres resultaron falsas.
+
+\subsection{La regla del mismo dueño, que explica los bags vacíos}
+
+Como parte de este frente se cerró un bloqueo que venía del 28 de agosto: las grabaciones sobre el vehículo salían vacías. La explicación que circulaba ---«hay que grabar como administrador»--- \textbf{era falsa}.
+
+El transporte de datos del middleware pasa por buzones en memoria compartida con permisos de solo lectura para terceros, y \textbf{el publicador tiene que poder escribir en el buzón del suscriptor}. La condición real es que \textbf{ambos extremos tengan el mismo dueño}. Medido en cuatro combinaciones:
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Mensajes recibidos según el dueño de cada extremo.}
+    \label{tab:dueno}
+    \begin{tabular}{@{}llc@{}}
+        \toprule
+        \textbf{Publicador} & \textbf{Grabador} & \textbf{Mensajes} \\ \midrule
+        Administrador & Usuario & \textbf{0} \\
+        Usuario & Administrador & \textbf{0} \\
+        Usuario & Usuario & 60 en 9 s \\
+        Usuario & Usuario & \textbf{918 en 141 s} \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+La regla es más amplia que la grabación: vale igual para las órdenes de inspección de tópicos, y engañó dos veces en tres horas produciendo un falso «no publica». \textbf{El fallo siempre se manifiesta como silencio, no como error}, porque el descubrimiento de nodos sí cruza dueños: el tópico aparece en la lista y después no llega un solo dato.
+
+Con la regla aplicada se obtuvo el \textbf{primer bag válido del proyecto}: 918 barridos en 141,3 s, con 66,7 \% de sensor en movimiento.
+
+\subsection{El estado de G1}
+
+G1 ---navegación autónoma punto a punto sobre el vehículo físico--- \textbf{no se ejecutó esta semana}. Sí avanzaron sus prerrequisitos: el sensor publica y convive con la pila del vehículo, y el control desde ROS 2 quedó verificado conduciendo el vehículo con mando. Falta la cadena de mando completa y los mensajes de coordinación compilados en la tarjeta del vehículo.
+
+\textbf{Ambas mitades del punto de decisión quedan, por tanto, sin resolver}, y el informe no las declara resueltas por analogía con el trabajo adyacente.
+
+\section{Interfaz humano--robot: trabajo adelantado del objetivo 3}
+
+El objetivo específico 3 estaba programado para la Semana 22 y \textbf{arrancó el 2 de septiembre}, cinco días antes, en paralelo a la campaña y a cargo del segundo autor. El reparto es posible porque la frontera ya estaba declarada en el contrato de interfaces: \textbf{RF-19 obliga a que la interfaz hable únicamente con el coordinador, nunca con los agentes}, de modo que los dos frentes no se tocan.
+
+Se construyó sobre JavaScript puro, sin bibliotecas externas ni recursos remotos, porque RF-20 exige funcionamiento sin salida a internet. Se descartó la biblioteca cliente habitual tras leer el paquete instalado: su clase de acciones implementa el protocolo de ROS 1, no las operaciones que el puente expone para acciones de ROS 2.
+
+Lo relevante es que \textbf{se verificó contra un coordinador real y no contra un simulacro}: el catálogo de 31 puntos cargó con la política de calidad de servicio que un tópico retenido exige, una misión completó su ciclo de estados con el motivo real emitido por el coordinador, el mensaje al usuario se mostró literal y el botón se reactivó al terminar. Quedan verificados \textbf{RF-17 a RF-19}.
+
+\textbf{Lo que esto no prueba}, y se declara: RF-20 solo se probó en emulación de teléfono, no en un dispositivo físico; y el guiado con relevo de extremo a extremo ---el criterio de cierre real de la Semana 22--- no se ejecutó, porque en esa prueba no había simulador ni robots corriendo.
+
+\section{Aporte de la semana a los objetivos específicos}
+\label{sec:aporte}
+
+\subsection{Relación entre actividades y objetivos}
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Trazabilidad entre las actividades ejecutadas y los objetivos específicos.}
+    \label{tab:trazabilidad}
+    \begin{tabular}{@{}p{4.0cm}cp{7.6cm}@{}}
+        \toprule
+        \textbf{Actividad} & \textbf{Objetivo} & \textbf{Contribución} \\ \midrule
+        Sorteo estratificado con semilla auditable & OE4 & Convierte un conjunto de corridas en una muestra, y hace el listado reproducible por un tercero \\ \addlinespace
+        Analizador de campaña & OE4 & Produce las cuatro métricas con intervalo de confianza; al escribirlo aparecieron dos defectos que habrían invalidado la campaña \\ \addlinespace
+        Ejecución de las 30 misiones & OE4 & Es la evidencia estadística del aporte: veredicto válido, 0 descartes \\ \addlinespace
+        Corrección del fallo silencioso de RTF & OE4 & Garantiza que una corrida no medida se detecte mientras todavía se puede salvar \\ \addlinespace
+        Guardián del coordinador y compuerta de localización & OE1, OE4 & Eliminan dos fuentes de fallo que contaminaban la métrica de tasa de éxito \\ \addlinespace
+        Interfaz web sobre el puente de ROS & OE3 & Verifica RF-17 a RF-19 contra un coordinador real \\ \addlinespace
+        Regla del mismo dueño y primer bag válido & OE2 & Desbloquea la captura de datos sobre el vehículo físico \\ \addlinespace
+        Pasillo medido e intento de G2 & OE2, OE4 & Deja el banco de medición montado y una causa probable medida para el mapa defectuoso \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Estado de los objetivos específicos}
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Avance por objetivo específico al cierre de la Semana 21.}
+    \label{tab:objetivos}
+    \begin{tabular}{@{}cp{2.6cm}p{4.2cm}p{4.8cm}@{}}
+        \toprule
+        \textbf{ID} & \textbf{Avance} & \textbf{Cubierto esta semana} & \textbf{Componente que lo mantiene detenido} \\ \midrule
+        OE1 & 80 \% & Coordinación ejercitada 30 veces sin fallo de asignación & Mensajes compilados en la tarjeta del vehículo y nombres definitivos de las salas \\ \addlinespace
+        OE2 & 55 \% & Captura de datos desbloqueada sobre el vehículo real & Segundo vehículo (R11) y comunicación entre robots \\ \addlinespace
+        OE3 & 35 \% & RF-17 a RF-19 verificados contra coordinador real & RF-20 en dispositivo físico y guiado con relevo de extremo a extremo \\ \addlinespace
+        OE4 & 55 \% $\rightarrow$ \textbf{85 \%} & Campaña ejecutada y las cuatro métricas medidas & Redacción del capítulo de resultados y un campo del registro sin instrumentar \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+El avance técnico agregado sin ponderar es del \textbf{63,75 \%} frente a un 65,6 \% de calendario transcurrido. La brecha se reduce a \textbf{2 puntos}, desde los 9 de la semana anterior y los 25 de hace dos semanas. \textbf{El salto procede íntegramente del objetivo 4}, que pasó de tener instrumentación sin datos a tener datos medidos.
+
+\textbf{Esto no significa que sobre tiempo}, y conviene decirlo: la congelación de código es la Semana 23, de modo que quedan dos semanas de desarrollo. Además, la barra más baja ya no es el objetivo 3 sino el \textbf{objetivo 2 al 55 \%}, cuyo pendiente principal ---el segundo vehículo--- no depende de horas de trabajo sino de disponibilidad de hardware.
+
+\section{Estado del cronograma y trabajo previsto}
+\label{sec:cronograma}
+
+\subsection{Cumplimiento del criterio de cierre}
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Criterio de cierre de la Semana 21, por mitades.}
+    \label{tab:cierre}
+    \begin{tabular}{@{}p{6.6cm}p{6.6cm}@{}}
+        \toprule
+        \textbf{Mitad del criterio} & \textbf{Resultado} \\ \midrule
+        En simulación, una solicitud que cruza niveles se completa de extremo a extremo con relevo, y el log arroja las cuatro métricas de OE4 & \textbf{Cumplida y superada.} El criterio pedía \emph{una} solicitud; se ejecutaron \textbf{quince} misiones que cruzan niveles, dentro de una campaña sorteada de treinta, y las cuatro métricas salen con intervalo de confianza en lugar de con un valor suelto \\ \addlinespace
+        Punto de decisión GO / NO-GO del frente de hardware & \textbf{Abierto.} G1 no se ejecutó; G2 se intentó y su regla de parada lo detuvo antes de producir cifras sin significado \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+\textbf{El punto de decisión no se cierra por interpretación.} Habría sido posible declarar G2 resuelto apoyándose en el trabajo adyacente ---el pasillo está medido, la cadena de análisis funciona, el primer bag válido existe--- pero ninguna de esas tres cosas es M1 ni M2. Un GO emitido sin la medición que lo respalda es precisamente el «GO falso» que la enmienda del 26 de agosto se escribió para evitar.
+
+\subsection{Planeado contra hecho}
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Reparto diario planificado y su cumplimiento.}
+    \label{tab:dias}
+    \begin{tabular}{@{}lp{5.6cm}p{5.0cm}@{}}
+        \toprule
+        \textbf{Día} & \textbf{Planificado} & \textbf{Resultado} \\ \midrule
+        Lun 31 & Poner el registro al día tras el desbloqueo de dominios & Cumplido \\ \addlinespace
+        Mar 1 & Sorteo de misiones con semilla anotada & Cumplido, y adelantado el analizador \\ \addlinespace
+        Mié 2 & Analizador de campaña & Cumplido; destapó dos defectos que habrían invalidado la campaña \\ \addlinespace
+        Jue 3 & Componer registros y ejercitar el remapeo de reloj & Cumplido; aparecieron cinco bags del 30 de agosto sin documentar, dos de ellos aprovechables \\ \addlinespace
+        Vie 4 & G2 por la mañana y corte semanal & \textbf{G2 intentado y detenido por su regla de parada}; por la tarde se corrieron las 10 primeras misiones de campaña \\ \addlinespace
+        Sáb 5 & \emph{No estaba planificado} & Misiones 11 a 30, tres regrabaciones y corrección del fallo silencioso de RTF \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+El corte semanal se desplazó del viernes al sábado, como ya ocurrió en la Semana 20. Se anota en lugar de fecharlo el viernes.
+
+\subsection{Efecto sobre el cronograma}
+
+La campaña de la Semana 24 queda \textbf{ejecutada por anticipado}. Lo que permanece en esa semana no es trivial: consolidar y versionar el conjunto de datos como entregable, y redactar el capítulo de resultados sobre las cifras obtenidas.
+
+\textbf{Las treinta misiones no se vuelven a correr.} Repetir una campaña válida sin una razón declarada de antemano es cocinar los datos, y la disciplina que se sostuvo durante toda la ejecución ---no repetir ninguna misión por su resultado--- se perdería al final por comodidad.
+
+\subsection{Arrastre declarado y trabajo previsto para la Semana 22}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{G2, con batería cargada y contraste en sitio.} Es el arrastre principal. La causa probable está medida y la comprobación está dentro del propio procedimiento.
+    \item \textbf{G1}, que cierra la otra mitad del punto de decisión.
+    \item \textbf{RF-20 en un teléfono físico} y el guiado con relevo de extremo a extremo, que es el criterio de cierre propio de la Semana 22.
+    \item \textbf{Mensajes de coordinación compilados en la tarjeta del vehículo}, que bloquea toda demostración física de la coordinación.
+    \item \textbf{Un campo del registro sin instrumentar} (los controladores activos del banco), único motivo por el que RF-25 no está verificado del todo.
+    \item \textbf{La misión de 85 cúspides}, que cierra el riesgo R12.
+\end{enumerate}
+
+\section{Conclusiones de la Semana}
+
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{El aporte del proyecto pasó de estar demostrado a estar medido.} La campaña de treinta misiones sorteadas se ejecutó con veredicto válido y sin descartes, y las cuatro métricas del objetivo 4 tienen valor propio con intervalo de confianza. La continuidad del servicio entre niveles ---la variable de respuesta principal--- da 14 de 14.
+
+    \item \textbf{Los límites del resultado se declaran junto con el resultado.} Con $N = 30$ lo defendible es que la tasa de éxito supera el 70 \%, no que valga 86,7 \%; y el contraste entre condiciones no sostiene ninguna conclusión. Es un límite de diseño, conocido antes de correr y no descubierto después.
+
+    \item \textbf{Los cuatro fallos son un solo modo y no son de coordinación.} Todos son llegadas cortas dentro de los 10 cm del criterio, atribuibles a la inobservabilidad longitudinal del pasillo ya caracterizada, no a la asignación ni al relevo.
+
+    \item \textbf{La campaña auditó su propio instrumento.} Un fallo que ocultaba la pérdida de la medición de RTF y devolvía éxito costó tres corridas. Está corregido en el origen, con una prueba de regresión que se validó demostrando que falla contra el código anterior.
+
+    \item \textbf{Se sostuvo la distinción entre fallo de instrumento y fallo de resultado.} Se regrabaron tres misiones no medidas y no se repitió ninguna misión por su resultado, incluida la que volvió a fallar.
+
+    \item \textbf{El punto de decisión de hardware queda abierto, y esa es la respuesta correcta.} G2 se intentó y su regla de parada, escrita antes de salir, impidió producir seis mediciones carentes de significado contra un mapa defectuoso. La causa probable ---la batería--- está medida, no supuesta.
+
+    \item \textbf{Tres defectos que fallaban en silencio se diagnosticaron esta semana}: dos coordinadores compitiendo por la misma acción, una compuerta que medía aparcamiento en lugar de localización, y una regla de propiedad de procesos que dejaba grabaciones vacías sin emitir ningún error. Los tres habrían contaminado la campaña de haberse quedado sin resolver.
+\end{enumerate}
+
+\end{document}

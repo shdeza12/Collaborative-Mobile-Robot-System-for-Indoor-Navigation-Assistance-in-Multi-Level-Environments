@@ -13,6 +13,12 @@ __pycache__/
 .idea/
 *.swp
 *~
+# Candados de LibreOffice: existen solo mientras el .csv está abierto y
+# desaparecen al cerrarlo. Versionarlos haría creer que el archivo está en uso.
+.~lock.*#
+
+# Configuración local del asistente: es del equipo, no del proyecto.
+.claude/
 
 # Sistema
 .DS_Store
