@@ -450,6 +450,23 @@ cd "$TESIS" && python3 herramientas/sortear_misiones.py --semilla 20260822 --n 3
 El listado sorteado se versiona **antes** de ejecutar la primera corrida. El orden de ejecución es
 el del archivo, sin reordenar.
 
+> **Regla de la semilla: es la fecha del sorteo en formato `AAAAMMDD`.** No se elige un número
+> «cualquiera», porque «cualquiera» es precisamente donde cabe probar diez y quedarse con el que
+> guste. La fecha es mecánica, no la elige el operador, y **se puede auditar contra el propio
+> archivo**: el CSV lleva el campo `sorteado:` y tiene que coincidir con la semilla. Quien quisiera
+> tantear semillas hasta que el resultado le agradara tendría que inventarse las fechas, y solo una
+> cuadra con el listado que entregó.
+>
+> Es la misma lógica que la decisión 5 de más abajo: se fija una **regla** de antemano, no un
+> resultado.
+>
+> **Excepción documentada.** El sorteo original usó la semilla `20260822` pero se ejecutó el
+> **2026-08-30** (así consta en su CSV), porque en ese momento esta regla no estaba escrita. No
+> invalida el listado —la semilla se fijó antes de ver ningún resultado, que es la condición que
+> importa—, pero la discrepancia se anota aquí en vez de disimularla. El resorteo estratificado ya
+> cumple la regla: semilla `20260904`, sorteado el `2026-09-04`. De aquí en adelante, cualquier
+> sorteo nuevo la cumple.
+
 > **Resorteo del 2026-09-04 (enmienda del §6.2.1).** Las misiones **11 a 30** se volvieron a sortear
 > con el diseño estratificado. El comando, reproducible:
 >
