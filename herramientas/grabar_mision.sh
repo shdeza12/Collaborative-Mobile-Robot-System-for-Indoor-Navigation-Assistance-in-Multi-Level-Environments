@@ -220,7 +220,43 @@ fi
 #
 # Medirlo aqui no compite con la simulacion: son dos lecturas de /clock, una
 # antes y otra despues, no un muestreo continuo.
-MARCA_INI="$(python3 "$MARCA_DIR/medir_rtf.py" --marca 2>/dev/null || true)"
+# --- Guarda 3: ¿se puede medir el RTF? --------------------------------------
+# EL FALLO NO SE PUEDE TRAGAR, y hasta el 2026-09-05 se tragaba. La linea era
+#     MARCA_INI="$(python3 .../medir_rtf.py --marca 2>/dev/null || true)"
+# y ese '2>/dev/null || true' hacia dos danos a la vez: escondia POR QUE fallo
+# la medida, y dejaba seguir la corrida como si nada.
+#
+# El 2026-09-05 costo TRES de las veinte misiones de la campana -la 13, la 22 y
+# la 28-. El aviso del final existia, pero se perdio entre la salida de veinte
+# corridas seguidas, el codigo de salida decia 0, y cuando se compusieron los
+# registros dos horas despues el gzserver ya estaba cerrado.
+#
+# Y el RTF perdido NO se reconstruye. Ni del bag -con '--use-sim-time' sim y
+# pared salen del mismo reloj y el cociente vale 1 por construccion-, ni de las
+# marcas de tiempo de los archivos: se probo contra las 17 corridas de esa
+# misma tanda que si tenian rtf.json y da 0,0000 en las 17, porque
+# condicion_inicial.json y metadata.yaml se escriben AMBOS al cerrar el bag,
+# con dos decimas de diferencia y en orden invertido. Perdida la ventana, la
+# unica salida honesta es repetir la corrida.
+#
+# Por eso la marca inicial es una guarda mas y aborta ANTES de grabar: si el
+# RTF no se puede medir, vale mas saberlo ahora que despues de cuatro minutos
+# de corrida inservible. El stderr de medir_rtf.py va al terminal sin filtrar,
+# que es donde dice si el problema fue que /clock no publica.
+set +e
+MARCA_INI="$(python3 "$MARCA_DIR/medir_rtf.py" --marca)"
+ESTADO_MARCA=$?
+set -e
+
+if [ "$ESTADO_MARCA" -ne 0 ] || [ -z "$MARCA_INI" ]; then
+    echo "" >&2
+    echo "No se graba: no se pudo tomar la marca inicial de RTF, y el esquema" >&2
+    echo "lo exige para el banco 'simulacion' (RNF-06 pide >= 0,99). Grabar" >&2
+    echo "igual dejaria un bag que despues NO se puede registrar." >&2
+    echo "Suele ser que /clock dejo de publicar: comprobar que Gazebo corre y" >&2
+    echo "que no esta en pausa. Ver §2.2 de ESQUEMA_REGISTRO_MISION.md." >&2
+    exit 1
+fi
 
 # '--use-sim-time' NO es opcional, y no es lo mismo que el use_sim_time de los
 # nodos. Sin el, 'ros2 bag record' sella cada mensaje con el reloj de PARED, y
@@ -263,7 +299,12 @@ elif [ -z "$COND_INICIAL" ]; then
 fi
 
 # --- Marca de RTF, al cerrar ------------------------------------------------
-MARCA_FIN="$(python3 "$MARCA_DIR/medir_rtf.py" --marca 2>/dev/null || true)"
+# Aqui NO se aborta -el bag ya esta grabado y abortar no lo desharia-, pero el
+# fallo tiene que doler: este es el ultimo instante en que la simulacion sigue
+# viva, o sea la ultima oportunidad de salvar la corrida. Ver la guarda 3.
+set +e
+MARCA_FIN="$(python3 "$MARCA_DIR/medir_rtf.py" --marca)"
+set -e
 
 if [ -n "$MARCA_INI" ] && [ -n "$MARCA_FIN" ]; then
     python3 - "$DESTINO" "$MARCA_INI" "$MARCA_FIN" <<'PY'
@@ -291,8 +332,28 @@ if rtf < 0.99:
           "a 'rtf_bajo' en causa_descarte.", file=sys.stderr)
 PY
 else
-    echo "AVISO: no se pudo medir el RTF (falta alguna marca de /clock)." >&2
-    echo "El registro tendra que componerse pasando --rtf a mano." >&2
+    echo "" >&2
+    echo "===================================================================" >&2
+    echo "EL BAG QUEDO GRABADO PERO SIN RTF, y esto se resuelve AHORA." >&2
+    echo "" >&2
+    echo "Mientras la simulacion siga viva el RTF todavia se puede medir. Si" >&2
+    echo "se cierra el gzserver se pierde para siempre y la mision hay que" >&2
+    echo "repetirla entera: no se reconstruye del bag ni de los archivos." >&2
+    echo "" >&2
+    echo "  python3 herramientas/medir_rtf.py --segundos 20" >&2
+    echo "" >&2
+    echo "y al componer el registro, pasar ese valor con --rtf, anotando en" >&2
+    echo "el informe que la medida es posterior a la mision." >&2
+    echo "===================================================================" >&2
+    SIN_RTF=1
+fi
+
+# Salida 3 = el bag se grabo bien pero se quedo sin RTF. Existe para que el
+# fallo no pase inadvertido en una tanda larga: con salida 0 el operador
+# encadena la siguiente mision sin enterarse, que es exactamente como se
+# perdieron las corridas 13, 22 y 28 el 2026-09-05.
+if [ "$ESTADO_GRABACION" -eq 0 ] && [ "${SIN_RTF:-0}" -ne 0 ]; then
+    exit 3
 fi
 
 exit "$ESTADO_GRABACION"
