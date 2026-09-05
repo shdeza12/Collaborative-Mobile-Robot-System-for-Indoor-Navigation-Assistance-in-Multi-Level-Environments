@@ -120,10 +120,21 @@ while true; do
 
         # Tercer chequeo: una sola pasada, sin bucle. Ver la cabecera.
         echo "Comprobando que la pila viva sea la del YAML..."
-        if ! python3 "$AQUI/verificar_parametros_vivos.py" "$ROBOT"; then
+        # 1 es desajuste real y 2 es "no se pudo leer": son diagnosticos
+        # distintos y llevan a acciones distintas, asi que no se confunden.
+        python3 "$AQUI/verificar_parametros_vivos.py" "$ROBOT"
+        CODIGO_PARAM=$?
+        if [ "$CODIGO_PARAM" -eq 1 ]; then
             echo "" >&2
             echo "NO GRABES: la pila corre con parametros distintos de los del" >&2
             echo "repositorio. El bag no mediria el cambio que quieres medir." >&2
+            exit 1
+        elif [ "$CODIGO_PARAM" -ne 0 ]; then
+            echo "" >&2
+            echo "NO GRABES TODAVIA: esta compuerta no pudo comprobar la pila." >&2
+            echo "No es lo mismo que decir que sea distinta. Vuelve a correr" >&2
+            echo "  python3 herramientas/verificar_parametros_vivos.py $ROBOT" >&2
+            echo "y solo si insiste, relanza la pila." >&2
             exit 1
         fi
 

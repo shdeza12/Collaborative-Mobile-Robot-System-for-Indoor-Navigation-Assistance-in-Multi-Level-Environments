@@ -30,13 +30,23 @@ olvidarlo es una tarde.
 Uso:
     python3 herramientas/verificar_parametros_vivos.py robot1
 
-Codigo de salida: 0 si la pila viva coincide con el YAML, 1 si no.
+Codigos de salida:
+    0  la pila viva coincide con el YAML
+    1  algun parametro vivo es DISTINTO del YAML
+    2  algun parametro no se pudo leer, que no es lo mismo que ser distinto
+
+El 2 existe desde el 2026-09-04. Ese dia el Piloto 3 aborto con "la pila corre
+con parametros distintos" por UNA lectura de alpha2 que se agoto, mientras el
+mismo nodo contestaba los otros cuatro alpha. Con la pila aun viva se leyo
+despues: 0.01, igual que el YAML. Decir "distinto" cuando lo que paso es "no
+pude leer" manda a repetir una corrida sana.
 """
 
 import os
 import re
 import subprocess
 import sys
+import time
 
 import yaml
 
@@ -73,8 +83,8 @@ def _en_yaml(doc, ruta):
     return nodo
 
 
-def _param_vivo(nodo, parametro):
-    """Devuelve el valor vivo, o None si no se pudo leer.
+def _leer_una_vez(nodo, parametro):
+    """Una llamada a 'ros2 param get'. Devuelve el valor o None.
 
     'ros2 param get' contesta con frases tipo 'Double value is: 0.01' o
     'Boolean value is: False'; se extrae lo de despues de los dos puntos.
@@ -87,6 +97,24 @@ def _param_vivo(nodo, parametro):
         return None
     m = re.search(r"value is:\s*(.+)", salida)
     return m.group(1).strip() if m else None
+
+
+def _param_vivo(nodo, parametro, intentos=3, pausa_s=1.0, lector=None):
+    """Devuelve el valor vivo, o None si no se pudo leer en 'intentos' tiradas.
+
+    Reintenta porque el fallo observado es intermitente: una sola llamada de
+    ocho se agoto contra un nodo que respondia todas las demas. Y la compuerta
+    corre dentro de la ventana de 2,6 min que dura la condicion inicial, asi
+    que un timeout suelto no puede costar la corrida.
+    """
+    lector = lector or _leer_una_vez
+    for i in range(intentos):
+        valor = lector(nodo, parametro)
+        if valor is not None:
+            return valor
+        if i + 1 < intentos and pausa_s:
+            time.sleep(pausa_s)
+    return None
 
 
 def _igual(vivo, esperado):
@@ -102,6 +130,20 @@ def _igual(vivo, esperado):
         return abs(float(vivo) - float(esperado)) < 1e-9
     except (TypeError, ValueError):
         return vivo.strip() == str(esperado).strip()
+
+
+def codigo_de_salida(desajustes, ilegibles):
+    """0 todo bien, 1 hay un valor distinto, 2 hay un valor que no se leyo.
+
+    El desajuste manda sobre el ilegible: si ya sabemos que un parametro no es
+    el del YAML, esa es la noticia y el remedio es relanzar; que ademas otro no
+    se dejara leer no cambia nada.
+    """
+    if desajustes:
+        return 1
+    if ilegibles:
+        return 2
+    return 0
 
 
 def main():
@@ -126,7 +168,7 @@ def main():
         vivo = _param_vivo(nodo, parametro)
         if vivo is None:
             ilegibles.append(f"{nodo} {parametro}")
-            print(f"  {nodo_corto}/{parametro}: NO SE PUDO LEER")
+            print(f"  {nodo_corto}/{parametro}: NO SE PUDO LEER (3 intentos)")
             continue
         ok = _igual(vivo, esperado)
         print(f"  {nodo_corto}/{parametro}: vivo {vivo}  YAML {esperado}  "
@@ -134,14 +176,9 @@ def main():
         if not ok:
             desajustes.append((nodo_corto, parametro, vivo, esperado))
 
-    if ilegibles:
-        print("")
-        print("No se pudieron leer parametros de nodos que deberian estar")
-        print("activos. O la pila no esta arriba, o este proceso esta en otro")
-        print("ROS_DOMAIN_ID.")
-        return 1
+    codigo = codigo_de_salida(desajustes, ilegibles)
 
-    if desajustes:
+    if codigo == 1:
         print("")
         print("LA PILA VIVA NO ES LA DEL YAML. Los nodos leyeron su")
         print("configuracion al arrancar, y el YAML se edito despues.")
@@ -150,6 +187,23 @@ def main():
         print("Matar la simulacion y relanzarla. Con --symlink-install NO hace")
         print("falta compilar; hace falta RELANZAR.")
         return 1
+
+    if codigo == 2:
+        print("")
+        print(f"NO SE PUDIERON LEER {len(ilegibles)} de {len(VIGILADOS)} "
+              f"parametros tras 3 intentos:")
+        for i in ilegibles:
+            print(f"  {i}")
+        print("")
+        print("Esto NO dice que la pila sea distinta del YAML: ningun valor")
+        print("leido salio distinto. Dice que la compuerta no pudo comprobarlo,")
+        print("y una compuerta que no puede comprobar no da paso.")
+        print("")
+        print("Si fallaron TODOS, la pila no esta arriba o este proceso esta")
+        print("en otro ROS_DOMAIN_ID. Si fallaron unos pocos contra un nodo")
+        print("que contesto los demas, es una lectura perdida: repite este")
+        print("mismo comando antes de dar por mala la pila.")
+        return 2
 
     print("")
     print("La pila viva lleva los valores del YAML.")
