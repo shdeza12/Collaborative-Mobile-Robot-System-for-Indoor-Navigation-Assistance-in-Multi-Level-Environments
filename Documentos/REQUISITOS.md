@@ -102,7 +102,7 @@ dependencias entre agendas y cae en la categoría XD de la taxonomía de Korsah,
 | **RF-11** | Cada vehículo ejecuta **locomoción** comandada por `/<ns>/cmd_vel`, con cinemática Ackermann | El vehículo se desplaza; recorrido medido contra `/odom` | 🟡 sim ✅ / físico vía web | S19–S21 |
 | **RF-12** | Cada vehículo publica **`/<ns>/scan`** utilizable para localización y evasión | El LiDAR publica a su frecuencia nominal y el mapa de costos local registra los obstáculos | 🟡 sim ✅ / físico 🔴 | **S19** (spike, pregunta 1) |
 | **RF-13** | Cada vehículo publica **odometría** en `/<ns>/odom` | Lectura antes y después de un desplazamiento conocido | 🟡 sim ✅ **contra un oráculo**, no verificado (ver §7.4) / físico 🔴, se mide en la corrida de ≥ 20 m de S20 | S19 |
-| **RF-14** | Cada vehículo se comanda **desde ROS 2**, sin pasar por la interfaz web del fabricante | Publicar en `/<ns>/cmd_vel` desde otra máquina de la red mueve el vehículo | 🔴 | **S19** (spike, pregunta 2) |
+| **RF-14** | Cada vehículo se comanda **desde ROS 2**, sin pasar por la interfaz web del fabricante | Publicar en `/<ns>/cmd_vel` desde otra máquina de la red mueve el vehículo | 🟡 **El requisito se cumple; la prueba tal como está escrita, no —y por dos razones distintas—.** *Cumplido:* el 2026-08-28 el vehículo se condujo desde ROS 2 sin la interfaz web ([`S20_frente_b_hardware.md`](Evidencia/S20_frente_b_hardware.md) §6), publicando `ServoCtrlMsg` en `/ctrl_pkg/servo_msg`, con hombre muerto de 0,6 s. *Lo que falta, (a) por calibrar:* eso es un **puente**, no la cadena `/cmd_vel`. Sus dos defectos **sí están corregidos** desde `f0fa40c` (2026-08-27) —tópico de publicación absoluto y ramas de tracción ordenadas de umbral mayor a menor— con 19 comprobaciones en `prueba_mapeo_servo.py`; pero la propia prueba deja escrito que **el escalón más bajo cae en 0,40 m/s** mientras Nav2 pide 0,25 en curva y 0,05 en la aproximación, así que **la cadena sigue devolviendo cero justo donde Nav2 la usa**. Es un problema de **escala**, no de mapeo, y la cadena **nunca se ha ejercitado sobre el vehículo**. *(b) por decidir:* la cláusula «desde otra máquina de la red» **choca con una decisión de seguridad documentada** —§6.3 de la misma evidencia: el teleoperador corre *en* el vehículo a propósito, porque si el wifi cae, `servo_pkg` se queda con el último valor y queda un vehículo acelerando sin nadie al mando—. No se reescribe la prueba para que pase: eso es una decisión de protocolo, igual que la del §5.4 de esa evidencia | **S19** (spike, pregunta 2) |
 | **RF-15** | Los dos vehículos y el coordinador se **alcanzan por red** con latencia acotada | Medida de ida y vuelta entre los dos vehículos | 🔴 bloqueado por **R11** | S19+ |
 | **RF-16** | El **mismo código fuente** se despliega en los dos destinos, simulado y físico (decisión D6) | Compilar el coordinador sin cambios en las dos distribuciones y completar una misión **en cada mundo por separado** | 🟡 **verificado con resultado condicionado** (2026-08-18) | S22 |
 | ~~RF-16b~~ | ~~Una misión con robot1 **simulado** y robot2 **físico** a la vez~~ | ~~Misión mixta completada sin recompilar~~ | ❌ **imposible sin trabajo nuevo** (2026-08-18) | — |
@@ -110,6 +110,18 @@ dependencias entre agendas y cae en la categoría XD de la taxonomía de Korsah,
 **Lectura de OE2.** El cuello de botella no es el software sino el acceso al hardware. RF-12 y
 RF-14 son las preguntas 1 y 2 del spike de esta semana y **se responden con un solo vehículo**.
 RF-15 exige los dos y está bloqueado por R11.
+
+*Revisión del 2026-09-05 sobre RF-14.* Pasa de 🔴 a 🟡 tras comprobarlo en el código y no en la
+bitácora. **Dos afirmaciones que este repositorio venía repitiendo eran falsas:** que la cadena
+`/cmd_vel` «sigue con sus dos defectos» —están corregidos desde el 27-ago, con prueba— y, por el
+otro lado, la tentación simétrica de darla por buena, porque `prueba_mapeo_servo.py` deja escrito
+que **el escalón más bajo cae en 0,40 m/s y Nav2 pide 0,25 y 0,05**. O sea: el mapeo está
+arreglado y la **escala** no, y eso es calibración contra el vehículo, que sigue sin hacerse.
+**Lo que esto cambia en el plan:** RF-14 **no** está bloqueado por R11 —le basta el vehículo que sí
+está disponible—, así que es trabajo ejecutable en S22–S23 y no una espera. Su parte irreducible no
+es técnica sino de protocolo: decidir si la prueba se reescribe sin la cláusula «desde otra máquina
+de la red», que contradice la decisión de seguridad del §6.3 de
+[`S20_frente_b_hardware.md`](Evidencia/S20_frente_b_hardware.md).
 
 **RF-16 era el requisito de mayor riesgo del proyecto** —la simulación corre sobre ROS 2 Humble y
 las dos unidades de cómputo de los vehículos sobre Jazzy— y **se midió el 2026-08-18** con la
@@ -284,27 +296,39 @@ del proyecto: sin ellos no hay resultado que sustentar.
 | Objetivo | Requisitos | Verificados | Pendientes | Semana de cierre |
 |---|---|---|---|---|
 | OE1 | RF-01 a RF-10 | **9** | **1** (RF-08) | ~~S20–S21~~ **S21**, salvo RF-08 |
-| OE2 | RF-11 a RF-16 | 0 (4 parciales) | 2 | S19–S22 |
+| OE2 | RF-11 a RF-16 | 0 (**5** parciales) | **1** (RF-15) | S19–S22 |
 | OE3 | RF-17 a RF-20 | 3 | 1 parcial | S22 |
 | OE4 | RF-21 a RF-27 | **5** | 1 + 1 parcial | ~~S20–S25~~ **S21**, salvo RF-27 (física) |
 | Restricciones | RNF-01 a RNF-07 | 6 | 1 parcial | — |
-| **Total** | **34** | **23** | **4 + 7 parciales** | |
+| **Total** | **34** | **23** | **3 + 8 parciales** | |
 
 **Veintitrés de treinta y cuatro requisitos están verificados** al 2026-09-05, y ya no son solo los
 de infraestructura: los cinco que entraron por OE4 (RF-21 a RF-24 y RF-26) son **las cuatro métricas
 más la campaña de N = 30**, y los cuatro que entraron por OE1 (RF-04 a RF-07) incluyen **el
-protocolo de relevo**, o sea el aporte declarado. **Solo quedan cuatro pendientes**, y conviene
-mirarlos por lo que los bloquea, no por cuántos son:
+protocolo de relevo**, o sea el aporte declarado. **Quedan tres pendientes y ocho parciales**, y
+conviene mirarlos por lo que los bloquea, no por cuántos son:
 
-- **RF-08** (estado del robot a 2 Hz) — falta código, cabe en S22–S23.
-- **RF-14** y **RF-15** (comando desde ROS 2 en el vehículo, y red entre los dos) — **atados a R11**,
-  el segundo DeepRacer en intervención técnica sin caracterizar desde el 14-ago. No dependen de
-  horas de trabajo.
+- **RF-08** (estado del robot a 2 Hz) — falta código, y no hay publicador de `/<ns>/estado`. Cabe en
+  S22–S23.
+- **RF-14** (comando desde ROS 2), ya en 🟡 — falta **calibrar la escala** de la cadena `/cmd_vel`
+  contra el vehículo, porque el escalón más bajo cae en 0,40 m/s y Nav2 pide 0,25 y 0,05. Le basta
+  **un** vehículo, luego **no está bloqueado por R11**: es trabajo ejecutable ya.
+- **RF-15** (red entre los dos vehículos) — **atado a R11**, el segundo DeepRacer en intervención
+  técnica sin caracterizar desde el 14-ago. No depende de horas de trabajo.
 - **RF-27** (campaña física de 5 a 10 corridas) — depende del GO/NO-GO de hardware, que **sigue
   abierto** porque G2 se detuvo por su propia regla de parada.
 
-O sea: **uno se resuelve trabajando y tres dependen de que el hardware aparezca.** Esa es la lectura
-honesta del 5 de septiembre, y no la mejora el hecho de que el conteo haya subido de 19 a 23.
+O sea: **dos se resuelven trabajando (RF-08 y la escala de RF-14) y dos dependen de que el hardware
+aparezca (RF-15 por R11, RF-27 por el GO/NO-GO).** Esa es la lectura honesta del 5 de septiembre, y
+no la mejora el hecho de que el conteo haya subido de 19 a 23.
+
+> *Nota sobre este §9, 2026-09-05.* Las revisiones de OE1 y de RF-14 de hoy salieron las dos de
+> **leer el código y los datos en vez de la bitácora**, y las dos encontraron el documento desfasado
+> en direcciones opuestas: OE1 estaba **subestimado** —cuatro requisitos ejecutados seguían en
+> rojo— y la cadena `/cmd_vel` estaba **descrita como más rota de lo que está**, con dos defectos
+> que llevaban corregidos desde el 27-ago. Un tablero puede equivocarse a la baja tanto como al
+> alza, y las dos formas cuestan igual: la primera esconde trabajo hecho, la segunda hace planificar
+> contra un problema que ya no existe.
 
 > *Corrección aritmética, 2026-09-05:* este párrafo decía «once de treinta y cuatro» mientras su
 > propia tabla sumaba catorce. Se recalcula contra la tabla, que es la fuente. El texto llevaba
