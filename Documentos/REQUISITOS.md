@@ -58,17 +58,29 @@ una de esas tres fuentes, sobra y se elimina.
 | **RF-01** | El sistema opera con **exactamente dos agentes**, cada uno dedicado a un nivel | Inventario de nodos por dominio: dos pilas completas, una por agente | ✅ | S18 |
 | **RF-02** | Cada agente es **direccionable de forma independiente**: una orden a uno no altera al otro | `ros2 topic list --no-daemon --spin-time 8` por dominio: ningún tópico cruzado. Ordenar a robot1 y leer `/robot2/odom` | ✅ | S18 |
 | **RF-03** | El coordinador manda a un agente **únicamente** mediante la acción `navigate_to_pose` | Inspección de suscriptores de `/robotN/cmd_vel`: ningún publicador fuera de la pila del propio agente | ✅ | S18 |
-| **RF-04** | El sistema conoce un **conjunto de localizaciones de interés**, cada una con nivel y pose | Existe `puntos_interes.yaml`; el coordinador lo republica *latched* y `ros2 topic echo` lo devuelve completo | 🔴 | S20 |
-| **RF-05** | El coordinador **asigna la misión al agente del nivel de origen** (asignación dinámica de tareas) | Una solicitud con origen en el nivel 1 activa a robot1 y no a robot2; y a la inversa | 🔴 | S20 |
-| **RF-06** | Si origen y destino están en el **mismo nivel**, la misión se resuelve con **un solo agente y cero relevos**, sin ramas especiales en la HRI | `result.num_relevos == 0` y el segundo agente permanece en estado `LIBRE` | 🔴 | S20 |
-| **RF-07** | Si origen y destino están en **niveles distintos**, se ejecuta el **protocolo de relevo**: guiado al punto de transferencia, publicación del relevo, activación del segundo agente, reanudación | Una misión entre niveles recorre las etapas `TRAMO_1 → TRANSFERENCIA → TRAMO_2 → COMPLETADA` y `result.num_relevos == 1` | 🔴 | **S21** |
-| **RF-08** | Cada agente **publica su estado** (nivel, pose, situación) a 2 Hz | `ros2 topic hz /robotN/estado` devuelve 2 Hz y el campo `estado` cambia al iniciar una misión | 🔴 | S20 |
+| **RF-04** | El sistema conoce un **conjunto de localizaciones de interés**, cada una con nivel y pose | Existe `puntos_interes.yaml`; el coordinador lo republica *latched* y `ros2 topic echo` lo devuelve completo | 🟢 **Verificado el 2026-09-02 y confirmado sobre la campaña.** La HRI cargó los **31 puntos** del catálogo real desde `/coordinacion/puntos_interes` con QoS `transient_local` —que es la forma ROS 2 de *latched*—, o sea que un suscriptor tardío lo recibe completo. Y las **30** misiones de la campaña llevan `procedencia.catalogo_sha256 = 849ecee96258…`, idéntico al `sha256` del `puntos_interes.yaml` versionado: no es que el coordinador conociera *un* catálogo, es que conoció **este**, byte a byte | S20 |
+| **RF-05** | El coordinador **asigna la misión al agente del nivel de origen** (asignación dinámica de tareas) | Una solicitud con origen en el nivel 1 activa a robot1 y no a robot2; y a la inversa | 🟢 **Verificado el 2026-08-29 y ejercitado 30 veces.** Dos solicitudes con destino en niveles distintos produjeron **dos agentes distintos** ([`S20_asignacion_por_nivel.md`](Evidencia/S20_asignacion_por_nivel.md)), que es lo que separa «eligió bien» de «siempre responde lo mismo». En la campaña, las **15 misiones intra-nivel** —donde origen y destino coinciden y la prueba es directa— asignaron el agente de ese nivel sin excepción: 8 de 1→1 a robot1 y 7 de 2→2 a robot2. En las 15 entre niveles el agente del nivel de destino cierra la misión y hubo relevo, lo que implica que el primer tramo lo llevó el otro | S20 |
+| **RF-06** | Si origen y destino están en el **mismo nivel**, la misión se resuelve con **un solo agente y cero relevos**, sin ramas especiales en la HRI | `result.num_relevos == 0` y el segundo agente permanece en estado `LIBRE` | 🟢 **Verificado sobre las 15 misiones de condición A de la campaña (2026-09-04/05).** Las 15 tienen `t_fin_tramo1` y `t_inicio_tramo2` en `null`: no hubo etapa de transferencia, luego no hubo relevo. La HRI no tiene rama por condición —lanza la misión igual y el coordinador decide—, verificado al inspeccionar `interfaz_web/` para RF-19. **Salvedad declarada:** el registro **no guarda un campo `num_relevos`**, así que lo probado es «no ocurrió transferencia», no la igualdad literal `num_relevos == 0`; y `estado: LIBRE` del segundo agente no se comprueba porque `/<ns>/estado` no existe todavía (ver RF-08) | S20 |
+| **RF-07** | Si origen y destino están en **niveles distintos**, se ejecuta el **protocolo de relevo**: guiado al punto de transferencia, publicación del relevo, activación del segundo agente, reanudación | Una misión entre niveles recorre las etapas `TRAMO_1 → TRANSFERENCIA → TRAMO_2 → COMPLETADA` y `result.num_relevos == 1` | 🟢 **Ejecutado el 2026-08-30 y medido 15 veces el 2026-09-04/05. Es el aporte declarado del proyecto y ya no es n = 1.** Las **15 misiones de condición B** de la campaña sorteada tienen las cuatro marcas de tramo pobladas y `veredicto.c3_relevo: true`, que el compositor calcula como `num_relevos == 1` —ni cero ni dos—. De ellas, **14 aciertos (93,3 %)** y **continuidad entre niveles 14/14 (100 %)**, con salto de relevo de mediana **0,100 s**, un solo tic de `/clock`. La 15.ª (misión 27) falló por llegada corta, no por el relevo. Primera ejecución con los dos robots vivos en [`S21_relevo_ejecutado.md`](Evidencia/S21_relevo_ejecutado.md) | **S21** |
+| **RF-08** | Cada agente **publica su estado** (nivel, pose, situación) a 2 Hz | `ros2 topic hz /robotN/estado` devuelve 2 Hz y el campo `estado` cambia al iniciar una misión | 🔴 **Sigue abierto, y no por descuido de registro: no hay publicador.** El tipo `coordinacion_msgs/EstadoRobot` existe y pasa el *round-trip* por DDS, y el §4 de [`CONTRATO_INTERFACES.md`](CONTRATO_INTERFACES.md) declara `/<ns>/estado` a 2 Hz; pero en `Robot/aws-deepracer/coordinacion/` solo hay `coordinador.py`, `planificador.py` y `registrador.py` —no hay nodo de agente que lo publique—. Lo único que se publica hoy es `/coordinacion/estado_mision` a 1 Hz, que es **de la misión, no del robot**. Es el único requisito de OE1 con trabajo pendiente, y arrastra media prueba de RF-06 | S20 |
 | **RF-09** | El entorno de operación tiene **dos niveles con un punto de transición vertical** | El mundo carga los dos niveles; se navega en el superior con la altura constante | ✅ | S18 |
 | **RF-10** | La **comunicación inter-robot** ocurre a través del coordinador, no directamente entre agentes | Ningún agente se suscribe a tópicos del otro (se sigue de RF-02) | ✅ | S18 |
 
-**Lectura de OE1.** De diez requisitos, cinco están verificados. Los cinco pendientes son el nodo
-de coordinación (RF-04 a RF-06, RF-08) y el protocolo de relevo (RF-07). **RF-07 es el aporte
-declarado del proyecto.**
+**Lectura de OE1, reescrita el 2026-09-05.** De diez requisitos, **nueve están verificados** y queda
+**uno**: RF-08. **RF-07 —el aporte declarado del proyecto— pasó de 🔴 a 🟢 con quince repeticiones
+sorteadas**, no con una demostración.
+
+*Esta tabla llevaba a RF-04, RF-05, RF-06 y RF-07 en 🔴 mientras el resto del repositorio los daba
+por ejecutados desde el 29 y el 30 de agosto. La contradicción se detectó al preparar el balance de
+objetivos del 5 de septiembre y se resolvió **contra los treinta registros de la campaña**, no
+contra lo que decía [`ESTADO.md`](../ESTADO.md): el `sha256` del catálogo, las marcas de tramo y el
+agente de cada misión salen de los archivos JSON versionados. La lección operativa es que cuando se
+actualiza el estado de un objetivo hay que revisar las tablas de **todos** los objetivos que la
+misma evidencia toca: la campaña de OE4 ejercitó de paso cuatro requisitos de OE1.*
+
+**Lo que RF-08 bloquea, dicho sin rebajarlo.** No es un adorno: la prueba de RF-06 pide que el
+segundo agente permanezca en `LIBRE`, y hoy eso no se puede leer. La misión se sabe entera, el robot
+no se sabe. Entra en el trabajo de S22–S23, antes de la congelación de código.
 
 **Qué algoritmo de coordinación implementan RF-05 y RF-07** está clasificado formalmente en
 [`ANEXO_ALGORITMO_COORDINACION.md`](ANEXO_ALGORITMO_COORDINACION.md): la asignación es ST–SR–IA
@@ -271,18 +283,28 @@ del proyecto: sin ellos no hay resultado que sustentar.
 
 | Objetivo | Requisitos | Verificados | Pendientes | Semana de cierre |
 |---|---|---|---|---|
-| OE1 | RF-01 a RF-10 | 5 | 5 | S20–S21 |
+| OE1 | RF-01 a RF-10 | **9** | **1** (RF-08) | ~~S20–S21~~ **S21**, salvo RF-08 |
 | OE2 | RF-11 a RF-16 | 0 (4 parciales) | 2 | S19–S22 |
 | OE3 | RF-17 a RF-20 | 3 | 1 parcial | S22 |
 | OE4 | RF-21 a RF-27 | **5** | 1 + 1 parcial | ~~S20–S25~~ **S21**, salvo RF-27 (física) |
 | Restricciones | RNF-01 a RNF-07 | 6 | 1 parcial | — |
-| **Total** | **34** | **19** | **8 + 7 parciales** | |
+| **Total** | **34** | **23** | **4 + 7 parciales** | |
 
-**Diecinueve de treinta y cuatro requisitos están verificados** al 2026-09-05, y ya no son solo los
-de infraestructura: los cinco que entraron el 5 de septiembre (RF-21 a RF-24 y RF-26) son **las
-cuatro métricas de OE4 más la campaña de N = 30**, o sea la evidencia del aporte. De los ocho
-pendientes, **cinco son de OE1** —nombres de salas y compilación en la tarjeta Jazzy—, dos de OE2
-(atados al segundo vehículo, R11) y uno es RF-27, la campaña física.
+**Veintitrés de treinta y cuatro requisitos están verificados** al 2026-09-05, y ya no son solo los
+de infraestructura: los cinco que entraron por OE4 (RF-21 a RF-24 y RF-26) son **las cuatro métricas
+más la campaña de N = 30**, y los cuatro que entraron por OE1 (RF-04 a RF-07) incluyen **el
+protocolo de relevo**, o sea el aporte declarado. **Solo quedan cuatro pendientes**, y conviene
+mirarlos por lo que los bloquea, no por cuántos son:
+
+- **RF-08** (estado del robot a 2 Hz) — falta código, cabe en S22–S23.
+- **RF-14** y **RF-15** (comando desde ROS 2 en el vehículo, y red entre los dos) — **atados a R11**,
+  el segundo DeepRacer en intervención técnica sin caracterizar desde el 14-ago. No dependen de
+  horas de trabajo.
+- **RF-27** (campaña física de 5 a 10 corridas) — depende del GO/NO-GO de hardware, que **sigue
+  abierto** porque G2 se detuvo por su propia regla de parada.
+
+O sea: **uno se resuelve trabajando y tres dependen de que el hardware aparezca.** Esa es la lectura
+honesta del 5 de septiembre, y no la mejora el hecho de que el conteo haya subido de 19 a 23.
 
 > *Corrección aritmética, 2026-09-05:* este párrafo decía «once de treinta y cuatro» mientras su
 > propia tabla sumaba catorce. Se recalcula contra la tabla, que es la fuente. El texto llevaba
