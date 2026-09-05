@@ -5,7 +5,7 @@ Hoja operativa para ejecutar a mano. El procedimiento normativo es
 puntos declarados en el §6**.
 
 Generada por `herramientas/generar_hoja_corridas.py` desde
-`Documentos/Evidencia/campana_oe4_misiones.csv`. No se edita a mano: se regenera.
+`Documentos/Evidencia/campana_oe4_misiones_v2.csv`. No se edita a mano: se regenera.
 
 ---
 
@@ -165,15 +165,21 @@ Pendiente: llevar los puntos 1 y 3, la ventana de 2,6 min y el patrón de `pkill
 
 ---
 
-## 7. Pilotaje — tres corridas antes de la campaña
+## 7. Pilotaje — cuatro corridas antes de la campaña
 
-El protocolo pide **cinco** corridas de piloto; hay dos (`S21_piloto_A_02`, `S21_piloto_B_01`).
-Faltan tres. Además, el bloque que escribe `condicion_inicial.json` se commiteó el 2026-09-04
-(`cca442f`) y hasta ese día nunca había corrido contra un Gazebo vivo. Las dos cosas se cierran con
-lo mismo.
+El protocolo pide **cinco** corridas de piloto; había dos (`S21_piloto_A_02`, `S21_piloto_B_01`).
+Además, el bloque que escribe `condicion_inicial.json` se commiteó el 2026-09-04 (`cca442f`) y hasta
+ese día nunca había corrido contra un Gazebo vivo. Las dos cosas se cierran con lo mismo.
 
-Dos en B y una en A, para estrenar el relevo. Itinerarios tomados de las filas 2, 3 y 4 del
+Los pilotos 1 a 3 —dos en B y uno en A, para estrenar el relevo— salen de las filas 2, 3 y 4 del
 sorteo; el piloto no consume la fila, que se vuelve a correr en la campaña.
+
+El **piloto 4 es una bajada** (piso 2 → piso 1) y no salía de ninguna fila, porque hasta el
+2026-09-04 el sorteo no generaba bajadas. Se corrió para comprobar que el coordinador las planifica
+antes de meter siete en la campaña, y es el espejo exacto de la misión 2: mismo par, al revés.
+Salió `exito: true` con un relevo y 0,142 m de error de llegada, así que la bajada es viable. Lo que
+sí se anotó, con n = 1 y por tanto como observación y no como resultado: recorrió 122,6 m en 259,6 s
+con 11 cúspides de velocidad, contra 103,9 m en 216,4 s y 5 cúspides de su espejo de subida.
 
 #### Piloto 1 — B · ETM7 → Aula 306  ·  relevos esperados: 1
 
@@ -227,15 +233,7 @@ cortar T4 antes de que la misión termine deja la misión sin su última marca. 
 
 #### Piloto 2 — A · ETM9 → ETM6  ·  relevos esperados: 0
 
-Bag: `S21_piloto_A_04`
-
-> **Se repite.** El intento `S21_piloto_A_03` se corrió **sin T1 ni T2** — culpa de una instrucción
-> mía, no de la hoja — así que reusó la pila del Piloto 1 y violó el §6.4 del protocolo, que pide
-> `gzserver` nuevo por misión. La corrida en sí salió bien (RTF 0,9979, llegada 0,068 m, error de
-> localización 0,032 m y 0,132 m), y de hecho fue la que demostró que el criterio 1 estaba mal
-> definido; pero un piloto existe para ensayar el procedimiento completo, y uno con un paso saltado
-> no lo ensaya. **El bag se conserva como evidencia del arreglo del criterio y no se compone como
-> registro.** Aquí hay que correr los cinco pasos, T1 y T2 incluidos.
+Bag: `S21_piloto_A_03`
 
 **T3 — parar el coordinador de la misión anterior** (t = 0)
 
@@ -270,7 +268,7 @@ source ~/deepracer_sim_ws/install/setup.bash && (herramientas/esperar_nav2.sh ro
 **T4 — grabar** (~t+75 s)
 
 ```bash
-source ~/deepracer_sim_ws/install/setup.bash && herramientas/grabar_mision.sh S21_piloto_A_04 robot1 robot2
+source ~/deepracer_sim_ws/install/setup.bash && herramientas/grabar_mision.sh S21_piloto_A_03 robot1 robot2
 ```
 
 **T5 — lanzar** (~t+95 s)
@@ -333,11 +331,79 @@ cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coo
 cortar T4 antes de que la misión termine deja la misión sin su última marca. Anota número, hora,
 `exito`, `relevos` y cualquier `AVISO`.
 
+#### Piloto 4 (bajada) — B · Aula 306 → ETM7  ·  relevos esperados: 1
+
+Bag: `S21_piloto_bajada_01`
+
+**T3 — parar el coordinador de la misión anterior** (t = 0)
+
+```bash
+pkill -f "coordinacion[/]coordinador"; sleep 2; pgrep -f "coordinacion[/]coordinador" || echo "sin coordinadores vivos"
+```
+
+**T1 — pila de robot1** (t = 0)
+
+```bash
+herramientas/robot.sh robot1 parar && herramientas/robot.sh robot1 nav2
+```
+
+**T2 — pila de robot2** (t = 0, lo más seguido que puedas tras T1)
+
+```bash
+herramientas/robot.sh robot2 parar && herramientas/robot.sh robot2 nav2
+```
+
+**T3 — coordinador** (~t+15 s)
+
+```bash
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 run coordinacion coordinador --ros-args -p use_sim_time:=true -p prefijo_mision:=S21C
+```
+
+**T4 — portón, a la vez que T3** (~t+15 s)
+
+```bash
+source ~/deepracer_sim_ws/install/setup.bash && (herramientas/esperar_nav2.sh robot1 >/tmp/g1.log 2>&1 & herramientas/esperar_nav2.sh robot2 >/tmp/g2.log 2>&1 & wait); tail -n 9 /tmp/g1.log /tmp/g2.log
+```
+
+**T4 — grabar** (~t+75 s)
+
+```bash
+source ~/deepracer_sim_ws/install/setup.bash && herramientas/grabar_mision.sh S21_piloto_bajada_01 robot1 robot2
+```
+
+**T5 — lanzar** (~t+95 s)
+
+```bash
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso2_aula_306', destino_id: 'piso1_etm7'}"
+```
+
+**Al acabar:** Ctrl-C en **T4** primero, que cierra el bag; después Ctrl-C en **T3**. En ese orden:
+cortar T4 antes de que la misión termine deja la misión sin su última marca. Anota número, hora,
+`exito`, `relevos` y cualquier `AVISO`.
+
 ---
 
 ## 8. Las 30 misiones
 
-#### 1 — A · ETM2 → ETM11  ·  relevos esperados: 0
+**Las 10 primeras ya están corridas** (10/10 éxito, 0 descartes) y sus bloques se
+dejan aquí como registro de lo que se ejecutó. El trabajo pendiente empieza en la
+**misión 11**.
+
+**Las misiones 11 a 30 se resortearon el 2026-09-04.** El sorteo original solo
+generaba condición A dentro del piso 1 y condición B de subida, así que B se diferenciaba de A en
+dos cosas a la vez —llevar relevo y pisar el piso 2— y ninguna medida podía separarlas. El sorteo
+nuevo estratifica por piso: **A1 = 8, A2 = 7, B12 = 8, B21 = 7**, que sigue dando 15 de A y 15 de B.
+Los pares de las 10 ya corridas quedaron excluidos, así que ninguna se repite. Está enmendado
+en el §6.2 y el §6.3 del protocolo.
+
+Dos consecuencias operativas, porque cambian lo que tienes que hacer:
+
+- **Ahora hay misiones que empiezan en el piso 2.** El `send_goal` lleva el `origen_id` del piso 2 y
+  el coordinador asignará **robot2 primero**. En una bajada el relevo va al revés que en una subida.
+- **El encabezado de cada bloque dice el estrato**, no solo la condición. Si el coordinador asigna
+  el robot que no toca para ese estrato, eso *es* un resultado y hay que anotarlo.
+
+#### 1 — A · estrato A1 · ETM2 → ETM11  ·  relevos esperados: 0
 
 Bag: `S21_OE4_01`
 
@@ -387,7 +453,7 @@ cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coo
 cortar T4 antes de que la misión termine deja la misión sin su última marca. Anota número, hora,
 `exito`, `relevos` y cualquier `AVISO`.
 
-#### 2 — B · ETM7 → Aula 306  ·  relevos esperados: 1
+#### 2 — B · estrato B12 · ETM7 → Aula 306  ·  relevos esperados: 1
 
 Bag: `S21_OE4_02`
 
@@ -437,7 +503,7 @@ cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coo
 cortar T4 antes de que la misión termine deja la misión sin su última marca. Anota número, hora,
 `exito`, `relevos` y cualquier `AVISO`.
 
-#### 3 — A · ETM9 → ETM6  ·  relevos esperados: 0
+#### 3 — A · estrato A1 · ETM9 → ETM6  ·  relevos esperados: 0
 
 Bag: `S21_OE4_03`
 
@@ -487,7 +553,7 @@ cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coo
 cortar T4 antes de que la misión termine deja la misión sin su última marca. Anota número, hora,
 `exito`, `relevos` y cualquier `AVISO`.
 
-#### 4 — B · ETM6 → IEEE  ·  relevos esperados: 1
+#### 4 — B · estrato B12 · ETM6 → IEEE  ·  relevos esperados: 1
 
 Bag: `S21_OE4_04`
 
@@ -537,7 +603,7 @@ cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coo
 cortar T4 antes de que la misión termine deja la misión sin su última marca. Anota número, hora,
 `exito`, `relevos` y cualquier `AVISO`.
 
-#### 5 — A · ETM6 → Representación  ·  relevos esperados: 0
+#### 5 — A · estrato A1 · ETM6 → Representación  ·  relevos esperados: 0
 
 Bag: `S21_OE4_05`
 
@@ -587,7 +653,7 @@ cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coo
 cortar T4 antes de que la misión termine deja la misión sin su última marca. Anota número, hora,
 `exito`, `relevos` y cualquier `AVISO`.
 
-#### 6 — B · ETM10 → Aula 303  ·  relevos esperados: 1
+#### 6 — B · estrato B12 · ETM10 → Aula 303  ·  relevos esperados: 1
 
 Bag: `S21_OE4_06`
 
@@ -637,7 +703,7 @@ cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coo
 cortar T4 antes de que la misión termine deja la misión sin su última marca. Anota número, hora,
 `exito`, `relevos` y cualquier `AVISO`.
 
-#### 7 — B · ETM8 → Aula 309  ·  relevos esperados: 1
+#### 7 — B · estrato B12 · ETM8 → Aula 309  ·  relevos esperados: 1
 
 Bag: `S21_OE4_07`
 
@@ -687,7 +753,7 @@ cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coo
 cortar T4 antes de que la misión termine deja la misión sin su última marca. Anota número, hora,
 `exito`, `relevos` y cualquier `AVISO`.
 
-#### 8 — B · ETM2 → Lab. Sistemas 312  ·  relevos esperados: 1
+#### 8 — B · estrato B12 · ETM2 → Lab. Sistemas 312  ·  relevos esperados: 1
 
 Bag: `S21_OE4_08`
 
@@ -737,7 +803,7 @@ cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coo
 cortar T4 antes de que la misión termine deja la misión sin su última marca. Anota número, hora,
 `exito`, `relevos` y cualquier `AVISO`.
 
-#### 9 — B · ETM3 → Aula 302  ·  relevos esperados: 1
+#### 9 — B · estrato B12 · ETM3 → Aula 302  ·  relevos esperados: 1
 
 Bag: `S21_OE4_09`
 
@@ -787,7 +853,7 @@ cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coo
 cortar T4 antes de que la misión termine deja la misión sin su última marca. Anota número, hora,
 `exito`, `relevos` y cualquier `AVISO`.
 
-#### 10 — A · ETM8 → ETM11  ·  relevos esperados: 0
+#### 10 — A · estrato A1 · ETM8 → ETM11  ·  relevos esperados: 0
 
 Bag: `S21_OE4_10`
 
@@ -837,7 +903,7 @@ cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coo
 cortar T4 antes de que la misión termine deja la misión sin su última marca. Anota número, hora,
 `exito`, `relevos` y cualquier `AVISO`.
 
-#### 11 — B · Almacén ETM → IEEE  ·  relevos esperados: 1
+#### 11 — A · estrato A1 · ETM10 → ETM2  ·  relevos esperados: 0
 
 Bag: `S21_OE4_11`
 
@@ -880,14 +946,14 @@ source ~/deepracer_sim_ws/install/setup.bash && herramientas/grabar_mision.sh S2
 **T5 — lanzar** (~t+95 s)
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso1_almacen', destino_id: 'piso2_ieee'}"
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso1_etm10', destino_id: 'piso1_etm2'}"
 ```
 
 **Al acabar:** Ctrl-C en **T4** primero, que cierra el bag; después Ctrl-C en **T3**. En ese orden:
 cortar T4 antes de que la misión termine deja la misión sin su última marca. Anota número, hora,
 `exito`, `relevos` y cualquier `AVISO`.
 
-#### 12 — B · ETM5 → Aula 311  ·  relevos esperados: 1
+#### 12 — B · estrato B21 · Aula 309 → ETM6  ·  relevos esperados: 1
 
 Bag: `S21_OE4_12`
 
@@ -930,14 +996,14 @@ source ~/deepracer_sim_ws/install/setup.bash && herramientas/grabar_mision.sh S2
 **T5 — lanzar** (~t+95 s)
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso1_etm5', destino_id: 'piso2_aula_311'}"
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso2_aula_309', destino_id: 'piso1_etm6'}"
 ```
 
 **Al acabar:** Ctrl-C en **T4** primero, que cierra el bag; después Ctrl-C en **T3**. En ese orden:
 cortar T4 antes de que la misión termine deja la misión sin su última marca. Anota número, hora,
 `exito`, `relevos` y cualquier `AVISO`.
 
-#### 13 — B · ETM7 → Sala de Docentes Fac. Ing. Civil  ·  relevos esperados: 1
+#### 13 — B · estrato B21 · Aula 310 → ETM3  ·  relevos esperados: 1
 
 Bag: `S21_OE4_13`
 
@@ -980,14 +1046,14 @@ source ~/deepracer_sim_ws/install/setup.bash && herramientas/grabar_mision.sh S2
 **T5 — lanzar** (~t+95 s)
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso1_etm7', destino_id: 'piso2_sala_docentes_civil'}"
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso2_aula_310', destino_id: 'piso1_etm3'}"
 ```
 
 **Al acabar:** Ctrl-C en **T4** primero, que cierra el bag; después Ctrl-C en **T3**. En ese orden:
 cortar T4 antes de que la misión termine deja la misión sin su última marca. Anota número, hora,
 `exito`, `relevos` y cualquier `AVISO`.
 
-#### 14 — B · ETM13 → Aula 305  ·  relevos esperados: 1
+#### 14 — A · estrato A2 · Aula 303 → Aula 307  ·  relevos esperados: 0
 
 Bag: `S21_OE4_14`
 
@@ -1030,14 +1096,14 @@ source ~/deepracer_sim_ws/install/setup.bash && herramientas/grabar_mision.sh S2
 **T5 — lanzar** (~t+95 s)
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso1_etm13', destino_id: 'piso2_aula_305'}"
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso2_aula_303', destino_id: 'piso2_aula_307'}"
 ```
 
 **Al acabar:** Ctrl-C en **T4** primero, que cierra el bag; después Ctrl-C en **T3**. En ese orden:
 cortar T4 antes de que la misión termine deja la misión sin su última marca. Anota número, hora,
 `exito`, `relevos` y cualquier `AVISO`.
 
-#### 15 — A · ETM3 → ETM7  ·  relevos esperados: 0
+#### 15 — B · estrato B21 · Aula 307 → ETM6  ·  relevos esperados: 1
 
 Bag: `S21_OE4_15`
 
@@ -1080,14 +1146,14 @@ source ~/deepracer_sim_ws/install/setup.bash && herramientas/grabar_mision.sh S2
 **T5 — lanzar** (~t+95 s)
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso1_etm3', destino_id: 'piso1_etm7'}"
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso2_aula_307', destino_id: 'piso1_etm6'}"
 ```
 
 **Al acabar:** Ctrl-C en **T4** primero, que cierra el bag; después Ctrl-C en **T3**. En ese orden:
 cortar T4 antes de que la misión termine deja la misión sin su última marca. Anota número, hora,
 `exito`, `relevos` y cualquier `AVISO`.
 
-#### 16 — A · ETM10 → ETM4  ·  relevos esperados: 0
+#### 16 — A · estrato A2 · Aula 309 → Sala de Docentes Fac. Ing. Civil  ·  relevos esperados: 0
 
 Bag: `S21_OE4_16`
 
@@ -1130,14 +1196,14 @@ source ~/deepracer_sim_ws/install/setup.bash && herramientas/grabar_mision.sh S2
 **T5 — lanzar** (~t+95 s)
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso1_etm10', destino_id: 'piso1_etm4'}"
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso2_aula_309', destino_id: 'piso2_sala_docentes_civil'}"
 ```
 
 **Al acabar:** Ctrl-C en **T4** primero, que cierra el bag; después Ctrl-C en **T3**. En ese orden:
 cortar T4 antes de que la misión termine deja la misión sin su última marca. Anota número, hora,
 `exito`, `relevos` y cualquier `AVISO`.
 
-#### 17 — B · ETM1 → IEEE  ·  relevos esperados: 1
+#### 17 — A · estrato A1 · ETM4 → ETM9  ·  relevos esperados: 0
 
 Bag: `S21_OE4_17`
 
@@ -1180,14 +1246,14 @@ source ~/deepracer_sim_ws/install/setup.bash && herramientas/grabar_mision.sh S2
 **T5 — lanzar** (~t+95 s)
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso1_etm1', destino_id: 'piso2_ieee'}"
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso1_etm4', destino_id: 'piso1_etm9'}"
 ```
 
 **Al acabar:** Ctrl-C en **T4** primero, que cierra el bag; después Ctrl-C en **T3**. En ese orden:
 cortar T4 antes de que la misión termine deja la misión sin su última marca. Anota número, hora,
 `exito`, `relevos` y cualquier `AVISO`.
 
-#### 18 — A · Representación → ETM6  ·  relevos esperados: 0
+#### 18 — A · estrato A2 · Aula 301 → Aula 304  ·  relevos esperados: 0
 
 Bag: `S21_OE4_18`
 
@@ -1230,14 +1296,14 @@ source ~/deepracer_sim_ws/install/setup.bash && herramientas/grabar_mision.sh S2
 **T5 — lanzar** (~t+95 s)
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso1_representacion', destino_id: 'piso1_etm6'}"
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso2_aula_301', destino_id: 'piso2_aula_304'}"
 ```
 
 **Al acabar:** Ctrl-C en **T4** primero, que cierra el bag; después Ctrl-C en **T3**. En ese orden:
 cortar T4 antes de que la misión termine deja la misión sin su última marca. Anota número, hora,
 `exito`, `relevos` y cualquier `AVISO`.
 
-#### 19 — A · ETM9 → ETM2  ·  relevos esperados: 0
+#### 19 — A · estrato A2 · Sala de Docentes Fac. Ing. Civil → Aula 304  ·  relevos esperados: 0
 
 Bag: `S21_OE4_19`
 
@@ -1280,14 +1346,14 @@ source ~/deepracer_sim_ws/install/setup.bash && herramientas/grabar_mision.sh S2
 **T5 — lanzar** (~t+95 s)
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso1_etm9', destino_id: 'piso1_etm2'}"
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso2_sala_docentes_civil', destino_id: 'piso2_aula_304'}"
 ```
 
 **Al acabar:** Ctrl-C en **T4** primero, que cierra el bag; después Ctrl-C en **T3**. En ese orden:
 cortar T4 antes de que la misión termine deja la misión sin su última marca. Anota número, hora,
 `exito`, `relevos` y cualquier `AVISO`.
 
-#### 20 — B · Almacén ETM → Aula 306  ·  relevos esperados: 1
+#### 20 — B · estrato B21 · Lab. Sistemas 313 → ETM5  ·  relevos esperados: 1
 
 Bag: `S21_OE4_20`
 
@@ -1330,14 +1396,14 @@ source ~/deepracer_sim_ws/install/setup.bash && herramientas/grabar_mision.sh S2
 **T5 — lanzar** (~t+95 s)
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso1_almacen', destino_id: 'piso2_aula_306'}"
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso2_lab_313', destino_id: 'piso1_etm5'}"
 ```
 
 **Al acabar:** Ctrl-C en **T4** primero, que cierra el bag; después Ctrl-C en **T3**. En ese orden:
 cortar T4 antes de que la misión termine deja la misión sin su última marca. Anota número, hora,
 `exito`, `relevos` y cualquier `AVISO`.
 
-#### 21 — A · ETM1 → ETM3  ·  relevos esperados: 0
+#### 21 — B · estrato B21 · Aula 305 → ETM1  ·  relevos esperados: 1
 
 Bag: `S21_OE4_21`
 
@@ -1380,14 +1446,14 @@ source ~/deepracer_sim_ws/install/setup.bash && herramientas/grabar_mision.sh S2
 **T5 — lanzar** (~t+95 s)
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso1_etm1', destino_id: 'piso1_etm3'}"
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso2_aula_305', destino_id: 'piso1_etm1'}"
 ```
 
 **Al acabar:** Ctrl-C en **T4** primero, que cierra el bag; después Ctrl-C en **T3**. En ese orden:
 cortar T4 antes de que la misión termine deja la misión sin su última marca. Anota número, hora,
 `exito`, `relevos` y cualquier `AVISO`.
 
-#### 22 — A · Almacén ETM → ETM1  ·  relevos esperados: 0
+#### 22 — B · estrato B12 · ETM13 → Aula 311  ·  relevos esperados: 1
 
 Bag: `S21_OE4_22`
 
@@ -1430,14 +1496,14 @@ source ~/deepracer_sim_ws/install/setup.bash && herramientas/grabar_mision.sh S2
 **T5 — lanzar** (~t+95 s)
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso1_almacen', destino_id: 'piso1_etm1'}"
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso1_etm13', destino_id: 'piso2_aula_311'}"
 ```
 
 **Al acabar:** Ctrl-C en **T4** primero, que cierra el bag; después Ctrl-C en **T3**. En ese orden:
 cortar T4 antes de que la misión termine deja la misión sin su última marca. Anota número, hora,
 `exito`, `relevos` y cualquier `AVISO`.
 
-#### 23 — B · ETM3 → Aula 307  ·  relevos esperados: 1
+#### 23 — B · estrato B21 · Aula 310 → ETM7  ·  relevos esperados: 1
 
 Bag: `S21_OE4_23`
 
@@ -1480,14 +1546,14 @@ source ~/deepracer_sim_ws/install/setup.bash && herramientas/grabar_mision.sh S2
 **T5 — lanzar** (~t+95 s)
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso1_etm3', destino_id: 'piso2_aula_307'}"
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso2_aula_310', destino_id: 'piso1_etm7'}"
 ```
 
 **Al acabar:** Ctrl-C en **T4** primero, que cierra el bag; después Ctrl-C en **T3**. En ese orden:
 cortar T4 antes de que la misión termine deja la misión sin su última marca. Anota número, hora,
 `exito`, `relevos` y cualquier `AVISO`.
 
-#### 24 — A · ETM10 → ETM8  ·  relevos esperados: 0
+#### 24 — A · estrato A1 · ETM11 → ETM9  ·  relevos esperados: 0
 
 Bag: `S21_OE4_24`
 
@@ -1530,14 +1596,14 @@ source ~/deepracer_sim_ws/install/setup.bash && herramientas/grabar_mision.sh S2
 **T5 — lanzar** (~t+95 s)
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso1_etm10', destino_id: 'piso1_etm8'}"
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso1_etm11', destino_id: 'piso1_etm9'}"
 ```
 
 **Al acabar:** Ctrl-C en **T4** primero, que cierra el bag; después Ctrl-C en **T3**. En ese orden:
 cortar T4 antes de que la misión termine deja la misión sin su última marca. Anota número, hora,
 `exito`, `relevos` y cualquier `AVISO`.
 
-#### 25 — A · ETM10 → ETM1  ·  relevos esperados: 0
+#### 25 — A · estrato A1 · ETM2 → ETM5  ·  relevos esperados: 0
 
 Bag: `S21_OE4_25`
 
@@ -1580,14 +1646,14 @@ source ~/deepracer_sim_ws/install/setup.bash && herramientas/grabar_mision.sh S2
 **T5 — lanzar** (~t+95 s)
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso1_etm10', destino_id: 'piso1_etm1'}"
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso1_etm2', destino_id: 'piso1_etm5'}"
 ```
 
 **Al acabar:** Ctrl-C en **T4** primero, que cierra el bag; después Ctrl-C en **T3**. En ese orden:
 cortar T4 antes de que la misión termine deja la misión sin su última marca. Anota número, hora,
 `exito`, `relevos` y cualquier `AVISO`.
 
-#### 26 — B · Representación → Sala de Docentes Fac. Ing. Civil  ·  relevos esperados: 1
+#### 26 — A · estrato A2 · Aula 305 → Aula 309  ·  relevos esperados: 0
 
 Bag: `S21_OE4_26`
 
@@ -1630,14 +1696,14 @@ source ~/deepracer_sim_ws/install/setup.bash && herramientas/grabar_mision.sh S2
 **T5 — lanzar** (~t+95 s)
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso1_representacion', destino_id: 'piso2_sala_docentes_civil'}"
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso2_aula_305', destino_id: 'piso2_aula_309'}"
 ```
 
 **Al acabar:** Ctrl-C en **T4** primero, que cierra el bag; después Ctrl-C en **T3**. En ese orden:
 cortar T4 antes de que la misión termine deja la misión sin su última marca. Anota número, hora,
 `exito`, `relevos` y cualquier `AVISO`.
 
-#### 27 — A · ETM13 → ETM4  ·  relevos esperados: 0
+#### 27 — B · estrato B21 · Aula 305 → ETM9  ·  relevos esperados: 1
 
 Bag: `S21_OE4_27`
 
@@ -1680,14 +1746,14 @@ source ~/deepracer_sim_ws/install/setup.bash && herramientas/grabar_mision.sh S2
 **T5 — lanzar** (~t+95 s)
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso1_etm13', destino_id: 'piso1_etm4'}"
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso2_aula_305', destino_id: 'piso1_etm9'}"
 ```
 
 **Al acabar:** Ctrl-C en **T4** primero, que cierra el bag; después Ctrl-C en **T3**. En ese orden:
 cortar T4 antes de que la misión termine deja la misión sin su última marca. Anota número, hora,
 `exito`, `relevos` y cualquier `AVISO`.
 
-#### 28 — B · Representación → Aula 311  ·  relevos esperados: 1
+#### 28 — A · estrato A2 · Aula 310 → Aula 303  ·  relevos esperados: 0
 
 Bag: `S21_OE4_28`
 
@@ -1730,14 +1796,14 @@ source ~/deepracer_sim_ws/install/setup.bash && herramientas/grabar_mision.sh S2
 **T5 — lanzar** (~t+95 s)
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso1_representacion', destino_id: 'piso2_aula_311'}"
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso2_aula_310', destino_id: 'piso2_aula_303'}"
 ```
 
 **Al acabar:** Ctrl-C en **T4** primero, que cierra el bag; después Ctrl-C en **T3**. En ese orden:
 cortar T4 antes de que la misión termine deja la misión sin su última marca. Anota número, hora,
 `exito`, `relevos` y cualquier `AVISO`.
 
-#### 29 — A · ETM6 → ETM7  ·  relevos esperados: 0
+#### 29 — A · estrato A2 · Sala de Docentes Fac. Ing. Civil → Aula 302  ·  relevos esperados: 0
 
 Bag: `S21_OE4_29`
 
@@ -1780,14 +1846,14 @@ source ~/deepracer_sim_ws/install/setup.bash && herramientas/grabar_mision.sh S2
 **T5 — lanzar** (~t+95 s)
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso1_etm6', destino_id: 'piso1_etm7'}"
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso2_sala_docentes_civil', destino_id: 'piso2_aula_302'}"
 ```
 
 **Al acabar:** Ctrl-C en **T4** primero, que cierra el bag; después Ctrl-C en **T3**. En ese orden:
 cortar T4 antes de que la misión termine deja la misión sin su última marca. Anota número, hora,
 `exito`, `relevos` y cualquier `AVISO`.
 
-#### 30 — A · ETM7 → ETM2  ·  relevos esperados: 0
+#### 30 — B · estrato B12 · ETM8 → Lab. Sistemas 313  ·  relevos esperados: 1
 
 Bag: `S21_OE4_30`
 
@@ -1830,7 +1896,7 @@ source ~/deepracer_sim_ws/install/setup.bash && herramientas/grabar_mision.sh S2
 **T5 — lanzar** (~t+95 s)
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso1_etm7', destino_id: 'piso1_etm2'}"
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 action send_goal /coordinacion/guiar_usuario coordinacion_msgs/action/GuiarUsuario "{origen_id: 'piso1_etm8', destino_id: 'piso2_lab_313'}"
 ```
 
 **Al acabar:** Ctrl-C en **T4** primero, que cierra el bag; después Ctrl-C en **T3**. En ese orden:

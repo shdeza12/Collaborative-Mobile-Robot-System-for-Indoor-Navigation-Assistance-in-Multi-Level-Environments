@@ -1,0 +1,43 @@
+# campana: OE4 - simulacion (RF-26)
+# protocolo: Documentos/PROTOCOLO_EXPERIMENTAL.md §6.2 y §6.3
+# sorteado: 2026-09-04
+# semilla: 20260904
+# catalogo: Robot/aws-deepracer/deepracer_bringup/config/puntos_interes.yaml
+# catalogo_sha256: 849ecee96258f753eac3316efac6a157540648dccde2d390aaba4c17c8d82dcd
+# orden: el de este archivo, sin reordenar (§6.3)
+# continua: Documentos/Evidencia/campana_oe4_misiones.csv, misiones 1-10 conservadas con su sorteo original
+# semilla_previa: 20260822
+# estratos: A1=4, A2=7, B12=2, B21=7
+# racha_maxima: 3 misiones seguidas del mismo estrato (§6.3, decision 5)
+# n: 30
+n,condicion,estrato,origen_id,destino_id,origen_nombre,destino_nombre
+1,A,A1,piso1_etm2,piso1_etm11,ETM2,ETM11
+2,B,B12,piso1_etm7,piso2_aula_306,ETM7,Aula 306
+3,A,A1,piso1_etm9,piso1_etm6,ETM9,ETM6
+4,B,B12,piso1_etm6,piso2_ieee,ETM6,IEEE
+5,A,A1,piso1_etm6,piso1_representacion,ETM6,Representación
+6,B,B12,piso1_etm10,piso2_aula_303,ETM10,Aula 303
+7,B,B12,piso1_etm8,piso2_aula_309,ETM8,Aula 309
+8,B,B12,piso1_etm2,piso2_lab_312,ETM2,Lab. Sistemas 312
+9,B,B12,piso1_etm3,piso2_aula_302,ETM3,Aula 302
+10,A,A1,piso1_etm8,piso1_etm11,ETM8,ETM11
+11,A,A1,piso1_etm10,piso1_etm2,ETM10,ETM2
+12,B,B21,piso2_aula_309,piso1_etm6,Aula 309,ETM6
+13,B,B21,piso2_aula_310,piso1_etm3,Aula 310,ETM3
+14,A,A2,piso2_aula_303,piso2_aula_307,Aula 303,Aula 307
+15,B,B21,piso2_aula_307,piso1_etm6,Aula 307,ETM6
+16,A,A2,piso2_aula_309,piso2_sala_docentes_civil,Aula 309,Sala de Docentes Fac. Ing. Civil
+17,A,A1,piso1_etm4,piso1_etm9,ETM4,ETM9
+18,A,A2,piso2_aula_301,piso2_aula_304,Aula 301,Aula 304
+19,A,A2,piso2_sala_docentes_civil,piso2_aula_304,Sala de Docentes Fac. Ing. Civil,Aula 304
+20,B,B21,piso2_lab_313,piso1_etm5,Lab. Sistemas 313,ETM5
+21,B,B21,piso2_aula_305,piso1_etm1,Aula 305,ETM1
+22,B,B12,piso1_etm13,piso2_aula_311,ETM13,Aula 311
+23,B,B21,piso2_aula_310,piso1_etm7,Aula 310,ETM7
+24,A,A1,piso1_etm11,piso1_etm9,ETM11,ETM9
+25,A,A1,piso1_etm2,piso1_etm5,ETM2,ETM5
+26,A,A2,piso2_aula_305,piso2_aula_309,Aula 305,Aula 309
+27,B,B21,piso2_aula_305,piso1_etm9,Aula 305,ETM9
+28,A,A2,piso2_aula_310,piso2_aula_303,Aula 310,Aula 303
+29,A,A2,piso2_sala_docentes_civil,piso2_aula_302,Sala de Docentes Fac. Ing. Civil,Aula 302
+30,B,B12,piso1_etm8,piso2_lab_313,ETM8,Lab. Sistemas 313

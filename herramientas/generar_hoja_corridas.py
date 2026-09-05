@@ -22,10 +22,19 @@ import pathlib
 import sys
 
 RAIZ = pathlib.Path(__file__).resolve().parent.parent
-CSV = RAIZ / "Documentos/Evidencia/campana_oe4_misiones.csv"
+# El v2 y no el original: el 2026-09-04 se enmendo el §6.2 para estratificar
+# por piso y se resortearon las misiones 11 a 30. Las 10 primeras son las
+# mismas y ya estan corridas; el original se conserva como evidencia de con que
+# listado se corrieron.
+CSV = RAIZ / "Documentos/Evidencia/campana_oe4_misiones_v2.csv"
 SALIDA = RAIZ / "Documentos/HOJA_CORRIDAS_OE4.md"
 
 PREFIJO_MISION = "S21C"
+
+# Misiones de la campana ya ejecutadas. Sus bloques se conservan como registro
+# y el resorteo del 2026-09-04 respeto sus pares; el trabajo pendiente empieza
+# en la siguiente.
+MISIONES_YA_CORRIDAS = 10
 
 PILOTOS = [
     ("Piloto 1", "B", "ETM7", "Aula 306", "S21_piloto_B_02",
@@ -34,6 +43,8 @@ PILOTOS = [
      "piso1_etm9", "piso1_etm6", 0),
     ("Piloto 3", "B", "ETM6", "IEEE", "S21_piloto_B_03",
      "piso1_etm6", "piso2_ieee", 1),
+    ("Piloto 4 (bajada)", "B", "Aula 306", "ETM7", "S21_piloto_bajada_01",
+     "piso2_aula_306", "piso1_etm7", 1),
 ]
 
 
@@ -107,7 +118,7 @@ Hoja operativa para ejecutar a mano. El procedimiento normativo es
 puntos declarados en el §6**.
 
 Generada por `herramientas/generar_hoja_corridas.py` desde
-`Documentos/Evidencia/campana_oe4_misiones.csv`. No se edita a mano: se regenera.
+`Documentos/Evidencia/campana_oe4_misiones_v2.csv`. No se edita a mano: se regenera.
 
 ---
 
@@ -267,15 +278,21 @@ Pendiente: llevar los puntos 1 y 3, la ventana de 2,6 min y el patrón de `pkill
 
 ---
 
-## 7. Pilotaje — tres corridas antes de la campaña
+## 7. Pilotaje — cuatro corridas antes de la campaña
 
-El protocolo pide **cinco** corridas de piloto; hay dos (`S21_piloto_A_02`, `S21_piloto_B_01`).
-Faltan tres. Además, el bloque que escribe `condicion_inicial.json` se commiteó el 2026-09-04
-(`cca442f`) y hasta ese día nunca había corrido contra un Gazebo vivo. Las dos cosas se cierran con
-lo mismo.
+El protocolo pide **cinco** corridas de piloto; había dos (`S21_piloto_A_02`, `S21_piloto_B_01`).
+Además, el bloque que escribe `condicion_inicial.json` se commiteó el 2026-09-04 (`cca442f`) y hasta
+ese día nunca había corrido contra un Gazebo vivo. Las dos cosas se cierran con lo mismo.
 
-Dos en B y una en A, para estrenar el relevo. Itinerarios tomados de las filas 2, 3 y 4 del
+Los pilotos 1 a 3 —dos en B y uno en A, para estrenar el relevo— salen de las filas 2, 3 y 4 del
 sorteo; el piloto no consume la fila, que se vuelve a correr en la campaña.
+
+El **piloto 4 es una bajada** (piso 2 → piso 1) y no salía de ninguna fila, porque hasta el
+2026-09-04 el sorteo no generaba bajadas. Se corrió para comprobar que el coordinador las planifica
+antes de meter siete en la campaña, y es el espejo exacto de la misión 2: mismo par, al revés.
+Salió `exito: true` con un relevo y 0,142 m de error de llegada, así que la bajada es viable. Lo que
+sí se anotó, con n = 1 y por tanto como observación y no como resultado: recorrió 122,6 m en 259,6 s
+con 11 cúspides de velocidad, contra 103,9 m en 216,4 s y 5 cúspides de su espejo de subida.
 
 """
 
@@ -313,12 +330,36 @@ def main():
     for titulo, cond, origen, destino, bag, oid, did, rel in PILOTOS:
         partes.append(bloque(titulo, cond, origen, destino, bag, oid, did, rel))
 
-    partes.append(f"---\n\n## 8. Las {len(misiones)} misiones\n\n")
+    hechas = sum(1 for f in misiones if int(f["n"]) <= MISIONES_YA_CORRIDAS)
+    partes.append(f"""---
+
+## 8. Las {len(misiones)} misiones
+
+**Las {hechas} primeras ya están corridas** ({hechas}/{hechas} éxito, 0 descartes) y sus bloques se
+dejan aquí como registro de lo que se ejecutó. El trabajo pendiente empieza en la
+**misión {hechas + 1}**.
+
+**Las misiones {hechas + 1} a {len(misiones)} se resortearon el 2026-09-04.** El sorteo original solo
+generaba condición A dentro del piso 1 y condición B de subida, así que B se diferenciaba de A en
+dos cosas a la vez —llevar relevo y pisar el piso 2— y ninguna medida podía separarlas. El sorteo
+nuevo estratifica por piso: **A1 = 8, A2 = 7, B12 = 8, B21 = 7**, que sigue dando 15 de A y 15 de B.
+Los pares de las {hechas} ya corridas quedaron excluidos, así que ninguna se repite. Está enmendado
+en el §6.2 y el §6.3 del protocolo.
+
+Dos consecuencias operativas, porque cambian lo que tienes que hacer:
+
+- **Ahora hay misiones que empiezan en el piso 2.** El `send_goal` lleva el `origen_id` del piso 2 y
+  el coordinador asignará **robot2 primero**. En una bajada el relevo va al revés que en una subida.
+- **El encabezado de cada bloque dice el estrato**, no solo la condición. Si el coordinador asigna
+  el robot que no toca para ese estrato, eso *es* un resultado y hay que anotarlo.
+
+""")
     for f in misiones:
         n = int(f["n"])
         cond = f["condicion"]
         partes.append(bloque(
-            str(n), cond, f["origen_nombre"], f["destino_nombre"],
+            str(n), f"{cond} · estrato {f['estrato']}",
+            f["origen_nombre"], f["destino_nombre"],
             f"S21_OE4_{n:02d}", f["origen_id"], f["destino_id"],
             1 if cond == "B" else 0))
 

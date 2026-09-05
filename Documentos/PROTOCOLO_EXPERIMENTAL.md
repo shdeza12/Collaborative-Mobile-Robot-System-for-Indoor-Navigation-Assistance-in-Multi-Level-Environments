@@ -358,14 +358,78 @@ estadística. Las dos cosas se reportan por separado y nunca se agregan en una s
 
 La variable independiente es el **tipo de misión**:
 
-| Condición | Origen y destino | Relevos | N |
-|---|---|---|---|
-| **A** — intra-nivel | ambos en el piso 1 | 0 | 15 |
-| **B** — inter-nivel | piso 1 → piso 2 | 1 | 15 |
+| Condición | Relevos | N |
+|---|---|---|
+| **A** — intra-nivel | 0 | 15 |
+| **B** — inter-nivel | 1 | 15 |
 
 La condición B es la que responde la pregunta de investigación. La A es el control: da la línea base
 de tiempo de respuesta y tasa de éxito **sin** relevo, y sin ella no se puede afirmar que el relevo
 no degrada el servicio.
+
+#### 6.2.1 Estratificación por piso
+
+> **Enmendado el 2026-09-04, con 10 de las 30 misiones ya ejecutadas.** Lo que sigue cambia el
+> diseño a mitad de campaña; el §6.2.2 dice exactamente qué se conserva y qué no.
+
+**El problema.** Hasta esta fecha la tabla de arriba decía «A: ambos en el piso 1» y «B: piso 1 →
+piso 2». Con eso, **la condición B se diferencia de la A en dos cosas a la vez**: lleva relevo *y*
+navega por el piso 2. Si B saliera peor que A, ningún dato de esta campaña permitiría distinguir
+«peor por el relevo» de «peor porque el piso 2 es más difícil», y el relevo es justamente lo único
+que se pretende medir. Es un confundido de diseño, no un ruido de medida: no se arregla con más N.
+
+No es una preocupación teórica. En el piloto 3, la deriva de AMCL en el tramo del piso 2 fue de
+**0,0209 m por metro recorrido**, contra 0,0036 y 0,0069 m/m en los tramos del piso 1 de la misma
+tanda. Los dos pisos no son intercambiables.
+
+**El diseño enmendado** cruza la condición con el piso, en cuatro estratos:
+
+| Estrato | Condición | Origen → destino | Relevos | N |
+|---|---|---|---|---|
+| **A1** | A | piso 1 → piso 1 | 0 | 8 |
+| **A2** | A | piso 2 → piso 2 | 0 | 7 |
+| **B12** | B | piso 1 → piso 2 | 1 | 8 |
+| **B21** | B | piso 2 → piso 1 | 1 | 7 |
+
+Sigue siendo **15 de A y 15 de B**, y esa es la comparación principal, la que responde la pregunta
+de investigación con el N que el §6.1 exige. La novedad es que ahora el piso está **equilibrado
+dentro de cada condición**, así que la diferencia A−B ya no arrastra la diferencia de piso.
+
+**Lo que este diseño NO permite** conviene decirlo, porque es la tentación obvia: comparar los
+cuatro estratos entre sí como si fueran cuatro condiciones. Con n ≈ 7 por celda, el intervalo de
+Wilson de una proporción es tan ancho que no permite afirmar nada —es el mismo argumento del §6.1
+que fija N = 30—. El piso entra en el diseño **como control**, para que no contamine el contraste
+A−B; cualquier diferencia entre pisos que se observe se reporta como **observación descriptiva**,
+nunca como resultado con inferencia.
+
+**El reparto 8/7/8/7 no es simétrico**, y el motivo es que las 10 misiones ya corridas fueron 4 de
+A1 y 6 de B12 (§6.2.2). Repartir 15 entre dos estratos obliga a un 8–7; se les dio el 8 a los
+estratos que ya tenían corridas hechas para no desperdiciar ninguna.
+
+**Qué cambia en la operación.** Ahora hay misiones que **empiezan en el piso 2**, y en ellas el
+coordinador asigna `robot2` primero y el relevo va en sentido contrario. Que el planificador ya
+soportaba las bajadas se verificó antes de sortearlas —emite «Baje al piso 1»— y se comprobó
+contra un Gazebo vivo en el **piloto 4** (`S21_piloto_bajada_01`): éxito, un relevo, 0,142 m de
+error de llegada.
+
+#### 6.2.2 Qué se conserva de la campaña ya empezada
+
+Las **misiones 1 a 10 se conservan tal cual**, con su sorteo original de semilla 20260822, y se
+cuentan en la campaña. No se repiten y no se descartan: se ejecutaron correctamente bajo el
+procedimiento vigente ese día, con 10/10 de éxito y 0 descartes, y descartar corridas válidas
+porque el diseño mejoró después sería peor que el problema que se está corrigiendo.
+
+Pero hay que escribirlo sin adornos, porque afecta a cómo se lee la campaña:
+
+- Esas 10 salieron de un **sorteo restringido a dos estratos** —4 de A1 y 6 de B12—, no del sorteo
+  estratificado. Dentro de ellas, condición y piso siguen confundidos.
+- Por tanto **la aleatorización de las 30 no es homogénea**: el primer tercio se sorteó con una
+  regla y los otros dos con otra. Las 30 juntas quedan equilibradas por estrato, que es lo que
+  arregla el confundido; lo que no puede afirmarse es que las 30 salgan de un único sorteo.
+- El orden temporal tampoco es neutro: **los cuatro estratos no están repartidos por igual a lo
+  largo de la sesión**, porque los dos nuevos solo pueden aparecer de la misión 11 en adelante.
+
+Esto va también al §11, donde se anota como amenaza a la validez y no solo como nota de diseño.
 
 ### 6.3 Selección de pares origen–destino
 
@@ -386,7 +450,23 @@ cd "$TESIS" && python3 herramientas/sortear_misiones.py --semilla 20260822 --n 3
 El listado sorteado se versiona **antes** de ejecutar la primera corrida. El orden de ejecución es
 el del archivo, sin reordenar.
 
-**Cuatro decisiones que este documento no fijaba y hubo que tomar al escribir la herramienta.** Se
+> **Resorteo del 2026-09-04 (enmienda del §6.2.1).** Las misiones **11 a 30** se volvieron a sortear
+> con el diseño estratificado. El comando, reproducible:
+>
+> ```bash
+> cd "$TESIS" && python3 herramientas/sortear_misiones.py --semilla 20260904 --estratos A1=4,A2=7,B12=2,B21=7 --continuar-de Documentos/Evidencia/campana_oe4_misiones.csv --conservar 10 --salida Documentos/Evidencia/campana_oe4_misiones_v2.csv
+> ```
+>
+> `--conservar 10` copia las 10 ya ejecutadas con su numeración y su sorteo original, y **excluye
+> sus 10 pares** del sorteo nuevo, de modo que ninguna misión se repite. Los cupos son los que
+> faltaban para llegar al 8/7/8/7 del §6.2.1, no el reparto completo.
+>
+> El listado vigente es [`campana_oe4_misiones_v2.csv`](Evidencia/campana_oe4_misiones_v2.csv). El
+> original [`campana_oe4_misiones.csv`](Evidencia/campana_oe4_misiones.csv) **se conserva sin
+> tocar**: es la evidencia de contra qué listado se corrieron las 10 primeras, y borrarlo dejaría
+> esa afirmación sin respaldo.
+
+**Cinco decisiones que este documento no fijaba y hubo que tomar al escribir la herramienta.** Se
 listan aquí, y no solo en el código, porque son de diseño experimental:
 
 1. **Los puntos de transferencia no se sortean**, ni como origen ni como destino. Una misión de
@@ -402,12 +482,38 @@ listan aquí, y no solo en el código, porque son de diseño experimental:
 4. **La herramienta se niega a sobrescribir un listado existente**, y comprueba antes de sortear.
    Pisar el listado a mitad de campaña dejaría unas corridas contra un listado y otras contra otro
    sin que nada en los registros lo delatara.
+5. **Ningún estrato aparece más de tres veces seguidas** en el orden de ejecución *(añadida el
+   2026-09-04)*. Barajar es necesario pero no basta para lo que pide la decisión 3: el sorteo del
+   2026-09-04 sacó **cinco de las siete B21 consecutivas**, en las misiones 15 a 19. Cinco bajadas
+   pegadas caen en el mismo tramo de la sesión —mismas horas de equipo encendido, misma deriva de
+   RTF, mismo cansancio del operador—, así que si las bajadas salieran peor no habría forma de
+   separar «peor por ser bajada» de «peor por la hora». Es el confundido del §6.2.1 con el tiempo
+   en lugar del piso. La herramienta baraja y vuelve a barajar hasta cumplir la regla.
 
-> **El sorteo no cubre el catálogo entero, y no pretende hacerlo.** Con la semilla 20260822 quedan
+   **Por qué esto no es ajustar la semilla hasta que salga bonito.** La diferencia es de orden, y
+   es la que separa un diseño de un apaño: la regla se declara **antes** de sortear, se aplica a
+   **cualquier** semilla y queda escrita aquí y en el código (`RACHA_MAXIMA`). No se elige un
+   resultado, se elige un criterio. Es aleatorización restringida, y el §6.3 ya prohibía
+   explícitamente lo contrario: «no ajustando la semilla hasta que salga bonito».
+
+   El límite es **3 y no 2** porque con 2 la restricción empieza a moldear el sorteo de verdad:
+   sobre la composición real solo el 35 % de los barajados la cumpliría, contra el 81 % con 3.
+   Cuanto más aprieta la regla, menos aleatorio es el resultado.
+
+   **La regla no se aplica hacia atrás.** Las misiones 6 a 9 son cuatro B12 seguidas y ya se
+   corrieron; lo único exigible al sorteo nuevo es que no alargue esa racha, no que la deshaga.
+
+> **El sorteo no cubre el catálogo entero, y no pretende hacerlo.** Con la semilla 20260822 quedaban
 > cubiertos 10 de los 15 destinos del piso 2 y 9 de los 14 del piso 1. Es lo que da un sorteo
 > aleatorio de 30 sobre 392 pares posibles. Si algún día se quiere cobertura garantizada, eso es un
 > diseño **estratificado** y hay que decidirlo aquí antes de ejecutar, no ajustando la semilla
 > hasta que salga bonito.
+>
+> **Actualizado el 2026-09-04.** El diseño estratificado del §6.2.1 se decidió y se escribió aquí
+> antes de ejecutar las misiones que estratifica, que es la condición que este párrafo ponía. La
+> cobertura subió como efecto secundario —ahora **13 de 14 puntos del piso 1 y 14 de 15 del piso
+> 2**—, pero conviene no confundir las dos cosas: se estratificó **por el confundido piso/condición
+> del §6.2.1**, no para cubrir más catálogo. La cobertura sigue sin ser un criterio del diseño.
 
 > **La misión del 2026-08-30 —`piso1_representacion → piso2_lab_313`— no está en el listado**, y
 > por tanto no es la corrida 1 de la campaña ni puede agregarse a ella. Sigue siendo lo que dice
@@ -618,6 +724,31 @@ Lo que puede hacer que estos números signifiquen otra cosa de la que parecen.
 - **El operador conoce la hipótesis.** Las corridas son automáticas de principio a fin
   precisamente por eso: el sorteo con semilla y el registro sin intervención manual (RF-25) quitan
   al operador toda decisión durante la medida.
+- **El piso estuvo confundido con la condición, y la corrección llegó a mitad de campaña**
+  *(2026-09-04)*. El diseño original hacía la condición A entera en el piso 1 y la B de subida, de
+  modo que B se diferenciaba de A en dos cosas a la vez: llevar relevo y navegar el piso 2. Los dos
+  pisos no son equivalentes —en el piloto 3 la deriva de AMCL fue de 0,0209 m/m en el piso 2 contra
+  0,0036 y 0,0069 m/m en el piso 1—, así que el confundido era real y no se arregla con más N. El
+  §6.2.1 lo corrige estratificando, pero **la corrección no es retroactiva**: las misiones 1 a 10 ya
+  estaban ejecutadas y dentro de ellas condición y piso siguen confundidos. Consecuencias que hay
+  que enunciar al reportar:
+  1. Las 30 juntas quedan equilibradas por estrato (8/7/8/7), y ese equilibrio es lo que permite
+     leer el contraste A−B sin el piso dentro. Lo que **no** puede afirmarse es que las 30 salgan de
+     un único sorteo homogéneo: el primer tercio se sorteó con una regla y el resto con otra.
+  2. Los estratos **no están repartidos por igual a lo largo del tiempo**, porque A2 y B21 solo
+     pueden aparecer de la misión 11 en adelante. Cualquier deriva de sesión les toca a ellos y no
+     a las 10 primeras, así que una diferencia por estrato admite esa explicación alternativa. La
+     regla de racha del §6.3 acota el problema dentro de las 20 nuevas, no lo elimina entre bloques.
+  3. Las comparaciones **entre los cuatro estratos** son descriptivas. Con n ≈ 7 por celda el
+     intervalo de Wilson es tan ancho que no sostiene inferencia; es el mismo argumento del §6.1 que
+     obliga a N = 30.
+- **La bajada tiene n = 1 de pilotaje y ninguna corrida de campaña todavía.** El único descenso
+  ejecutado (`S21_piloto_bajada_01`) salió con éxito, pero recorrió 122,6 m en 259,6 s con 11
+  cúspides de velocidad frente a 103,9 m en 216,4 s y 5 cúspides de su espejo de subida. Con una
+  sola corrida eso es una **observación, no un resultado**, y se enuncia así. Si las 7 misiones B21
+  confirmaran el patrón, la condición B dejaría de ser homogénea por dentro y habría que reportar
+  B12 y B21 por separado —cosa que el punto anterior ya advierte que solo se podrá hacer de forma
+  descriptiva—.
 
 ---
 
