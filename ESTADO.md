@@ -12,8 +12,8 @@
 | **Fecha de corte** | 2026-09-05 (sábado; el corte formal del viernes se corrió un día, como ya pasó en S20) |
 | **Fases activas** | Fase 5 — Integración (S18–S23) |
 | **Semanas restantes** | **3 de desarrollo** (S21, S22, S23) — la congelación de código es S23, del 14 al 20 de septiembre. Después no entra funcionalidad nueva: solo campaña, análisis y escritura. Sustentación **S28 (19–25 oct)**, documento final S29–S32 |
-| **Último entregable formal** | Semana 20 |
-| **Entregables pendientes** | Ninguno. El atraso de dos cortes seguidos —S19 se cerró 4 de 4 el 25-ago sin documento y S20 cerró el 29-ago— quedó saldado en el corte del 29-ago: `Entregable_semana_19.pdf` y `Entregable_semana_20.pdf` emitidos |
+| **Último entregable formal** | Semana 21 |
+| **Entregables pendientes** | Ninguno. El atraso de dos cortes seguidos —S19 se cerró 4 de 4 el 25-ago sin documento y S20 cerró el 29-ago— quedó saldado en el corte del 29-ago: `Entregable_semana_19.pdf` y `Entregable_semana_20.pdf` emitidos. El de S21 ([PDF](Documentos/Entregables/Entregable_semana_21.pdf), 22 páginas) se emitió el 2026-09-05, el mismo día de la campaña |
 | **Acta de directores** | ✅ *Actividad 1 – Corte 1* revisada y firmada por **Armando Mateus** el 2026-08-14 ([PDF](Documentos/Entregables/Actividad_1_Corte_1_Cronograma_2026-2_firmado.pdf)) |
 | **Planificación vigente** | [`Documentos/CRONOGRAMA_S17_S32.md`](Documentos/CRONOGRAMA_S17_S32.md) |
 
