@@ -416,7 +416,7 @@ una corrida física completa. Repositorio etiquetado.
 
 ### S24 · 21 – 27 sep — Campaña experimental en simulación
 
-> **EJECUTADA POR ANTICIPADO EL 2026-09-05, en S21.** Las 30 corridas están hechas, compuestas en
+> **EJECUTADA POR ANTICIPADO ENTRE EL 2026-09-04 Y EL 2026-09-05, en S21.** Las 30 corridas están hechas, compuestas en
 > 30 registros validados y agregadas con veredicto **`VALIDA`** y **0 de 30 descartes**. Se pudo
 > adelantar porque `sortear_misiones.py` y `analizar_campana.py` quedaron terminados y probados el
 > 2 de septiembre, o sea que la condición que hacía peligroso adelantar —analizar con un agregador
