@@ -55,8 +55,8 @@ una de esas tres fuentes, sobra y se elimina.
 
 | ID | Requisito | Prueba | Estado | Semana |
 |---|---|---|---|---|
-| **RF-01** | El sistema opera con **exactamente dos agentes**, cada uno dedicado a un nivel | Inventario de nodos por dominio: dos pilas completas, una por agente | ✅ | S18 |
-| **RF-02** | Cada agente es **direccionable de forma independiente**: una orden a uno no altera al otro | `ros2 topic list --no-daemon --spin-time 8` por dominio: ningún tópico cruzado. Ordenar a robot1 y leer `/robot2/odom` | ✅ | S18 |
+| **RF-01** | El sistema opera con **exactamente dos agentes**, cada uno dedicado a un nivel | Inventario de nodos: dos pilas completas, una por agente | ✅ **S18, re-anclado el 2026-09-05.** La prueba original decía «por dominio» y esa arquitectura ya no existe: el 30-ago se eligió la **opción B —un dominio, dos `gzserver`, separación por espacios de nombres**— ([`S21_bloqueo_dominios.md`](Evidencia/S21_bloqueo_dominios.md) §3). El requisito se sostiene igual y con más datos: las 30 misiones de la campaña corrieron con las dos pilas vivas en un solo grafo | S18 |
+| **RF-02** | Cada agente es **direccionable de forma independiente**: una orden a uno no altera al otro | `ros2 topic list --no-daemon --spin-time 8`: ningún tópico cruzado entre espacios de nombres. Ordenar a robot1 y leer `/robot2/odom` | ✅ **S18, re-anclado el 2026-09-05.** Misma corrección que RF-01: la separación ya no la da el `ROS_DOMAIN_ID` sino el prefijo `/robotN`. La evidencia fuerte es la campaña: sobre las trazas de las **15 misiones de condición B** —las únicas donde los dos agentes aparecen— no hay **ni un solo instante** con los dos por encima de 0,05 m/s. Se mueven en relevo, nunca a la vez, que es justo lo que no pasaría si una orden alcanzara a los dos | S18 |
 | **RF-03** | El coordinador manda a un agente **únicamente** mediante la acción `navigate_to_pose` | Inspección de suscriptores de `/robotN/cmd_vel`: ningún publicador fuera de la pila del propio agente | ✅ | S18 |
 | **RF-04** | El sistema conoce un **conjunto de localizaciones de interés**, cada una con nivel y pose | Existe `puntos_interes.yaml`; el coordinador lo republica *latched* y `ros2 topic echo` lo devuelve completo | 🟢 **Verificado el 2026-09-02 y confirmado sobre la campaña.** La HRI cargó los **31 puntos** del catálogo real desde `/coordinacion/puntos_interes` con QoS `transient_local` —que es la forma ROS 2 de *latched*—, o sea que un suscriptor tardío lo recibe completo. Y las **30** misiones de la campaña llevan `procedencia.catalogo_sha256 = 849ecee96258…`, idéntico al `sha256` del `puntos_interes.yaml` versionado: no es que el coordinador conociera *un* catálogo, es que conoció **este**, byte a byte | S20 |
 | **RF-05** | El coordinador **asigna la misión al agente del nivel de origen** (asignación dinámica de tareas) | Una solicitud con origen en el nivel 1 activa a robot1 y no a robot2; y a la inversa | 🟢 **Verificado el 2026-08-29 y ejercitado 30 veces.** Dos solicitudes con destino en niveles distintos produjeron **dos agentes distintos** ([`S20_asignacion_por_nivel.md`](Evidencia/S20_asignacion_por_nivel.md)), que es lo que separa «eligió bien» de «siempre responde lo mismo». En la campaña, las **15 misiones intra-nivel** —donde origen y destino coinciden y la prueba es directa— asignaron el agente de ese nivel sin excepción: 8 de 1→1 a robot1 y 7 de 2→2 a robot2. En las 15 entre niveles el agente del nivel de destino cierra la misión y hubo relevo, lo que implica que el primer tramo lo llevó el otro | S20 |
@@ -99,17 +99,24 @@ dependencias entre agendas y cae en la categoría XD de la taxonomía de Korsah,
 
 | ID | Requisito | Prueba | Estado | Semana |
 |---|---|---|---|---|
-| **RF-11** | Cada vehículo ejecuta **locomoción** comandada por `/<ns>/cmd_vel`, con cinemática Ackermann | El vehículo se desplaza; recorrido medido contra `/odom` | 🟡 sim ✅ / físico vía web | S19–S21 |
-| **RF-12** | Cada vehículo publica **`/<ns>/scan`** utilizable para localización y evasión | El LiDAR publica a su frecuencia nominal y el mapa de costos local registra los obstáculos | 🟡 sim ✅ / físico 🔴 | **S19** (spike, pregunta 1) |
-| **RF-13** | Cada vehículo publica **odometría** en `/<ns>/odom` | Lectura antes y después de un desplazamiento conocido | 🟡 sim ✅ **contra un oráculo**, no verificado (ver §7.4) / físico 🔴, se mide en la corrida de ≥ 20 m de S20 | S19 |
+| **RF-11** | Cada vehículo ejecuta **locomoción** comandada por `/<ns>/cmd_vel`, con cinemática Ackermann | El vehículo se desplaza; recorrido medido contra `/odom` | 🟡 sim ✅ / **físico parcial, y ya no «vía web»** (revisado el 2026-09-05). El 2026-08-28 el vehículo se desplazó **mandado desde ROS 2, sin la interfaz del fabricante** ([`S20_frente_b_hardware.md`](Evidencia/S20_frente_b_hardware.md) §6), de ida y vuelta tres veces sobre una recta de 3,000 m. **Lo que falta son las dos mitades de la prueba tal como está escrita:** el mando fue `ServoCtrlMsg` en `/ctrl_pkg/servo_msg`, **no `/<ns>/cmd_vel`** —eso es RF-14, y su pendiente es de escala—, y el recorrido se leyó de `map → base_link`, **no de `/odom`** —eso es RF-13— | S19–S21 |
+| **RF-12** | Cada vehículo publica **`/<ns>/scan`** utilizable para localización y evasión | El LiDAR publica a su frecuencia nominal y el mapa de costos local registra los obstáculos | 🟡 sim ✅ / **físico: primera mitad verificada, segunda mitad pendiente** (revisado el 2026-09-05, estaba en 🔴 sin serlo). El LiDAR real publica un `/scan` **utilizable y medido contra referencia externa**: RANSAC secuencial —que nunca recibe la distancia esperada— sitúa la pared en **1,0228 m** contra 1,000 m de flexómetro, en **10 de 10 barridos**, con **2,8 mm** de dispersión y residuos de 2–11 mm ([`S19_spike_p1_p2_hardware.md`](Evidencia/S19_spike_p1_p2_hardware.md) §1.3). Y desde el 28-ago **convive con la pila completa del vehículo**, a **6,35 Hz** frente a 6,80 Hz aislado, −6,6 %. **Falta la segunda mitad —el mapa de costos local— porque Nav2 no se ha ejecutado nunca sobre el carro**, y falta el espacio de nombres: el tópico real es `/rplidar_ros/scan`, no `/<ns>/scan`. **Riesgo anotado para S26:** el URDF simulado declara 300°, 600 muestras y 10 m donde el sensor real da **360°, 1328 muestras y 16 m**; comparar simulación contra hardware sin alinearlo mediría la diferencia de modelos además de la del entorno | **S19** (spike, pregunta 1) |
+| **RF-13** | Cada vehículo publica **odometría** en `/<ns>/odom` | Lectura antes y después de un desplazamiento conocido | 🟡 sim ✅ **contra un oráculo**, no verificado (ver §7.4) / **físico: el desplazamiento conocido ya se midió, pero no sobre `/odom`** (revisado el 2026-09-05; la celda decía «se mide en la corrida de ≥ 20 m de S20» y esa corrida ya ocurrió). El 2026-08-28 se recorrió una recta de **3,000 m** de flexómetro con cinco estimaciones —media **3,088 m**, σ 0,025 m, **error sistemático de +2,9 %**— y una deriva de cierre de **0,18 % sobre ~18,4 m**. Dos cosas hay que decir enteras: **(a)** la lectura salió de `map → base_link`, o sea de la **odometría láser**, no del `/<ns>/odom` que el requisito nombra; **(b)** el +2,9 % tiene **dos causas sin discriminar** —escala del sensor o colocación del vehículo en cada extremo— y hay una prueba definida que las separa: medir un tramo de pared con flexómetro y contra el `.pgm` del mapa. La deriva de cierre **no** desmiente el 2,9 %: un error de escala se cancela al volver | S19 |
 | **RF-14** | Cada vehículo se comanda **desde ROS 2**, sin pasar por la interfaz web del fabricante | Publicar en `/<ns>/cmd_vel` desde otra máquina de la red mueve el vehículo | 🟡 **El requisito se cumple; la prueba tal como está escrita, no —y por dos razones distintas—.** *Cumplido:* el 2026-08-28 el vehículo se condujo desde ROS 2 sin la interfaz web ([`S20_frente_b_hardware.md`](Evidencia/S20_frente_b_hardware.md) §6), publicando `ServoCtrlMsg` en `/ctrl_pkg/servo_msg`, con hombre muerto de 0,6 s. *Lo que falta, (a) por calibrar:* eso es un **puente**, no la cadena `/cmd_vel`. Sus dos defectos **sí están corregidos** desde `f0fa40c` (2026-08-27) —tópico de publicación absoluto y ramas de tracción ordenadas de umbral mayor a menor— con 19 comprobaciones en `prueba_mapeo_servo.py`; pero la propia prueba deja escrito que **el escalón más bajo cae en 0,40 m/s** mientras Nav2 pide 0,25 en curva y 0,05 en la aproximación, así que **la cadena sigue devolviendo cero justo donde Nav2 la usa**. Es un problema de **escala**, no de mapeo, y la cadena **nunca se ha ejercitado sobre el vehículo**. *(b) por decidir:* la cláusula «desde otra máquina de la red» **choca con una decisión de seguridad documentada** —§6.3 de la misma evidencia: el teleoperador corre *en* el vehículo a propósito, porque si el wifi cae, `servo_pkg` se queda con el último valor y queda un vehículo acelerando sin nadie al mando—. No se reescribe la prueba para que pase: eso es una decisión de protocolo, igual que la del §5.4 de esa evidencia | **S19** (spike, pregunta 2) |
 | **RF-15** | Los dos vehículos y el coordinador se **alcanzan por red** con latencia acotada | Medida de ida y vuelta entre los dos vehículos | 🔴 bloqueado por **R11** | S19+ |
 | **RF-16** | El **mismo código fuente** se despliega en los dos destinos, simulado y físico (decisión D6) | Compilar el coordinador sin cambios en las dos distribuciones y completar una misión **en cada mundo por separado** | 🟡 **verificado con resultado condicionado** (2026-08-18) | S22 |
 | ~~RF-16b~~ | ~~Una misión con robot1 **simulado** y robot2 **físico** a la vez~~ | ~~Misión mixta completada sin recompilar~~ | ❌ **imposible sin trabajo nuevo** (2026-08-18) | — |
 
-**Lectura de OE2.** El cuello de botella no es el software sino el acceso al hardware. RF-12 y
-RF-14 son las preguntas 1 y 2 del spike de esta semana y **se responden con un solo vehículo**.
-RF-15 exige los dos y está bloqueado por R11.
+**Lectura de OE2, reescrita el 2026-09-05.** El cuello de botella sigue siendo el acceso al
+hardware, pero **estaba peor descrito que la realidad**. Al revisar las cinco celdas contra las
+evidencias del 19 y el 28 de agosto —no contra la bitácora— resulta que **de un solo vehículo ya
+se sacó más de lo que la tabla reconocía**: RF-12 tenía el LiDAR real medido contra flexómetro y
+conviviendo con la pila, y aparecía en 🔴; RF-13 tenía la corrida de desplazamiento conocido hecha,
+y la celda seguía anunciándola como futura; RF-11 decía «vía web» cuando el carro se conduce desde
+ROS 2 desde el 28-ago. **Lo que de verdad falta en OE2 son tres cosas concretas y ninguna es un
+misterio:** el mapa de costos local sobre el carro (RF-12, exige Nav2 a bordo), la lectura sobre
+`/<ns>/odom` en vez de `map → base_link` (RF-13), y la escala de la cadena `/cmd_vel` (RF-14).
+**Solo RF-15 exige los dos vehículos y solo él está bloqueado por R11.**
 
 *Revisión del 2026-09-05 sobre RF-14.* Pasa de 🔴 a 🟡 tras comprobarlo en el código y no en la
 bitácora. **Dos afirmaciones que este repositorio venía repitiendo eran falsas:** que la cadena
@@ -173,8 +180,8 @@ presente antes de invertir tiempo en un mapa interactivo.
 
 | ID | Requisito | Prueba | Estado | Semana |
 |---|---|---|---|---|
-| **RF-21** | El sistema registra el **tiempo de respuesta**: desde la solicitud hasta que el agente inicia el movimiento | El registro de la misión contiene la marca temporal de ambos eventos | 🟢 **Verificado el 2026-08-27.** El registro de `S20_rutas_03` trae `t_solicitud: 87.9` y `t_primer_movimiento: 88.1`, ambas leídas de `/clock` | S20 |
-| **RF-22** | El sistema registra el **tiempo de asignación de robot**: desde la solicitud hasta que un agente queda asignado | Ídem | 🟢 **Verificado el 2026-08-27.** `t_solicitud` y `t_robot_activo` en el mismo registro | S20 |
+| **RF-21** | El sistema registra el **tiempo de respuesta**: desde la solicitud hasta que el agente inicia el movimiento | El registro de la misión contiene la marca temporal de ambos eventos | 🟢 **Verificado el 2026-08-27 y medido 30 veces el 2026-09-04/05** (la celda citaba `S20_rutas_03`, n = 1). Las **30** misiones traen `t_solicitud` y `t_primer_movimiento` pobladas: **mediana 0,2 s, rango 0,1–0,4 s**. Con el matiz de instrumento dicho de una vez: los sellos del bag van cuantizados a **100 ms** por `/clock`, así que una mediana de 0,2 s son **dos tics** y la cifra no admite más de un decimal. A diferencia de RF-22, aquí la métrica **sí** queda por encima del suelo del instrumento | S20 |
+| **RF-22** | El sistema registra el **tiempo de asignación de robot**: desde la solicitud hasta que un agente queda asignado | Sobre el bag la resta vale cero por construcción; la cifra sale del **banco aislado** de [`herramientas/banco_tiempo_asignacion.py`](../herramientas/banco_tiempo_asignacion.py), con `perf_counter_ns()` dentro del proceso del coordinador | 🟢 **Verificado, pero no por donde decía esta celda** (revisado el 2026-09-05). Decía «`t_solicitud` y `t_robot_activo` en el mismo registro», y esa resta vale **exactamente 0,0 s en 30 de las 30 misiones** de la campaña —comprobado—, se ejecute lo que se ejecute: `ros2 bag record --use-sim-time` sella con `/clock`, que `gazebo_ros_init` publica a 10 Hz, luego **todo sello está cuantizado a 100 ms**, y asignar son ~150 µs. Eso no mide el evento, **mide el reloj**, y una prueba que se satisface con un cero no es una prueba. La cifra real viene del banco del 2026-08-30 ([`S21_banco_tiempo_asignacion.md`](Evidencia/S21_banco_tiempo_asignacion.md)): **4 corridas sorteadas de n = 30**, mediana entre **154,3 y 175,3 µs** y máximo **306,4 µs** —**326 veces menor que un tic de `/clock`**—, alternando intra e inter-nivel para ejercitar las dos ramas de `planificar()`. **Conviene no confundir esto con el defecto de software que sí hubo:** hasta el 29-ago el coordinador fijaba `etapa` y `robot_activo` en la misma publicación y no existía marca intermedia; se corrigió con la etapa `RECIBIDA`, y fue necesario pero no suficiente | S20 |
 | **RF-23** | El sistema registra el **éxito o fallo** de cada misión, con el motivo | `result.exito` y `result.motivo_fallo` quedan en el registro | 🟢 **Verificado sobre las 30 misiones de la campaña (2026-09-04/05).** Cada registro trae su veredicto calculado contra `/odom`, no contra el `SUCCEEDED` de Nav2: **26 aciertos de 30 (86,7 %)**, IC95 de Wilson **70,3–94,7 %**. Los 4 fallos quedan con su motivo y son **un solo modo** —error de llegada de 0,284 a 0,347 m contra un criterio de 0,25 m—, o sea inobservabilidad longitudinal del pasillo, **no fallo de coordinación** | S21 |
 | **RF-24** | El sistema registra la **continuidad del servicio entre niveles**: que la misión atraviesa el relevo sin interrupción del guiado | Ninguna etapa queda sin agente activo entre `TRAMO_1` y `TRAMO_2` | 🟢 **Verificado el 2026-09-05: 14 de 14 (100 %)**, IC95 **78,5–100 %**, con salto de relevo de mediana **0,100 s** —un tic de `/clock`, o sea el suelo del instrumento—. Evalúa 14 y no 15 misiones entre niveles porque la 27 nunca llegó a `COMPLETADA`: medir continuidad sobre una misión fallida sería medir otra cosa. **Es la variable de respuesta principal del proyecto** y no tenía campo en el registro hasta el esquema 1.1.0 (31-ago) | S21 |
 | **RF-25** | Las métricas se obtienen de un **registro estructurado y automático**, no de observación manual | Un archivo por misión, procesable sin intervención | 🟡 **Verificado el 2026-08-27 en condición A.** Esquema JSON versionado y comprobable; `herramientas/componer_registro.py` compone el registro desde el bag y lo valida contra el esquema; el veredicto se calcula contra `/odom` y nunca contra el `SUCCEEDED` de Nav2. **Probado en condición B y a escala el 2026-09-05:** 30 registros compuestos sin intervención manual, 15 de ellos de condición B, todos validados contra el esquema 1.1.0. **La campaña además puso a prueba el propio registrador y encontró un fallo silencioso:** tres bags salieron sin RTF y `grabar_mision.sh` lo tragaba saliendo con código 0, así que la corrida se perdía sin que nadie se enterara; corregido de raíz —aborta antes de grabar si falla la marca inicial, código 3 si falla la de cierre— con prueba de regresión (`herramientas/prueba_grabar_mision.py`, 12 comprobaciones sin ROS). **Sigue 🟡 y no 🟢** por un solo campo: `salud_del_banco.controladores_activos` todavía sale `{}` | S20 |
@@ -195,6 +202,15 @@ supera el 70 %» es defendible y «la tasa es del 86,7 %» no lo es**; y el cont
 intervalos solapados y apuntando además en contra de la intuición, porque la condición con relevo
 salió mejor.
 
+**RF-22 merece una advertencia aparte, porque es la métrica que puede reportarse mal sin que nadie
+lo note.** El tiempo de asignación **no puede leerse del bag**: la resta `t_robot_activo −
+t_solicitud` vale 0,0 s en las 30 misiones, no porque el coordinador sea infinitamente rápido sino
+porque las dos marcas caen en el mismo tic de `/clock`. Quien tome esa columna del registro y
+escriba «tiempo de asignación: 0 s» estará reportando el reloj, no el sistema. La cifra que se
+lleva al documento final es la del banco aislado —**mediana ~155–175 µs, máximo 306 µs**— y hay que
+decir con ella el método, porque un microsegundo medido dentro del proceso y un segundo medido
+sobre el bag no son la misma magnitud.
+
 Lo que queda de OE4 deja de ser *producir evidencia* y pasa a ser *redactarla*, más el campo
 pendiente de RF-25 y la campaña física de RF-27.
 
@@ -207,12 +223,12 @@ del anteproyecto §4.3.
 
 | ID | Restricción | Cómo se demuestra | Estado |
 |---|---|---|---|
-| **RNF-01** | **Ningún agente cruza entre niveles.** La transición es un evento lógico del protocolo, no un desplazamiento | La coordenada vertical de cada agente es constante durante toda la misión | ✅ medido en S18 |
+| **RNF-01** | **Ningún agente cruza entre niveles.** La transición es un evento lógico del protocolo, no un desplazamiento | La coordenada vertical de cada agente es constante durante toda la misión | ✅ **medido en S18 y confirmado sobre la campaña (2026-09-05).** El registro guarda `descriptivas.desviacion_z_m` por robot: **60 medidas** —dos agentes por cada una de las 30 misiones— con un máximo de **0,0070 m**. Ningún agente subió ni bajó: la transición sigue siendo un evento del protocolo |
 | **RNF-02** | Los agentes **no manipulan objetos, no transportan carga y no interactúan mecánicamente con la infraestructura** (puertas, botones de ascensor) | Por diseño: el vehículo no tiene actuadores más allá de tracción y dirección | ✅ |
 | **RNF-03** | Operación **en interiores, en un espacio previamente delimitado y en condiciones controladas** | Las repeticiones se ejecutan en franjas de baja circulación; las personas se registran como observación cualitativa | 🟡 declarado |
 | **RNF-04** | Plataforma **de bajo costo** | AWS DeepRacer en lugar de DonkeyCar; desviación registrada en `ESTADO.md` §6 | ✅ con desviación |
-| **RNF-05** | Las trayectorias deben ser **ejecutables por cinemática Ackermann**: sin giro sobre el propio eje | Planificador con radio mínimo, árboles de comportamiento sin la primitiva de giro | ✅ S17 |
-| **RNF-06** | La simulación debe correr **a tiempo real** para que las métricas temporales sean válidas | Factor de tiempo real ≥ 0,99 con las dos pilas activas | ✅ 0,996 medido en S18 |
+| **RNF-05** | Las trayectorias deben ser **ejecutables por cinemática Ackermann**: sin giro sobre el propio eje | Planificador con radio mínimo, árboles de comportamiento sin la primitiva de giro | ✅ **S17, y verificado sobre las trazas el 2026-09-05.** De **42 278** pares consecutivos de traza de la campaña, solo **3 (0,007 %)** muestran cambio de rumbo apreciable con menos de 1 cm de avance, y a 5 Hz de decimación eso es compatible con el temblor de la pose estimada estando quieto, no con un giro sobre el eje |
+| **RNF-06** | La simulación debe correr **a tiempo real** para que las métricas temporales sean válidas | Factor de tiempo real ≥ 0,99 con las dos pilas activas | ✅ **0,996 en S18 y sostenido en las 30 misiones (2026-09-05): 30 de 30 por encima de 0,99**, mínimo **0,9917**, media **0,9973**. No es un adorno: si el RTF se hubiera caído, las cifras temporales de RF-21 y RF-24 no valdrían, así que esta restricción es lo que hace legibles las métricas de OE4 |
 | **RNF-07** | El sistema **no resuelve navegación autónoma general**: opera en un entorno conocido y mapeado | El mapa es un insumo, no un producto de la misión | ✅ |
 
 **RNF-01 merece atención especial.** Es a la vez una restricción y **el aporte del proyecto**: lo
@@ -317,10 +333,16 @@ conviene mirarlos por lo que los bloquea, no por cuántos son:
   técnica sin caracterizar desde el 14-ago. No depende de horas de trabajo.
 - **RF-27** (campaña física de 5 a 10 corridas) — depende del GO/NO-GO de hardware, que **sigue
   abierto** porque G2 se detuvo por su propia regla de parada.
+- **RF-11, RF-12 y RF-13**, los tres parciales de OE2 — tras la revisión del 5-sep lo que les falta
+  está acotado y **también le basta un vehículo**: el mapa de costos local sobre el carro, la
+  lectura de `/<ns>/odom`, y discriminar el +2,9 % de escala de la odometría láser con la prueba
+  del `.pgm` que ya está definida.
 
-O sea: **dos se resuelven trabajando (RF-08 y la escala de RF-14) y dos dependen de que el hardware
-aparezca (RF-15 por R11, RF-27 por el GO/NO-GO).** Esa es la lectura honesta del 5 de septiembre, y
-no la mejora el hecho de que el conteo haya subido de 19 a 23.
+O sea: **dos pendientes se resuelven trabajando (RF-08 y la escala de RF-14) y dos dependen de que
+el hardware aparezca (RF-15 por R11, RF-27 por el GO/NO-GO).** Y de los ocho parciales, **los tres
+de OE2 no están esperando a R11**: esperan una jornada de laboratorio con el vehículo que sí hay.
+Esa es la lectura honesta del 5 de septiembre, y no la mejora el hecho de que el conteo haya subido
+de 19 a 23.
 
 > *Nota sobre este §9, 2026-09-05.* Las revisiones de OE1 y de RF-14 de hoy salieron las dos de
 > **leer el código y los datos en vez de la bitácora**, y las dos encontraron el documento desfasado
@@ -329,6 +351,22 @@ no la mejora el hecho de que el conteo haya subido de 19 a 23.
 > que llevaban corregidos desde el 27-ago. Un tablero puede equivocarse a la baja tanto como al
 > alza, y las dos formas cuestan igual: la primera esconde trabajo hecho, la segunda hace planificar
 > contra un problema que ya no existe.
+>
+> *Barrido completo del resto de la matriz, mismo día.* Se revisaron las veinte celdas restantes con
+> el mismo método y **ninguna cambió de color**, pero **nueve estaban mal escritas**, en tres clases
+> distintas que conviene separar porque se corrigen de forma distinta:
+> **(1) prueba obsoleta** — RF-01 y RF-02 se probaban «por dominio» y esa arquitectura se sustituyó
+> el 30-ago por un dominio con dos `gzserver`; la prueba se reescribió y se re-ancló a la campaña.
+> **(2) evidencia subestimada** — RF-11, RF-12 y RF-13 daban por futuro o por rojo lo que se midió
+> el 19 y el 28 de agosto con un solo vehículo; RF-21 citaba n = 1 teniendo n = 30; RNF-01 y RNF-06
+> citaban S18 teniendo 60 y 30 medidas de la campaña.
+> **(3) prueba que se satisface con un cero** — el caso grave es **RF-22**: su prueba era «el
+> registro contiene las dos marcas», y esa resta vale 0,0 s en 30 de 30 **por construcción del
+> instrumento**. Estaba en verde por una comprobación que no puede fallar. Se reescribió contra el
+> banco aislado, que es de donde sale la cifra publicable.
+>
+> La clase (3) es la que hay que buscar en el resto del documento antes de la sustentación: **una
+> prueba que no puede fallar no es una prueba**, y no se distingue de una buena mirando el color.
 
 > *Corrección aritmética, 2026-09-05:* este párrafo decía «once de treinta y cuatro» mientras su
 > propia tabla sumaba catorce. Se recalcula contra la tabla, que es la fuente. El texto llevaba
