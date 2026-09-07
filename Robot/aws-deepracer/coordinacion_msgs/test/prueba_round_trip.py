@@ -14,8 +14,20 @@ compilar y funcionar en DOS distribuciones -Humble en el PC, Jazzy en la tarjeta
 del carro-. Cuando se compile en Jazzy hay que volver a correr este archivo:
 que genere los headers no prueba que rmw los transporte igual en las dos.
 
-Ultima ejecucion en Humble: 2026-08-24, 18 de 18 comprobaciones OK, con los 16
-puntos reales de puntos_interes.yaml.
+Ultima ejecucion en Humble: 2026-09-07, 19 de 19 comprobaciones OK, con los 31
+puntos reales de puntos_interes.yaml. (La linea decia '18 de 18, con los 16
+puntos' y se habia quedado en el 2026-08-24: la comprobacion de mas es
+RECIBIDA=6, anadida el 2026-08-29, y el catalogo crecio de 16 a 31 puntos.)
+
+Ultima ejecucion en Jazzy, sobre la tarjeta del carro: NUNCA. Es lo que va a
+hacer la Tarea 5 del lunes 7 en Documentos/PLAN_S22.md. Mientras esta linea siga
+diciendo NUNCA, que el paquete funcione en la tarjeta es una suposicion.
+
+OJO, ESTA PRUEBA NO ES AUTOCONTENIDA: la seccion 4 abre el catalogo real en
+../../deepracer_bringup/config/puntos_interes.yaml, relativo a ESTE fichero, y lo
+abre sin guarda. Si no esta, la prueba no avisa al empezar: da tres secciones en
+verde y revienta a mitad con FileNotFoundError. Al copiarla a otra maquina hay
+que llevarse tambien ese YAML, dos niveles por encima de coordinacion_msgs/test/.
 """
 import os
 import threading

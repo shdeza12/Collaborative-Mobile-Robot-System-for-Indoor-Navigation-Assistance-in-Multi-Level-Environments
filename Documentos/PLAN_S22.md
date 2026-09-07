@@ -198,6 +198,47 @@ cada diapositiva y las preguntas trampa. **No es un guion para leer**, es lo que
 cuando alguien se sale del guion. Se escribió el lunes 7 al revisar la diapositiva del intervalo de
 Wilson. La §6 es la única parte que hay que saber de memoria.
 
+**Tarea 5 — `coordinacion_msgs` en la tarjeta Jazzy. Adelantada del martes.**
+
+Se adelanta porque **no necesita la batería de motor**: el carro no se mueve, la tarjeta va con el
+powerbank y todo es compilar y hablar por DDS. Sacarla hoy le devuelve media hora al martes, que es
+la jornada apretada.
+
+> **El criterio del martes decía «compila», y eso es una prueba que no puede fallar.** El §5 de
+> [`CONTRATO_INTERFACES.md`](CONTRATO_INTERFACES.md) ya lo había declarado el 2026-08-24, con estas
+> palabras: *«generar los headers no prueba que `rmw` transporte igual en las dos distribuciones»*.
+> El criterio bueno es **el round-trip corriendo en la tarjeta**, no el `colcon build` en verde.
+
+| Paso | Comando | Esperado |
+|---|---|---|
+| 5.1 | `ping -c 2 deepracer.local` | Una IP. **Cambia entre sesiones**, no la des por sabida |
+| 5.2 | `ssh -t deepracer@<IP> "ls ~/deepracer_ws/src"` | Ver **dónde cuelga `deepracer_bringup`**: si de `src/` o de `src/aws-deepracer/`. De eso depende el paso 5.3 |
+| 5.3 | Desde la raíz del repositorio: `cd Robot/aws-deepracer && scp -r coordinacion_msgs deepracer@<IP>:~/deepracer_ws/src/` | Copiado |
+| 5.4 | Y a continuación: `scp deepracer_bringup/config/puntos_interes.yaml deepracer@<IP>:~/deepracer_ws/src/deepracer_bringup/config/` | Copiado. **Ajustar la ruta destino a lo que devolvió 5.2** |
+| 5.5 | `ssh -t deepracer@<IP> "source /opt/ros/jazzy/setup.bash && cd ~/deepracer_ws && colcon build --packages-select coordinacion_msgs"` | `1 package finished` |
+| 5.6 | `ssh -t deepracer@<IP> "source /opt/ros/jazzy/setup.bash && source ~/deepracer_ws/install/setup.bash && python3 ~/deepracer_ws/src/coordinacion_msgs/test/prueba_round_trip.py"` | `Todas las comprobaciones pasan`, con `catalogo cargado del YAML: 31 puntos` y `llegan los puntos completos 31 de 31` |
+
+**El paso 5.4 no es opcional, y es la trampa de esta tarea.** `prueba_round_trip.py` **no es
+autocontenida**: carga el catálogo real desde `../../deepracer_bringup/config/puntos_interes.yaml`,
+con un `open()` **sin guarda** (línea 153). Si el YAML no está donde lo busca, la prueba **no avisa
+al empezar**: corre, da tres secciones en verde y **revienta a mitad** con `FileNotFoundError`. Es el
+peor momento para enterarse. La ruta se resuelve **relativa al fichero de la prueba**, así que lo que
+importa no es que el YAML exista en la tarjeta, sino que exista **dos niveles por encima** de
+`coordinacion_msgs/test/`.
+
+- **Si 5.5 falla por `rosidl_default_generators`:** la tarjeta tiene `ros-base` y no los generadores
+  de interfaces. **Es R8 materializándose, que es justo lo que esta tarea existe para averiguar.**
+  Anotar el error literal y no improvisar la instalación de noche: con el carro sin poder reiniciarse
+  —se queda en GRUB—, tocar paquetes del sistema a última hora es el riesgo peor.
+- **Si 5.6 falla en el round-trip pero 5.5 compiló:** ése es el hallazgo que la tarea busca, y hay
+  que saberlo **antes de S23**. Anotar qué tipo falla y en qué campo.
+- **No hace falta `sudo`, y conviene no ponerlo.** La regla de dueño del 4-sep —publicador y
+  suscriptor con el mismo dueño, o silencio— aquí **se cumple por construcción**: esta prueba publica
+  y escucha **dentro de un solo proceso**. Correrla con `sudo` dejaría además ficheros de `root` en
+  el workspace del carro.
+- **Criterio de cierre:** la salida de 5.6 guardada en `Documentos/Evidencia/logs/`, y la línea
+  «Última ejecución» de la cabecera de `prueba_round_trip.py` actualizada con la fecha y la distro.
+
 ---
 
 ### Martes 8 — Salida al pasillo: G2, escala de `/cmd_vel`, `coordinacion_msgs` en Jazzy
@@ -234,9 +275,11 @@ bash herramientas/localizar_desde_bag.sh <bag> && python3 herramientas/medir_g2.
    usa**. Es calibración contra el vehículo, no mapeo: los dos defectos de mapeo están corregidos
    desde el 27-ago con 19 comprobaciones en `prueba_mapeo_servo.py`. **Criterio:** una tabla de
    throttle contra velocidad medida, con al menos un punto por debajo de 0,25 m/s.
-2. **`coordinacion_msgs` en la tarjeta Jazzy.** `colcon build --packages-select coordinacion_msgs`
-   sobre la tarjeta. **Criterio:** compila; y si no compila, el error queda anotado, porque eso sería
-   R8 materializándose y hay que saberlo antes de S23.
+2. ~~**`coordinacion_msgs` en la tarjeta Jazzy.**~~ **Adelantada al lunes 7** (Tarea 5), porque no
+   necesita la batería de motor: la tarjeta va con el powerbank y el carro no se mueve. Allí está
+   también corregido su criterio, que aquí decía «compila» y era una prueba que no puede fallar: el
+   criterio bueno es **el round-trip corriendo en la tarjeta**, como el §5 del contrato de interfaces
+   venía exigiendo desde el 2026-08-24.
 
 ---
 

@@ -114,7 +114,7 @@ Si origen y destino están en el mismo nivel, los pasos 4–6 se omiten: **un so
 
 Paquete **`coordinacion_msgs`** (en `Robot/aws-deepracer/`). Cinco definiciones, nada más.
 
-**Existe desde el 2026-08-24**, compilado en Humble y verificado con un round-trip real por DDS —`coordinacion_msgs/test/prueba_round_trip.py`, 18 de 18—, no solo con que compile: el paquete tiene que correr también en la tarjeta Jazzy del carro, y generar los headers no prueba que `rmw` transporte igual en las dos distribuciones. Las constantes (`LIBRE=0`…, `INACTIVA=0`…) se declaran en los `.msg` para que ningún nodo escriba el número suelto.
+**Existe desde el 2026-08-24**, compilado en Humble y verificado con un round-trip real por DDS —`coordinacion_msgs/test/prueba_round_trip.py`, **19 de 19 al 2026-09-07**, con los 31 puntos reales del catálogo; la cifra decía «18 de 18» y se había quedado en el 2026-08-24, cuando el catálogo tenía 16 puntos y no existía `RECIBIDA=6`—, no solo con que compile: el paquete tiene que correr también en la tarjeta Jazzy del carro, y generar los headers no prueba que `rmw` transporte igual en las dos distribuciones. **En Jazzy no se ha corrido nunca**, y mientras no se corra eso es una suposición y no un hecho: lo hace la Tarea 5 del lunes 7 de [`PLAN_S22.md`](PLAN_S22.md). Las constantes (`LIBRE=0`…, `INACTIVA=0`…) se declaran en los `.msg` para que ningún nodo escriba el número suelto.
 
 ```
 # EstadoRobot.msg
