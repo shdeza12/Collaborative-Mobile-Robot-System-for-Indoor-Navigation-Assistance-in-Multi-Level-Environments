@@ -1,8 +1,17 @@
 # Lo que un robot dice de si mismo. Lo publica cada agente en su propio
-# namespace, /robotN/estado_robot, y lo consume el coordinador.
+# namespace, /robotN/estado, y lo consume el coordinador.
 #
 # Definido en Documentos/CONTRATO_INTERFACES.md seccion 5. Si cambia aqui,
 # cambia alli: son el mismo contrato escrito dos veces.
+#
+# EL NOMBRE ES /<ns>/estado, SIN SUFIJO. Esta cabecera le anadia un '_robot'
+# hasta el 2026-09-07, en contra de la tabla normativa del §4 del contrato y del
+# criterio de aceptacion de RF-08, que dicen los dos /<ns>/estado. Nadie lo noto
+# porque el unico codigo que usaba el nombre con sufijo era la prueba de esta
+# carpeta, que publicaba y se suscribia al MISMO nombre inventado: una prueba de
+# ida y vuelta no puede detectar que el nombre este mal, solo que sea consistente
+# consigo misma. Corregido al implementar el agente (RF-08); ahora
+# coordinacion/test/prueba_agente.py falla si el sufijo reaparece.
 
 # Constantes de 'estado'. Se declaran para que nadie escriba el numero suelto.
 uint8 LIBRE=0

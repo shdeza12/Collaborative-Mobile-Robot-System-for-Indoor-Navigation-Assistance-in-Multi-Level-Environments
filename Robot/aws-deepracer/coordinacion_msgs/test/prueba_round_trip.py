@@ -81,9 +81,14 @@ def main():
 
     print("\n2. EstadoRobot por DDS")
     recibido = {}
-    n.create_subscription(EstadoRobot, "/robot2/estado_robot",
+    # El nombre es /<ns>/estado, el mismo que publica coordinacion/agente.py y
+    # el que exige el criterio de aceptacion de RF-08. Aqui llevaba un sufijo
+    # '_robot' hasta el 2026-09-07; no fallaba porque esta prueba publica y
+    # escucha el mismo nombre, asi que habria pasado con cualquier cadena. Lo
+    # que si puede fallar es coordinacion/test/prueba_agente.py, seccion 2.
+    n.create_subscription(EstadoRobot, "/robot2/estado",
                           lambda m: recibido.setdefault("er", m), 10)
-    pub = n.create_publisher(EstadoRobot, "/robot2/estado_robot", 10)
+    pub = n.create_publisher(EstadoRobot, "/robot2/estado", 10)
     m = EstadoRobot()
     m.robot_id = "robot2"
     m.nivel = 2
