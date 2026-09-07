@@ -76,7 +76,9 @@ igual, pero **el G2 no se declara**. No es motivo para no salir.
 > **Un `/scan` con huecos de medio segundo no construye mapas.** El bag grabado en esa ventana
 > produjo un pasillo doblado que no cerró el bucle (ver §7).
 >
-> **Antes de dar por buena cualquier medida rara, comprueba la batería.**
+> **Antes de dar por buena cualquier medida rara, comprueba la batería.** Y no la compruebes por
+> el `max`, que se solapa entre batería sana y batería muriendo: el criterio numérico —`std dev`
+> de `/scan` **≥ 0,020 s** ⇒ bag SOSPECHOSO— está en el **§5**, y se anota por bag en el §11.
 
 ---
 
@@ -140,6 +142,36 @@ Guía de mapeo, **Pasos 2.2 a 2.5**. Resumen de lo que no se puede saltar:
 > midieron parones de hasta **~600 ms**. Por eso el Bloque 3 dice que empujes **despacio**: con un
 > hueco de 600 ms, a 0,5 m/s te quedan 30 cm sin barrido, y a 0,4 m/s, 24 cm. No es una avería,
 > es una razón para ir lento.
+
+> ### El `max` no sirve para juzgar la batería. La `std dev` sí
+>
+> **Anotado el 2026-09-07, antes de la salida, para que sea criterio y no explicación.**
+>
+> Los dos párrafos de arriba se contradicen si se leen con prisa: el §3 usa un `max` de **0,464 s**
+> como la señal de la batería muriendo, y este §5 dice que parones de **~600 ms son normales**. Los
+> dos son ciertos, y por eso **`max` no discrimina**: el hueco sano y el hueco enfermo caen en el
+> mismo rango, así que un `max` alto no prueba nada en ninguna dirección.
+>
+> Lo que sí separó los dos casos del 3-sep fue la **dispersión**, con el mismo sensor, la misma
+> configuración y los mismos procesos:
+>
+> | | `std dev` | `max` |
+> |---|---|---|
+> | Batería cayendo (murió 20 min después) | **0,072 s** | 0,464 s |
+> | La misma, recargada | **0,008 s** | 0,177 s |
+>
+> Un `max` que se solapa; una `std dev` **nueve veces mayor**. La batería no rompe el `/scan`, lo
+> vuelve irregular.
+>
+> **CRITERIO, fijado antes de tener el dato delante, como pide el §7 del protocolo experimental:**
+> se anota la `std dev` de `ros2 topic hz /scan` **al abrir y al cerrar cada bag** (columnas
+> `std ini` / `std fin` del §11). Un bag cuya `std dev` llegue a **≥ 0,020 s** se marca
+> **SOSPECHOSO** y no entra en el cálculo de M1 sin repetirse con la batería cambiada.
+>
+> El 0,020 no es redondeo: está **2,5 veces por encima** del valor sano medido y **3,6 veces por
+> debajo** del degradado, o sea en el hueco vacío entre los dos casos conocidos. Cuesta diez
+> segundos por bag y es lo único que delató el caso plátano —aquel día no hubo ni un error, y el
+> mapa de 47 m sobre un pasillo de 20 m parecía normal hasta que alguien miró el `/scan`—.
 
 **Criterio de cierre:** `/scan` a ~6,6 Hz, `frame_id: laser`, y 22 tópicos tres veces.
 
@@ -405,16 +437,21 @@ el carro mira hacia ____________________ en el 0 m
 **Las pasadas** (una línea por bag):
 
 ```
-nombre           sentido        hora    msgs    abortada   incidencias
---------------------------------------------------------------------------
-mapa_pasillo_    ida y vuelta   ____    ____    __         ________________
-g2_ida_1         0 -> final     ____    ____    __         ________________
-g2_vuelta_1      final -> 0     ____    ____    __         ________________
-g2_ida_2         0 -> final     ____    ____    __         ________________
-g2_vuelta_2      final -> 0     ____    ____    __         ________________
-g2_ida_3         0 -> final     ____    ____    __         ________________
-g2_vuelta_3      final -> 0     ____    ____    __         ________________
+nombre           sentido        hora    msgs    abortada  std ini  std fin  incidencias
+---------------------------------------------------------------------------------------------
+mapa_pasillo_    ida y vuelta   ____    ____    __        0,____   0,____   ________________
+g2_ida_1         0 -> final     ____    ____    __        0,____   0,____   ________________
+g2_vuelta_1      final -> 0     ____    ____    __        0,____   0,____   ________________
+g2_ida_2         0 -> final     ____    ____    __        0,____   0,____   ________________
+g2_vuelta_2      final -> 0     ____    ____    __        0,____   0,____   ________________
+g2_ida_3         0 -> final     ____    ____    __        0,____   0,____   ________________
+g2_vuelta_3      final -> 0     ____    ____    __        0,____   0,____   ________________
 ```
+
+**`std ini` / `std fin`** son la `std dev` que da `ros2 topic hz /scan` justo antes de abrir el
+bag y justo después de cerrarlo. **≥ 0,020 s en cualquiera de las dos → el bag va marcado
+SOSPECHOSO** y se repite con la batería cambiada; el porqué del número está en el §5. No se anota
+el `max`: se solapa entre batería sana y batería muriendo, así que no distingue.
 
 **Las incidencias importan.** Alguien cruzándose, una rueda subida a un zócalo, una pausa. En el
 análisis, un valor raro **con una nota al lado es un dato**; sin la nota es basura.
@@ -434,6 +471,8 @@ análisis, un valor raro **con una nota al lado es un dato**; sin la nota es bas
 | `Ctrl-C` no cierra el teleop | Entraste por SSH sin `-t` |
 | El LiDAR deja de publicar y `systemctl` dice `active` | Tocaste el USB con la pila corriendo |
 | Todo «deja de funcionar» poco a poco | **Mide las baterías antes de depurar nada.** El 28-ago se plantearon tres causas de software y las tres eran falsas |
+| La `std dev` de `/scan` llega a 0,020 s o más | Batería. Marca el bag SOSPECHOSO, cambia batería y repite la pasada (§5 y §11) |
+| El mapa sale mucho más largo que el pasillo medido | §7, «el caso plátano». Mira primero la `std dev` anotada de ese bag |
 | Se te ocurre reiniciar el carro | **No.** Se queda en GRUB |
 
 Las tablas completas de diagnóstico están en la **Parte 7** de cada una de las dos guías.
@@ -445,7 +484,7 @@ Las tablas completas de diagnóstico están en la **Parte 7** de cada una de las
 - ¿El mapa está aceptado, mirado y medido? (§7)
 - ¿Hay al menos un bag válido por sentido, con `message_count` comprobado?
 - ¿Está anotada la longitud con dos decimales y hechas las fotos?
-- ¿Está rellenada la hoja del §11?
+- ¿Está rellenada la hoja del §11, **con las dos `std dev` de cada bag**?
 
 **Si las cuatro son que sí, recoge la cinta.** Si alguna es que no, la cinta se queda: repetir con
 la cinta puesta cuesta cinco minutos, y volver otro día cuesta una mañana.

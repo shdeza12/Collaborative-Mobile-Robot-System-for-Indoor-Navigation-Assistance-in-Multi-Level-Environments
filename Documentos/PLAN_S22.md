@@ -165,6 +165,17 @@ esas dos medidas.
 lista de lo que hay que llevar (§3) y la regla de decisión del caso plátano (§7). No se reescribe: se
 lee y se comprueba que el material de §3 existe.
 
+> **Añadido el lunes 7 al releerla, y es un criterio nuevo, no una aclaración.** La hoja se
+> contradecía a sí misma sobre la batería: el §3 usaba un `max` de `/scan` de **0,464 s** como la
+> señal de batería agonizando, y el §5 decía que parones de **~600 ms son normales**. Los dos eran
+> ciertos, luego **`max` no distingue nada**: el hueco sano y el enfermo caen en el mismo rango. Lo
+> que sí separó los dos casos del 3-sep fue la **dispersión** —`std dev` **0,072** moribunda contra
+> **0,008** recargada, nueve veces—. Queda fijado en el §5 de la hoja, **antes de salir** como pide
+> el §7 del protocolo: se anota la `std dev` al abrir y al cerrar **cada** bag, y **≥ 0,020 s marca
+> el bag SOSPECHOSO** y obliga a repetirlo. El 0,020 cae en el hueco vacío entre los dos valores
+> medidos —2,5 veces por encima del sano, 3,6 por debajo del degradado—. Cuesta diez segundos por
+> bag, y es lo único que delató el caso plátano: aquel día no hubo ni un error en el log.
+
 **Tarea 3 — RF-08: publicador de `/<ns>/estado` a 2 Hz.**
 
 | | |
@@ -179,6 +190,13 @@ lee y se comprueba que el material de §3 existe.
 > **Ojo con la trampa que este proyecto ya conoce:** una prueba que compruebe solo *«el tópico
 > existe»* es una prueba que no puede fallar, de la misma clase que la de RF-22. La prueba tiene que
 > comprobar **frecuencia** y **cambio de valor**, que es lo que dice el requisito.
+
+**Tarea 4 — estudiar la guía del primer control de avances.**
+[`GUIA_SUSTENTACION_CONTROL1.md`](GUIA_SUSTENTACION_CONTROL1.md) es el material de detrás de
+`Primera_entrega_avances_Proyecto_II.pptx`: vocabulario desde cero, las cuatro métricas, qué decir en
+cada diapositiva y las preguntas trampa. **No es un guion para leer**, es lo que permite contestar
+cuando alguien se sale del guion. Se escribió el lunes 7 al revisar la diapositiva del intervalo de
+Wilson. La §6 es la única parte que hay que saber de memoria.
 
 ---
 
