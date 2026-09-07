@@ -191,12 +191,10 @@ lee y se comprueba que el material de §3 existe.
 > existe»* es una prueba que no puede fallar, de la misma clase que la de RF-22. La prueba tiene que
 > comprobar **frecuencia** y **cambio de valor**, que es lo que dice el requisito.
 
-**Tarea 4 — estudiar la guía del primer control de avances.**
-[`GUIA_SUSTENTACION_CONTROL1.md`](GUIA_SUSTENTACION_CONTROL1.md) es el material de detrás de
-`Primera_entrega_avances_Proyecto_II.pptx`: vocabulario desde cero, las cuatro métricas, qué decir en
-cada diapositiva y las preguntas trampa. **No es un guion para leer**, es lo que permite contestar
-cuando alguien se sale del guion. Se escribió el lunes 7 al revisar la diapositiva del intervalo de
-Wilson. La §6 es la única parte que hay que saber de memoria.
+> **La numeración salta de la 3 a la 5.** Aquí figuró un rato como «Tarea 4» el estudiar la guía del
+> control de avances, y **eso no es una actividad del cronograma**: es un compromiso académico
+> externo al desarrollo del proyecto. Queda apartado en la nota del final del día. La Tarea 5 no se
+> renumera porque sus pasos internos son 5.1–5.8.
 
 **Tarea 5 — `coordinacion_msgs` en la tarjeta Jazzy. Adelantada del martes.**
 
@@ -259,10 +257,19 @@ importa no es que el YAML exista en la tarjeta, sino que exista **dos niveles po
 - **Criterio de cierre — CUMPLIDO:** la salida de 5.8 está en
   [`Evidencia/logs/S22_jazzy_round_trip.txt`](Evidencia/logs/S22_jazzy_round_trip.txt) y la línea
   «Última ejecución en Jazzy» de `prueba_round_trip.py` ya no dice `NUNCA`.
-- **Lo que esta corrida NO cierra, y conviene no exagerarlo el día de la sustentación:** la prueba
-  publica y escucha en un solo proceso, así que **no** demuestra que dos procesos separados en la
-  tarjeta se vean, ni que el portátil en Humble hable con la tarjeta en Jazzy **entre máquinas**.
-  R8 queda acotado, no cerrado.
+- **Lo que esta corrida NO cierra, y conviene no afirmar de más:** la prueba publica y escucha en un
+  solo proceso, así que **no** demuestra que dos procesos separados en la tarjeta se vean, ni que el
+  portátil en Humble hable con la tarjeta en Jazzy **entre máquinas**. R8 queda acotado, no cerrado.
+
+---
+
+#### Fuera del cronograma — material del control de avances
+
+**No es una actividad del proyecto y no compite con las tareas de arriba.** Se anota aquí sólo para
+que el documento no quede huérfano: [`GUIA_SUSTENTACION_CONTROL1.md`](GUIA_SUSTENTACION_CONTROL1.md)
+es el material de apoyo de `Primera_entrega_avances_Proyecto_II.pptx`, escrito el 2026-09-07. Es un
+compromiso académico externo; el avance del proyecto se mide contra los objetivos y el cronograma,
+no contra él.
 
 ---
 
