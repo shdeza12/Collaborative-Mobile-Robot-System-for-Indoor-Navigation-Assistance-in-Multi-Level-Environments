@@ -354,10 +354,39 @@ extremo con relevo, y el log arroja las cuatro métricas de OE4.
 > —*«lectura antes y después de un desplazamiento conocido»*— aplicada sobre una recta de
 > **≥ 20 m**, no sobre los 4 m que da el laboratorio. De un solo bag salen las dos cifras:
 >
-> | | Qué se mide | Umbral |
-> |---|---|---|
-> | **M1** | Desplazamiento que registra `/odom` ÷ desplazamiento real medido con cinta, sobre la recta | **≥ 0,90** |
-> | **M2** | Error de `/amcl_pose` contra la marca de cinta al final de la recta | **≤ 0,50 m** |
+> | | Qué se mide | Umbral | Función |
+> |---|---|---|---|
+> | **M1** | Desplazamiento que registra `/odom` ÷ desplazamiento real medido con cinta, sobre la recta | **\|registrado ÷ real − 1\| ≤ 0,10** *(enmendado el 2026-09-06; antes «≥ 0,90»)* | **Puerta** |
+> | **M2** | Error de `/amcl_pose` contra la marca de cinta al final de la recta | Se reporta el valor, sin umbral *(enmendado el 2026-09-06; antes «≤ 0,50 m» como puerta)* | **Medida** |
+>
+> **Enmienda del 2026-09-06, tomada antes de correr el G2 y no después, como obliga el §7 del
+> protocolo experimental.** Fundamento completo en el §4 de
+> [`S21_preparacion_G2.md`](Evidencia/S21_preparacion_G2.md), escrito el 2026-09-01.
+>
+> **M1 pasa a dos lados porque, tal como estaba, no podía fallar.** Un umbral «≥ 0,90» tolera un
+> 10 % de error cuando el peor que el proyecto ha medido nunca es el 5,7 % de esta misma nota, y
+> además **no tiene cota superior**: el defecto real conocido —el carro registra **+2,9 % de
+> más**, hallazgo «repetibilidad no es calibración» del 29-ago— pasaba por definición, y pasaría
+> igual a +50 %. Los tres casos ya medidos por el proyecto lo pasan: 1,029 · 0,943 · 0,987. Era la
+> crítica del 26-ago —*«calibrado para no verlo»*— reaparecida dentro del criterio escrito para
+> corregirla. Con `\|ratio − 1\| ≤ 0,10` el +2,9 % **sigue pasando, pero por margen y no por
+> construcción**, y un sesgo largo grande sí se vería.
+>
+> **M2 baja de puerta a medida porque su resultado se calcula sin correrla.** Con el +2,9 %
+> medido, 0,029 × 20 m = **0,58 m**, por encima del umbral de 0,50 m, y **R3** dice que en un
+> pasillo uniforme el eje longitudinal no es observable, así que AMCL no lo corrige. Una puerta
+> cuyo veredicto se conoce de antemano no gatea nada. **Se corre igual, y vale la mañana**: el
+> pasillo real tiene marcos de puerta, mobiliario y gente que el simulado no tiene, de modo que el
+> 5,7 % es un piso y no una estimación; en simulación el piso 2, con forma de S, hizo que AMCL se
+> reanclara de 0,320 m a 0,052 m. **La pregunta abierta de verdad es cuánto recupera AMCL con
+> geometría real**, y esa se responde con un número, no con un aprobado.
+>
+> **Sobre qué ramifica el GO/NO-GO, decidido ahora y no con el dato delante:** ramifica **solo
+> sobre M1**. Un M2 alto **no manda parar**: R3 está documentado desde el 26-ago y en esa misma
+> fecha se decidió no construir la solución de localización dentro de este trabajo. Si M2 sale por
+> encima de 0,50 m se registra como **limitación medida** en `REQUISITOS.md` y en el documento
+> final, y el cronograma **no se renegocia**. Lo que M2 sí puede hacer es lo contrario: si sale
+> claramente por debajo, es un resultado a favor que hoy nadie tiene.
 >
 > **El umbral de M1 es una decisión, no una derivación, y se fija antes de ver el dato** —misma
 > disciplina que el §7 del protocolo experimental—. Se justifica así: la tolerancia de llegada del
@@ -384,6 +413,8 @@ extremo con relevo, y el log arroja las cuatro métricas de OE4.
 > congelación de S23 en vez de descubrirlo en la campaña de S25.
 
 ### S22 · 7 – 13 sep — Interfaz HRI e integración
+
+Reparto día a día en [`PLAN_S22.md`](PLAN_S22.md), escrito el domingo 2026-09-06.
 
 | Frente | Actividad |
 |---|---|
