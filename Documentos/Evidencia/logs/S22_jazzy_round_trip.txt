@@ -1,0 +1,143 @@
+Tarea 5 de S22 -- coordinacion_msgs corre sobre la tarjeta del carro, bajo Jazzy
+Medido el 2026-09-07, lunes de S22, por SSH a deepracer@192.168.0.102.
+
+Maquina: tarjeta original Intel del AWS DeepRacer, Ubuntu 24.04.4 LTS,
+         kernel 6.8.0-117-lowlatency, ROS 2 Jazzy, PyYAML 6.0.1.
+Prueba:  coordinacion_msgs/test/prueba_round_trip.py, 19 comprobaciones.
+
+POR QUE ESTA CORRIDA EXISTE. Hasta hoy la prueba solo se habia corrido en Humble,
+en el portatil. El criterio que traia la tarea era "compila", y compilar no
+prueba que un mensaje sobreviva al serializado: es la misma clase de criterio que
+no puede fallar que se corrigio en RF-22 y en el nombre del topico de RF-08. Lo
+que cierra la tarea es la prueba corriendo, no el paquete construyendo.
+
+
+=============================================================================
+LO QUE HABIA EN LA TARJETA -- NO LO QUE EL PLAN SUPONIA
+=============================================================================
+
+El plan daba por hecho un workspace en ~/deepracer_ws/src. NO EXISTE. La tarjeta
+tiene en el home los bags y mapas de las corridas de campo, un build/ install/
+log/ sueltos de un colcon sin fuentes -install/ solo contiene los scripts de
+setup, ningun paquete- y un fichero llamado 'ros2' que no es carpeta.
+
+Es decir: el codigo de coordinacion NUNCA habia estado en la tarjeta. Se creo un
+workspace limpio en ~/tesis_ws/ sin tocar nada de lo anterior.
+
+  ~/tesis_ws/src/coordinacion_msgs/               (8 ficheros, sin __pycache__)
+  ~/tesis_ws/src/deepracer_bringup/config/puntos_interes.yaml
+  ~/tesis_ws/src/deepracer_bringup/COLCON_IGNORE  (solo lleva el YAML, no es paquete)
+
+EL YAML NO ES OPCIONAL. La seccion 4 de la prueba abre
+../../deepracer_bringup/config/puntos_interes.yaml, relativo al fichero de la
+prueba, y lo abre SIN GUARDA: si falta, no avisa al empezar, da tres secciones en
+verde y revienta a mitad con FileNotFoundError. Por eso se copia a esa ruta exacta
+y se comprobo con md5 en las dos maquinas, no con un ls:
+
+  de944a8a3b6950590f6f86cb4475bc2d   en el portatil
+  de944a8a3b6950590f6f86cb4475bc2d   en la tarjeta
+
+Un ls dice que hay un fichero; el hash dice que es el mismo fichero. Un YAML
+truncado en el envio habria fallado mas tarde y disfrazado de otra cosa.
+
+
+=============================================================================
+PRERREQUISITOS, COMPROBADOS ANTES DE COMPILAR
+=============================================================================
+
+  which colcon                            -> /usr/bin/colcon
+  python3 -c 'import yaml; yaml.__version__' -> 6.0.1
+  ros2 pkg prefix rosidl_default_generators   -> /opt/ros/jazzy
+
+Se comprueban por separado a proposito: si se compila a ciegas y falla, no se
+distingue "a la tarjeta le faltan herramientas" de "el paquete no compila bajo
+Jazzy". La segunda es R8; la primera no. Los tres estaban.
+
+
+=============================================================================
+COMPILACION
+=============================================================================
+
+  source /opt/ros/jazzy/setup.bash && cd ~/tesis_ws && colcon build --packages-select coordinacion_msgs
+
+  Finished <<< coordinacion_msgs [1min 31s]
+  Summary: 1 package finished [1min 31s]
+
+Sin stderr. R8 -la divergencia Humble/Jazzy- NO se materializo en este paquete.
+Eso vale para coordinacion_msgs y solo para el; los paquetes con codigo C++ o con
+dependencias de Nav2 siguen sin comprobarse en la tarjeta.
+
+Sin sudo, a proposito: compilar como root habria dejado install/ de root y el
+paso siguiente habria fallado de una forma que parece otro problema.
+
+
+=============================================================================
+LA PRUEBA
+=============================================================================
+
+  source /opt/ros/jazzy/setup.bash && source ~/tesis_ws/install/setup.bash \
+    && python3 ~/tesis_ws/src/coordinacion_msgs/test/prueba_round_trip.py
+
+1. Constantes declaradas en los .msg
+  [OK ] EstadoRobot LIBRE/NAVEGANDO/EN_TRANSFERENCIA/ERROR = 0/1/2/3
+  [OK ] EstadoMision INACTIVA..FALLIDA = 0..5
+  [OK ] EstadoMision RECIBIDA = 6, sin renumerar las anteriores
+
+2. EstadoRobot por DDS
+  [OK ] llega el mensaje
+  [OK ] robot_id, nivel, estado intactos
+  [OK ] pose con frame_id y float64 sin perdida x=-21.651215
+
+3. EstadoMision con PuntoInteres anidado
+  [OK ] llega el mensaje
+  [OK ] PuntoInteres anidado sobrevive
+  [OK ] texto en espanol con acentos y n-tilde 'Espere aquí, el robot del piso 1 está en camino. Señalice.'
+
+4. ListaPuntosInteres: el catalogo real, y latched de verdad
+      catalogo cargado del YAML: 31 puntos
+  [OK ] un suscriptor tardio recibe el catalogo sin republicar
+  [OK ] llegan los puntos completos 31 de 31
+  [OK ] los ids sobreviven en orden
+  [OK ] los puntos de transferencia siguen marcados ['piso1_escalera', 'piso2_escalera']
+  [OK ] hay destinos de los dos niveles [1, 2]
+
+5. GuiarUsuario: goal -> feedback -> result
+  [OK ] el servidor de accion aparece
+  [OK ] el goal es aceptado
+  [OK ] llega el result
+  [OK ] result: exito, 42.5 s, 1 relevo (True, 42.5, 1)
+  [OK ] llego feedback con EstadoMision dentro 1 feedback(s)
+
+============================================================
+Todas las comprobaciones pasan.
+============================================================
+
+  -> 19 de 19 (3 + 3 + 3 + 5 + 5). CUMPLE.
+
+
+=============================================================================
+QUE QUEDA PROBADO Y QUE NO
+=============================================================================
+
+PROBADO en la tarjeta, bajo Jazzy:
+  - las cuatro definiciones .msg y la .action generan y se instalan,
+  - las constantes valen lo mismo que en Humble -no se renumeraron al regenerar-,
+  - float64 de la pose sobrevive sin perdida (x = -21.651215),
+  - el texto en espanol con acentos y n-tilde sobrevive al serializado, que es lo
+    que la HRI va a mostrarle al usuario,
+  - el catalogo real de 31 puntos viaja entero y con los ids en orden,
+  - transient_local funciona: un suscriptor tardio recibe el catalogo sin que
+    nadie republique,
+  - la accion completa el ciclo goal -> feedback -> result.
+
+NO PROBADO, y no lo prueba esta corrida:
+  - que dos procesos SEPARADOS en la tarjeta se vean entre si. Esta prueba publica
+    y se suscribe DENTRO DE UN MISMO PROCESO, asi que no toca la regla del mismo
+    dueno de los buzones /dev/shm/fastrtps_port70NN anotada el 2026-09-04.
+  - que el portatil (Humble) y la tarjeta (Jazzy) se comuniquen entre maquinas.
+  - cualquier otro paquete: coordinacion, deepracer_bringup, el plugin C++.
+    R8 sigue abierto para todos ellos.
+
+La IP de la tarjeta CAMBIA entre sesiones. Hoy fue 192.168.0.102; el primer ping
+fallo y el segundo respondio, asi que conviene reintentar antes de dar por caida
+la conexion.

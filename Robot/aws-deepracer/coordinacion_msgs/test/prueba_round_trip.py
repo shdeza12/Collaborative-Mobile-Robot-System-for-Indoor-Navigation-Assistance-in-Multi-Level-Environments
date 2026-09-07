@@ -19,9 +19,17 @@ puntos reales de puntos_interes.yaml. (La linea decia '18 de 18, con los 16
 puntos' y se habia quedado en el 2026-08-24: la comprobacion de mas es
 RECIBIDA=6, anadida el 2026-08-29, y el catalogo crecio de 16 a 31 puntos.)
 
-Ultima ejecucion en Jazzy, sobre la tarjeta del carro: NUNCA. Es lo que va a
-hacer la Tarea 5 del lunes 7 en Documentos/PLAN_S22.md. Mientras esta linea siga
-diciendo NUNCA, que el paquete funcione en la tarjeta es una suposicion.
+Ultima ejecucion en Jazzy, sobre la tarjeta del carro: 2026-09-07, 19 de 19, con
+los mismos 31 puntos. Salida completa y contexto en
+Documentos/Evidencia/logs/S22_jazzy_round_trip.txt. Compilo en 1 min 31 s sin
+stderr, asi que R8 -la divergencia Humble/Jazzy- no afecta a ESTE paquete; sigue
+abierto para los demas. La tarjeta no tenia ningun workspace del proyecto: se
+creo ~/tesis_ws/ desde cero.
+
+OJO CON LO QUE ESTA PRUEBA NO PRUEBA: publica y se suscribe DENTRO DE UN MISMO
+PROCESO, asi que no toca la regla del mismo dueno de los buzones
+/dev/shm/fastrtps_port70NN (anotada el 2026-09-04), ni dice nada sobre si el
+portatil en Humble y la tarjeta en Jazzy se ven entre maquinas.
 
 OJO, ESTA PRUEBA NO ES AUTOCONTENIDA: la seccion 4 abre el catalogo real en
 ../../deepracer_bringup/config/puntos_interes.yaml, relativo a ESTE fichero, y lo
