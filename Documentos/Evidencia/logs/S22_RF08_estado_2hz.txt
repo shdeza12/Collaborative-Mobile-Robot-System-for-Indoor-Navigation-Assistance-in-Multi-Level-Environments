@@ -1,0 +1,141 @@
+RF-08 -- Cada agente publica su estado en /<ns>/estado a 2 Hz
+Medido el 2026-09-07, lunes de S22, en el portatil (ROS 2 Humble).
+Nodo: coordinacion/agente, lanzado con  -r __ns:=/robot1 -p nivel:=1
+
+El criterio de aceptacion de RF-08 tiene DOS mitades y aqui se miden las dos por
+separado, porque comprobar solo que el topico existe seria una prueba que no
+puede fallar (la misma clase de defecto que se encontro en RF-22).
+
+
+=============================================================================
+MITAD 1 -- FRECUENCIA:  ros2 topic hz /robot1/estado
+=============================================================================
+
+average rate: 2.000
+        min: 0.499s max: 0.501s std dev: 0.00033s window: 16
+average rate: 1.999
+        min: 0.499s max: 0.502s std dev: 0.00052s window: 18
+average rate: 2.000
+        min: 0.499s max: 0.502s std dev: 0.00057s window: 21
+
+  -> 2,000 Hz. Desviacion tipica 0,0005 s sobre un periodo de 0,5 s.
+     CUMPLE.
+
+
+=============================================================================
+MITAD 2 -- EL CAMPO 'estado' CAMBIA
+=============================================================================
+
+El estado no se copia de /coordinacion/estado_mision -eso seria el coordinador
+dandose la razon a si mismo, y dejaria sin valor la prueba de RF-06-, sino que
+se deduce del status de la propia accion navigate_to_pose, que publica Nav2.
+
+Para provocar los cambios sin levantar la simulacion se inyecta un
+action_msgs/GoalStatusArray en /robot1/navigate_to_pose/_action/status:
+
+  ros2 topic pub /robot1/navigate_to_pose/_action/status \
+      action_msgs/msg/GoalStatusArray "{status_list: [{status: N}]}" \
+      --qos-durability transient_local --qos-reliability reliable -r 2
+
+Resultado, leyendo  ros2 topic echo /robot1/estado --field estado --once :
+
+  sin ningun status (recien arrancado)  -> estado = 0   LIBRE
+  status = 2  EJECUTANDO                -> estado = 1   NAVEGANDO
+  status = 4  EXITOSA                   -> estado = 0   LIBRE
+  status = 6  ABORTADA                  -> estado = 3   ERROR
+
+  -> El campo cambia, y cambia en los dos sentidos: no se queda pegado.
+     CUMPLE.
+
+Esta inyeccion prueba ademas algo que la prueba fuera de linea no puede probar:
+que la suscripcion EMPAREJA por DDS. El topico de status de una accion se
+publica con RELIABLE + TRANSIENT_LOCAL; con el perfil por defecto (VOLATILE) la
+suscripcion no habria emparejado y el callback no se habria llamado nunca, sin
+ningun error y sin ningun aviso. El robot se habria quedado LIBRE para siempre.
+
+
+=============================================================================
+UN MENSAJE COMPLETO
+=============================================================================
+
+robot_id: robot1
+nivel: 1
+pose:
+  header:
+    stamp: {sec: 0, nanosec: 0}
+    frame_id: ''
+  pose:
+    position: {x: 0.0, y: 0.0, z: 0.0}
+    orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}
+estado: 0
+detalle: 'TF robot1/map -> robot1/base_link no disponible: "robot1/map" passed
+          to lookupTransform argument target_frame does not exist. '
+stamp: {sec: 1788796616, nanosec: 160755533}
+
+SOBRE LA POSE EN CERO. Esta corrida es SIN simulador: no hay TF, y por eso no
+hay pose. Lo importante es lo que hace el nodo con eso:
+
+  (a) sigue publicando a 2 Hz -un fallo de TF no puede tumbar el temporizador,
+      porque entonces RF-08 fallaria por un motivo que no tiene que ver con lo
+      que RF-08 mide-, y
+  (b) DICE en 'detalle' que no tiene pose, en vez de mandar ceros callando.
+
+Publicar una pose vieja como si fuera fresca es exactamente el engano de
+/<ns>/amcl_pose que advierte EstadoRobot.msg: ese topico es TRANSIENT_LOCAL y
+con el robot quieto entrega la ultima muestra caducada sin dar ningun error
+(medido el 2026-08-24: 0 mensajes en 10 s parado, 12 en movimiento). Por eso
+este nodo lee la TF y no aquel topico.
+
+PENDIENTE, DECLARADO: la pose con valores reales queda por comprobar contra la
+simulacion viva. Entra el miercoles 9 con la integracion de extremo a extremo.
+
+
+=============================================================================
+PRUEBA FUERA DE LINEA
+=============================================================================
+
+  python3 src/aws-deepracer/coordinacion/test/prueba_agente.py
+  -> 40 de 40 comprobaciones pasan.
+
+La prueba se valido MUTANDO el codigo, no solo viendola verde. Cuatro
+mutaciones, cuatro detecciones:
+
+  PERIODO_S = 1.0 en vez de 1/FRECUENCIA_HZ  -> [MAL] frecuencia
+  anadir una lectura de amcl_pose            -> [MAL] anticircularidad de pose
+  QoS de la suscripcion a 10                 -> [MAL] QoS del status
+  devolver el sufijo viejo al nombre          -> [MAL] nombre del topico
+
+La tercera NO se detectaba en la primera version de la prueba: buscaba el texto
+'qos_profile_action_status_default' en cualquier parte del fichero, y el import
+sin usar bastaba para darla por buena. Se corrigio para mirar el ARGUMENTO de
+la llamada create_subscription con ast, no el texto crudo.
+
+
+=============================================================================
+UN DEFECTO DE FONDO QUE APARECIO AL IMPLEMENTAR ESTO
+=============================================================================
+
+Antes de escribir una linea de codigo hubo que resolver una contradiccion: el
+repositorio nombraba el topico de DOS formas a la vez.
+
+  Documentos/CONTRATO_INTERFACES.md §4  -> /<ns>/estado          (normativo)
+  Documentos/REQUISITOS.md, RF-08       -> /<ns>/estado          (criterio)
+  coordinacion_msgs/msg/EstadoRobot.msg -> el mismo con sufijo   (cabecera)
+  coordinacion_msgs/test/prueba_round_trip.py:84,86 -> idem      (codigo)
+
+Se adopta /<ns>/estado: es lo que dice la tabla normativa y es la cadena literal
+del criterio de aceptacion de RF-08. Las dos referencias con sufijo se
+corrigieron el 2026-09-07.
+
+POR QUE SOBREVIVIO TANTO. La unica prueba que tocaba ese nombre publicaba y se
+suscribia AL MISMO nombre. Una prueba de ida y vuelta comprueba que el mensaje
+sobrevive al serializado, no que el topico se llame como debe: habria pasado en
+verde con cualquier cadena. Es otra vez el defecto de clase (3) que se encontro
+en RF-22 -una prueba que no puede fallar-, y por eso la correccion no fue solo
+renombrar: prueba_agente.py §2 tiene ahora una comprobacion que recorre los dos
+paquetes y falla si el nombre viejo reaparece en cualquier .py, .msg, .action o
+.xml. Verificada mutando (linea de arriba).
+
+Nota: herramientas/verificar_repositorio.sh daba 12/12 con la contradiccion
+dentro. No cruza nombres de topico entre documentos y codigo; eso queda anotado
+como limite conocido de esa herramienta, no como fallo de esta corrida.

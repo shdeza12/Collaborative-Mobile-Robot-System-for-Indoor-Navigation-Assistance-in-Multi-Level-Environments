@@ -21,6 +21,7 @@ setup(
     entry_points={
         'console_scripts': [
             'coordinador = coordinacion.coordinador:main',
+            'agente = coordinacion.agente:main',
         ],
     },
 )

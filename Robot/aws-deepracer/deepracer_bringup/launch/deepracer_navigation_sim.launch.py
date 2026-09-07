@@ -227,6 +227,36 @@ def acciones(context, *args, **kwargs):
              parameters=[{'use_sim_time': use_sim_time},
                          {'autostart': autostart},
                          {'node_names': LIFECYCLE_NODES}]),
+    ] + agente(ns, ns_nodo, use_sim_time, remappings, context)
+
+
+def agente(ns, ns_nodo, use_sim_time, remappings, context):
+    """El nodo que publica /<ns>/estado a 2 Hz (RF-08).
+
+    VA AQUI, CON NAV2, Y NO EN UN LANZAMIENTO PROPIO, porque lee
+    '<ns>/navigate_to_pose/_action/status', que publica el bt_navigator de esta
+    misma pila. Arrancarlo por separado dejaria un nodo publicando LIBRE
+    eternamente cada vez que alguien levantara el robot sin navegacion: no daria
+    error, daria un dato falso, que es peor.
+
+    SOLO SE LANZA CON NAMESPACE. La cabecera de este archivo promete que sin
+    'namespace' el lanzamiento queda identico al original de AWS, y esa promesa
+    la comprueba gente que no esta leyendo esto. Ademas, un agente sin namespace
+    publicaria en '/estado' con robot_id vacio, que no le sirve al coordinador.
+    """
+    if not ns:
+        return []
+
+    nivel = LaunchConfiguration('nivel').perform(context).strip()
+
+    return [
+        Node(package='coordinacion', executable='agente', name='agente',
+             output='screen',
+             namespace=ns_nodo,
+             remappings=remappings,
+             parameters=[{'use_sim_time': use_sim_time},
+                         {'robot_id': ns},
+                         {'nivel': int(nivel or 0)}]),
     ]
 
 
@@ -245,6 +275,18 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'use_sim_time', default_value='false',
             description='Use simulation (Gazebo) clock if true'),
+
+        # RF-08. No se deduce del nombre del namespace a proposito: la
+        # correspondencia nivel <-> robot es configuracion explicita del
+        # coordinador ('robot_nivel_1', 'robot_nivel_2'), no una convencion de
+        # nombres. Deducirla aqui crearia una segunda fuente de verdad que
+        # podria discrepar de la primera sin que nada lo dijera.
+        DeclareLaunchArgument(
+            'nivel', default_value='0',
+            description='Piso que atiende este robot: 1 o 2. Solo se usa con '
+                        "'namespace'. Si se deja en 0, el agente arranca igual "
+                        'pero avisa: publicaria un nivel que EstadoRobot.msg no '
+                        'admite.'),
 
         DeclareLaunchArgument(
             'clock_topic', default_value='/clock',
