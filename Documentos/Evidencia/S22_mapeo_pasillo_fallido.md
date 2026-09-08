@@ -256,6 +256,11 @@ Se comparó, ventana a ventana de 1 s, el desplazamiento que estima rf2o contra 
 del bag de simulación, **descompuesto en el marco del robot**. Esa descomposición es la que decide,
 porque un factor de escala afecta a todo por igual y una inobservabilidad no.
 
+> **Cómo se repite.** [`herramientas/medir_registro_odometria.py`](../../herramientas/medir_registro_odometria.py),
+> pasándole el bag con el `/odom` de rf2o y el bag de simulación con la odometría exacta. El `/odom`
+> de rf2o no está en el bag original: hay que reproducirlo con rf2o corriendo —como en
+> `mapear_desde_bag.sh`— y grabarlo aparte con `ros2 bag record -o /tmp/odom_rf2o /odom`.
+
 | componente | rf2o | verdad | razón |
 |---|---|---|---|
 | **longitudinal** | 34,94 m | 90,02 m | **0,388** |
@@ -282,6 +287,12 @@ En las ventanas ciegas el alcance frontal está **clavado en 7,40 m mientras el 
 No es saturación: el sensor simulado llega a 10,0 m. Es la pared lateral vista por el borde del
 sector, a distancia invariante.
 
+> **Cómo se repite, y para qué sirve de aquí en adelante.**
+> [`herramientas/medir_visibilidad_frontal.py`](../../herramientas/medir_visibilidad_frontal.py)
+> produce esa tabla. Su uso previsto ya no es diagnóstico sino **preventivo**: correrlo sobre un bag
+> de reconocimiento dice, antes de comprometer una campaña, si el sitio aporta la estructura que la
+> cadena necesita.
+
 ### 8.3 El mecanismo
 
 rf2o estima el movimiento **solo** del cambio entre barridos consecutivos. En un pasillo recto y
@@ -301,7 +312,9 @@ Criterio y predicción fijados **antes** de correr, como exige el §6.3 del prot
 Entorno: `pasillo_test.world`, el modelo `pasillo_usta`, una caja **cerrada** de 7,70 × 2,70 m
 interiores. Desde cualquier punto las dos paredes de los extremos entran en los 10 m del sensor, así
 que el avance sí es observable. Movimiento: **recta pura de ida y vuelta**, 4 travesías de 5,6 m,
-22,4 m en total a 0,33 m/s —la misma velocidad de `S21_piloto_bajada_01` y sin un solo giro—. La
+22,4 m en total a 0,33 m/s —la misma velocidad de `S21_piloto_bajada_01` y sin un solo giro—,
+conducido por [`herramientas/conducir_recta.py`](../../herramientas/conducir_recta.py), que fija el
+movimiento para que la única variable del ensayo sea la geometría del entorno. La
 única variable que cambia respecto al pasillo largo es la geometría del entorno.
 
 | | pasillo de 46,9 m | caja cerrada de 7,7 m |
