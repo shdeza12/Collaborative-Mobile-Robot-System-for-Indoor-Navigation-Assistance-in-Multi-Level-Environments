@@ -37,11 +37,38 @@ que arranco el sensor a la primera. El propio RPLIDAR declaro entonces
 'Hardware Rev: 5' y 12,0 m de alcance, que es el A1M8-R5 de fabrica del Evo, y
 publico 360 muestras sobre 360 grados a 6,80 Hz.
 
+ESPACIO DE NOMBRES: POR QUE SE ANADIO EL 2026-09-08
+---------------------------------------------------
+Hasta hoy el nodo llevaba 'namespace=' escrito en el codigo, con el argumento
+-correcto para UN vehiculo- de que asi publica en '/scan', que es donde miran
+Nav2 y slam_toolbox. Con DOS vehiculos en el dominio 0 eso deja de valer: los
+dos publicarian en '/scan' y no serian direccionables por separado, que es
+justo lo que exige RF-02. Y RF-12 pide literalmente '/<ns>/scan'.
+
+El defecto por defecto NO cambia: sin argumento, el nodo sigue sin espacio de
+nombres y sigue publicando en '/scan'.
+
+El marco del sensor se prefija junto con el topico, y no es un adorno. La
+simulacion lleva desde el 2026-08-24 prefijando TODOS los marcos
+(Evidencia/S20_marco_map_prefijado.md, y el comentario largo de
+deepracer_navigation_sim.launch.py): es lo que permite que dos robots
+compartan el topico '/tf' sin compartir el arbol. Dejar el marco en 'laser'
+mientras el topico pasa a '/robot1/scan' daria una separacion aparente -los
+topicos no chocan- con los dos arboles TF pisandose por el nombre del marco.
+
+Medido en el vehiculo el 2026-09-08, y por eso el cambio es seguro hoy: la
+tarjeta NO publica ningun arbol TF. 'ros2 topic echo /tf' y '/tf_static'
+responden 'does not appear to be published yet', y entre los 9 nodos de
+deepracer-core no hay 'robot_state_publisher'. Es decir que no hay nada que
+romper, y tampoco hay nada sobre lo que Nav2 pueda correr todavia: eso es la
+segunda mitad pendiente de RF-12 y se trata aparte.
+
 USO
 ---
 En el vehiculo, con deepracer-core ya corriendo sin LiDAR:
 
     ros2 launch deepracer_bringup lidar_vehiculo.launch.py
+    ros2 launch deepracer_bringup lidar_vehiculo.launch.py namespace:=robot1
 
 Comprobar que publica de verdad, y no solo que el topico aparece en la lista
 -que no significa nada, ver §2 del informe del 21-ago-:
@@ -51,21 +78,39 @@ Comprobar que publica de verdad, y no solo que el topico aparece en la lista
 """
 
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
+from launch.actions import DeclareLaunchArgument, OpaqueFunction
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
 
-def generate_launch_description():
-    return LaunchDescription([
-        DeclareLaunchArgument(
-            'serial_port', default_value='/dev/ttyUSB0',
-            description='Puerto del puente USB-serie CP210x del sensor'),
-        DeclareLaunchArgument(
-            'frame_id', default_value='laser',
-            description='Marco del sensor; el URDF del vehiculo lo llama asi'),
+def resolver_espacio(namespace, frame_id):
+    """Traduce el argumento 'namespace' a lo que necesita launch_ros.
 
-        Node(
+    Devuelve (ns_nodo, frame_id). Esta fuera de 'acciones' para que la prueba
+    pueda llamarla sin montar un LaunchContext.
+
+    Dos detalles que no son obvios:
+
+      - launch_ros distingue None -sin espacio de nombres- de la cadena vacia,
+        que traduce a '__ns:=/' y NO es lo mismo. Mismo criterio que
+        deepracer_localization_sim.launch.py:83.
+      - un 'frame_id' explicito manda: si alguien lo pasa a mano se respeta tal
+        cual, prefijado o no. El prefijado automatico es solo el defecto.
+    """
+    ns = namespace.strip('/')
+    ns_nodo = ns if ns else None
+    if frame_id:
+        return ns_nodo, frame_id
+    return ns_nodo, f'{ns}/laser' if ns else 'laser'
+
+
+def acciones(context, *args, **kwargs):
+    ns_nodo, frame_id = resolver_espacio(
+        LaunchConfiguration('namespace').perform(context),
+        LaunchConfiguration('frame_id').perform(context).strip(),
+    )
+
+    return [Node(
             # 'rplidar_ros' y 'rplidar_composition' son los nombres que existen
             # de verdad en la tarjeta (Jazzy). No 'rplidar_ros2' ni
             # 'rplidar_scan_publisher', que es lo que pedia deepracer.launch.py
@@ -74,18 +119,36 @@ def generate_launch_description():
             package='rplidar_ros',
             executable='rplidar_composition',
             name='rplidar_composition',
-            # SIN espacio de nombres, a proposito: asi publica en '/scan', que
-            # es donde miran Nav2 y slam_toolbox. Bajo 'rplidar_ros' publicaria
-            # en '/rplidar_ros/scan' y haria falta un remapeo, que es
-            # exactamente el punto 6 del backlog del spike de S19.
-            namespace='',
+            # Sin argumento esto es None y el sensor publica en '/scan', que es
+            # donde miran Nav2 y slam_toolbox con un solo vehiculo. Con
+            # 'namespace:=robot1' pasa a '/robot1/scan', que es lo que pide
+            # RF-12. Lo que NO se hace nunca es dejarlo bajo el espacio de AWS
+            # ('/rplidar_ros/scan'), que obligaria a un remapeo: ese es el punto
+            # 6 del backlog del spike de S19.
+            namespace=ns_nodo,
             output='screen',
             parameters=[{
                 'serial_port': LaunchConfiguration('serial_port'),
                 'serial_baudrate': 115200,
-                'frame_id': LaunchConfiguration('frame_id'),
+                'frame_id': frame_id,
                 'inverted': False,
                 'angle_compensate': True,
             }],
-        ),
+        )]
+
+
+def generate_launch_description():
+    return LaunchDescription([
+        DeclareLaunchArgument(
+            'serial_port', default_value='/dev/ttyUSB0',
+            description='Puerto del puente USB-serie CP210x del sensor'),
+        DeclareLaunchArgument(
+            'namespace', default_value='',
+            description='Espacio de nombres del vehiculo (robot1, robot2). '
+                        'Vacio deja el sensor en /scan, como hasta el 2026-09-08'),
+        DeclareLaunchArgument(
+            'frame_id', default_value='',
+            description='Marco del sensor. Vacio lo deriva del namespace: '
+                        "'laser' sin namespace, '<ns>/laser' con el"),
+        OpaqueFunction(function=acciones),
     ])
