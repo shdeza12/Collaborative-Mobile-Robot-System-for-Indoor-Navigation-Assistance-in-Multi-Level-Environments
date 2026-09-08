@@ -264,6 +264,12 @@ Si dice **`root`**, graba con `sudo -i` (el comando exacto está en el Paso 3.1 
 > si quien mira no tiene el mismo dueño que quien publica**. Vale igual para `ros2 topic hz` y
 > `ros2 topic echo`. El fallo siempre es **silencio, no error**. Si un tópico parece mudo, repite
 > la medida con el dueño correcto antes de creértelo.
+>
+> **Segunda causa del mismo silencio, medida el 2026-09-08:** el `ros2-daemon` se rompe y **no
+> muere, responde mal** — devuelve `!rclpy.ok()` por XMLRPC y `ros2 topic echo` sale *al instante*,
+> que sobre la terminal se lee exactamente igual que un tópico mudo. Distinguirlo no cuesta nada:
+> **cronometra**. Si `echo` vuelve antes de agotar su `timeout`, no midió nada. La cura es
+> `--no-daemon` en `topic list`, `topic echo` y `node list`; en el pasillo, úsalo siempre.
 
 ### 6.3 Recorrer
 
