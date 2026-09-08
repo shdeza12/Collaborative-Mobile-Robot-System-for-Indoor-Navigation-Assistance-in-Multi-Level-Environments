@@ -116,10 +116,18 @@ Nunca se habían mirado los `slam.log`. Los cuatro traen lo mismo:
 | barridos descartados por cola llena | 24 | 15 | 9 |
 | barridos con longitud distinta de 360 | 54 y 85 muestras | — | — |
 
-El primero es un fallo de **deserialización CDR**: hay mensajes mal formados dentro de `/scan`, del
-orden de **25 por bag**. No es la causa principal —25 de 1200— pero es un defecto del sensor o de
-la grabación que no estaba documentado. Los barridos de 54 y 85 muestras los rechaza slam_toolbox
-explícitamente (`LaserRangeScan contains 54 range readings, expected 360`).
+El primero se leyó como un fallo de **deserialización CDR** —mensajes mal formados dentro de
+`/scan`, del orden de **25 por bag**—, y **eso quedó refutado el mismo día**. Corriendo la cadena
+sobre un bag de **simulación** aparece **23 veces, y en los cuatro logs a la vez**: `slam.log`,
+`rf2o.log`, `play.log` y **`tf.log`**. El publicador de TF estática **no se suscribe a `/scan`**,
+así que el mensaje no puede venir del contenido del barrido. Es el aviso cosmético de
+descubrimiento de Fast-DDS ya documentado el 2026-08-19, lo emite cada nodo al arrancar, y **no
+es un defecto de este proyecto**. Se deja escrito porque la lectura equivocada estuvo a punto de
+abrir una línea de trabajo sobre un sensor sano.
+
+Lo que **sí** es real es lo segundo y lo tercero: barridos descartados por cola llena, y los
+barridos de 54 y 85 muestras, que slam_toolbox rechaza explícitamente
+(`LaserRangeScan contains 54 range readings, expected 360`).
 
 ---
 
@@ -140,20 +148,115 @@ explícitamente (`LaserRangeScan contains 54 range readings, expected 360`).
 
 ---
 
-## 7. Qué queda abierto, y dónde se resuelve
+## 7. El experimento de control: la cadena falla también en simulación
 
-Todo lo que sigue es **de escritorio, sobre estos cuatro bags**, sin volver al pasillo:
+*Añadido la misma tarde del 2026-09-08, de escritorio, sin volver al pasillo.*
 
-1. **Resolver la discrepancia de 180°** entre el URDF y el montaje real, y corregir la TF de
-   `mapear_desde_bag.sh` o el URDF, según cuál esté mal.
-2. **Decidir si rf2o puede funcionar en este pasillo.** Con el sector ciego apuntando al eje y
-   paredes de std 0,30, puede que la respuesta sea que no, y entonces hace falta otra fuente de
-   odometría o mapear con otra técnica.
-3. **Los mensajes mal formados de `/scan`**: de dónde salen y si se pueden filtrar.
-4. **Nadie ha aceptado nunca un mapa en este proyecto.** La cadena rf2o + slam_toolbox no ha
-   producido todavía un mapa válido; hasta que lo haga, no se puede distinguir un fallo del pasillo
-   de un fallo de la cadena. **Ese es el primer experimento a montar**, y se puede hacer contra un
-   bag de simulación, donde la verdad del terreno se conoce.
+El §8 de abajo listaba como **primer** experimento montar la cadena contra un bag de simulación,
+porque mientras no exista **un** mapa aceptado no se puede distinguir un fallo del pasillo de un
+fallo de la cadena. Se montó, y el resultado cambia el diagnóstico entero.
+
+### 7.1 El banco
+
+Bag **`S21_piloto_bajada_01`** de la campaña de OE4: 2896 barridos de `/robot2/scan` en 289,6 s,
+con `robot2` recorriendo **43,932 m en X** de un pasillo de 46,8 m. Es el banco correcto por tres
+razones y conviene decirlas:
+
+- El barrido simulado es de **600 muestras sobre 300°** —medido en el bag, coincide con el URDF—,
+  o sea **el mismo hueco al frente** que el vehículo real.
+- La verdad de terreno es **exacta**: en simulación `/robot2/odom` sale de `model_->WorldPose()`,
+  no de una estimación. Y el mapa de referencia `mundo_definitivo_piso2.yaml` ya está **aceptado**
+  por `verificar_mapa.py` (cobertura 100,2 % X × 100,9 % Y, 0 de 7608 obstáculos falsos).
+- La TF `base_link → laser` del guion **es la del URDF de ese mismo robot**, luego es correcta por
+  construcción. Aquí no hay discrepancia de montaje que valga.
+
+Se construyó un bag derivado con **solo `/scan` y marco `laser`** —la forma exacta de un bag de
+campo— para que `mapear_desde_bag.sh` corriera **sin tocar una línea**: lo único que cambia entre
+esta corrida y las del pasillo es la entrada.
+
+**Criterio fijado antes de correr**, y no inventado para la ocasión: es la corrección de M1 que ya
+propuso [`S21_preparacion_G2.md`](S21_preparacion_G2.md) §4 —`|mapa ÷ verdad − 1| ≤ 0,10`, de dos
+lados— contra la extensión del mapa ya aceptado, **46,9 m X × 10,6 m Y**.
+
+### 7.2 El resultado
+
+| | X | Y |
+|---|---|---|
+| verdad (mapa aceptado) | 46,9 m | 10,6 m |
+| **mapa reconstruido** | **17,90 m** | 10,25 m |
+| desviación | **−61,8 % · NO PASA** | −3,3 % · pasa |
+
+**La cadena falla también en simulación**, con datos perfectos, TF correcta y verdad conocida. Pero
+**falla al revés que en el pasillo**: allí el mapa reventaba a 1166 m, aquí **se encoge**. Imagen:
+[`S22_mapa_simulacion_encogido.png`](S22_mapa_simulacion_encogido.png).
+
+### 7.3 De quién es el encogimiento: se grabó la odometría de rf2o
+
+Se repitió la corrida grabando `/odom`. **2852 poses de rf2o contra una verdad de 43,932 m en X y
+90,82 m de camino:**
+
+| | rf2o | verdad | registro |
+|---|---|---|---|
+| extensión en X | 16,646 m | 43,932 m | **37,9 %** |
+| camino recorrido | 45,51 m | 90,82 m | **50,1 %** |
+
+Y el mapa mide 17,90 m contra los 16,65 m que abarca rf2o, o sea rf2o **más la huella del sensor**:
+**slam_toolbox no corrige prácticamente nada.** El mapa *es* el error de rf2o hecho visible.
+
+**Es el tercer punto de R3, y el más limpio.** Los dos anteriores, sobre el bag `mision3`, daban
+**5,7 %** y **1,3 %**. Tres medidas independientes, tres veces muy por debajo de 100.
+
+### 7.4 Tres hipótesis refutadas con datos, incluidas dos propias
+
+1. **«Se movió demasiado rápido»** — refutada en el §2: la pasada más suave dio el peor mapa.
+2. **«Hay mensajes CDR mal formados en `/scan`»** — refutada en el §5: aparecen 23 veces en
+   `tf.log`, y el publicador de TF estática no se suscribe a `/scan`.
+3. **«La discrepancia de 180° del URDF explica la fuga»** — refutada aquí. Se corrió el **mismo**
+   bag con la TF girada 180° a propósito:
+
+   | corrida | TF | mapa en X |
+   |---|---|---|
+   | `mapa_sim` | yaw = π (la del guion) | 17,90 m |
+   | `mapa_sim2` | yaw = π, repetición | **17,90 m** |
+   | `mapa_sim_yaw0` | yaw = 0 (mal 180°) | 17,80 m |
+
+   **10 cm de diferencia sobre 17,9 m.** Y tiene sentido a posteriori: una rotación pura de π con
+   el sensor casi sobre el eje **gira** la trayectoria, no la deforma. Las dos repeticiones con
+   yaw = π dan la misma cifra al centímetro, así que esto no es ruido: es un resultado.
+
+   La discrepancia de 180° **sigue siendo real y hay que arreglarla** —importa para que AMCL se
+   localice después sobre un mapa con la orientación que espera—, pero **no es la causa del fallo
+   de mapeo** y arreglarla no daría un mapa aceptado.
+
+### 7.5 Lo que esto decide
+
+**La cadena rf2o + slam_toolbox no puede mapear este pasillo**, ni el simulado ni el real. No es la
+batería, no es el mando, no es el CDR, no es el montaje del sensor. Es la inobservabilidad
+longitudinal del §3, ahora medida **sobre la cadena de mapeo** y no inferida del error de llegada.
+
+**Consecuencia de planificación, que es lo que importa a cuatro días de la congelación de código:
+volver al pasillo no arregla esto.** Con la TF corregida y la batería llena el mapa seguiría
+saliendo corto, porque sale corto en simulación con datos perfectos.
+
+---
+
+## 8. Qué queda abierto, y dónde se resuelve
+
+1. ~~**Resolver la discrepancia de 180°**~~ **Sigue abierta pero baja de prioridad** (§7.4): es
+   real y hay que arreglarla para AMCL, pero no causa el fallo de mapeo.
+2. ~~**Decidir si rf2o puede funcionar en este pasillo.**~~ **Decidido con datos el 2026-09-08:
+   no.** 37,9 % de registro en simulación, 5,7 % y 1,3 % en las medidas de agosto.
+3. ~~**Los mensajes mal formados de `/scan`**: de dónde salen y si se pueden filtrar.~~
+   **Cerrado el mismo 2026-09-08, y en falso:** no son mensajes mal formados, es el aviso de
+   descubrimiento de Fast-DDS. Ver el §5 corregido.
+4. ~~**Nadie ha aceptado nunca un mapa en este proyecto.**~~ **Ejecutado el 2026-09-08 (§7), y la
+   respuesta es que el fallo es de la cadena, no del pasillo.**
+5. **Lo único que queda abierto de verdad: de dónde sale el mapa del pasillo real, si no de SLAM.**
+   El proyecto ya resolvió exactamente este problema una vez, y está en R10: en vez de rehacer el
+   SLAM, `herramientas/generar_mapa_desde_mundo.py` **derivó el mapa de la geometría** y el
+   resultado pasó `verificar_mapa.py` con 99,7 % de cobertura. El pasillo real ya está **medido con
+   flexómetro: 20,08 m**. Es el mismo camino, y es la vía que hay que evaluar antes que añadir una
+   fuente de odometría nueva a cuatro días de la congelación.
 
 **Los cuatro bags se conservan en la tarjeta y copiados en el portátil.** Son la evidencia con la
 que se repite el diagnóstico las veces que haga falta.
