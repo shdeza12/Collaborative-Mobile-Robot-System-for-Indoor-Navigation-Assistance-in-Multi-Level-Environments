@@ -84,7 +84,7 @@ igual, pero **el G2 no se declara**. No es motivo para no salir.
 > cualquier proxy. El `max` no sirve, se solapa entre batería sana y muriendo. Y la `std dev` de
 > `/scan` **ya no es una puerta**: sigue siendo útil, pero **una sola lectura marca sospechoso un
 > sensor sano dos de cada seis veces**, así que se toman tres. Todo el detalle en el **§5**, y se
-> anota por bag en el §11.
+> anota por bag en el §12.
 
 ---
 
@@ -113,7 +113,7 @@ abajo.
 > denominador de 20,08 a 20,000 mueve la razón un **0,4 %**, contra una compuerta de ±10 %. No
 > cambia ningún veredicto; cambia de qué se puede presumir.
 >
-> **Dos cosas que hay que anotar en el §11 antes de salir, porque no se deducen del número:**
+> **Dos cosas que hay que anotar en el §12 antes de salir, porque no se deducen del número:**
 > 1. **La clase y la marca del flexómetro.** «De instrumentación» sin clase declarada es un
 >    adjetivo; con la clase (I o II) es una incertidumbre que otro puede verificar, y es lo que
 >    de verdad sostiene el presupuesto de M2.
@@ -197,7 +197,7 @@ Guía de mapeo, **Pasos 2.2 a 2.5**. Resumen de lo que no se puede saltar:
 >
 > **CRITERIO, fijado antes de tener el dato delante, como pide el §7 del protocolo experimental:**
 > se anota la `std dev` de `ros2 topic hz /scan` **al abrir y al cerrar cada bag** (columnas
-> `std ini` / `std fin` del §11). Un bag cuya `std dev` llegue a **≥ 0,020 s** se marca
+> `std ini` / `std fin` del §12). Un bag cuya `std dev` llegue a **≥ 0,020 s** se marca
 > **SOSPECHOSO** y no entra en el cálculo de M1 sin repetirse con la batería cambiada.
 >
 > El 0,020 no es redondeo: está **2,5 veces por encima** del valor sano medido y **3,6 veces por
@@ -482,7 +482,7 @@ Cada pasada, en este orden:
    mide es dónde cree AMCL que está, no lo bien que conduces.
 6. **5 s quieto.** Ventana de llegada.
 7. **`Ctrl-C` una vez**, y **`grep message_count`**.
-8. **Anotar la pasada** en la tabla del §11.
+8. **Anotar la pasada** en la tabla del §12.
 
 **Regla dura: no se recoge la cinta con menos de un bag válido por sentido.** Si la mañana se va,
 se va con dos bags, no con cero.
@@ -492,7 +492,109 @@ localización). Si algo está mal, lo descubres con dos bags perdidos y no con s
 
 ---
 
-## 10. Las tres trampas, en una tabla
+## 10. Bloque 7 — La escala de tracción (RF-14). **Solo si el G2 ya está cerrado**
+
+**Esto no es G2 y no compite con él.** El §1 no cambia: si vuelves sin este bloque, la mañana valió
+igual. Se hace **únicamente** cuando el mínimo irrenunciable ya está grabado —el bag de mapeo, un
+bag de localización por sentido y la longitud medida—. Si el G2 se torció, recoge y vete: esto
+tiene su propia sesión.
+
+**Por qué aquí, entonces.** Porque el vehículo, el mando y una recta medida con flexómetro solo
+coinciden hoy, y RF-14 lleva desde el 28-ago esperando exactamente eso. Está en el
+[`PLAN_S22.md`](PLAN_S22.md) como la primera tarea de holgura del martes.
+
+### 10.1 Qué falta, con los números del código y no de memoria
+
+`cmdvel_to_servo_node.py` convierte `/cmd_vel` en `ServoCtrlMsg` por escalones, y los tres
+umbrales salen de dividir por `MAX_SPEED = 4,0 m/s` (`cmdvel_to_servo_pkg/constants.py`):
+
+| Velocidad pedida en `/cmd_vel` | `throttle` que sale |
+|---|---|
+| **< 0,40 m/s** | **0,0 — nada** |
+| 0,40 – 1,20 m/s | 0,5 |
+| 1,20 – 2,00 m/s | 0,8 |
+| ≥ 2,00 m/s | 1,0 |
+
+Nav2 pide **0,25 m/s en curva y 0,05 en la aproximación**. Las dos caen en la primera fila, así que
+**la cadena devuelve cero justo donde Nav2 la usa**.
+
+Los dos defectos de **mapeo** están corregidos desde el 27-ago, con 19 comprobaciones en
+`prueba_mapeo_servo.py`. Lo que queda es la **escala**, y no se arregla leyendo código:
+`MAX_SPEED = 4,0 m/s` es una **suposición heredada de AWS** y de ella cuelgan los tres umbrales.
+Si el carro real no hace 4 m/s, la tabla entera está corrida.
+
+**La pregunta de hoy, y solo esa:** ¿cuánta velocidad real da un `throttle` dado?
+
+**Criterio de cierre**, tomado del `PLAN_S22.md`: una tabla de `throttle` contra velocidad medida,
+**con al menos un punto por debajo de 0,25 m/s**.
+
+### 10.2 La trampa de dueños muerde aquí de otra forma
+
+`/scan` lo publica el LiDAR del Paso 2.3, **sin `sudo`** — usuario `deepracer`.
+`/ctrl_pkg/servo_msg` lo publica `teleop_mando.py`, que va **con `sudo`** — usuario `root`. Por la
+regla de los dos extremos del §6.2, **un solo `ros2 bag record` no puede traerse los dos**: el que
+grabe como usuario se llevará `/scan` y **cero** mensajes de servo, y no dirá una palabra.
+
+Así que **dos bags a la vez, uno por dueño**. Se emparejan luego por reloj, que es el mismo porque
+los dos salen de la misma tarjeta.
+
+Terminal de usuario:
+
+```bash
+source /opt/ros/jazzy/setup.bash && cd ~ && ros2 bag record /scan -o escala_N
+```
+
+Terminal de `root`:
+
+```bash
+sudo -i bash -c "source /opt/ros/jazzy/setup.bash && cd ~deepracer && ros2 bag record /ctrl_pkg/servo_msg -o escala_N_servo"
+```
+
+**Comprueba los dos `message_count` al cerrar.** Un `escala_N_servo` con 0 mensajes es la trampa de
+dueños otra vez, no un mando averiado.
+
+> **Si no te distrae, arranca también el bag de servo durante las seis pasadas del §9.** Es gratis
+> para el G2 —va en su propio bag, y si falla no toca el de `/scan`— y da datos de conducción real
+> además de los del barrido. Si te añade carga mental en el bloque que produce lo irremplazable,
+> **sáltatelo**: el G2 manda.
+
+### 10.3 El barrido, y por qué sale una nube y no una tabla limpia
+
+El mando es **analógico**: `teleop_mando.py` escala el gatillo hasta `limite_normal = 0,35`, y
+hasta `0,70` con turbo. **No hay escalones**, así que sostener un valor a mano da una nube.
+
+Se acepta a propósito, porque la nube ya responde la pregunta del §10.1 con margen de sobra: si a
+0,35 de `throttle` el carro hace medio metro por segundo, `MAX_SPEED = 4,0` está mal por un factor
+de tres, y eso se ve sin ninguna precisión. La tabla fina de escalones sostenidos necesita un nodo
+que publique un valor fijo con hombre muerto, y eso es código que hoy no existe.
+
+Cuatro tramos sobre la recta ya marcada, **sin turbo**, en este orden:
+
+1. Gatillo **al mínimo con el que el carro se mueva**. Búscalo con paciencia.
+2. Gatillo a **un cuarto** de recorrido, sostenido hasta el otro extremo.
+3. Gatillo a **medio** recorrido.
+4. Gatillo **a fondo** — que sigue siendo 0,35, porque el turbo no se usa.
+
+En cada tramo: **5 s quieto, recorrer sosteniendo el gatillo, 5 s quieto.** Son las mismas dos
+ventanas de quietud que usa `medir_g2.py`, así que el análisis ya sabe leerlas.
+
+**Si solo da tiempo a una cosa, que sea el punto 1.** Dónde empieza a moverse el carro es el número
+que decide si 0,05 m/s es siquiera alcanzable, y hoy no existe en ningún documento.
+
+### 10.4 Qué significa cada resultado, decidido antes de medir
+
+| Lo que salga | Qué quiere decir |
+|---|---|
+| A 0,35 de `throttle`, **~0,5 m/s** | `MAX_SPEED` real ≈ 1,4 m/s y no 4,0. Se recalculan los tres umbrales y el escalón bajo cae donde Nav2 lo usa. RF-14 se cierra calibrando |
+| A 0,35 de `throttle`, **~1,4 m/s o más** | La escala no está lejos; entonces el problema es la **resolución** —cuatro escalones— y no el factor. Decisión aparte, no se improvisa en el pasillo |
+| Por debajo de cierto gatillo **no se mueve nada** | Ese es el suelo físico del motor. Si queda por encima de 0,25 m/s, **RF-14 no se cierra calibrando**: es una limitación medida y Nav2 necesita otra estrategia de aproximación |
+
+La tercera fila es un resultado **válido**, y hay que traerla escrita si es lo que pasa. **No se
+ajusta el criterio para que salga bien**, que es el reproche que este proyecto ya se hizo el 26-ago.
+
+---
+
+## 11. Las tres trampas, en una tabla
 
 Cada una de estas costó una salida. Ninguna avisa.
 
@@ -513,7 +615,7 @@ propio grabador. Verde ahí no prueba nada; **rojo ahí es definitivo**.
 
 ---
 
-## 11. Hoja de anotaciones
+## 12. Hoja de anotaciones
 
 **El pasillo** (rellenar en el Bloque 1):
 
@@ -546,21 +648,35 @@ g2_vuelta_3      final -> 0     ____  ____  __   0,____ / 0,____ / __   0,____ /
 ```
 
 **`std` / `min` / `lvl`**, al abrir y al cerrar cada bag: la `std dev` y el `min` de
-`ros2 topic hz /scan`, y el `level` del servicio de batería. Como se toman **tres** lecturas de
-`hz` y se anota la **mediana**, en la casilla va la mediana, no la última.
-**REGLA REVISADA EL 2026-09-08, lee el §5 antes de usarla:** se toman **tres** lecturas cada vez,
-no una, y se anota la **mediana**; una sola lectura marca sospechoso un sensor sano dos de cada
-seis veces. **La `std dev` ya no es una puerta: es una anotación.** No repitas una pasada en el
-pasillo por ella. Anota también el **`min`** de cada lectura —hipótesis preinscrita del §5— y el
-**`level` de batería** del servicio `/i2c_pkg/battery_level`, que sí es una medida directa. No se
-anota el `max`: se solapa entre batería sana y batería muriendo, así que no distingue.
+`ros2 topic hz /scan`, y el `level` de `/i2c_pkg/battery_level`.
+
+**REGLA REVISADA EL 2026-09-08, lee el §5 antes de usarla:** se toman **tres** lecturas de `hz`
+cada vez, no una, y en la casilla va la **mediana**, no la última. Una sola lectura marca
+sospechoso un sensor sano dos de cada seis veces. **La `std dev` ya no es una puerta: es una
+anotación.** No repitas una pasada en el pasillo por ella. El `min` se anota porque es la
+hipótesis preinscrita del §5. El `max` **no** se anota: se solapa entre batería sana y batería
+muriendo, así que no distingue.
 
 **Las incidencias importan.** Alguien cruzándose, una rueda subida a un zócalo, una pausa. En el
 análisis, un valor raro **con una nota al lado es un dato**; sin la nota es basura.
 
+**El barrido de tracción del §10**, si se llega a hacer. Una línea por tramo:
+
+```
+tramo   gatillo            se movio  hora    msgs /scan  msgs servo  incidencias
+-----------------------------------------------------------------------------------------
+1       minimo que mueve   SI / NO   ____    ____        ____        ________________
+2       un cuarto          SI / NO   ____    ____        ____        ________________
+3       medio              SI / NO   ____    ____        ____        ________________
+4       a fondo, sin turbo SI / NO   ____    ____        ____        ________________
+```
+
+**`msgs servo` en cero no es un mando averiado: es la trampa de dueños del §10.2.** Los dos bags
+se cierran y se comprueban por separado.
+
 ---
 
-## 12. Si algo va mal
+## 13. Si algo va mal
 
 | Síntoma | Dónde está la respuesta |
 |---|---|
@@ -573,7 +689,7 @@ análisis, un valor raro **con una nota al lado es un dato**; sin la nota es bas
 | `Ctrl-C` no cierra el teleop | Entraste por SSH sin `-t` |
 | El LiDAR deja de publicar y `systemctl` dice `active` | Tocaste el USB con la pila corriendo |
 | Todo «deja de funcionar» poco a poco | **Mide las baterías antes de depurar nada.** El 28-ago se plantearon tres causas de software y las tres eran falsas |
-| La `std dev` de `/scan` llega a 0,020 s o más | **Repítela dos veces más antes de concluir nada** (revisado el 2026-09-08: 2 de cada 6 lecturas dan eso con el sensor sano). Si la **mediana de tres** sigue alta **o la media de `hz` cae por debajo de ~7 Hz**, entonces sí: batería. Consulta `level` y anota (§5 y §11) |
+| La `std dev` de `/scan` llega a 0,020 s o más | **Repítela dos veces más antes de concluir nada** (revisado el 2026-09-08: 2 de cada 6 lecturas dan eso con el sensor sano). Si la **mediana de tres** sigue alta **o la media de `hz` cae por debajo de ~7 Hz**, entonces sí: batería. Consulta `level` y anota (§5 y §12) |
 | El mapa sale mucho más largo que el pasillo medido | §7, «el caso plátano». Mira primero la `std dev` anotada de ese bag |
 | Se te ocurre reiniciar el carro | **No.** Se queda en GRUB |
 
@@ -581,12 +697,16 @@ Las tablas completas de diagnóstico están en la **Parte 7** de cada una de las
 
 ---
 
-## 13. Lo último, antes de recoger
+## 14. Lo último, antes de recoger
 
 - ¿El mapa está aceptado, mirado y medido? (§7)
 - ¿Hay al menos un bag válido por sentido, con `message_count` comprobado?
 - ¿Está anotada la longitud con dos decimales y hechas las fotos?
-- ¿Está rellenada la hoja del §11, **con las dos `std dev` de cada bag**?
+- ¿Está rellenada la hoja del §12, **con las dos `std dev` de cada bag**?
+
+**El §10 no entra en esta lista a propósito.** Es extra: si no se hizo, las cuatro de arriba
+siguen bastando para recoger. Si sí se hizo, comprueba que **los dos** bags de cada tramo tienen
+mensajes, porque uno vacío deja el otro sin con qué emparejarse.
 
 **Si las cuatro son que sí, recoge la cinta.** Si alguna es que no, la cinta se queda: repetir con
 la cinta puesta cuesta cinco minutos, y volver otro día cuesta una mañana.
