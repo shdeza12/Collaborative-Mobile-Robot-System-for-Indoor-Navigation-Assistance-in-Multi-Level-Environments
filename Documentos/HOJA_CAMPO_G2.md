@@ -79,9 +79,12 @@ igual, pero **el G2 no se declara**. No es motivo para no salir.
 > **Un `/scan` con huecos de medio segundo no construye mapas.** El bag grabado en esa ventana
 > produjo un pasillo doblado que no cerró el bucle (ver §7).
 >
-> **Antes de dar por buena cualquier medida rara, comprueba la batería.** Y no la compruebes por
-> el `max`, que se solapa entre batería sana y batería muriendo: el criterio numérico —`std dev`
-> de `/scan` **≥ 0,020 s** ⇒ bag SOSPECHOSO— está en el **§5**, y se anota por bag en el §11.
+> **Antes de dar por buena cualquier medida rara, comprueba la batería.** Desde el 2026-09-08 hay
+> **medida directa** —`ros2 service call /i2c_pkg/battery_level ...`, ver §5—, que es mejor que
+> cualquier proxy. El `max` no sirve, se solapa entre batería sana y muriendo. Y la `std dev` de
+> `/scan` **ya no es una puerta**: sigue siendo útil, pero **una sola lectura marca sospechoso un
+> sensor sano dos de cada seis veces**, así que se toman tres. Todo el detalle en el **§5**, y se
+> anota por bag en el §11.
 
 ---
 
@@ -201,8 +204,64 @@ Guía de mapeo, **Pasos 2.2 a 2.5**. Resumen de lo que no se puede saltar:
 > debajo** del degradado, o sea en el hueco vacío entre los dos casos conocidos. Cuesta diez
 > segundos por bag y es lo único que delató el caso plátano —aquel día no hubo ni un error, y el
 > mapa de 47 m sobre un pasillo de 20 m parecía normal hasta que alguien miró el `/scan`—.
+>
+> ### REVISADO EL 2026-09-08: seis medidas en vez de una, y el criterio no aguanta como puerta
+>
+> El criterio de arriba se fijó con **una** lectura sana y **una** degradada. El 8-sep se midió
+> seis veces seguidas el mismo sensor **sano**, en cinco minutos, sobre el vehículo:
+>
+> | Lectura | `std dev` final | `min` | Veredicto del criterio de arriba |
+> |---|---|---|---|
+> | 1 | 0,070 s | 0,001 s | **SOSPECHOSO** |
+> | 2 | 0,0033 s | 0,135 s | sano |
+> | 3 | 0,0035 s | 0,133 s | sano |
+> | 4 | 0,043 s | 0,005 s | **SOSPECHOSO** |
+> | 5 | 0,0031 s | 0,135 s | sano |
+> | 6 | 0,0034 s | 0,134 s | sano |
+>
+> **Dos de seis lecturas marcan SOSPECHOSO un sensor sano.** Con siete bags, marcar mal al menos
+> uno es prácticamente seguro. Lo que **no** se deduce es que el criterio sea falso: la medida del
+> 3-sep tiene corroboración independiente —el carro murió veinte minutos después—, o sea que
+> acierta cuando hay problema. Es **sensible y poco específico**.
+>
+> **Qué cambia, y solo esto:**
+>
+> 1. La `std dev` **deja de ser una puerta y pasa a ser una anotación**. No repitas una pasada en
+>    el pasillo por una sola lectura alta. El 8-sep eso habría costado la tarde entera con el
+>    sensor sano.
+> 2. **Tres lecturas de `hz`, no una**, y se anotan las tres. Con 2 artefactos de cada 6, la
+>    mediana de tres acierta ~93 % de las veces. Dato que ayuda a leerlas: la **media** se mantuvo
+>    en ~7 Hz **también en las lecturas malas**. El artefacto dispersa, no pierde muestras; una
+>    media que cae sí es señal de verdad.
+> 3. Se añade una **medida directa de batería**, que hasta el 8-sep se creía inexistente:
+>
+>        source /opt/aws/deepracer/lib/setup.bash
+>        ros2 service call /i2c_pkg/battery_level deepracer_interfaces_pkg/srv/BatteryLevelSrv "{}"
+>
+>    Devuelve `level=N` (el 8-sep, con el carro recién cargado, dio **10**). Se anota al abrir y
+>    al cerrar cada bag. **Salvedad declarada:** el DeepRacer lleva **dos** baterías —tracción y
+>    cómputo— y este servicio lee la del bus I2C. El LiDAR cuelga por USB de la tarjeta, así que
+>    puede estar midiendo la que no es. Se anota igual: un número real vale más que ninguno, y
+>    comparar `level` contra `std dev` a lo largo de la salida es lo que dirá si sirve.
+>
+> **HIPÓTESIS PREINSCRITA para esta salida — no es criterio todavía.** En las seis lecturas el
+> `min` separa los dos casos sin solaparse: **0,133–0,137 s** sano frente a **0,001–0,005 s** en
+> los artefactos. Un `min` muy por debajo del período nominal (0,143 s a 7 Hz) significa mensajes
+> llegando en ráfaga, que es algo que el sensor no puede producir. **No se adopta hoy**, porque
+> estaría elegido después de ver los datos, que es lo que prohíbe el §6.3 del protocolo. Se anota
+> el `min` junto a la `std dev` en las tres lecturas; si vuelve a separarlos con los datos de esta
+> salida, sustituye a la `std dev` con derecho.
+>
+> **Aviso que costó una vuelta el 8-sep:** el mensaje `WARNING: topic ... does not appear to be
+> published yet` **no predice nada**. Salió en lecturas buenas y faltó en otras buenas. Ignóralo.
 
 **Criterio de cierre:** `/scan` a ~6,6 Hz, `frame_id: laser`, y 22 tópicos tres veces.
+
+> **Cuidado con contar tópicos, anotado el 2026-09-08.** En el vehículo se vio **dos veces** que la
+> introspección no ve un tópico que está vivo: `ros2 topic list` dejó fuera `/rplidar_ros/scan`
+> mientras publicaba a 6,99 Hz, y `ros2 topic info` dijo `Publisher count: 0` del mismo tópico. Si
+> falta uno, **compruébalo con `ros2 topic hz` antes de darlo por caído**: el conteo puede mentir,
+> el `hz` no.
 
 ---
 
@@ -475,21 +534,26 @@ el carro mira hacia ____________________ en el 0 m
 **Las pasadas** (una línea por bag):
 
 ```
-nombre           sentido        hora    msgs    abortada  std ini  std fin  incidencias
----------------------------------------------------------------------------------------------
-mapa_pasillo_    ida y vuelta   ____    ____    __        0,____   0,____   ________________
-g2_ida_1         0 -> final     ____    ____    __        0,____   0,____   ________________
-g2_vuelta_1      final -> 0     ____    ____    __        0,____   0,____   ________________
-g2_ida_2         0 -> final     ____    ____    __        0,____   0,____   ________________
-g2_vuelta_2      final -> 0     ____    ____    __        0,____   0,____   ________________
-g2_ida_3         0 -> final     ____    ____    __        0,____   0,____   ________________
-g2_vuelta_3      final -> 0     ____    ____    __        0,____   0,____   ________________
+nombre           sentido        hora  msgs  ab.  AL ABRIR  std/min/lvl   AL CERRAR std/min/lvl   incidencias
+------------------------------------------------------------------------------------------------------------------
+mapa_pasillo_    ida y vuelta   ____  ____  __   0,____ / 0,____ / __   0,____ / 0,____ / __   ________________
+g2_ida_1         0 -> final     ____  ____  __   0,____ / 0,____ / __   0,____ / 0,____ / __   ________________
+g2_vuelta_1      final -> 0     ____  ____  __   0,____ / 0,____ / __   0,____ / 0,____ / __   ________________
+g2_ida_2         0 -> final     ____  ____  __   0,____ / 0,____ / __   0,____ / 0,____ / __   ________________
+g2_vuelta_2      final -> 0     ____  ____  __   0,____ / 0,____ / __   0,____ / 0,____ / __   ________________
+g2_ida_3         0 -> final     ____  ____  __   0,____ / 0,____ / __   0,____ / 0,____ / __   ________________
+g2_vuelta_3      final -> 0     ____  ____  __   0,____ / 0,____ / __   0,____ / 0,____ / __   ________________
 ```
 
-**`std ini` / `std fin`** son la `std dev` que da `ros2 topic hz /scan` justo antes de abrir el
-bag y justo después de cerrarlo. **≥ 0,020 s en cualquiera de las dos → el bag va marcado
-SOSPECHOSO** y se repite con la batería cambiada; el porqué del número está en el §5. No se anota
-el `max`: se solapa entre batería sana y batería muriendo, así que no distingue.
+**`std` / `min` / `lvl`**, al abrir y al cerrar cada bag: la `std dev` y el `min` de
+`ros2 topic hz /scan`, y el `level` del servicio de batería. Como se toman **tres** lecturas de
+`hz` y se anota la **mediana**, en la casilla va la mediana, no la última.
+**REGLA REVISADA EL 2026-09-08, lee el §5 antes de usarla:** se toman **tres** lecturas cada vez,
+no una, y se anota la **mediana**; una sola lectura marca sospechoso un sensor sano dos de cada
+seis veces. **La `std dev` ya no es una puerta: es una anotación.** No repitas una pasada en el
+pasillo por ella. Anota también el **`min`** de cada lectura —hipótesis preinscrita del §5— y el
+**`level` de batería** del servicio `/i2c_pkg/battery_level`, que sí es una medida directa. No se
+anota el `max`: se solapa entre batería sana y batería muriendo, así que no distingue.
 
 **Las incidencias importan.** Alguien cruzándose, una rueda subida a un zócalo, una pausa. En el
 análisis, un valor raro **con una nota al lado es un dato**; sin la nota es basura.
@@ -509,7 +573,7 @@ análisis, un valor raro **con una nota al lado es un dato**; sin la nota es bas
 | `Ctrl-C` no cierra el teleop | Entraste por SSH sin `-t` |
 | El LiDAR deja de publicar y `systemctl` dice `active` | Tocaste el USB con la pila corriendo |
 | Todo «deja de funcionar» poco a poco | **Mide las baterías antes de depurar nada.** El 28-ago se plantearon tres causas de software y las tres eran falsas |
-| La `std dev` de `/scan` llega a 0,020 s o más | Batería. Marca el bag SOSPECHOSO, cambia batería y repite la pasada (§5 y §11) |
+| La `std dev` de `/scan` llega a 0,020 s o más | **Repítela dos veces más antes de concluir nada** (revisado el 2026-09-08: 2 de cada 6 lecturas dan eso con el sensor sano). Si la **mediana de tres** sigue alta **o la media de `hz` cae por debajo de ~7 Hz**, entonces sí: batería. Consulta `level` y anota (§5 y §11) |
 | El mapa sale mucho más largo que el pasillo medido | §7, «el caso plátano». Mira primero la `std dev` anotada de ese bag |
 | Se te ocurre reiniciar el carro | **No.** Se queda en GRUB |
 
