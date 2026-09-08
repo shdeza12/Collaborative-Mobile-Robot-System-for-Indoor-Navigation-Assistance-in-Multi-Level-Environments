@@ -63,12 +63,37 @@ deepracer-core no hay 'robot_state_publisher'. Es decir que no hay nada que
 romper, y tampoco hay nada sobre lo que Nav2 pueda correr todavia: eso es la
 segunda mitad pendiente de RF-12 y se trata aparte.
 
-USO
----
+USO: POR RUTA, PORQUE EN LA TARJETA NO HAY WORKSPACE
+----------------------------------------------------
+Comprobado el 2026-09-07 (Documentos/PLAN_S22.md §5.2): la tarjeta NO tiene
+ningun workspace del proyecto. Solo existe '~/tesis_ws/', creado ese dia, y
+dentro unicamente 'coordinacion_msgs' y un YAML. 'deepracer_bringup' NUNCA ha
+estado alli, asi que invocarlo por paquete falla con
+'Package deepracer_bringup not found'. Paso el 2026-09-08 y costo el arranque
+de una salida de campo.
+
+Este fichero se copia suelto y se invoca por ruta. Funciona porque no depende
+de su paquete: importa solo 'launch' y 'launch_ros' -los dos en /opt/ros/jazzy-
+y no llama a 'get_package_share_directory'.
+
+    scp .../launch/lidar_vehiculo.launch.py deepracer@<IP>:~/
+
 En el vehiculo, con deepracer-core ya corriendo sin LiDAR:
 
+    ros2 launch ~/lidar_vehiculo.launch.py
+    ros2 launch ~/lidar_vehiculo.launch.py namespace:=robot1
+
+Sin haberlo copiado, el equivalente exacto -mismos cinco parametros, sin
+espacio de nombres- es:
+
+    ros2 run rplidar_ros rplidar_composition --ros-args
+        -p serial_port:=/dev/ttyUSB0 -p serial_baudrate:=115200
+        -p frame_id:=laser -p inverted:=false -p angle_compensate:=true
+
+En simulacion, o en un equipo donde el paquete SI este construido, la forma por
+paquete sigue valiendo:
+
     ros2 launch deepracer_bringup lidar_vehiculo.launch.py
-    ros2 launch deepracer_bringup lidar_vehiculo.launch.py namespace:=robot1
 
 Comprobar que publica de verdad, y no solo que el topico aparece en la lista
 -que no significa nada, ver §2 del informe del 21-ago-:

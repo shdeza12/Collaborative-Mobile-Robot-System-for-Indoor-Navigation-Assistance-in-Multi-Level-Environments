@@ -201,6 +201,35 @@ hay que llevar contestadas —y firmadas por el director— están en el **Paso 
 **Si no están contestadas, sal igual:** los bags de las dos pasadas valen y se pueden analizar
 después. Lo que no se puede es **declarar el G2** con unos umbrales elegidos al ver el número.
 
+### Paso 1.5 — Copiar al carro lo que allí no está
+
+**En la tarjeta NO hay ningún workspace del proyecto.** Comprobado el 2026-09-07
+([`PLAN_S22.md`](PLAN_S22.md) §5.2): solo existe `~/tesis_ws/`, creado ese día, y dentro únicamente
+`coordinacion_msgs` y un YAML. **`deepracer_bringup` nunca ha estado en el carro**, así que
+`ros2 launch deepracer_bringup ...` no puede funcionar allí y no es un fallo tuyo cuando falla.
+
+No se compila el paquete en el pasillo. Se copian **dos ficheros sueltos**, que es todo lo que la
+salida necesita. **[PORTÁTIL]**, desde la raíz del repositorio:
+
+```bash
+scp Robot/aws-deepracer/deepracer_bringup/launch/lidar_vehiculo.launch.py herramientas/teleop_mando.py deepracer@<IP>:~/
+```
+
+**Esperado:** dos líneas `100%`.
+
+**Por qué el lanzador se copia suelto y funciona igual:** `ros2 launch` acepta la **ruta de un
+fichero**, no solo `<paquete> <fichero>`. Y este lanzador es autocontenido —importa `launch` y
+`launch_ros`, los dos en `/opt/ros/jazzy`, y no llama a `get_package_share_directory`—, así que no
+necesita ni paquete instalado ni workspace. Verificado con `ros2 launch <ruta> --show-args`, que
+lista sus tres argumentos.
+
+**Y por qué se prefiere al `ros2 run` a pelo del Paso 2.3:** el lanzador es el único camino que
+acepta `namespace:=`, que es lo que pide RF-12 y lo que hará falta en cuanto haya dos vehículos.
+Con un solo carro los dos caminos dan exactamente lo mismo.
+
+**Si el `scp` falla por contraseña o por red:** no bloquea la salida. El Paso 2.3 trae la
+alternativa sin prerrequisitos.
+
 ---
 
 ## Parte 2. En el pasillo: montar y medir
@@ -255,21 +284,36 @@ ssh deepracer@<IP>
 
 **[CARRITO — SSH]**
 
+**Sin `sudo`.** Si copiaste el lanzador en el Paso 1.5:
+
 ```bash
-source /opt/ros/jazzy/setup.bash && source ~/deepracer_ws/install/setup.bash && ros2 launch deepracer_bringup lidar_vehiculo.launch.py
+source /opt/ros/jazzy/setup.bash && ros2 launch ~/lidar_vehiculo.launch.py
 ```
 
-**Esperado:** el driver anuncia `RPLIDAR S/N`, `Hardware Rev: 5` y arranca el escaneo.
+**Esperado:** el driver anuncia `RPLIDAR S/N`, `Hardware Rev: 5`, `current scan mode: Express`, y
+arranca el escaneo.
 
-**Si dice `Package 'deepracer_bringup' not found`:** el paquete no está compilado en el carro. No
-pierdas tiempo compilándolo en el pasillo — arranca el nodo a pelo, con **los mismos parámetros**
-que el launch:
+**Si no llegaste a copiarlo** —o el `scp` falló—, arranca el nodo a pelo. Son **los mismos cinco
+parámetros** que pone el lanzador, y sin espacio de nombres publica igual en `/scan`:
 
 ```bash
 source /opt/ros/jazzy/setup.bash && ros2 run rplidar_ros rplidar_composition --ros-args -p serial_port:=/dev/ttyUSB0 -p serial_baudrate:=115200 -p frame_id:=laser -p inverted:=false -p angle_compensate:=true
 ```
 
-Sin espacio de nombres, publica en `/scan`, que es lo que hace falta.
+> **Lo que NO se hace aquí es `ros2 launch deepracer_bringup lidar_vehiculo.launch.py`.** Esa forma
+> pide el paquete instalado en la tarjeta, y **no lo está** —ver Paso 1.5—. Hasta el 2026-09-08 esta
+> guía la daba como comando principal, con un `source ~/deepracer_ws/install/setup.bash` que
+> apuntaba a un workspace inexistente. Costó el arranque de la salida de ese día.
+
+**Con dos vehículos** —desde que llegue el segundo carro— el sensor va bajo su espacio de nombres,
+y entonces el lanzador deja de ser equivalente al `ros2 run` y pasa a ser obligatorio:
+
+```bash
+source /opt/ros/jazzy/setup.bash && ros2 launch ~/lidar_vehiculo.launch.py namespace:=robot1
+```
+
+Eso publica en `/robot1/scan` con el marco `robot1/laser`. **Hoy, con un solo carro, no lo uses:**
+toda la cadena de análisis de esta guía espera `/scan`.
 
 **Si dice que no encuentra `/dev/ttyUSB0`:** el sensor no está conectado o el puerto es otro.
 Compruébalo con `ls /dev/ttyUSB*`.
@@ -319,8 +363,21 @@ sudo -i bash -c 'source /opt/ros/jazzy/setup.bash && ros2 daemon start && sleep 
 
 **Esperado:** `22`. Repítelo dos veces más: tiene que dar **22 las tres veces**.
 
-**Si da números distintos entre corridas, no grabes todavía.** Espera y repite hasta que se
-estabilice.
+**Si da números distintos entre corridas, no grabes todavía.** Reinicia el demonio y repite hasta
+que se estabilice:
+
+```bash
+sudo -i bash -c 'source /opt/ros/jazzy/setup.bash && ros2 daemon stop && ros2 daemon start && sleep 3 && ros2 topic list | wc -l'
+```
+
+> **El demonio también puede romperse sin morir, y entonces miente.** Medido el 2026-09-08: devuelve
+> `!rclpy.ok()` por XMLRPC y `ros2 topic echo` **sale al instante**, que en la terminal se lee igual
+> que un tópico mudo. **Distinguirlo es cronometrar:** si `echo` vuelve antes de agotar su `timeout`,
+> no midió nada — reinicia el demonio con el comando de arriba.
+>
+> **`--no-daemon` no es el remedio por defecto**, aunque lo parezca: es justamente la forma que da
+> 2, 10 y 17 en la tabla de abajo. Sirve como desempate para una consulta suelta, sabiendo que
+> subcuenta, y **nunca como la evidencia con la que se decide grabar**.
 
 > **Por qué.** El descubrimiento de ROS 2 en este carro **no es determinista para un participante
 > recién nacido**. Medido el 2026-09-01 contra un grafo que no cambiaba:

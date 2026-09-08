@@ -899,8 +899,19 @@ launch llama**.
 `/opt/`, se deja que `deepracer-core` arranque **sin** el LiDAR y se arranca el sensor aparte:
 
 ```bash
-ros2 launch deepracer_bringup lidar_vehiculo.launch.py
+source /opt/ros/jazzy/setup.bash && ros2 launch ~/lidar_vehiculo.launch.py
 ```
+
+> **El lanzador se invoca por RUTA, no por paquete.** En la tarjeta **no hay ningún workspace del
+> proyecto** —comprobado el 2026-09-07, [`PLAN_S22.md`](PLAN_S22.md) §5.2—, así que
+> `ros2 launch deepracer_bringup lidar_vehiculo.launch.py` falla allí con
+> `Package 'deepracer_bringup' not found`. El fichero viaja suelto por `scp` (Paso 1.5 de
+> [`GUIA_PASADA_MAPEO.md`](GUIA_PASADA_MAPEO.md)) y funciona igual: importa solo `launch` y
+> `launch_ros`, que están en `/opt/ros/jazzy`, y no resuelve rutas de paquete.
+>
+> **Sin haberlo copiado**, el equivalente exacto con los mismos cinco parámetros es:
+>
+>     source /opt/ros/jazzy/setup.bash && ros2 run rplidar_ros rplidar_composition --ros-args -p serial_port:=/dev/ttyUSB0 -p serial_baudrate:=115200 -p frame_id:=laser -p inverted:=false -p angle_compensate:=true
 
 Tres razones, y la primera es la que importa:
 

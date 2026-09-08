@@ -64,6 +64,22 @@ igual, pero **el G2 no se declara**. No es motivo para no salir.
   gente, y una marca perdida a mitad de pasillo no se puede reponer a ojo.
 - Esta hoja impresa o en el móvil, y un bolígrafo.
 
+**Y una cosa que no se lleva, se hace — con red y antes de salir.** En la tarjeta **no hay ningún
+workspace del proyecto** (comprobado el 2026-09-07), así que ni el lanzador del LiDAR ni el teleop
+están allí. Los dos viajan sueltos, en un solo comando, desde la raíz del repositorio:
+
+```bash
+ping -c 2 deepracer.local
+```
+```bash
+scp Robot/aws-deepracer/deepracer_bringup/launch/lidar_vehiculo.launch.py herramientas/teleop_mando.py deepracer@<IP>:~/
+```
+
+**Esperado:** dos líneas `100%`. Si esto falla en el pasillo te quedas sin conducir; si falla en
+casa, se arregla en casa. El detalle está en el **Paso 1.5** de
+[`GUIA_PASADA_MAPEO.md`](GUIA_PASADA_MAPEO.md), y **el §5 trae la alternativa sin prerrequisitos**
+por si aun así no llegó.
+
 > ### La batería es el sospechoso número uno de este proyecto
 >
 > **Mide la batería antes de salir, y otra vez a mitad de mañana.** No es prudencia genérica: es
@@ -155,8 +171,13 @@ abajo.
 Guía de mapeo, **Pasos 2.2 a 2.5**. Resumen de lo que no se puede saltar:
 
 1. SSH al carro. La IP **cambia entre sesiones**: sácala con `ping -c 2 deepracer.local`.
-2. Arranca el LiDAR con `lidar_vehiculo.launch.py` (Paso 2.3). **Sin `sudo`**, tal como está
-   escrito allí.
+2. Arranca el LiDAR (Paso 2.3). **Sin `sudo`.** En la tarjeta **no hay workspace del proyecto**, así
+   que `ros2 launch deepracer_bringup ...` **no funciona**: o el lanzador por ruta, si lo copiaste
+   con el Paso 1.5, o el nodo a pelo, que no tiene prerrequisitos.
+
+       source /opt/ros/jazzy/setup.bash && ros2 launch ~/lidar_vehiculo.launch.py
+
+       source /opt/ros/jazzy/setup.bash && ros2 run rplidar_ros rplidar_composition --ros-args -p serial_port:=/dev/ttyUSB0 -p serial_baudrate:=115200 -p frame_id:=laser -p inverted:=false -p angle_compensate:=true
 3. **Comprueba que publica de verdad**, con `ros2 topic hz /scan`. Esperado: **~6,6 Hz**.
 4. **Comprueba que es `/scan` y no `/rplidar_ros/scan`.** Si sale el segundo, arrancaste por la vía
    de AWS: párala y vuelve al Paso 2.3. Es exactamente el error que hundió los bags del 28-ago.
@@ -235,8 +256,13 @@ Guía de mapeo, **Pasos 2.2 a 2.5**. Resumen de lo que no se puede saltar:
 >    media que cae sí es señal de verdad.
 > 3. Se añade una **medida directa de batería**, que hasta el 8-sep se creía inexistente:
 >
->        source /opt/aws/deepracer/lib/setup.bash
->        ros2 service call /i2c_pkg/battery_level deepracer_interfaces_pkg/srv/BatteryLevelSrv "{}"
+>        sudo -i bash -c 'source /opt/ros/jazzy/setup.bash && source /opt/aws/deepracer/lib/setup.bash && ros2 service call /i2c_pkg/battery_level deepracer_interfaces_pkg/srv/BatteryLevelSrv "{}"'
+>
+>    **Va con `sudo`, y no es un adorno.** Quien sirve `/i2c_pkg/battery_level` es `deepracer-core`,
+>    que es de `root`, así que la regla de dueños del §6.2 aplica igual que a un tópico. Sin `sudo`
+>    el fallo esperado es **que se quede colgado**, no un error. El 8-sep se midió `level=10` pero
+>    **no quedó anotado con qué usuario**, así que se escribe la forma que la regla predice, no la
+>    que se supone que se usó.
 >
 >    Devuelve `level=N` (el 8-sep, con el carro recién cargado, dio **10**). Se anota al abrir y
 >    al cerrar cada bag. **Salvedad declarada:** el DeepRacer lleva **dos** baterías —tracción y
@@ -327,8 +353,19 @@ Si dice **`root`**, graba con `sudo -i` (el comando exacto está en el Paso 3.1 
 > **Segunda causa del mismo silencio, medida el 2026-09-08:** el `ros2-daemon` se rompe y **no
 > muere, responde mal** — devuelve `!rclpy.ok()` por XMLRPC y `ros2 topic echo` sale *al instante*,
 > que sobre la terminal se lee exactamente igual que un tópico mudo. Distinguirlo no cuesta nada:
-> **cronometra**. Si `echo` vuelve antes de agotar su `timeout`, no midió nada. La cura es
-> `--no-daemon` en `topic list`, `topic echo` y `node list`; en el pasillo, úsalo siempre.
+> **cronometra**. Si `echo` vuelve antes de agotar su `timeout`, no midió nada.
+>
+> **La regla, resuelta el 2026-09-08 porque estos dos párrafos se contradecían.** El Paso 2.5 de la
+> guía de mapeo midió el 1-sep que **con** demonio salen 22 tópicos las tres veces y **sin** él salen
+> 2, 10 y 17: `--no-daemon` no es «la versión honesta», es la que **subcuenta**. Y este párrafo midió
+> el 8-sep que el demonio puede romperse y mentir. Las dos cosas son ciertas, así que el orden es:
+>
+> 1. **Trabaja con demonio.** Es el que da la cuenta estable.
+> 2. **Compruébalo antes de grabar** con el `22` tres veces del Paso 2.5.
+> 3. **Si la cuenta baila, o si `echo` vuelve al instante**, el demonio está roto: reinícialo con
+>    `ros2 daemon stop && ros2 daemon start && sleep 3`, y repite la comprobación.
+> 4. **`--no-daemon` solo como desempate**, para una consulta suelta, sabiendo que subcuenta. **No
+>    se graba** con esa cuenta como única evidencia.
 
 ### 6.3 Recorrer
 
@@ -591,6 +628,30 @@ que decide si 0,05 m/s es siquiera alcanzable, y hoy no existe en ningún docume
 
 La tercera fila es un resultado **válido**, y hay que traerla escrita si es lo que pasa. **No se
 ajusta el criterio para que salga bien**, que es el reproche que este proyecto ya se hizo el 26-ago.
+
+### 10.5 Al volver: qué se corre con los dos bags
+
+Nada de esto se hace en el pasillo. Por cada tramo, en el portátil:
+
+```bash
+python3 herramientas/adaptar_bag_jazzy.py /tmp/escala_N
+bash herramientas/localizar_desde_bag.sh /tmp/escala_N_humble <mapa>.yaml /tmp/salida_escala_N
+python3 herramientas/medir_escala_traccion.py /tmp/salida_escala_N/trayectoria.csv /tmp/escala_N_servo/escala_N_servo_0.mcap
+```
+
+`<mapa>.yaml` es el mismo mapa que aceptaste en el §7: la barrida se hace en el pasillo que ya
+mapeaste, así que no hace falta uno nuevo. Al bag de **servo** no se le pasa
+`adaptar_bag_jazzy.py`: se apunta directo a su `.mcap` y rosbag2 saca los tópicos del propio
+archivo, que es la salida que ya se usó con `bag_mapa_1456` el 2026-09-01.
+
+[`medir_escala_traccion.py`](../herramientas/medir_escala_traccion.py) empareja el `throttle` con
+la velocidad que salió de la odometría, saca el **umbral de arranque** y el **`MAX_SPEED`
+implícito**, y decide entre las tres filas del §10.4 sin que nadie tenga que interpretarlas.
+
+**Lee el CDR del `ServoCtrlMsg` a mano y no necesita el tipo de AWS**, así que el análisis se hace
+en el portátil y no en la tarjeta. Y **se niega a dar cifra** —no da una aproximada— si los dos
+bags no se solapan en el tiempo, si el de servo está vacío, o si una muestra cae en un hueco de la
+odometría.
 
 ---
 
