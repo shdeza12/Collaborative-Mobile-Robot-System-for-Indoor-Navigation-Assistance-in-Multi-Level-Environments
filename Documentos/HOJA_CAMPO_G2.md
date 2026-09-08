@@ -57,8 +57,11 @@ igual, pero **el G2 no se declara**. No es motivo para no salir.
 - **El carro con la batería llena, y comprobada antes de salir.** Ver el aviso de abajo.
 - **El mando con su cable USB-C.** Va al carro, no al portátil.
 - El portátil cargado, y algo donde apoyarlo en el pasillo.
-- **Flexómetro o cinta métrica de obra.** No vale el móvil; el §4 explica por qué.
-- Cinta de enmascarar y marcador.
+- **Flexómetro o cinta métrica de obra.** No vale el móvil; el §4 explica por qué. *(Al
+  2026-09-07 el marcado ya está hecho y las marcas fijadas en valores exactos, así que el
+  flexómetro va sólo por si alguna tira se despegó o si hay que comprobar el ancho.)*
+- Cinta de enmascarar y marcador. **Llévalos igual**: las tiras se levantan con el paso de la
+  gente, y una marca perdida a mitad de pasillo no se puede reponer a ojo.
 - Esta hoja impresa o en el móvil, y un bolígrafo.
 
 > ### La batería es el sospechoso número uno de este proyecto
@@ -82,13 +85,39 @@ igual, pero **el G2 no se declara**. No es motivo para no salir.
 
 ---
 
-## 4. Bloque 1 — Medir y marcar (~25 min)
+## 4. Bloque 1 — Medir y marcar (~~25 min~~ **HECHO el 2026-09-07; el martes son ~5 min de repaso**)
 
 **Antes de encender nada.** Este número es la verdad de terreno de todo lo demás.
 
 **Puede que las marcas de la salida anterior sigan puestas.** Si es así, **no las des por buenas
 sin medirlas otra vez**: se hicieron con el móvil y eso no sirve como referencia, por la razón de
 abajo.
+
+> **HECHO el 2026-09-07 por la noche. Este bloque ya no se ejecuta el martes 8.** La recta se
+> midió con **flexómetro de instrumentación**, dejando una tira de cinta cada **5 m**, y las
+> marcas se **fijaron en valores exactos**: 0 · 5 · 10 · 15 · 20 m.
+>
+> **Consecuencia, y es la que importa: el mensurando pasa a ser 20,000 m exactos.** Los
+> **20,08 m** que aparecen más abajo en «el caso plátano» eran la medida del móvil y **dejan de
+> ser la referencia**; se conservan ahí porque son el registro de lo que pasó el 4-sep, no un
+> valor vigente. Ninguna cifra nueva se compara ya contra ellos.
+>
+> **Lo que este cambio NO hace:** no vuelve la incertidumbre cero. Quedan el encadenado de los
+> cuatro tramos de 5 m, la colocación de cada marca y el ancho de la propia tira de cinta. Pero
+> todo eso vive en los milímetros y centímetros, contra un presupuesto de error de **0,50 m**
+> para M2 — o sea, **la medición deja de ser el término que limita**, y el que manda pasa a ser
+> AMCL, que es donde tiene que estar. Sobre M1 el efecto es menor todavía: cambiar el
+> denominador de 20,08 a 20,000 mueve la razón un **0,4 %**, contra una compuerta de ±10 %. No
+> cambia ningún veredicto; cambia de qué se puede presumir.
+>
+> **Dos cosas que hay que anotar en el §11 antes de salir, porque no se deducen del número:**
+> 1. **La clase y la marca del flexómetro.** «De instrumentación» sin clase declarada es un
+>    adjetivo; con la clase (I o II) es una incertidumbre que otro puede verificar, y es lo que
+>    de verdad sostiene el presupuesto de M2.
+> 2. **Qué borde de la tira de cinta es la marca** — el de dentro o el de fuera. Una tira mide
+>    2–5 cm de ancho; si el arranque usa un borde y el cierre el otro, se cuela un sesgo
+>    sistemático de hasta 5 cm. Es pequeño frente a 0,50 m, pero es **gratis** eliminarlo si se
+>    decide ahora y se usa igual en las dos pasadas.
 
 1. Elige la recta más larga y despejada. Tiene que dar **≥ 20 m**.
 2. Marca el **0 m** con cinta.
@@ -424,7 +453,10 @@ propio grabador. Verde ahí no prueba nada; **rojo ahí es definitivo**.
 **El pasillo** (rellenar en el Bloque 1):
 
 ```
-longitud total  : ______ , ____ m      (flexometro, dos decimales)
+longitud total  : __20__ , _000_ m     (FIJADA con flexometro el 2026-09-07,
+                                        marcas exactas en 0/5/10/15/20 m)
+clase del flexometro (I o II)   : ____________  marca: ____________
+el borde de la cinta que cuenta : DE DENTRO / DE FUERA   (el mismo en las dos pasadas)
 ancho punto 1   : ______ , ____ m
 ancho punto 2   : ______ , ____ m
 ancho punto 3   : ______ , ____ m
