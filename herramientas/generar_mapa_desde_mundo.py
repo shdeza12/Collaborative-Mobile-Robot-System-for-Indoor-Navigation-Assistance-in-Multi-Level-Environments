@@ -177,7 +177,12 @@ def modelos_del_mundo(mundo, ruta_world):
                      "model.config ni model.sdf).")
         modelo = ET.parse(archivo).getroot().find('model')
         if modelo is None:
-            sys.exit(f"{archivo} no contiene un elemento <model>.")
+            # Un <include> sin <model> no es un error: es una luz. El
+            # 'model://sun' que abre casi todo .world de Gazebo declara un
+            # <light>, y abortar ahi dejaba fuera a pasillo_test.world y
+            # pasillo_grande.world, que son los unicos mundos acotados que
+            # tiene el proyecto. Una luz no aporta paredes: se salta.
+            continue
         # El <pose> de un <include> SUSTITUYE a la que trae el modelo incluido,
         # no se suma a ella. Sumarlas no dio problema mientras el unico modelo
         # incluido fue primer_piso, cuya pose propia es 0 0 0. mundo_Definitivo

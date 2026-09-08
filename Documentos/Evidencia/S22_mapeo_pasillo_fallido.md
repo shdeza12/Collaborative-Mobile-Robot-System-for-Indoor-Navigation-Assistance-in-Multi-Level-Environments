@@ -39,7 +39,11 @@ residuo queda **después** de alinear —o sea, cuánto ha cambiado la geometrí
 | `2029` conducido | 13,9 °/s | 40 % | 0,085 m | 0,620 m | 143/360 | 95 × 36 m |
 | `2009` conducido | 20,8 °/s | 41 % | 0,099 m | 0,438 m | 158/360 | 62 × 52 m |
 
-Sobre una recta medida de **20,08 m**.
+Sobre una **recta de ensayo** medida de **20,08 m** —hoy 20,000 m exactos, remedidos con
+flexómetro el 7-sep—. Es el tramo origen-destino que se marcó con cinta para medir odometría y
+mapeo, **no el largo del pasillo**, que es bastante mayor y sigue sin medir. La distinción importa:
+lo que condiciona a rf2o no es cuánto recorre el carro sino qué tiene el sensor delante mientras
+lo recorre (§8.6).
 
 **El orden se rompe.** Conducir sí degrada el dato —el residuo entre barridos se triplica—, pero
 **la pasada más suave de las cuatro produjo el peor mapa, por un factor de veinte**. Si el
@@ -240,7 +244,123 @@ saliendo corto, porque sale corto en simulación con datos perfectos.
 
 ---
 
-## 8. Qué queda abierto, y dónde se resuelve
+## 8. La causa raíz, medida: rf2o no es el problema, el pasillo uniforme sí
+
+El §7 dejó dicho que la cadena falla también en simulación, y de ahí se concluyó que el fallo era
+«de la cadena». **Esa conclusión era prematura y aquí se corrige.** El §7 midió el síntoma; faltaba
+preguntar por qué.
+
+### 8.1 Dónde se pierde el movimiento
+
+Se comparó, ventana a ventana de 1 s, el desplazamiento que estima rf2o contra la verdad de terreno
+del bag de simulación, **descompuesto en el marco del robot**. Esa descomposición es la que decide,
+porque un factor de escala afecta a todo por igual y una inobservabilidad no.
+
+| componente | rf2o | verdad | razón |
+|---|---|---|---|
+| **longitudinal** | 34,94 m | 90,02 m | **0,388** |
+| lateral | 3,51 m | 3,08 m | 1,143 |
+| rotación | 11,22 rad | 10,64 rad | 1,055 |
+
+**Lo lateral y la rotación se estiman bien. Solo se pierde el avance.** No es un factor de escala,
+y descarta de golpe cualquier explicación que afecte al barrido entero: ni el reloj, ni la TF, ni
+la deserialización, ni el `freq` de rf2o —que además vale 1,0 fijo en el fuente
+(`CLaserOdometry2D.cpp:153`) y se cancela entre el `dt(u) = fps*(...)` de la línea 507 y el
+`incrx = kai_loc_fil(0)/fps` de la 898—.
+
+### 8.2 El interruptor
+
+La pérdida no es constante: por bloques de 30 s la razón salta entre 0,997 / 0,999 / 0,817 y
+0,068 / 0,085 / 0,111. Agrupando por lo que el sensor tiene delante:
+
+| estructura al frente | ventanas | razón longitudinal |
+|---|---|---|
+| menos de 6 m | 16 | **0,998** |
+| 6–9 m | 76 | **0,255** |
+
+En las ventanas ciegas el alcance frontal está **clavado en 7,40 m mientras el robot avanza 1,00 m**.
+No es saturación: el sensor simulado llega a 10,0 m. Es la pared lateral vista por el borde del
+sector, a distancia invariante.
+
+### 8.3 El mecanismo
+
+rf2o estima el movimiento **solo** del cambio entre barridos consecutivos. En un pasillo recto y
+uniforme cada rango queda determinado por la posición lateral y el rumbo, y **no depende de la
+posición longitudinal**: el robot avanza y el barrido siguiente es idéntico al anterior. rf2o
+devuelve casi cero, y *acierta* —desde el punto de vista del sensor no ha pasado nada—. Lo lateral
+y la rotación sí cambian el barrido, y por eso sí se estiman.
+
+**No es un defecto del algoritmo ni un parámetro mal puesto: la información no está en el dato.**
+Es el §3 —inobservabilidad longitudinal— medido por fin sobre la cadena de mapeo.
+
+### 8.4 El ensayo controlado que lo confirma
+
+Criterio y predicción fijados **antes** de correr, como exige el §6.3 del protocolo: el mismo
+`|mapa ÷ verdad − 1| ≤ 0,10` de `S21_preparacion_G2.md`, y razón longitudinal **≥ 0,90**.
+
+Entorno: `pasillo_test.world`, el modelo `pasillo_usta`, una caja **cerrada** de 7,70 × 2,70 m
+interiores. Desde cualquier punto las dos paredes de los extremos entran en los 10 m del sensor, así
+que el avance sí es observable. Movimiento: **recta pura de ida y vuelta**, 4 travesías de 5,6 m,
+22,4 m en total a 0,33 m/s —la misma velocidad de `S21_piloto_bajada_01` y sin un solo giro—. La
+única variable que cambia respecto al pasillo largo es la geometría del entorno.
+
+| | pasillo de 46,9 m | caja cerrada de 7,7 m |
+|---|---|---|
+| razón longitudinal | 0,388 (0,209 en recta) | **1,010** |
+| por bloques de 30 s | 0,068 … 0,999 | 1,015 / 1,008 / 0,997 |
+| cobertura del mapa | 38,2 % X — **NO PASA** | **98,1 % X, 95,0 % Y — pasa** |
+| obstáculos inventados | — | **0 de 755 (0,0 %)** |
+| veredicto de `verificar_mapa.py` | RECHAZADO | **ACEPTADO** |
+
+**Es el primer mapa que este proyecto acepta con SLAM.** Queda en
+`Documentos/Evidencia/S22_mapa_caja_aceptado.{pgm,yaml,png}` y vuelve a verificar desde ahí.
+
+### 8.5 Dos defectos reales que salieron del ensayo
+
+El mapa de la caja salió **rechazado en el primer intento**, y por dos motivos que no tenían nada que
+ver con SLAM. Los dos se arreglaron y los dos afectan a cualquier mapa que produzca esta cadena.
+
+1. **`map_saver_cli` escribe `free_thresh: 0.25` y el valor 205 para «desconocido».** 205 son 0,196
+   de ocupación, por debajo de 0,25, así que **map_server lee como LIBRE cada celda que el mapa
+   declara desconocida** y Nav2 planifica por donde nadie ha mirado. Los mapas vigentes del
+   repositorio traen 0,1, que es el valor bueno; los que salían de esta cadena, no.
+   `mapear_desde_bag.sh` ya lo corrige al guardar.
+2. **El origen del `.yaml` está en el marco `map`, que slam_toolbox sitúa donde arrancó el
+   vehículo, no en el origen del mundo.** El robot nació en x = −3,0 y el mapa salió corrido 3 m;
+   `verificar_mapa.py` leyó **el 47 % de los obstáculos como inventados**. Restado el corrimiento,
+   **0,0 %**. El guion ahora lo avisa al terminar. Es una trampa seria: el mapa es correcto y el
+   informe dice que está lleno de paredes falsas.
+
+### 8.6 Lo que esto cambia
+
+- **La cadena rf2o + slam_toolbox funciona.** Lo que no funciona es pedirle que mapee un pasillo
+  recto y uniforme más largo que el alcance del sensor. Volver al pasillo con la misma cadena y
+  mejor conducción no arregla nada, porque el dato no contiene la información.
+- **El criterio pasa a ser medible antes de salir a campo:** hace falta estructura no uniforme
+  dentro del alcance del sensor a lo largo de todo el recorrido.
+- **El largo del pasillo real no se conoce, y es el dato que decide.** *(Corregido el 2026-09-08,
+  el mismo día: una versión anterior de este párrafo daba el pasillo por 20,08 m y concluía que
+  está mejor condicionado que el simulado de 46,9 m. **Es falso, y la conclusión que colgaba de
+  ahí se retira.**)* Los 20,08 m —hoy **20,000 m** exactos, remedidos con flexómetro el 7-sep— son
+  el **largo de la recta de ensayo**, marcada con cinta cada 5 m entre un origen y un destino que
+  se eligieron para medir odometría y mapeo. Es el mensurando de M1, no la geometría del edificio.
+  **El pasillo es bastante más largo que eso** y nadie lo ha medido.
+- **Y la corrección no es neutra: apunta al lado malo.** Lo que el §8.3 mide no es el largo total
+  sino si el sensor tiene estructura no uniforme delante. Una recta de 20 m **contenida dentro de
+  un pasillo uniforme mucho más largo** es exactamente la geometría que falla: los extremos nunca
+  entran en los 12 m del LiDAR y, entre ellos, cada barrido es igual al anterior. Es el caso del
+  pasillo simulado de 46,9 m, no el de la caja cerrada de 7,7 m donde las dos paredes de los
+  extremos se ven siempre. **Así que el pasillo real podría estar peor condicionado, no mejor.**
+- **Nada de esto está medido todavía**, y hacen falta dos cosas, ninguna cara: *(a)* los bags de la
+  campaña del 2026-09-07, que están solo en la tarjeta —los de agosto no sirven,
+  `comprobar_movimiento_bag.py` los da quietos el 100 %, 74 %, 100 % y 89 % del tiempo—; *(b)* el
+  **largo real del pasillo y dónde están sus rupturas** —puertas, columnas, cruces, cambios de
+  ancho—, que es un dato de flexómetro y libreta, no de robot, y que se puede tomar en la misma
+  visita en la que se recojan los bags.
+
+---
+
+## 9. Qué queda abierto, y dónde se resuelve
 
 1. ~~**Resolver la discrepancia de 180°**~~ **Sigue abierta pero baja de prioridad** (§7.4): es
    real y hay que arreglarla para AMCL, pero no causa el fallo de mapeo.
@@ -249,14 +369,22 @@ saliendo corto, porque sale corto en simulación con datos perfectos.
 3. ~~**Los mensajes mal formados de `/scan`**: de dónde salen y si se pueden filtrar.~~
    **Cerrado el mismo 2026-09-08, y en falso:** no son mensajes mal formados, es el aviso de
    descubrimiento de Fast-DDS. Ver el §5 corregido.
-4. ~~**Nadie ha aceptado nunca un mapa en este proyecto.**~~ **Ejecutado el 2026-09-08 (§7), y la
-   respuesta es que el fallo es de la cadena, no del pasillo.**
-5. **Lo único que queda abierto de verdad: de dónde sale el mapa del pasillo real, si no de SLAM.**
-   El proyecto ya resolvió exactamente este problema una vez, y está en R10: en vez de rehacer el
-   SLAM, `herramientas/generar_mapa_desde_mundo.py` **derivó el mapa de la geometría** y el
-   resultado pasó `verificar_mapa.py` con 99,7 % de cobertura. El pasillo real ya está **medido con
-   flexómetro: 20,08 m**. Es el mismo camino, y es la vía que hay que evaluar antes que añadir una
-   fuente de odometría nueva a cuatro días de la congelación.
+4. ~~**Nadie ha aceptado nunca un mapa en este proyecto.**~~ **Cerrado el 2026-09-08 (§8.4): la
+   cadena produjo un mapa ACEPTADO en la caja cerrada, con 98,1 % de cobertura y 0 obstáculos
+   inventados.** La conclusión que el §7 sacó —«el fallo es de la cadena»— **queda corregida**: la
+   cadena funciona; lo que falla es pedirle un pasillo uniforme más largo que el sensor.
+5. ~~**De dónde sale el mapa del pasillo real, si no de SLAM.**~~ **Replanteado con el §8:** ya no
+   hace falta renunciar a SLAM por principio. La pregunta correcta es si el pasillo real cumple la
+   condición del §8.6 —estructura no uniforme dentro de los 12 m del LiDAR a lo largo de todo el
+   recorrido—, **y eso está sin medir**: los 20,000 m son la recta de ensayo, no el pasillo, que es
+   bastante más largo. Sigue disponible el precedente de R10 —`generar_mapa_desde_mundo.py` derivó
+   el mapa de la geometría y pasó `verificar_mapa.py` con 99,7 %— como salida segura si la medida
+   dice que no, y hoy esa vía es **más** probable que ayer, no menos.
+6. **Traer al portátil los bags de la campaña del 2026-09-07, y medir el pasillo.** Los bags están
+   solo en la tarjeta, y sin ellos no se puede aplicar al pasillo real la medida del §8.1. El largo
+   del pasillo y la posición de sus rupturas —puertas, columnas, cruces— se toman con flexómetro en
+   la misma visita. Las dos cosas juntas deciden entre las dos vías del punto anterior; ninguna
+   necesita conducir el carro.
 
-**Los cuatro bags se conservan en la tarjeta y copiados en el portátil.** Son la evidencia con la
-que se repite el diagnóstico las veces que haga falta.
+**Los cuatro bags se conservan en la tarjeta.** Son la evidencia con la que se repite el
+diagnóstico las veces que haga falta.

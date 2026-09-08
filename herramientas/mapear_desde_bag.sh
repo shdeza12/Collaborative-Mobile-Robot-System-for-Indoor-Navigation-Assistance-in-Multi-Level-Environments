@@ -190,6 +190,16 @@ ros2 run nav2_map_server map_saver_cli -f "$SALIDA/mapa" \
     --ros-args -p use_sim_time:=true > "$SALIDA/saver.log" 2>&1
 sleep 2
 
+# map_saver_cli escribe 'free_thresh: 0.25' y el valor 205 para 'desconocido'.
+# 205 son 0,196 de ocupacion, por debajo de 0,25, asi que map_server lee como
+# LIBRE cada celda que el mapa declara desconocida: Nav2 planifica por donde
+# nadie ha mirado. Se detecto el 2026-09-08 porque verificar_mapa.py rechazo
+# por esto un mapa cuya geometria era correcta al 98 %. Los mapas vigentes del
+# repositorio traen 0,1, que es el valor bueno.
+if [ -f "$SALIDA/mapa.yaml" ]; then
+    sed -i 's/^free_thresh: 0.25$/free_thresh: 0.1/' "$SALIDA/mapa.yaml"
+fi
+
 if grep -q "jump back in time" "$SALIDA/slam.log" 2>/dev/null; then
     echo
     echo "AVISO GRAVE: hubo saltos de tiempo hacia atras. Habia otro publicador"
@@ -200,6 +210,12 @@ if [ -f "$SALIDA/mapa.pgm" ]; then
     echo
     echo "Mapa en $SALIDA/mapa.pgm"
     echo "Miralo antes de creertelo:  eog $SALIDA/mapa.pgm"
+    echo
+    echo "El origen del .yaml esta en el marco 'map', que slam_toolbox situa"
+    echo "donde ARRANCO el vehiculo, no en el origen del mundo. Para comparar"
+    echo "con verificar_mapa.py hay que restarle la pose de salida; si no, el"
+    echo "mapa sale corrido y sus paredes se leen como inventadas. El"
+    echo "2026-09-08 eso convirtio un 0 % de obstaculos falsos en un 47 %."
 else
     echo
     echo "ERROR: no se escribio el mapa. Mira $SALIDA/saver.log y $SALIDA/slam.log" >&2
