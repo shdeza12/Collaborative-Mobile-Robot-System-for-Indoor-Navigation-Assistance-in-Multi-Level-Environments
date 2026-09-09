@@ -170,7 +170,16 @@ MUNDO="${MUNDO:-$REPO/$MUNDO_REL}"
 # distinguia, pero el error era matar de mas; ahora es matar de menos, y eso se
 # ve enseguida porque el puerto sigue ocupado. Aun asi se avisa: sin el aviso,
 # 'parar' diria "no habia nada" con un gzserver vivo delante.
-PATRONES='gzserver|gzclient|ros2 launch deepracer|spawn_entity|robot_state_publisher|static_transform_publisher|rviz2|slam_toolbox|ros2_control_node|controller_manager|component_container|teleop_twist|amcl|map_server|planner_server|controller_server|bt_navigator|behavior_server|smoother_server|velocity_smoother|waypoint_follower|lifecycle_manager'
+#
+# La marca sola no basta: un proceso que NO case con ningun patron no se mira
+# siquiera, asi que no se mata Y TAMPOCO se avisa de el. Eso le paso al 'agente'
+# el 2026-09-09: lo lanza este script, lleva la marca correcta, y aun asi
+# 'parar' lo dejaba vivo tres veces seguidas diciendo que todo estaba limpio.
+# Un agente sobreviviente no ocupa el puerto, asi que la comprobacion final no
+# lo delata: al relanzar quedan dos agentes del mismo robot publicando a la vez.
+# Por eso 'coordinacion/agente' esta en la lista. Va con la ruta y no solo con
+# 'agente' porque esa palabra sola casaria con demasiadas lineas de comando.
+PATRONES='gzserver|gzclient|ros2 launch deepracer|spawn_entity|robot_state_publisher|static_transform_publisher|rviz2|slam_toolbox|ros2_control_node|controller_manager|component_container|teleop_twist|amcl|map_server|planner_server|controller_server|bt_navigator|behavior_server|smoother_server|velocity_smoother|waypoint_follower|lifecycle_manager|coordinacion/agente'
 
 # Cada linea sale clasificada: 'MIO <pid>' o 'AJENO <pid> <programa>'. La
 # etiqueta no es adorno. La funcion se llama dentro de '$( )', que es una
@@ -314,9 +323,14 @@ case "$accion" in
       extras+=("map:=$REPO/Robot/aws-deepracer/deepracer_bringup/maps/$MAPA")
     fi
     echo "== $robot: Nav2 + AMCL + Gazebo, piso $NIVEL, mapa $MAPA, reloj $RELOJ =="
+    # 'nivel:' sale de la misma tabla que la pose, no del nombre del robot. Este
+    # echo ya decia "piso $NIVEL" desde hacia semanas, pero el valor no cruzaba
+    # al launch: el agente publicaba EstadoRobot.nivel=0 mientras la consola
+    # afirmaba lo contrario. Es el peor tipo de fallo -la pantalla dice la verdad
+    # y el mensaje no- y por eso las dos cosas leen ahora la misma variable.
     exec ros2 launch deepracer_bringup nav_amcl_demo_sim.launch.py \
       world:="$MUNDO" namespace:="$robot" x:="$X" y:="$Y" z:="$Z" yaw:="$YAW" \
-      clock_topic:="$RELOJ" "${extras[@]}"
+      clock_topic:="$RELOJ" nivel:="$NIVEL" "${extras[@]}"
     ;;
 
   rviz)

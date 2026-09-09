@@ -97,6 +97,22 @@ def generate_launch_description():
     declare_y_arg = DeclareLaunchArgument('y', default_value=pose_texto('y'))
     declare_yaw_arg = DeclareLaunchArgument('yaw', default_value=pose_texto('yaw'))
     declare_z_arg = DeclareLaunchArgument('z', default_value=pose_texto('z'))
+    # EL NIVEL NO SE DEDUCE DE 'z'. Va aparte porque el agente lo publica en
+    # EstadoRobot.nivel, y ese campo solo admite 1 o 2. Hasta el 2026-09-09 este
+    # launch ni lo declaraba ni lo reenviaba, asi que deepracer_navigation_sim
+    # se quedaba con su defecto '0' y los dos agentes publicaban un valor que su
+    # propio .msg declara invalido. No fallo en ningun sitio: el agente lo avisa
+    # por el log -donde nadie mira mientras corre una campana- y sigue con el 0.
+    #
+    # Alcance, comprobado y no supuesto: 'nivel' NO aparece en el esquema de
+    # Documentos/Evidencia/registros/*.json, asi que los 30 registros de la
+    # campana OE4 no quedaron contaminados. El valor solo viajaba por el topico
+    # de estado, que es lo que lee la HRI.
+    declare_nivel_arg = DeclareLaunchArgument(
+        'nivel', default_value='0',
+        description="Piso de este robot (1 o 2). El '0' significa 'nadie lo "
+                    "dijo': el agente lo denuncia en vez de inventarlo.")
+    nivel_cfg = LaunchConfiguration('nivel')
 
     include_files = GroupAction([
         # start deepracer simulation
@@ -116,6 +132,7 @@ def generate_launch_description():
             launch_arguments = {'params': params_cfg,
                                 'namespace': ns_cfg,
                                 'clock_topic': reloj_cfg,
+                                'nivel': nivel_cfg,
                                 'use_sim_time': 'true'}.items()
         ),
         # start localization (amcl) and map_server
@@ -146,6 +163,7 @@ def generate_launch_description():
     ld.add_action(declare_y_arg)
     ld.add_action(declare_yaw_arg)
     ld.add_action(declare_z_arg)
+    ld.add_action(declare_nivel_arg)
     ld.add_action(include_files)
 
     return ld
