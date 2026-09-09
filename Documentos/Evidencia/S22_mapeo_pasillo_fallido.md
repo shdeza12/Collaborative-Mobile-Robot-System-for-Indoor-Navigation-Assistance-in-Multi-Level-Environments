@@ -373,6 +373,57 @@ ver con SLAM. Los dos se arreglaron y los dos afectan a cualquier mapa que produ
 
 ---
 
+### 8.7 Una medida que sí sirve sobre bags reales, y la predicción que falló primero
+
+Las dos herramientas del §8.1 y §8.2 exigen verdad de terreno, y **en el carro no la hay**: el
+DeepRacer no lleva encoders, así que su `/odom` *es* la estimación de rf2o y usarla como referencia
+sería circular. Hacía falta algo que decidiera con `/scan` y nada más.
+
+**Qué mide.** Por cada rayo se estima la normal de la superficie sobre la que cae, ajustando una
+recta por mínimos cuadrados totales a los 7 puntos cartesianos vecinos y descartando los saltos de
+rango, que son bordes y no superficies. El índice es la fracción de rayos cuya normal queda a menos
+de 45° del eje de marcha: son los únicos cuyo rango cambia al avanzar. Un solo barrido basta; **no
+compara instantes**, y por eso no puede confundir un sensor quieto con un entorno sin información,
+que es el defecto por el que hubo que retractar la primera métrica del 2026-09-08.
+Herramienta: [`herramientas/medir_informacion_avance.py`](../../herramientas/medir_informacion_avance.py).
+
+**La primera predicción falló, y conviene que conste.** Fijada antes de correr (§6.3): caja ≥ 10 %,
+pasillo ≤ 5 %, separación ≥ 2×. Medido: **caja 14,5 %, pasillo 26,7 %** — al revés. La tentación era
+retocar umbrales; en vez de eso se buscó la causa, y no era un defecto de la medida: **los dos bags
+no se mueven igual.** `S21_piloto_bajada_01` es un piloto con giros, y durante un giro las paredes
+laterales quedan oblicuas al eje del robot, con lo que su rango sí cambia al avanzar. El índice subía
+porque de verdad había información. Confirma el mecanismo el propio bag: rf2o registró 0,388 del
+avance en todo el recorrido pero solo 0,209 en las rectas.
+
+**Segunda predicción, fijada antes de correr y cumplida.** Restringiendo los dos bags a recta pura
+—`|giro| ≤ 0,05 rad/s` y `v ≥ 0,10 m/s`, medidos con la verdad de simulación usada *solo para
+seleccionar* barridos comparables, nunca para calcular el índice—: mediana del pasillo ≤ 8 % y
+separación ≥ 1,8×.
+
+| entorno | sintético exacto | bag real, todo | bag real, **recta pura** |
+|---|---|---|---|
+| caja cerrada de 7,70 m | 12,5 % | 14,5 % | **13,8 %** (p10 10,0) |
+| pasillo de 46,9 m | 5,2 % | 26,7 % | **6,8 %** (p10 5,7) |
+| separación | 2,4× | 0,54× ✗ | **2,03× ✓** |
+
+La columna sintética es geometría analítica sin robot —dos paredes paralelas y sus tapas— y sirve de
+patrón: el estimador reproduce el valor exacto, y con el ruido del LiDAR simulado (σ = 0,01 m,
+`deepracer.xacro:52`) no se mueve. A σ = 0,02 m sí empieza a inflarse, y eso acota su uso.
+
+**Condición de uso, que es el resultado más importante de esta sección.** El índice es instantáneo y
+correcto por barrido, pero **solo es comparable entre recorridos con movimiento parecido**. Para un
+bag de reconocimiento en línea recta —el caso de campo— vale la mediana. Para uno con giros hay que
+mirar el decil inferior, que es donde están los tramos sin información: el mapa se encoge en esos, no
+en el promedio.
+
+**Nota de método.** El bag de control de la caja se había grabado en `/tmp` y se perdió al limpiarse
+el directorio. Se regeneró el 2026-09-09 con el mismo procedimiento del §8.4 —`conducir_recta.py`,
+0,33 m/s, 4 travesías de 5,6 m— y quedó en `~/tesis_evidencia/S22_caja_control_02`. Que se pudiera
+rehacer sin discutir nada es el argumento a favor de haber guardado el conductor como herramienta; que
+hubiera que rehacerlo es el argumento contra grabar en `/tmp`.
+
+---
+
 ## 9. Qué queda abierto, y dónde se resuelve
 
 1. ~~**Resolver la discrepancia de 180°**~~ **Sigue abierta pero baja de prioridad** (§7.4): es
@@ -394,7 +445,8 @@ ver con SLAM. Los dos se arreglaron y los dos afectan a cualquier mapa que produ
    el mapa de la geometría y pasó `verificar_mapa.py` con 99,7 %— como salida segura si la medida
    dice que no, y hoy esa vía es **más** probable que ayer, no menos.
 6. **Traer al portátil los bags de la campaña del 2026-09-07, y medir el pasillo.** Los bags están
-   solo en la tarjeta, y sin ellos no se puede aplicar al pasillo real la medida del §8.1. El largo
+   solo en la tarjeta, y sin ellos no se puede aplicar al pasillo real la medida del §8.7 —la del
+   §8.1 no sirve allí, porque exige verdad de terreno y el carro no la tiene—. El largo
    del pasillo y la posición de sus rupturas —puertas, columnas, cruces— se toman con flexómetro en
    la misma visita. Las dos cosas juntas deciden entre las dos vías del punto anterior; ninguna
    necesita conducir el carro.
