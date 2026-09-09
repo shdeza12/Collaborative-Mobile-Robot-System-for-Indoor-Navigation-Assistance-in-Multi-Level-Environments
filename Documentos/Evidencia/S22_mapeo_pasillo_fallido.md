@@ -326,7 +326,7 @@ movimiento para que la única variable del ensayo sea la geometría del entorno.
 | veredicto de `verificar_mapa.py` | RECHAZADO | **ACEPTADO** |
 
 **Es el primer mapa que este proyecto acepta con SLAM.** Queda en
-`Documentos/Evidencia/S22_mapa_caja_aceptado.{pgm,yaml,png}` y vuelve a verificar desde ahí.
+`Documentos/Evidencia/S22_mapa_caja_SIMULACION_aceptado.{pgm,yaml,png}` y vuelve a verificar desde ahí.
 
 ### 8.5 Dos defectos reales que salieron del ensayo
 

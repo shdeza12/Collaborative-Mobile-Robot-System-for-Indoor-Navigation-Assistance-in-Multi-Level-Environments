@@ -1,4 +1,4 @@
-image: S22_mapa_caja_aceptado.pgm
+image: S22_mapa_caja_SIMULACION_aceptado.pgm
 mode: trinary
 resolution: 0.05
 origin: [-4.06, -1.4, 0]
