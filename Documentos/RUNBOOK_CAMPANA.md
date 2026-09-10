@@ -72,12 +72,14 @@ el par no es un problema; los datos de piloto se guardan aparte y marcados.
 
 ### 0.1 De dónde se ejecuta cada comando
 
-Una corrida abre **cuatro terminales**, y cada una empieza en tu carpeta personal. Antes del primer
-comando de cada terminal hay que dejarla donde toca. Sólo hay dos sitios:
+Una corrida abre **cinco terminales** —siete si la misión se pide desde el teléfono (§4.1)—, y cada
+una empieza en tu carpeta personal. Antes del primer comando de cada terminal hay que dejarla donde
+toca. Sólo hay dos sitios:
 
 | Comandos que empiezan por… | Se ejecutan desde |
 |---|---|
 | `herramientas/…`, `python3 herramientas/…` | la **raíz del repositorio** (tu clon) |
+| `python3 -m http.server … --directory interfaz_web` | la **raíz del repositorio** (§4.1) |
 | `ros2 …` a secas | `~/deepracer_sim_ws`, con `source install/setup.bash` hecho |
 
 Este runbook no escribe la ruta de tu clon en ningún sitio, porque no la sabe: puede colgar de
@@ -212,6 +214,70 @@ parar.
 **`use_sim_time:=true` no es opcional.** El §3 del protocolo define `t_solicitud` sobre el reloj de
 simulación, que es el mismo que sella el bag. Sin él, el coordinador marcaría con reloj de pared y
 con RTF ≥ 0,99 las dos formas difieren hasta un 1 %: sobre `t_respuesta` eso no es ruido, es sesgo.
+
+---
+
+## 4.1 La HRI, cuando la misión se pide desde el teléfono
+
+Sólo hace falta para las corridas que verifican RF-17 a RF-20. Una misión lanzada con
+`ros2 action send_goal` (§6) no necesita nada de esto.
+
+Son **dos procesos más**, y van después del coordinador porque los dos hablan con él.
+
+Se numeran 6 y 7 aunque se arranquen antes que la 5: la 4 y la 5 ya están dadas a grabar (§5) y a
+lanzar la misión (§6), y renumerarlas aquí obligaría a leer dos runbooks distintos según cómo se
+pida la misión.
+
+**Terminal 6 — el puente.** Desde el workspace, porque sin `coordinacion_msgs` sourceado el
+puente no sabe serializar la acción:
+
+```bash
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 launch rosbridge_server rosbridge_websocket_launch.xml
+```
+
+**Esperado:** `Rosbridge WebSocket server started on port 9090`.
+
+**Terminal 7 — servir los ficheros.** Desde la raíz del repositorio:
+
+```bash
+python3 -m http.server 8000 --directory interfaz_web
+```
+
+**Esperado:** `Serving HTTP on 0.0.0.0 port 8000`.
+
+**La dirección que se teclea en el teléfono** sale de:
+
+```bash
+hostname -I
+```
+
+y se abre como `http://<esa_ip>:8000/`. No hay que configurar nada más en la página:
+`interfaz_web/js/app.js` deriva la dirección del WebSocket de `location.hostname`, así que el
+teléfono habla con el mismo equipo del que se descargó. Para apuntar a otro,
+`http://<ip>:8000/?ws=<host>:9090`.
+
+**`localhost` no vale desde el teléfono** y es el error que más tiempo cuesta, porque la página
+carga y sólo falla la conexión: el led se queda rojo con «sin conexion, reintentando…».
+
+### El cortafuegos, y por qué la regla va acotada a la subred
+
+El portátil tiene `ufw` activo. Con la política por omisión el teléfono no llega a ninguno de los
+dos puertos, y el síntoma es que la página ni siquiera carga:
+
+```bash
+sudo ufw allow from 192.168.0.0/24 to any port 8000 proto tcp comment 'HRI web tesis'
+sudo ufw allow from 192.168.0.0/24 to any port 9090 proto tcp comment 'rosbridge tesis'
+```
+
+**Acotada a la subred, no `allow 9090` a secas.** `rosbridge` **no tiene autenticación**: quien
+alcance el 9090 puede publicar en cualquier tópico y llamar cualquier servicio, incluido conducir
+los robots. Con la regla escrita así, la misma máquina en otra red —la del edificio, por ejemplo—
+queda cerrada sin tener que acordarse de borrar nada.
+
+Comprobar en cualquier momento con `sudo ufw status numbered`.
+
+> **Verificado el 2026-09-10** con un teléfono real en el SSID `DEEPRACER`: la página cargó y el
+> led se puso verde, que es la evidencia física que RF-20 tenía pendiente desde el 2026-09-02.
 
 ---
 

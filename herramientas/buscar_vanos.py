@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 """Encuentra los vanos de un mundo y decide cuales hay que tapar.
 
+    python3 herramientas/buscar_vanos.py mundo_definitivo_piso2.world \\
+        --region -23.39 -11.30 -17.37 -6.76 --xml Limite_p2_
+
+Sin --xml solo informa; con --xml escribe los paneles listos para pegar en el
+.world. El juego completo de --region del piso 2 esta en GUIA_EJECUCION.md.
+
 POR QUE EXISTE
 --------------
 generar_mapa_desde_mundo.py pinta las paredes y rellena el interior desde una

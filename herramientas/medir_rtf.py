@@ -7,8 +7,8 @@ Aqui se mide lo unico que le importa a ROS: cuanto avanza /clock por cada
 segundo de reloj de pared. Ese es el numero que contamina o no las metricas
 de tiempo del objetivo 4.
 
-Uso:  python3 medir_rtf.py [--topico /clock] [--segundos 20]
-      python3 medir_rtf.py --marca            -> imprime "<sim_s> <pared_s>"
+Uso:  python3 herramientas/medir_rtf.py [--topico /clock] [--segundos 20]
+      python3 herramientas/medir_rtf.py --marca   -> imprime "<sim_s> <pared_s>"
 
 EL MODO --marca EXISTE POR UN AGUJERO REAL. El 2026-08-29 las dos misiones de
 la condicion A se grabaron sin medir RTF, y al componer el registro el esquema

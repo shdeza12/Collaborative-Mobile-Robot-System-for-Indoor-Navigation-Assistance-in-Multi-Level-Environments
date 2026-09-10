@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Pruebas de adaptar_bag_jazzy.py. No necesitan ROS ni el plugin de mcap.
 
+    python3 herramientas/prueba_adaptar_bag_jazzy.py
+
 Lo que se comprueba es la TRADUCCION de la metadata, que es lo unico que este
 guion hace. Que el bag resultante se pueda abrir depende ademas de que el PC
 tenga 'ros-humble-rosbag2-storage-mcap', y eso no es cosa de estas pruebas.

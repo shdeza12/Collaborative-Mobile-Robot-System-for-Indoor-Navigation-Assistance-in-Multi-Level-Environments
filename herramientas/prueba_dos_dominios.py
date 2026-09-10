@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 """P1 — un proceso, dos contextos rclpy, dos ROS_DOMAIN_ID.
 
+    herramientas/prueba_dos_dominios.py
+
+No necesita Gazebo ni las dos pilas levantadas. La otra mitad del bloqueo de
+dominios -las acciones- la cubre 'prueba_dos_dominios_accion.py'.
+
 Pregunta que decide la opcion D del bloqueo de dominios: ¿puede UN proceso
 -el coordinador- hablar con robot1 (dominio 0) y robot2 (dominio 2) a la vez?
 

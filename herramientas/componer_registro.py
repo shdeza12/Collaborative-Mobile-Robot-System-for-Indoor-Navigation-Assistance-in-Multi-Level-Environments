@@ -2,6 +2,12 @@
 """Compone el registro de una mision a partir de su bag. Ver
 Documentos/ESQUEMA_REGISTRO_MISION.md.
 
+    source ~/deepracer_sim_ws/install/setup.bash && python3 herramientas/componer_registro.py ~/tesis_evidencia/S21_piloto_A_01 --banco simulacion --campana OE4_simulacion --piloto --semilla 20260822 --salida Documentos/Evidencia/registros/S21_piloto_A_01.json
+
+Necesita el 'source' porque lee el bag con rosbag2. --banco y --campana son
+obligatorios; el RTF, la condicion inicial y los controladores los recoge de los
+ficheros que 'grabar_mision.sh' dejo junto al bag.
+
 No corre durante la mision, y eso es deliberado: RNF-06 exige RTF >= 0,99 y un
 registrador serializando a 50 Hz compite por la CPU con dos Gazebo en el mismo
 equipo. El bag sigue siendo la fuente; esto solo lo lee.

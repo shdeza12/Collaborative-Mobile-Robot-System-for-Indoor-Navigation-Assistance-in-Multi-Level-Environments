@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """Hace legible en Humble un bag grabado en la tarjeta Jazzy del vehiculo.
 
+    python3 herramientas/adaptar_bag_jazzy.py /tmp/g2_ida_1 -o /tmp/g2i1
+
+El bag de origen NO se toca: se copia al destino con la metadata traducida.
+
 POR QUE EXISTE
 --------------
 La tarjeta del DeepRacer corre Ubuntu 24.04 con ROS 2 Jazzy; el PC donde se

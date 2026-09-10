@@ -3,6 +3,12 @@
 
 Se ejecuta EN EL VEHICULO. Ver GUIA_TELEOP_MANDO.md.
 
+    scp herramientas/teleop_mando.py deepracer@<IP>:~/     # desde el portatil
+    sudo -i bash -c 'source /opt/ros/jazzy/setup.bash && source /opt/aws/deepracer/lib/setup.bash && python3 ~deepracer/teleop_mando.py'
+
+Con 'sudo -i' el '~' es /root, de ahi el '~deepracer/' explicito. La logica sin
+ROS se prueba en el portatil con 'prueba_teleop_mando.py'.
+
 POR QUE LA LOGICA ESTA EN FUNCIONES SUELTAS
 -------------------------------------------
 `escalar`, `decidir` y `salida` no tocan ROS ni el nodo: reciben numeros y
