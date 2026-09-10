@@ -872,6 +872,38 @@ def pruebas_de_bag(esquema):
         check("y el registro con condicion inicial valida",
               valida(con_cond, esquema), _por_que(con_cond, esquema))
 
+        # --- 'controladores_activos', por el mismo camino y por la misma razon ---
+        # Este campo esta en el esquema desde el principio y hasta el 2026-09-10
+        # SIEMPRE salio '{}'. No por olvido de quien compone: 'ros2 control
+        # list_controllers' es un SERVICIO, no un topico, asi que no queda en el
+        # bag ni puede quedar. El compositor no tenia de donde sacarlo, y en vez
+        # de decirlo escribia un objeto vacio -que en el esquema es tan valido
+        # como el lleno-. De ahi que 30 registros pasaran la validacion sin que
+        # nadie lo notara.
+        #
+        # La solucion es la de rtf.json y condicion_inicial.json, ya probada
+        # arriba: lo mide quien graba, en el momento, y lo deja junto al bag.
+        # Los 30 registros de la campana OE4 conservan su '{}' y siguen siendo
+        # validos: rellenarlos ahora seria inventar una medida que nadie tomo.
+        check("sin controladores.json el campo queda vacio, no falla",
+              sin_cond["salud_del_banco"]["controladores_activos"] == {},
+              f"-> {sin_cond['salud_del_banco']['controladores_activos']}")
+
+        with open(os.path.join(ruta, "controladores.json"), "w",
+                  encoding="utf-8") as f:
+            json.dump({"robot1": "7/7", "robot2": "sin respuesta"}, f)
+        con_ctrl = componer(ruta, banco="simulacion", campana="prueba", rtf=0.995)
+        ctrl = con_ctrl["salud_del_banco"]["controladores_activos"]
+        check("el compositor lee controladores.json de junto al bag",
+              ctrl.get("robot1") == "7/7", f"-> {ctrl}")
+        # Mismo principio que en la condicion inicial: 'no lo se' y 'estaban
+        # todos' no pueden verse igual. Si el robot no contesta al servicio, el
+        # registro lo dice; omitir la clave dejaria creer que solo habia un robot.
+        check("y un robot que no contesto se declara, no se omite ni se aprueba",
+              ctrl.get("robot2") == "sin respuesta", f"-> {ctrl}")
+        check("y el registro con controladores valida",
+              valida(con_ctrl, esquema), _por_que(con_ctrl, esquema))
+
         # §4.2: el compositor falla ruidosamente, nunca inventa. Un bag ilegible
         # y una mision sin eventos NO pueden verse igual.
         vacio = os.path.join(tmp, "no_es_un_bag")

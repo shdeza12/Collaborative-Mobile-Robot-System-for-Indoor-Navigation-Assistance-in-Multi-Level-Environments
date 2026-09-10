@@ -207,6 +207,53 @@ if [ "$COND_ESTADO" -ne 0 ]; then
     echo "  python3 herramientas/verificar_condicion_inicial.py ${ROBOTS[*]}" >&2
 fi
 
+# --- Controladores activos, aqui y no al componer ---------------------------
+# 'ros2 control list_controllers' es un SERVICIO. Su respuesta NO queda en el
+# bag, no puede quedar, y por eso el campo 'controladores_activos' del esquema
+# salio '{}' en los 30 registros de la campana OE4: el compositor no tenia de
+# donde leerlo y escribia un objeto vacio, que el esquema acepta igual que el
+# lleno. Nadie lo noto hasta el 2026-09-10.
+#
+# Misma cura que el RTF y la condicion inicial: se mide ahora, con la pila viva,
+# y se deja junto al bag. Se mide DESPUES de la condicion inicial y antes de la
+# marca de RTF por la misma razon que aquella -no meter ventana muerta entre las
+# dos marcas de reloj-, y con 'timeout' porque un cliente creado mientras el
+# controller_manager arranca puede quedarse esperando para siempre.
+#
+# NO es una guarda: no aborta. La compuerta de controladores ya la paso
+# esperar_nav2.sh en el paso 3; esto solo deja constancia de lo que habia en el
+# momento de grabar. Un robot que no conteste se declara 'sin respuesta', que no
+# es lo mismo que '7/7' ni que no aparecer: 'no lo se' y 'estaban todos' tienen
+# que verse distintos en el registro.
+CTRL_JSON="{"
+CTRL_COMA=""
+for R in "${ROBOTS[@]}"; do
+    set +e
+    CTRL_LISTA="$(timeout 15 ros2 control list_controllers \
+                  -c "/$R/controller_manager" 2>/dev/null \
+                  | sed 's/\x1b\[[0-9;]*m//g')"
+    set -e
+    if [ -z "$CTRL_LISTA" ]; then
+        CTRL_VALOR="sin respuesta"
+    else
+        CTRL_N=0
+        for C in joint_state_broadcaster \
+                 left_rear_wheel_velocity_controller \
+                 right_rear_wheel_velocity_controller \
+                 left_front_wheel_velocity_controller \
+                 right_front_wheel_velocity_controller \
+                 left_steering_hinge_position_controller \
+                 right_steering_hinge_position_controller; do
+            grep -qE "^$C .*active" <<< "$CTRL_LISTA" && CTRL_N=$((CTRL_N + 1))
+        done
+        CTRL_VALOR="$CTRL_N/7"
+    fi
+    CTRL_JSON="$CTRL_JSON$CTRL_COMA\"$R\": \"$CTRL_VALOR\""
+    CTRL_COMA=", "
+    echo "Controladores de $R: $CTRL_VALOR"
+done
+CTRL_JSON="$CTRL_JSON}"
+
 # --- Marca de RTF, antes de grabar ------------------------------------------
 # EL BAG NO PUEDE DAR EL RTF, y por eso se mide aqui. Con '--use-sim-time'
 # 'ros2 bag record' sella en tiempo de simulacion tanto los mensajes como el
@@ -296,6 +343,14 @@ if [ -n "$COND_INICIAL" ] && [ -d "$DESTINO" ]; then
 elif [ -z "$COND_INICIAL" ]; then
     echo "AVISO: no se pudo medir la condicion inicial. El registro saldra sin" >&2
     echo "el criterio 1 del §8, y ese criterio NO se puede reconstruir despues." >&2
+fi
+
+# --- Y los controladores, por lo mismo y en el mismo sitio ------------------
+# La MEDIDA es la de antes de grabar, tomada mas arriba con la pila viva; esto
+# solo la deja en disco, ahora que el directorio del bag existe.
+if [ -d "$DESTINO" ]; then
+    printf '%s\n' "$CTRL_JSON" > "$DESTINO/controladores.json"
+    echo "Controladores -> $DESTINO/controladores.json"
 fi
 
 # --- Marca de RTF, al cerrar ------------------------------------------------

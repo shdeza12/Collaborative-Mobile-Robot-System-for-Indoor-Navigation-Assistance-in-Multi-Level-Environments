@@ -29,6 +29,7 @@ De ahi las dos guardas que se prueban aqui:
      que nadie la viera.
 """
 
+import json
 import os
 import shutil
 import subprocess
@@ -67,6 +68,24 @@ topic)
     esac
     ;;
 interface) exit 0 ;;
+control)
+    # 'list_controllers' es un SERVICIO: su respuesta nunca esta en el bag, y de
+    # ahi que 'controladores_activos' saliera '{}' hasta el 2026-09-10. Se imita
+    # aqui -con el color ANSI incluido, que es lo que rompia la comparacion- para
+    # comprobar que el grabador lo captura EN EL MOMENTO y lo deja junto al bag.
+    # Con ROS2_CONTROL_MUDO se calla, que es lo que hace un controller_manager
+    # que no esta o no responde dentro del plazo.
+    [ -n "$ROS2_CONTROL_MUDO" ] && exit 0
+    for C in joint_state_broadcaster \\
+             left_rear_wheel_velocity_controller \\
+             right_rear_wheel_velocity_controller \\
+             left_front_wheel_velocity_controller \\
+             right_front_wheel_velocity_controller \\
+             left_steering_hinge_position_controller \\
+             right_steering_hinge_position_controller; do
+        printf '%s tipo/Tipo \\033[92mactive\\033[0m\\n' "$C"
+    done
+    ;;
 bag)
     # Deja constancia de que se llego a grabar, y crea el directorio como
     # haria el grabador de verdad.
@@ -128,10 +147,12 @@ def montar(tmp, marcas_buenas):
     return herr / "grabar_mision.sh", entorno
 
 
-def correr(marcas_buenas):
+def correr(marcas_buenas, ros2_control=True):
     with tempfile.TemporaryDirectory() as d:
         tmp = Path(d)
         script, entorno = montar(tmp, marcas_buenas)
+        if not ros2_control:
+            entorno["ROS2_CONTROL_MUDO"] = "1"
         r = subprocess.run(["bash", str(script), "mision_de_prueba", "robot1"],
                            capture_output=True, text=True, env=entorno,
                            timeout=60)
@@ -140,7 +161,17 @@ def correr(marcas_buenas):
             "salida": r.stdout + r.stderr,
             "se_grabo": (tmp / "se_grabo.txt").exists(),
             "hay_bag": (tmp / "evidencia" / "mision_de_prueba").exists(),
+            "controladores": _leer_json(
+                tmp / "evidencia" / "mision_de_prueba" / "controladores.json"),
         }
+
+
+def _leer_json(ruta):
+    """None si no existe: 'no se escribio' y 'se escribio vacio' no son lo
+    mismo, y la prueba tiene que poder distinguirlos."""
+    if not ruta.exists():
+        return None
+    return json.loads(ruta.read_text())
 
 
 def pruebas_de_la_marca_inicial():
@@ -174,6 +205,26 @@ def prueba_de_la_corrida_sana():
     check("sale con codigo 0", r["codigo"] == 0, f"codigo {r['codigo']}")
     check("grabo el bag", r["se_grabo"])
     check("no avisa de nada roto", "se resuelve AHORA" not in r["salida"])
+    # El campo que estuvo vacio en los 30 registros de la campana OE4. Se
+    # comprueba aqui, en la mitad que MIDE, porque la otra mitad -que el
+    # compositor lo lea- ya la cubre prueba_componer_registro.py. Las dos juntas
+    # cierran el camino entero: servicio vivo -> fichero junto al bag -> registro.
+    check("deja los controladores junto al bag", r["controladores"] is not None,
+          "sin controladores.json el compositor vuelve a escribir {}")
+    check("y con los siete que vio, no con un si/no",
+          (r["controladores"] or {}).get("robot1") == "7/7",
+          f"-> {r['controladores']}")
+
+
+def prueba_de_los_controladores_mudos():
+    print("\nSi el controller_manager no contesta, se dice, no se aprueba")
+    # 'no lo se' y 'estaban los siete' no pueden verse igual en el registro: un
+    # '7/7' inventado convertiria una corrida sin banco en una corrida sana.
+    r = correr(marcas_buenas=2, ros2_control=False)
+    check("el bag se graba igual: esto no es una compuerta", r["se_grabo"])
+    check("y el robot mudo se declara 'sin respuesta'",
+          (r["controladores"] or {}).get("robot1") == "sin respuesta",
+          f"-> {r['controladores']}")
 
 
 def main():
@@ -183,6 +234,7 @@ def main():
     pruebas_de_la_marca_inicial()
     pruebas_de_la_marca_final()
     prueba_de_la_corrida_sana()
+    prueba_de_los_controladores_mudos()
     print()
     if FALLOS:
         print(f"{len(FALLOS)} fallan.")

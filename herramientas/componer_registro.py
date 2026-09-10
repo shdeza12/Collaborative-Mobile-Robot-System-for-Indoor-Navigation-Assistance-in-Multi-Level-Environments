@@ -529,7 +529,8 @@ def componer(ruta_bag, banco, campana, error_posicion_m=None, rtf=None,
                                      medido_por, nota),
         "veredicto": veredicto,
         "descriptivas": _descriptivas(banco, topicos, poses, marcas),
-        "salud_del_banco": _salud(banco, rtf, _condicion_inicial(ruta_bag)),
+        "salud_del_banco": _salud(banco, rtf, _condicion_inicial(ruta_bag),
+                                  _controladores(ruta_bag)),
         "traza": _traza(ruta_bag, poses),
     }
 
@@ -923,16 +924,40 @@ def _condicion_inicial(ruta_bag):
         return json.load(f)
 
 
-def _salud(banco, rtf, condicion_inicial=None):
+def _controladores(ruta_bag):
+    """Los 7 controladores por robot que esperar_nav2.sh vio activos, o {}.
+
+    Nace del mismo defecto que rtf.json, y conviene dejarlo escrito. El campo
+    'controladores_activos' esta en el esquema desde el principio, y hasta el
+    2026-09-10 SIEMPRE salio '{}' -los 30 registros de la campana OE4 incluidos-.
+    No fue un olvido de quien compone: 'ros2 control list_controllers' es un
+    SERVICIO, no un topico, asi que su respuesta no queda en el bag ni puede
+    quedar. El compositor no tenia de donde sacar el dato y escribia un objeto
+    vacio, que el esquema acepta igual que el lleno. Por eso paso inadvertido.
+
+    La solucion es la ya usada para el RTF y la condicion inicial: lo mide quien
+    graba, en el momento, y lo deja junto al bag. Devolver {} cuando el fichero
+    falta no es un apano, es lo unico honesto: esos 30 registros no llevan la
+    medida porque nadie la tomo, y rellenarlos ahora seria inventarla.
+    """
+    ruta = os.path.join(ruta_bag, "controladores.json")
+    if not os.path.exists(ruta):
+        return {}
+    with open(ruta, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def _salud(banco, rtf, condicion_inicial=None, controladores=None):
     """Para que un descarte sea demostrable. La causa la pone una persona
     despues, y solo puede ser una de las cuatro del §8 del protocolo: el esquema
     rechaza cualquier otra."""
+    ctrl = dict(controladores or {})
     if banco == "fisico":
-        salud = {"rtf": None, "controladores_activos": {},
+        salud = {"rtf": None, "controladores_activos": ctrl,
                  "gzserver_vivo_al_final": None, "descartada": False,
                  "causa_descarte": None}
     else:
-        salud = {"rtf": rtf, "controladores_activos": {},
+        salud = {"rtf": rtf, "controladores_activos": ctrl,
                  "gzserver_vivo_al_final": True, "descartada": False,
                  "causa_descarte": None}
     if condicion_inicial is not None:
