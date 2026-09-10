@@ -33,6 +33,7 @@ from action_msgs.msg import GoalStatus
 from geometry_msgs.msg import PoseStamped
 from nav2_msgs.action import NavigateToPose
 from nav_msgs.msg import Odometry
+from std_msgs.msg import String
 from rclpy.action import ActionClient, ActionServer
 from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.node import Node
@@ -43,9 +44,11 @@ from coordinacion_msgs.msg import EstadoMision, ListaPuntosInteres, PuntoInteres
 from coordinacion.registrador import RegistroMision, entorno_simulacion
 
 from coordinacion.planificador import (
-    ASIGNACION_POR_DEFECTO, COMPLETADA, ErrorPlanificacion, FALLIDA, INACTIVA,
-    RECIBIDA, condicion_de, generar_mision_id, planificar, yaw_a_cuaternion,
+    ASIGNACION_POR_DEFECTO, COMPLETADA, ErrorPlanificacion,
+    ESPERANDO_CONFIRMACION, FALLIDA, INACTIVA, RECIBIDA, TRANSFERENCIA,
+    condicion_de, generar_mision_id, planificar, yaw_a_cuaternion,
 )
+from coordinacion.espera_confirmacion import ALERTA_S, PLAZO_S, Enganche, fase
 
 # Criterio de llegada del §3.3 de PROTOCOLO_EXPERIMENTAL.md, medido contra
 # /<ns>/odom. No inventar otro aqui: si se cambia, se cambia en el protocolo
@@ -129,6 +132,22 @@ class Coordinador(Node):
             self, GuiarUsuario, "/coordinacion/guiar_usuario",
             execute_callback=self._ejecutar, callback_group=self.grupo)
 
+        # RF-28. El usuario avisa por aqui de que ya cambio de piso. Topico y no
+        # servicio a proposito: 'ros2 bag' NO graba servicios, y el instante de
+        # la confirmacion tiene que quedar en el bag para poder comprobarlo
+        # despues. Es la misma razon por la que origen_id y destino_id estan en
+        # EstadoMision y no solo en el goal.
+        #
+        # El callback_group NO es decoracion: el bucle de _esperar_confirmacion
+        # bloquea dentro de _ejecutar. Solo porque self.grupo es reentrante y el
+        # executor es multihilo puede correr este callback mientras aquel espera.
+        # Con el grupo mutuamente excluyente por defecto, la espera se agotaria
+        # SIEMPRE a los 120 s aunque el usuario confirmara al instante.
+        self.enganche = Enganche()
+        self.create_subscription(
+            String, "/coordinacion/confirmacion_piso",
+            self._confirmacion, 10, callback_group=self.grupo)
+
         self.get_logger().info(
             f"Coordinador listo. {len(self.catalogo)} puntos, "
             f"asignacion {self.asignacion}")
@@ -203,6 +222,10 @@ class Coordinador(Node):
             {str(k): v for k, v in self.asignacion.items()},
             t_solicitud=t0, condicion=self.condicion) if self.ruta_registros else None
 
+        # Cualquier confirmacion anterior deja de valer: si no, una pulsacion
+        # tardia de la mision pasada arrancaria el tramo 2 de esta sin preguntar.
+        self.enganche.reiniciar(mision_id)
+
         self.get_logger().info(
             f"Mision: {pet.origen_id} -> {pet.destino_id}")
 
@@ -255,6 +278,23 @@ class Coordinador(Node):
                 res.tiempo_total_s = self._ahora() - t0
                 res.num_relevos = relevos
                 return self._cerrar_registro(res, tramo.punto)
+
+            # RF-28. Terminado el tramo de TRANSFERENCIA el robot del piso de
+            # destino ya esta en su escalera, pero el usuario puede no haber
+            # subido todavia. Sin esta pausa el tramo 2 arrancaba solo y la
+            # mision podia completarse con el usuario en el otro piso.
+            if tramo.etapa == TRANSFERENCIA:
+                ok, motivo = self._esperar_confirmacion(
+                    tramo, goal_handle, mision_id)
+                if not ok:
+                    self._marcar(FALLIDA, tramo.robot, tramo.punto,
+                                 f"Mision detenida: {motivo}", mision_id)
+                    self._feedback(goal_handle)
+                    goal_handle.abort()
+                    res.exito, res.motivo_fallo = False, motivo
+                    res.tiempo_total_s = self._ahora() - t0
+                    res.num_relevos = relevos
+                    return self._cerrar_registro(res, tramo.punto)
 
         destino = next(p for p in self.catalogo if p["id"] == pet.destino_id)
         self._marcar(COMPLETADA, tramos[-1].robot, destino,
@@ -322,6 +362,11 @@ class Coordinador(Node):
         pos = msg.pose.pose.position
         self.registro.muestra(self._ahora(), ns, pos.x, pos.y, pos.z,
                               math.hypot(v.x, v.y), yaw)
+
+    def _confirmacion(self, msg):
+        """El usuario dice que ya cambio de piso (RF-28)."""
+        self.enganche.recibir(msg.data)
+        self.get_logger().info(f"confirmacion de piso recibida: '{msg.data}'")
 
     def _marcar(self, etapa, robot, punto, mensaje, mision_id):
         self.estado.mision_id = mision_id
@@ -479,6 +524,72 @@ class Coordinador(Node):
                 f"{TOLERANCIA_LLEGADA_M} m de tolerancia")
         self.get_logger().info(f"    llegada verificada contra /odom: {d:.3f} m")
         return True, ""
+
+    def _esperar_confirmacion(self, tramo, goal_handle, mision_id):
+        """La pausa de RF-28: el tramo 2 no arranca sin el visto bueno del usuario.
+
+        Devuelve (True, "") si el usuario confirmo, y (False, motivo) si se
+        agoto el plazo o se cancelo la mision.
+
+        El robot que espera es el del piso de DESTINO -el tramo de
+        TRANSFERENCIA ya es suyo, porque mientras el usuario sube el conduce
+        hasta su escalera-, y se publica en 'robot_activo' siempre lleno: con
+        ese campo vacio la continuidad del RF-24 se vuelve falsa en toda mision
+        entre niveles.
+        """
+        nivel = tramo.punto.get("nivel", "")
+        if self.enganche.consumir(mision_id):
+            self.get_logger().info(
+                "    el usuario ya habia confirmado antes de que el robot "
+                "llegara: se sigue sin esperar")
+            return True, ""
+
+        self._marcar(ESPERANDO_CONFIRMACION, tramo.robot, tramo.punto,
+                     f"¿Ya esta en el piso {nivel}? Confirmelo para continuar.",
+                     mision_id)
+        self._feedback(goal_handle)
+        self.get_logger().info(
+            f"    esperando confirmacion del usuario (alerta a {ALERTA_S:.0f} s, "
+            f"plazo {PLAZO_S:.0f} s)")
+
+        # time.time() y no self._ahora(): ver el docstring de _esperar y la §4
+        # del diseno. El plazo es de paciencia humana, y si Gazebo muere /clock
+        # se para y un plazo en tiempo de simulacion no venceria nunca.
+        t0 = time.time()
+        avisado = False
+        while True:
+            if goal_handle.is_cancel_requested:
+                # Inerte mientras el servidor no registre un cancel_callback
+                # -hoy rclpy rechaza toda cancelacion por defecto-, pero queda
+                # correcto para cuando se arregle.
+                return False, "Cancelada por el usuario durante la espera"
+
+            if self.enganche.consumir(mision_id):
+                espera = time.time() - t0
+                self.get_logger().info(
+                    f"    confirmado por el usuario tras {espera:.1f} s")
+                return True, ""
+
+            estado = fase(time.time() - t0)
+            if estado == "agotada":
+                return False, (
+                    f"el usuario no confirmo la llegada al piso {nivel} en "
+                    f"{PLAZO_S:.0f} s")
+            if estado == "alerta" and not avisado:
+                # UNA sola vez, no en cada vuelta del bucle: a 20 Hz serian
+                # 1200 marcas por minuto en el bag y el conteo de transiciones
+                # dejaria de significar nada.
+                avisado = True
+                restante = PLAZO_S - ALERTA_S
+                self._marcar(
+                    ESPERANDO_CONFIRMACION, tramo.robot, tramo.punto,
+                    f"Seguimos esperando su confirmacion. Quedan "
+                    f"{restante:.0f} segundos.", mision_id)
+                self._feedback(goal_handle)
+                self.get_logger().warn(
+                    f"    alerta: {ALERTA_S:.0f} s sin confirmacion")
+
+            time.sleep(0.05)
 
     def _esperar(self, futuro, timeout=120.0):
         """Espera un futuro sin bloquear el executor (es multihilo).
