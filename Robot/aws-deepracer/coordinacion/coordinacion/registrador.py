@@ -70,7 +70,8 @@ TOLERANCIA_LLEGADA_M = 0.25
 # el tiempo de asignacion del §3.2 dejara de valer cero. Va al final para no
 # renumerar las cinco etapas que ya estaban escritas en los bags anteriores.
 ETAPAS = {0: "INACTIVA", 1: "TRAMO_1", 2: "TRANSFERENCIA", 3: "TRAMO_2",
-          4: "COMPLETADA", 5: "FALLIDA", 6: "RECIBIDA"}
+          4: "COMPLETADA", 5: "FALLIDA", 6: "RECIBIDA",
+          7: "ESPERANDO_CONFIRMACION"}
 
 
 class RegistroMision:

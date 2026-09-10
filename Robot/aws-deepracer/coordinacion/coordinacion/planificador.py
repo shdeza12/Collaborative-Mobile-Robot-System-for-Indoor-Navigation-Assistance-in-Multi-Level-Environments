@@ -66,6 +66,9 @@ FALLIDA = 5
 # El estado entre 'llego la solicitud' y 'ya hay agente'. Sin el, el tiempo de
 # asignacion vale cero por construccion. Ver el comentario de EstadoMision.msg.
 RECIBIDA = 6
+# La pausa en la que la mision espera que el usuario confirme que ya cambio de piso.
+# Ver Documentos/DISENO_CONFIRMACION_PISO.md.
+ESPERANDO_CONFIRMACION = 7
 
 
 def yaw_a_cuaternion(yaw):

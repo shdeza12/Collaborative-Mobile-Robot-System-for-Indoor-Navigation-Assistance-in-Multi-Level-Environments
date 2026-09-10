@@ -27,6 +27,17 @@ uint8 FALLIDA=5
 # suscriptor ya compilado sigue deserializando. Solo vera un valor de etapa que
 # no conoce, y por eso la HRI de S22 debe tratar RECIBIDA como 'preparando'.
 uint8 RECIBIDA=6
+# ESPERANDO_CONFIRMACION es la pausa del §4 de DISENO_CONFIRMACION_PISO.md: el robot del
+# piso de destino ya esta en su escalera y la mision no arranca el tramo 2 hasta que el
+# usuario confirme que subio. Se anade el 2026-09-10 (RF-28), a peticion del director.
+#
+# Va al final y con numero nuevo por la misma razon que RECIBIDA=6: las constantes no
+# viajan por el cable, asi que la serializacion no cambia y un suscriptor ya compilado
+# sigue deserializando. Solo vera un valor de etapa que no conoce.
+#
+# La marca de esta etapa lleva 'robot_activo' con el robot del piso de destino, NUNCA
+# vacio: es la condicion que mantiene cierta la continuidad del RF-24.
+uint8 ESPERANDO_CONFIRMACION=7
 
 string mision_id
 string origen_id                # el punto de partida que pidio el usuario
