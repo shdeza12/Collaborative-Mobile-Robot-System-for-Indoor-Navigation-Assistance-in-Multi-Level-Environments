@@ -171,7 +171,7 @@ proponía justamente esa misión mixta. Ya no es una salida.
 | **RF-18** | La HRI **muestra el estado de la misión** al usuario en texto legible | El campo `mensaje_usuario` se muestra literal y cambia en cada etapa | 🟢 **Verificado el 2026-09-02.** El panel se repinta en cada mensaje de `/coordinacion/estado_mision` (1 Hz) y muestra `mensaje_usuario` sin reescribirlo; probado hasta el ciclo RECIBIDA→TRAMO_1→FALLIDA con el motivo real del coordinador | S22 |
 | **RF-19** | La HRI se comunica **solo con `/coordinacion`**, nunca con los agentes | Inspección de la superficie expuesta por `rosbridge`: ningún tópico `/robotN/*` | 🟢 **Verificado el 2026-09-02.** El código de `interfaz_web/` no referencia ningún tópico `/robotN/*`; solo suscribe `/coordinacion/puntos_interes` y `/coordinacion/estado_mision`, y llama `/coordinacion/guiar_usuario` | S22 |
 | **RF-20** | La HRI es accesible desde el **navegador de un teléfono**, sin instalación | Carga y operación completa desde un móvil en la misma red | 🟢 **Verificado el 2026-09-10** en un teléfono real, SSID `DEEPRACER`, y con las dos mitades del criterio: **carga** (la página se sirvió y el led se puso verde, o sea WebSocket establecido contra `rosbridge`, no solo HTML entregado) y **operación** —desde el móvil se eligió `piso1_etm2` → `piso2_aula_302` y la misión se completó con relevo—. Sin dependencias externas ni CDN. La evidencia no es la pantalla sino el registro validado [`S22_RF20_telefono_C_02.json`](Evidencia/registros/S22_RF20_telefono_C_02.json): veredicto `exito: true`, `c3_relevo: true`, RTF 0,9949. Hizo falta abrir 8000 y 9090 en `ufw` acotados a la subred ([`RUNBOOK_CAMPANA.md`](RUNBOOK_CAMPANA.md) §4.1) | S22 |
-| **RF-28** | En una misión entre niveles, el tramo del piso de destino **no inicia hasta que el usuario confirma** el cambio de piso desde la interfaz. Se avisa a los 60 s y la misión falla a los 120 s sin confirmación | Registro de una misión B con marcas de `ESPERANDO_CONFIRMACION`, más las tres corridas del §7 de [`DISENO_CONFIRMACION_PISO.md`](DISENO_CONFIRMACION_PISO.md) | 🔴 | S22 |
+| **RF-28** | En una misión entre niveles, el tramo del piso de destino **no inicia hasta que el usuario confirma** el cambio de piso desde la interfaz. Se avisa a los 60 s y la misión falla a los 120 s sin confirmación | Registro de una misión B con marcas de `ESPERANDO_CONFIRMACION`, más las tres corridas del §7 de [`DISENO_CONFIRMACION_PISO.md`](DISENO_CONFIRMACION_PISO.md) | 🟢 **Verificado el 2026-09-10 con las tres corridas**, evidencia en [`S22_RF28_confirmacion.md`](Evidencia/S22_RF28_confirmacion.md) y registros `S22_RF28_{A,B,C}V3.json`, los tres validados contra el esquema. Mismo origen y destino, una sola variable —qué hizo la persona—: **A** confirmó a los 11,9 s y la misión cerró en 56,4 s; **B** esperó la alerta y confirmó a los 73,8 s, cerró en 122,6 s; **C** no confirmó y la misión pasó a `FALLIDA` a los **119,9 s**. La separación entre la pregunta y la alerta es de **60,0 s de simulación exactos** en B y en C. La prueba del acto del usuario no es la reacción del coordinador sino `/coordinacion/confirmacion_piso`, que desde esta campaña se graba: **1 mensaje en A y B con el `mision_id` de la misión en vuelo, 0 en C**, y el `TRAMO_2` arranca **≤ 0,1 s** después de la pulsación. El `robot_activo` de todas las marcas de etapa 7 dice `robot2` y nunca queda vacío, que es lo que mantiene cierta la continuidad de RF-24 en toda misión entre niveles. **Defecto de integración que esto destapó y que conviene no olvidar:** con `rosbridge` en su valor por omisión el botón no hacía nada —atiende la meta de acción en el mismo hilo con el que lee el WebSocket—, así que la §4.1 del [`RUNBOOK_CAMPANA.md`](RUNBOOK_CAMPANA.md) exige ahora `send_action_goals_in_new_thread:=true` | S22 |
 
 **Lectura de OE3 al 2026-09-02.** La interfaz se adelantó del S22 (7–13 sep) al final de S21: los
 cuatro requisitos tienen implementación, y tres están verificados contra un `coordinador` real (sin
@@ -197,12 +197,12 @@ presente antes de invertir tiempo en un mapa interactivo.
 | **RF-22** | El sistema registra el **tiempo de asignación de robot**: desde la solicitud hasta que un agente queda asignado | Sobre el bag la resta vale cero por construcción; la cifra sale del **banco aislado** de [`herramientas/banco_tiempo_asignacion.py`](../herramientas/banco_tiempo_asignacion.py), con `perf_counter_ns()` dentro del proceso del coordinador | 🟢 **Verificado, pero no por donde decía esta celda** (revisado el 2026-09-05). Decía «`t_solicitud` y `t_robot_activo` en el mismo registro», y esa resta vale **exactamente 0,0 s en 30 de las 30 misiones** de la campaña —comprobado—, se ejecute lo que se ejecute: `ros2 bag record --use-sim-time` sella con `/clock`, que `gazebo_ros_init` publica a 10 Hz, luego **todo sello está cuantizado a 100 ms**, y asignar son ~150 µs. Eso no mide el evento, **mide el reloj**, y una prueba que se satisface con un cero no es una prueba. La cifra real viene del banco del 2026-08-30 ([`S21_banco_tiempo_asignacion.md`](Evidencia/S21_banco_tiempo_asignacion.md)): **4 corridas sorteadas de n = 30**, mediana entre **154,3 y 175,3 µs** y máximo **306,4 µs** —**326 veces menor que un tic de `/clock`**—, alternando intra e inter-nivel para ejercitar las dos ramas de `planificar()`. **Conviene no confundir esto con el defecto de software que sí hubo:** hasta el 29-ago el coordinador fijaba `etapa` y `robot_activo` en la misma publicación y no existía marca intermedia; se corrigió con la etapa `RECIBIDA`, y fue necesario pero no suficiente | S20 |
 | **RF-23** | El sistema registra el **éxito o fallo** de cada misión, con el motivo | `result.exito` y `result.motivo_fallo` quedan en el registro | 🟢 **Verificado sobre las 30 misiones de la campaña (2026-09-04/05).** Cada registro trae su veredicto calculado contra `/odom`, no contra el `SUCCEEDED` de Nav2: **26 aciertos de 30 (86,7 %)**, IC95 de Wilson **70,3–94,7 %**. Los 4 fallos quedan con su motivo y son **un solo modo** —error de llegada de 0,284 a 0,347 m contra un criterio de 0,25 m—, o sea inobservabilidad longitudinal del pasillo, **no fallo de coordinación** | S21 |
 | **RF-24** | El sistema registra la **continuidad del servicio entre niveles**: que la misión atraviesa el relevo sin interrupción del guiado | Ninguna etapa queda sin agente activo entre `TRAMO_1` y `TRAMO_2` | 🟢 **Verificado el 2026-09-05: 14 de 14 (100 %)**, IC95 **78,5–100 %**, con salto de relevo de mediana **0,100 s** —un tic de `/clock`, o sea el suelo del instrumento—. Evalúa 14 y no 15 misiones entre niveles porque la 27 nunca llegó a `COMPLETADA`: medir continuidad sobre una misión fallida sería medir otra cosa. **Es la variable de respuesta principal del proyecto** y no tenía campo en el registro hasta el esquema 1.1.0 (31-ago) | S21 |
-| **RF-25** | Las métricas se obtienen de un **registro estructurado y automático**, no de observación manual | Un archivo por misión, procesable sin intervención | 🟡 **Verificado el 2026-08-27 en condición A.** Esquema JSON versionado y comprobable; `herramientas/componer_registro.py` compone el registro desde el bag y lo valida contra el esquema; el veredicto se calcula contra `/odom` y nunca contra el `SUCCEEDED` de Nav2. **Probado en condición B y a escala el 2026-09-05:** 30 registros compuestos sin intervención manual, 15 de ellos de condición B, todos validados contra el esquema 1.1.0. **La campaña además puso a prueba el propio registrador y encontró un fallo silencioso:** tres bags salieron sin RTF y `grabar_mision.sh` lo tragaba saliendo con código 0, así que la corrida se perdía sin que nadie se enterara; corregido de raíz —aborta antes de grabar si falla la marca inicial, código 3 si falla la de cierre— con prueba de regresión (`herramientas/prueba_grabar_mision.py`, 12 comprobaciones sin ROS). **Sigue 🟡 y no 🟢** por un solo campo: `salud_del_banco.controladores_activos` todavía sale `{}` | S20 |
+| **RF-25** | Las métricas se obtienen de un **registro estructurado y automático**, no de observación manual | Un archivo por misión, procesable sin intervención | 🟡 **Verificado el 2026-08-27 en condición A.** Esquema JSON versionado y comprobable; `herramientas/componer_registro.py` compone el registro desde el bag y lo valida contra el esquema; el veredicto se calcula contra `/odom` y nunca contra el `SUCCEEDED` de Nav2. **Probado en condición B y a escala el 2026-09-05:** 30 registros compuestos sin intervención manual, 15 de ellos de condición B, todos validados contra el esquema 1.1.0. **La campaña además puso a prueba el propio registrador y encontró un fallo silencioso:** tres bags salieron sin RTF y `grabar_mision.sh` lo tragaba saliendo con código 0, así que la corrida se perdía sin que nadie se enterara; corregido de raíz —aborta antes de grabar si falla la marca inicial, código 3 si falla la de cierre— con prueba de regresión (`herramientas/prueba_grabar_mision.py`, 12 comprobaciones sin ROS). **🟢 desde el 2026-09-10**, cuando se cerró el único campo que faltaba: `salud_del_banco.controladores_activos` salía `{}` en 30 de 30. **La causa no era el compositor**, que es donde se buscó dos veces: `ros2 control list_controllers` es un **servicio**, no un tópico, así que su respuesta no está en el bag **ni puede estarlo**, y no había de dónde leerla. Se arregló con el mismo patrón que `rtf.json` y `condicion_inicial.json` —lo mide `grabar_mision.sh` con la pila viva y lo deja en `<bag>/controladores.json`—, y los tres registros de RF-28 ya traen `{"robot1": "7/7", "robot2": "7/7"}` (`S22_RF28_{A,B,C}V3.json`). **Los 30 registros de la campaña se quedan con `{}` para siempre** y eso se dice, no se tapa: reponer el campo exigiría rehacer la campaña, y una campaña `VALIDA` no se repite por un campo de salud del banco | S20 |
 | **RF-26** | La campaña en simulación alcanza **N = 30 repeticiones** (decisión D1) | Treinta registros válidos | 🟢 **Cumplido el 2026-09-04/05, tres semanas antes de lo planificado.** 30 misiones sorteadas con semilla, corridas y compuestas en 30 registros validados contra el esquema; `analizar_campana.py` dictamina **`VALIDA`** con **0 de 30 descartes** contra un techo del 20 % | ~~S24~~ **S21** |
 | **RF-27** | La demostración física ejecuta el protocolo completo con **N entre 5 y 10** (decisión D1) | Registros de las corridas físicas | 🔴 | S24–S25 |
 
-**Lectura de OE4, revisada el 2026-09-05.** De los siete requisitos, **cinco están verificados**
-(RF-21 a RF-24 y RF-26), uno queda en amarillo por un solo campo (RF-25) y el único rojo es RF-27,
+**Lectura de OE4, revisada el 2026-09-05 y de nuevo el 2026-09-10.** De los siete requisitos,
+**seis están verificados** (RF-21 a RF-26; **RF-25 cerró su último campo el 10-sep**) y el único rojo es RF-27,
 que depende de hardware. El bloqueo que esta lectura describía el 27-ago —el relevo imposible de
 ejecutar porque `robot1` y `robot2` vivían en dominios DDS distintos— **se levantó el 30-ago**: un
 solo dominio, dos `gzserver`, separación por nombres.
@@ -224,8 +224,8 @@ lleva al documento final es la del banco aislado —**mediana ~155–175 µs, m�
 decir con ella el método, porque un microsegundo medido dentro del proceso y un segundo medido
 sobre el bag no son la misma magnitud.
 
-Lo que queda de OE4 deja de ser *producir evidencia* y pasa a ser *redactarla*, más el campo
-pendiente de RF-25 y la campaña física de RF-27.
+Lo que queda de OE4 deja de ser *producir evidencia* y pasa a ser *redactarla*, más la campaña
+física de RF-27. **El campo pendiente de RF-25 se cerró el 2026-09-10** y con él el amarillo.
 
 ---
 
@@ -326,24 +326,33 @@ del proyecto: sin ellos no hay resultado que sustentar.
 |---|---|---|---|---|
 | OE1 | RF-01 a RF-10 | **10** | **0** | ~~S20–S21~~ ~~**S21**, salvo RF-08~~ **S22 — cerrado** |
 | OE2 | RF-11 a RF-16 | 0 (**5** parciales) | **1** (RF-15) | S19–S22 |
-| OE3 | RF-17 a RF-20, RF-28 | 4 | **1** (RF-28) | S22 |
-| OE4 | RF-21 a RF-27 | **5** | 1 + 1 parcial | ~~S20–S25~~ **S21**, salvo RF-27 (física) |
+| OE3 | RF-17 a RF-20, RF-28 | **5** | **0** | **S22 — cerrado** |
+| OE4 | RF-21 a RF-27 | **6** | 1 | ~~S20–S25~~ **S21**, salvo RF-27 (física) |
 | Restricciones | RNF-01 a RNF-07 | 6 | 1 parcial | — |
-| **Total** | **35** | **24** | **3 + 8 parciales** | |
+| **Total** | **35** | **27** | **2 + 6 parciales** | |
 
 > **El total sube de 34 a 35 el 2026-09-10** con la entrada de **RF-28**, que no estaba en el
 > anteproyecto: lo pidió el director como situación de experiencia de usuario. Es **funcionalidad
 > añadida**, no una corrección: no modifica ninguna de las cuatro métricas de OE4 ni el
 > planificador, así que **la campaña de 30 misiones no se reejecuta** (el argumento fila por fila
-> está en la §5 de [`DISENO_CONFIRMACION_PISO.md`](DISENO_CONFIRMACION_PISO.md)). Los 24
-> verificados no cambian; los pendientes pasan de 2 a 3.
+> está en la §5 de [`DISENO_CONFIRMACION_PISO.md`](DISENO_CONFIRMACION_PISO.md)). Al entrar, los
+> verificados no cambiaron y los pendientes pasaron de 2 a 3. **Al día siguiente, 2026-09-11, RF-28
+> se verificó y RF-25 cerró su último campo**, de modo que los verificados suben a **27** y los
+> pendientes bajan a **2**, los dos de hardware.
+>
+> **Dos erratas de aritmética corregidas el 2026-09-11**, encontradas al recontar fila por fila en
+> vez de arrastrar el total: esta tabla decía **24** verificados cuando sus propias filas sumaban
+> 25, y **8** parciales cuando eran 7 (los cinco de OE2, RNF-03 y RF-25). El texto de abajo repetía
+> el 24. No cambia ninguna conclusión, pero un tablero que no cuadra consigo mismo no se puede citar
+> en el documento final.
 
-**Veinticuatro de treinta y cinco requisitos están verificados** al 2026-09-07, y ya no son solo
+**Veintisiete de treinta y cinco requisitos están verificados** al 2026-09-11, y ya no son solo
 los de infraestructura: los cinco que entraron por OE4 (RF-21 a RF-24 y RF-26) son **las cuatro
 métricas más la campaña de N = 30**, y los cuatro que entraron por OE1 (RF-04 a RF-07) incluyen **el
-protocolo de relevo**, o sea el aporte declarado. Con RF-08 cerrado el 7 de septiembre, **OE1 queda
-completo: diez de diez**. **Quedan tres pendientes y ocho parciales**, y conviene mirarlos por lo
-que los bloquea, no por cuántos son:
+protocolo de relevo**, o sea el aporte declarado. Con RF-08 cerrado el 7 de septiembre **OE1 queda
+completo: diez de diez**, y con RF-28 cerrado el 10 **OE3 queda completo: cinco de cinco**.
+**Quedan dos pendientes y seis parciales**, y conviene mirarlos por lo que los bloquea, no por
+cuántos son:
 
 - **RF-14** (comando desde ROS 2), ya en 🟡 — falta **calibrar la escala** de la cadena `/cmd_vel`
   contra el vehículo, porque el escalón más bajo cae en 0,40 m/s y Nav2 pide 0,25 y 0,05. Le basta
@@ -352,26 +361,27 @@ que los bloquea, no por cuántos son:
   técnica sin caracterizar desde el 14-ago. No depende de horas de trabajo.
 - **RF-27** (campaña física de 5 a 10 corridas) — depende del GO/NO-GO de hardware, que **sigue
   abierto** porque G2 se detuvo por su propia regla de parada.
-- **RF-28** (confirmación del cambio de piso) — entró el 2026-09-10 y **no depende de hardware
-  ninguno**: es código más tres corridas en simulación. Implementado el mismo día; queda solo su
-  evidencia, que es el §7 de [`DISENO_CONFIRMACION_PISO.md`](DISENO_CONFIRMACION_PISO.md).
+- ~~**RF-28** (confirmación del cambio de piso)~~ — **cerrado el 2026-09-10**, el mismo día que
+  entró: implementación y las tres corridas del §7 del diseño. Fue el último pendiente que se
+  resolvía solo escribiendo código.
 - **RF-11, RF-12 y RF-13**, los tres parciales de OE2 — tras la revisión del 5-sep lo que les falta
   está acotado y **también le basta un vehículo**: el mapa de costos local sobre el carro, la
   lectura de `/<ns>/odom`, y discriminar el +2,9 % de escala de la odometría láser con la prueba
   del `.pgm` que ya está definida.
 
-O sea: **dos de los tres pendientes dependen de que el hardware aparezca** —RF-15 por R11, RF-27
-por el GO/NO-GO—, y el tercero, RF-28, no existía cuando se escribió este párrafo. Hasta el
-2026-09-10 la frase era más fuerte: *ya no queda ningún pendiente que se resuelva solo escribiendo
-código*, y era cierta —el último así fue RF-08, cerrado el 7 de septiembre—. **RF-28 la reabre, y
-no por un descuido de planificación:** lo pidió el director como situación de experiencia de
-usuario, no sale del anteproyecto, y es la primera de seis que él planteó. Queda escrito aquí para
-que el recuento no se lea como un retroceso. Y de los ocho parciales, **los tres de OE2 no
+O sea: **los dos pendientes que quedan dependen los dos de que el hardware aparezca** —RF-15 por
+R11, RF-27 por el GO/NO-GO—. La frase fuerte vuelve a ser cierta desde el 2026-09-10: *no queda
+ningún pendiente que se resuelva solo escribiendo código*. Lo fue hasta el 7 de septiembre con
+RF-08, **RF-28 la reabrió durante un día** —lo pidió el director como situación de experiencia de
+usuario, no sale del anteproyecto, y es la primera de seis que él planteó— y volvió a cerrarse con
+las tres corridas del 10. Queda escrito aquí para que ni la reapertura se lea como un retroceso ni
+el cierre como que las otras cinco situaciones del director ya estén hechas: **no lo están**, y no
+son requisitos. Y de los seis parciales, **los tres de OE2 no
 están esperando a R11**: esperan una jornada de laboratorio con el vehículo que sí hay, igual que
 la escala de RF-14.
 
 Esa es la lectura honesta del 7 de septiembre, y **no la mejora el conteo**, que ha subido de 19 a
-24 en dos semanas. Lo que la mejoraría es la salida al pasillo del martes 8: los cuatro puntos que
+27 en dos semanas. Lo que la mejoraría es la salida al pasillo del martes 8: los cuatro puntos que
 siguen abiertos —RF-14, RF-11, RF-12, RF-13— son todos trabajo de campo con un solo vehículo, y
 salen de una misma jornada.
 
