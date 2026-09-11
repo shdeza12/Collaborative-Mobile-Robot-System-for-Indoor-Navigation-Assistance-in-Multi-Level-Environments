@@ -1194,107 +1194,229 @@ git add Documentos/CONTRATO_INTERFACES.md Documentos/REQUISITOS.md Robot/aws-dee
 
 **Archivos:** ninguno. Esta tarea produce evidencia, no código.
 
-**Requisito previo:** tareas 1 a 4 completas y el workspace compilado.
+**Requisito previo:** tareas 1 a 6 completas y el workspace compilado.
 
-El procedimiento de arranque de la simulación, rosbridge y la página es el del
-`RUNBOOK_CAMPANA.md`. Las tres corridas usan **la misma misión entre pisos** y se diferencian
-solo en lo que hace la persona.
+El arranque es el del `RUNBOOK_CAMPANA.md`, §2 a §4.1, sin una sola desviación. Las tres
+corridas usan **la misma misión** y se diferencian solo en lo que hace la persona.
 
-**Dos cosas que hay que tener montadas antes de empezar, o las corridas no sirven de evidencia:**
+### 7.0 Tres correcciones a cómo se pensaba medir esto
 
-1. **El coordinador tiene que llevar `ruta_registros`.** El parámetro vale `""` por defecto
-   (`coordinador.py:84`), y con él vacío `self.registro` se queda en `None` (línea 204): la
-   misión corre bien pero **no se escribe ningún registro**, y el recuento de marcas de etapa 7
-   no se puede comprobar en ninguna parte. Lanzarlo con
-   `-p ruta_registros:=$HOME/registros_rf28`.
-2. **Un cuarto terminal capturando los textos.** Ni el registro en vivo ni el compuesto guardan
-   `mensaje_usuario` —`marca()` guarda `t`, `etapa`, `etapa_num`, `robot`, `punto_id` y
-   `extraordinaria`, nada más—, así que el texto de la alerta hay que recogerlo del tópico:
+Las tres salieron de verificar el código antes de escribir el procedimiento, y las tres
+invalidaban la versión anterior de esta tarea. Quedan anotadas porque el error es fácil de
+repetir.
 
-```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && ros2 topic echo /coordinacion/estado_mision --field mensaje_usuario | tee /tmp/rf28_textos.txt
+**1. `ruta_registros` NO se enciende.** La versión anterior lo exigía. El §4 del
+`RUNBOOK_CAMPANA.md` lo prohíbe desde el 2026-09-01: el registrador en vivo serializando a 50 Hz
+compite por la CPU contra dos Gazebo justo donde RNF-06 exige RTF ≥ 0,99, y lo que escribe no es
+un registro válido de la campaña. Encenderlo para medir RF-28 **cambiaría la condición del banco**
+para medir una funcionalidad que no tiene nada que ver con la carga de CPU.
+
+**2. Tampoco hace falta un cuarto terminal con `ros2 topic echo --field mensaje_usuario`.** El
+bag graba `/coordinacion/estado_mision` completo, y ese mensaje **lleva dentro**
+`mensaje_usuario`. El texto ya estaba grabado; lo que faltaba era leerlo.
+
+**3. Ni medir el RTF a mano.** `grabar_mision.sh` lo mide él —es su guarda 3, y aborta antes de
+grabar si no puede— y deja el `rtf.json` junto al bag. Un `medir_rtf.py --segundos 20` aparte solo
+añadiría 20 s de ventana muerta.
+
+**Lo que sí hace falta es un instrumento que no existía:** `herramientas/inspeccionar_etapas.py`,
+que lee el bag y lista cada cambio de etapa con su `t` de simulación, su `robot_activo` y su
+texto literal. Era necesario porque el bloque `marcas` del registro compuesto es un **diccionario**
+de los siete instantes de la §3.5 con `additionalProperties: false`, y la etapa 7 puede marcarse
+**dos veces** en una misión —la pregunta y la alerta—. Un diccionario de instantes únicos no
+representa eso; contar marcas pide una lista.
+
+### 7.1 La misión, y por qué esta y no otra
+
+**`piso1_representacion` → `piso2_ieee`.** Es la misión entre pisos **más corta** de las 21 ya
+registradas, y está validada: `S21_piloto_B_01` la corrió con éxito y `continuidad: true`.
+
+Su línea de tiempo, leída del bag con el instrumento nuevo (es la referencia contra la que
+comparar):
+
+```
+     t_sim  etapa            robot
+     181,3  RECIBIDA         —        Recibida la solicitud; asignando el robot.
+     181,3  TRAMO_1          robot1   El robot va hacia Representación. Espere alli.
+     188,4  TRAMO_1          robot1   Siga al robot hasta Escaleras.
+     197,0  TRANSFERENCIA    robot2   Suba al piso 2. Otro robot le espera en Escaleras.
+     203,2  TRAMO_2          robot2   Siga al robot hasta IEEE.
+     217,7  COMPLETADA       robot2   Ha llegado a IEEE.
 ```
 
-**Y hay que saber que en cada corrida salen DOS documentos distintos, con la misma palabra
-«marcas» significando cosas distintas:**
+**La etapa 7 se inserta en el segundo 203,2**, donde antes arrancaba el tramo 2: el gancho va
+**después** de `_navegar(tramo)` del tramo de TRANSFERENCIA (`coordinador.py:287`), o sea cuando
+robot2 ya está en su escalera. En reloj de la corrida eso son **~22 s desde que se lanza la
+misión**. Toda la misión sin esperar dura 36 s, así que las tres corridas son cortas incluso la C,
+que se va a los 120 s de plazo.
 
-| Documento | Quién lo escribe | Qué es `marcas` ahí | Para qué sirve aquí |
-|---|---|---|---|
-| `~/registros_rf28/mision_*.json` | el coordinador, en vivo | **lista** de cambios de etapa, con `etapa` como nombre y `etapa_num` | contar las marcas de etapa 7 y medir su separación |
-| el que compone `componer_registro.py` del bag | el PC, después | **diccionario** de los siete instantes de la §3.5 | validar contra el esquema y leer la continuidad |
+### 7.2 Montaje
 
-El esquema `esquema_registro_mision.json` describe el **segundo**, no el primero (su `marcas` es
-un objeto con `additionalProperties: false`). No intentar validar el registro en vivo contra él.
+Exactamente el del runbook. Seis terminales, **ninguna exporta `ROS_DOMAIN_ID`**, y las que no
+dicen otra cosa trabajan desde la raíz del repositorio.
 
-Medir el RTF antes de cada corrida, porque hace falta para interpretar los tiempos del bag:
-
-```bash
-source ~/deepracer_sim_ws/install/setup.bash && python3 herramientas/medir_rtf.py --segundos 20
-```
-
-- [ ] **Corrida A — confirmación temprana.** Pulsar el botón a los ~10 s de que aparezca.
-  Esperado: la misión sigue al tramo 2 y termina en `COMPLETADA`. En el registro **en vivo**,
-  `metricas.continuidad: true` y **una sola** marca con `"etapa": "ESPERANDO_CONFIRMACION"`.
-
-- [ ] **Corrida B — confirmación tras la alerta.** Dejar pasar el minuto y pulsar hacia los
-  75 s. Esperado, en tres sitios distintos:
-  - en el **panel**, a los 60 s de reloj de pared el texto cambia a *«Seguimos esperando su
-    confirmacion. Quedan 60 segundos.»* (captura);
-  - en el **log del coordinador**, la línea `alerta: 60 s sin confirmacion`, una sola vez;
-  - en `/tmp/rf28_textos.txt`, los dos textos de la etapa 7, distintos;
-  - en el registro **en vivo**, **dos** marcas de `ESPERANDO_CONFIRMACION`, separadas en tiempo
-    de simulación por `60 s × RTF` (no por 60 s: el plazo es de pared, las marcas son de
-    `/clock`). Con el RTF del paso anterior eso se comprueba sin ambigüedad.
-
-  La misión termina en `COMPLETADA` y `continuidad: true`.
-
-- [ ] **Corrida C — sin confirmar.** No pulsar. Esperado: a los 120 s de reloj de pared la
-  misión pasa a `FALLIDA` con motivo *«el usuario no confirmó la llegada al piso 2»*, y el
-  panel se pone rojo con «Camino bloqueado». El registro en vivo se escribe igual —el
-  `_cerrar_registro` va en todas las salidas de `_ejecutar`, incluidas las de fallo— con
-  `cierre.exito_declarado: false` y el motivo redactado.
-
-- [ ] **Contar las marcas de etapa 7 en las tres**
+- [ ] **Paso 1: levantar las dos pilas** (§2 del runbook). Terminal 1 y terminal 2:
 
 ```bash
-for f in ~/registros_rf28/mision_*.json; do python3 -c "import json,sys; d=json.load(open(sys.argv[1])); m=[x for x in d['marcas'] if x['etapa']=='ESPERANDO_CONFIRMACION']; print(sys.argv[1].split('/')[-1], len(m), [x['t'] for x in m], d['metricas']['continuidad'])" "$f"; done
+herramientas/robot.sh robot1 parar && herramientas/robot.sh robot1 nav2
 ```
-
-Esperado: `1` marca en A, `2` en B separadas por `60 s × RTF`, `2` en C (la inicial y la de la
-alerta). `continuidad` verdadera en A y B.
-
-- [ ] **Componer y validar las tres desde el bag**
-
-Para cada corrida, componer el registro y validarlo:
 
 ```bash
-python3 herramientas/componer_registro.py <ruta_del_bag> --salida /tmp/rf28_X.json && python3 -c "import json,jsonschema;jsonschema.validate(json.load(open('/tmp/rf28_X.json')),json.load(open('Documentos/esquema_registro_mision.json')));print('ESQUEMA OK')"
+herramientas/robot.sh robot2 parar && herramientas/robot.sh robot2 nav2
 ```
 
-Antes de correrlo, confirmar los nombres reales de los argumentos:
+Esperado: cada uno anuncia su puerto libre y levanta Gazebo y Nav2. Tardan 28–35 s. Las dos
+pilas van **siempre**, también porque la comparación con la campaña exige la misma carga de
+máquina (§1 del runbook).
+
+- [ ] **Paso 2: la compuerta** (§3 del runbook). Terminal 4:
 
 ```bash
-python3 herramientas/componer_registro.py --help
+source ~/deepracer_sim_ws/install/setup.bash && herramientas/esperar_nav2.sh robot1 && herramientas/esperar_nav2.sh robot2
 ```
 
-Esperado en A y B: `ESQUEMA OK` y `"continuidad": true`. En C: `ESQUEMA OK`, veredicto no
-exitoso y el motivo redactado.
+Esperado: `LISTA. Nav2, controladores, parametros y condicion inicial.` dos veces, salida 0.
 
-**Criterio de cierre de RF-28:** las tres corridas se comportan como arriba, los registros
-validan, y ninguna de las dos corridas exitosas sale con `continuidad: false`. Un
-`continuidad: false` en A o B es un fallo del diseño —la condición de la marca con robot no
-vacío— y no una anomalía del banco: hay que volver al paso 6 de la Tarea 3 antes de dar nada
-por bueno.
+```bash
+source ~/deepracer_sim_ws/install/setup.bash && python3 herramientas/verificar_condicion_inicial.py robot1 && python3 herramientas/verificar_condicion_inicial.py robot2
+```
 
-- [ ] **Guardar la evidencia**
+Esperado: los dos dentro de **0,15 m**. Si uno se sale, **relanzar esa pila y no seguir**: las
+pilas derivan ~17 mm/min en reposo y medir sobre una pose contaminada mide el tiempo que el
+simulador llevaba encendido.
 
-Copiar los tres registros **compuestos** a `Documentos/Evidencia/registros/` con nombres
-`S22_RF28_A.json`, `_B.json` y `_C.json`, y escribir
-`Documentos/Evidencia/S22_RF28_confirmacion.md` con: el RTF medido en cada corrida, lo que hizo
-la persona, el resultado, la salida del conteo de marcas de etapa 7, los dos textos de
-`/tmp/rf28_textos.txt` en la corrida B, y capturas del panel en la etapa 7 y en la alerta.
+- [ ] **Paso 3: el coordinador** (§4 del runbook). Terminal 3:
 
-- [ ] **Commit**
+```bash
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 run coordinacion coordinador --ros-args -p use_sim_time:=true -p prefijo_mision:=RF28
+```
+
+Esperado: `Coordinador listo. 31 puntos, asignacion {1: 'robot1', 2: 'robot2'}`, y el aviso de
+que `piso2_escalera` es provisional. **Sin `ruta_registros`** (§7.0). **`use_sim_time:=true` no
+es opcional**: sin él el coordinador marcaría con reloj de pared y el bag con reloj de
+simulación, y las marcas no se podrían situar.
+
+- [ ] **Paso 4: el puente y la página** (§4.1 del runbook). Terminal 6:
+
+```bash
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 launch rosbridge_server rosbridge_websocket_launch.xml
+```
+
+Terminal 7:
+
+```bash
+python3 -m http.server 8000 --directory interfaz_web
+```
+
+Abrir `http://localhost:8000/` en el portátil, o `http://<hostname -I>:8000/` en el teléfono.
+Esperado: el LED verde, «conectado», y el desplegable de origen con los 31 puntos. **La misión se
+lanza desde la página y no con `ros2 action send_goal`**, porque el botón de confirmar está ahí:
+lanzarla por la acción dejaría sin probar el único camino nuevo.
+
+### 7.3 Las tres corridas
+
+Cada corrida: bag nuevo, nombre nuevo, y `Ctrl-C` del grabador al terminar. Terminal 4, antes de
+lanzar cada misión:
+
+```bash
+source ~/deepracer_sim_ws/install/setup.bash && herramientas/grabar_mision.sh S22_RF28_A robot1 robot2
+```
+
+Esperado: `Grabando en ...` con el recuento de tópicos, `Controladores de robotN: 7/7`, y **ni un
+`AVISO`**. Un `AVISO` de condición inicial hace la corrida candidata a descarte.
+
+En la página: origen **Representación**, destino **IEEE**, «Iniciar guiado».
+
+- [ ] **Corrida A — confirmación temprana.** Pulsar «Ya estoy en el otro piso» a los ~10 s de que
+  aparezca el botón (o sea, hacia el segundo 32 de la misión).
+
+  Esperado: el panel vuelve a «Sígueme» y la misión acaba en **COMPLETADA**. En el log del
+  coordinador, `confirmado por el usuario tras 10,X s`. **Una sola** marca de etapa 7.
+
+- [ ] **Corrida B — confirmación tras la alerta.** Bag `S22_RF28_B`. Dejar pasar el minuto y
+  pulsar hacia los **75 s**.
+
+  Esperado, en tres sitios:
+  - en el **panel**, a los 60 s de reloj de pared el texto cambia a
+    *«Seguimos esperando su confirmacion. Quedan 60 segundos.»* — captura de pantalla;
+  - en el **log del coordinador**, `alerta: 60 s sin confirmacion`, **una sola vez** (el `avisado`
+    de `coordinador.py:583` existe para eso: a 20 Hz serían 1200 marcas por minuto);
+  - **dos** marcas de etapa 7 con textos distintos, separadas en tiempo de simulación por
+    `60 s × RTF`. No por 60 s: el plazo es de pared y las marcas son de `/clock`.
+
+  La misión acaba en **COMPLETADA**.
+
+- [ ] **Corrida C — sin confirmar.** Bag `S22_RF28_C`. No pulsar nada. Esperar los dos minutos.
+
+  Esperado: a los 120 s de reloj de pared la misión pasa a **FALLIDA**, el panel se pone rojo con
+  «Camino bloqueado», y el texto de la marca es literalmente
+
+  > `Mision detenida: el usuario no confirmo la llegada al piso 2 en 120 s`
+
+  **Dos** marcas de etapa 7: la pregunta y la alerta de los 60 s.
+
+### 7.4 Leer las tres
+
+- [ ] **Paso 5: la línea de tiempo completa de cada corrida**
+
+```bash
+source ~/deepracer_sim_ws/install/setup.bash && for n in A B C; do echo "== $n =="; python3 herramientas/inspeccionar_etapas.py ~/tesis_evidencia/S22_RF28_$n; done
+```
+
+Esperado: la secuencia de la §7.1 **con la etapa 7 intercalada** entre TRANSFERENCIA y TRAMO_2,
+y en C terminando en FALLIDA en vez de COMPLETADA. El `robot` de cada marca de etapa 7 tiene que
+decir `robot2`, **nunca `(vacio)`**: con ese campo vacío la continuidad de RF-24 se vuelve falsa
+en toda misión entre niveles.
+
+- [ ] **Paso 6: contar las marcas de etapa 7 y medir su separación**
+
+```bash
+source ~/deepracer_sim_ws/install/setup.bash && for n in A B C; do echo "== $n =="; python3 herramientas/inspeccionar_etapas.py ~/tesis_evidencia/S22_RF28_$n --etapa 7; done
+```
+
+Esperado: **1** marca en A, **2** en B, **2** en C. En B y C la herramienta imprime la separación
+y el RTF que la explicaría; ese número tiene que coincidir con el `rtf.json` de esa corrida:
+
+```bash
+for n in A B C; do echo -n "$n: "; cat ~/tesis_evidencia/S22_RF28_$n/rtf.json; echo; done
+```
+
+- [ ] **Paso 7: componer y validar los tres registros**
+
+`--banco` y `--campana` son **obligatorios**, y el bag va como argumento posicional. `--piloto`
+marca `es_piloto: true`, que es lo honesto: estas tres no son misiones de la campaña OE4 y no
+deben contarse con ellas.
+
+```bash
+source ~/deepracer_sim_ws/install/setup.bash && for n in A B C; do python3 herramientas/componer_registro.py ~/tesis_evidencia/S22_RF28_$n --banco simulacion --campana RF28_confirmacion --piloto --salida Documentos/Evidencia/registros/S22_RF28_$n.json; done
+```
+
+```bash
+for n in A B C; do python3 -c "
+import json,jsonschema,sys
+d=json.load(open(f'Documentos/Evidencia/registros/S22_RF28_{sys.argv[1]}.json'))
+jsonschema.validate(d, json.load(open('Documentos/esquema_registro_mision.json')))
+print(sys.argv[1], 'ESQUEMA OK', 'exito=', d['veredicto']['exito'], 'continuidad=', d['veredicto']['continuidad']['continua'])
+" $n; done
+```
+
+Esperado: `ESQUEMA OK` en las tres. `exito=True` y `continuidad=True` en **A y B**. En **C**,
+`exito=False` y `continuidad=None` con motivo *«ventana abierta: falta t_completada…»* — eso **no
+es un fallo**: es lo que dice `continuidad_de` de toda misión que no llega a COMPLETADA, y ya
+pasó igual con `S21_OE4_27`.
+
+**Criterio de cierre de RF-28:** las tres corridas se comportan como arriba, los tres registros
+validan, y **ninguna de las dos exitosas sale con `continuidad: false`**. Un `continuidad: false`
+en A o B es un fallo del diseño —la marca de etapa 7 con `robot_activo` vacío— y no una anomalía
+del banco: hay que volver al paso 6 de la Tarea 3 antes de dar nada por bueno.
+
+- [ ] **Paso 8: guardar la evidencia**
+
+Escribir `Documentos/Evidencia/S22_RF28_confirmacion.md` con: el RTF de cada corrida, lo que hizo
+la persona, el resultado, la salida de los pasos 5 y 6, y capturas del panel en la etapa 7 y en la
+alerta de los 60 s.
+
+- [ ] **Paso 9: commit**
 
 ```bash
 git add Documentos/Evidencia/registros/S22_RF28_A.json Documentos/Evidencia/registros/S22_RF28_B.json Documentos/Evidencia/registros/S22_RF28_C.json Documentos/Evidencia/S22_RF28_confirmacion.md && git commit -m "RF-28 cerrado: las tres corridas de la confirmacion de piso"
