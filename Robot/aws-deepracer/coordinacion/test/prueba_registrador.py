@@ -168,6 +168,62 @@ with tempfile.TemporaryDirectory() as d:
     comprueba("las marcas distinguen la extraordinaria del tick de 1 Hz",
               all("extraordinaria" in x for x in datos["marcas"]))
 
+# ------------------------------------------- 7. la espera de RF-28
+# Que la pausa de la confirmacion no toque ninguna de las cuatro metricas. El
+# razonamiento esta en la §5 de DISENO_CONFIRMACION_PISO.md; aqui se ejecuta.
+# 'continuidad' es la variable de respuesta principal del RF-24: un falso true o
+# un falso false ahi invalida la campana entera, asi que se comprueban los dos
+# sentidos.
+print("\n7. La pausa de confirmacion de piso no altera las metricas (RF-28)")
+
+reg7 = RegistroMision("RF28_B_1", "piso1_etm1", "piso2_aula_307",
+                      {"1": "robot1", "2": "robot2"}, t_solicitud=10.0)
+reg7.marca(10.0, 6, "")                          # RECIBIDA, robot vacio por diseno
+reg7.marca(10.2, 1, "robot1", "piso1_etm1")
+traza(reg7, "robot1", 10.5, 0.5, [0.5] * 40)
+reg7.marca(30.0, 2, "robot2", "piso2_escalera")
+traza(reg7, "robot2", 30.5, 0.5, [0.5] * 20)
+# La pausa, donde va de verdad: entre TRANSFERENCIA y TRAMO_2. Dos marcas,
+# porque la segunda es la alerta del minuto.
+reg7.marca(41.0, 7, "robot2", "piso2_escalera")
+reg7.marca(101.0, 7, "robot2", "piso2_escalera")
+reg7.marca(120.0, 3, "robot2", "piso2_aula_307")
+traza(reg7, "robot2", 120.5, 0.5, [0.5] * 40)
+reg7.marca(141.0, 4, "robot2", "piso2_aula_307")
+reg7.cerrar(141.0, True, "", 1, {"x": 0.0, "y": 0.0, "yaw": 0.0})
+m7 = reg7.metricas()
+
+comprueba("la continuidad sigue cierta con la etapa 7 dentro de la ventana",
+          m7["continuidad"] is True, f"-> {m7['continuidad']}")
+# hueco_relevo_s mide desde el INICIO de la TRANSFERENCIA (t=30.0) hasta el
+# primer movimiento de robot2 (t=30.5), asi que la espera, que viene despues, no
+# puede tocarlo. Si saliera ~91 s, estaria midiendo desde la marca equivocada.
+comprueba("el hueco de relevo no lo toca la espera",
+          m7["hueco_relevo_s"] == 0.5, f"-> {m7['hueco_relevo_s']}")
+
+nombres7 = [x["etapa"] for x in reg7.marcas if x["etapa_num"] == 7]
+comprueba("la etapa 7 se escribe con nombre y no como numero",
+          nombres7 == ["ESPERANDO_CONFIRMACION"] * 2, f"-> {nombres7}")
+
+# Y el error que el diseno prohibe: etapa 7 con robot_activo vacio. TIENE que
+# dar continuidad falsa. Si diera verdadera, la comprobacion del RF-24 no
+# estaria mirando estas marcas y el requisito no estaria medido.
+reg7b = RegistroMision("RF28_B_2", "piso1_etm1", "piso2_aula_307",
+                       {"1": "robot1", "2": "robot2"}, t_solicitud=10.0)
+reg7b.marca(10.0, 6, "")
+reg7b.marca(10.2, 1, "robot1", "piso1_etm1")
+traza(reg7b, "robot1", 10.5, 0.5, [0.5] * 40)
+reg7b.marca(30.0, 2, "robot2", "piso2_escalera")
+traza(reg7b, "robot2", 30.5, 0.5, [0.5] * 20)
+reg7b.marca(41.0, 7, "", "piso2_escalera")       # el error, a proposito
+reg7b.marca(120.0, 3, "robot2", "piso2_aula_307")
+reg7b.marca(141.0, 4, "robot2", "piso2_aula_307")
+reg7b.cerrar(141.0, True, "", 1, {"x": 0.0, "y": 0.0, "yaw": 0.0})
+
+comprueba("un robot vacio en la etapa 7 SI rompe la continuidad",
+          reg7b.metricas()["continuidad"] is False,
+          f"-> {reg7b.metricas()['continuidad']}")
+
 print("\n" + "=" * 62)
 if FALLOS:
     print(f"{FALLOS} comprobaciones FALLAN de {OK + FALLOS}")

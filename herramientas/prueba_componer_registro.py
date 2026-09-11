@@ -578,6 +578,42 @@ def pruebas_de_continuidad():
     check("una mision discontinua puede seguir siendo un exito del §3.3",
           v["exito"] is True, f"-> {v}")
 
+    # --- RF-28: la pausa de la confirmacion de piso -----------------------
+    # La espera va entre TRANSFERENCIA y TRAMO_2 y publica robot_activo lleno
+    # (D-C4 del diseno), asi que no puede romper la continuidad. Se comprueban
+    # los DOS sentidos: que con robot no la rompe, y que sin robot SI la rompe.
+    # El segundo es el que demuestra que esta funcion esta mirando de verdad
+    # estas marcas y no pasandolas por alto.
+    ESPERANDO_CONFIRMACION = 7
+    con_espera = [
+        (10.0, INACTIVA, "", ""), (10.15, RECIBIDA, "", "m1"),
+        (10.2, TRAMO_1, "robot1", "m1"), (40.0, TRANSFERENCIA, "robot2", "m1"),
+        (41.0, ESPERANDO_CONFIRMACION, "robot2", "m1"),
+        (101.0, ESPERANDO_CONFIRMACION, "robot2", "m1"),
+        (120.0, TRAMO_2, "robot2", "m1"), (141.0, COMPLETADA, "robot2", "m1"),
+        (151.0, INACTIVA, "", ""),
+    ]
+    marcas_espera = {"t_solicitud": 10.15, "t_robot_activo": 10.2,
+                     "t_completada": 141.0}
+    c = continuidad_de(con_espera, marcas_espera, "B")
+    check("RF-28: la espera con robot lleno no rompe la continuidad",
+          c["continua"] is True, f"-> {c}")
+    check("RF-28: la ventana sigue llegando hasta COMPLETADA",
+          c["ventana"] == [10.2, 141.0], f"-> {c['ventana']}")
+
+    sin_robot = [e if e[1] != ESPERANDO_CONFIRMACION else (e[0], e[1], "", e[3])
+                 for e in con_espera]
+    c = continuidad_de(sin_robot, marcas_espera, "B")
+    check("RF-28: la espera con robot vacio SI rompe la continuidad",
+          c["continua"] is False and c["instantes_sin_agente"] == [41.0, 101.0],
+          f"-> {c}")
+
+    # Y que las siete marcas de la §3.5 siguen saliendo en orden: la etapa 7 no
+    # es ninguna de ellas, asi que aparecer entre dos no puede desordenarlas.
+    mar = marcas_de(con_espera, {}, "B")
+    check("RF-28: la espera no desordena las marcas de la §3.5",
+          marcas_en_orden(mar), f"-> {mar}")
+
 
 def pruebas_de_escenario(esquema):
     """procedencia.escenario_por_robot, anadido el 2026-09-01.
