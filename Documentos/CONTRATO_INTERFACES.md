@@ -91,6 +91,20 @@ Los motivos que sí se sostienen sobre el entorno vigente son tres:
 | `/coordinacion/guiar_usuario` | acción `coordinacion_msgs/GuiarUsuario` | la HRI la llama |
 | `/coordinacion/estado_mision` | `coordinacion_msgs/EstadoMision` | la HRI la escucha, 1 Hz |
 | `/coordinacion/puntos_interes` | `coordinacion_msgs/ListaPuntosInteres` (latched) | la HRI la escucha al cargar |
+| `/coordinacion/confirmacion_piso` | `std_msgs/String` | **la HRI publica, el coordinador escucha** (RF-28) |
+
+> **`/coordinacion/confirmacion_piso`, añadido el 2026-09-10 (RF-28).** El cuerpo es el
+> `mision_id` de la misión que se confirma, y nada más. El coordinador **descarta** todo
+> `mision_id` que no sea el de la misión en curso, y descarta también el vacío: sin esa regla,
+> una pulsación tardía de la misión anterior arrancaría el tramo 2 de la siguiente sin
+> preguntarle nada a nadie. La confirmación que llega *antes* de que el robot del piso de
+> destino haya llegado sí se retiene y se honra al empezar la espera, porque el usuario puede
+> subir más rápido que el robot.
+>
+> **Es un tópico y no un servicio a propósito.** `ros2 bag` no graba servicios, y el instante
+> de la confirmación tiene que quedar en el bag para poder comprobar después qué pasó. Es la
+> misma razón por la que `origen_id` y `destino_id` viven en `EstadoMision` y no solo en el
+> goal de la acción.
 
 > **Corregido el 2026-08-24.** Esta fila decía `coordinacion_msgs/PuntoInteres[]`, y **ese tipo no se puede publicar**: un tópico de ROS 2 transporta un mensaje, no un arreglo — `PuntoInteres[]` es sintaxis válida para un *campo*, no para un tipo. Salió al construir el paquete, no al escribir el contrato, y afectaba también al §5, que cerraba con «cuatro definiciones, nada más». El envoltorio `ListaPuntosInteres` es la quinta. *Latched* aquí sí es lo correcto —el catálogo no caduca y la HRI se conecta mucho después de que arranque el coordinador—, al revés que en `amcl_pose`, donde el mismo QoS engañó dos veces ese mismo día porque una pose vieja sí parece actual. **La regla que separa los dos casos: se retienen catálogos, nunca medidas.**
 
@@ -147,7 +161,7 @@ PuntoInteres[] puntos
 string mision_id
 string origen_id                # el punto de partida que pidio el usuario
 string destino_id               # el destino FINAL, no el del tramo en curso
-uint8 etapa                     # INACTIVA=0 TRAMO_1=1 TRANSFERENCIA=2 TRAMO_2=3 COMPLETADA=4 FALLIDA=5 RECIBIDA=6
+uint8 etapa                     # INACTIVA=0 TRAMO_1=1 TRANSFERENCIA=2 TRAMO_2=3 COMPLETADA=4 FALLIDA=5 RECIBIDA=6 ESPERANDO_CONFIRMACION=7
 string robot_activo
 PuntoInteres destino_actual
 float32 distancia_restante
@@ -172,6 +186,25 @@ string mensaje_usuario          # texto ya redactado en español para mostrar ta
 > de modo que **el formato de serialización no cambia** y un suscriptor ya compilado sigue
 > deserializando; solo verá un valor de `etapa` que no conoce. **La HRI de S22 debe tratar
 > `RECIBIDA` como *preparando***, con el robot todavía sin asignar y `distancia_restante` en cero.
+
+> **`ESPERANDO_CONFIRMACION=7` se añadió el 2026-09-10 (RF-28)**, a petición del director. Es la
+> pausa entre `TRANSFERENCIA` y `TRAMO_2`: el robot del piso de destino ya está en su escalera y
+> la misión no arranca el segundo tramo hasta que el usuario confirme por
+> `/coordinacion/confirmacion_piso` que ya cambió de piso. Se avisa a los **60 s** y la misión
+> falla a los **120 s** sin confirmación, plazos de **reloj de pared** y no de tiempo de
+> simulación (la espera es de paciencia humana, y si Gazebo muere `/clock` se detiene y un plazo
+> en tiempo de simulación no vencería nunca).
+>
+> Dos reglas de presentación, y las dos son obligatorias. **`robot_activo` NUNCA viaja vacío en
+> esta etapa:** lleva el robot del piso de destino, porque ese tramo ya es suyo, y con el campo
+> vacío la `continuidad` del **RF-24** se volvería falsa en toda misión entre niveles. Y la HRI
+> muestra el botón de confirmar **solo** en esta etapa: visible en cualquier otra sería una
+> forma de confirmar una misión que no está preguntando nada. En la barra de etapas, la 7
+> ilumina el paso *«Relevo»* —es la pausa dentro del relevo, no un paso aparte—, para que el
+> usuario no vea la barra apagarse.
+>
+> Va al final y con número nuevo por la misma razón que `RECIBIDA=6`: la serialización no cambia
+> y un suscriptor ya compilado sigue deserializando.
 
 ```
 # GuiarUsuario.action

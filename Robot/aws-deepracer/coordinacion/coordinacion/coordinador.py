@@ -10,6 +10,7 @@ Interfaces, segun §4 de Documentos/CONTRATO_INTERFACES.md:
     /coordinacion/guiar_usuario    accion GuiarUsuario     (la sirve este nodo)
     /coordinacion/estado_mision    EstadoMision a 1 Hz     (lo publica)
     /coordinacion/puntos_interes   ListaPuntosInteres      (latched, al arrancar)
+    /coordinacion/confirmacion_piso  std_msgs/String       (la escucha, RF-28)
     /<ns>/navigate_to_pose         accion de Nav2          (la llama)
 
 UN AVISO QUE NO ES TEORICO. El §2 del contrato quedo refutado el 2026-08-18:

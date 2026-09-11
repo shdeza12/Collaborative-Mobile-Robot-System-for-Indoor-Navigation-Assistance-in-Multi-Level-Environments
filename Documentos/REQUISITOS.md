@@ -171,6 +171,7 @@ proponía justamente esa misión mixta. Ya no es una salida.
 | **RF-18** | La HRI **muestra el estado de la misión** al usuario en texto legible | El campo `mensaje_usuario` se muestra literal y cambia en cada etapa | 🟢 **Verificado el 2026-09-02.** El panel se repinta en cada mensaje de `/coordinacion/estado_mision` (1 Hz) y muestra `mensaje_usuario` sin reescribirlo; probado hasta el ciclo RECIBIDA→TRAMO_1→FALLIDA con el motivo real del coordinador | S22 |
 | **RF-19** | La HRI se comunica **solo con `/coordinacion`**, nunca con los agentes | Inspección de la superficie expuesta por `rosbridge`: ningún tópico `/robotN/*` | 🟢 **Verificado el 2026-09-02.** El código de `interfaz_web/` no referencia ningún tópico `/robotN/*`; solo suscribe `/coordinacion/puntos_interes` y `/coordinacion/estado_mision`, y llama `/coordinacion/guiar_usuario` | S22 |
 | **RF-20** | La HRI es accesible desde el **navegador de un teléfono**, sin instalación | Carga y operación completa desde un móvil en la misma red | 🟢 **Verificado el 2026-09-10** en un teléfono real, SSID `DEEPRACER`, y con las dos mitades del criterio: **carga** (la página se sirvió y el led se puso verde, o sea WebSocket establecido contra `rosbridge`, no solo HTML entregado) y **operación** —desde el móvil se eligió `piso1_etm2` → `piso2_aula_302` y la misión se completó con relevo—. Sin dependencias externas ni CDN. La evidencia no es la pantalla sino el registro validado [`S22_RF20_telefono_C_02.json`](Evidencia/registros/S22_RF20_telefono_C_02.json): veredicto `exito: true`, `c3_relevo: true`, RTF 0,9949. Hizo falta abrir 8000 y 9090 en `ufw` acotados a la subred ([`RUNBOOK_CAMPANA.md`](RUNBOOK_CAMPANA.md) §4.1) | S22 |
+| **RF-28** | En una misión entre niveles, el tramo del piso de destino **no inicia hasta que el usuario confirma** el cambio de piso desde la interfaz. Se avisa a los 60 s y la misión falla a los 120 s sin confirmación | Registro de una misión B con marcas de `ESPERANDO_CONFIRMACION`, más las tres corridas del §7 de [`DISENO_CONFIRMACION_PISO.md`](DISENO_CONFIRMACION_PISO.md) | 🔴 | S22 |
 
 **Lectura de OE3 al 2026-09-02.** La interfaz se adelantó del S22 (7–13 sep) al final de S21: los
 cuatro requisitos tienen implementación, y tres están verificados contra un `coordinador` real (sin
@@ -325,17 +326,24 @@ del proyecto: sin ellos no hay resultado que sustentar.
 |---|---|---|---|---|
 | OE1 | RF-01 a RF-10 | **10** | **0** | ~~S20–S21~~ ~~**S21**, salvo RF-08~~ **S22 — cerrado** |
 | OE2 | RF-11 a RF-16 | 0 (**5** parciales) | **1** (RF-15) | S19–S22 |
-| OE3 | RF-17 a RF-20 | 4 | 0 | S22 |
+| OE3 | RF-17 a RF-20, RF-28 | 4 | **1** (RF-28) | S22 |
 | OE4 | RF-21 a RF-27 | **5** | 1 + 1 parcial | ~~S20–S25~~ **S21**, salvo RF-27 (física) |
 | Restricciones | RNF-01 a RNF-07 | 6 | 1 parcial | — |
-| **Total** | **34** | **24** | **2 + 8 parciales** | |
+| **Total** | **35** | **24** | **3 + 8 parciales** | |
 
-**Veinticuatro de treinta y cuatro requisitos están verificados** al 2026-09-07, y ya no son solo
+> **El total sube de 34 a 35 el 2026-09-10** con la entrada de **RF-28**, que no estaba en el
+> anteproyecto: lo pidió el director como situación de experiencia de usuario. Es **funcionalidad
+> añadida**, no una corrección: no modifica ninguna de las cuatro métricas de OE4 ni el
+> planificador, así que **la campaña de 30 misiones no se reejecuta** (el argumento fila por fila
+> está en la §5 de [`DISENO_CONFIRMACION_PISO.md`](DISENO_CONFIRMACION_PISO.md)). Los 24
+> verificados no cambian; los pendientes pasan de 2 a 3.
+
+**Veinticuatro de treinta y cinco requisitos están verificados** al 2026-09-07, y ya no son solo
 los de infraestructura: los cinco que entraron por OE4 (RF-21 a RF-24 y RF-26) son **las cuatro
 métricas más la campaña de N = 30**, y los cuatro que entraron por OE1 (RF-04 a RF-07) incluyen **el
 protocolo de relevo**, o sea el aporte declarado. Con RF-08 cerrado el 7 de septiembre, **OE1 queda
-completo: diez de diez**. **Quedan dos pendientes y ocho parciales**, y conviene mirarlos por lo que
-los bloquea, no por cuántos son:
+completo: diez de diez**. **Quedan tres pendientes y ocho parciales**, y conviene mirarlos por lo
+que los bloquea, no por cuántos son:
 
 - **RF-14** (comando desde ROS 2), ya en 🟡 — falta **calibrar la escala** de la cadena `/cmd_vel`
   contra el vehículo, porque el escalón más bajo cae en 0,40 m/s y Nav2 pide 0,25 y 0,05. Le basta
@@ -344,14 +352,21 @@ los bloquea, no por cuántos son:
   técnica sin caracterizar desde el 14-ago. No depende de horas de trabajo.
 - **RF-27** (campaña física de 5 a 10 corridas) — depende del GO/NO-GO de hardware, que **sigue
   abierto** porque G2 se detuvo por su propia regla de parada.
+- **RF-28** (confirmación del cambio de piso) — entró el 2026-09-10 y **no depende de hardware
+  ninguno**: es código más tres corridas en simulación. Implementado el mismo día; queda solo su
+  evidencia, que es el §7 de [`DISENO_CONFIRMACION_PISO.md`](DISENO_CONFIRMACION_PISO.md).
 - **RF-11, RF-12 y RF-13**, los tres parciales de OE2 — tras la revisión del 5-sep lo que les falta
   está acotado y **también le basta un vehículo**: el mapa de costos local sobre el carro, la
   lectura de `/<ns>/odom`, y discriminar el +2,9 % de escala de la odometría láser con la prueba
   del `.pgm` que ya está definida.
 
-O sea: **los dos pendientes que quedan dependen los dos de que el hardware aparezca** —RF-15 por
-R11, RF-27 por el GO/NO-GO—. Ya no queda ningún pendiente que se resuelva solo escribiendo código:
-el último era RF-08 y se cerró el 7 de septiembre. Y de los ocho parciales, **los tres de OE2 no
+O sea: **dos de los tres pendientes dependen de que el hardware aparezca** —RF-15 por R11, RF-27
+por el GO/NO-GO—, y el tercero, RF-28, no existía cuando se escribió este párrafo. Hasta el
+2026-09-10 la frase era más fuerte: *ya no queda ningún pendiente que se resuelva solo escribiendo
+código*, y era cierta —el último así fue RF-08, cerrado el 7 de septiembre—. **RF-28 la reabre, y
+no por un descuido de planificación:** lo pidió el director como situación de experiencia de
+usuario, no sale del anteproyecto, y es la primera de seis que él planteó. Queda escrito aquí para
+que el recuento no se lea como un retroceso. Y de los ocho parciales, **los tres de OE2 no
 están esperando a R11**: esperan una jornada de laboratorio con el vehículo que sí hay, igual que
 la escala de RF-14.
 
