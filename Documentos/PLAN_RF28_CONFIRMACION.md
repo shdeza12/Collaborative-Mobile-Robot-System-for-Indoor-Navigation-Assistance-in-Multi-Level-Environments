@@ -1328,6 +1328,12 @@ lanzarla por la acción dejaría sin probar el único camino nuevo.
 
 ### 7.3 Las tres corridas
 
+> **Hecho el 2026-09-10.** Los bags buenos son los de la tercera tanda y llevan sufijo `V3`:
+> `S22_RF28_AV3`, `S22_RF28_BV3`, `S22_RF28_CV3`. Las dos primeras tandas destaparon los tres
+> defectos que corrigió `03c68c6` y no sirven como evidencia. **En todos los comandos de esta
+> sección y de la §7.4, `S22_RF28_$n` es en realidad `S22_RF28_${n}V3`.** El resultado está en
+> [`Evidencia/S22_RF28_confirmacion.md`](Evidencia/S22_RF28_confirmacion.md).
+
 Cada corrida: bag nuevo, nombre nuevo, y `Ctrl-C` del grabador al terminar. Terminal 4, antes de
 lanzar cada misión:
 
@@ -1340,13 +1346,13 @@ Esperado: `Grabando en ...` con el recuento de tópicos, `Controladores de robot
 
 En la página: origen **Representación**, destino **IEEE**, «Iniciar guiado».
 
-- [ ] **Corrida A — confirmación temprana.** Pulsar «Ya estoy en el otro piso» a los ~10 s de que
+- [x] **Corrida A — confirmación temprana.** Pulsar «Ya estoy en el otro piso» a los ~10 s de que
   aparezca el botón (o sea, hacia el segundo 32 de la misión).
 
   Esperado: el panel vuelve a «Sígueme» y la misión acaba en **COMPLETADA**. En el log del
   coordinador, `confirmado por el usuario tras 10,X s`. **Una sola** marca de etapa 7.
 
-- [ ] **Corrida B — confirmación tras la alerta.** Bag `S22_RF28_B`. Dejar pasar el minuto y
+- [x] **Corrida B — confirmación tras la alerta.** Bag `S22_RF28_B`. Dejar pasar el minuto y
   pulsar hacia los **75 s**.
 
   Esperado, en tres sitios:
@@ -1359,7 +1365,7 @@ En la página: origen **Representación**, destino **IEEE**, «Iniciar guiado».
 
   La misión acaba en **COMPLETADA**.
 
-- [ ] **Corrida C — sin confirmar.** Bag `S22_RF28_C`. No pulsar nada. Esperar los dos minutos.
+- [x] **Corrida C — sin confirmar.** Bag `S22_RF28_C`. No pulsar nada. Esperar los dos minutos.
 
   Esperado: a los 120 s de reloj de pared la misión pasa a **FALLIDA**, el panel se pone rojo con
   «Camino bloqueado», y el texto de la marca es literalmente
@@ -1370,7 +1376,7 @@ En la página: origen **Representación**, destino **IEEE**, «Iniciar guiado».
 
 ### 7.4 Leer las tres
 
-- [ ] **Paso 5: la línea de tiempo completa de cada corrida**
+- [x] **Paso 5: la línea de tiempo completa de cada corrida**
 
 ```bash
 source ~/deepracer_sim_ws/install/setup.bash && for n in A B C; do echo "== $n =="; python3 herramientas/inspeccionar_etapas.py ~/tesis_evidencia/S22_RF28_$n; done
@@ -1381,7 +1387,7 @@ y en C terminando en FALLIDA en vez de COMPLETADA. El `robot` de cada marca de e
 decir `robot2`, **nunca `(vacio)`**: con ese campo vacío la continuidad de RF-24 se vuelve falsa
 en toda misión entre niveles.
 
-- [ ] **Paso 6: contar las marcas de etapa 7 y medir su separación**
+- [x] **Paso 6: contar las marcas de etapa 7 y medir su separación**
 
 ```bash
 source ~/deepracer_sim_ws/install/setup.bash && for n in A B C; do echo "== $n =="; python3 herramientas/inspeccionar_etapas.py ~/tesis_evidencia/S22_RF28_$n --etapa 7; done
@@ -1394,7 +1400,7 @@ y el RTF que la explicaría; ese número tiene que coincidir con el `rtf.json` d
 for n in A B C; do echo -n "$n: "; cat ~/tesis_evidencia/S22_RF28_$n/rtf.json; echo; done
 ```
 
-- [ ] **Paso 7: componer y validar los tres registros**
+- [x] **Paso 7: componer y validar los tres registros**
 
 `--banco` y `--campana` son **obligatorios**, y el bag va como argumento posicional. `--piloto`
 marca `es_piloto: true`, que es lo honesto: estas tres no son misiones de la campaña OE4 y no
@@ -1423,13 +1429,13 @@ validan, y **ninguna de las dos exitosas sale con `continuidad: false`**. Un `co
 en A o B es un fallo del diseño —la marca de etapa 7 con `robot_activo` vacío— y no una anomalía
 del banco: hay que volver al paso 6 de la Tarea 3 antes de dar nada por bueno.
 
-- [ ] **Paso 8: guardar la evidencia**
+- [x] **Paso 8: guardar la evidencia**
 
 Escribir `Documentos/Evidencia/S22_RF28_confirmacion.md` con: el RTF de cada corrida, lo que hizo
 la persona, el resultado, la salida de los pasos 5 y 6, y capturas del panel en la etapa 7 y en la
 alerta de los 60 s.
 
-- [ ] **Paso 9: commit**
+- [x] **Paso 9: commit**
 
 ```bash
 git add Documentos/Evidencia/registros/S22_RF28_A.json Documentos/Evidencia/registros/S22_RF28_B.json Documentos/Evidencia/registros/S22_RF28_C.json Documentos/Evidencia/S22_RF28_confirmacion.md && git commit -m "RF-28 cerrado: las tres corridas de la confirmacion de piso"
