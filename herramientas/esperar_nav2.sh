@@ -20,6 +20,15 @@
 #    'inactive' rechazando cada meta en unos 50 ms. Desde fuera parece que la
 #    mision "fallo rapido"; en realidad nunca empezo.
 #
+#    Hay un SEGUNDO modo de fallo que deja la misma lista de nodos pendientes y
+#    no tiene nada que ver con ese: lifecycle_manager_navigation configura sus
+#    cinco nodos en orden y espera cada respuesta sin plazo, asi que si el
+#    middleware pierde la respuesta de un change_state se queda clavado para
+#    siempre en el primero. Se distingue por el estado: ahi los nodos de detras
+#    quedan en 'unconfigured', no en 'inactive'. El diagnostico del final los
+#    separa; el remedio del primero -esperar, reintentar- no sirve para el
+#    segundo, que solo se arregla relanzando.
+#
 # 2. Los siete controladores de ros2_control en 'active'. Nav2 puede estar
 #    perfecto y publicar cmd_vel impecable, y el carro no moverse ni un metro
 #    porque los controladores no levantaron. El bag saldria CON cmd_vel y sin
@@ -179,9 +188,52 @@ while true; do
             echo "Si alguno sale 'unconfigured', casi siempre es el spawner que" >&2
             echo "corrio antes que gazebo_ros2_control. Relanzar." >&2
         else
-            echo "Faltan nodos de NAV2: es la carrera entre los dos" >&2
-            echo "lifecycle_manager. Relanzar suele bastar; si se repite, mirar" >&2
-            echo "si hay 'Invalid frame ID \"$ROBOT/map\"' en el log del launch." >&2
+            # Dos fallos distintos se ven IGUAL desde aqui -"faltan nodos de
+            # Nav2"- y piden remedios opuestos. Hasta el 2026-09-10 esta rama
+            # afirmaba que siempre era la carrera entre los dos
+            # lifecycle_manager; ese dia el fallo era el otro y la pista costo
+            # media hora de depuracion. Asi que ya no se adivina: se mira el
+            # estado de los que faltan, que es lo que los separa.
+            echo "Faltan nodos de NAV2. Estado real de cada uno:" >&2
+            for N in "${FALTAN[@]}"; do
+                printf '  %-22s %s\n' "$N" \
+                    "$(timeout 10 ros2 lifecycle get "/$ROBOT/$N" 2>/dev/null || echo '(no responde)')" >&2
+            done
+            echo "" >&2
+            # 'unconfigured' detras de uno que si llego a 'inactive' = el gestor
+            # de navegacion se quedo bloqueado. Configura sus cinco nodos EN
+            # ORDEN y espera la respuesta de cada change_state SIN PLAZO, asi que
+            # si el middleware pierde UNA respuesta no vuelve a avanzar nunca.
+            # Queda clavado en "Configuring <el primero>" y ni su propio
+            # 'manage_nodes' contesta. Visto el 2026-08-10 y el 2026-09-10, las
+            # dos veces en controller_server y las dos veces con este aviso en el
+            # log del nodo:
+            #   failed to send response to /<ns>/controller_server/change_state
+            #   (timeout): client will not receive response
+            # El emparejamiento DDS del canal de respuesta no estaba hecho
+            # cuando la respuesta salio. No hay nada que reintentar desde fuera.
+            #
+            # El '-mmin -30' no es cosmetico: el mismo aviso aparece en logs de
+            # hace semanas y sin acotarlo la pista senalaria una corrida vieja
+            # como si fuera la de ahora, que es exactamente el error que esta
+            # rama existe para no repetir.
+            PERDIDA="$(find "$HOME/.ros/log" -maxdepth 1 -name '*.log' -mmin -30 \
+                       -exec grep -l "failed to send response to /$ROBOT/.*change_state" {} + \
+                       2>/dev/null | tail -3)"
+            if [ -n "$PERDIDA" ]; then
+                echo "El gestor de ciclo de vida esta BLOQUEADO, no lento: el" >&2
+                echo "middleware perdio una respuesta de change_state." >&2
+                printf '%s\n' "$PERDIDA" | sed 's/^/  /' >&2
+                echo "Esperar mas no sirve y 'manage_nodes' tampoco responde." >&2
+                echo "Unico remedio -solo este robot, el otro no se toca-:" >&2
+                echo "  herramientas/robot.sh $ROBOT nav2" >&2
+            else
+                echo "Si TODOS los que faltan salen 'inactive', es la carrera" >&2
+                echo "entre los dos lifecycle_manager: nav2_costmap_2d bloqueado" >&2
+                echo "en on_activate esperando $ROBOT/map. Se reconoce por" >&2
+                echo "'Invalid frame ID \"$ROBOT/map\"' en bucle en el log del" >&2
+                echo "launch. Relanzar: herramientas/robot.sh $ROBOT nav2" >&2
+            fi
         fi
         exit 1
     fi

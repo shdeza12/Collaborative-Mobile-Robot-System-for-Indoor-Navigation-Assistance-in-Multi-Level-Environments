@@ -1277,6 +1277,13 @@ source ~/deepracer_sim_ws/install/setup.bash && herramientas/esperar_nav2.sh rob
 
 Esperado: `LISTA. Nav2, controladores, parametros y condicion inicial.` dos veces, salida 0.
 
+Si en vez de eso sale `NO ARRANCO en 120 s`, **el plazo no se amplía**: el script imprime el estado
+de cada nodo pendiente y el remedio que corresponde. El caso ya visto dos veces es
+`El gestor de ciclo de vida esta BLOQUEADO` —una respuesta de `change_state` que perdió el
+middleware, §3 del runbook—; ahí se relanza **sólo** el robot que falló
+(`herramientas/robot.sh robot1 nav2`), se vuelve a pasar la compuerta y se sigue. No cuesta la
+corrida: cuesta 30 s.
+
 ```bash
 source ~/deepracer_sim_ws/install/setup.bash && python3 herramientas/verificar_condicion_inicial.py robot1 && python3 herramientas/verificar_condicion_inicial.py robot2
 ```

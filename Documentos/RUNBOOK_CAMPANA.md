@@ -173,9 +173,25 @@ source ~/deepracer_sim_ws/install/setup.bash && herramientas/esperar_nav2.sh rob
 **Esperado:** `LISTA. Nav2, controladores, parametros y condicion inicial.` dos veces, y código de
 salida 0. Comprueba los siete nodos de ciclo de vida en `active` y los siete controladores.
 
-**Si falla:** el propio script dice cuál de las dos cosas falta. Si faltan **controladores**, suele
-ser el spawner corriendo antes que `gazebo_ros2_control`: relanzar esa pila. Si faltan **nodos de
-Nav2**, es la carrera entre los dos `lifecycle_manager`: relanzar suele bastar.
+**Si falla:** el propio script dice cuál de las dos cosas falta, y desde el 2026-09-10 imprime el
+estado de cada nodo pendiente en vez de dar por supuesta la causa. Si faltan **controladores**,
+suele ser el spawner corriendo antes que `gazebo_ros2_control`: relanzar esa pila. Si faltan
+**nodos de Nav2**, hay dos causas distintas y el script las separa:
+
+- **«El gestor de ciclo de vida está BLOQUEADO»**, con los nodos de detrás en `unconfigured`.
+  `lifecycle_manager_navigation` configura sus cinco nodos en orden y espera cada respuesta **sin
+  plazo**; si el middleware pierde una —`failed to send response to
+  /robotN/controller_server/change_state (timeout)` en el log del nodo— se queda clavado en el
+  primero para siempre y ni su propio `manage_nodes` contesta. Visto dos veces, el 2026-08-10 y el
+  2026-09-10, las dos en `controller_server` de `robot1`. **Esperar más no sirve**: relanzar sólo
+  ese robot, el otro no se toca. No hay riesgo para los datos: la compuerta lo ve siempre, porque
+  cinco nodos que nunca configuran no llegan nunca a `active`.
+- **Todos los pendientes en `inactive`**: ésa sí es la carrera entre los dos `lifecycle_manager`,
+  con `Invalid frame ID "robotN/map"` en bucle. También se relanza.
+
+No se intenta evitar el primer fallo tocando el launch. El coste de que ocurra son 30 s de
+relanzamiento y lo detecta la compuerta; el coste de cambiar el arranque de Nav2 a trece días del
+congelamiento lo paga cada misión de la campaña.
 
 **Terminal 4, desde la raíz del repositorio:**
 
