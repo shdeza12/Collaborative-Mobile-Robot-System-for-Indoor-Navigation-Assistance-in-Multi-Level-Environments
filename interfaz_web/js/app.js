@@ -13,8 +13,8 @@
  * regla que fija Documentos/CONTRATO_INTERFACES.md seccion 5 para RECIBIDA.
  */
 
-const ETAPA = { INACTIVA: 0, TRAMO_1: 1, TRANSFERENCIA: 2, TRAMO_2: 3, COMPLETADA: 4, FALLIDA: 5, RECIBIDA: 6 };
-const NOMBRE_ETAPA = { 0: "INACTIVA", 1: "TRAMO_1", 2: "TRANSFERENCIA", 3: "TRAMO_2", 4: "COMPLETADA", 5: "FALLIDA", 6: "RECIBIDA" };
+const ETAPA = { INACTIVA: 0, TRAMO_1: 1, TRANSFERENCIA: 2, TRAMO_2: 3, COMPLETADA: 4, FALLIDA: 5, RECIBIDA: 6, ESPERANDO_CONFIRMACION: 7 };
+const NOMBRE_ETAPA = { 0: "INACTIVA", 1: "TRAMO_1", 2: "TRANSFERENCIA", 3: "TRAMO_2", 4: "COMPLETADA", 5: "FALLIDA", 6: "RECIBIDA", 7: "ESPERANDO_CONFIRMACION" };
 
 const $ = (id) => document.getElementById(id);
 const escapar = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -145,7 +145,7 @@ $("btn-ir").addEventListener("click", () => {
   estado.metaId = puente.enviarMeta(
     "/coordinacion/guiar_usuario", "coordinacion_msgs/action/GuiarUsuario",
     { origen_id: estado.origenSel, destino_id: estado.destinoSel },
-    { onFeedback: (valores) => pintarPanel(valores.estado), onResult: alTerminar },
+    { onFeedback: (valores) => { estado.ultimoEstadoMision = valores.estado; pintarPanel(valores.estado); }, onResult: alTerminar },
   );
   refrescarBotonIr();
 });
@@ -154,6 +154,16 @@ $("btn-cancelar").addEventListener("click", () => {
   if (estado.metaId === null) return;
   $("nota").textContent = "Enviando la cancelacion...";
   puente.cancelarMeta("/coordinacion/guiar_usuario", estado.metaId);
+});
+
+$("btn-confirmar").addEventListener("click", () => {
+  const e = estado.ultimoEstadoMision;
+  if (!e || !e.mision_id) return;
+  // El mision_id va en el cuerpo para que el coordinador pueda descartar una
+  // pulsacion de una mision anterior. Ver Enganche en espera_confirmacion.py.
+  puente.publicar("/coordinacion/confirmacion_piso", "std_msgs/msg/String",
+                  { data: e.mision_id });
+  $("nota").textContent = "Confirmacion enviada.";
 });
 
 function alTerminar(valores, exitoLlamada) {
@@ -183,6 +193,7 @@ function claveYTitulo(e) {
     case ETAPA.TRAMO_2:
       return e.destino_actual.id && e.destino_actual.id === e.origen_id
         ? ["espera", "Espera al robot"] : ["sigueme", "Sígueme"];
+    case ETAPA.ESPERANDO_CONFIRMACION: return ["confirmar", "¿Ya subió?"];
     default: return ["inactiva", "Sin misión activa"];
   }
 }
@@ -197,6 +208,11 @@ function pintarPanel(e) {
   $("panel-titulo").textContent = titulo;
   $("panel-frase").textContent = e.mensaje_usuario || "—";
 
+  // RF-28: el boton de confirmar existe solo mientras el coordinador lo espera.
+  // Visible en cualquier otra etapa seria una forma de confirmar una mision que
+  // no esta preguntando nada.
+  $("acciones-confirmar").hidden = e.etapa !== ETAPA.ESPERANDO_CONFIRMACION;
+
   const filas = [];
   if (e.robot_activo) filas.push(["Robot", e.robot_activo]);
   if (e.destino_actual && e.destino_actual.nombre) filas.push(["Va hacia", e.destino_actual.nombre]);
@@ -210,13 +226,16 @@ function pintarPanel(e) {
   $("panel-etapas").innerHTML = ORDEN_ETAPAS.map(([n, txt]) => {
     let clase = "et";
     if (e.etapa === ETAPA.FALLIDA) clase += n === 6 ? " mal" : "";
-    else if (n === e.etapa) clase += " on";
+    // La etapa 7 no tiene paso propio en la barra: es la pausa DENTRO del
+    // relevo, asi que ilumina "Relevo" y el usuario no ve la barra apagarse.
+    else if (n === e.etapa || (e.etapa === ETAPA.ESPERANDO_CONFIRMACION && n === 2)) clase += " on";
     return `<span class="${clase}">${txt}</span>`;
   }).join("");
 }
 
 function pintarPanelSinDatos(mensaje) {
   const panel = $("panel");
+  $("acciones-confirmar").hidden = true;
   panel.className = "panel inactiva";
   $("panel-etiqueta").textContent = "estado";
   $("panel-titulo").textContent = mensaje;

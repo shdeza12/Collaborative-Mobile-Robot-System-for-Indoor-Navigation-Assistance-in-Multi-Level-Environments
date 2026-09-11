@@ -116,6 +116,12 @@ select:focus, input:focus { outline: none; border-color: var(--acento); }
 .panel.llegada::before { background: var(--verde); } .panel.llegada h2 { color: #8ff0b5; }
 .panel.bloqueado::before { background: var(--rojo); } .panel.bloqueado h2 { color: #ffa1ae; }
 .panel.preparando::before { background: var(--gris); } .panel.preparando h2 { color: #c6ccdb; }
+.panel.confirmar::before { background: var(--ambar); } .panel.confirmar h2 { color: #ffd08a; }
+.boton.confirmar { background: var(--ambar); color: #17110a; border-color: var(--ambar); }
+/* RF-28: el bloque del boton vive DENTRO del panel, debajo de la pregunta, asi que separa por
+   arriba y no por abajo, y ocupa el ancho completo aunque .acciones se parta en 2fr 1fr. */
+#acciones-confirmar { grid-template-columns: 1fr; margin: 18px 0 0; }
+@media (min-width: 520px) { #acciones-confirmar { grid-template-columns: 1fr; } }
 
 .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 .chip { background: var(--panel2); border: 1px solid var(--borde); border-radius: 10px; padding: 8px 11px; font-size: 13px; color: var(--suave); }

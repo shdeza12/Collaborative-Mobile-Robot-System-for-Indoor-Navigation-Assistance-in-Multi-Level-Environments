@@ -17,6 +17,7 @@ class Puente {
     this.socket = null;
     this.suscripciones = new Map(); // topic -> {type, qos, cb}
     this.acciones = new Map();      // id -> {onFeedback, onResult}
+    this.publicados = new Map();    // topic -> type, para re-anunciar al reconectar
     this.contador = 0;
     this.onEstadoConexion = null;   // (conectado: boolean) => void
     this._conectar();
@@ -29,6 +30,8 @@ class Puente {
       // Un socket nuevo no hereda las suscripciones del anterior: hay que
       // volver a pedirlas todas.
       for (const [topic, s] of this.suscripciones) this._enviarSuscripcion(topic, s);
+      // Un socket nuevo tampoco hereda los anuncios de publicacion.
+      for (const [topic, type] of this.publicados) this._enviar({ op: "advertise", topic, type });
     };
     this.socket.onclose = () => {
       this.onEstadoConexion && this.onEstadoConexion(false);
@@ -97,5 +100,14 @@ class Puente {
 
   cancelarMeta(accion, id) {
     this._enviar({ op: "cancel_action_goal", action: accion, id });
+  }
+
+  /** Publica en un topico. Lo anuncia la primera vez y al reconectar. */
+  publicar(topic, type, msg) {
+    if (!this.publicados.has(topic)) {
+      this.publicados.set(topic, type);
+      this._enviar({ op: "advertise", topic, type });
+    }
+    this._enviar({ op: "publish", topic, msg });
   }
 }

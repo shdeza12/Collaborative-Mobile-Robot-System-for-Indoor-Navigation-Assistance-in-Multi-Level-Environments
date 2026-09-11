@@ -57,6 +57,12 @@
     <p class="frase" id="panel-frase">—</p>
     <div class="chips" id="panel-datos"></div>
     <div class="etapas" id="panel-etapas"></div>
+    <!-- RF-28: solo aparece en la etapa ESPERANDO_CONFIRMACION. Lo muestra app.js.
+         Va DENTRO del panel y al final, para que la respuesta quede debajo de la
+         pregunta "¿Ya subió?" y no encima de ella. -->
+    <div class="acciones" id="acciones-confirmar" hidden>
+      <button id="btn-confirmar" class="boton grande confirmar" type="button">Ya estoy en el otro piso</button>
+    </div>
   </section>
 </main>
 
