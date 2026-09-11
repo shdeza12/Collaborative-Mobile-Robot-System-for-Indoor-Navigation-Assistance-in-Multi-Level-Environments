@@ -126,6 +126,41 @@ RELOJ = {
     'robot2': '/robot2/clock',
 }
 
+# Los controladores de ros2_control, por la misma razon que las poses y los
+# relojes: la lista estaba copiada a mano en CUATRO sitios que no se hablan
+# -'deepracer_spawn.launch.py', que los carga; 'esperar_nav2.sh', que es la
+# compuerta; 'grabar_mision.sh', que anota cuantos estaban activos; y
+# 'verificar_contrato.py'-, y ninguna se entera si otra cambia.
+#
+# El fallo no seria ruidoso, que es lo de siempre: si se renombra o se agrega un
+# controlador, el grabador sigue contando contra la lista vieja y escribe un
+# '7/7' que ya no significa "estaban todos". Un dato falso en el registro es
+# peor que un dato ausente, porque nadie lo va a revisar.
+#
+# La declaracion de verdad es 'config/agent_control.yaml': el controller_manager
+# solo puede cargar lo que ese archivo declara con su 'type'. Esta lista es su
+# reflejo, y 'herramientas/verificar_repositorio.sh' comprueba en cada corte que
+# las dos sigan diciendo lo mismo. No se lee el YAML aqui a proposito: este
+# modulo lo importan los launch en el arranque, y meterles una lectura de disco
+# que puede fallar es cambiar un fallo de verificacion por uno de lanzamiento.
+#
+# El broadcaster va primero y aparte: los seis de articulacion solo se cargan
+# cuando el ya esta activo.
+BROADCASTER = 'joint_state_broadcaster'
+
+CONTROLADORES_ARTICULACION = [
+    'left_rear_wheel_velocity_controller',
+    'right_rear_wheel_velocity_controller',
+    'left_front_wheel_velocity_controller',
+    'right_front_wheel_velocity_controller',
+    'left_steering_hinge_position_controller',
+    'right_steering_hinge_position_controller',
+]
+
+# Los siete, en el orden en que se cargan. Es la lista contra la que miden la
+# compuerta, el grabador y el verificador del contrato.
+CONTROLADORES = [BROADCASTER] + CONTROLADORES_ARTICULACION
+
 # Con 'namespace' vacio -un solo robot- se usa esta fila. Es la que ven los
 # launch cuando nadie pasa x:=/y:=/yaw:=.
 ROBOT_POR_DEFECTO = 'robot1'

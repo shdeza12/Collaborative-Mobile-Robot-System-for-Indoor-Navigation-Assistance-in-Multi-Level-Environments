@@ -29,6 +29,7 @@
 # Las sustituciones de launch no saben omitir; Python si.
 
 import os
+import sys
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
@@ -38,18 +39,12 @@ from launch.event_handlers import OnProcessExit
 from launch.substitutions import Command, LaunchConfiguration
 from launch_ros.actions import Node
 
-# El broadcaster va primero y aparte: los seis controladores de articulacion
-# solo se cargan cuando el ya esta activo.
-BROADCASTER = 'joint_state_broadcaster'
-
-CONTROLADORES = [
-    'left_rear_wheel_velocity_controller',
-    'right_rear_wheel_velocity_controller',
-    'left_front_wheel_velocity_controller',
-    'right_front_wheel_velocity_controller',
-    'left_steering_hinge_position_controller',
-    'right_steering_hinge_position_controller',
-]
+# El modulo vive junto a este archivo, dentro del propio paquete instalado.
+# Los nombres de los controladores estan alli y no aqui porque los comparten la
+# compuerta y el grabador; el motivo completo, en la cabecera de ese bloque.
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
+from deepracer_raiz_repo import (BROADCASTER,  # noqa: E402
+                                 CONTROLADORES_ARTICULACION)
 
 
 # Espera del cliente por cada respuesta del controller_manager, en segundos.
@@ -167,7 +162,7 @@ def acciones(context, *args, **kwargs):
     )
 
     cargar_broadcaster = cargar_controladores([BROADCASTER], ns)
-    cargar_resto = [cargar_controladores(CONTROLADORES, ns)]
+    cargar_resto = [cargar_controladores(CONTROLADORES_ARTICULACION, ns)]
 
     return [
         RegisterEventHandler(

@@ -76,13 +76,10 @@ control)
     # Con ROS2_CONTROL_MUDO se calla, que es lo que hace un controller_manager
     # que no esta o no responde dentro del plazo.
     [ -n "$ROS2_CONTROL_MUDO" ] && exit 0
-    for C in joint_state_broadcaster \\
-             left_rear_wheel_velocity_controller \\
-             right_rear_wheel_velocity_controller \\
-             left_front_wheel_velocity_controller \\
-             right_front_wheel_velocity_controller \\
-             left_steering_hinge_position_controller \\
-             right_steering_hinge_position_controller; do
+    # Los mismos nombres que declara el doble del modulo compartido, y solo
+    # esos: el grabador tiene que contar contra la lista que lee, no contra una
+    # copia suya.
+    for C in controlador_de_prueba_1 controlador_de_prueba_2; do
         printf '%s tipo/Tipo \\033[92mactive\\033[0m\\n' "$C"
     done
     ;;
@@ -100,13 +97,24 @@ exit 0
 
 # Primera llamada bien, la segunda falla: asi se prueba el caso en que el bag
 # ya esta grabado y lo que se pierde es la marca de cierre.
+#
+# LAS DOS MARCAS BUENAS TIENEN QUE AVANZAR. Devolviendo la misma marca dos veces
+# -que es lo que hacia este doble- la ventana de pared sale de cero segundos,
+# grabar_mision.sh se protege de esa division y NO escribe rtf.json. La prueba
+# de la corrida sana pasaba igual porque no miraba el archivo, asi que la rama
+# que calcula el RTF y lo deja en disco -el motivo por el que existe todo este
+# archivo- nunca se llego a ejecutar en ninguna prueba.
+#
+# 100 s de simulacion por cada 100 s de pared son RTF 1,0: una corrida sana, por
+# encima del 0,99 que exige RNF-06, de modo que el aviso de 'rtf_bajo' tampoco
+# se dispara.
 MEDIR_RTF_FALSO = """#!/usr/bin/env python3
 import os, sys
 contador = os.environ["CONTADOR_MARCAS"]
 n = int(open(contador).read()) if os.path.exists(contador) else 0
 open(contador, "w").write(str(n + 1))
 if n < int(os.environ["MARCAS_BUENAS"]):
-    print("100.000000 200.000000")
+    print("{:.6f} {:.6f}".format(100.0 + 100 * n, 200.0 + 100 * n))
     sys.exit(0)
 print("SIN DATOS en /clock tras 10 s.", file=sys.stderr)
 sys.exit(1)
@@ -116,7 +124,18 @@ COND_INICIAL_FALSA = """#!/usr/bin/env python3
 print('{"criterio": "falso", "por_robot": {}}')
 """
 
-RELOJ_FALSO = "def reloj_de(ns):\n    return '/clock' if ns == 'robot1' else f'/{ns}/clock'\n"
+# El doble del modulo compartido. Trae los controladores ADEMAS del reloj porque
+# el grabador ya no lleva la lista escrita a mano: la lee de aqui, que es el
+# mismo sitio del que la lee el launch que los carga. La lista del doble es
+# corta y con nombres inventados a proposito: si el grabador volviera a contar
+# contra una lista propia, el '2/2' saldria '0/7' y la prueba lo veria.
+RELOJ_FALSO = """
+def reloj_de(ns):
+    return '/clock' if ns == 'robot1' else f'/{ns}/clock'
+
+
+CONTROLADORES = ['controlador_de_prueba_1', 'controlador_de_prueba_2']
+"""
 
 
 def montar(tmp, marcas_buenas):
@@ -163,6 +182,8 @@ def correr(marcas_buenas, ros2_control=True):
             "hay_bag": (tmp / "evidencia" / "mision_de_prueba").exists(),
             "controladores": _leer_json(
                 tmp / "evidencia" / "mision_de_prueba" / "controladores.json"),
+            "rtf": _leer_json(
+                tmp / "evidencia" / "mision_de_prueba" / "rtf.json"),
         }
 
 
@@ -197,6 +218,9 @@ def pruebas_de_la_marca_final():
           "se resuelve AHORA" in r["salida"])
     check("da el comando de rescate",
           "medir_rtf.py --segundos" in r["salida"])
+    # Y no se inventa un RTF con la unica marca que tiene: sin ventana no hay
+    # RTF, y un rtf.json a medias seria peor que ninguno.
+    check("no escribe un rtf.json a medias", r["rtf"] is None, f"-> {r['rtf']}")
 
 
 def prueba_de_la_corrida_sana():
@@ -211,9 +235,24 @@ def prueba_de_la_corrida_sana():
     # cierran el camino entero: servicio vivo -> fichero junto al bag -> registro.
     check("deja los controladores junto al bag", r["controladores"] is not None,
           "sin controladores.json el compositor vuelve a escribir {}")
-    check("y con los siete que vio, no con un si/no",
-          (r["controladores"] or {}).get("robot1") == "7/7",
+    # '2/2' y no '7/7': el doble del modulo compartido declara dos controladores
+    # inventados. Que salga '2/2' prueba que el grabador cuenta contra la lista
+    # que LEE del modulo, no contra una copia suya escrita a mano -que era el
+    # defecto: una copia no se entera de que la otra cambio-.
+    check("y contra la lista que declara el modulo, no contra una copia suya",
+          (r["controladores"] or {}).get("robot1") == "2/2",
           f"-> {r['controladores']}")
+    # La razon de ser del script. Hasta que el doble de medir_rtf.py devolvio
+    # marcas que AVANZAN, la ventana de pared era de cero segundos y esta rama
+    # no se ejecutaba en ninguna prueba.
+    check("calcula el RTF y lo deja junto al bag", r["rtf"] is not None,
+          "sin rtf.json la corrida no se puede registrar y el dato es "
+          "irrecuperable con el gzserver cerrado")
+    check("con el RTF de la ventana, no con el valor de una marca suelta",
+          (r["rtf"] or {}).get("rtf") == 1.0, f"-> {r['rtf']}")
+    check("y deja ver de que ventana salio",
+          (r["rtf"] or {}).get("sim_s") == 100.0
+          and (r["rtf"] or {}).get("pared_s") == 100.0, f"-> {r['rtf']}")
 
 
 def prueba_de_los_controladores_mudos():

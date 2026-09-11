@@ -15,6 +15,7 @@ Codigo de salida: 0 si todo pasa, 1 si algo falla.
 """
 
 import argparse
+import os
 import re
 import subprocess
 import sys
@@ -40,15 +41,14 @@ TOPICOS_ROBOT = [
     "dynamic_joint_states",
 ]
 
-CONTROLADORES = [
-    "joint_state_broadcaster",
-    "left_rear_wheel_velocity_controller",
-    "right_rear_wheel_velocity_controller",
-    "left_front_wheel_velocity_controller",
-    "right_front_wheel_velocity_controller",
-    "left_steering_hinge_position_controller",
-    "right_steering_hinge_position_controller",
-]
+# Los controladores NO se listan aqui: vienen de 'deepracer_raiz_repo.py', el
+# mismo modulo con el que el launch los carga. Un verificador de contrato con su
+# propia copia de la lista puede dar por bueno un sistema al que le falta un
+# controlador nuevo, que es justo lo contrario de para lo que existe.
+sys.path.insert(0, os.path.join(
+    os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
+    "Robot", "aws-deepracer", "deepracer_bringup", "launch"))
+from deepracer_raiz_repo import CONTROLADORES  # noqa: E402
 
 # Tópicos que por definicion de ROS 2 viven en la raiz y no se namespacean.
 GLOBALES = {

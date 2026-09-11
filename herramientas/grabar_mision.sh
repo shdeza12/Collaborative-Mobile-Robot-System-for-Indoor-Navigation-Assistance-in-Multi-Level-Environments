@@ -231,6 +231,29 @@ fi
 # momento de grabar. Un robot que no conteste se declara 'sin respuesta', que no
 # es lo mismo que '7/7' ni que no aparecer: 'no lo se' y 'estaban todos' tienen
 # que verse distintos en el registro.
+#
+# LA LISTA NO SE COPIA AQUI. Sale de 'deepracer_raiz_repo.py', el mismo modulo
+# con el que el launch los carga, por el motivo que ya costo caro con la pose:
+# una copia a mano no se entera de que la otra cambio. Si se renombra o se agrega
+# un controlador, un grabador con la lista vieja sigue escribiendo '7/7' y ese
+# '7/7' ya no significa "estaban todos" -significa "estaban los siete que yo
+# conocia"-, que es un dato falso en un registro que nadie va a revisar.
+#
+# Aqui SI se corta si no se puede leer: sin saber cuantos se esperan, el
+# denominador del 'N/M' se lo estaria inventando el script.
+if ! CTRL_ESPERADOS=$(python3 -c "
+import sys
+sys.path.insert(0, '$LAUNCH_DIR')
+from deepracer_raiz_repo import CONTROLADORES
+print('\n'.join(CONTROLADORES))
+" 2>&1); then
+    echo "No se graba: no pude leer la lista de controladores." >&2
+    printf '%s\n' "$CTRL_ESPERADOS" | sed 's/^/  /' >&2
+    exit 1
+fi
+read -r -d '' -a CTRL_NOMBRES <<< "$CTRL_ESPERADOS" || true
+CTRL_TOTAL=${#CTRL_NOMBRES[@]}
+
 CTRL_JSON="{"
 CTRL_COMA=""
 for R in "${ROBOTS[@]}"; do
@@ -243,16 +266,10 @@ for R in "${ROBOTS[@]}"; do
         CTRL_VALOR="sin respuesta"
     else
         CTRL_N=0
-        for C in joint_state_broadcaster \
-                 left_rear_wheel_velocity_controller \
-                 right_rear_wheel_velocity_controller \
-                 left_front_wheel_velocity_controller \
-                 right_front_wheel_velocity_controller \
-                 left_steering_hinge_position_controller \
-                 right_steering_hinge_position_controller; do
+        for C in "${CTRL_NOMBRES[@]}"; do
             grep -qE "^$C .*active" <<< "$CTRL_LISTA" && CTRL_N=$((CTRL_N + 1))
         done
-        CTRL_VALOR="$CTRL_N/7"
+        CTRL_VALOR="$CTRL_N/$CTRL_TOTAL"
     fi
     CTRL_JSON="$CTRL_JSON$CTRL_COMA\"$R\": \"$CTRL_VALOR\""
     CTRL_COMA=", "

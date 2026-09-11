@@ -208,6 +208,45 @@ else
   mal "$(printf '%s\n' "$SALIDA_POSE" | grep -E 'FALLO|Error|error' | head -5)"
 fi
 
+# Los nombres de los controladores viven en 'deepracer_raiz_repo.py' -de ahi los
+# leen el launch que los carga, la compuerta y el grabador-, pero quien los
+# DECLARA de verdad es 'agent_control.yaml': el controller_manager solo puede
+# cargar lo que ese archivo lista con su 'type'. Si los dos se separan, el
+# sintoma no es un error: la compuerta espera por un controlador que ya no
+# existe y agota el plazo, o el grabador anota '7/7' contando una lista vieja.
+#
+# La comprobacion va aqui y no en el propio modulo porque lo importan los launch
+# al arrancar: meterles una lectura de disco que puede fallar seria cambiar un
+# fallo de verificacion por uno de lanzamiento.
+paso 'los controladores declarados en el YAML son los que el codigo carga'
+SALIDA_CTRL=$(python3 - <<'PY' 2>&1
+import sys
+import yaml
+
+LAUNCH = 'Robot/aws-deepracer/deepracer_bringup/launch'
+YAML = 'Robot/aws-deepracer/deepracer_bringup/config/agent_control.yaml'
+CLAVE = '/**/controller_manager'
+
+sys.path.insert(0, LAUNCH)
+from deepracer_raiz_repo import CONTROLADORES
+
+with open(YAML, encoding='utf-8') as f:
+    params = yaml.safe_load(f)[CLAVE]['ros__parameters']
+
+# Un controlador es una entrada anidada con 'type'; asi se descarta
+# 'update_rate', que es un escalar y vive en el mismo nivel.
+declarados = {n for n, v in params.items() if isinstance(v, dict) and 'type' in v}
+codigo = set(CONTROLADORES)
+
+if declarados != codigo:
+    print('solo en agent_control.yaml: ' + (', '.join(sorted(declarados - codigo)) or '-'))
+    print('solo en deepracer_raiz_repo.py: ' + (', '.join(sorted(codigo - declarados)) or '-'))
+    sys.exit(1)
+PY
+)
+if [ $? -eq 0 ]; then bien
+else mal "$SALIDA_CTRL"; fi
+
 # ---------------------------------------------------------- 5. estado al dia
 titulo '5. El tablero de estado refleja la realidad'
 

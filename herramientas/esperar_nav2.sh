@@ -69,21 +69,36 @@ AQUI="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 NODOS=(map_server amcl controller_server planner_server behavior_server
        bt_navigator waypoint_follower)
 
-# Los siete de ros2_control. Migrados en S12: el estado es 'active', no 'start'.
-CONTROLADORES=(joint_state_broadcaster
-               left_rear_wheel_velocity_controller
-               right_rear_wheel_velocity_controller
-               left_front_wheel_velocity_controller
-               right_front_wheel_velocity_controller
-               left_steering_hinge_position_controller
-               right_steering_hinge_position_controller)
+# Los de ros2_control. Migrados en S12: el estado es 'active', no 'start'.
+#
+# La lista NO se copia aqui: sale de 'deepracer_raiz_repo.py', el mismo modulo
+# que la usa para cargarlos. Una compuerta que espera por una lista vieja deja
+# pasar una corrida a la que le falta un controlador, y eso no da error: el carro
+# arranca y no se mueve. Si el modulo no se puede leer se corta, porque una
+# compuerta que no sabe que exigir no es una compuerta.
+#
+# Se usa sustitucion de ORDEN y no 'mapfile < <(...)': mapfile devuelve 0 aunque
+# el python de dentro reviente, asi que el fallo entraria en el array como texto
+# de error y la compuerta esperaria por un controlador llamado 'Traceback'.
+LAUNCH_DIR="$AQUI/../Robot/aws-deepracer/deepracer_bringup/launch"
+if ! LISTA_CTRL=$(python3 -c "
+import sys
+sys.path.insert(0, '$LAUNCH_DIR')
+from deepracer_raiz_repo import CONTROLADORES
+print('\n'.join(CONTROLADORES))
+" 2>&1); then
+    echo "No pude leer la lista de controladores de deepracer_raiz_repo.py:" >&2
+    printf '%s\n' "$LISTA_CTRL" | sed 's/^/  /' >&2
+    exit 1
+fi
+read -r -d '' -a CONTROLADORES <<< "$LISTA_CTRL" || true
 
 # 'ros2 control list_controllers' colorea su salida, y en ANSI "active" es
 # "\x1b[92mactive\x1b[0m". Sin limpiarlo, la comparacion no casa nunca.
 ANSI='s/\x1b\[[0-9;]*m//g'
 
 echo "Esperando a que la pila de $ROBOT este lista (plazo ${PLAZO} s)."
-echo "Compuerta: 7 nodos de Nav2 en active + 7 controladores en active."
+echo "Compuerta: ${#NODOS[@]} nodos de Nav2 en active + ${#CONTROLADORES[@]} controladores en active."
 
 INICIO=$SECONDS
 ULTIMO=""
@@ -123,7 +138,7 @@ while true; do
 
     if [ ${#FALTAN[@]} -eq 0 ]; then
         echo ""
-        echo "Los 7 nodos de Nav2 y los 7 controladores estan en active."
+        echo "Los ${#NODOS[@]} nodos de Nav2 y los ${#CONTROLADORES[@]} controladores estan en active."
         echo "Tiempo de arranque: $((SECONDS - INICIO)) s."
         echo ""
 
