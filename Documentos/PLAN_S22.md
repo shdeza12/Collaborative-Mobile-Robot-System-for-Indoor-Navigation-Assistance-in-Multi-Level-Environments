@@ -147,7 +147,7 @@ completo está en el §4 de [`S21_preparacion_G2.md`](Evidencia/S21_preparacion_
 | | |
 |---|---|
 | **Comando** | `git pull && bash herramientas/verificar_repositorio.sh` |
-| **Resultado esperado** | 12/12 |
+| **Resultado esperado** | 13/13 — eran 12 hasta el 2026-09-11; la nueva cruza los controladores que declara `agent_control.yaml` con los que carga el código |
 | **Si difiere** | Arreglar antes de seguir; un repositorio que se contradice invalida todo lo que se escriba encima esta semana |
 
 **Tarea 1 — poner la batería a cargar.** Sin comando y es la más importante del día. El «caso plátano»
@@ -365,7 +365,7 @@ Tres tareas de tamaño conocido, en orden de valor:
 - `ESTADO.md`: avance por OE, camino crítico, riesgos, bitácora. **Incluir la corrección de §1.2**
   (la HRI ya está en `main`) y el resultado del GO/NO-GO.
 - Entregable S22.
-- Batería completa antes de empujar: `verificar_repositorio.sh` 12/12, `colcon build` limpio de los
+- Batería completa antes de empujar: `verificar_repositorio.sh` 13/13, `colcon build` limpio de los
   8 paquetes del repositorio, las pruebas `prueba_*.py` en verde, barrido de enlaces rotos.
 - Commit y push.
 
