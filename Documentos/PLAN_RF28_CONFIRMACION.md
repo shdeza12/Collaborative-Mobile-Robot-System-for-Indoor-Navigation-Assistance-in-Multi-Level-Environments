@@ -849,39 +849,97 @@ del navegador del paso siguiente.
 
 - [ ] **Paso 9: comprobar el botón contra el coordinador, sin simulador**
 
-Tres terminales. En la primera, el coordinador:
+Son **cuatro terminales**, no tres, y cada una se queda ocupada con un proceso que no termina
+solo. Abrirlas todas antes de empezar y no cerrar ninguna hasta el final.
+
+**Montaje (A) — terminal 1, el coordinador:**
 
 ```bash
 cd ~/deepracer_sim_ws && source install/setup.bash && ros2 run coordinacion coordinador --ros-args -p prefijo_mision:=PRUEBARF28
 ```
 
-En la segunda, rosbridge y el servidor de la página (el procedimiento del §4.1 de
-`RUNBOOK_CAMPANA.md`). En la tercera, el escucha:
+Esperado: termina imprimiendo `Coordinador listo.` y se queda quieto. Si se cae con
+`ModuleNotFoundError` o `AttributeError`, falta el `colcon build` del paso 8 de la Tarea 1.
+
+**Montaje (B) — terminal 2, rosbridge y la página.** Es el procedimiento del §4.1 de
+`RUNBOOK_CAMPANA.md`. Al final el navegador en `localhost:8000` tiene que mostrar el LED
+**verde** y el texto «conectado». Si queda rojo, rosbridge no está en el puerto 9090:
+comprobarlo con `ss -ltnp | grep 9090` en cualquier terminal libre.
+
+**Montaje (C) — terminal 3, el escucha. Arrancarlo ANTES de pulsar nada**, porque
+`ros2 topic echo` solo imprime lo que llega después de él:
 
 ```bash
 cd ~/deepracer_sim_ws && source install/setup.bash && ros2 topic echo /coordinacion/confirmacion_piso
 ```
 
-En el navegador: la página carga, el LED queda verde. **El botón «Ya estoy en el otro piso» no
-debe estar visible**, porque la etapa es INACTIVA. Eso ya es una comprobación.
+Esperado: no imprime nada y se queda esperando. Eso es correcto: todavía nadie confirmó.
 
-Para forzar su aparición sin correr una misión, en la tercera terminal:
+**Montaje (D) — terminal 4, el estado falso.** La etapa 7 solo ocurre a mitad de una misión
+real, así que se simula publicando el estado a mano:
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && ros2 topic pub --once /coordinacion/estado_mision coordinacion_msgs/msg/EstadoMision "{mision_id: 'FALSA_1', etapa: 7, robot_activo: 'robot2', mensaje_usuario: 'Prueba de etapa 7'}"
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 topic pub -r 5 /coordinacion/estado_mision coordinacion_msgs/msg/EstadoMision "{mision_id: 'FALSA_1', etapa: 7, robot_activo: 'robot2', mensaje_usuario: 'Prueba de etapa 7'}"
 ```
 
-Esperado en el navegador: el panel se pone ámbar, el título dice **«¿Ya subió?»**, la etiqueta
-dice `ESPERANDO_CONFIRMACION`, el paso «Relevo» de la barra queda iluminado, y **aparece el
-botón**. Al pulsarlo, el `ros2 topic echo` imprime `data: FALSA_1`.
+**`-r 5` y NO `--once`, y esto se aprendió fallando.** Con `--once` el botón aparece y
+desaparece en menos de un segundo, así que no se puede pulsar, y pulsarlo es lo único que prueba
+el camino HRI → rosbridge → ROS. El motivo está en `coordinador.py:118`: el timer de 1 Hz llama
+a `_publicar_estado`, que publica `self.estado` **sin comprobar si hay misión**, de modo que el
+`INACTIVA` del coordinador sobrescribe el mensaje falso en el siguiente tick y `pintarPanel`
+vuelve a esconder el botón. A 5 Hz el mensaje falso le gana al coordinador y el panel se queda
+estable. Este comando no termina solo: se corta con `Ctrl-C` en la comprobación 3.
 
-Si el panel dice «Sin misión activa», falta el paso 3. Si dice `desconocida (7)`, falta el
-paso 2. Si el botón no aparece, falta el paso 7 o el `hidden` del HTML. Si el `echo` no imprime
-nada, falta el `publicar` del paso 1: mirar la consola del navegador.
+Con el montaje en pie, son **tres comprobaciones** y hay que pasar las tres.
 
-Nota: ese `estado_mision` falso lo publica `ros2 topic pub`, no el coordinador, y a 1 Hz el
-coordinador lo sobrescribirá con su `INACTIVA`. Es normal que el panel alterne; basta con ver
-el botón aparecer y el `echo` imprimir.
+**Comprobación 1 — el panel dibuja la pregunta.** Mirar el navegador sin tocarlo.
+
+Esperado, y estable (no un parpadeo): panel **ámbar**, título **«¿Ya subió?»**, etiqueta
+`ESPERANDO_CONFIRMACION`, chip `Robot: robot2`, frase «Prueba de etapa 7», el paso **«Relevo»**
+de la barra iluminado, y el botón **«Ya estoy en el otro piso» visible de forma permanente**.
+
+Qué significa cada desenlace: si dice «Sin misión activa», falta el paso 3 (el `onFeedback` no
+guarda `ultimoEstadoMision`). Si dice `desconocida (7)`, falta el paso 2 (la etapa 7 no está en
+`NOMBRE_ETAPA`). Si el panel sale bien pero sin botón, falta el paso 7 o el `hidden` del HTML.
+Si el botón parpadea, el `pub` se quedó en `--once`.
+
+**Comprobación 2 — pulsar el botón publica en ROS.** Esta es la que vale: sin ella no hay
+prueba de que la página sepa *escribir* en ROS, solo de que sabe leer. Pulsar una sola vez
+«Ya estoy en el otro piso» y mirar **las terminales 3 y 1**.
+
+Esperado en la terminal 3:
+
+```
+data: FALSA_1
+---
+```
+
+Esperado en la terminal 1: una línea nueva `confirmacion de piso recibida: 'FALSA_1'`.
+
+Qué significa cada desenlace:
+- **Las dos líneas aparecen** → el camino completo HRI → rosbridge → coordinador funciona.
+  Cierra la comprobación.
+- **Nada en la terminal 3** → el `publicar` del paso 1 no salió. Abrir la consola del navegador
+  (F12 → Console) y buscar el error; lo más probable es que falte el `advertise`.
+- **Sale en la 3 pero no en la 1** → el coordinador no está suscrito. Verificarlo con
+  `ros2 topic info /coordinacion/confirmacion_piso` en una terminal libre: tiene que decir
+  `Subscription count: 1`.
+- **El coordinador no hace nada más** → es lo correcto. No hay misión en curso, así que
+  `Enganche.recibir` descarta el `mision_id` por no coincidir. El log es toda la prueba que se
+  busca aquí.
+
+**Comprobación 3 — el botón desaparece cuando ya no se pregunta.** `Ctrl-C` en la **terminal 4**
+para parar el estado falso y esperar dos segundos.
+
+Esperado: el botón desaparece y el panel vuelve a «Sin misión activa» en gris.
+
+Esta es la mitad que se olvida y vale tanto como la otra: un botón de confirmar visible fuera de
+la etapa 7 permitiría confirmar una misión que no está preguntando nada. Si el botón se queda
+ahí, falta el `= true` de `pintarPanelSinDatos` del paso 8.
+
+**Criterio de cierre del paso:** las tres comprobaciones pasan. Entonces `Ctrl-C` en las
+terminales 3 y 1 y en los procesos de la 2, y confirmar que no quedó nada vivo con
+`ps -eo pid,etimes,args | grep "[c]oordinacion coordinador" | wc -l`, que debe imprimir `0`.
 
 - [ ] **Paso 10: commit**
 
