@@ -185,8 +185,21 @@ RF-28 le agregue trabajo.
 
    Cada una se comprueba desde el bag con `componer_registro.py` y se valida contra
    `esquema_registro_mision.json`.
-4. **Revisión de la HRI en el navegador del teléfono**: en etapa 7 el panel muestra el
-   título correcto y el botón de confirmar; en cualquier otra etapa el botón no está.
+4. **Revisión de la HRI**: en etapa 7 el panel muestra el título correcto y el botón de
+   confirmar; en cualquier otra etapa el botón no está.
+
+   Esto se comprueba con `interfaz_web/prueba_confirmacion_piso.js`, que carga los dos
+   archivos reales de `interfaz_web/js` sobre un DOM mínimo y el WebSocket nativo de Node,
+   contra el rosbridge y el coordinador reales. El equipo no tiene navegador automatizable
+   —solo Firefox, sin geckodriver, selenium ni playwright—, así que el dibujado de píxeles se
+   verifica una vez a mano, con captura de pantalla; todo lo demás (qué etapa enciende el
+   botón, qué publica al pulsarlo, y que desaparece al salir de la etapa 7) queda automatizado
+   y vuelve a correrse en cada cambio.
 
 Una corrida cuyo registro valide pero cuyo `continuidad` salga `false` es un fallo de este
 diseño, no una anomalía del banco: la condición D-C4 existe precisamente para eso.
+
+## 6. Plan de implementación
+
+Las siete tareas, con los archivos exactos y los comandos de verificación de cada paso, están
+en `Documentos/PLAN_RF28_CONFIRMACION.md`.

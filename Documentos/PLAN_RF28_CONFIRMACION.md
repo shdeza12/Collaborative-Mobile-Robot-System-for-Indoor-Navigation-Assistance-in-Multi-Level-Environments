@@ -34,6 +34,10 @@ documento se contradicen, manda el documento.
 - **Todo el texto nuevo va en español**, y los comentarios de código sin tildes, como el resto
   de los archivos del paquete.
 - **Los mensajes de commit van en español y sin `Co-Authored-By`.**
+- **Los comandos se corren desde la raíz del repositorio**, salvo los que empiezan por
+  `cd ~/deepracer_sim_ws`, que necesitan el workspace de colcon. Ningún comando de este plan
+  nombra la ruta del repositorio: `herramientas/verificar_repositorio.sh` rechaza las rutas de
+  una máquina concreta, y un plan que las lleve hace fallar su propio paso de verificación.
 - **No empujar nada** hasta completar la batería de verificación del repositorio.
 - **RF-28 es funcionalidad añadida, así que la campaña de 30 misiones NO se reejecuta.** Las
   pruebas que este plan manda correr son las del repositorio (que se corren siempre, en cada
@@ -151,7 +155,7 @@ Esperado: 0 en `[MAL]`, código de salida 0.
 - [ ] **Paso 7: commit**
 
 ```bash
-cd ~/Documents/Tesis && git add Robot/aws-deepracer/coordinacion_msgs/msg/EstadoMision.msg Robot/aws-deepracer/coordinacion/coordinacion/planificador.py Robot/aws-deepracer/coordinacion/coordinacion/registrador.py && git commit -m "RF-28: la etapa ESPERANDO_CONFIRMACION existe en los tres sitios que la nombran"
+git add Robot/aws-deepracer/coordinacion_msgs/msg/EstadoMision.msg Robot/aws-deepracer/coordinacion/coordinacion/planificador.py Robot/aws-deepracer/coordinacion/coordinacion/registrador.py && git commit -m "RF-28: la etapa ESPERANDO_CONFIRMACION existe en los tres sitios que la nombran"
 ```
 
 ---
@@ -403,7 +407,7 @@ se pegó el archivo a medias.
 - [ ] **Paso 5: commit**
 
 ```bash
-cd ~/Documents/Tesis && git add Robot/aws-deepracer/coordinacion/coordinacion/espera_confirmacion.py Robot/aws-deepracer/coordinacion/test/prueba_espera_confirmacion.py && git commit -m "RF-28: la politica de plazos y el enganche, probables sin simulador"
+git add Robot/aws-deepracer/coordinacion/coordinacion/espera_confirmacion.py Robot/aws-deepracer/coordinacion/test/prueba_espera_confirmacion.py && git commit -m "RF-28: la politica de plazos y el enganche, probables sin simulador"
 ```
 
 ---
@@ -673,7 +677,7 @@ descarta el `mision_id` por no coincidir. El log demuestra que el cable está pu
 - [ ] **Paso 12: commit**
 
 ```bash
-cd ~/Documents/Tesis && git add Robot/aws-deepracer/coordinacion/coordinacion/coordinador.py Robot/aws-deepracer/coordinacion/package.xml && git commit -m "RF-28: el tramo 2 no arranca sin que el usuario confirme el cambio de piso"
+git add Robot/aws-deepracer/coordinacion/coordinacion/coordinador.py Robot/aws-deepracer/coordinacion/package.xml && git commit -m "RF-28: el tramo 2 no arranca sin que el usuario confirme el cambio de piso"
 ```
 
 ---
@@ -841,7 +845,7 @@ escuchando al otro lado.
 - [ ] **Paso 8: comprobar que el JavaScript no tiene errores de sintaxis**
 
 ```bash
-cd ~/Documents/Tesis && node --check interfaz_web/js/rosbridge.js && node --check interfaz_web/js/app.js && echo SINTAXIS_OK
+node --check interfaz_web/js/rosbridge.js && node --check interfaz_web/js/app.js && echo SINTAXIS_OK
 ```
 
 Esperado: `SINTAXIS_OK`. Si `node` no está instalado, saltar este paso y confiar en la consola
@@ -944,7 +948,7 @@ terminales 3 y 1 y en los procesos de la 2, y confirmar que no quedó nada vivo 
 - [ ] **Paso 10: commit**
 
 ```bash
-cd ~/Documents/Tesis && git add interfaz_web/js/rosbridge.js interfaz_web/js/app.js interfaz_web/index.html interfaz_web/css/estilo.css && git commit -m "RF-28: la interfaz publica la confirmacion de piso y dibuja la etapa 7"
+git add interfaz_web/js/rosbridge.js interfaz_web/js/app.js interfaz_web/index.html interfaz_web/css/estilo.css && git commit -m "RF-28: la interfaz publica la confirmacion de piso y dibuja la etapa 7"
 ```
 
 ---
@@ -1110,7 +1114,7 @@ que no hay que tocar las importaciones.
 - [ ] **Paso 4: correr la prueba del compositor**
 
 ```bash
-cd ~/Documents/Tesis && source ~/deepracer_sim_ws/install/setup.bash && python3 herramientas/prueba_componer_registro.py
+source ~/deepracer_sim_ws/install/setup.bash && python3 herramientas/prueba_componer_registro.py
 ```
 
 Esperado: `0 fallo(s).` y código de salida 0.
@@ -1124,7 +1128,7 @@ salida 1. Comprobado el 2026-09-10: es fallo de entorno, no de la etapa 7.
 - [ ] **Paso 5: commit**
 
 ```bash
-cd ~/Documents/Tesis && git add Robot/aws-deepracer/coordinacion/test/prueba_registrador.py herramientas/prueba_componer_registro.py && git commit -m "RF-28: regresion de que la etapa 7 no altera continuidad ni hueco de relevo"
+git add Robot/aws-deepracer/coordinacion/test/prueba_registrador.py herramientas/prueba_componer_registro.py && git commit -m "RF-28: regresion de que la etapa 7 no altera continuidad ni hueco de relevo"
 ```
 
 ---
@@ -1173,7 +1177,7 @@ grep -n "34\b" Documentos/REQUISITOS.md | head
 - [ ] **Paso 4: comprobar que el repositorio sigue coherente**
 
 ```bash
-cd ~/Documents/Tesis && ./herramientas/verificar_repositorio.sh
+./herramientas/verificar_repositorio.sh
 ```
 
 Esperado: 12/12. Si alguna comprobación de conteo de requisitos falla, es el paso 3 a medias.
@@ -1181,7 +1185,7 @@ Esperado: 12/12. Si alguna comprobación de conteo de requisitos falla, es el pa
 - [ ] **Paso 5: commit**
 
 ```bash
-cd ~/Documents/Tesis && git add Documentos/CONTRATO_INTERFACES.md Documentos/REQUISITOS.md Robot/aws-deepracer/coordinacion/coordinacion/coordinador.py && git commit -m "RF-28: queda en el contrato de interfaces y en la tabla de requisitos"
+git add Documentos/CONTRATO_INTERFACES.md Documentos/REQUISITOS.md Robot/aws-deepracer/coordinacion/coordinacion/coordinador.py && git commit -m "RF-28: queda en el contrato de interfaces y en la tabla de requisitos"
 ```
 
 ---
@@ -1225,7 +1229,7 @@ un objeto con `additionalProperties: false`). No intentar validar el registro en
 Medir el RTF antes de cada corrida, porque hace falta para interpretar los tiempos del bag:
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && python3 ~/Documents/Tesis/herramientas/medir_rtf.py --segundos 20
+source ~/deepracer_sim_ws/install/setup.bash && python3 herramientas/medir_rtf.py --segundos 20
 ```
 
 - [ ] **Corrida A — confirmación temprana.** Pulsar el botón a los ~10 s de que aparezca.
@@ -1264,7 +1268,7 @@ alerta). `continuidad` verdadera en A y B.
 Para cada corrida, componer el registro y validarlo:
 
 ```bash
-cd ~/Documents/Tesis && python3 herramientas/componer_registro.py <ruta_del_bag> --salida /tmp/rf28_X.json && python3 -c "import json,jsonschema;jsonschema.validate(json.load(open('/tmp/rf28_X.json')),json.load(open('Documentos/esquema_registro_mision.json')));print('ESQUEMA OK')"
+python3 herramientas/componer_registro.py <ruta_del_bag> --salida /tmp/rf28_X.json && python3 -c "import json,jsonschema;jsonschema.validate(json.load(open('/tmp/rf28_X.json')),json.load(open('Documentos/esquema_registro_mision.json')));print('ESQUEMA OK')"
 ```
 
 Antes de correrlo, confirmar los nombres reales de los argumentos:
@@ -1293,7 +1297,7 @@ la persona, el resultado, la salida del conteo de marcas de etapa 7, los dos tex
 - [ ] **Commit**
 
 ```bash
-cd ~/Documents/Tesis && git add Documentos/Evidencia/registros/S22_RF28_A.json Documentos/Evidencia/registros/S22_RF28_B.json Documentos/Evidencia/registros/S22_RF28_C.json Documentos/Evidencia/S22_RF28_confirmacion.md && git commit -m "RF-28 cerrado: las tres corridas de la confirmacion de piso"
+git add Documentos/Evidencia/registros/S22_RF28_A.json Documentos/Evidencia/registros/S22_RF28_B.json Documentos/Evidencia/registros/S22_RF28_C.json Documentos/Evidencia/S22_RF28_confirmacion.md && git commit -m "RF-28 cerrado: las tres corridas de la confirmacion de piso"
 ```
 
 - [ ] **Poner RF-28 en verde** en `Documentos/REQUISITOS.md` y actualizar `ESTADO.md`, en el
