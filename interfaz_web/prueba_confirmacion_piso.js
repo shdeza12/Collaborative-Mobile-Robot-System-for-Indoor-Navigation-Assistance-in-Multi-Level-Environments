@@ -16,12 +16,22 @@
  *
  *   source ~/deepracer_sim_ws/install/setup.bash
  *   ros2 run coordinacion coordinador --ros-args -p prefijo_mision:=PRUEBARF28 &
- *   ros2 launch rosbridge_server rosbridge_websocket_launch.xml &
+ *   ros2 launch rosbridge_server rosbridge_websocket_launch.xml \
+ *       send_action_goals_in_new_thread:=true &
  *   ros2 topic echo /coordinacion/confirmacion_piso > /tmp/rf28_eco.txt &
  *   node interfaz_web/prueba_confirmacion_piso.js
  *
+ * El argumento del puente es el que comprueba la seccion 7; con el valor por
+ * omision esa seccion falla a proposito. Se corre SIN Nav2: la seccion 7
+ * necesita una meta que tarde en resolverse, y sin robots la meta falla sola a
+ * los 20 s, que es justo la ventana que hace falta.
+ *
+ * El coordinador tiene que estar RECIEN ARRANCADO: su EstadoMision es pegajoso
+ * -se queda en la ultima etapa- y la seccion 7 lo deja en FALLIDA, asi que una
+ * segunda pasada contra el mismo proceso haria fallar las secciones 2 y 6.
+ *
  * El 'topic pub' del estado falso de etapa 7 lo lanza y lo mata este archivo.
- * Sale 0 si las 18 comprobaciones pasan.
+ * Sale 0 si las 21 comprobaciones pasan.
  */
 const fs = require("fs");
 const vm = require("vm");
@@ -64,6 +74,9 @@ vm.createContext(contexto);
 for (const f of ["rosbridge.js", "app.js"]) {
   vm.runInContext(fs.readFileSync(`${RAIZ}/js/${f}`, "utf8"), contexto, { filename: f });
 }
+// "const" en el nivel superior de un script de vm no queda como propiedad del
+// contexto, sino en su ambito lexico global; se llega evaluando el nombre.
+const enContexto = (expr) => vm.runInContext(expr, contexto);
 
 // -------------------------------------------------------- comprobaciones ---
 let pasan = 0, fallan = 0;
@@ -80,6 +93,18 @@ async function hasta(cond, ms = 15000) {
 
 // -------------------------------------------------------------- guion -----
 (async () => {
+  console.log("\n== 0. el atributo 'hidden' oculta de verdad ==");
+  // Este banco monta un DOM de mentira, asi que "hidden = true" siempre se le
+  // ve bien aunque en un navegador no oculte nada. Y eso fue exactamente lo
+  // que paso: #acciones-confirmar hereda display:grid de .acciones, que gana a
+  // la regla [hidden]{display:none} de la hoja del navegador -origen de autor
+  // sobre origen de usuario-agente-, de modo que el boton se veia SIEMPRE. Sin
+  // pixeles no se puede comprobar el efecto, pero si se puede comprobar que la
+  // hoja trae la regla que lo garantiza.
+  const css = fs.readFileSync(`${RAIZ}/css/estilo.css`, "utf8");
+  comprueba("estilo.css declara [hidden] { display: none !important }",
+            /\[hidden\]\s*\{[^}]*display:\s*none\s*!important/.test(css));
+
   console.log("\n== 1. conexion con rosbridge ==");
   const conectado = await hasta(() => nodo("txt-conexion").textContent === "conectado");
   comprueba("el puente abre el socket y la pagina dice 'conectado'", conectado,
@@ -147,6 +172,35 @@ async function hasta(cond, ms = 15000) {
             `titulo='${nodo("panel-titulo").textContent}'`);
   comprueba("la clase del panel vuelve a 'panel inactiva'",
             nodo("panel").className === "panel inactiva", nodo("panel").className);
+
+  console.log("\n== 7. pulsar CON UNA MISION EN VUELO ==");
+  // La comprobacion que faltaba, y que dejo pasar el fallo del 2026-09-10. Las
+  // secciones 3 a 6 pulsan sin ninguna meta en curso, que es la unica
+  // situacion en la que el boton no puede fallar. En una mision de verdad si
+  // la hay, y si rosbridge corre con send_action_goals_in_new_thread=false
+  // -su valor por omision- atiende la meta en el mismo hilo con el que lee el
+  // WebSocket: el "publish" del boton se queda encolado hasta que la mision
+  // acaba. El panel sigue pintandose, porque la salida va por el ejecutor de
+  // ROS, asi que el sintoma es un boton mudo y una mision que muere por plazo
+  // agotado. Sin Nav2 la meta tarda ~20 s en fallar; sobra ventana.
+  const antesDeLaMeta = fs.existsSync(ECO) ? fs.readFileSync(ECO, "utf8") : "";
+  enContexto("estado.origenSel = 'piso1_etm2'; estado.destinoSel = 'piso2_aula_302';");
+  for (const fn of nodo("btn-ir").manejadores.click || []) fn();
+  const enCurso = await hasta(
+    () => { const e = enContexto("estado.ultimoEstadoMision"); return !!(e && e.mision_id); }, 10000);
+  comprueba("la mision arranca y el panel ya trae un mision_id real", enCurso);
+
+  if (enCurso) {
+    const idVivo = enContexto("estado.ultimoEstadoMision").mision_id;
+    for (const fn of nodo("btn-confirmar").manejadores.click || []) fn();
+    const llego = await hasta(() => {
+      const eco = fs.existsSync(ECO) ? fs.readFileSync(ECO, "utf8") : "";
+      return eco.slice(antesDeLaMeta.length).includes(idVivo);
+    }, 8000);
+    comprueba("la confirmacion llega a ROS en menos de 8 s con la meta en vuelo", llego,
+              llego ? "" : `no aparecio 'data: ${idVivo}' en el eco; si rosbridge ` +
+                           `dice 'Sending action goals in existing thread', es eso`);
+  }
 
   console.log(`\n${pasan} comprobaciones pasan, ${fallan} fallan.`);
   process.exit(fallan ? 1 : 0);

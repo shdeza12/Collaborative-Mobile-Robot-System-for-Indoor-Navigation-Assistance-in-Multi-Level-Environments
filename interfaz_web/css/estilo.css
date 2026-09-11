@@ -21,6 +21,14 @@
 }
 
 * { box-sizing: border-box; }
+/* El atributo "hidden" lo oculta todo el navegador con la regla [hidden]
+   {display:none} de su hoja de usuario-agente, pero esa hoja PIERDE frente a
+   cualquier declaracion de "display" de esta. Por eso el bloque
+   #acciones-confirmar, que es un .acciones y hereda display:grid, se veia
+   siempre aunque app.js le pusiera hidden. Se repite la regla aqui, ya en el
+   origen del autor, y con !important para que no dependa del orden en que
+   aparezcan las clases mas abajo. */
+[hidden] { display: none !important; }
 html, body { margin: 0; padding: 0; }
 body {
   background: var(--fondo);

@@ -1306,8 +1306,14 @@ simulación, y las marcas no se podrían situar.
 - [ ] **Paso 4: el puente y la página** (§4.1 del runbook). Terminal 6:
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && ros2 launch rosbridge_server rosbridge_websocket_launch.xml
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 launch rosbridge_server rosbridge_websocket_launch.xml send_action_goals_in_new_thread:=true
 ```
+
+**`send_action_goals_in_new_thread:=true` no es opcional.** Con el valor por omisión, `rosbridge`
+atiende la meta de `guiar_usuario` en el mismo hilo con el que lee el WebSocket y no procesa
+ningún mensaje entrante más de ese cliente hasta que la misión acaba: el botón de confirmar no
+hace nada y la misión muere a los 120 s. Esperado, además del puerto 9090: `Sending action goals
+in new thread`. El porqué completo y la medición están en el §4.1 del runbook.
 
 Terminal 7:
 

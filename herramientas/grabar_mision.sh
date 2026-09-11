@@ -41,7 +41,13 @@ fi
 # /coordinacion/estado_mision y /clock son de donde salen las marcas. Si falta
 # uno de los dos, el registro no se puede componer y la corrida no vale.
 IMPRESCINDIBLES=(/clock /coordinacion/estado_mision)
-TOPICOS=("${IMPRESCINDIBLES[@]}" /coordinacion/puntos_interes /tf /tf_static)
+# /coordinacion/confirmacion_piso NO es imprescindible -una mision sin relevo
+# no lo publica nunca, y la guarda de abajo exige publicadores-, pero si se
+# graba: es la unica prueba de CUANDO pulso el usuario. Sin el, del bag solo se
+# deduce que el coordinador paso de ESPERANDO_CONFIRMACION a TRAMO_2, que es la
+# reaccion, no el acto. RF-28 se verifica con los dos.
+TOPICOS=("${IMPRESCINDIBLES[@]}" /coordinacion/puntos_interes
+         /coordinacion/confirmacion_piso /tf /tf_static)
 
 # HAY QUE GRABAR EL RELOJ DE CADA ROBOT, no solo '/clock'.
 #

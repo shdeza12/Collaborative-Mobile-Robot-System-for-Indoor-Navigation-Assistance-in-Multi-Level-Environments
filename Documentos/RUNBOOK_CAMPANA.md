@@ -248,10 +248,26 @@ pida la misión.
 puente no sabe serializar la acción:
 
 ```bash
-cd ~/deepracer_sim_ws && source install/setup.bash && ros2 launch rosbridge_server rosbridge_websocket_launch.xml
+cd ~/deepracer_sim_ws && source install/setup.bash && ros2 launch rosbridge_server rosbridge_websocket_launch.xml send_action_goals_in_new_thread:=true
 ```
 
-**Esperado:** `Rosbridge WebSocket server started on port 9090`.
+**Esperado:** `Sending action goals in new thread` y `Rosbridge WebSocket server started on port 9090`.
+
+**El argumento no es opcional y no es cosmético.** Por omisión vale `false`, y entonces
+`rosbridge` atiende la meta de `guiar_usuario` **en el mismo hilo que lee el WebSocket**:
+`SendActionGoal.send_action_goal` llama `ActionClientHandler.run()` en línea, y ese `run()` no
+vuelve hasta que la misión termina. Mientras tanto el puente no procesa **ni un solo mensaje
+entrante más de ese cliente**. El tráfico de salida sí sigue —lo emite el ejecutor de ROS—, así
+que el panel se actualiza con normalidad y todo parece bien; lo que se queda encolado es lo que
+el usuario pulsa. Con RF-28 eso significa que «Ya estoy en el otro piso» no hace nada y la
+misión muere a los 120 s. Recargar la página lo «arreglaba» solo porque abría un cliente nuevo,
+con su propia cola.
+
+Medido el 2026-09-10 con una misión que tarda 20 s en fallar: con el valor por omisión el
+`publish` salió del navegador a los 3,06 s y llegó al coordinador **2 ms después de terminar la
+misión**, 17 s tarde; con `send_action_goals_in_new_thread:=true`, en la misma prueba, llegó a
+los 3,06 s. El mismo defecto afecta a cualquier situación que el usuario dispare con una misión
+en curso —cancelar y pausar, de la lista del director—, así que el argumento se queda puesto.
 
 **Terminal 7 — servir los ficheros.** Desde la raíz del repositorio:
 

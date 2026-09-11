@@ -306,9 +306,6 @@ class Coordinador(Node):
         res.tiempo_total_s = self._ahora() - t0
         res.num_relevos = relevos
         res.motivo_fallo = ""
-        self.get_logger().info(
-            f"Mision completada en {res.tiempo_total_s:.1f} s, "
-            f"{relevos} relevo(s)")
         return self._cerrar_registro(res, destino)
 
     def _cerrar_registro(self, res, punto):
@@ -320,7 +317,23 @@ class Coordinador(Node):
         dice que una corrida fallida cuenta como fallo salvo que su causa este
         en la lista cerrada de descartes, y para poder decidir eso hace falta el
         archivo.
+
+        Por lo mismo, el desenlace se ANOTA aqui y no en cada salida de
+        _ejecutar. Hasta el 2026-09-10 solo lo anotaba la salida de exito, y
+        una mision muerta por plazo agotado dejaba la consola muda: la ultima
+        linea era la alerta de los 60 s, de modo que quien operaba no podia
+        distinguir una mision todavia viva de una ya terminada. Esta funcion es
+        el unico punto por el que pasan TODAS las salidas, asi que es el unico
+        donde el desenlace no se puede olvidar al agregar una salida nueva.
         """
+        if res.exito:
+            self.get_logger().info(
+                f"Mision completada en {res.tiempo_total_s:.1f} s, "
+                f"{res.num_relevos} relevo(s)")
+        else:
+            self.get_logger().warning(
+                f"Mision terminada SIN exito tras {res.tiempo_total_s:.1f} s: "
+                f"{res.motivo_fallo}")
         if self.registro is None:
             return res
         try:
