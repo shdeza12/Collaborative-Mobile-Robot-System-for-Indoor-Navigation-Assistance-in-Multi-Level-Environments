@@ -33,9 +33,10 @@ import yaml
 from action_msgs.msg import GoalStatus
 from geometry_msgs.msg import PoseStamped
 from nav2_msgs.action import NavigateToPose
+from nav2_msgs.srv import ClearEntireCostmap
 from nav_msgs.msg import Odometry
 from std_msgs.msg import String
-from rclpy.action import ActionClient, ActionServer
+from rclpy.action import ActionClient, ActionServer, CancelResponse
 from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.node import Node
 from rclpy.qos import DurabilityPolicy, HistoryPolicy, QoSProfile
@@ -45,11 +46,26 @@ from coordinacion_msgs.msg import EstadoMision, ListaPuntosInteres, PuntoInteres
 from coordinacion.registrador import RegistroMision, entorno_simulacion
 
 from coordinacion.planificador import (
-    ASIGNACION_POR_DEFECTO, COMPLETADA, ErrorPlanificacion,
+    ASIGNACION_POR_DEFECTO, CANCELANDO, COMPLETADA, ErrorPlanificacion,
     ESPERANDO_CONFIRMACION, FALLIDA, INACTIVA, RECIBIDA, TRANSFERENCIA,
     condicion_de, generar_mision_id, planificar, yaw_a_cuaternion,
 )
 from coordinacion.espera_confirmacion import ALERTA_S, PLAZO_S, Enganche, fase
+
+
+class _Cancelada(Exception):
+    """Señal interna: el usuario canceló la misión (RF-29, botón Cancelar).
+
+    La levanta cualquiera de los tres puntos de espera de _ejecutar (entre
+    tramos, dentro de _navegar mientras Nav2 responde, y dentro de
+    _esperar_confirmacion). La captura _ejecutar en un solo sitio, que es
+    quien manda al robot en curso de vuelta a su escalera antes de cerrar la
+    misión: no se le abandona a mitad de pasillo.
+    """
+
+    def __init__(self, robot):
+        super().__init__(f"cancelada, {robot} vuelve a su escalera")
+        self.robot = robot
 
 # Criterio de llegada del §3.3 de PROTOCOLO_EXPERIMENTAL.md, medido contra
 # /<ns>/odom. No inventar otro aqui: si se cambia, se cambia en el protocolo
@@ -129,9 +145,30 @@ class Coordinador(Node):
                 lambda msg, n=ns: self._odom(msg, n), 10,
                 callback_group=self.grupo)
 
+        # Clientes para limpiar los costmaps antes de la vuelta a casa de una
+        # cancelacion. MEDIDO EL 2026-09-13: cancelar a un robot a mitad de un
+        # corredor estrecho -p. ej. cruzando una puerta- puede dejar SU PROPIA
+        # posicion marcada como espacio letal en el costmap local un rato
+        # despues de parar («Starting point in lethal space!»), y el
+        # planificador rechaza cualquier goal nuevo, incluida la vuelta a
+        # casa, hasta que decae solo. Limpiar antes de reintentar evita esa
+        # espera.
+        self.clientes_costmap = {
+            ns: {
+                "global": self.create_client(
+                    ClearEntireCostmap, f"/{ns}/global_costmap/clear_entirely_global_costmap",
+                    callback_group=self.grupo),
+                "local": self.create_client(
+                    ClearEntireCostmap, f"/{ns}/local_costmap/clear_entirely_local_costmap",
+                    callback_group=self.grupo),
+            }
+            for ns in set(self.asignacion.values())
+        }
+
         self.servidor = ActionServer(
             self, GuiarUsuario, "/coordinacion/guiar_usuario",
-            execute_callback=self._ejecutar, callback_group=self.grupo)
+            execute_callback=self._ejecutar, cancel_callback=self._cancelar_solicitado,
+            callback_group=self.grupo)
 
         # RF-28. El usuario avisa por aqui de que ya cambio de piso. Topico y no
         # servicio a proposito: 'ros2 bag' NO graba servicios, y el instante de
@@ -254,48 +291,49 @@ class Coordinador(Node):
             res.tiempo_total_s = self._ahora() - t0
             return self._cerrar_registro(res, None)
 
-        for i, tramo in enumerate(tramos, 1):
-            if goal_handle.is_cancel_requested:
-                goal_handle.canceled()
-                res.exito, res.motivo_fallo = False, "Cancelada por el usuario"
-                res.tiempo_total_s = self._ahora() - t0
-                return self._cerrar_registro(res, tramos[-1].punto)
+        try:
+            for i, tramo in enumerate(tramos, 1):
+                if goal_handle.is_cancel_requested:
+                    raise _Cancelada(tramo.robot)
 
-            self._marcar(tramo.etapa, tramo.robot, tramo.punto,
-                         tramo.mensaje_usuario, mision_id)
-            self._feedback(goal_handle)
-            self.get_logger().info(
-                f"  tramo {i}/{len(tramos)}: {tramo.robot} -> {tramo.punto['id']}")
-
-            ok, motivo = self._navegar(tramo)
-            if not ok:
-                self.get_logger().error(f"  tramo {i} fallo: {motivo}")
-                self._marcar(FALLIDA, tramo.robot, tramo.punto,
-                             f"No se pudo completar el trayecto: {motivo}",
-                             mision_id)
+                self._marcar(tramo.etapa, tramo.robot, tramo.punto,
+                             tramo.mensaje_usuario, mision_id)
                 self._feedback(goal_handle)
-                goal_handle.abort()
-                res.exito, res.motivo_fallo = False, motivo
-                res.tiempo_total_s = self._ahora() - t0
-                res.num_relevos = relevos
-                return self._cerrar_registro(res, tramo.punto)
+                self.get_logger().info(
+                    f"  tramo {i}/{len(tramos)}: {tramo.robot} -> {tramo.punto['id']}")
 
-            # RF-28. Terminado el tramo de TRANSFERENCIA el robot del piso de
-            # destino ya esta en su escalera, pero el usuario puede no haber
-            # subido todavia. Sin esta pausa el tramo 2 arrancaba solo y la
-            # mision podia completarse con el usuario en el otro piso.
-            if tramo.etapa == TRANSFERENCIA:
-                ok, motivo = self._esperar_confirmacion(
-                    tramo, goal_handle, mision_id)
+                ok, motivo = self._navegar(tramo.robot, tramo.punto, goal_handle)
                 if not ok:
+                    self.get_logger().error(f"  tramo {i} fallo: {motivo}")
                     self._marcar(FALLIDA, tramo.robot, tramo.punto,
-                                 f"Mision detenida: {motivo}", mision_id)
+                                 f"No se pudo completar el trayecto: {motivo}",
+                                 mision_id)
                     self._feedback(goal_handle)
                     goal_handle.abort()
                     res.exito, res.motivo_fallo = False, motivo
                     res.tiempo_total_s = self._ahora() - t0
                     res.num_relevos = relevos
                     return self._cerrar_registro(res, tramo.punto)
+
+                # RF-28. Terminado el tramo de TRANSFERENCIA el robot del piso de
+                # destino ya esta en su escalera, pero el usuario puede no haber
+                # subido todavia. Sin esta pausa el tramo 2 arrancaba solo y la
+                # mision podia completarse con el usuario en el otro piso.
+                if tramo.etapa == TRANSFERENCIA:
+                    ok, motivo = self._esperar_confirmacion(
+                        tramo, goal_handle, mision_id)
+                    if not ok:
+                        self._marcar(FALLIDA, tramo.robot, tramo.punto,
+                                     f"Mision detenida: {motivo}", mision_id)
+                        self._feedback(goal_handle)
+                        goal_handle.abort()
+                        res.exito, res.motivo_fallo = False, motivo
+                        res.tiempo_total_s = self._ahora() - t0
+                        res.num_relevos = relevos
+                        return self._cerrar_registro(res, tramo.punto)
+        except _Cancelada as c:
+            res.num_relevos = relevos
+            return self._cancelar_e_ir_a_casa(c.robot, mision_id, res, t0, goal_handle)
 
         destino = next(p for p in self.catalogo if p["id"] == pet.destino_id)
         self._marcar(COMPLETADA, tramos[-1].robot, destino,
@@ -352,6 +390,93 @@ class Coordinador(Node):
         finally:
             self.registro = None
         return res
+
+    def _cancelar_solicitado(self, goal_handle):
+        """Acepta toda peticion de cancelacion (RF-29, boton Cancelar de la HRI).
+
+        Antes de esto no habia ningun cancel_callback registrado, y el
+        ActionServer de rclpy rechaza por omision (CancelResponse.REJECT):
+        'is_cancel_requested' de _ejecutar nunca llegaba a valer True, pese a
+        que ya lo comprobaba en tres sitios. La cancelacion en si no ocurre
+        aqui -este metodo solo abre la puerta-: quien la ejecuta de verdad es
+        _ejecutar, al ver 'is_cancel_requested' en su siguiente comprobacion.
+        """
+        del goal_handle  # no se usa: se acepta cualquier cancelacion en curso
+        return CancelResponse.ACCEPT
+
+    def _punto_home(self, robot):
+        """La escalera del nivel que atiende 'robot': su posicion de reposo.
+
+        Es la unica pose con sentido para "cancelar y volver": esta en el
+        catalogo -no hay que inventar una pose nueva-, y es exactamente donde
+        ese robot ya estaria si la mision nunca hubiera arrancado.
+        """
+        nivel = next((n for n, r in self.asignacion.items() if r == robot), None)
+        return next((p for p in self.catalogo
+                     if p.get("nivel") == nivel and p.get("es_transferencia")), None)
+
+    def _limpiar_costmaps(self, robot):
+        """Vacia los dos costmaps de 'robot'. Ver la nota de 'clientes_costmap'.
+
+        Best-effort: si el servicio no responde a tiempo -o no existe, porque
+        Nav2 de ese robot no llegara a arrancar del todo en algun escenario de
+        prueba-, se registra y se continua. Un costmap sucio en el peor caso
+        hace que el intento de vuelta a casa falle igual que antes de este
+        arreglo; no limpiarlo nunca es peor que el estado de partida.
+        """
+        for capa, cliente in self.clientes_costmap[robot].items():
+            if not cliente.wait_for_service(timeout_sec=2.0):
+                self.get_logger().warn(
+                    f"    costmap {capa} de {robot} no respondio; se intenta "
+                    f"la vuelta a casa igual")
+                continue
+            self._esperar(cliente.call_async(ClearEntireCostmap.Request()), timeout=3.0)
+
+    def _cancelar_e_ir_a_casa(self, robot, mision_id, res, t0, goal_handle):
+        """El usuario canceló: 'robot' vuelve a su escalera antes de cerrar.
+
+        No se le deja donde iba a mitad de tramo -eso bloquearia el pasillo y,
+        si el usuario pide otra mision, el robot arrancaria desde un sitio que
+        no esta en el catalogo-. La vuelta usa la misma _navegar de siempre,
+        sin 'goal_handle': esta segunda cancelacion no se vigila, para no
+        encadenar cancelaciones sobre la propia cancelacion.
+        """
+        casa = self._punto_home(robot) if robot else None
+        if casa is not None:
+            self._marcar(CANCELANDO, robot, casa,
+                         "Cancelando: el robot vuelve a las escaleras.", mision_id)
+            self._feedback(goal_handle)
+            self.get_logger().info(f"  cancelada: {robot} vuelve a '{casa['id']}'")
+            # MEDIDO EL 2026-09-13: cancelar a mitad de una cuspide de Hybrid-A*
+            # -el giro en tres puntos que R12 ya documento en las esquinas del
+            # pasillo- puede parar al robot en una pose donde su propio costmap
+            # local lo ve pegado a la pared un instante. Un solo intento fallaba
+            # con "Starting point in lethal space" incluso limpiando antes; tres
+            # intentos con una pausa entre cada uno le dan tiempo al costmap a
+            # asentarse. Si los tres fallan, es un atasco real y no uno
+            # transitorio, y se informa tal cual en vez de reintentar para siempre.
+            intentos = 3
+            for intento in range(1, intentos + 1):
+                self._limpiar_costmaps(robot)
+                ok, motivo = self._navegar(robot, casa)
+                if ok:
+                    break
+                self.get_logger().warn(
+                    f"    vuelta a casa, intento {intento}/{intentos} fallo: {motivo}")
+                if intento < intentos:
+                    time.sleep(1.0)
+            if not ok:
+                # No hay mas remedio que decirlo tal cual: el robot no llego a
+                # casa y no hay una segunda posicion de reposo que ofrecer.
+                self.get_logger().error(f"  no volvio a casa tras {intentos} intentos: {motivo}")
+
+        self._marcar(FALLIDA, robot, casa,
+                     "Misión cancelada por el usuario.", mision_id)
+        self._feedback(goal_handle)
+        goal_handle.canceled()
+        res.exito, res.motivo_fallo = False, "Cancelada por el usuario"
+        res.tiempo_total_s = self._ahora() - t0
+        return self._cerrar_registro(res, casa)
 
     def _ahora(self):
         """Segundos del reloj del NODO, no de pared.
@@ -474,8 +599,8 @@ class Coordinador(Node):
             return yaml_yaw, f"rumbo de aproximacion {math.degrees(rumbo):.0f} grados"
         return opuesto, f"rumbo de aproximacion {math.degrees(rumbo):.0f} grados"
 
-    def _navegar(self, tramo):
-        """Manda un goal y espera. Devuelve (ok, motivo).
+    def _navegar(self, robot, punto, goal_handle=None):
+        """Manda un goal a 'robot' hacia 'punto' y espera. Devuelve (ok, motivo).
 
         LA LLEGADA SE COMPRUEBA CONTRA /odom, NO CONTRA EL SUCCEEDED de Nav2.
         Es la regla del 2026-08-12 y no es formalismo: Nav2 devuelve SUCCEEDED en
@@ -483,11 +608,18 @@ class Coordinador(Node):
         llegada con 0,190 m de error real que habria pasado igual. Un goal de
         cero metros tambien devuelve SUCCEEDED al instante. Si el SUCCEEDED y el
         /odom no coinciden, manda el /odom.
+
+        'goal_handle', si se pasa, es el goal de arriba (GuiarUsuario). Se vigila
+        mientras Nav2 responde: si el usuario cancela a mitad de un tramo, el
+        sub-goal de Nav2 se cancela con el -dejarlo navegando solo, sin que
+        nadie lo vigile, es peor que la demora de pararlo-, y este metodo
+        levanta _Cancelada para que _ejecutar mande al robot de vuelta a casa.
+        Se pasa None para la propia vuelta a casa: esa no se vuelve a cancelar.
         """
-        cliente = self.clientes[tramo.robot]
+        cliente = self.clientes[robot]
         if not cliente.wait_for_server(timeout_sec=self.espera_servidor):
             return False, (
-                f"El robot '{tramo.robot}' no ofrece navigate_to_pose despues de "
+                f"El robot '{robot}' no ofrece navigate_to_pose despues de "
                 f"{self.espera_servidor:.0f} s. Si el robot esta vivo, sospechar "
                 f"del desajuste Humble/Jazzy descrito en la cabecera de este "
                 f"archivo")
@@ -496,15 +628,15 @@ class Coordinador(Node):
         objetivo.pose = PoseStamped()
         # El §3 del contrato: todos los marcos llevan el prefijo del namespace,
         # incluido map. Son dos arboles TF desconectados a proposito.
-        objetivo.pose.header.frame_id = f"{tramo.robot}/map"
+        objetivo.pose.header.frame_id = f"{robot}/map"
         objetivo.pose.header.stamp = self.get_clock().now().to_msg()
-        objetivo.pose.pose = self._a_msg(tramo.punto).pose
+        objetivo.pose.pose = self._a_msg(punto).pose
 
         # El punto (x, y) es sagrado; el rumbo no. Ver _yaw_de_llegada.
-        yaw, motivo_yaw = self._yaw_de_llegada(tramo.robot, tramo.punto)
+        yaw, motivo_yaw = self._yaw_de_llegada(robot, punto)
         _, _, qz, qw = yaw_a_cuaternion(yaw)
         objetivo.pose.pose.orientation.z, objetivo.pose.pose.orientation.w = qz, qw
-        yaml_yaw = float(tramo.punto["pose"].get("yaw", 0.0))
+        yaml_yaw = float(punto["pose"].get("yaw", 0.0))
         if abs(_normalizar(yaw - yaml_yaw)) > 1e-6:
             self.get_logger().info(
                 f"    rumbo de llegada invertido respecto al catalogo: "
@@ -516,9 +648,9 @@ class Coordinador(Node):
         if gh is None:
             return False, "Nav2 no respondio al envio del goal"
         if not gh.accepted:
-            return False, f"'{tramo.robot}' rechazo el goal"
+            return False, f"'{robot}' rechazo el goal"
 
-        resultado = self._esperar(gh.get_result_async(), timeout=None)
+        resultado = self._esperar_resultado_nav2(gh, goal_handle, robot)
         if resultado is None:
             return False, "Nav2 no devolvio resultado"
 
@@ -526,18 +658,43 @@ class Coordinador(Node):
             return False, f"Nav2 termino con estado {resultado.status}"
 
         # Y ahora la comprobacion que de verdad decide.
-        d = self._distancia(tramo.robot, tramo.punto)
+        d = self._distancia(robot, punto)
         if math.isnan(d):
             return False, (
-                f"'{tramo.robot}' dijo SUCCEEDED pero no publica /odom, asi que "
+                f"'{robot}' dijo SUCCEEDED pero no publica /odom, asi que "
                 f"la llegada no se puede verificar. No se acepta")
         if d > TOLERANCIA_LLEGADA_M:
             return False, (
-                f"'{tramo.robot}' dijo SUCCEEDED pero /odom lo situa a "
+                f"'{robot}' dijo SUCCEEDED pero /odom lo situa a "
                 f"{d:.3f} m del punto, por encima de los "
                 f"{TOLERANCIA_LLEGADA_M} m de tolerancia")
         self.get_logger().info(f"    llegada verificada contra /odom: {d:.3f} m")
         return True, ""
+
+    def _esperar_resultado_nav2(self, gh_nav2, goal_handle_top, robot):
+        """Como _esperar(), pero ademas vigila la cancelacion del goal de arriba.
+
+        Sin timeout, igual que antes de esto: una navegacion legitima puede
+        tardar y no hay plazo que ponerle. 'goal_handle_top' en None -la vuelta
+        a casa- se comporta exactamente como el _esperar() de siempre.
+
+        MEDIDO EL 2026-09-13: cancelar el sub-goal y mandar el de vuelta a casa
+        de inmediato -sin esperar a que Nav2 terminara de procesar la
+        cancelacion- hacia que el segundo goal abortara solo (estado 6),
+        porque el controller_server todavia estaba desmontando el plan
+        anterior. Por eso aqui se espera DOS veces: a que el cancel_goal_async
+        se confirme, y despues a que el propio 'fut' del sub-goal cancelado
+        efectivamente termine -recien entonces Nav2 queda libre para un goal
+        nuevo-.
+        """
+        fut = gh_nav2.get_result_async()
+        while not fut.done():
+            if goal_handle_top is not None and goal_handle_top.is_cancel_requested:
+                self._esperar(gh_nav2.cancel_goal_async(), timeout=5.0)
+                self._esperar(fut, timeout=5.0)
+                raise _Cancelada(robot)
+            time.sleep(0.05)
+        return fut.result()
 
     def _esperar_confirmacion(self, tramo, goal_handle, mision_id):
         """La pausa de RF-28: el tramo 2 no arranca sin el visto bueno del usuario.
@@ -573,10 +730,13 @@ class Coordinador(Node):
         avisado = False
         while True:
             if goal_handle.is_cancel_requested:
-                # Inerte mientras el servidor no registre un cancel_callback
-                # -hoy rclpy rechaza toda cancelacion por defecto-, pero queda
-                # correcto para cuando se arregle.
-                return False, "Cancelada por el usuario durante la espera"
+                # Hasta que _cancelar_solicitado registro un cancel_callback,
+                # esto era inerte -rclpy rechaza toda cancelacion por
+                # omision- y este 'if' nunca se ejecutaba. El robot ya esta en
+                # su propia escalera en esta etapa (es el destino de
+                # TRANSFERENCIA), asi que _cancelar_e_ir_a_casa no tiene que
+                # moverlo: solo cierra la mision.
+                raise _Cancelada(tramo.robot)
 
             if self.enganche.consumir(mision_id):
                 espera = time.time() - t0
