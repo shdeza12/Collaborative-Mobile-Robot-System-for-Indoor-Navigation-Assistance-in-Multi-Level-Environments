@@ -29,17 +29,23 @@
   <!-- ------------------------------------------------------------ PASO 1 -->
   <section class="tarjeta">
     <p class="paso">1 · ¿Desde dónde partes?</p>
-    <select id="origen" aria-label="Punto de partida"></select>
+    <div class="buscable" id="campo-origen">
+      <input id="origen-buscador" type="search" inputmode="search" autocomplete="off"
+             placeholder="Escribe el nombre: aula, laboratorio…"
+             aria-label="Punto de partida">
+      <div class="lista" id="lista-origen" role="listbox" aria-label="Puntos de partida" hidden></div>
+    </div>
   </section>
 
   <!-- ------------------------------------------------------------ PASO 2 -->
   <section class="tarjeta">
     <p class="paso">2 · ¿A dónde quieres ir?</p>
-    <input id="buscador" type="search" inputmode="search" autocomplete="off"
-           placeholder="Escribe el nombre: aula, laboratorio…"
-           aria-label="Buscar destino por nombre">
-    <div class="lista" id="lista-destinos" role="listbox" aria-label="Destinos"></div>
-    <p class="elegido" id="destino-elegido"></p>
+    <div class="buscable" id="campo-destino">
+      <input id="buscador" type="search" inputmode="search" autocomplete="off"
+             placeholder="Escribe el nombre: aula, laboratorio…"
+             aria-label="Buscar destino por nombre">
+      <div class="lista" id="lista-destinos" role="listbox" aria-label="Destinos" hidden></div>
+    </div>
   </section>
 
   <!-- ----------------------------------------------------------- ACCIONES -->

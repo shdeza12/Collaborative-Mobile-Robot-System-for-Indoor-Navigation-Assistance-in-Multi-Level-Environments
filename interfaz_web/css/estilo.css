@@ -66,17 +66,23 @@ body {
   margin: 0 0 10px; font-weight: 700;
 }
 
-select, input[type="search"] {
+input[type="search"] {
   width: 100%; background: var(--panel2); color: var(--texto); border: 1.5px solid var(--borde);
   border-radius: 12px; padding: 13px 12px; font: inherit; min-height: 48px;
 }
-select:focus, input:focus { outline: none; border-color: var(--acento); }
+input:focus { outline: none; border-color: var(--acento); }
 
-#buscador { margin-bottom: 10px; }
+/* Envoltorio de cada campo con busqueda: es el ancla de posicion de su propia
+   lista, que flota ENCIMA del resto de la pagina en vez de empujarlo hacia
+   abajo -asi desplegar el campo 1 no aleja el boton "Iniciar guiado" de la
+   vista, y las dos listas (origen y destino) quedan con el mismo look. */
+.buscable { position: relative; }
 
 .lista {
+  position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 20;
   max-height: 320px; overflow-y: auto; -webkit-overflow-scrolling: touch;
-  border: 1px solid var(--borde); border-radius: 12px;
+  background: var(--panel2); border: 1px solid var(--borde); border-radius: 12px;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, .38);
 }
 .lista:empty { display: none; }
 .opcion {
@@ -93,8 +99,6 @@ select:focus, input:focus { outline: none; border-color: var(--acento); }
 .etq { font-size: 11px; padding: 3px 8px; border-radius: 999px; background: var(--panel2); color: var(--suave); border: 1px solid var(--borde); }
 .etq.relevo { background: #2c1f45; color: #dcc6ff; border-color: #3d2c63; }
 .vacio { padding: 14px 12px; color: var(--tenue); font-size: 14px; }
-.elegido { margin: 10px 2px 0; font-size: 13.5px; color: var(--acento); font-weight: 600; min-height: 1px; }
-.elegido:empty { display: none; }
 
 /* ----------------------------------------------------------- acciones --- */
 .acciones { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 14px; }
@@ -124,6 +128,7 @@ select:focus, input:focus { outline: none; border-color: var(--acento); }
 .panel.llegada::before { background: var(--verde); } .panel.llegada h2 { color: #8ff0b5; }
 .panel.bloqueado::before { background: var(--rojo); } .panel.bloqueado h2 { color: #ffa1ae; }
 .panel.preparando::before { background: var(--gris); } .panel.preparando h2 { color: #c6ccdb; }
+.panel.cancelando::before { background: var(--ambar); } .panel.cancelando h2 { color: #ffd08a; }
 .panel.confirmar::before { background: var(--ambar); } .panel.confirmar h2 { color: #ffd08a; }
 .boton.confirmar { background: var(--ambar); color: #17110a; border-color: var(--ambar); }
 /* RF-28: el bloque del boton vive DENTRO del panel, debajo de la pregunta, asi que separa por
