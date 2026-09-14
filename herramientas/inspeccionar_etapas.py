@@ -48,7 +48,7 @@ TOPICO = "/coordinacion/estado_mision"
 # el repositorio, igual que componer_registro.py y por el mismo motivo.
 ETAPAS = {0: "INACTIVA", 1: "TRAMO_1", 2: "TRANSFERENCIA", 3: "TRAMO_2",
           4: "COMPLETADA", 5: "FALLIDA", 6: "RECIBIDA",
-          7: "ESPERANDO_CONFIRMACION"}
+          7: "ESPERANDO_CONFIRMACION", 8: "CANCELANDO"}
 
 
 def transiciones(muestras):
@@ -57,16 +57,20 @@ def transiciones(muestras):
     Solo los CAMBIOS. El coordinador republica su estado a 1 Hz, asi que sin
     esto una mision de cinco minutos daria trescientas filas identicas.
 
-    Cambio significa etapa distinta o texto distinto: la alerta de los 60 s de
-    RF-28 repite la etapa 7 y cambia solo el texto, y es justamente la fila que
-    hay que ver. Comparar solo la etapa la haria invisible.
+    Cambio significa etapa distinta, texto distinto o DESTINO ACTUAL distinto:
+    la alerta de los 60 s de RF-28 repite la etapa 7 y cambia solo el texto, y
+    es justamente la fila que hay que ver. Comparar solo la etapa la haria
+    invisible. El destino entro en la comparacion el 2026-09-14 con RF-29: en
+    una cancelacion la etapa 8 es la que cambia el destino de golpe -del punto
+    que pidio el usuario a la escalera del piso-, y esa fila es la prueba de que
+    el robot dio media vuelta.
     """
     salida, previo = [], None
     for t, m in muestras:
-        actual = (m.etapa, m.mensaje_usuario)
+        actual = (m.etapa, m.mensaje_usuario, m.destino_actual.id)
         if actual != previo:
             salida.append((t, m.etapa, m.robot_activo, m.mision_id,
-                           m.mensaje_usuario))
+                           m.destino_actual.id, m.mensaje_usuario))
             previo = actual
     return salida
 
@@ -91,14 +95,15 @@ def main():
     if a.etapa is not None:
         filas = [f for f in filas if f[1] == a.etapa]
 
-    print(f"{'t_sim (s)':>10}  {'etapa':<22} {'robot':<8} {'mision':<16} texto")
-    print("-" * 100)
-    for t, etapa, robot, mid, texto in filas:
+    print(f"{'t_sim (s)':>10}  {'etapa':<22} {'robot':<8} {'mision':<16} "
+          f"{'destino_actual':<20} texto")
+    print("-" * 120)
+    for t, etapa, robot, mid, destino, texto in filas:
         nombre = ETAPAS.get(etapa, f"desconocida({etapa})")
         print(f"{t:10.1f}  {nombre:<22} {robot or '(vacio)':<8} "
-              f"{mid or '(vacio)':<16} {texto}")
+              f"{mid or '(vacio)':<16} {destino or '(vacio)':<20} {texto}")
 
-    print("-" * 100)
+    print("-" * 120)
     print(f"{len(filas)} marca(s).")
 
     if a.etapa is not None and len(filas) >= 2:

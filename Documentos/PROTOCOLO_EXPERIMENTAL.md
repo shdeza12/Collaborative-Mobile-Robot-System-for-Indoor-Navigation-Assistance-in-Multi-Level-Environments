@@ -591,7 +591,7 @@ campaña.
 | Uno o más de los 7 controladores no llegó a `active` | `ros2 control list_controllers` al arrancar la corrida |
 | RTF por debajo de 0,99 (RNF-06) | medida de RTF de la corrida |
 | Fallo de la máquina anfitriona ajeno al experimento | corte de energía, OOM del sistema, con su log |
-| **Cancelación por el usuario (RF-29)**, y solo por una causa **externa a la misión** | el registro trae `motivo_fallo` = `"Cancelada por el usuario"` **y** el bag trae al menos una marca de etapa `CANCELANDO`; la causa externa queda escrita en la hoja de campo **con la hora**, antes de mirar el resultado |
+| **Cancelación por el usuario (RF-29)**, y solo por una causa **externa a la misión** | el bag trae al menos una marca de etapa `CANCELANDO` **y** su marca `FALLIDA` lleva `mensaje_usuario` = `"Misión cancelada por el usuario."`; la causa externa queda escrita en la hoja de campo **con la hora**, antes de mirar el resultado |
 
 **La lista es cerrada y está escrita antes de la campaña.** Cualquier otra cosa —el robot se
 atascó, AMCL se perdió, el goal checker maniobró hasta abortar, el planificador no encontró ruta—
@@ -604,6 +604,34 @@ tasa de éxito de RF-23. Eso sería falso: el sistema no falló, un humano lo de
 hipotético ni raro —en la campaña física de **RF-27** habrá una persona junto al vehículo con ese
 botón en la mano, que es justamente para lo que existe—, y hasta que RF-29 se implementó el 14 de
 septiembre no podía darse, porque `rclpy` rechazaba toda cancelación en silencio.
+
+**Por qué se demuestra contra el bag y no contra el `motivo_fallo` del registro.** Esta regla se
+escribió el 14 de septiembre pidiendo que «el registro traiga `motivo_fallo` = `"Cancelada por el
+usuario"`», y la primera corrida real de RF-29 —ese mismo día— demostró que **eso no ocurre nunca**.
+El `motivo_fallo` que dice esa frase es el del **resultado de la acción**, y un resultado de acción
+viaja por un **servicio**: `ros2 bag` no graba servicios. Es la misma razón por la que `origen_id` y
+`destino_id` tuvieron que mudarse a `EstadoMision`. El registro, que se compone desde el bag, no ve
+ese campo y reconstruye el suyo con los criterios del §3.3; en la corrida escribió `"llegada a
+37.754 m, fuera de 0.25 m; la mision no llego a COMPLETADA sin pasar por FALLIDA"`. Con la redacción
+anterior **ninguna misión cancelada habría sido descartable** y todas habrían contado como fallo del
+sistema contra RF-23 — exactamente lo que esta fila existe para impedir. Lo que sí queda grabado es
+el `mensaje_usuario` de la marca `FALLIDA`, y por eso la prueba se apoya ahí.
+
+**Lo que se corrigió esa misma tarde, y por qué la regla sigue apuntando al bag.** Aquellos
+37,754 m salían de medir contra el **destino de la misión**, que en una cancelación es precisamente
+el sitio al que el robot ya no va. `componer_registro.py` toma ahora el punto de referencia de la
+última marca `CANCELANDO` —que publica en `destino_actual` el punto de reposo al que el coordinador
+devuelve al robot— y la pose de llegada del instante de la `FALLIDA`. Recompuesto el bag, la cifra
+es **0,121 m** y el `motivo_fallo` del registro dice `"cancelada por el usuario (RF-29)"`. La regla
+de esta fila **no cambia por eso y se sigue demostrando contra el bag**: el registro es un derivado,
+y una comprobación que se apoye en el derivado deja de detectar que el derivado se rompió — que es
+justo lo que pasó aquí. El registro corregido es una confirmación, no la fuente.
+
+**Qué hacer con el `error_posicion_m` de una misión cancelada.** No entra en ninguna estadística del
+§5: una misión descartada por esta causa no aporta su error de llegada. Y desde la corrección ya no
+es la distancia al destino abandonado sino la que separa al robot de su punto de reposo, que es la
+que RF-29 pide. Si alguien encuentra una cifra de decenas de metros en un registro con marca
+`CANCELANDO`, ese registro se compuso con la versión anterior al 2026-09-14 y hay que rehacerlo.
 
 **Y por qué es la causa más peligrosa de las cinco, dicho aquí y no en el informe.** Las otras
 cuatro las provoca la máquina; **esta la provoca el operador, que es quien mira el resultado**.

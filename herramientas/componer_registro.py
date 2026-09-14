@@ -42,6 +42,12 @@ INACTIVA, TRAMO_1, TRANSFERENCIA, TRAMO_2, COMPLETADA, FALLIDA = 0, 1, 2, 3, 4, 
 # igual: t_solicitud cae entonces sobre el TRAMO_1, que es exactamente lo que
 # hacia que el tiempo de asignacion valiera cero.
 RECIBIDA = 6
+# ESPERANDO_CONFIRMACION (RF-28, 2026-09-10) no se usa aqui y esta puesta solo
+# para que el numero 8 no se lea como si fuera el siguiente libre.
+ESPERANDO_CONFIRMACION = 7
+# CANCELANDO (RF-29, 2026-09-13) SI se usa: cambia contra que punto se mide la
+# llegada. Ver destino_efectivo().
+CANCELANDO = 8
 
 UMBRAL_MOVIMIENTO_MS = 0.02
 MUESTRAS_CONSECUTIVAS = 3
@@ -184,7 +190,8 @@ def marcas_en_orden(marcas):
     return all(a <= b for a, b in zip(vistos, vistos[1:]))
 
 
-def veredicto_de(marcas, estados, error_posicion_m, condicion, num_relevos):
+def veredicto_de(marcas, estados, error_posicion_m, condicion, num_relevos,
+                 cancelada=False):
     """Las tres condiciones del §3.3 del protocolo, por separado.
 
     Se guardan sueltas y no solo su AND porque si la tasa de exito sale baja hay
@@ -195,6 +202,14 @@ def veredicto_de(marcas, estados, error_posicion_m, condicion, num_relevos):
     error_posicion_m None significa 'pendiente de medir' (§4.4, banco fisico):
     entonces c1 y exito van None y el analizador rechaza el registro. No se
     inventa un veredicto.
+
+    'cancelada' NO cambia ninguna de las tres condiciones -una mision cancelada
+    sigue siendo exito=false, que es justamente la condicion (1) de RF-29-. Solo
+    cambia el TEXTO del motivo, porque el que salia era literalmente falso: con
+    error_posicion_m ya medido contra el punto de transferencia, decir "llegada
+    a 0,121 m, fuera de 0,25" seria mentir dos veces, y "no llego a COMPLETADA"
+    describe como un fracaso lo unico que una cancelacion puede hacer. Anadido
+    el 2026-09-14, despues de leer el motivo que produjo la primera corrida.
     """
     c1 = None if error_posicion_m is None else error_posicion_m <= TOLERANCIA_LLEGADA_M
     hubo_fallida = any(e == FALLIDA for _, e, _, _ in estados)
@@ -228,17 +243,47 @@ def veredicto_de(marcas, estados, error_posicion_m, condicion, num_relevos):
     motivo = ""
     if exito is False:
         partes = []
+        if cancelada:
+            partes.append("cancelada por el usuario (RF-29)")
         if c1 is False:
-            partes.append(f"llegada a {error_posicion_m:.3f} m, fuera de "
-                          f"{TOLERANCIA_LLEGADA_M} m")
+            partes.append(
+                (f"regreso a {error_posicion_m:.3f} m del punto de "
+                 f"transferencia, fuera de {TOLERANCIA_LLEGADA_M} m")
+                if cancelada else
+                (f"llegada a {error_posicion_m:.3f} m, fuera de "
+                 f"{TOLERANCIA_LLEGADA_M} m"))
         if not c2:
-            partes.append("la mision no llego a COMPLETADA sin pasar por FALLIDA")
+            partes.append(
+                "cerro en FALLIDA, que es como cierra una cancelacion"
+                if cancelada else
+                "la mision no llego a COMPLETADA sin pasar por FALLIDA")
         if condicion == "B" and c3 is False:
             partes.append(f"{num_relevos} relevo(s), se esperaba 1")
         motivo = "; ".join(partes)
 
     return {"exito": exito, "c1_posicion": c1, "c2_completada_sin_fallida": c2,
             "c3_relevo": c3, "motivo_fallo": motivo}
+
+
+def destino_efectivo(destino_mision, cancelaciones):
+    """Contra que punto hay que medir la llegada, que no siempre es el destino.
+
+    Casi siempre lo es. Pero una mision CANCELADA (RF-29) ya no va a ese punto:
+    el coordinador aborta el sub-objetivo de Nav2 y lleva al robot al punto de
+    transferencia de su piso, que es lo que la condicion (2) del requisito pide
+    comprobar. Medir contra el destino abandonado da una cifra correcta con la
+    etiqueta equivocada -en la corrida del 2026-09-14, 37,754 m-, y leida suelta
+    parece un fallo de navegacion gravisimo cuando lo que hubo fue un usuario
+    pulsando un boton.
+
+    'cancelaciones' es la lista de ids de 'destino_actual' de las marcas
+    CANCELANDO, en el orden en que salieron. Se toma el ULTIMO, que es a donde
+    el sistema dijo por ultima vez que iba. Sale del propio bag y no del
+    catalogo a proposito: si mañana el punto de reposo deja de ser la escalera,
+    esto sigue midiendo contra el punto correcto sin tocar una linea.
+    """
+    utiles = [d for d in cancelaciones if d]
+    return utiles[-1] if utiles else destino_mision
 
 
 def continuidad_de(estados, marcas, condicion):
@@ -509,12 +554,32 @@ def componer(ruta_bag, banco, campana, error_posicion_m=None, rtf=None,
     # Se respeta el valor pasado a mano. En el banco fisico es la lectura de
     # cinta y no hay alternativa; en simulacion permite rehacer un registro con
     # una medida revisada sin tener que tocar el bag.
+    #
+    # Y una mision CANCELADA (RF-29) no se mide contra lo que se pidio sino
+    # contra donde el sistema llevo al robot. Las dos piezas salen del bag: la
+    # etapa CANCELANDO y el 'destino_actual' que esa misma marca publica.
+    cancelaciones = [m.destino_actual.id for _, m in crudos
+                     if m.etapa == CANCELANDO]
+    cancelada = bool(cancelaciones)
+    destino_medido = destino_efectivo(destino, cancelaciones)
+    # Una cancelacion cierra en FALLIDA, asi que no hay t_completada; sin esto
+    # la pose de llegada saldria de la ultima muestra del bag, o sea de cuando
+    # el operador corto la grabadora.
+    t_cierre, marca_cierre = marcas["t_completada"], "t_completada"
+    if cancelada and t_cierre is None:
+        t_cierre = _primero(estados, lambda e, r: e == FALLIDA)
+        marca_cierre = "t_fallida"
     pose_llegada, nota = _pose_llegada(poses, _robot_final(estados),
-                                       marcas["t_completada"])
+                                       t_cierre, marca_cierre)
     if banco == "simulacion" and error_posicion_m is None:
-        error_posicion_m = _error_de_llegada(pose_llegada, destino)
+        error_posicion_m = _error_de_llegada(pose_llegada, destino_medido)
+    if cancelada and destino_medido != destino:
+        nota = (f"{nota}; mision CANCELADA (RF-29): el error se mide contra "
+                f"{destino_medido}, el punto al que el coordinador devolvio al "
+                f"robot, y NO contra el destino pedido {destino}")
 
-    veredicto = veredicto_de(marcas, estados, error_posicion_m, condicion, relevos)
+    veredicto = veredicto_de(marcas, estados, error_posicion_m, condicion,
+                             relevos, cancelada)
     # RF-24 va DENTRO de veredicto pero FUERA del AND que decide el exito. Ver
     # continuidad_de(): es la variable de respuesta, no un criterio del §3.3.
     veredicto["continuidad"] = continuidad_de(estados, marcas, condicion)
@@ -773,39 +838,44 @@ def _robot_final(estados):
     return ""
 
 
-def _pose_llegada(poses, robot, t_completada):
+def _pose_llegada(poses, robot, t_cierre, marca="t_completada"):
     """La pose con la que se juzga la llegada, y el instante del que sale.
 
-    Se toma en t_completada y NO al final del bag. El bag sigue grabando hasta
+    Se toma en t_cierre y NO al final del bag. El bag sigue grabando hasta
     que alguien pulsa Ctrl-C, asi que la ultima muestra puede estar minutos
     despues de la llegada y a metros de ella -si al robot lo movieron, o si
     siguio corrigiendo-. Medir alli haria que el error de llegada dependiera de
     la mano del operador, y con 15 corridas por condicion en S24 eso no es un
     detalle: es una fuente de dispersion que no esta en el experimento.
 
-    Sin t_completada -mision fallida- no hay instante de llegada, y entonces si
-    se usa la ultima muestra: es cuanto se acerco antes de rendirse.
+    t_cierre es t_completada en una mision normal y el instante de la FALLIDA en
+    una CANCELADA, que es cuando el robot ya volvio a su escalera y la mision
+    cierra (RF-29). Sin cierre de ninguna clase -mision abortada a medias- si se
+    usa la ultima muestra: es cuanto se acerco antes de rendirse.
     """
     muestras = poses.get(robot) or []
     if not muestras:
         return None, ""
-    if t_completada is None:
+    if t_cierre is None:
         t, x, y, yaw = muestras[-1]
         return ({"x": x, "y": y, "yaw": yaw},
-                f"mision sin t_completada: pose de la ultima muestra de {robot} "
+                f"mision sin {marca}: pose de la ultima muestra de {robot} "
                 f"(t={t:.3f} s)")
-    previas = [m for m in muestras if m[0] <= t_completada]
+    previas = [m for m in muestras if m[0] <= t_cierre]
     t, x, y, yaw = (previas or muestras)[-1]
     return ({"x": x, "y": y, "yaw": yaw},
             f"pose de {robot} en t={t:.3f} s, la ultima antes de "
-            f"t_completada={t_completada:.3f} s")
+            f"{marca}={t_cierre:.3f} s")
 
 
 def _error_de_llegada(pose_llegada, destino_id):
-    """A cuantos metros del punto pedido se quedo el robot.
+    """A cuantos metros del punto EFECTIVO se quedo el robot.
 
     Solo tiene sentido en simulacion, donde /odom es la WorldPose de Gazebo. El
     catalogo da las coordenadas del punto en el mismo marco.
+
+    'destino_id' lo decide destino_efectivo(), no la solicitud: en una mision
+    cancelada el punto pedido ya no es a donde el sistema fue.
     """
     if pose_llegada is None:
         return None

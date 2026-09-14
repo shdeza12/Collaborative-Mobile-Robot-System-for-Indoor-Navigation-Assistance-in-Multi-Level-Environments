@@ -33,8 +33,10 @@ ESQUEMA = os.path.join(RAIZ, "Documentos", "esquema_registro_mision.json")
 
 sys.path.insert(0, AQUI)
 from componer_registro import (  # noqa: E402
-    continuidad_de, marcas_de, marcas_en_orden, primer_movimiento, veredicto_de,
+    continuidad_de, destino_efectivo, marcas_de, marcas_en_orden,
+    primer_movimiento, veredicto_de,
     INACTIVA, TRAMO_1, TRANSFERENCIA, TRAMO_2, COMPLETADA, FALLIDA, RECIBIDA,
+    CANCELANDO,
 )
 
 fallos = []
@@ -401,6 +403,50 @@ def pruebas_de_marcas():
     v = veredicto_de(marcas_de(estados_b, mov, "B"), estados_b, None, "B", 1)
     check("sin error medido, c1 y exito van null", v["c1_posicion"] is None
           and v["exito"] is None)
+
+    # --- RF-29: una mision cancelada no se mide contra el destino pedido ------
+    #
+    # Escrito el 2026-09-14 DESPUES de leer el registro de la primera corrida
+    # cancelada, que decia "llegada a 37.754 m, fuera de 0.25 m" habiendo
+    # terminado el robot a 0,121 m de donde el sistema lo llevo. La cifra era
+    # correcta y la etiqueta, falsa: media contra un destino ABANDONADO.
+    print("\n== destino efectivo y motivo de una cancelacion (RF-29) ==")
+    check("sin cancelacion se mide contra el destino de la mision",
+          destino_efectivo("piso2_aula_302", []) == "piso2_aula_302")
+    check("con cancelacion se mide contra el punto al que volvio el robot",
+          destino_efectivo("piso2_aula_302", ["piso1_escalera"]) == "piso1_escalera")
+    check("si hay varias marcas CANCELANDO manda la ultima",
+          destino_efectivo("piso2_aula_302",
+                           ["piso1_escalera", "piso2_escalera"]) == "piso2_escalera")
+    # El coordinador publica la etapa antes de resolver a donde vuelve, asi que
+    # la primera marca puede traer el destino_actual vacio. Caer al destino de
+    # la mision ahi seria reintroducir los 37,754 m por la puerta de atras.
+    check("un destino_actual vacio no cuenta como cancelacion util",
+          destino_efectivo("piso2_aula_302", ["", "piso1_escalera"]) == "piso1_escalera")
+    check("y si TODAS vienen vacias se cae al destino de la mision, no a None",
+          destino_efectivo("piso2_aula_302", ["", ""]) == "piso2_aula_302")
+
+    estados_c = [(10.0, RECIBIDA, "", "m1"), (11.0, TRAMO_1, "robot1", "m1"),
+                 (119.8, CANCELANDO, "robot1", "m1"),
+                 (146.0, FALLIDA, "robot1", "m1")]
+    mc = {"robot1": [(12.0, 0.3, 0.0)] * 3}
+    v = veredicto_de(marcas_de(estados_c, mc, "A"), estados_c, 0.121, "A", 0,
+                     cancelada=True)
+    check("una mision cancelada sigue siendo exito false (condicion 1 de RF-29)",
+          v["exito"] is False)
+    check("el motivo dice que la cancelo el usuario",
+          "cancelada por el usuario" in v["motivo_fallo"],
+          f"-> {v['motivo_fallo']}")
+    check("y NO dice que la llegada quedara fuera de tolerancia, porque no lo esta",
+          "fuera de" not in v["motivo_fallo"], f"-> {v['motivo_fallo']}")
+    check("c1 mira los 0,121 m contra el punto de transferencia y da true",
+          v["c1_posicion"] is True)
+    # Regresion de la corrida de control: sin cancelacion el texto es el de
+    # siempre. Si alguien 'simplifica' el veredicto poniendo el mensaje de
+    # cancelacion incondicional, esta comprobacion lo caza.
+    v = veredicto_de(marcas_de(estados_b, mov, "B"), estados_b, 1.98, "B", 1)
+    check("sin cancelacion el motivo NO menciona a ningun usuario",
+          "usuario" not in v["motivo_fallo"], f"-> {v['motivo_fallo']}")
 
 
 def bag_sintetico(ruta):
