@@ -38,6 +38,24 @@ uint8 RECIBIDA=6
 # La marca de esta etapa lleva 'robot_activo' con el robot del piso de destino, NUNCA
 # vacio: es la condicion que mantiene cierta la continuidad del RF-24.
 uint8 ESPERANDO_CONFIRMACION=7
+# CANCELANDO es la ventana entre "el usuario pulso Cancelar" y "el robot ya
+# esta en su escalera": RF-29, boton Cancelar de la HRI. Antes de esto
+# 'is_cancel_requested' se comprobaba en tres sitios de _ejecutar pero nunca
+# llegaba a valer True -el ActionServer rechazaba toda cancelacion por
+# omision, al no tener un cancel_callback registrado-, asi que cancelar no
+# hacia nada salvo dejar el boton de la HRI congelado. Se anade el
+# 2026-09-13, a peticion directa del usuario: cancelar debe abortar la mision
+# Y devolver al robot a su posicion de reposo, no solo dejarlo donde iba.
+#
+# Va al final y con numero nuevo por la misma razon que RECIBIDA=6 y
+# ESPERANDO_CONFIRMACION=7: las constantes no viajan por el cable, asi que la
+# serializacion no cambia y un suscriptor ya compilado sigue deserializando.
+#
+# La mision cierra en FALLIDA -no hay un CANCELADA aparte-: 'motivo_fallo'
+# ya distingue "cancelada por el usuario" de un fallo de navegacion, y no
+# hacia falta una rama nueva en el analizador de campana para un estado que
+# esta etapa jamas ve, porque no se usa durante la campana de OE4.
+uint8 CANCELANDO=8
 
 string mision_id
 string origen_id                # el punto de partida que pidio el usuario

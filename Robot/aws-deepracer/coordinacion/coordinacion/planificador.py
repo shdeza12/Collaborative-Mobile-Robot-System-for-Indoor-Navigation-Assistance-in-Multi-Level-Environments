@@ -69,6 +69,12 @@ RECIBIDA = 6
 # La pausa en la que la mision espera que el usuario confirme que ya cambio de piso.
 # Ver Documentos/DISENO_CONFIRMACION_PISO.md.
 ESPERANDO_CONFIRMACION = 7
+# El usuario canceló (RF-29): el robot en curso vuelve a su escalera antes de
+# que la mision cierre en FALLIDA. Va al final y con numero nuevo, no
+# intercalada -misma razon que RECIBIDA en 2026-08-29-: las constantes son de
+# compilacion, no viajan por el cable, asi que anadir una al final no cambia
+# la serializacion y un suscriptor ya compilado sigue leyendo los bags viejos.
+CANCELANDO = 8
 
 
 def yaw_a_cuaternion(yaw):

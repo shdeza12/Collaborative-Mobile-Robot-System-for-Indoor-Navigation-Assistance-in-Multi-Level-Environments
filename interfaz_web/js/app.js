@@ -13,8 +13,8 @@
  * regla que fija Documentos/CONTRATO_INTERFACES.md seccion 5 para RECIBIDA.
  */
 
-const ETAPA = { INACTIVA: 0, TRAMO_1: 1, TRANSFERENCIA: 2, TRAMO_2: 3, COMPLETADA: 4, FALLIDA: 5, RECIBIDA: 6, ESPERANDO_CONFIRMACION: 7 };
-const NOMBRE_ETAPA = { 0: "INACTIVA", 1: "TRAMO_1", 2: "TRANSFERENCIA", 3: "TRAMO_2", 4: "COMPLETADA", 5: "FALLIDA", 6: "RECIBIDA", 7: "ESPERANDO_CONFIRMACION" };
+const ETAPA = { INACTIVA: 0, TRAMO_1: 1, TRANSFERENCIA: 2, TRAMO_2: 3, COMPLETADA: 4, FALLIDA: 5, RECIBIDA: 6, ESPERANDO_CONFIRMACION: 7, CANCELANDO: 8 };
+const NOMBRE_ETAPA = { 0: "INACTIVA", 1: "TRAMO_1", 2: "TRANSFERENCIA", 3: "TRAMO_2", 4: "COMPLETADA", 5: "FALLIDA", 6: "RECIBIDA", 7: "ESPERANDO_CONFIRMACION", 8: "CANCELANDO" };
 
 const $ = (id) => document.getElementById(id);
 const escapar = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -50,7 +50,11 @@ puente.onEstadoConexion = (conectado) => {
 
 puente.suscribir(
   "/coordinacion/puntos_interes", "coordinacion_msgs/msg/ListaPuntosInteres",
-  (msg) => { estado.puntos = msg.puntos || []; pintarOrigen(); pintarDestinos(); },
+  (msg) => {
+    estado.puntos = msg.puntos || [];
+    pintarOrigen();
+    campoDestino.refrescarCatalogo();
+  },
   { history: "keep_last", depth: 1, reliability: "reliable", durability: "transient_local" },
 );
 
@@ -60,44 +64,138 @@ puente.suscribir(
 );
 
 // ------------------------------------------------------------- catalogo ---
-function pintarOrigen() {
-  const sel = $("origen"), previo = sel.value;
-  if (!estado.puntos.length) {
-    sel.innerHTML = `<option value="">Esperando el catalogo del coordinador...</option>`;
-    return;
+// Un solo widget de "campo con busqueda", reutilizado para origen y destino:
+// las dos listas se veian distintas -un <select> nativo contra esta lista
+// propia- y la propia solo se podia dejar siempre abierta, ocupando espacio
+// permanente. Aqui las dos usan el mismo look, y las dos se pliegan: al
+// enfocar se despliega mostrando TODO (no lo ya escrito, que filtraria a un
+// solo resultado), al escribir filtra, y al elegir o al tocar fuera se
+// repliega. El input nunca deja de poder escribirse.
+class CampoBuscable {
+  constructor({ input, lista, obtenerOpciones, renderizarOpcion, vacioTexto, onSeleccion }) {
+    this.input = input;
+    this.lista = lista;
+    this.obtenerOpciones = obtenerOpciones;
+    this.renderizarOpcion = renderizarOpcion;
+    this.vacioTexto = vacioTexto;
+    this.onSeleccion = onSeleccion;
+    this.seleccionId = null;
+    this.seleccionNombre = "";
+
+    this.input.addEventListener("focus", () => this._abrir());
+    this.input.addEventListener("input", () => this._pintar(this.input.value));
+    // Mismo arreglo que ya tenia el listado de destino: en un telefono, el
+    // primer toque fuera del campo a veces solo cierra el teclado (bug
+    // conocido de iOS Safari) y no llega a marcar la opcion. Cerrando el
+    // teclado en cuanto el dedo toca la lista, el toque que elige ya no
+    // compite con eso. OJO: esto no oculta la lista, solo el teclado -si
+    // ocultara la lista aqui, el click de seleccion nunca llegaria a disparar.
+    this.lista.addEventListener("touchstart", () => this.input.blur(), { passive: true });
+    this.lista.addEventListener("click", (ev) => {
+      const b = ev.target.closest(".opcion");
+      if (!b) return;
+      this._seleccionar(b.dataset.id, b.querySelector(".nombre").textContent);
+    });
+    document.addEventListener("click", (ev) => {
+      if (this.lista.hidden) return;
+      if (!this.input.contains(ev.target) && !this.lista.contains(ev.target)) this._cerrar();
+    });
   }
-  sel.innerHTML = estado.puntos
-    .map((p) => `<option value="${p.id}">${escapar(p.nombre)}${p.es_transferencia ? " (escaleras)" : ""} · piso ${p.nivel}</option>`)
-    .join("");
-  sel.value = estado.puntos.some((p) => p.id === previo) ? previo : estado.puntos[0].id;
-  estado.origenSel = sel.value;
+
+  /** Fija la seleccion sin pasar por el click del usuario (p. ej. el defecto inicial). */
+  seleccionar(id, nombre) { this.seleccionId = id; this.seleccionNombre = nombre; this.input.value = nombre; }
+
+  refrescarCatalogo() {
+    if (!this.lista.hidden) this._pintar(this.input.value);
+    else if (!this.input.value) this.input.value = this.seleccionNombre;
+  }
+
+  _abrir() {
+    this.lista.hidden = false;
+    this._pintar("");   // se abre mostrando TODO, no filtrado por la seleccion previa
+    this.input.select();
+  }
+
+  _cerrar() {
+    this.lista.hidden = true;
+    // Sin una seleccion valida, el texto tecleado y no confirmado se descarta:
+    // el campo vuelve a mostrar la ultima seleccion real (o queda vacio).
+    this.input.value = this.seleccionNombre;
+  }
+
+  _seleccionar(id, nombre) {
+    this.seleccionId = id;
+    this.seleccionNombre = nombre;
+    this.input.value = nombre;
+    this._cerrar();
+    this.onSeleccion(id);
+  }
+
+  _pintar(filtro) {
+    if (!estado.puntos.length) {
+      this.lista.innerHTML = `<p class="vacio">Esperando el catalogo del coordinador...</p>`;
+      return;
+    }
+    const aguja = sinAcentos(filtro.trim());
+    const opciones = this.obtenerOpciones();
+    const hallados = aguja
+      ? opciones.filter((p) => sinAcentos(`${p.nombre} ${p.id}`).includes(aguja))
+      : opciones;
+    this.lista.innerHTML = !hallados.length
+      ? `<p class="vacio">${this.vacioTexto(filtro)}</p>`
+      : hallados.map((p) => `
+        <button class="opcion" type="button" role="option" data-id="${p.id}"
+                aria-selected="${p.id === this.seleccionId}">
+          ${this.renderizarOpcion(p)}
+        </button>`).join("");
+  }
 }
 
-function pintarDestinos() {
-  const cont = $("lista-destinos");
-  const aguja = sinAcentos(estado.filtro.trim());
-  const candidatos = estado.puntos.filter((p) => p.id !== estado.origenSel);
-  const hallados = aguja
-    ? candidatos.filter((p) => sinAcentos(`${p.nombre} ${p.id}`).includes(aguja))
-    : candidatos;
+const opcionEstandar = (p) => `
+  <span class="nombre">${escapar(p.nombre)}${p.es_transferencia ? " (escaleras)" : ""}</span>
+  <span class="etiquetas"><span class="etq">piso ${p.nivel}</span></span>`;
 
-  if (!estado.puntos.length) {
-    cont.innerHTML = `<p class="vacio">Esperando el catalogo del coordinador...</p>`;
-  } else if (!hallados.length) {
-    cont.innerHTML = `<p class="vacio">Ningun destino contiene "${escapar(estado.filtro)}".</p>`;
-  } else {
-    const origen = estado.puntos.find((p) => p.id === estado.origenSel);
-    cont.innerHTML = hallados.map((p) => `
-      <button class="opcion" type="button" role="option" data-id="${p.id}"
-              aria-selected="${p.id === estado.destinoSel}">
-        <span class="nombre">${escapar(p.nombre)}</span>
-        <span class="etiquetas">
-          <span class="etq">piso ${p.nivel}</span>
-          ${origen && p.nivel !== origen.nivel ? '<span class="etq relevo">con relevo</span>' : ""}
-        </span>
-      </button>`).join("");
+const campoOrigen = new CampoBuscable({
+  input: $("origen-buscador"), lista: $("lista-origen"),
+  obtenerOpciones: () => estado.puntos,
+  renderizarOpcion: opcionEstandar,
+  vacioTexto: (filtro) => `Ningun punto contiene "${escapar(filtro)}".`,
+  onSeleccion: (id) => {
+    estado.origenSel = id;
+    if (estado.destinoSel === estado.origenSel) campoDestino.seleccionar(null, "");
+    campoDestino.refrescarCatalogo();
+    refrescarBotonIr();
+  },
+});
+
+const campoDestino = new CampoBuscable({
+  input: $("buscador"), lista: $("lista-destinos"),
+  obtenerOpciones: () => estado.puntos.filter((p) => p.id !== estado.origenSel),
+  renderizarOpcion: (p) => {
+    const origen = estado.puntos.find((o) => o.id === estado.origenSel);
+    const conRelevo = origen && p.nivel !== origen.nivel;
+    return `
+      <span class="nombre">${escapar(p.nombre)}</span>
+      <span class="etiquetas">
+        <span class="etq">piso ${p.nivel}</span>
+        ${conRelevo ? '<span class="etq relevo">con relevo</span>' : ""}
+      </span>`;
+  },
+  vacioTexto: (filtro) => filtro
+    ? `Ningun destino contiene "${escapar(filtro)}".`
+    : "No hay destinos en otros puntos del catalogo.",
+  onSeleccion: (id) => { estado.destinoSel = id; refrescarBotonIr(); },
+});
+
+function pintarOrigen() {
+  // El defecto -el primer punto del catalogo- solo se fija la primera vez que
+  // llega el catalogo; si el usuario ya eligio otro origen, un refresco del
+  // catalogo (p. ej. al reconectar) no se lo pisa.
+  if (!estado.origenSel && estado.puntos.length) {
+    estado.origenSel = estado.puntos[0].id;
+    campoOrigen.seleccionar(estado.puntos[0].id, estado.puntos[0].nombre);
   }
-  refrescarBotonIr();
+  campoOrigen.refrescarCatalogo();
 }
 
 function refrescarBotonIr() {
@@ -108,38 +206,6 @@ function refrescarBotonIr() {
 }
 
 // -------------------------------------------------------------- eventos ---
-$("origen").addEventListener("change", (ev) => {
-  estado.origenSel = ev.target.value;
-  if (estado.destinoSel === estado.origenSel) {
-    estado.destinoSel = null;
-    $("destino-elegido").textContent = "";
-  }
-  pintarDestinos();
-});
-
-$("buscador").addEventListener("input", (ev) => { estado.filtro = ev.target.value; pintarDestinos(); });
-
-// En el teclado de un telefono, el primer toque fuera del campo de busqueda a
-// veces solo cierra el teclado y no llega a disparar el "click" del boton que
-// hay debajo (el bug clasico de Safari/iOS en listas largas). Cerrando el
-// teclado en cuanto el dedo toca la lista, el toque que elige el destino ya
-// no tiene que competir con eso.
-$("lista-destinos").addEventListener("touchstart", () => $("buscador").blur(), { passive: true });
-
-$("lista-destinos").addEventListener("click", (ev) => {
-  const b = ev.target.closest(".opcion");
-  if (!b) return;
-  estado.destinoSel = b.dataset.id;
-  for (const el of $("lista-destinos").children) {
-    if (el.setAttribute) el.setAttribute("aria-selected", el === b ? "true" : "false");
-  }
-  // Confirmacion visible del toque, independiente de si el boton de abajo
-  // queda o no a la vista: sin esto, en una lista larga no hay ninguna senal
-  // inmediata de que la seleccion se registro.
-  $("destino-elegido").textContent = "Destino elegido: " + b.querySelector(".nombre").textContent;
-  refrescarBotonIr();
-});
-
 $("btn-ir").addEventListener("click", () => {
   $("nota").textContent = "";
   estado.metaId = puente.enviarMeta(
@@ -194,6 +260,7 @@ function claveYTitulo(e) {
       return e.destino_actual.id && e.destino_actual.id === e.origen_id
         ? ["espera", "Espera al robot"] : ["sigueme", "Sígueme"];
     case ETAPA.ESPERANDO_CONFIRMACION: return ["confirmar", "¿Ya subió?"];
+    case ETAPA.CANCELANDO: return ["cancelando", "Cancelando"];
     default: return ["inactiva", "Sin misión activa"];
   }
 }
@@ -251,4 +318,4 @@ function nombreDe(id) {
 
 pintarPanelSinDatos("Conectando con el coordinador...");
 pintarOrigen();
-pintarDestinos();
+campoDestino.refrescarCatalogo();
