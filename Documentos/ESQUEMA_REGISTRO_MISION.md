@@ -512,7 +512,24 @@ amenaza a la validez de S26 en el §11 del protocolo, no descubrirlo en la compa
 | Versión | Fecha | Cambio | Qué pasa con los registros anteriores |
 |---|---|---|---|
 | `1.0.0` | 2026-08-22 | versión congelada inicial | — |
-| `1.1.0` | 2026-08-31 | se añade `veredicto.continuidad` (§3.7.1) | siguen siendo válidos; el `required` del campo está condicionado a `esquema_version == "1.1.0"` en el `allOf` del esquema |
+| `1.1.0` | 2026-08-31 | se añade `veredicto.continuidad` (§3.7.1) | siguen siendo válidos; el `required` del campo está condicionado a la versión en el `allOf` del esquema |
+| `1.2.0` | 2026-09-14 | `causa_descarte` admite `cancelacion_usuario` (§8 del protocolo), con la entrada de **RF-29** | **siguen siendo válidos y ninguno se recompone**: el enumerado solo *gana* un valor, así que los 30 registros `1.1.0` de la campaña validan sin tocarlos |
+
+**Este es el primer cambio de esquema posterior a la primera corrida de campaña**, y el §7 de arriba
+dice que a partir de ahí ningún cambio es gratis: se anota con la fecha, el motivo y qué corridas
+quedan afectadas. **Afectadas: ninguna.** El motivo es que una misión cancelada cierra con
+`exito: false`, de modo que sin una causa que la recoja el analizador la contaría como fallo del
+sistema contra la tasa de éxito de RF-23 — y en la campaña física de RF-27 habrá una persona junto al
+vehículo con ese botón en la mano.
+
+**La trampa que este cambio casi pisa, escrita aquí porque es la parte reutilizable.** La condición
+del `allOf` que hace obligatorio `veredicto.continuidad` estaba escrita como
+`esquema_version == "1.1.0"`, con `const`. Subir la versión a `1.2.0` sin mirar esa línea habría
+hecho que la condición **dejara de dispararse**, y `continuidad` habría dejado de ser obligatoria
+**en silencio**: el registro validaría igual, sin la variable de respuesta principal del experimento
+— exactamente el agujero que la versión `1.1.0` se creó para tapar, reabierto por el acto de tapar
+otro. Se cambió el `const` por un **enumerado de versiones**, de modo que cada versión menor nueva
+hay que añadirla a mano: si alguien la olvida, la prueba falla en vez de aflojarse el esquema.
 
 **Se aprovechó la ventana correcta.** El cambio entra en S21, con S24 a tres semanas y cero corridas
 de campaña ejecutadas: no hay ninguna que quede afectada. Si el hueco lo hubiera destapado el

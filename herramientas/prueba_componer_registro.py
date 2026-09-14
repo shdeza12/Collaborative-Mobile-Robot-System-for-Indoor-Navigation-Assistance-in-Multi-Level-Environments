@@ -129,6 +129,20 @@ def pruebas_de_esquema(esquema):
     check("el mismo registro marcado 1.0.0 sigue siendo valido",
           valida(r, esquema), _por_que(r, esquema))
 
+    # La trampa del 2026-09-14. La regla que obliga a traer continuidad colgaba
+    # de un {"const": "1.1.0"}, asi que subir la version a 1.2.0 sin tocar el
+    # esquema habria dejado de exigir la variable de respuesta principal de
+    # RF-24 -en silencio, y validando-. Se cambio a un enum; esta comprobacion
+    # es la que se romperia si alguien vuelve a poner un const, o si al entrar
+    # un 1.3.0 se olvida de anadirlo a la lista.
+    r = registro_valido(); del r["veredicto"]["continuidad"]
+    r["esquema_version"] = "1.2.0"
+    check("un registro 1.2.0 SIN continuidad tambien se rechaza",
+          not valida(r, esquema), _por_que(r, esquema))
+    check("y con continuidad, un 1.2.0 valida",
+          valida(dict(registro_valido(), esquema_version="1.2.0"), esquema),
+          _por_que(dict(registro_valido(), esquema_version="1.2.0"), esquema))
+
     # La continuidad NO puede entrar en el AND del exito. Si alguien la anade a
     # las condiciones del §3.3 mas adelante, esta prueba lo delata: un registro
     # discontinuo y exitoso a la vez tiene que ser representable, porque es
@@ -825,8 +839,8 @@ def pruebas_de_bag(esquema):
               c["continua"] is True and c["ventana"] is not None, f"-> {c}")
         check("la continuidad no toco el exito, que se decide con el §3.3",
               auto["veredicto"]["exito"] is True)
-        check("el compositor escribe la version 1.1.0",
-              auto["esquema_version"] == "1.1.0",
+        check("el compositor escribe la version 1.2.0",
+              auto["esquema_version"] == "1.2.0",
               f"-> {auto['esquema_version']}")
         # La B truncada no llega a COMPLETADA: la ventana no se cierra y la
         # continuidad es null. Es el caso que distingue 'no termino' de 'se

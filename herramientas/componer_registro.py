@@ -54,7 +54,15 @@ TOLERANCIA_LLEGADA_M = 0.25   # la misma de coordinador.py y del §5 del protoco
 # en 1.0.0 y no se recomponen: eran condicion A, donde la continuidad es null de
 # todas formas, asi que recomponerlos anadiria un campo vacio y perderia la
 # trazabilidad de con que version se escribieron.
-ESQUEMA_VERSION = "1.1.0"
+#
+# 1.2.0 el 2026-09-14: 'cancelacion_usuario' entra en el enumerado cerrado de
+# causa_descarte (§8 del protocolo), con RF-29. Tambien es aditivo -los 30
+# registros de la campana son 1.1.0 y siguen validando sin tocarlos, porque el
+# enum solo GANA un valor- y por eso vuelve a subir la menor. Este es el primer
+# cambio de esquema posterior a la primera corrida de campana, asi que el §7 del
+# esquema obliga a anotarlo en la bitacora con la fecha, el motivo y a que
+# corridas afecta: a ninguna, ninguna se recompone.
+ESQUEMA_VERSION = "1.2.0"
 
 
 def primer_movimiento(muestras, umbral=UMBRAL_MOVIMIENTO_MS,

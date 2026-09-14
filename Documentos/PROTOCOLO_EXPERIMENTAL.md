@@ -591,11 +591,36 @@ campaña.
 | Uno o más de los 7 controladores no llegó a `active` | `ros2 control list_controllers` al arrancar la corrida |
 | RTF por debajo de 0,99 (RNF-06) | medida de RTF de la corrida |
 | Fallo de la máquina anfitriona ajeno al experimento | corte de energía, OOM del sistema, con su log |
+| **Cancelación por el usuario (RF-29)**, y solo por una causa **externa a la misión** | el registro trae `motivo_fallo` = `"Cancelada por el usuario"` **y** el bag trae al menos una marca de etapa `CANCELANDO`; la causa externa queda escrita en la hoja de campo **con la hora**, antes de mirar el resultado |
 
 **La lista es cerrada y está escrita antes de la campaña.** Cualquier otra cosa —el robot se
 atascó, AMCL se perdió, el goal checker maniobró hasta abortar, el planificador no encontró ruta—
 **es un fallo del sistema y cuenta como tal**. Son precisamente los modos de fallo que el
 experimento existe para cuantificar.
+
+**Por qué la cancelación entra en la lista, añadida el 2026-09-14.** Una misión cancelada cierra con
+`exito: false`, así que **sin una causa que la recoja se contaría como fallo del sistema** contra la
+tasa de éxito de RF-23. Eso sería falso: el sistema no falló, un humano lo detuvo. El caso no es
+hipotético ni raro —en la campaña física de **RF-27** habrá una persona junto al vehículo con ese
+botón en la mano, que es justamente para lo que existe—, y hasta que RF-29 se implementó el 14 de
+septiembre no podía darse, porque `rclpy` rechazaba toda cancelación en silencio.
+
+**Y por qué es la causa más peligrosa de las cinco, dicho aquí y no en el informe.** Las otras
+cuatro las provoca la máquina; **esta la provoca el operador, que es quien mira el resultado**.
+Cancelar una corrida que «se ve mal» y repetirla es sesgo de selección, y produce exactamente la
+tasa del 100 % por construcción contra la que avisa el primer párrafo de este §. Tres reglas lo
+acotan, y son parte de la lista cerrada:
+
+1. **La causa externa se escribe en la hoja de campo con la hora, antes de conocer el resultado.**
+   Una cancelación sin esa anotación **no es descarte: es fallo**, y entra en el denominador.
+2. **«Parecía que iba a fallar» no es causa externa.** Lo son el paso de una persona por el pasillo,
+   una obstrucción que no forma parte del escenario, o una parada de seguridad. Que el robot maniobre
+   raro, se demore o se acerque a una pared es **el fenómeno medido**, no una interferencia.
+3. **No se cancela después de la llegada.** Una corrida cuyo robot ya entró en la tolerancia de
+   llegada tiene su resultado decidido; cancelarla entonces no descarta nada.
+
+Sigue aplicando el techo del 20 % de abajo, que es el que limita el daño si estas tres reglas se
+relajan sin querer.
 
 Un descarte no es gratis: se documenta en la tabla de descartes del informe, con la corrida, la
 causa y la evidencia. **Si los descartes superan el 20 % de las corridas, la campaña no es válida**

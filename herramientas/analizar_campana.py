@@ -38,7 +38,15 @@ import sys
 # esquema JSON lo impone al escribir y esto lo vuelve a imponer al leer. Un
 # registro escrito a mano que se salte el validador no se cuela por aqui.
 CAUSAS_ADMITIDAS = {"caida_gazebo", "controladores_incompletos",
-                    "rtf_bajo", "fallo_anfitrion"}
+                    "rtf_bajo", "fallo_anfitrion",
+                    # Anadida el 2026-09-14 con RF-29. Una mision cancelada
+                    # cierra con exito=false, asi que sin esta causa el
+                    # analizador la contaria como FALLO DEL SISTEMA contra la
+                    # tasa de exito de RF-23, cuando quien la detuvo fue un
+                    # humano. Es la unica de las cinco que provoca el operador
+                    # -el mismo que mira el resultado-, y por eso el §8 le pone
+                    # tres reglas de campo que este archivo no puede comprobar.
+                    "cancelacion_usuario"}
 
 # §8: "Si los descartes superan el 20 % de las corridas, la campana no es
 # valida". "Superan" es estricto: el 20 % justo pasa.

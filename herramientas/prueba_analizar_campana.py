@@ -210,9 +210,28 @@ def pruebas_de_descartes():
           any("exito" in e and "null" in e for e in inf["errores"]),
           f"-> {inf['errores']}")
 
-    check("el enumerado cerrado tiene exactamente las cuatro causas del §8",
+    # Esta comprobacion existe para que ampliar la lista cerrada DUELA. Decia
+    # "las cuatro causas" y fallo el 2026-09-14 al entrar la quinta, que es
+    # exactamente lo que tenia que hacer: obliga a que quien la amplie pase por
+    # aqui, por el §8 del protocolo y por el enum del esquema, en vez de colar
+    # una excusa de descarte en un solo sitio y en silencio.
+    check("el enumerado cerrado tiene exactamente las cinco causas del §8",
           CAUSAS_ADMITIDAS == {"caida_gazebo", "controladores_incompletos",
-                               "rtf_bajo", "fallo_anfitrion"})
+                               "rtf_bajo", "fallo_anfitrion",
+                               "cancelacion_usuario"})
+
+    # La quinta la provoca el OPERADOR y no la maquina, asi que se comprueba lo
+    # que de verdad importa de ella: que se comporte como descarte y no como
+    # fallo. Sin esto, una mision cancelada -que cierra con exito=false- restaria
+    # en la tasa de exito de RF-23 y el sistema cargaria con lo que hizo un
+    # humano. Es el motivo entero por el que la causa se anadio.
+    cancelada = reg(exito=None, descartada=True, causa="cancelacion_usuario")
+    inf = analizar(campana(29) + [cancelada])
+    check("una mision cancelada se descarta, no cuenta como fallo",
+          inf["exito"]["n"] == 29 and inf["descartes"]["n"] == 1,
+          f"-> N={inf['exito']['n']}, descartes={inf['descartes']['n']}")
+    check("y no produce ningun error del §8",
+          not inf["errores"], f"-> {inf['errores']}")
 
 
 # --------------------------------------------------------------------------

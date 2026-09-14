@@ -172,6 +172,7 @@ proponía justamente esa misión mixta. Ya no es una salida.
 | **RF-19** | La HRI se comunica **solo con `/coordinacion`**, nunca con los agentes | Inspección de la superficie expuesta por `rosbridge`: ningún tópico `/robotN/*` | 🟢 **Verificado el 2026-09-02.** El código de `interfaz_web/` no referencia ningún tópico `/robotN/*`; solo suscribe `/coordinacion/puntos_interes` y `/coordinacion/estado_mision`, y llama `/coordinacion/guiar_usuario` | S22 |
 | **RF-20** | La HRI es accesible desde el **navegador de un teléfono**, sin instalación | Carga y operación completa desde un móvil en la misma red | 🟢 **Verificado el 2026-09-10** en un teléfono real, SSID `DEEPRACER`, y con las dos mitades del criterio: **carga** (la página se sirvió y el led se puso verde, o sea WebSocket establecido contra `rosbridge`, no solo HTML entregado) y **operación** —desde el móvil se eligió `piso1_etm2` → `piso2_aula_302` y la misión se completó con relevo—. Sin dependencias externas ni CDN. La evidencia no es la pantalla sino el registro validado [`S22_RF20_telefono_C_02.json`](Evidencia/registros/S22_RF20_telefono_C_02.json): veredicto `exito: true`, `c3_relevo: true`, RTF 0,9949. Hizo falta abrir 8000 y 9090 en `ufw` acotados a la subred ([`RUNBOOK_CAMPANA.md`](RUNBOOK_CAMPANA.md) §4.1) | S22 |
 | **RF-28** | En una misión entre niveles, el tramo del piso de destino **no inicia hasta que el usuario confirma** el cambio de piso desde la interfaz. Se avisa a los 60 s y la misión falla a los 120 s sin confirmación | Registro de una misión B con marcas de `ESPERANDO_CONFIRMACION`, más las tres corridas del §7 de [`DISENO_CONFIRMACION_PISO.md`](DISENO_CONFIRMACION_PISO.md) | 🟢 **Verificado el 2026-09-10 con las tres corridas**, evidencia en [`S22_RF28_confirmacion.md`](Evidencia/S22_RF28_confirmacion.md) y registros `S22_RF28_{A,B,C}V3.json`, los tres validados contra el esquema. Mismo origen y destino, una sola variable —qué hizo la persona—: **A** confirmó a los 11,9 s y la misión cerró en 56,4 s; **B** esperó la alerta y confirmó a los 73,8 s, cerró en 122,6 s; **C** no confirmó y la misión pasó a `FALLIDA` a los **119,9 s**. La separación entre la pregunta y la alerta es de **60,0 s de simulación exactos** en B y en C. La prueba del acto del usuario no es la reacción del coordinador sino `/coordinacion/confirmacion_piso`, que desde esta campaña se graba: **1 mensaje en A y B con el `mision_id` de la misión en vuelo, 0 en C**, y el `TRAMO_2` arranca **≤ 0,1 s** después de la pulsación. El `robot_activo` de todas las marcas de etapa 7 dice `robot2` y nunca queda vacío, que es lo que mantiene cierta la continuidad de RF-24 en toda misión entre niveles. **Defecto de integración que esto destapó y que conviene no olvidar:** con `rosbridge` en su valor por omisión el botón no hacía nada —atiende la meta de acción en el mismo hilo con el que lee el WebSocket—, así que la §4.1 del [`RUNBOOK_CAMPANA.md`](RUNBOOK_CAMPANA.md) exige ahora `send_action_goals_in_new_thread:=true` | S22 |
+| **RF-29** | El usuario **cancela una misión en curso** desde la interfaz. El robot que la ejecutaba **regresa al punto de transferencia de su propio nivel** antes de que la misión cierre, y la misión cierra declarando la cancelación como motivo | Registro de una misión cancelada a mitad de tramo, con **cuatro** condiciones que se comprueban por separado, y **una corrida de control**: (1) aparece al menos una marca de etapa `CANCELANDO` con `destino_actual` igual al punto de transferencia del nivel del robot activo; (2) `/odom` sitúa al robot a **≤ 0,25 m** de ese punto —la misma tolerancia del §5 del [protocolo](PROTOCOLO_EXPERIMENTAL.md), y contra `/odom` y no contra el `SUCCEEDED` de Nav2, por la regla del 2026-08-12—; (3) la misión termina con `exito: false` y `motivo_fallo` = `"Cancelada por el usuario"`; (4) el registro valida contra el esquema. **Control:** una misión equivalente **sin** cancelar no produce ninguna marca de etapa 8. Las cuatro condiciones son falsables y la versión del código anterior al 2026-09-14 fallaba la (1) siempre —`rclpy` rechazaba toda cancelación sin `cancel_callback`—, que es lo que hace de esto una medida y no un invariante de diseño (la lección de **R14**) | 🟡 **Implementado y revisado el 2026-09-14**, sin verificar. Entra con la fusión de la rama `hri-cancelar-y-buscador`: el servidor de acción registra `cancel_callback`, el sub-objetivo de Nav2 se cancela junto con el de arriba —y se espera a que Nav2 confirme la cancelación **y** a que el sub-objetivo termine, porque mandar el de vuelta a casa de inmediato lo abortaba en estado 6—, y el robot vuelve a su escalera con hasta **tres intentos** y limpieza del mapa de costos entre ellos, porque parar a mitad de una cúspide de Hybrid-A* deja al vehículo un instante en `lethal space`. **Lo que falta es exactamente la prueba:** no se ha corrido una misión cancelada con registro, y por eso está en amarillo y no en verde. **Consecuencia de protocolo que esto obliga a cerrar antes:** una misión cancelada cierra con `exito: false`, así que sin una causa de descarte que la recoja se contaría como **fallo** contra la tasa de éxito de RF-23 — ver `cancelacion_usuario` en el §8 del [protocolo](PROTOCOLO_EXPERIMENTAL.md) | S23 |
 
 **Lectura de OE3 al 2026-09-02.** La interfaz se adelantó del S22 (7–13 sep) al final de S21: los
 cuatro requisitos tienen implementación, y tres están verificados contra un `coordinador` real (sin
@@ -326,10 +327,10 @@ del proyecto: sin ellos no hay resultado que sustentar.
 |---|---|---|---|---|
 | OE1 | RF-01 a RF-10 | **10** | **0** | ~~S20–S21~~ ~~**S21**, salvo RF-08~~ **S22 — cerrado** |
 | OE2 | RF-11 a RF-16 | 0 (**5** parciales) | **1** (RF-15) | S19–S22 |
-| OE3 | RF-17 a RF-20, RF-28 | **5** | **0** | **S22 — cerrado** |
+| OE3 | RF-17 a RF-20, RF-28, RF-29 | **5** | **1** (RF-29) | ~~**S22 — cerrado**~~ **reabierto el 2026-09-14 por RF-29; cierre en S23** |
 | OE4 | RF-21 a RF-27 | **6** | 1 | ~~S20–S25~~ **S21**, salvo RF-27 (física) |
 | Restricciones | RNF-01 a RNF-07 | 6 | 1 parcial | — |
-| **Total** | **35** | **27** | **2 + 6 parciales** | |
+| **Total** | **36** | **27** | **3 + 6 parciales** | |
 
 > **El total sube de 34 a 35 el 2026-09-10** con la entrada de **RF-28**, que no estaba en el
 > anteproyecto: lo pidió el director como situación de experiencia de usuario. Es **funcionalidad
@@ -340,18 +341,30 @@ del proyecto: sin ellos no hay resultado que sustentar.
 > se verificó y RF-25 cerró su último campo**, de modo que los verificados suben a **27** y los
 > pendientes bajan a **2**, los dos de hardware.
 >
+> **El total sube de 35 a 36 el 2026-09-14** con **RF-29**, la cancelación de misión, que es la
+> **segunda** de las situaciones de experiencia de usuario que planteó el director —RF-28 fue la
+> primera— y tampoco sale del anteproyecto. Entra ya implementada y revisada, pero **sin verificar**,
+> así que los verificados **siguen en 27** y los pendientes suben de 2 a **3**. Es funcionalidad
+> añadida y no una corrección: no toca el planificador ni ninguna de las cuatro métricas de OE4,
+> luego **la campaña de 30 misiones no se reejecuta**. Con esto **OE3 se reabre**: estaba cerrado
+> desde el 10-sep con cinco de cinco y pasa a cinco de seis. Se deja escrito en vez de dejar el
+> requisito fuera de la matriz, que era la alternativa cómoda: el código está en `main` desde el 14,
+> y código en `main` sin fila en esta tabla es exactamente lo que este documento existe para impedir.
+>
 > **Dos erratas de aritmética corregidas el 2026-09-11**, encontradas al recontar fila por fila en
 > vez de arrastrar el total: esta tabla decía **24** verificados cuando sus propias filas sumaban
 > 25, y **8** parciales cuando eran 7 (los cinco de OE2, RNF-03 y RF-25). El texto de abajo repetía
 > el 24. No cambia ninguna conclusión, pero un tablero que no cuadra consigo mismo no se puede citar
 > en el documento final.
 
-**Veintisiete de treinta y cinco requisitos están verificados** al 2026-09-11, y ya no son solo
+**Veintisiete de treinta y seis requisitos están verificados** al 2026-09-14, y ya no son solo
 los de infraestructura: los cinco que entraron por OE4 (RF-21 a RF-24 y RF-26) son **las cuatro
 métricas más la campaña de N = 30**, y los cuatro que entraron por OE1 (RF-04 a RF-07) incluyen **el
 protocolo de relevo**, o sea el aporte declarado. Con RF-08 cerrado el 7 de septiembre **OE1 queda
-completo: diez de diez**, y con RF-28 cerrado el 10 **OE3 queda completo: cinco de cinco**.
-**Quedan dos pendientes y seis parciales**, y conviene mirarlos por lo que los bloquea, no por
+completo: diez de diez**. **OE3 llegó a estar completo el 10 —cinco de cinco— y el 14 vuelve a
+cinco de seis** con la entrada de RF-29; no es un retroceso de trabajo sino un requisito nuevo que
+llega con su código ya escrito y sin su prueba.
+**Quedan tres pendientes y seis parciales**, y conviene mirarlos por lo que los bloquea, no por
 cuántos son:
 
 - **RF-14** (comando desde ROS 2), ya en 🟡 — falta **calibrar la escala** de la cadena `/cmd_vel`
@@ -362,21 +375,30 @@ cuántos son:
 - **RF-27** (campaña física de 5 a 10 corridas) — depende del GO/NO-GO de hardware, que **sigue
   abierto** porque G2 se detuvo por su propia regla de parada.
 - ~~**RF-28** (confirmación del cambio de piso)~~ — **cerrado el 2026-09-10**, el mismo día que
-  entró: implementación y las tres corridas del §7 del diseño. Fue el último pendiente que se
-  resolvía solo escribiendo código.
+  entró: implementación y las tres corridas del §7 del diseño.
+- **RF-29** (cancelación de misión), en 🟡 desde el 2026-09-14 — **no lo bloquea nada**. El código
+  está en `main` y lo que falta es una corrida en simulación con registro: una misión cancelada a
+  mitad de tramo y una de control sin cancelar. No necesita hardware, no necesita a nadie más, y
+  cabe en una tarde. **Es el único pendiente de los tres que se resuelve sin que aparezca un carro.**
 - **RF-11, RF-12 y RF-13**, los tres parciales de OE2 — tras la revisión del 5-sep lo que les falta
   está acotado y **también le basta un vehículo**: el mapa de costos local sobre el carro, la
   lectura de `/<ns>/odom`, y discriminar el +2,9 % de escala de la odometría láser con la prueba
   del `.pgm` que ya está definida.
 
-O sea: **los dos pendientes que quedan dependen los dos de que el hardware aparezca** —RF-15 por
-R11, RF-27 por el GO/NO-GO—. La frase fuerte vuelve a ser cierta desde el 2026-09-10: *no queda
-ningún pendiente que se resuelva solo escribiendo código*. Lo fue hasta el 7 de septiembre con
-RF-08, **RF-28 la reabrió durante un día** —lo pidió el director como situación de experiencia de
-usuario, no sale del anteproyecto, y es la primera de seis que él planteó— y volvió a cerrarse con
-las tres corridas del 10. Queda escrito aquí para que ni la reapertura se lea como un retroceso ni
-el cierre como que las otras cinco situaciones del director ya estén hechas: **no lo están**, y no
-son requisitos. Y de los seis parciales, **los tres de OE2 no
+O sea: **dos de los tres pendientes dependen de que el hardware aparezca** —RF-15 por R11, RF-27 por
+el GO/NO-GO—, y el tercero, RF-29, no depende de nada. La frase fuerte que este párrafo venía
+sosteniendo —*no queda ningún pendiente que se resuelva solo escribiendo código*— **vuelve a ser
+falsa el 2026-09-14**, y se deja escrito así. Lo fue hasta el 7 de septiembre con RF-08, **RF-28 la
+rompió durante un día** —lo pidió el director como situación de experiencia de usuario, no sale del
+anteproyecto, y es la primera de seis que él planteó— y volvió a cerrarse con las tres corridas del
+10; **RF-29 la rompe otra vez**, y con menos excusa, porque aquí el código ya está escrito y lo que
+falta es la corrida que lo comprueba. Queda escrito aquí para que ni las reaperturas se lean como un
+retroceso ni el cierre de RF-28 como que las otras situaciones del director ya estén hechas:
+**quedan tres sin diseñar** —pausar, alerta cuando el vehículo no puede avanzar, y batería visible
+en la interfaz—, y no son requisitos. El *homing*, que el §5 de
+[`DISENO_CONFIRMACION_PISO.md`](DISENO_CONFIRMACION_PISO.md) reservaba como pieza aparte, **queda
+absorbido por RF-29**: el regreso a la escalera es lo que hace la cancelación, no un requisito
+separado. Y de los seis parciales, **los tres de OE2 no
 están esperando a R11**: esperan una jornada de laboratorio con el vehículo que sí hay, igual que
 la escala de RF-14.
 

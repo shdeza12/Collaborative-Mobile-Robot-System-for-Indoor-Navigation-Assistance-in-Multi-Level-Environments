@@ -269,9 +269,9 @@
         "gzserver_vivo_al_final": {"type": ["boolean", "null"]},
         "descartada": {"type": "boolean"},
         "causa_descarte": {
-          "comentario": "Lista CERRADA del §8 del protocolo. 'AMCL se perdio' y 'no encontro ruta' NO estan, y no es un olvido: son precisamente los modos de fallo que el experimento existe para cuantificar. Aqui 'la lista es cerrada' deja de ser una frase del documento y pasa a ser algo que el archivo no permite violar.",
+          "comentario": "Lista CERRADA del §8 del protocolo. 'AMCL se perdio' y 'no encontro ruta' NO estan, y no es un olvido: son precisamente los modos de fallo que el experimento existe para cuantificar. Aqui 'la lista es cerrada' deja de ser una frase del documento y pasa a ser algo que el archivo no permite violar. 'cancelacion_usuario' entra en 1.2.0 el 2026-09-14 con RF-29: una mision cancelada cierra con exito=false, asi que sin esta causa se contaria como fallo del sistema cuando quien la detuvo fue un humano. Es la unica de las cinco que provoca el OPERADOR y no la maquina, y por eso el §8 le pone tres reglas que este archivo NO puede imponer -la causa externa anotada con la hora antes de ver el resultado, 'parecia que iba a fallar' no vale, y no se cancela despues de la llegada-. Que el esquema no pueda comprobarlas es justamente por que estan escritas alli.",
           "enum": ["caida_gazebo", "controladores_incompletos", "rtf_bajo",
-                   "fallo_anfitrion", null]
+                   "fallo_anfitrion", "cancelacion_usuario", null]
         }
       }
     },
@@ -301,8 +301,8 @@
 
   "allOf": [
     {
-      "comentario": "A partir de 1.1.0 el campo de continuidad es obligatorio. Antes no existia. Un registro nuevo sin el no valida -que es el punto: RF-24 es la variable de respuesta principal y no puede volver a quedarse sin medir por olvido-, y los tres de S20, escritos en 1.0.0, siguen validando sin tocarlos.",
-      "if": {"properties": {"esquema_version": {"const": "1.1.0"}},
+      "comentario": "A partir de 1.1.0 el campo de continuidad es obligatorio. Antes no existia. Un registro nuevo sin el no valida -que es el punto: RF-24 es la variable de respuesta principal y no puede volver a quedarse sin medir por olvido-, y los tres de S20, escritos en 1.0.0, siguen validando sin tocarlos. OJO, Y ESTA ES LA TRAMPA QUE 1.2.0 CASI PISA el 2026-09-14: esto decia 'const: 1.1.0'. Subir la version a 1.2.0 sin tocarlo habria hecho que la condicion dejara de dispararse, y 'continuidad' habria dejado de ser obligatoria EN SILENCIO -el registro validaria igual, sin la variable de respuesta principal-. Por eso ahora es un enum de versiones y no una constante: cada version menor nueva se anade aqui a mano, a proposito, para que olvidarlo rompa la prueba en vez de aflojar el esquema.",
+      "if": {"properties": {"esquema_version": {"enum": ["1.1.0", "1.2.0"]}},
              "required": ["esquema_version"]},
       "then": {"properties": {"veredicto": {"required": ["continuidad"]}}}
     },
