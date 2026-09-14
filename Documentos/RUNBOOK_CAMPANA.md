@@ -10,6 +10,13 @@ levantar y depurar el sistema; ésta es una lista de verificación que se sigue 
 entendida. Mezclarlas haría que el día de la campaña haya que leer treinta páginas para ejecutar
 seis comandos.
 
+> **Si lo que buscas es arrancar el sistema, y no ejecutar una corrida de campaña, este no es el
+> documento.** Ve a [`GUIA_ARRANQUE.md`](GUIA_ARRANQUE.md), escrita el 2026-09-14. Este runbook es
+> del 2026-08-30 y **no conoce RF-28 ni RF-29**: no menciona la confirmación de piso ni la
+> cancelación, porque ninguna de las dos existía. Lo que sí sigue siendo suyo y no se ha duplicado
+> allí es el pilotaje (§0, §9.3), la comparación de los dos productores de registro (§6) y el
+> historial de por qué cada compuerta está donde está.
+
 El listado y su semilla salen de la §6.3 del [protocolo](PROTOCOLO_EXPERIMENTAL.md); el
 aislamiento entre corridas, de la §6.4; el pilotaje, de la §7.
 

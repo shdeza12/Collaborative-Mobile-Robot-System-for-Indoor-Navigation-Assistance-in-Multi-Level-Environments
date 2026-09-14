@@ -351,6 +351,15 @@ robot, sin prefijos. El estado y las limitaciones de este modo están en
 levantamiento del bloqueo de dominios en
 [`Documentos/Evidencia/S21_bloqueo_dominios.md`](Documentos/Evidencia/S21_bloqueo_dominios.md).
 
+### Una misión completa, de punta a punta
+
+Los dos comandos de arriba dejan las pilas levantadas, que es donde termina este README. **Lo que
+sigue —el coordinador, la interfaz del teléfono, lanzar una misión y componer su evidencia— está
+en [`Documentos/GUIA_ARRANQUE.md`](Documentos/GUIA_ARRANQUE.md)**, y ése es el documento a seguir
+para replicar el sistema completo: las siete terminales en orden, las tres clases de misión que
+soporta hoy —intra-nivel, entre pisos con confirmación del usuario, y cancelación— y los cinco
+criterios por los que una corrida vale o se descarta.
+
 ---
 
 ## Guardar y verificar un mapa
