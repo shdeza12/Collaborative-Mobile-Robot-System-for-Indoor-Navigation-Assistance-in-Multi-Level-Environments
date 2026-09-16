@@ -85,13 +85,40 @@ t_respuesta = t_primer_movimiento − t_solicitud
   sistema robótico y no se puede medir desde dentro.
 - **`t_primer_movimiento`**: primera muestra de `/<ns>/odom` del robot asignado en la que
   `|v| ≥ 0,02 m/s` **y las dos muestras siguientes también**. Las tres muestras consecutivas están
-  para no disparar con un pico de ruido; a 50 Hz cuestan 60 ms, muy por debajo de la resolución que
-  interesa.
+  para no disparar con un pico de ruido, y en la base de tiempo del bag **cuestan 0 ms o 100 ms**:
+  con `/clock` a 10 Hz, `ros2 bag record --use-sim-time` sella las tres con el mismo tick o con dos.
+  El filtro antirruido no estropea la medida —un coste de un tick sigue cayendo dentro de un
+  escalón—, que es lo que importa.
+
+> **Corregido el 2026-09-16.** Aquí decía «a 50 Hz cuestan 60 ms». La frase mezcla dos relojes: el
+> vehículo publica `/odom` a 50 Hz, pero lo que el bag sella es el tick de `/clock`, y ése va a
+> 10 Hz (§3.2.1). Tres muestras a 50 Hz tampoco son 60 ms sino 40 —del primer sello al tercero hay
+> dos intervalos, no tres—, así que el número estaba mal por partida doble. La conclusión no cambia;
+> el número sí.
 
 > El umbral de 0,02 m/s no es arbitrario: es dos órdenes de magnitud menor que la velocidad de
 > crucero configurada (`desired_linear_vel: 0.5`) y mayor que el ruido en reposo observado. Si al
 > pilotar (§7) resulta que el ruido en reposo lo supera, **se cambia el umbral en este documento y
 > se vuelve a pilotar**, no se ajusta a mitad de campaña.
+
+#### 3.1.1 Cómo se reporta: por escalones, no con media y desviación
+
+*Añadido el 2026-09-16, tras el barrido de S22.* El tiempo de respuesta **sí varía**, que es más de
+lo que se podía decir de RF-22. Pero su rango entero en las 30 corridas son cuatro valores:
+
+| `t_respuesta` | 0,1 s | 0,2 s | 0,3 s | 0,4 s |
+|---|---|---|---|---|
+| misiones | 10 | 15 | 4 | 1 |
+
+Todos múltiplos exactos de 100 ms, que es el tick de `/clock` (§3.2.1). **La resolución del
+instrumento es del orden de la magnitud medida** —entre el 25 % y el 100 % del valor—, así que la
+mediana de 0,2 s significa «uno o dos ticks», no «doscientos milisegundos».
+
+Se reporta, por tanto, **la distribución de escalones de la tabla de arriba, o una cota**. La cota
+que importa para un usuario —«el robot arranca en menos de medio segundo»— se sostiene con holgura
+en las 30. Lo que **no** se hace es dar media y desviación típica: sugerirían una precisión que el
+reloj no da. El analizador las calcula, y están en su salida porque sirven para comparar lotes entre
+sí; lo que no pueden es llegar al informe como si fueran la medida.
 
 ### 3.2 Tiempo de asignación (RF-22)
 
@@ -190,6 +217,15 @@ Una misión es **exitosa** si y solo si se cumplen las tres:
 2. La misión llegó a `etapa = COMPLETADA` sin pasar por `FALLIDA`.
 3. En una misión entre niveles, hubo relevo: `num_relevos = 1`.
 
+> **Qué comprueba realmente la condición 3, dicho desde el 2026-09-16.** `num_relevos` sale de
+> `res.num_relevos = relevos` en el coordinador, y ése es **lo que devolvió `planificar()`**, no lo
+> que hizo el sistema. Con dos pisos, un par entre niveles siempre planifica exactamente un relevo.
+> Luego: si la planificación tuvo éxito, `c3` es verdadero **siempre**; y si falló, `c2` ya es falso
+> porque se publicó `FALLIDA`. La condición 3 **verifica el plan, no la ejecución**, y por eso salió
+> 15/15 en verde incluidas las misiones que fallaron. Se mantiene —comprobar que el planificador no
+> devuelve un plan degenerado tiene valor— pero no se puede presentar como evidencia de que el
+> relevo ocurrió. Esa evidencia es el hueco del §3.4.
+
 **El rumbo de llegada NO es criterio de éxito.** Se mide y se reporta siempre, como variable
 descriptiva, pero no decide. La razón está en §4.
 
@@ -223,8 +259,31 @@ La continuidad **se cumple** si durante todo el intervalo `[t_robot_activo, t_co
 `etapa` de `estado_mision` nunca vale `INACTIVA`, y `robot_activo` nunca queda vacío. Es decir: en
 ningún momento la misión se queda sin nadie a cargo.
 
-`hueco` se reporta aunque la continuidad se cumpla: un relevo correcto pero de 40 s es un mal
-resultado que la variable binaria escondería.
+#### 3.4.1 La binaria es un invariante estructural; la evidencia es el hueco
+
+*Reescrito el 2026-09-16, tras el barrido de S22 y con la campaña ya ejecutada.* Hay que decir con
+precisión qué puede y qué no puede hacer cada mitad de este criterio, porque RF-24 es la variable de
+respuesta principal del §2 y presentarlo mal sería el peor error del informe.
+
+**La binaria no puede dar «no».** Los únicos dos productores de los valores que la incumplirían
+están en `coordinacion/coordinador.py`, y los dos caen **fuera de la ventana por delante**:
+`etapa = INACTIVA` solo se publica en el constructor del nodo, antes de la primera misión; y
+`robot_activo` vacío solo en `_marcar(RECIBIDA, …)` y en el `FALLIDA` del fallo de planificación,
+ambos anteriores a `t_robot_activo`, que es donde la ventana **abre**. Dentro del bucle de tramos
+cada `_marcar` recibe un robot lleno. El resultado de la campaña —**0 incumplimientos de 0
+posibles**, 14/14— es por tanto un invariante del diseño del coordinador, no una medida del sistema.
+Se reporta así, literalmente: *«ninguna misión se quedó sin agente, y no podía quedarse, porque el
+coordinador no publica ninguno de los dos valores dentro de la ventana»*. Es una afirmación cierta y
+verificable sobre la arquitectura; lo que no es, es un resultado experimental.
+
+**La evidencia del relevo es el hueco**, y ésa sí varía. Se reporta como **cota: `hueco ≤ 200 ms` en
+las 15 misiones entre niveles** de la campaña. Con la misma advertencia del §3.1.1: el hueco tomó
+exactamente dos valores, 0,1 s y 0,2 s, o sea **uno o dos ticks** de `/clock`; la mediana de 0,1 s no
+significa «cien milisegundos», significa «un tick». La cota es lo defendible.
+
+`hueco` se reporta aunque la continuidad se cumpla —un relevo correcto pero de 40 s sería un mal
+resultado que la binaria escondería—, y desde el esquema `1.3.0` (2026-09-16) va en el propio
+registro, en `descriptivas.hueco_relevo_s`, y no solo dentro del analizador.
 
 > **Enmienda del 2026-08-31: el intervalo empieza en `t_robot_activo`, no en `t_solicitud`.** La
 > versión congelada el 22-ago decía `[t_solicitud, t_completada]`, y con la implementación de hoy esa
@@ -238,8 +297,13 @@ resultado que la variable binaria escondería.
 > está midiendo la definición.** El tramo que se excluye no queda sin vigilar; es exactamente lo que
 > mide RF-22, acotado a menos de un tick de `/clock` (§3.2.2).
 >
-> El cierre es `t_completada` **inclusive**. Después el coordinador vuelve a `INACTIVA`, que es su
-> reposo normal, y contarlo sería el mismo error por el otro extremo.
+> El cierre es `t_completada` **inclusive**. *(Frase corregida el 2026-09-16: aquí decía «después el
+> coordinador vuelve a `INACTIVA`, que es su reposo normal». **No vuelve.** `INACTIVA` aparece dos
+> veces en `coordinador.py` —en el `import` y en el constructor— y no se publica nunca más; al
+> terminar una misión el coordinador se queda republicando el estado terminal a 1 Hz hasta que llega
+> una solicitud nueva. Cerrar en `t_completada` sigue siendo lo correcto, pero por otra razón: lo que
+> hay después no es reposo, es residuo de la misión anterior, y es el mismo residuo que obliga al
+> compositor a filtrar por `mision_id`.)*
 >
 > La enmienda se hace en S21, **antes de ejecutar ninguna corrida de campaña**, así que no hay datos
 > afectados. Se descubrió al escribir el analizador, que es para lo que sirve escribirlo antes de
