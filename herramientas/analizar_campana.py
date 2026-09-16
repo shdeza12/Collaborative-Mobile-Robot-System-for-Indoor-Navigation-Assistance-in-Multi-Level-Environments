@@ -64,12 +64,35 @@ UMBRAL_LLEGADA_M = 0.25
 # RF-26 / §6.1.
 N_SIMULACION = 30
 
-# Las dos versiones del registro que este analizador entiende. 1.1.0 anadio
-# veredicto.continuidad el 2026-08-31; 1.0.0 se sigue leyendo porque los tres
-# registros de S20 son evidencia entregada y no se reescribe la historia. Lo que
-# NO se hace es tratar su ausencia de continuidad como continuidad: las misiones
-# 1.0.0 salen del denominador de RF-24 y se listan.
-VERSIONES_LEIBLES = {"1.0.0", "1.1.0"}
+# RNF-01, §3.4: ningun robot cambia de nivel; lo que cruza es el mensaje. Hasta
+# el 2026-09-16 el criterio decia "z permanece constante" y no tenia numero, asi
+# que nada lo evaluaba: 7,012 mm atravesaron 30 corridas sin que se senalaran,
+# siendo 3690 veces la referencia que el propio § citaba. No era una violacion
+# -un piso son metros, y la dispersion entre las 60 parejas fue de 3 um: es la
+# altura de reposo sobre la suspension, un desplazamiento fijo-, pero si z SI se
+# hubiera movido este mecanismo tampoco lo habria dicho.
+#
+# OJO CON QUE SE COMPARA. 'descriptivas.desviacion_z_m' NO es una desviacion
+# tipica: es max|z| sobre la mision. Acotar |z| es MAS fuerte que acotar la
+# dispersion -si max|z| < 0,05 m, dos muestras cualesquiera distan menos de
+# 0,10 m-, asi que el umbral sirve; pero se reporta como COTA y no como sigma,
+# porque ponerle nombre de estadistico a una cifra que mide otra cosa es
+# exactamente el patron que el barrido de S22 existe para cazar.
+UMBRAL_Z_M = 0.05
+
+# Las versiones del registro que este analizador entiende. 1.1.0 anadio
+# veredicto.continuidad el 2026-08-31; 1.2.0 la causa de descarte de RF-29 el
+# 14-sep; 1.3.0 el hueco de relevo el 16-sep. 1.0.0 se sigue leyendo porque los
+# tres registros de S20 son evidencia entregada y no se reescribe la historia.
+# Lo que NO se hace es tratar su ausencia de continuidad como continuidad: las
+# misiones 1.0.0 salen del denominador de RF-24 y se listan.
+#
+# ESTA LISTA SE DESFASO UNA VEZ, y costo datos: 1.2.0 entro sin tocarla y los
+# DOS registros de RF-29 -el requisito para el que 1.2.0 se creo- se quedaron
+# fuera del analisis durante dos dias, listados como 'omitido'. Ahora
+# prueba_analizar_campana.py comprueba que componer_registro.ESQUEMA_VERSION
+# este aqui dentro, asi que la proxima version no puede colarse en silencio.
+VERSIONES_LEIBLES = {"1.0.0", "1.1.0", "1.2.0", "1.3.0"}
 
 # t de Student de dos colas al 95 %. Sin scipy a proposito: el analizador tiene
 # que correr en el portatil, en el carro y en la maquina del jurado.
@@ -379,6 +402,43 @@ def analizar(registros, incluir_pilotos=False):
     llegada["por_encima_de_025"] = sum(1 for e in errs
                                        if e is not None and e > UMBRAL_LLEGADA_M)
 
+    # --- RNF-01: constancia de z, con umbral ------------------------------
+    # Una pareja por ROBOT y por mision, no una por mision: la afirmacion del
+    # §3.4 es sobre cada agente, y promediar los dos robots de una mision
+    # escondaria justo al que se hubiera movido.
+    zetas, fuera, sin_z = [], [], []
+    for r in validas:
+        d = r.get("descriptivas", {}).get("desviacion_z_m")
+        if not isinstance(d, dict) or not d:
+            sin_z.append(_id(r))
+            continue
+        for ns, v in sorted(d.items()):
+            if v is None:
+                sin_z.append(f"{_id(r)}/{ns}")
+                continue
+            zetas.append(v)
+            if v > UMBRAL_Z_M:
+                fuera.append(f"{_id(r)}/{ns}")
+    rnf01 = resumen_continuo(zetas)
+    rnf01["umbral_m"] = UMBRAL_Z_M
+    rnf01["fuera"] = fuera
+    rnf01["sin_campo"] = sin_z
+    rnf01["nota"] = ("La cifra es max|z| por robot y mision, una COTA y no una "
+                     "desviacion tipica. Acotarla acota la variacion: dos "
+                     "muestras cualesquiera distan menos del doble.")
+    if fuera:
+        alertas.append(
+            f"RNF-01 incumplido en {len(fuera)} pareja(s) robot-mision "
+            f"({', '.join(fuera[:5])}): |z| supera los {UMBRAL_Z_M:.2f} m, o sea "
+            "que un agente se movio en vertical mas de lo que la suspension "
+            "explica. RNF-01 dice que lo que cruza de nivel es el mensaje, no "
+            "el robot: esto es el resultado, no una incidencia.")
+    if sin_z:
+        alertas.append(
+            f"RNF-01 no es comprobable en {len(sin_z)} caso(s) "
+            f"({', '.join(sin_z[:5])}): el registro no trae desviacion_z_m. NO "
+            "se cuentan como cumplimiento; hay que recomponerlos desde el bag.")
+
     # --- Tamano de muestra ------------------------------------------------
     if banco == "simulacion" and total and total != N_SIMULACION:
         alertas.append(
@@ -415,7 +475,8 @@ def analizar(registros, incluir_pilotos=False):
             "leidos": len(registros), "pilotos": len(pilotos),
             "exito": tasa, "descartes": desc, "respuesta": respuesta,
             "asignacion": asignacion, "continuidad": continuidad,
-            "llegada": llegada, "errores": errores, "alertas": alertas}
+            "llegada": llegada, "rnf01": rnf01, "errores": errores,
+            "alertas": alertas}
 
 
 # --------------------------------------------------------------------------
@@ -504,6 +565,18 @@ def formatear(inf):
     if g["n"]:
         L.append(f"  por encima de {g['umbral_m']} m: "
                  f"{g['por_encima_de_025']}/{g['n']}")
+
+    z = inf["rnf01"]
+    L.append(f"\nRNF-01 · Constancia de z (§3.4)  ·  cota |z| <= "
+             f"{z['umbral_m']:.2f} m por robot y mision")
+    L.append(_linea_continua("max|z|", z, unidad="m"))
+    if z["n"]:
+        L.append(f"  fuera de la cota: {len(z['fuera'])}/{z['n']}"
+                 + (f"  ->  {', '.join(z['fuera'][:5])}" if z["fuera"] else ""))
+    if z["sin_campo"]:
+        L.append(f"  sin el campo: {len(z['sin_campo'])} caso(s), NO contados "
+                 "como cumplimiento")
+    L.append(f"  {z['nota']}")
 
     if inf["errores"]:
         L.append("\nERRORES DE INTEGRIDAD (estos registros no se cuentan en "

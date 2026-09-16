@@ -255,9 +255,31 @@ incumplimiento, para poder volver al bag por ellos. Hasta esa versión el campo 
 cumplir las tres y aun así haber tenido un bache de coordinación; si la continuidad entrara en el
 `exito`, RF-23 y RF-24 dejarían de ser dos variables y la principal se perdería dentro de la otra.
 
-> **RNF-01 se verifica en la misma corrida:** la coordenada `z` de cada agente debe permanecer
-> constante durante toda la misión. Ningún robot cruza de nivel; lo que cruza es el mensaje. Se
-> comprueba con la desviación de `z` en `/odom`, que en S18 fue de 1,9 µm.
+> **RNF-01 se verifica en la misma corrida:** ningún robot cruza de nivel; lo que cruza es el
+> mensaje. El criterio es **`max|z| ≤ 0,05 m` por robot y por misión**, sobre la `z` de `/odom`.
+> `analizar_campana.py` lo agrega y lo reporta como las demás variables, y una pareja
+> robot–misión fuera de la cota es una alerta.
+
+**Por qué hay un número aquí desde el 2026-09-16, y por qué es ése.** Hasta esa fecha el criterio
+decía «la `z` debe permanecer constante» y citaba los 1,9 µm de S18 como referencia. «Constante» no
+es un criterio: no hay nada contra qué comparar, y `analizar_campana.py` ni mencionaba RNF-01, así
+que el campo **solo se escribía**. En la campaña de S21 se escribieron **7,012 mm** en las 60
+parejas robot–misión — 3690 veces la referencia citada — y nada lo señaló.
+
+No es un incumplimiento, y conviene decirlo antes que nada: cambiar de piso son metros, no
+milímetros, y la dispersión entre las 60 medidas fue de 3 µm, o sea que los 7 mm son un
+**desplazamiento fijo** —la altura de reposo del vehículo sobre la suspensión simulada— y no una
+deriva. El hallazgo es el otro: una cifra 3690 veces mayor que la referencia del propio párrafo
+atravesó 30 corridas sin que nada la señalara, y si la `z` **sí** se hubiera movido este mecanismo
+tampoco lo habría dicho. Los 0,05 m quedan dos órdenes de magnitud por debajo de cualquier cambio de
+nivel real y dos por encima del valor observado.
+
+**Y una precisión sobre qué estadístico se compara.** `descriptivas.desviacion_z_m` **no es una
+desviación típica**: es `max|z|` sobre la misión. Acotar `|z|` es *más* fuerte que acotar la
+dispersión —si `max|z| < 0,05 m`, dos muestras cualesquiera distan menos de 0,10 m—, así que la cota
+sirve, pero se reporta **como cota y no como σ**. Ponerle nombre de estadístico a una cifra que mide
+otra cosa es exactamente el patrón que el barrido de S22 existe para cazar, y no se va a introducir
+al corregirlo.
 
 ---
 

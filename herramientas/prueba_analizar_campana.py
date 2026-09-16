@@ -21,7 +21,8 @@ AQUI = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, AQUI)
 
 from analizar_campana import (  # noqa: E402
-    CAUSAS_ADMITIDAS, TECHO_DESCARTE, TICK_CLOCK_S,
+    CAUSAS_ADMITIDAS, TECHO_DESCARTE, TICK_CLOCK_S, UMBRAL_Z_M,
+    VERSIONES_LEIBLES,
     analizar, hueco_de, resumen_continuo, t_asignacion_de, t_respuesta_de,
     wilson,
 )
@@ -47,7 +48,8 @@ def reg(n=1, exito=True, condicion="A", descartada=False, causa=None,
         banco="simulacion", campana="S24_campana", piloto=False,
         t_solicitud=100.0, t_robot_activo=100.0, t_movimiento=101.4,
         t_fin_tramo1=None, t_inicio_tramo2=None, t_completada=160.0,
-        error_m=0.08, entre_niveles=None, version="1.1.0", continua=True):
+        error_m=0.08, entre_niveles=None, version="1.1.0", continua=True,
+        z=None):
     """Un registro minimo con la forma del esquema 1.0.0.
 
     Solo lleva los campos que el analizador mira. No valida contra el esquema
@@ -82,7 +84,11 @@ def reg(n=1, exito=True, condicion="A", descartada=False, causa=None,
                    "t_completada": t_completada},
         "verdad_de_terreno": {"error_posicion_m": error_m},
         "veredicto": veredicto,
-        "descriptivas": {"distancia_recorrida_m": 40.0, "tiempo_total_s": 60.0},
+        # 7,012 mm es el valor real de la campana de S21: la altura de reposo
+        # del vehiculo sobre la suspension simulada, fija en las 60 parejas.
+        "descriptivas": {"distancia_recorrida_m": 40.0, "tiempo_total_s": 60.0,
+                         "desviacion_z_m": ({"robot1": 0.007012}
+                                            if z is None else z)},
         "salud_del_banco": {"rtf": 0.999, "controladores_activos": {},
                             "gzserver_vivo_al_final": True,
                             "descartada": descartada, "causa_descarte": causa},
@@ -417,6 +423,88 @@ def pruebas_de_n():
           any("RF-26" in x for x in inf["alertas"]), f"-> {inf['alertas']}")
 
 
+# --------------------------------------------------------------------------
+# 11. Las versiones que el analizador sabe leer
+# --------------------------------------------------------------------------
+
+def pruebas_de_versiones():
+    """El desfase que se destapo el 2026-09-16, y que ya estaba costando datos.
+
+    'VERSIONES_LEIBLES' se quedo en {1.0.0, 1.1.0} cuando 1.2.0 entro el 14-sep.
+    Consecuencia real, no hipotetica: los DOS registros de RF-29 -el requisito
+    para el que 1.2.0 se creo- se quedaban fuera del analisis, listados como
+    'omitido'. El esquema tiene su trampa de enumerado para esto; el analizador
+    no tenia ninguna, asi que la version nueva pasaba la prueba del compositor y
+    moria aqui.
+    """
+    from componer_registro import ESQUEMA_VERSION  # noqa: E402
+
+    check("el analizador lee la version que el compositor escribe hoy",
+          ESQUEMA_VERSION in VERSIONES_LEIBLES,
+          f"-> compositor {ESQUEMA_VERSION}, analizador {sorted(VERSIONES_LEIBLES)}")
+    check("y sigue leyendo todas las anteriores, que son evidencia entregada",
+          {"1.0.0", "1.1.0", "1.2.0"} <= VERSIONES_LEIBLES,
+          f"-> {sorted(VERSIONES_LEIBLES)}")
+
+    inf = analizar(campana(30, version=ESQUEMA_VERSION))
+    check("una campana escrita con la version de hoy se analiza entera",
+          inf["exito"]["n"] == 30, f"-> N={inf['exito']['n']}")
+
+
+# --------------------------------------------------------------------------
+# 12. RNF-01: 'constante' no es un criterio sin un numero al lado
+# --------------------------------------------------------------------------
+
+def pruebas_de_rnf01():
+    """Accion 5 del §8 del barrido de S22.
+
+    El §3.4 decia que z 'debe permanecer constante' y citaba 1,9 um de S18. En
+    la campana se escribieron 7,012 mm -3690 veces mas- en las 60 parejas
+    robot-mision, y nada lo senalo: el criterio no tenia umbral ni evaluador.
+    No era una violacion -cambiar de piso son metros- pero el mecanismo tampoco
+    habria dicho nada si z SI se hubiera movido.
+
+    Ojo con que estadistico se compara, que es donde el barrido se quedo corto:
+    'desviacion_z_m' NO es una sigma, es max|z| sobre la mision. Acotar |z| es
+    mas fuerte que acotar la dispersion -si max|z| < 0,05 entonces dos muestras
+    cualesquiera distan menos de 0,10 m-, asi que sirve, pero hay que decir que
+    es una COTA y no una desviacion tipica. Lo contrario seria poner nombre de
+    estadistico a una cifra que mide otra cosa, que es el patron que el barrido
+    existe para cazar.
+    """
+    check("el umbral de RNF-01 esta fijado en 0,05 m", cerca(UMBRAL_Z_M, 0.05))
+
+    inf = analizar(campana(30))
+    r = inf["rnf01"]
+    check("se agrega una pareja robot-mision por robot, no una por mision",
+          r["n"] == 30, f"-> {r['n']}")
+    check("con los 7 mm reales de la campana, el maximo sale por debajo",
+          cerca(r["max"], 0.007012, tol=1e-6), f"-> {r['max']}")
+    check("y ninguna pareja incumple", r["fuera"] == [], f"-> {r['fuera']}")
+    check("sin incumplimientos no hay alerta de RNF-01",
+          not any("RNF-01" in x for x in inf["alertas"]), f"-> {inf['alertas']}")
+
+    # Un robot que sube de verdad. 3 m es un piso; el umbral lo caza con dos
+    # ordenes de magnitud de margen.
+    sube = reg(n=99, z={"robot1": 0.007, "robot2": 3.1})
+    inf = analizar(campana(29) + [sube])
+    check("un robot que cambia de nivel se marca, con robot y mision",
+          inf["rnf01"]["fuera"] == ["M99/robot2"], f"-> {inf['rnf01']['fuera']}")
+    check("...y RNF-01 sale en las alertas, no enterrado en un campo",
+          any("RNF-01" in x for x in inf["alertas"]), f"-> {inf['alertas']}")
+
+    # El campo es opcional en los registros viejos; su ausencia no puede
+    # contarse como cumplimiento, por la misma razon que la continuidad ausente
+    # no cuenta como continuidad.
+    sin_campo = reg(n=98)
+    del sin_campo["descriptivas"]["desviacion_z_m"]
+    inf = analizar(campana(29) + [sin_campo])
+    check("una mision sin el campo no se da por buena, se lista",
+          inf["rnf01"]["sin_campo"] == ["M98"], f"-> {inf['rnf01']['sin_campo']}")
+    check("...y tambien avisa", any("RNF-01" in x for x in inf["alertas"]),
+          f"-> {inf['alertas']}")
+
+
 def main():
     print("Intervalo de Wilson")
     pruebas_de_wilson()
@@ -438,6 +526,10 @@ def main():
     pruebas_de_llegada()
     print("Tamano de muestra (RF-26)")
     pruebas_de_n()
+    print("Versiones de registro que el analizador lee")
+    pruebas_de_versiones()
+    print("Constancia de z (RNF-01)")
+    pruebas_de_rnf01()
     print(f"\n{len(fallos)} fallo(s).")
     return 1 if fallos else 0
 
