@@ -1,0 +1,26 @@
+{
+  "requisito": "RF-15",
+  "fecha": "2026-09-15 00:19:36",
+  "emisor_host": "amss-ez9n",
+  "ecos_que_respondieron": [
+    "amss-jgm9"
+  ],
+  "enviados": 600,
+  "recibidos": 600,
+  "perdidos": 0,
+  "perdida_pct": 0.0,
+  "duplicados": 0,
+  "pongs_sin_ping_conocido": 0,
+  "hz_pedido": 10.0,
+  "relleno_bytes": 240,
+  "umbral_mediana_ms": 100.0,
+  "umbral_p95_ms": 250.0,
+  "minimo_muestras": 100,
+  "etiqueta": "carroA_carroB",
+  "min_ms": 4.736,
+  "mediana_ms": 7.61,
+  "p95_ms": 20.756,
+  "max_ms": 58.605,
+  "veredicto": "CUMPLE",
+  "motivo": "mediana, p95 y perdida dentro del criterio preinscrito"
+}

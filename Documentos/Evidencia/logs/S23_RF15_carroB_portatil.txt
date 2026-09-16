@@ -1,0 +1,99 @@
+RF-15, pareja 2 -- carro B (Jazzy) emisor  ->  portatil (Humble) eco
+Fecha: 2026-09-14
+
+QUE ES ESTE FICHERO. Es la transcripcion de consola de la corrida, no la salida
+del instrumento. El JSON que el medidor escribio quedo en /tmp del carro B y no
+alcanzo a copiarse: el vehiculo se descargo minutos despues y /tmp se limpia al
+arrancar. No se reconstruye el JSON a mano, porque un fichero escrito por una
+persona no es una medida del instrumento aunque tenga las mismas cifras.
+La pareja que RF-15 exige -carro contra carro- si tiene su JSON:
+Documentos/Evidencia/registros/S23_RF15_carroA_carroB.json
+
+POR QUE SE CORRIO. Para discriminar el origen de las lineas
+"sequence size exceeds remaining buffer" que habian aparecido el mismo dia en la
+pareja portatil -> carro A. La hipotesis en pie era que Jazzy emitia algo que
+Humble no sabia leer. Esta corrida la refuta.
+
+----------------------------------------------------------------------
+TERMINAL 1 -- eco en el portatil (Humble)
+----------------------------------------------------------------------
+[INFO] [1789432005.441010904] [rf15_eco]: eco en 'santiagopc': escuchando /rf15/ping, devolviendo por /rf15/pong. Ctrl-C para parar.
+sequence size exceeds remaining buffer          <- 22 lineas iguales
+[INFO] [1789431859.805655110] [rf15_eco]: 100 rebotados
+[INFO] [1789431869.781604703] [rf15_eco]: 200 rebotados
+[INFO] [1789431879.789591851] [rf15_eco]: 300 rebotados
+[INFO] [1789431889.776524337] [rf15_eco]: 400 rebotados
+[INFO] [1789431899.781026950] [rf15_eco]: 500 rebotados
+[INFO] [1789431909.783386556] [rf15_eco]: 600 rebotados
+sequence size exceeds remaining buffer          <- 10 lineas iguales
+^C
+eco parado tras 600 rebotes
+
+----------------------------------------------------------------------
+TERMINAL 2 -- emisor en carro B (Jazzy)
+----------------------------------------------------------------------
+emisor en 'amss-jgm9' -> 600 pings a 10.0 Hz (60 s), carga util +240 B
+esperando 2 s a que el eco aparezca en el grafo...
+enviados todos; esperando 2 s a los pongs en vuelo...
+
+==================================================================
+RF-15 -- ida y vuelta  [carroB_portatil]
+==================================================================
+  emisor      : amss-jgm9
+  eco         : santiagopc
+  enviados    : 600   recibidos: 600   perdidos: 0 (0.0 %)
+  ida y vuelta: min 3.285 ms | mediana 8.48 ms | p95 45.644 ms | max 98.549 ms
+------------------------------------------------------------------
+  VEREDICTO   : CUMPLE
+  mediana, p95 y perdida dentro del criterio preinscrito
+==================================================================
+
+escrito /tmp/rf15_carroB_portatil.json
+
+----------------------------------------------------------------------
+LO QUE ESTABLECE
+----------------------------------------------------------------------
+1. Jazzy -> Humble funciona: el eco Humble deserializo los 600 pings.
+2. Humble -> Jazzy funciona: el emisor Jazzy deserializo los 600 pongs.
+   Luego NO hay asimetria de serializacion entre las dos distribuciones
+   para std_msgs/Header. La hipotesis del XCDR queda refutada.
+3. Los 32 errores de buffer convivieron con 600 de 600 mensajes limpios,
+   0 perdidos y 0 duplicados. Si fueran los pongs habria perdida. No lo son.
+
+----------------------------------------------------------------------
+PRUEBAS DE CONTROL, el mismo dia
+----------------------------------------------------------------------
+CONTROL A -- eco solo, nadie publicando en /rf15/*, dominio 0, carros encendidos:
+  21 lineas "sequence size exceeds remaining buffer" en 30 s, CERO rebotes.
+  => los errores no dependen del trafico de RF-15.
+
+CONTROL B -- mismo eco con ROS_DOMAIN_ID=77, 20 s:
+  silencio absoluto, ni un error.
+  => los errores los producen OTROS participantes del dominio 0, es decir
+     los carros, en trafico de descubrimiento y no en /rf15/ping ni /rf15/pong.
+
+----------------------------------------------------------------------
+LO QUE QUEDA ABIERTO
+----------------------------------------------------------------------
+Desde el portatil Humble, 'ros2 node list --no-daemon --spin-time 15' devolvio
+vacio. NO se concluye nada de eso todavia, por tres confusores sin descartar:
+  (a) carro A ya se habia caido de la red cuando se corrio -- 'No route to host'
+      y desaparecido de la tabla ARP;
+  (b) no se comprobo que deepracer-core tuviera nodos vivos en ningun carro;
+  (c) el demonio de ros2 pudo haber arrancado antes con otro entorno.
+La comprobacion pendiente, con un solo vehiculo basta:
+  1. en el carro: ros2 node list --no-daemon --spin-time 5   (confirmar N nodos)
+  2. en el portatil Humble: ros2 node list --no-daemon --spin-time 15
+Si el carro lista nodos y el portatil no, ESO si es un hallazgo de R8 con
+consecuencia para el coordinador. Si los lista, los errores son anuncios sueltos
+que Fast-DDS descarta sin perder extremos.
+
+----------------------------------------------------------------------
+ERROR DE METODO QUE ESTA SESION DESTAPO, y conviene no repetir
+----------------------------------------------------------------------
+La asimetria Humble/Jazzy se concluyo de la pareja 1, que fue una corrida
+ABORTADA con Ctrl-C antes de imprimir informe. Se contaron 32 errores de fondo
+como si fueran los pongs perdidos. El emisor no imprime NADA entre el banner de
+arranque y el informe final -solo el eco imprime progreso-, asi que el silencio
+se leyo como fallo. Regla: una corrida sin informe impreso no sostiene ninguna
+conclusion.
