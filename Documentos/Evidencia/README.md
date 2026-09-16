@@ -278,15 +278,22 @@ y por qué. `S17_nav2_namespaces.md`, `S17_aplicacion_contrato.md`, `S17_dos_sim
 
 ## Lo que no se puede rastrear
 
-De los nueve entregables en PDF, **solo tres conservan su fuente LaTeX**
-(`Entregable_semana_17.tex`, `Entregable_semana_18.tex` y `Cronograma_S17_S32.tex`). Los de las
-semanas 10 a 15 existen únicamente como PDF compilado.
+**Los entregables de las semanas 10 a 15 existen únicamente como PDF compilado**: no se conserva
+su fuente LaTeX. Del 17 en adelante sí (`Entregable_semana_17.tex` … `Entregable_semana_22.tex`,
+más `Cronograma_S17_S32.tex`).
 
 Consecuencia concreta: las imágenes de S12, S13 y S14 de este índice fueron casi con certeza
 a esos entregables, pero **no hay forma de comprobarlo** —no queda el `.tex` que las
 incluía—, así que los pies de foto de arriba se escribieron mirando las imágenes, no
 recuperando su contexto original. Si un jurado pide el origen de una figura de esos
 entregables, la respuesta es que no se conserva.
+
+Esto es lo que decidió la regla del **2026-09-16**: el entregable que el repositorio versiona es
+**la fuente `.tex`**, y el PDF deja de ser condición para declararlo emitido. La compilación vive
+en Overleaf —aquí no hay distribución TeX y el logotipo de la portada no está versionado—, así que
+el PDF es un derivado que se produce fuera y se entrega desde allí. De las dos formas, **la que
+hace falta para rastrear una figura o una cifra es la fuente**, que es justo lo que a las semanas
+10–15 les falta.
 
 No tiene arreglo retroactivo. Hacia adelante, la fuente `.tex` de cada entregable se
 versiona junto al PDF. **El primero que cumple la regla desde el día uno es el de la semana 18**

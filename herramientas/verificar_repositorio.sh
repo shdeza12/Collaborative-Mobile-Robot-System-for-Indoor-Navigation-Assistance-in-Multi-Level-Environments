@@ -251,11 +251,18 @@ else mal "$SALIDA_CTRL"; fi
 titulo '5. El tablero de estado refleja la realidad'
 
 paso 'ESTADO.md cita el ultimo entregable que existe'
-ULTIMO=$(ls Documentos/Entregables/Entregable_semana_*.pdf 2>/dev/null \
-         | sed 's/.*semana_0*\([0-9]*\)\.pdf/\1/' | sort -n | tail -1)
+# Se cuentan las dos formas, .tex y .pdf. Desde el 2026-09-16 el entregable que
+# el repositorio versiona es la FUENTE: el PDF se compila en Overleaf -fuera de
+# aqui- y esperarlo dejaba el entregable declarado pendiente por un tramite que
+# no se reproduce con un git clone. Los de S10 a S21 son PDF y siguen siendo el
+# entregable de su semana, asi que mirar solo una extension se equivoca en un
+# extremo o en el otro.
+ULTIMO=$(ls Documentos/Entregables/Entregable_semana_*.pdf \
+            Documentos/Entregables/Entregable_semana_*.tex 2>/dev/null \
+         | sed 's/.*semana_0*\([0-9]*\)\.\(pdf\|tex\)/\1/' | sort -n | tail -1)
 DECLARADO=$(grep -o 'Último entregable formal.*| Semana [0-9]*' ESTADO.md | grep -o '[0-9]*$')
 if [ "$ULTIMO" = "$DECLARADO" ]; then bien
-else mal "ESTADO.md dice 'Semana $DECLARADO' pero el ultimo PDF en Documentos/Entregables es el de la semana $ULTIMO"; fi
+else mal "ESTADO.md dice 'Semana $DECLARADO' pero el ultimo entregable en Documentos/Entregables -.tex o .pdf- es el de la semana $ULTIMO"; fi
 
 paso 'ESTADO.md se actualizo con el trabajo mas reciente'
 CORTE=$(grep -o 'Fecha de corte.*| [0-9-]*' ESTADO.md | grep -o '[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}')

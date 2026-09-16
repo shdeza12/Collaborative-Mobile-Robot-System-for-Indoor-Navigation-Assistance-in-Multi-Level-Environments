@@ -704,6 +704,7 @@ operación por defecto debe ser sin ventanas.
 | `robot_description` parece no publicarse | Se publica `Transient Local` | Añadir `--qos-durability transient_local` al `echo` |
 | Los STL parecen de 90 bytes | `stat` mide el enlace, no el archivo | Usar `stat -Lc%s` |
 | El robot maniobra en el sitio y aborta | Verificador de meta `stateful: True` contra la restricción Ackermann | **Defecto abierto**, ver §4 |
+| **`ModuleNotFoundError: No module named 'rclpy'` justo después de sourcear el workspace, y antes funcionaba** | Se corrió `colcon build` en una terminal **sin `/opt/ros/humble` sourceado**. Colcon anota la cadena de underlays que encuentra en el entorno *en el momento de compilar*: si no hay ninguno, regenera `install/setup.bash` **sin** el enlace a `/opt/ros/humble` y el workspace queda huérfano. No da ningún error al compilar — falla después, al importar | Comprobar con `source ~/deepracer_sim_ws/install/setup.bash; echo $ROS_DISTRO`: si sale vacío, está roto. Se repara recompilando **con el underlay puesto**: `cd ~/deepracer_sim_ws && source /opt/ros/humble/setup.bash && colcon build --symlink-install --packages-select <paquete>` |
 
 ---
 
