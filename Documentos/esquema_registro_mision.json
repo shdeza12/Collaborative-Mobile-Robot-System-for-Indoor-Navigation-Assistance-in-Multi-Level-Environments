@@ -201,7 +201,10 @@
       "required": ["error_rumbo_rad", "desviacion_z_m", "distancia_recorrida_m",
                    "num_cuspides", "tiempo_total_s", "deriva_map_odom_m"],
       "properties": {
-        "error_rumbo_rad": {"type": ["number", "null"]},
+        "error_rumbo_rad": {
+          "comentario": "null PERMANENTE desde el 2026-09-16, no pendiente: el yaw del catalogo -unica referencia posible- esta declarado ORIENTATIVO desde el 24-ago y yaw_goal_tolerance vale 3.15 rad, asi que la resta daria el angulo de entrada de la ruta y no un error del sistema. El §4 del protocolo retira la promesa de reportarlo. El campo NO se borra: los 46 registros ya entregados lo traen y este objeto es additionalProperties:false, asi que borrarlo los invalidaria a todos. Se deja number|null y no null a secas para no cerrarle la puerta al dia en que el rumbo si se exija.",
+          "type": ["number", "null"]
+        },
         "desviacion_z_m": {
           "comentario": "Por robot. Verifica RNF-01 en la misma corrida: ningun robot cruza de nivel, lo que cruza es el mensaje. En S18 fue de 1.9 um.",
           "type": "object", "additionalProperties": {"type": "number"}

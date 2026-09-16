@@ -970,9 +970,14 @@ def _descriptivas(banco, topicos, poses, marcas, entre_niveles):
         hueco = marcas["t_inicio_tramo2"] - marcas["t_fin_tramo1"]
 
     return {
-        # Presente y sin llenar en 1.0.0 a proposito: para calcularlo hace falta
-        # el yaw del punto del catalogo, y el §3.7 dice que el rumbo NO decide
-        # mientras R12 siga abierto. Llenarlo despues es una version menor.
+        # null PERMANENTE desde el 2026-09-16, no pendiente. La referencia con
+        # la que habria que restarlo -el yaw del catalogo- esta declarada
+        # ORIENTATIVA en puntos_interes.yaml desde el 24-ago, y
+        # yaw_goal_tolerance vale 3.15 rad: el sistema nunca persigue ese rumbo.
+        # La resta daria el angulo con que la ruta entro al punto, no un error.
+        # El §4 del protocolo retira la promesa de reportarlo; el campo se queda
+        # por compatibilidad con los 46 registros ya entregados. Quien vigila el
+        # riesgo del rumbo es num_cuspides, dos lineas mas abajo.
         "error_rumbo_rad": None,
         "desviacion_z_m": desviacion,
         "distancia_recorrida_m": recorrido,

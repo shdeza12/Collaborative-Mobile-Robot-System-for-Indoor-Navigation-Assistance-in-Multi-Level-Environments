@@ -226,8 +226,8 @@ Una misión es **exitosa** si y solo si se cumplen las tres:
 > devuelve un plan degenerado tiene valor— pero no se puede presentar como evidencia de que el
 > relevo ocurrió. Esa evidencia es el hueco del §3.4.
 
-**El rumbo de llegada NO es criterio de éxito.** Se mide y se reporta siempre, como variable
-descriptiva, pero no decide. La razón está en §4.
+**El rumbo de llegada NO es criterio de éxito, y desde el 2026-09-16 tampoco se reporta.** La razón
+de lo primero está en §4; la de lo segundo, en el recuadro que cierra esa sección.
 
 **Los 0,25 m no se tocan, y desde el 2026-08-27 ya no coinciden con la `xy_goal_tolerance` de
 Nav2.** Hasta ese día eran el mismo número, con esta justificación: «el sistema hizo lo que se le
@@ -370,8 +370,29 @@ tasa de éxito acabaría midiendo el goal checker en lugar del sistema.
 2. **El criterio de éxito mira solo posición**, contra `/odom`. Así la métrica no depende de una
    garantía que la plataforma no da.
 
-El rumbo **no se esconde**: se registra en cada corrida y se reporta su distribución. Si resulta que
-el sistema cierra el rumbo bien casi siempre, eso es un resultado a favor y estará en los datos.
+> **La promesa de reportar el rumbo se retira, 2026-09-16.** Hasta hoy aquí decía que el rumbo «no
+> se esconde: se registra en cada corrida y se reporta su distribución». No se cumplió:
+> `error_rumbo_rad` vale `null` en los 46 registros compuestos, y es la acción 7 del §8 de
+> [`Evidencia/S22_barrido_criterios_infalsables.md`](Evidencia/S22_barrido_criterios_infalsables.md).
+> Caben dos salidas —rellenarlo o retirar la promesa— y se retira, por una razón que es de fondo y
+> no de esfuerzo.
+>
+> Para calcular un error de rumbo hace falta un rumbo de referencia, y el único candidato es el
+> `yaw` del catálogo. Ese `yaw` está declarado **ORIENTATIVO** en
+> [`puntos_interes.yaml`](../Robot/aws-deepracer/deepracer_bringup/config/puntos_interes.yaml)
+> desde el 2026-08-24, con estas palabras: *«hoy es ORIENTATIVO: nadie lo comprueba»*. Y no lo
+> comprueba nadie porque `yaw_goal_tolerance` es 3,15 rad (~π): **cualquier** rumbo final se acepta,
+> por diseño y por RNF-05. Restarle a la orientación final una referencia que el sistema nunca
+> persiguió no da un error del sistema: da el ángulo con que la ruta entró al punto, que depende del
+> sentido de recorrido. Llamar «error» a eso es exactamente el patrón que el barrido de S22 existe
+> para cazar —ponerle nombre de métrica a una cifra que mide otra cosa—, así que la cifra no se
+> publica.
+>
+> Lo que sí queda es **`num_cuspides`**, en el mismo bloque de descriptivas. Esa es la variable que
+> de verdad vigila el riesgo del que habla esta sección: la maniobra patológica se ve en el número
+> de cambios de sentido, no en los grados finales. El campo `error_rumbo_rad` se conserva en el
+> esquema como `null` por compatibilidad con los 46 registros ya entregados, no como una medida
+> pendiente.
 
 > **El cambio de `stateful` todavía no está hecho, y no se da por bueno hasta medirlo.** Es el paso
 > 1 de §9. Cambiar la línea es trivial; demostrar que quita las cúspides exige repetir los tres

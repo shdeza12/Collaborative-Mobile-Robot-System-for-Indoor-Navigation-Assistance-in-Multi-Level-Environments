@@ -226,6 +226,26 @@ def clasificar(registros, incluir_pilotos=False):
 
     for r in registros:
         mid = _id(r)
+
+        # El hueco de relevo vive en DOS sitios desde 1.3.0: hueco_de() lo saca
+        # de las marcas -asi se lee tambien en los registros anteriores, que no
+        # traen el campo- y el compositor lo escribe ademas en descriptivas. Dos
+        # fuentes para un mismo numero acaban separandose; lo que no puede pasar
+        # es que se separen en silencio. Si el campo esta y no cuadra con las
+        # marcas del propio registro, o se edito a mano o el compositor tiene un
+        # fallo: en los dos casos el registro deja de ser evidencia. Se comprueba
+        # lo PRIMERO, antes que el descarte, porque un registro que se contradice
+        # a si mismo no es de fiar ni para descartarlo.
+        guardado = r.get("descriptivas", {}).get("hueco_relevo_s")
+        calculado = hueco_de(r)
+        if guardado is not None and (calculado is None
+                                     or abs(guardado - calculado) > 1e-6):
+            errores.append(
+                f"{mid}: descriptivas.hueco_relevo_s vale {guardado} y las "
+                f"marcas del mismo registro dan {calculado}. Un registro que se "
+                "contradice a si mismo no se agrega en ningun sitio.")
+            continue
+
         salud = r.get("salud_del_banco", {})
         descartada = bool(salud.get("descartada"))
         causa = salud.get("causa_descarte")

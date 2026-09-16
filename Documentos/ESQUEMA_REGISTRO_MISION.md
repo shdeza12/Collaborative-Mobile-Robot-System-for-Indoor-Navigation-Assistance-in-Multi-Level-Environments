@@ -297,7 +297,12 @@ Se guardan los instantes y no sólo el booleano porque un `false` suelto no se d
 `error_rumbo_rad` · `desviacion_z_m` (por robot) · `distancia_recorrida_m` · `num_cuspides` ·
 `tiempo_total_s` · `hueco_relevo_s` (desde `1.3.0`) · `deriva_map_odom_m` (`null` en físico)
 
-> **`error_rumbo_rad`** está porque §3.3 lo exige explícitamente como variable descriptiva.
+> **`error_rumbo_rad`** vale `null` en los 46 registros y **seguirá valiendo `null`**. Estaba
+> porque el §3.3 del protocolo lo exigía; el 2026-09-16 el §4 retiró esa exigencia, al comprobar
+> que la única referencia con la que restarlo —el `yaw` del catálogo— está declarada ORIENTATIVA
+> desde el 24-ago y que `yaw_goal_tolerance` vale 3,15 rad. El campo se conserva porque
+> `descriptivas` es `additionalProperties: false` y borrarlo invalidaría de golpe los 46 registros
+> ya entregados. Quien vigila el riesgo del rumbo es `num_cuspides`.
 >
 > **`desviacion_z_m`** verifica **RNF-01** en la misma corrida: ningún robot cruza de nivel, lo que
 > cruza es el mensaje. En S18 fue de 1,9 µm.
@@ -322,6 +327,10 @@ Se guardan los instantes y no sólo el booleano porque un `false` suelto no se d
 > que falla antes de la transferencia no produce las dos marcas. Un cero declararía instantáneo
 > justamente el peor caso. El esquema lo impone: en condición A el campo ha de ser `null`, y un valor
 > negativo se rechaza (lo mismo que `marcas_en_orden()` ya cazaba, aquí como última puerta).
+>
+> Los registros anteriores a `1.3.0` **no lo traen y no se recomponen** (§ del final de este
+> documento): el hueco se saca de sus marcas, y `analizar_campana.py` lo hace. Lo que el analizador
+> no consiente es que un registro traiga el campo y **contradiga** a sus propias marcas.
 >
 > **`deriva_map_odom_m`** es la cifra que el 26-ago delató a AMCL: 1,977 m de deriva en una
 > transformada que, con `/odom` publicado desde `WorldPose()`, debería ser constante. Grabarla en
@@ -533,7 +542,7 @@ amenaza a la validez de S26 en el §11 del protocolo, no descubrirlo en la compa
 | `1.0.0` | 2026-08-22 | versión congelada inicial | — |
 | `1.1.0` | 2026-08-31 | se añade `veredicto.continuidad` (§3.7.1) | siguen siendo válidos; el `required` del campo está condicionado a la versión en el `allOf` del esquema |
 | `1.2.0` | 2026-09-14 | `causa_descarte` admite `cancelacion_usuario` (§8 del protocolo), con la entrada de **RF-29** | **siguen siendo válidos y ninguno se recompone**: el enumerado solo *gana* un valor, así que los 30 registros `1.1.0` de la campaña validan sin tocarlos |
-| `1.3.0` | 2026-09-16 | se añade `descriptivas.hueco_relevo_s` (§3.8), acción 6 del §8 del barrido de S22 | siguen siendo válidos; el `required` va condicionado a la versión en el `allOf`, igual que `continuidad`. **Los 30 registros de S21 sí se recomponen**, porque el campo se calcula del bag y los bags están conservados — ver abajo |
+| `1.3.0` | 2026-09-16 | se añade `descriptivas.hueco_relevo_s` (§3.8), acción 6 del §8 del barrido de S22 | siguen siendo válidos; el `required` va condicionado a la versión en el `allOf`, igual que `continuidad`. **Ningún registro entregado se recompone**: recomponer reescribiría su `procedencia.commit`, y el hueco ya se obtiene de sus marcas con discrepancia 0,0 — ver abajo |
 
 **Este es el primer cambio de esquema posterior a la primera corrida de campaña**, y el §7 de arriba
 dice que a partir de ahí ningún cambio es gratis: se anota con la fecha, el motivo y qué corridas
@@ -557,13 +566,39 @@ sin continuidad también se rechaza» existe precisamente para reventar si eso s
 nuevo se escribió con `enum` y no con `const` por la misma razón, de modo que `1.4.0` heredará la
 misma disciplina.
 
-**Por qué `1.3.0` sí recompone y `1.2.0` no.** `1.2.0` solo ensanchaba un enumerado: ningún registro
-existente cambiaba de contenido al recomponerse. `1.3.0` añade una **cifra que sale del bag**, y los
-33 bags de S21 están conservados en `~/tesis_evidencia/` (2,2 GB), así que el campo es recuperable
-sin volver a correr nada. Dejarlo vacío en los 30 registros de la campaña sería guardar la evidencia
-del relevo solo en el analizador, que es justo lo que la acción 6 corrige. La recomposición se hace
-**en una sola pasada**, junto con la decisión pendiente sobre `error_rumbo_rad` (acción 7), para no
-tocar dos veces la misma evidencia y no dejar dos tandas de registros con procedencias distintas.
+**Recomponer no es repetir las corridas.** Conviene decirlo sin rodeos porque la palabra se presta:
+*recomponer* es volver a pasar `herramientas/componer_registro.py` sobre los bags que ya están
+guardados en `~/tesis_evidencia/` —33 bags, 2,2 GB, cada uno con su `condicion_inicial.json`, su
+`metadata.yaml`, su `rtf.json` y su `.db3`—. Son unos minutos de CPU en el portátil: **no se abre
+Gazebo, no se enciende ningún vehículo y no se vuelve a ejecutar ninguna misión.** El bag es el dato
+crudo y el registro JSON es una lectura de ese dato; al cambiar el compositor cambia la lectura, no
+el dato. Ningún veredicto se mueve.
+
+**Y los registros entregados no se recomponen.** Se iba a hacer: `1.3.0` añade una cifra que sale
+del bag, los 33 bags están conservados, y dejar el campo vacío en los 30 registros de la campaña
+parecía dejar la evidencia del relevo a medias. El 2026-09-16 se recompusieron los 46 a un
+directorio temporal **para ver qué cambiaba antes de decidir**, y el experimento recomendó lo
+contrario. Está entero en
+[`Evidencia/S23_reproducibilidad_de_los_registros.md`](Evidencia/S23_reproducibilidad_de_los_registros.md);
+lo que decide son dos cifras:
+
+- Recomponer reescribe **`procedencia.commit` en 44 de 44**: `S21_OE4_15` se corrió con `0e2b46c` y
+  pasaría a declarar `38be2da`, código que no existía ese día. El campo dejaría de decir «con esto
+  se midió» para decir «con esto se leyó», que es otra afirmación y encima falsa.
+- El hueco compuesto coincide con la resta de las marcas del registro entregado con **discrepancia
+  0,0** en los 23 casos —el mismo número, no «dentro de tolerancia»—, porque es literalmente la
+  misma resta sobre las mismas marcas. La cifra **ya está** en los registros viejos, escrita como
+  dos marcas; `analizar_campana.py` la lee así con `hueco_de()`. No se pierde nada.
+
+Así que `hueco_relevo_s` rige **de `1.3.0` hacia adelante** y conviven dos poblaciones, con campo y
+sin él. Como eso deja dos fuentes para un mismo número, el analizador comprueba que no se
+contradigan: un registro que trae el campo y no cuadra con sus propias marcas es error de
+integridad y no se cuenta en ningún sitio.
+
+> De regalo, el experimento dejó una comprobación que no se había hecho nunca: los 44 registros
+> recompuestos traen **el mismo veredicto, las mismas marcas y las mismas descriptivas** que los
+> entregados. La cadena bag → registro es reproducible, y los resultados de OE4 no dependen del
+> estado en que estuviera el portátil el 5 de septiembre.
 
 **Se aprovechó la ventana correcta.** El cambio entra en S21, con S24 a tres semanas y cero corridas
 de campaña ejecutadas: no hay ninguna que quede afectada. Si el hueco lo hubiera destapado el

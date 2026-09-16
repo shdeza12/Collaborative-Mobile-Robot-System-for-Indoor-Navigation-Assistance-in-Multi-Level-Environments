@@ -29,6 +29,9 @@ from analizar_campana import (  # noqa: E402
 
 fallos = []
 
+# Centinela para "el registro no trae el campo", distinto de "lo trae en null".
+AUSENTE = object()
+
 
 def check(nombre, ok, detalle=""):
     print(f"  [{'OK ' if ok else 'FALLA'}] {nombre} {detalle}")
@@ -49,7 +52,7 @@ def reg(n=1, exito=True, condicion="A", descartada=False, causa=None,
         t_solicitud=100.0, t_robot_activo=100.0, t_movimiento=101.4,
         t_fin_tramo1=None, t_inicio_tramo2=None, t_completada=160.0,
         error_m=0.08, entre_niveles=None, version="1.1.0", continua=True,
-        z=None):
+        z=None, hueco=AUSENTE):
     """Un registro minimo con la forma del esquema 1.0.0.
 
     Solo lleva los campos que el analizador mira. No valida contra el esquema
@@ -68,6 +71,15 @@ def reg(n=1, exito=True, condicion="A", descartada=False, causa=None,
                  "motivo_fallo": "" if exito else "c1_posicion"}
     if version != "1.0.0":
         veredicto["continuidad"] = cont
+    # 7,012 mm es el valor real de la campana de S21: la altura de reposo del
+    # vehiculo sobre la suspension simulada, fija en las 60 parejas.
+    descriptivas = {"distancia_recorrida_m": 40.0, "tiempo_total_s": 60.0,
+                    "desviacion_z_m": {"robot1": 0.007012} if z is None else z}
+    # AUSENTE y no None: hay que poder construir las tres formas que el
+    # analizador distingue -sin campo (registros anteriores a 1.3.0), con el
+    # campo en null, y con el campo con cifra-, y None es una de ellas.
+    if hueco is not AUSENTE:
+        descriptivas["hueco_relevo_s"] = hueco
     return {
         "esquema_version": version,
         "mision": {"mision_id": f"M{n:02d}", "campana": campana,
@@ -84,11 +96,7 @@ def reg(n=1, exito=True, condicion="A", descartada=False, causa=None,
                    "t_completada": t_completada},
         "verdad_de_terreno": {"error_posicion_m": error_m},
         "veredicto": veredicto,
-        # 7,012 mm es el valor real de la campana de S21: la altura de reposo
-        # del vehiculo sobre la suspension simulada, fija en las 60 parejas.
-        "descriptivas": {"distancia_recorrida_m": 40.0, "tiempo_total_s": 60.0,
-                         "desviacion_z_m": ({"robot1": 0.007012}
-                                            if z is None else z)},
+        "descriptivas": descriptivas,
         "salud_del_banco": {"rtf": 0.999, "controladores_activos": {},
                             "gzserver_vivo_al_final": True,
                             "descartada": descartada, "causa_descarte": causa},
@@ -505,6 +513,62 @@ def pruebas_de_rnf01():
           f"-> {inf['alertas']}")
 
 
+# --------------------------------------------------------------------------
+# 13. El hueco de relevo vive en dos sitios y no puede contradecirse
+# --------------------------------------------------------------------------
+
+def pruebas_de_coherencia_del_hueco():
+    """Los registros anteriores a 1.3.0 NO se recomponen (§ del esquema).
+
+    La consecuencia es que conviven dos poblaciones: unos con
+    'descriptivas.hueco_relevo_s' escrito por el compositor y otros sin el, de
+    los que el hueco se saca restando las marcas. Mientras el campo no exista,
+    restar es la unica fuente y no hay nada que contradecir; en cuanto existe,
+    hay dos, y dos fuentes de un mismo numero acaban separandose. Que se separen
+    no se puede impedir desde aqui -el JSON es editable-, pero que se separen
+    CALLANDO, si.
+    """
+    b = dict(condicion="B", t_fin_tramo1=140.0, t_inicio_tramo2=140.3)
+
+    ok = reg(n=1, hueco=0.3, **b)
+    check("un registro cuyo campo cuadra con sus marcas pasa",
+          analizar([ok])["errores"] == [], f"-> {analizar([ok])['errores']}")
+
+    malo = reg(n=2, hueco=0.9, **b)
+    inf = analizar([malo])
+    check("uno que se contradice a si mismo es error de integridad",
+          len(inf["errores"]) == 1, f"-> {inf['errores']}")
+    check("...y desaparece de los tres recuentos, para que el N no cuadre",
+          inf["exito"]["n"] == 0 and inf["descartes"]["n"] == 0
+          and inf["pilotos"] == 0 and inf["leidos"] == 1,
+          f"-> validas={inf['exito']['n']} leidos={inf['leidos']}")
+    check("...y el lote entero sale INVALIDA",
+          inf["veredicto"] == "INVALIDA", f"-> {inf['veredicto']}")
+
+    # El descarte no lo salva: se comprueba antes que la salud del banco.
+    desc = reg(n=3, hueco=0.9, descartada=True,
+               causa=sorted(CAUSAS_ADMITIDAS)[0], **b)
+    check("ni siquiera descartada se agrega una que se contradice",
+          len(analizar([desc])["errores"]) == 1,
+          f"-> {analizar([desc])['errores']}")
+
+    # Las dos formas legitimas de no traer cifra.
+    viejo = reg(n=4, **b)
+    check("un registro anterior a 1.3.0, sin el campo, no da error",
+          analizar([viejo])["errores"] == [])
+    intra = reg(n=5, condicion="A", hueco=None)
+    check("una mision intra-nivel con el campo en null tampoco",
+          analizar([intra])["errores"] == [])
+
+    # Tolerancia: el hueco se compone restando flotantes del bag, asi que el
+    # campo guardado y la resta pueden diferir en el ultimo bit sin que nadie
+    # haya tocado nada. 1 us separa eso de una edicion a mano; el tick de /clock
+    # son 100 ms.
+    ruido = reg(n=6, hueco=0.3 + 1e-9, **b)
+    check("el ruido de coma flotante no se confunde con una contradiccion",
+          analizar([ruido])["errores"] == [], f"-> {analizar([ruido])['errores']}")
+
+
 def main():
     print("Intervalo de Wilson")
     pruebas_de_wilson()
@@ -530,6 +594,8 @@ def main():
     pruebas_de_versiones()
     print("Constancia de z (RNF-01)")
     pruebas_de_rnf01()
+    print("Coherencia del hueco de relevo")
+    pruebas_de_coherencia_del_hueco()
     print(f"\n{len(fallos)} fallo(s).")
     return 1 if fallos else 0
 
