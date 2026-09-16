@@ -145,6 +145,69 @@ def pruebas_de_esquema(esquema):
           valida(dict(registro_valido(), esquema_version="1.2.0"), esquema),
           _por_que(dict(registro_valido(), esquema_version="1.2.0"), esquema))
 
+    # --- 1.3.0: el hueco de relevo, accion 6 del §8 del barrido de S22 ---
+    # El §3.4 decide el relevo con una BINARIA que es un invariante estructural
+    # -si el coordinador publica TRANSFERENCIA y luego TRAMO_2, c3 sale True
+    # siempre-, asi que la binaria no mide nada. Lo que mide es el hueco. Estaba
+    # solo en el analizador, calculado al vuelo: un registro suelto no lo traia y
+    # nadie que lo leyera podia ver la evidencia del criterio que firma.
+    r = registro_valido(); r["esquema_version"] = "1.3.0"
+    check("un registro 1.3.0 SIN hueco_relevo_s se rechaza",
+          not valida(r, esquema), _por_que(r, esquema))
+    r["descriptivas"]["hueco_relevo_s"] = 1.5
+    check("y con el hueco, un 1.3.0 valida", valida(r, esquema),
+          _por_que(r, esquema))
+
+    # La misma trampa del enum, un escalon mas arriba. Si al anadir 1.3.0 se
+    # olvida la lista del allOf, la continuidad deja de ser obligatoria en
+    # silencio y RF-24 se queda sin medir. Esta comprobacion es la que revienta.
+    r = registro_valido(); r["esquema_version"] = "1.3.0"
+    r["descriptivas"]["hueco_relevo_s"] = 1.5
+    del r["veredicto"]["continuidad"]
+    check("un 1.3.0 SIN continuidad tambien se rechaza", not valida(r, esquema),
+          _por_que(r, esquema))
+
+    # Hacia atras, inofensivo: los 46 registros ya compuestos no tienen el campo
+    # y no pueden invalidarse por el.
+    check("un 1.2.0 sin hueco_relevo_s sigue siendo valido",
+          valida(dict(registro_valido(), esquema_version="1.2.0"), esquema))
+
+    # Una B que falla antes de la transferencia no tiene las dos marcas, asi que
+    # el hueco no esta definido: null, no un cero inventado. Un cero diria que el
+    # relevo fue instantaneo, que es la mejor cifra posible para el peor caso.
+    r = registro_valido(); r["esquema_version"] = "1.3.0"
+    r["veredicto"]["exito"] = False
+    r["veredicto"]["c1_posicion"] = False
+    r["veredicto"]["c3_relevo"] = False
+    r["veredicto"]["motivo_fallo"] = "fallo antes de llegar a la transferencia"
+    r["marcas"]["t_fin_tramo1"] = None
+    r["marcas"]["t_inicio_tramo2"] = None
+    r["marcas"]["t_completada"] = None
+    r["verdad_de_terreno"]["error_posicion_m"] = None
+    r["descriptivas"]["hueco_relevo_s"] = None
+    check("una B sin marcas de relevo lleva hueco null", valida(r, esquema),
+          _por_que(r, esquema))
+
+    # Y en condicion A el §3.4 no define la metrica. Un hueco con cifra en una
+    # mision intra-nivel seria el compositor midiendo un relevo que no ocurrio.
+    r = registro_valido(); r["esquema_version"] = "1.3.0"
+    r["mision"]["condicion"] = "A"
+    r["solicitud"]["entre_niveles"] = False
+    r["marcas"]["t_fin_tramo1"] = None
+    r["marcas"]["t_inicio_tramo2"] = None
+    r["veredicto"]["c3_relevo"] = None
+    r["descriptivas"]["hueco_relevo_s"] = None
+    check("la condicion A con hueco null es valida", valida(r, esquema),
+          _por_que(r, esquema))
+    r["descriptivas"]["hueco_relevo_s"] = 1.5
+    check("condicion A con un hueco medido se rechaza", not valida(r, esquema))
+
+    # Un hueco negativo es lo que marcas_en_orden ya caza, pero el esquema es la
+    # ultima puerta: un registro con esa cifra no puede existir en el disco.
+    r = registro_valido(); r["esquema_version"] = "1.3.0"
+    r["descriptivas"]["hueco_relevo_s"] = -0.5
+    check("un hueco de relevo negativo se rechaza", not valida(r, esquema))
+
     # La continuidad NO puede entrar en el AND del exito. Si alguien la anade a
     # las condiciones del §3.3 mas adelante, esta prueba lo delata: un registro
     # discontinuo y exitoso a la vez tiene que ser representable, porque es
@@ -885,9 +948,32 @@ def pruebas_de_bag(esquema):
               c["continua"] is True and c["ventana"] is not None, f"-> {c}")
         check("la continuidad no toco el exito, que se decide con el §3.3",
               auto["veredicto"]["exito"] is True)
-        check("el compositor escribe la version 1.2.0",
-              auto["esquema_version"] == "1.2.0",
+        check("el compositor escribe la version 1.3.0",
+              auto["esquema_version"] == "1.3.0",
               f"-> {auto['esquema_version']}")
+
+        # Accion 6 del §8, de extremo a extremo. El bag pone TRANSFERENCIA en
+        # 40,0 y el primer movimiento de robot2 en 41,5, asi que el hueco es
+        # 1,5 s -no 1,0-: t_inicio_tramo2 NO es el cambio de etapa a TRAMO_2
+        # (41,0), es el instante en que el segundo vehiculo se mueve de verdad.
+        # La diferencia no es un detalle contable: el hueco asi medido incluye
+        # el arranque del relevo, que es lo que el usuario espera de pie en el
+        # rellano, mientras que el cambio de etapa solo dice cuando el
+        # coordinador cambio de idea. Se comprueba ademas contra las dos marcas
+        # del propio registro, porque el riesgo de duplicar una cifra es que las
+        # dos copias se separen y ya no se sepa cual manda.
+        d, m = auto["descriptivas"], auto["marcas"]
+        check("el registro compuesto trae el hueco de relevo",
+              d.get("hueco_relevo_s") is not None
+              and abs(d["hueco_relevo_s"] - 1.5) < 1e-9,
+              f"-> {d.get('hueco_relevo_s')}")
+        check("y coincide con la resta de sus propias marcas",
+              abs(d["hueco_relevo_s"]
+                  - (m["t_inicio_tramo2"] - m["t_fin_tramo1"])) < 1e-9)
+        # La B truncada no llega a la transferencia: hueco null, no cero.
+        check("la B truncada compone el hueco como null, no como cero",
+              corto["descriptivas"]["hueco_relevo_s"] is None,
+              f"-> {corto['descriptivas']['hueco_relevo_s']}")
         # La B truncada no llega a COMPLETADA: la ventana no se cierra y la
         # continuidad es null. Es el caso que distingue 'no termino' de 'se
         # quedo sin nadie a cargo'; el primero ya lo cuenta c2, y contarlo dos

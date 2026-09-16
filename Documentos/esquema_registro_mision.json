@@ -212,6 +212,10 @@
           "type": "integer"
         },
         "tiempo_total_s": {"type": ["number", "null"]},
+        "hueco_relevo_s": {
+          "comentario": "t_inicio_tramo2 - t_fin_tramo1. Anadido en 1.3.0 por la accion 6 del §8 de S22_barrido_criterios_infalsables.md: el c3 del §3.4 es una binaria que sale True siempre que el coordinador publique TRANSFERENCIA y luego TRAMO_2 -un invariante estructural, no una medida-, asi que la EVIDENCIA del relevo es este hueco y no aquel booleano. Estaba solo en analizar_campana.py, calculado al vuelo, y un registro suelto no lo traia. null cuando no esta definido: condicion A, o una B que falla antes de la transferencia. Nunca cero por defecto, que seria declarar instantaneo el peor caso. OPCIONAL en el required base y obligatorio desde 1.3.0 en el allOf, para no invalidar los 46 registros ya compuestos.",
+          "type": ["number", "null"], "minimum": 0
+        },
         "deriva_map_odom_m": {
           "comentario": "La cifra que el 26-ago delato a AMCL: 1.977 m en una transformada que, con /odom publicado desde WorldPose(), deberia ser constante. Hace que la campana CUANTIFIQUE R3 en vez de solo padecerlo. null en fisico.",
           "type": ["number", "null"]
@@ -302,9 +306,15 @@
   "allOf": [
     {
       "comentario": "A partir de 1.1.0 el campo de continuidad es obligatorio. Antes no existia. Un registro nuevo sin el no valida -que es el punto: RF-24 es la variable de respuesta principal y no puede volver a quedarse sin medir por olvido-, y los tres de S20, escritos en 1.0.0, siguen validando sin tocarlos. OJO, Y ESTA ES LA TRAMPA QUE 1.2.0 CASI PISA el 2026-09-14: esto decia 'const: 1.1.0'. Subir la version a 1.2.0 sin tocarlo habria hecho que la condicion dejara de dispararse, y 'continuidad' habria dejado de ser obligatoria EN SILENCIO -el registro validaria igual, sin la variable de respuesta principal-. Por eso ahora es un enum de versiones y no una constante: cada version menor nueva se anade aqui a mano, a proposito, para que olvidarlo rompa la prueba en vez de aflojar el esquema.",
-      "if": {"properties": {"esquema_version": {"enum": ["1.1.0", "1.2.0"]}},
+      "if": {"properties": {"esquema_version": {"enum": ["1.1.0", "1.2.0", "1.3.0"]}},
              "required": ["esquema_version"]},
       "then": {"properties": {"veredicto": {"required": ["continuidad"]}}}
+    },
+    {
+      "comentario": "A partir de 1.3.0 el hueco de relevo es obligatorio, por la misma logica y con la misma trampa que el bloque de arriba: enum y no const, para que la proxima version menor haya de anadirse aqui a mano. Los 46 registros en 1.0.0/1.1.0/1.2.0 no lo tienen y siguen validando.",
+      "if": {"properties": {"esquema_version": {"enum": ["1.3.0"]}},
+             "required": ["esquema_version"]},
+      "then": {"properties": {"descriptivas": {"required": ["hueco_relevo_s"]}}}
     },
     {
       "comentario": "§4.3, restriccion 1: banco = simulacion exige /clock, oraculo y RTF.",
@@ -338,7 +348,8 @@
         "properties": {
           "marcas": {"properties": {"t_fin_tramo1": {"type": "null"},
                                     "t_inicio_tramo2": {"type": "null"}}},
-          "veredicto": {"properties": {"c3_relevo": {"type": "null"}}}
+          "veredicto": {"properties": {"c3_relevo": {"type": "null"}}},
+          "descriptivas": {"properties": {"hueco_relevo_s": {"type": "null"}}}
         }
       }
     },

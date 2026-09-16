@@ -68,7 +68,7 @@ TOLERANCIA_LLEGADA_M = 0.25   # la misma de coordinador.py y del §5 del protoco
 # cambio de esquema posterior a la primera corrida de campana, asi que el §7 del
 # esquema obliga a anotarlo en la bitacora con la fecha, el motivo y a que
 # corridas afecta: a ninguna, ninguna se recompone.
-ESQUEMA_VERSION = "1.2.0"
+ESQUEMA_VERSION = "1.3.0"
 
 
 def primer_movimiento(muestras, umbral=UMBRAL_MOVIMIENTO_MS,
@@ -584,6 +584,11 @@ def componer(ruta_bag, banco, campana, error_posicion_m=None, rtf=None,
     # continuidad_de(): es la variable de respuesta, no un criterio del §3.3.
     veredicto["continuidad"] = continuidad_de(estados, marcas, condicion)
 
+    # Se saca a una variable para que el 'entre_niveles' que decide si el hueco
+    # de relevo esta definido sea EL MISMO que el registro publica, y no una
+    # segunda copia calculada aparte que pueda separarse de aquella.
+    solicitud = _solicitud(crudos, condicion, niveles, origen, destino)
+
     return {
         "esquema_version": ESQUEMA_VERSION,
         "mision": {
@@ -602,12 +607,13 @@ def componer(ruta_bag, banco, campana, error_posicion_m=None, rtf=None,
         },
         "procedencia": _procedencia(ruta_bag, distro, mundo, mapa,
                                     _robots_de(estados)),
-        "solicitud": _solicitud(crudos, condicion, niveles, origen, destino),
+        "solicitud": solicitud,
         "marcas": marcas,
         "verdad_de_terreno": _verdad(banco, error_posicion_m, pose_llegada,
                                      medido_por, nota),
         "veredicto": veredicto,
-        "descriptivas": _descriptivas(banco, topicos, poses, marcas),
+        "descriptivas": _descriptivas(banco, topicos, poses, marcas,
+                                      solicitud["entre_niveles"]),
         "salud_del_banco": _salud(banco, rtf, _condicion_inicial(ruta_bag),
                                   _controladores(ruta_bag)),
         "traza": _traza(ruta_bag, poses),
@@ -931,7 +937,7 @@ def _verdad(banco, error_posicion_m, pose_llegada, medido_por, nota):
     }
 
 
-def _descriptivas(banco, topicos, poses, marcas):
+def _descriptivas(banco, topicos, poses, marcas, entre_niveles):
     """Se miden y se reportan; no deciden el exito. Ver §3.8 del esquema."""
     recorrido = 0.0
     desviacion = {}
@@ -953,6 +959,16 @@ def _descriptivas(banco, topicos, poses, marcas):
     if marcas["t_completada"] is not None and marcas["t_solicitud"] is not None:
         total = marcas["t_completada"] - marcas["t_solicitud"]
 
+    # §3.4. El c3 del veredicto es una binaria que sale True siempre que el
+    # coordinador publique TRANSFERENCIA y despues TRAMO_2: un invariante
+    # estructural, no una medida. La evidencia del relevo es este hueco. null
+    # -nunca cero- cuando no esta definido: en condicion A no hay relevo que
+    # medir, y una B que falla antes de la transferencia no produce las marcas.
+    hueco = None
+    if (entre_niveles and marcas["t_fin_tramo1"] is not None
+            and marcas["t_inicio_tramo2"] is not None):
+        hueco = marcas["t_inicio_tramo2"] - marcas["t_fin_tramo1"]
+
     return {
         # Presente y sin llenar en 1.0.0 a proposito: para calcularlo hace falta
         # el yaw del punto del catalogo, y el §3.7 dice que el rumbo NO decide
@@ -962,6 +978,7 @@ def _descriptivas(banco, topicos, poses, marcas):
         "distancia_recorrida_m": recorrido,
         "num_cuspides": cuspides,
         "tiempo_total_s": total,
+        "hueco_relevo_s": hueco,
         # La cifra que el 26-ago delato a AMCL. Con /odom publicado desde
         # WorldPose(), map->odom deberia ser CONSTANTE; derivo 1,977 m. Grabarla
         # en cada mision hace que la campana cuantifique R3 en vez de padecerlo.

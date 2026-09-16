@@ -295,7 +295,7 @@ Se guardan los instantes y no sólo el booleano porque un `false` suelto no se d
 ### 3.8 `descriptivas` — se miden y se reportan, no deciden
 
 `error_rumbo_rad` · `desviacion_z_m` (por robot) · `distancia_recorrida_m` · `num_cuspides` ·
-`tiempo_total_s` · `deriva_map_odom_m` (`null` en físico)
+`tiempo_total_s` · `hueco_relevo_s` (desde `1.3.0`) · `deriva_map_odom_m` (`null` en físico)
 
 > **`error_rumbo_rad`** está porque §3.3 lo exige explícitamente como variable descriptiva.
 >
@@ -304,6 +304,24 @@ Se guardan los instantes y no sólo el booleano porque un `false` suelto no se d
 >
 > **`num_cuspides`** convierte en rutina la comparación que **R12** lleva pendiente desde el 18-ago.
 > En vez de una medición puntual contra el registro del 21-ago, cada misión la aporta.
+>
+> **`hueco_relevo_s`** = `t_inicio_tramo2 − t_fin_tramo1`. *Añadido en la versión `1.3.0`, el
+> 2026-09-16, por la acción 6 del §8 de `Evidencia/S22_barrido_criterios_infalsables.md`.* El
+> criterio `c3` del §3.4 es una **binaria que sale `True` siempre** que el coordinador publique
+> `TRANSFERENCIA` y después `TRAMO_2`: es un invariante estructural del planificador, no una medida
+> del relevo. La evidencia del relevo es este hueco, y hasta ahora vivía **solo** en
+> `analizar_campana.py`, calculado al vuelo sobre la campaña: un registro suelto no lo traía, y quien
+> lo leyera no podía ver la cifra que respalda el criterio que el propio registro firma.
+>
+> Ojo con qué mide: `t_inicio_tramo2` **no** es el cambio de etapa a `TRAMO_2`, es el **primer
+> movimiento real** del segundo robot posterior a la transferencia (§3.5). El hueco incluye por tanto
+> el arranque del relevo — lo que el usuario espera de pie en el rellano — y no solo el instante en
+> que el coordinador cambió de idea.
+>
+> Va `null`, **nunca cero**, cuando no está definido: en condición A no hay relevo que medir, y una B
+> que falla antes de la transferencia no produce las dos marcas. Un cero declararía instantáneo
+> justamente el peor caso. El esquema lo impone: en condición A el campo ha de ser `null`, y un valor
+> negativo se rechaza (lo mismo que `marcas_en_orden()` ya cazaba, aquí como última puerta).
 >
 > **`deriva_map_odom_m`** es la cifra que el 26-ago delató a AMCL: 1,977 m de deriva en una
 > transformada que, con `/odom` publicado desde `WorldPose()`, debería ser constante. Grabarla en
@@ -430,7 +448,8 @@ contaría como no ocurrida, y eso infla la tasa de éxito por omisión.**
 
 - `banco = "simulacion"` ⟹ `marcas.reloj = "/clock"` **y** `verdad_de_terreno.fuente = "gazebo_worldpose_via_odom"` **y** `salud_del_banco.rtf` no es `null`.
 - `banco = "fisico"` ⟹ `verdad_de_terreno.fuente = "cinta_metrica"` **y** `pose_final = null` **y** `rtf = null` **y** `deriva_map_odom_m = null`.
-- `condicion = "A"` ⟹ `t_fin_tramo1 = null`, `t_inicio_tramo2 = null`, `c3_relevo = null`.
+- `condicion = "A"` ⟹ `t_fin_tramo1 = null`, `t_inicio_tramo2 = null`, `c3_relevo = null`,
+  `hueco_relevo_s = null`.
 - `condicion = "B"` ⟹ `c3_relevo` no es `null`. Las dos marcas de relevo **sí pueden ir `null`**: una
   misión inter-nivel que falla antes de llegar a la transferencia nunca las produce, y exigirlas
   obligaría a inventar un número. Lo que el esquema sí impone es que si hay `t_inicio_tramo2` haya
@@ -514,6 +533,7 @@ amenaza a la validez de S26 en el §11 del protocolo, no descubrirlo en la compa
 | `1.0.0` | 2026-08-22 | versión congelada inicial | — |
 | `1.1.0` | 2026-08-31 | se añade `veredicto.continuidad` (§3.7.1) | siguen siendo válidos; el `required` del campo está condicionado a la versión en el `allOf` del esquema |
 | `1.2.0` | 2026-09-14 | `causa_descarte` admite `cancelacion_usuario` (§8 del protocolo), con la entrada de **RF-29** | **siguen siendo válidos y ninguno se recompone**: el enumerado solo *gana* un valor, así que los 30 registros `1.1.0` de la campaña validan sin tocarlos |
+| `1.3.0` | 2026-09-16 | se añade `descriptivas.hueco_relevo_s` (§3.8), acción 6 del §8 del barrido de S22 | siguen siendo válidos; el `required` va condicionado a la versión en el `allOf`, igual que `continuidad`. **Los 30 registros de S21 sí se recomponen**, porque el campo se calcula del bag y los bags están conservados — ver abajo |
 
 **Este es el primer cambio de esquema posterior a la primera corrida de campaña**, y el §7 de arriba
 dice que a partir de ahí ningún cambio es gratis: se anota con la fecha, el motivo y qué corridas
@@ -530,6 +550,20 @@ hecho que la condición **dejara de dispararse**, y `continuidad` habría dejado
 — exactamente el agujero que la versión `1.1.0` se creó para tapar, reabierto por el acto de tapar
 otro. Se cambió el `const` por un **enumerado de versiones**, de modo que cada versión menor nueva
 hay que añadirla a mano: si alguien la olvida, la prueba falla en vez de aflojarse el esquema.
+
+**Y la trampa hizo su trabajo dos días después.** Al entrar `1.3.0` hubo que añadirla al enumerado de
+`continuidad` *además* de escribir el suyo propio para `hueco_relevo_s`; la comprobación «un `1.3.0`
+sin continuidad también se rechaza» existe precisamente para reventar si eso se olvida. El bloque
+nuevo se escribió con `enum` y no con `const` por la misma razón, de modo que `1.4.0` heredará la
+misma disciplina.
+
+**Por qué `1.3.0` sí recompone y `1.2.0` no.** `1.2.0` solo ensanchaba un enumerado: ningún registro
+existente cambiaba de contenido al recomponerse. `1.3.0` añade una **cifra que sale del bag**, y los
+33 bags de S21 están conservados en `~/tesis_evidencia/` (2,2 GB), así que el campo es recuperable
+sin volver a correr nada. Dejarlo vacío en los 30 registros de la campaña sería guardar la evidencia
+del relevo solo en el analizador, que es justo lo que la acción 6 corrige. La recomposición se hace
+**en una sola pasada**, junto con la decisión pendiente sobre `error_rumbo_rad` (acción 7), para no
+tocar dos veces la misma evidencia y no dejar dos tandas de registros con procedencias distintas.
 
 **Se aprovechó la ventana correcta.** El cambio entra en S21, con S24 a tres semanas y cero corridas
 de campaña ejecutadas: no hay ninguna que quede afectada. Si el hueco lo hubiera destapado el
