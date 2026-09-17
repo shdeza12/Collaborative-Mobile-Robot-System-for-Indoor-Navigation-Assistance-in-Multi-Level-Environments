@@ -568,7 +568,7 @@ Si el carro real no hace 4 m/s, la tabla entera está corrida.
 ### 10.2 La trampa de dueños muerde aquí de otra forma
 
 `/scan` lo publica el LiDAR del Paso 2.3, **sin `sudo`** — usuario `deepracer`.
-`/ctrl_pkg/servo_msg` lo publica `teleop_mando.py`, que va **con `sudo`** — usuario `root`. Por la
+`/ctrl_pkg/servo_msg` lo publica `sostener_traccion.py`, que va **con `sudo`** — usuario `root`. Por la
 regla de los dos extremos del §6.2, **un solo `ros2 bag record` no puede traerse los dos**: el que
 grabe como usuario se llevará `/scan` y **cero** mensajes de servo, y no dirá una palabra.
 
@@ -595,28 +595,70 @@ dueños otra vez, no un mando averiado.
 > además de los del barrido. Si te añade carga mental en el bloque que produce lo irremplazable,
 > **sáltatelo**: el G2 manda.
 
-### 10.3 El barrido, y por qué sale una nube y no una tabla limpia
+### 10.3 El barrido, con escalones sostenidos
 
-El mando es **analógico**: `teleop_mando.py` escala el gatillo hasta `limite_normal = 0,35`, y
-hasta `0,70` con turbo. **No hay escalones**, así que sostener un valor a mano da una nube.
+**Esto cambió el 2026-09-17.** Hasta entonces el barrido se hacía con el mando, que es
+**analógico** —`teleop_mando.py` escala el gatillo de forma continua—, así que sostener un valor a
+mano daba una nube y no una tabla. Esta hoja lo aceptaba a propósito y anotaba la razón: «la tabla
+fina de escalones sostenidos necesita un nodo que publique un valor fijo con hombre muerto, y eso
+es código que hoy no existe». **Ese código ya existe**:
+[`sostener_traccion.py`](../herramientas/sostener_traccion.py), con 33 comprobaciones en
+`prueba_sostener_traccion.py`.
 
-Se acepta a propósito, porque la nube ya responde la pregunta del §10.1 con margen de sobra: si a
-0,35 de `throttle` el carro hace medio metro por segundo, `MAX_SPEED = 4,0` está mal por un factor
-de tres, y eso se ve sin ninguna precisión. La tabla fina de escalones sostenidos necesita un nodo
-que publique un valor fijo con hombre muerto, y eso es código que hoy no existe.
+Publica un `throttle` **fijo** durante un tiempo **fijo**, con ángulo cero —el mensurando es
+velocidad sobre una recta, y curvar contamina justo lo que se mide—, y para solo porque el reloj
+lo dice. Corre **en el vehículo**, por la misma razón de seguridad del §6.3: por red, una caída de
+wifi deja a `servo_pkg` con el último valor y un carro acelerando sin nadie al mando.
 
-Cuatro tramos sobre la recta ya marcada, **sin turbo**, en este orden:
+Desde el portátil, una sola vez:
 
-1. Gatillo **al mínimo con el que el carro se mueva**. Búscalo con paciencia.
-2. Gatillo a **un cuarto** de recorrido, sostenido hasta el otro extremo.
-3. Gatillo a **medio** recorrido.
-4. Gatillo **a fondo** — que sigue siendo 0,35, porque el turbo no se usa.
+```bash
+scp herramientas/sostener_traccion.py deepracer@<IP>:~/
+```
 
-En cada tramo: **5 s quieto, recorrer sosteniendo el gatillo, 5 s quieto.** Son las mismas dos
-ventanas de quietud que usa `medir_g2.py`, así que el análisis ya sabe leerlas.
+**Primero, la pregunta que manda: dónde empieza a moverse.** Una rampa corta, mirando el carro:
 
-**Si solo da tiempo a una cosa, que sea el punto 1.** Dónde empieza a moverse el carro es el número
+```bash
+sudo -i bash -c 'source /opt/ros/jazzy/setup.bash && source /opt/aws/deepracer/lib/setup.bash && python3 ~deepracer/sostener_traccion.py --rampa 0.04:0.30:0.02 --marcha 3'
+```
+
+Imprime cada escalón al cambiar. **El valor que esté en pantalla cuando el carro arranque es la
+respuesta**, y no depende de ningún bag ni de ninguna odometría: lo ves con los ojos. Anótalo en el
+sitio.
+
+**Después, los escalones para la tabla.** Uno por corrida, sobre la recta ya marcada:
+
+```bash
+sudo -i bash -c 'source /opt/ros/jazzy/setup.bash && source /opt/aws/deepracer/lib/setup.bash && python3 ~deepracer/sostener_traccion.py --throttle 0.15 --marcha 8'
+```
+
+Repetir con `0.10`, `0.20`, `0.30` —o con el arranque medido arriba si quedó por encima de 0,10—.
+El programa mete él solo **5 s de quietud antes y después**, que son las mismas dos ventanas que
+usa `medir_g2.py`, así que el análisis las lee sin tocar nada. Rechaza de entrada un `--throttle`
+por encima de `0,35`, un tramo de más de 20 s y una corrida de más de 60 s de marcha total.
+
+**Si solo da tiempo a una cosa, que sea la rampa.** Dónde empieza a moverse el carro es el número
 que decide si 0,05 m/s es siquiera alcanzable, y hoy no existe en ningún documento.
+
+### 10.3-bis El testigo doble, y por qué sin él la mañana puede salir en blanco
+
+`medir_escala_traccion.py` saca la velocidad de la **trayectoria de rf2o**. Y el 2026-09-08 se
+midió que en un pasillo recto y uniforme **rf2o no ve el avance longitudinal**: devuelve cero y
+*acierta*, porque la información no está en el dato (memoria del proyecto, inobservabilidad
+longitudinal). **El carro no tiene encóders.** El eje ciego es exactamente el que se va a medir, en
+exactamente el sitio donde se va a medir.
+
+El riesgo concreto: volver con dos bags impecables que dicen «0 m/s a todos los `throttle`» y **sin
+forma de distinguir** si el carro no se movió o si rf2o no lo vio moverse. Eso no es un resultado
+negativo válido; es una mañana perdida.
+
+**Mitigación: un segundo testigo que el LiDAR no pueda contradecir.** Graba **vídeo** del carro
+cruzando las marcas de la recta ya medida con flexómetro. Distancia entre marcas dividida por
+tiempo en vídeo es una velocidad de referencia que no pasa por rf2o. Un móvil apoyado al final de
+la recta, encuadrando las marcas, basta.
+
+De paso mide por primera vez si el pasillo real es observable: si el vídeo dice 0,4 m/s y rf2o dice
+0, la inobservabilidad queda documentada con dato propio.
 
 ### 10.4 Qué significa cada resultado, decidido antes de medir
 
@@ -652,6 +694,12 @@ implícito**, y decide entre las tres filas del §10.4 sin que nadie tenga que i
 en el portátil y no en la tarjeta. Y **se niega a dar cifra** —no da una aproximada— si los dos
 bags no se solapan en el tiempo, si el de servo está vacío, o si una muestra cae en un hueco de la
 odometría.
+
+**Y el testigo que no pasa por rf2o**: para cada tramo, saca del vídeo el tiempo entre dos marcas y
+divídelo por la distancia ya medida con flexómetro. Esa columna va **al lado** de la que saca
+`medir_escala_traccion.py`, no en su lugar. Si las dos coinciden, la cifra está confirmada por dos
+caminos independientes. Si la de rf2o da cero y la del vídeo no, **manda el vídeo** y la
+discrepancia se anota como medida de la inobservabilidad del §10.3-bis.
 
 ---
 
