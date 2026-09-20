@@ -349,8 +349,16 @@ demostración.
 
 ### Bloque 5 — Análisis y escritura
 
-Análisis comparativo simulación ↔ físico sobre la misma geometría; tabla de cumplimiento requisito
-por requisito (§7.4 del anteproyecto); conclusiones; presentación; documento final.
+**5.1 — Capítulo de resultados de la campaña en simulación. 🟢 Hecho el 2026-09-19:**
+[`RESULTADOS_OE4_SIMULACION.md`](RESULTADOS_OE4_SIMULACION.md). No dependía de los vehículos, así
+que se adelantó a su semana (S24). Deja dos encargos para el resto del bloque: el modo de fallo
+único queda atribuido al término de estimación de pose del presupuesto de error, y el campo que
+cerraría la atribución —la distancia entre pose estimada y verdad de terreno en el instante de
+parada— existe hoy solo como texto libre dentro de `mensaje_usuario`.
+
+**5.2 y siguientes.** Análisis comparativo simulación ↔ físico sobre la misma geometría; tabla de
+cumplimiento requisito por requisito (§7.4 del anteproyecto); conclusiones; presentación; documento
+final.
 
 ---
 
