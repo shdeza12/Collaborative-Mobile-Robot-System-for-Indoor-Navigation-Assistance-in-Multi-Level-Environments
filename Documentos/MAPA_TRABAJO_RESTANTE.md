@@ -104,6 +104,13 @@ El §3 de [`PROTOCOLO_EXPERIMENTAL.md`](PROTOCOLO_EXPERIMENTAL.md) prohíbe move
 de ver resultados. Estas cinco están pendientes, y cada corrida que se ejecute sin resolverlas
 queda contaminada.
 
+> **Resuelto el 2026-09-21 en [`ACTA_GO_NOGO.md`](ACTA_GO_NOGO.md):** el punto de decisión GO/NO-GO
+> se cerró con **GO pleno** —la demostración se intenta con los dos vehículos reales—, con seis
+> criterios de fallo escritos de antemano y cuatro puntos de corte con fecha, el último el
+> **16 de octubre**, después del cual no se toman más datos. El acta **no** resuelve las decisiones
+> 1 y 3 de esta lista: el sitio de la etapa 3 y el N de RF-27 son de directores, y el acta los
+> traslada con la medición de por medio. Hasta que eso esté por escrito no se corre la etapa 3.
+
 1. **El sitio de la etapa 3.** RF-27 y [`ENTORNO_DE_EVALUACION.md`](ENTORNO_DE_EVALUACION.md) §6
    dicen «el pasillo real de la USTA, en dos plantas». Está medido que **ninguno de los dos pisos
    contiene la información de avance**: 5,1 % en piso 1 y 5,9 % en piso 2, los dos por debajo del
