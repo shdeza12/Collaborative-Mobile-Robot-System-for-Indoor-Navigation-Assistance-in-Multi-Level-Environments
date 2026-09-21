@@ -230,8 +230,11 @@ Ordenado por dependencia:
 
 ## 7. Deuda abierta que muerde al final
 
-- **R6 🔴** discrepancias entre informes y repositorio. Impacto declarado: *credibilidad de la
-  evidencia ante el jurado*. El riesgo más barato de cerrar y el más caro de dejar.
+- **R6 ✅ cerrado el 2026-09-21** con `S24_fe_de_erratas_S15.md`: las siete discrepancias tienen
+  veredicto publicado. No se corrigió el informe —está entregado y solo existe como PDF—, se
+  publicó la corrección. Una de las siete no era errata: el mapa de S15 medía 23,04 × 15,72 m
+  contra los «44 × 5» declarados, y esa deformación **era la inobservabilidad longitudinal tres
+  meses antes de que se midiera**.
 - **R4 🟡** pared sur abierta en el SDF, deja celdas desconocidas. Abierto desde S14.
 - **Tres correcciones retroactivas del 2026-09-17/18**, que hay que aplicar antes de citar
   documentos anteriores: el criterio de estructura visible es **~6 m y no 12 m**; las rupturas de
@@ -391,6 +394,15 @@ S24. Trabajo de escritorio, sin vehículos, sin decisiones pendientes.
 
 **1.5 · Cerrar R6** —las discrepancias informe ↔ repositorio— y **actualizar el libro del
 cronograma en sitio**.
+
+> **R6 CERRADO el 2026-09-21.** Evidencia en `S24_fe_de_erratas_S15.md`. Las siete filas del §5
+> de `ESTADO.md` quedan con veredicto: tres erratas del informe, una afirmación falsa con
+> mecanismo explicado, dos retiradas y una precisión. La corrección se **publica**, no se aplica
+> al entregable: S15 está entregado y solo existe como PDF.
+>
+> **Pendiente de 1.5:** el libro del cronograma
+> (`Entregables/Actividad_1_Corte_1_Cronograma_2026-2.xlsx`), que se edita en sitio y lleva sin
+> actualizar desde antes de S23.
 
 ---
 

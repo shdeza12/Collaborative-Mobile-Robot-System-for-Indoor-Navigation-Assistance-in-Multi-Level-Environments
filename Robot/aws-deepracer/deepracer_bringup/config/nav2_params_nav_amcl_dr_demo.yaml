@@ -149,7 +149,7 @@ global_costmap:
       robot_base_frame: base_link
       use_sim_time: False
       footprint: '[[0.140, 0.095], [0.140, -0.095], [-0.140, -0.095], [-0.140, 0.095]]'
-      resolution: 0.06   # debe coincidir con la resolucion del mapa (primer_piso.yaml)
+      resolution: 0.06   # debe coincidir con la resolucion del mapa (mundo_definitivo_piso1.yaml)
       track_unknown_space: true
       plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
       obstacle_layer:
