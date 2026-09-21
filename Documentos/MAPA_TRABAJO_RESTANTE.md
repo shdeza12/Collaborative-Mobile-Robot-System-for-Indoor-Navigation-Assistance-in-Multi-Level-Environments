@@ -279,6 +279,36 @@ resolución y frecuencia.
 **Cierre.** La salida de los comandos pegada en un fichero de evidencia, y la decisión del §3.5
 escrita con su razón.
 
+**🟢 Resuelto el 2026-09-21 — y no salió binario.**
+Registro: [`S24_desempate_camara_vehiculo.md`](Evidencia/S24_desempate_camara_vehiculo.md).
+**Hay imagen**, `/camera_pkg/display_mjpeg` en los dos vehículos, así que **A no se cae y C no pasa
+a ser el plan**. Pero la pila de fábrica la expone a **160 × 120** —insuficiente para marcadores— y
+`camera_info` viene **entero en ceros**, sin intrínsecos. El sensor sí admite 640 × 480 a 30 fps y
+hasta 1280 × 640, luego los 160 × 120 son elección de AWS, no techo del hardware.
+
+**Y esa elección está localizada en el fuente.** `deepracer-core` arranca por `start_ros.sh`, que
+lanza `deepracer_launcher.py` con `camera_mode:=modern` —el nodo real es `camera_ros`, no el
+`camera_pkg` de Foxy—, y allí `resolution = resize_images and [160, 120] or [640, 480]` depende del
+argumento `camera_resize`, cuyo defecto es `True`. Consecuencia para la opción A, con los precios ya
+medidos y no supuestos: **640 × 480 cuesta una palabra** (`camera_resize:=False`); **la calibración
+cuesta editar el launch**, porque `camera_info_url` es de solo lectura y no es argumento; y **elegir
+cuál de las dos cámaras Condor se usa no funciona hoy** —el bloque de detección de `libcamera` no
+llegó a ejecutarse—, que es lo que hay que arreglar antes de imprimir el primer marcador.
+
+Advertencia que sale del mismo fuente: los remapeos del nodo de cámara son **absolutos**
+(`/camera_pkg/camera_info`, `/camera_pkg/display_mjpeg`), así que **envolver el launch en un
+namespace de robot no separa los dos vehículos**. La pieza 3 del §2.2 exige tocar esos remapeos o
+lanzar `camera_ros` por nuestra cuenta.
+
+Hallazgo colateral: `ros2 topic info` devolvió **`Publisher count: 2`** sobre una cámara por carro,
+y `ros2 node list` lo confirma con el aviso propio de ROS sobre **nodos que comparten nombre
+exacto**, repitiendo cada nodo de `deepracer-core`. Los dos vehículos publican en el mismo nombre
+absoluto y se ven entre sí: es la primera evidencia en hardware de lo que la pieza 3 del §2.2
+anotaba como nunca ejercitado, y **contamina cualquier medida tomada con los dos encendidos** —la
+tasa de fotogramas y las listas de tópicos de hoy, entre ellas—. Mientras no haya namespaces, medir
+exige `ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST` tras `ros2 daemon stop`, que es como se desambiguó
+la batería.
+
 ---
 
 ### Bloque 1 — Lo que no espera a nadie (se puede arrancar el lunes en paralelo)
