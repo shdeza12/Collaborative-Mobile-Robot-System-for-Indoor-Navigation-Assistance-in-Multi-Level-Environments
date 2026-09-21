@@ -378,6 +378,13 @@ sudo -i bash -c 'source /opt/ros/jazzy/setup.bash && ros2 daemon stop && ros2 da
 > **`--no-daemon` no es el remedio por defecto**, aunque lo parezca: es justamente la forma que da
 > 2, 10 y 17 en la tabla de abajo. Sirve como desempate para una consulta suelta, sabiendo que
 > subcuenta, y **nunca como la evidencia con la que se decide grabar**.
+>
+> **No cuentes nodos: cuenta tópicos o servicios.** Medido el 2026-09-21 (`S24_actuacion_bloqueada_servo.md`):
+> `ros2 node list` osciló entre **21 y 0** en llamadas consecutivas sobre un vehículo que no
+> cambiaba, y llegó a devolver **0 mientras `ros2 service list -t` devolvía sus 186 entradas
+> completas**. El grafo estaba sano; el comando mentía. Un recuento de nodos en cero **no es
+> evidencia de que el grafo esté caído**, y usarlo como tal cuesta horas persiguiendo hipótesis
+> sobre un fallo que no existe.
 
 > **Por qué.** El descubrimiento de ROS 2 en este carro **no es determinista para un participante
 > recién nacido**. Medido el 2026-09-01 contra un grafo que no cambiaba:

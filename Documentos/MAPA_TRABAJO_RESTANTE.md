@@ -354,9 +354,24 @@ la batería.
   más que un riesgo abierto.
 - *Cierre:* RF-16 en verde, o un fichero de evidencia con la lista completa de lo que no compila.
 
-**1.3 · RF-11: recorrido medido por `/cmd_vel`.** Es el único requisito de hardware que no depende
-de nada, y su verificación no necesita ni mapa ni TF: basta publicar en `/<ns>/cmd_vel` y medir con
-flexómetro.
+**1.3 · RF-11: recorrido medido.** ~~Basta publicar en `/<ns>/cmd_vel` y medir con flexómetro.~~
+
+> **CORREGIDA y BLOQUEADA el 2026-09-21.** Evidencia en `S24_actuacion_bloqueada_servo.md`.
+>
+> 1. **`/cmd_vel` no existe en el vehículo.** De los 21 tópicos de `deepracer-core`, la cadena
+>    real es `ctrl_pkg` → `/ctrl_pkg/servo_msg` (`ServoCtrlMsg`) → `servo_pkg`. La tarea tal como
+>    estaba redactada **no es ejecutable**.
+> 2. **`ServoCtrlMsg` habla en razones, no en unidades físicas**, contra los límites de
+>    calibración guardados. La calibración pasa a ser parte del dato de RF-11, no del entorno.
+> 3. **Bloqueada por una anomalía abierta:** desde una pérdida de alimentación de tracción,
+>    `servo_pkg` no atiende sus servicios ni actúa sobre los mensajes que recibe, y el fallo
+>    sobrevive a `systemctl restart`, a `reboot` y a reasentar la batería, con el diario de
+>    systemd limpio. `i2c_pkg`, por el mismo camino, sí responde.
+> 4. **Lo siguiente es el carro `.102`**, intacto: si allí `servo_pkg` contesta, el fallo es de
+>    estado del `.101` y RF-11 se mide en el `.102` sin esperar a entender el `.101`.
+> 5. Hallazgo de método con alcance más amplio: **`ros2 node list` no es fiable en las tarjetas**
+>    —osciló entre 21 y 0 con el grafo sano—. La salud del grafo se mide contando tópicos o
+>    servicios. `GUIA_PASADA_MAPEO.md` §2.5 queda corregida.
 
 **1.4 · Consolidar y versionar el conjunto de datos de las 30 corridas.** Criterio de cierre de
 S24. Trabajo de escritorio, sin vehículos, sin decisiones pendientes.
