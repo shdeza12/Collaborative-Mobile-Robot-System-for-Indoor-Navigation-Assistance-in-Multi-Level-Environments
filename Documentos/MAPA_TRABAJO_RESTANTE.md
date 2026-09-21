@@ -326,6 +326,24 @@ la batería.
 - *Cierre:* árbol TF con los dos marcos, y la transformada `base_link → laser` comprobada contra
   flexómetro (el sensor está a `x = 0,02913`, `z = 0,16145`, `yaw` π respecto al chasis).
 
+> **CERRADA el 2026-09-21.** Evidencia en `S24_tf_hardware_peldano_1.md`. `tf2_echo` en el carro
+> `.101` publica `base_link → laser` = `[0.029, 0.000, 0.185]` con `yaw` −180°, y el flexómetro
+> mide el plano del láser a 175 mm del piso contra 175,7 calculados: **el URDF de simulación
+> describe el vehículo real dentro de 1 mm**. El peldaño 1 está de pie en hardware.
+>
+> Tres correcciones a lo que esta tarea daba por supuesto:
+>
+> 1. **El xacro no se procesa en la tarjeta.** El URDF plano se genera en el portátil y se copia;
+>    `robot_state_publisher` no abre mallas. Así 1.1 deja de depender de 1.2.
+> 2. **Los parámetros del LiDAR real no cierran el peldaño.** Aterrizan dentro de
+>    `<gazebo><sensor>` y en hardware son inertes. Lo que coloca el sensor es `hokuyo_joint`,
+>    escrito a mano en el xacro.
+> 3. **Faltaban paquetes base en la tarjeta** —ni `robot_state_publisher` ni `tf2_ros` en una
+>    instalación de 194 paquetes—. Instalarlos resultó aditivo (`0 upgraded`) y exigió liberar
+>    939 MB de caché muerta de apt. **Esto adelanta el riesgo R8 y cambia lo que hay que esperar
+>    de 1.2:** el primer fallo previsible no es de código, es de dependencias ausentes. El carro
+>    `.102` sigue sin tocar, como clon de control; habrá que repetir allí antes de grabar bags.
+
 **1.2 · Compilar `deepracer_bringup` en Jazzy.** Cierra RF-16 y acota el riesgo R8.
 
 - *Comando:* `colcon build --symlink-install --packages-select deepracer_bringup` en la tarjeta,
