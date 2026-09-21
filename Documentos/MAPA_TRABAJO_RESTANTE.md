@@ -376,6 +376,19 @@ la batería.
 **1.4 · Consolidar y versionar el conjunto de datos de las 30 corridas.** Criterio de cierre de
 S24. Trabajo de escritorio, sin vehículos, sin decisiones pendientes.
 
+> **CERRADA el 2026-09-21.** Evidencia en `S24_consolidacion_datos_oe4.md`. Los 30 registros
+> regeneran las métricas publicadas con una sola orden, sin ROS y sin bags: **13 de 13 bloques
+> idénticos, ninguna cifra publicada se mueve**, veredicto `VALIDA` sin alertas.
+>
+> La comprobación encontró un hueco real: **el artefacto versionado de S21 no contenía el bloque
+> `rnf01`**, que `REQUISITOS.md` y `RESULTADOS_OE4_SIMULACION.md` ya citaban. Se añade
+> `S24_metricas_campana_oe4.json` con los 13 bloques intactos más el que faltaba; el JSON de S21
+> **no se toca**, porque es artefacto entregado y es la prueba de que nada cambió.
+>
+> Queda declarada una limitación del conjunto: **los bags no están versionados** —2,2 GB fuera del
+> repositorio—, así que el tramo bag → registro no es reproducible por un tercero. Lo avalan la
+> comprobación de S23 y el `sha256` del catálogo que cada registro guarda.
+
 **1.5 · Cerrar R6** —las discrepancias informe ↔ repositorio— y **actualizar el libro del
 cronograma en sitio**.
 
