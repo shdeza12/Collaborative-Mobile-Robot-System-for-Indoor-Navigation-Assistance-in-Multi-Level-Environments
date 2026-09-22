@@ -124,10 +124,27 @@ semanas previas. Por tanto:
 |---|---|---|---|
 | **C-0** | **Vie 25 sep** (S24) | G-1 alcanzado | Se abre el diagnóstico de plataforma como línea propia, y se replantea el alcance en S25 |
 | **C-1** | **Vie 2 oct** (S25) | G-2 y G-3 alcanzados | Se revierte a **NO-GO**: RF-27 se declara no alcanzable y la evidencia queda en la campaña de simulación, con este acta como justificación |
-| **C-2** | **Vie 9 oct** (S26) | G-4 alcanzado | Se revierte a **GO parcial**: un vehículo real y uno simulado, que además sostiene RF-16 |
+| **C-2** | **Vie 9 oct** (S26) | G-4 alcanzado | Se revierte a **GO parcial**: **un solo vehículo real**, y el segundo piso queda cubierto por la campaña de simulación. RF-16 no se sostiene por esta vía |
 | **C-3** | **Vie 16 oct** (S27) | G-5 y G-6 alcanzados | Se reporta lo corrido con su n real y se cierra la toma de datos, pase lo que pase |
 
 **Después de C-3 no se toman más datos.** Lo que haya el 16 de octubre es lo que se defiende.
+
+**Por qué el repliegue de C-2 no puede ser «uno real y uno simulado».** Una versión anterior de esta
+fila lo proponía, y nuestra propia evidencia ya lo había refutado. R8 (medido el 2026-08-18) establece
+que `nav2_msgs/NavigateToPose` cambia de definición entre Humble y Jazzy —en Humble el result es
+`std_msgs/Empty`, en Jazzy lleva `error_code` y `error_msg`—, y ese es el único camino de mando del
+`CONTRATO_INTERFACES.md`. Un coordinador en Humble no encuentra servidor en un robot Jazzy, y no lo
+reporta: falla en silencio. El mismo código fuente sirve para los dos destinos, pero no a la vez. Es
+la decisión D6: portabilidad de fuente, no interoperabilidad de grafo.
+
+**Y por qué no se iguala la distro.** Se evaluó bajar los vehículos de Jazzy a Humble. No procede, por
+tres razones verificadas: (a) `deepracer-custom-car` no publica objetivo 22.04 + Humble para la tarjeta
+original `amd64` —su matriz APT lo marca «No», y solo ofrece flashear a 24.04 o el stack sobre un 20.04
+existente—; (b) no sería un downgrade sino una reinstalación del sistema operativo, que destruiría el
+estado ya medido en hardware (`/scan`, el mapa del laboratorio, el teleoperado por
+`/ctrl_pkg/servo_msg`, `coordinacion_msgs` 19/19, RF-15 600/600); y (c) no toca ninguno de los dos
+bloqueadores reales, G-1 y G-2, que son indiferentes a la distro. El camino inverso tampoco existe:
+`gazebo_ros2_control` no está liberado para Jazzy, así que la simulación no puede subir.
 
 ## 6. Lo que no deciden los autores
 

@@ -20,6 +20,13 @@ es un error: son los **dos carros encendidos viéndose en el dominio 0**, el mis
 el Bloque 0 ya había anotado. Cualquier medida tomada con ambos encendidos está contaminada
 mientras no haya espacios de nombres.
 
+> **Corrección abierta (2026-09-21, tarde).** El párrafo anterior **explica el 2 sin haberlo
+> comprobado**, y la explicación está ahora en duda: se repitió el mismo comando con el `.101`
+> apagado y **el contador siguió en 2**. No sabemos todavía si el segundo publicador es un fantasma
+> en la caché del demonio, un `ctrl_node` huérfano en esta misma tarjeta, o un participante ajeno.
+> Se retoma en el §8. Mientras no se resuelva, **la frase «son los dos carros» no sostiene nada**,
+> y con ella se cae el argumento de contaminación que de ahí se derivaba.
+
 ## 1. El mensaje no habla en unidades físicas
 
 ```
@@ -159,3 +166,71 @@ requiere tocar nada.
 | El fallo sobrevive a `restart`, `reboot` y reasentar batería | Tres intentos, carro `.101` |
 | Servicio `active`, `NRestarts=0`, diario limpio | `systemctl show`, `journalctl` |
 | `ros2 node list` devuelve 0 y 21 alternadamente | Llamadas consecutivas contra `service list -t` estable en 186 |
+
+## 8. Sesión del 2026-09-21 por la tarde: lo verificado y lo que queda abierto
+
+Se abrió la sesión sobre el carro `.102` (`amss-ez9n`) para responder la pregunta que sostiene el
+C-0 del viernes 25: **si la anomalía de `servo_pkg` es del `.101` o de la plataforma.** No se llegó
+a la sonda. El bloque de preparación sí quedó cerrado, y la primera comprobación de aislamiento
+abrió una duda que invalida una frase del §0.
+
+### 8.1 Preparación, cerrada en verde
+
+| Comprobación | Resultado | Lectura |
+|---|---|---|
+| Cortafuegos del portátil (`192.168.0.103`) | regla **[6]** `Anywhere ALLOW IN 192.168.0.0/24` | ya por subred; no vuelve a caducar con el DHCP |
+| Cortafuegos del carro | regla **[9]** `Anywhere ALLOW IN 192.168.0.0/24` | ídem |
+| Identificación por hostname | `deepracer@amss-ez9n` en `192.168.0.102` | el inventario de S23 se mantiene |
+| Salud del grafo | `ros2 service list -t \| wc -l` → **186** | se cuentan servicios, no nodos (§6) |
+
+**Deuda de limpieza anotada, no ejecutada:** sobreviven las reglas viejas por IP suelta —la `[1]`
+del portátil, y la `[7]` y la `[8]` del carro—. La `[7]` apunta a `192.168.0.101` con la etiqueta
+«ROS 2 con el portátil», que es falsa: el portátil es el `.103`. Son redundantes desde que existe
+la regla por subred, y una etiqueta mentirosa en un cortafuegos es exactamente lo que costó la
+mañana del 8 de septiembre.
+
+### 8.2 La medida que detuvo la sesión
+
+Con **un solo carro encendido** —el `.101` apagado por interruptor, confirmado por el usuario—:
+
+```
+$ ros2 topic info /ctrl_pkg/servo_msg
+Type: deepracer_interfaces_pkg/msg/ServoCtrlMsg
+Publisher count: 2
+Subscription count: 1
+```
+
+El `2` sobrevive al apagado del segundo vehículo. Luego **no eran los dos carros**, o no solo. La
+sesión se detuvo aquí a propósito: medir la actuación sin saber quién es el segundo publicador
+habría producido un dato que no se puede defender.
+
+### 8.3 Cómo se retoma, con las cuatro hipótesis separadas
+
+Todo dentro de una sola sesión `ssh` en el carro, sin publicar nada todavía.
+
+| # | Comando | Qué decide |
+|---|---|---|
+| **B1a** | `ros2 topic info /ctrl_pkg/servo_msg --verbose` | Si los dos bloques traen el **mismo `Node name`**, es un nodo con dos publicadores o dos instancias locales, no dos máquinas |
+| **B1b** | `ros2 daemon stop && ros2 topic info /ctrl_pkg/servo_msg --no-daemon --verbose` | Si baja a **1**, el segundo era un fantasma en la caché del demonio —el mismo modo de fallo del §6— y el aislamiento estaba bien |
+| **B1c** | `ps -ef \| grep [c]trl` | Si salen **dos** `ctrl_node`, `deepracer-core` dejó un huérfano de un reinicio anterior. Los corchetes evitan que `grep` se cuente a sí mismo |
+| **B1d** | `ping -c 2 192.168.0.101` | Confirma que nadie contesta en esa IP. Si contesta, puede ser otro equipo que tomó la dirección por DHCP |
+
+Resuelto eso, la sesión continúa por donde iba:
+
+1. **B2** — cargar la receta de entorno del §2 (las tres variables, sin `source`).
+2. **B3** — `ros2 service list -t | grep -iE 'servo|battery'`, para leer nombres y tipos exactos en
+   vez de suponerlos.
+3. **B4** — **el control antes que la sonda**: `timeout 10 ros2 service call /i2c_pkg/battery_level
+   <tipo> '{}'; echo SALIDA=$?`. Si `i2c_pkg` contesta y `servo_pkg` no, la receta de entorno queda
+   descartada como causa. Sirve además para saber si hay batería de tracción: por debajo de
+   `level=5`, cargar antes de seguir o el resultado no significa nada.
+4. **B5** — la sonda: `get_calibration` con `timeout` y `echo SALIDA=$?`. **`SALIDA=124` en el
+   `.102` sería un resultado, no un fracaso**: querría decir que la anomalía es de plataforma y no
+   del `.101`, y G-1 se declararía no alcanzado con diagnóstico.
+5. **B6** — solo si B5 da `SALIDA=0`: mover las ruedas con el mando y el carro **en alto**
+   (`GUIA_TELEOP_MANDO.md`, Parte 6). Es el instrumento que ya tiene hombre muerto de 0,6 s; no se
+   improvisa con `ros2 topic pub`.
+
+**Lo que no se hace todavía:** provocarle al `.102` la pérdida de alimentación de tracción que
+rompió al `.101`. Es el experimento decisivo sobre la anomalía del §5 y también la forma de
+quedarnos sin vehículo antes del C-0. No antes del viernes.
