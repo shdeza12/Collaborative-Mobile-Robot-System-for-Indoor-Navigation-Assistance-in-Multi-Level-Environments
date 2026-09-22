@@ -729,52 +729,84 @@ d(2 s) = arranque +      0      + inercia
 El arranque y la inercia son los mismos en las dos corridas —misma velocidad de crucero, mismo
 suelo—, así que **se cancelan exactos**. Lo que queda son 2 s de velocidad de crucero y nada más.
 La única suposición es que el carro llega a su velocidad estable **antes** del segundo 2, y esa
-suposición se comprueba en la corrida 11.
+suposición se comprueba en la corrida 13.
 
 #### Antes de la primera corrida
 
 | | Comprobación | Comando |
 |---|---|---|
-| 1 | **Solo un carro encendido.** Es regla de seguridad medida, no prudencia: un comando movió los dos a la vez (§7 de S23), y apagar el GPIO del otro **no** lo impide | apagar el `amss-ez9n` con el interruptor |
-| 2 | Y comprobarlo por el dato, no por la fe | `ssh deepracer@192.168.0.101 "sudo -i bash -c 'source /opt/ros/jazzy/setup.bash && source /opt/aws/deepracer/lib/setup.bash && ros2 topic info /ctrl_pkg/servo_msg'"` → **`Subscription count: 1`**, no 2 |
-| 3 | **Batería, primero y al final.** Una curva tomada mientras la batería cae no es una curva | `ssh deepracer@192.168.0.101 "sudo -i bash -c 'source /opt/ros/jazzy/setup.bash && source /opt/aws/deepracer/lib/setup.bash && ros2 service call /i2c_pkg/battery_level deepracer_interfaces_pkg/srv/BatteryLevelSrv \"{}\"'"` |
+| 1 | **Solo un carro encendido.** Es regla de seguridad medida, no prudencia: un comando movió los dos a la vez (§7 de S23), y apagar el GPIO del otro **no** lo impide | apagar el `amss-jgm9` con el interruptor |
+| 2 | Y comprobarlo por el dato, no por la fe | `ssh deepracer@192.168.0.102 "sudo -i bash -c 'source /opt/ros/jazzy/setup.bash && source /opt/aws/deepracer/lib/setup.bash && ros2 topic info /ctrl_pkg/servo_msg'"` → **`Subscription count: 1`**, no 2 |
+| 3 | **Batería, primero y al final.** Una curva tomada mientras la batería cae no es una curva | `ssh deepracer@192.168.0.102 "sudo -i bash -c 'source /opt/ros/jazzy/setup.bash && source /opt/aws/deepracer/lib/setup.bash && ros2 service call /i2c_pkg/battery_level deepracer_interfaces_pkg/srv/BatteryLevelSrv \"{}\"'"` |
 | 4 | La recta, medida y marcada con flexómetro: marca de **salida** y, cada metro, marcas hasta el final | flexómetro y cinta |
 
-**El carro es el `amss-jgm9` (192.168.0.101)**, y no por costumbre: es el único con la dirección
-centrada contra las ruedas, que el §8 de S23 dejó escrito como **prerrequisito** de esta tabla —un
-carro que arrastra las ruedas subestima la velocidad por una cantidad desconocida—. Verificado el
-2026-09-22 en las dos capas que pueden discrepar, disco y nodo vivo: `min 1 200 000 · mid
-1 320 000 · max 1 800 000`.
+**El carro es el `amss-ez9n` (192.168.0.102)**, porque es el que va recto. Eso se sabe por haberlo
+visto rodar en el pasillo, y ése es el dato que vale: el §8 de S23 puso como **prerrequisito** de
+esta tabla que la dirección esté centrada —un carro que arrastra las ruedas subestima la velocidad
+por una cantidad desconocida— y la única comprobación válida de «va recto» es que vaya recto.
 
-> **Ojo con el número del §5 de S23.** Aquel documento anotó `1 000 000 / 1 290 000 / 2 000 000` a
-> las 20:17. El archivo del carro está escrito a las **20:53** de esa misma noche con otros valores:
-> hubo una tercera pasada de calibración que no quedó anotada. **El centro válido es el del carro**,
-> y por eso se lee antes de medir en vez de citarlo de un documento.
+> **Un criterio que parecía servir y no sirve.** El 2026-09-22 se leyó la calibración de los dos
+> vehículos y se razonó que el centro bueno es el que **no** cae en el punto medio geométrico del
+> recorrido, porque eso delataría un valor de fábrica sin medir. El criterio no discrimina: los dos
+> están descentrados —el `amss-ez9n` 50 000 y el `amss-jgm9` 180 000 respecto de 1 500 000—, así que
+> distingue *cuánto* se tocó cada uno, no *cuál quedó recto*. Estar descentrado es condición
+> necesaria, no suficiente. **Queda escrito para no volver a usarlo.**
 
-#### Las once corridas
+| Vehículo | Dirección (`cal_type: 0`), leída del carro el 2026-09-22 |
+|---|---|
+| `amss-ez9n` (.102) | `min 1 300 000 · mid 1 450 000 · max 1 700 000` |
+| `amss-jgm9` (.101) | `min 1 200 000 · mid 1 320 000 · max 1 800 000` |
+
+La **tracción es idéntica en los dos** —`1 311 000 / 1 446 000 / 1 603 500`, polaridad −1—, que es
+lo que permite comparar esta curva con la del otro vehículo si algún día hace falta. Aun así, ver
+§«Las trece corridas»: el umbral de arranque **se vuelve a medir aquí**, no se importa.
+
+> **Ojo con el número del §5 de S23, aunque ya no sea el carro de esta tabla.** Aquel documento
+> anotó la dirección del `amss-jgm9` como `1 000 000 / 1 290 000 / 2 000 000` a las 20:17. El
+> archivo del vehículo está escrito a las **20:53** de esa misma noche con otros valores: hubo una
+> tercera pasada de calibración que no quedó anotada. **El centro válido es el del carro**, y por
+> eso se lee antes de medir en vez de citarlo de un documento.
+
+#### Las trece corridas
 
 Orden **ascendente**, y a propósito: así el operador ve crecer la distancia escalón a escalón y
 decide con los ojos si cabe la siguiente.
 
 | # | `--throttle` | `--marcha` | Se anota |
 |---|---|---|---|
-| 1 | 0.60 | 2 | `d` = salida → donde queda quieto |
-| 2 | 0.60 | 4 | `d` |
-| 3 | 0.70 | 2 | `d` |
-| 4 | 0.70 | 4 | `d` |
-| 5 | 0.80 | 2 | `d` |
-| 6 | 0.80 | 4 | `d` |
-| 7 | 0.90 | 2 | `d` |
-| 8 | 0.90 | 4 | `d` |
-| 9 | 1.00 | 2 | `d` |
-| 10 | 1.00 | 4 | `d` |
-| 11 | el escalón más alto que haya cabido | 6 | `d`, **solo para validar** |
+| 1 | 0.50 | 2 | `d`, que **se espera 0** — ver abajo |
+| 2 | 0.50 | 4 | `d`, que **se espera 0** |
+| 3 | 0.60 | 2 | `d` = salida → donde queda quieto |
+| 4 | 0.60 | 4 | `d` |
+| 5 | 0.70 | 2 | `d` |
+| 6 | 0.70 | 4 | `d` |
+| 7 | 0.80 | 2 | `d` |
+| 8 | 0.80 | 4 | `d` |
+| 9 | 0.90 | 2 | `d` |
+| 10 | 0.90 | 4 | `d` |
+| 11 | 1.00 | 2 | `d` |
+| 12 | 1.00 | 4 | `d` |
+| 13 | el escalón más alto que haya cabido | 6 | `d`, **solo para validar** |
 
-- **Objetivo.** Las diez primeras dan la curva. La 11 comprueba la única suposición del método.
+> **Por qué se vuelve a medir el 0,50, que ya estaba medido.** Porque estaba medido **en el otro
+> carro**. El `0.50 → 0 arranques de 5` del §4 de S23 se tomó sobre el `amss-jgm9`, y es el número
+> sobre el que se apoya **todo** el argumento de
+> [`S24_analisis_previo_RF11.md`](Evidencia/S24_analisis_previo_RF11.md): que Nav2 pide 0,50 m/s, que
+> la cadena emite 0,4247 y que por eso el carro no se mueve. Si la curva se levanta sobre el
+> `amss-ez9n`, ese apoyo pertenece a otro vehículo. La calibración de tracción es idéntica en los
+> dos, pero el umbral de arranque no lo fija sólo el PWM: lo fijan el motor, el variador, la batería
+> y el rozamiento. **Dos corridas, veintidós segundos, y el argumento deja de colgar de un vehículo
+> distinto del que produce la tabla.**
+>
+> Si el `0.50` **sí** mueve este carro, no es un contratiempo: es un hallazgo, y cambia la
+> conclusión del §2.3 de aquel documento. Se anota y se sigue.
+
+- **Objetivo.** Las corridas 1 y 2 anclan el umbral en este vehículo; de la 3 a la 12 sale la
+  curva; la 13 comprueba la única suposición del método.
 - **Comando** (cambiando los dos números en cada corrida):
 
 ```bash
-ssh -t deepracer@192.168.0.101 "sudo -i bash -c 'source /opt/ros/jazzy/setup.bash && source /opt/aws/deepracer/lib/setup.bash && python3 ~deepracer/sostener_traccion.py --throttle 0.60 --marcha 2 --tope 1.0 --quietud 2'"
+ssh -t deepracer@192.168.0.102 "sudo -i bash -c 'source /opt/ros/jazzy/setup.bash && source /opt/aws/deepracer/lib/setup.bash && python3 ~deepracer/sostener_traccion.py --throttle 0.60 --marcha 2 --tope 1.0 --quietud 2'"
 ```
 
 - **Resultado esperado.** Antes de tocar el vehículo imprime el resumen, que es donde se confirma
@@ -787,8 +819,8 @@ Quietud 2 s a cada lado. Empieza en 5 s, dura 11 s en total.
 
   Después, cuenta atrás de 5 s, `quieto_inicial`, `marcha throttle=0.600`, `quieto_final`, y el
   programa sale solo. El carro arranca, rueda y se para sin que nadie toque nada. Once segundos por
-  corrida con `--marcha 2`, trece con `--marcha 4`: **las once corridas son tres minutos de
-  vehículo**; el resto de la sesión es flexómetro.
+  corrida con `--marcha 2`, trece con `--marcha 4`: **las trece corridas son menos de cuatro
+  minutos de vehículo**; el resto de la sesión es flexómetro.
 - **Si falla.**
   - *«`throttle 1.0` pasa del tope 0.35»* → falta `--tope 1.0`. Ver el recuadro de abajo.
   - *El carro no se mueve y la pantalla imprime las fases con normalidad* → es la trampa de dueños
@@ -798,8 +830,8 @@ Quietud 2 s a cada lado. Empieza en 5 s, dura 11 s en total.
     `/opt/aws/deepracer/lib/setup.bash`.
   - *El carro se va de lado* → para el barrido. La dirección se descentró y todas las distancias
     quedan subestimadas (§8 de S23). Recalibrar antes de seguir, no después.
-- **Criterio de cierre.** Diez `d` anotadas, cinco velocidades calculadas, y la 11 confirmando la
-  del escalón que le toca.
+- **Criterio de cierre.** Doce `d` anotadas, cinco velocidades calculadas, el umbral de arranque
+  anclado en **este** carro, y la 13 confirmando la velocidad del escalón que le toca.
 
 > **`--tope 1.0` es obligatorio aquí, y la herramienta avisa de ello a propósito.** Su tope por
 > defecto es 0,35, el mismo `limite_normal` que `teleop_mando.py` da a una persona con el mando en
@@ -824,7 +856,7 @@ delante. De ahí las tres reglas:
 
 #### Al volver: la cuenta
 
-Para cada escalón, `v = (d₄ − d₂) / 2`, en metros por segundo. Y la comprobación de la corrida 11:
+Para cada escalón, `v = (d₄ − d₂) / 2`, en metros por segundo. Y la comprobación de la corrida 13:
 `(d₆ − d₄) / 2` tiene que dar **lo mismo** que `(d₄ − d₂) / 2` de ese escalón, dentro del error del
 flexómetro.
 

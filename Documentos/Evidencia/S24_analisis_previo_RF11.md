@@ -301,7 +301,7 @@ arranque e inercia son idénticos en las dos corridas, así que la resta los can
 exactamente 2 s de velocidad de crucero. Cuesta cinco corridas más —de once segundos cada una— y
 convierte una cifra contaminada en una medida.
 
-El guion completo, con las once corridas, el plan de parada y qué hacer si algo falla, queda
+El guion completo, con las trece corridas, el plan de parada y qué hacer si algo falla, queda
 en el **§10.3-ter** de [`HOJA_CAMPO_G2.md`](../HOJA_CAMPO_G2.md), junto a los procedimientos que
 sustituye. Los comandos se ensayaron en el portátil el 2026-09-22: la validación rechaza 0,60 sin
 `--tope` con el mensaje que el guion cita, y lo acepta con `--tope 1.0`.
@@ -312,9 +312,31 @@ sustituye. Los comandos se ensayaron en el portátil el 2026-09-22: la validaci�
 > `calibration.json` del vehículo está escrito a las **20:53** de esa noche y dice
 > `1 200 000 / 1 320 000 / 1 800 000`; el `servo_node` vivo dice lo mismo. Hubo una tercera pasada de
 > calibración que no se anotó. No se corrige S23 —es el registro de lo que pasó aquel día—, pero el
-> guion lee el valor del vehículo antes de medir. Lo que importa para RF-14 se mantiene: el centro
-> **no** cae en el punto medio geométrico (1 500 000), así que está medido contra las ruedas y el
-> prerrequisito del §8 de S23 se cumple.
+> guion lee el valor del vehículo antes de medir. No se corrige S23 —es el registro de lo que pasó
+> aquel día—, pero el número operativo es el del carro.
+
+### 5.3 El vehículo de la curva es el `amss-ez9n`, y eso obliga a re-medir el 0,50
+
+De ese mismo párrafo se dedujo, el 2026-09-22, que el carro de la tabla debía ser el `amss-jgm9`
+porque su centro de dirección no cae en el punto medio geométrico del recorrido y por tanto estaría
+medido contra las ruedas. **El razonamiento no discrimina y se retira.** Los dos vehículos están
+descentrados —el `amss-ez9n` 50 000 y el `amss-jgm9` 180 000 respecto de 1 500 000—, de modo que el
+criterio distingue *cuánto* se tocó cada calibración, no *cuál quedó recto*. Estar descentrado es
+condición necesaria, no suficiente, y la única comprobación válida de «va recto» es haberlo visto
+rodar. **El carro que va recto es el `amss-ez9n` (192.168.0.102)**, y es el de la curva.
+
+El cambio de vehículo tiene **una consecuencia que hay que pagar en la misma sesión**. El número
+sobre el que se apoya todo el §2.3 de este documento —`throttle 0.50` → **0 arranques de 5**— se
+midió en el §4 de [`S23_campo_traccion_RF14.md`](S23_campo_traccion_RF14.md) sobre el **otro** carro.
+Si la curva se levanta sobre el `amss-ez9n`, ese apoyo pertenece a un vehículo distinto del que
+produce la tabla, y el argumento queda cojo justo en su articulación.
+
+La calibración de tracción es **idéntica en los dos** —`1 311 000 / 1 446 000 / 1 603 500`,
+polaridad −1—, lo que hace razonable esperar el mismo umbral; pero el umbral de arranque no lo fija
+sólo el PWM, lo fijan el motor, el variador, la batería y el rozamiento. **Razonable no es medido.**
+Por eso el guion sube de once corridas a trece: las dos primeras son `0.50`, y anclan el umbral en
+el vehículo que produce la curva. **Veintidós segundos.** Si resultara que el `0.50` sí mueve a este
+carro, no es un contratiempo sino un hallazgo, y cambia la conclusión del §2.3.
 
 ---
 

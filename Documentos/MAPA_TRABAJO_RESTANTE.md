@@ -83,9 +83,11 @@ que `sostener_traccion.py` **no frena** —publica ceros y el carro rueda por in
 distancia hasta donde el carro queda quieto incluye un término desconocido que crece con la
 velocidad; y que su `--rampa` encadena tramos sin quietud entre ellos, así que sin odometría no se
 puede atribuir distancia a cada escalón. **Se mide cada escalón dos veces, con 2 s y con 4 s**, y la
-resta cancela arranque e inercia. Las once corridas, el plan de parada y los criterios están en el
-**§10.3-ter** de [`HOJA_CAMPO_G2.md`](HOJA_CAMPO_G2.md): **tres minutos de vehículo**, el resto es
-flexómetro.
+resta cancela arranque e inercia. Las trece corridas, el plan de parada y los criterios están en el
+**§10.3-ter** de [`HOJA_CAMPO_G2.md`](HOJA_CAMPO_G2.md): **menos de cuatro minutos de vehículo**, el
+resto es flexómetro. El carro de la curva es el **`amss-ez9n`**, que es el que va recto, y por eso
+dos de esas trece corridas vuelven a medir el `0.50`: el umbral de arranque en que se apoya el punto
+2 de arriba se midió sobre el otro vehículo.
 
 ### 2.2 Las cinco piezas de la cadena, en orden de dependencia
 
