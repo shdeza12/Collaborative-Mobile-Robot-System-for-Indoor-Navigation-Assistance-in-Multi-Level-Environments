@@ -695,6 +695,148 @@ la recta, encuadrando las marcas, basta.
 De paso mide por primera vez si el pasillo real es observable: si el vídeo dice 0,4 m/s y rf2o dice
 0, la inobservabilidad queda documentada con dato propio.
 
+### 10.3-ter La rampa que falta (0,60 → 1,00) con flexómetro: guion de corrida
+
+> **Escrito el 2026-09-22.** Esta sección **sustituye a los comandos del §10.3** para lo que queda
+> de RF-14. El §10.3 sigue valiendo como historia y como explicación de la herramienta, pero sus
+> tres comandos ya no sirven para medir lo que falta, y por tres razones distintas: su rampa
+> (`0.04:0.30:0.02`) busca el umbral de arranque, que **ya está medido** (0,60 sí, 0,50 no, §10.1.1);
+> su `--throttle 0.15` cae por debajo de ese umbral, así que no mueve el carro; y todo el bloque
+> descansa en rf2o, que en este pasillo **no ve el avance** (§10.3-bis).
+
+**Qué se busca, en una línea:** la curva `throttle → velocidad real sobre el suelo` entre 0,60 y
+1,00. Es el único dato que falta para decidir el par `(MAX_SPEED, MAX_SPEED_PCT)`
+([`S24_analisis_previo_RF11.md`](Evidencia/S24_analisis_previo_RF11.md) §4 y §5). Hoy el único punto
+que existe es `0,60 → menos de 1 m en 4 s`, y `1,00` figura literalmente como **«sin medir»**
+([`S23_campo_traccion_RF14.md`](Evidencia/S23_campo_traccion_RF14.md) §4).
+
+#### El error de método que hay que evitar: la inercia se mide sola
+
+`sostener_traccion.py` **no frena**: al acabar el tramo publica ceros, y el carro *rueda por
+inercia* hasta pararse. Así que la distancia entre la marca de salida y donde el carro acaba
+quieto **no es la distancia recorrida en el tramo**: es el tramo **más** la inercia, y la inercia
+crece con la velocidad. A 0,60 apenas se nota —el carro casi no se mueve—; a 1,00 puede ser la
+mitad de la medida. Una corrida por escalón da un número contaminado por una cantidad desconocida.
+
+**La solución es medir cada escalón dos veces, con 2 s y con 4 s de marcha**, y restar:
+
+```
+d(4 s) = arranque + 2 s de crucero + inercia
+d(2 s) = arranque +      0      + inercia
+                                     velocidad = ( d(4 s) − d(2 s) ) / 2
+```
+
+El arranque y la inercia son los mismos en las dos corridas —misma velocidad de crucero, mismo
+suelo—, así que **se cancelan exactos**. Lo que queda son 2 s de velocidad de crucero y nada más.
+La única suposición es que el carro llega a su velocidad estable **antes** del segundo 2, y esa
+suposición se comprueba en la corrida 11.
+
+#### Antes de la primera corrida
+
+| | Comprobación | Comando |
+|---|---|---|
+| 1 | **Solo un carro encendido.** Es regla de seguridad medida, no prudencia: un comando movió los dos a la vez (§7 de S23), y apagar el GPIO del otro **no** lo impide | apagar el `amss-ez9n` con el interruptor |
+| 2 | Y comprobarlo por el dato, no por la fe | `ssh deepracer@192.168.0.101 "sudo -i bash -c 'source /opt/ros/jazzy/setup.bash && source /opt/aws/deepracer/lib/setup.bash && ros2 topic info /ctrl_pkg/servo_msg'"` → **`Subscription count: 1`**, no 2 |
+| 3 | **Batería, primero y al final.** Una curva tomada mientras la batería cae no es una curva | `ssh deepracer@192.168.0.101 "sudo -i bash -c 'source /opt/ros/jazzy/setup.bash && source /opt/aws/deepracer/lib/setup.bash && ros2 service call /i2c_pkg/battery_level deepracer_interfaces_pkg/srv/BatteryLevelSrv \"{}\"'"` |
+| 4 | La recta, medida y marcada con flexómetro: marca de **salida** y, cada metro, marcas hasta el final | flexómetro y cinta |
+
+**El carro es el `amss-jgm9` (192.168.0.101)**, y no por costumbre: es el único con la dirección
+centrada contra las ruedas, que el §8 de S23 dejó escrito como **prerrequisito** de esta tabla —un
+carro que arrastra las ruedas subestima la velocidad por una cantidad desconocida—. Verificado el
+2026-09-22 en las dos capas que pueden discrepar, disco y nodo vivo: `min 1 200 000 · mid
+1 320 000 · max 1 800 000`.
+
+> **Ojo con el número del §5 de S23.** Aquel documento anotó `1 000 000 / 1 290 000 / 2 000 000` a
+> las 20:17. El archivo del carro está escrito a las **20:53** de esa misma noche con otros valores:
+> hubo una tercera pasada de calibración que no quedó anotada. **El centro válido es el del carro**,
+> y por eso se lee antes de medir en vez de citarlo de un documento.
+
+#### Las once corridas
+
+Orden **ascendente**, y a propósito: así el operador ve crecer la distancia escalón a escalón y
+decide con los ojos si cabe la siguiente.
+
+| # | `--throttle` | `--marcha` | Se anota |
+|---|---|---|---|
+| 1 | 0.60 | 2 | `d` = salida → donde queda quieto |
+| 2 | 0.60 | 4 | `d` |
+| 3 | 0.70 | 2 | `d` |
+| 4 | 0.70 | 4 | `d` |
+| 5 | 0.80 | 2 | `d` |
+| 6 | 0.80 | 4 | `d` |
+| 7 | 0.90 | 2 | `d` |
+| 8 | 0.90 | 4 | `d` |
+| 9 | 1.00 | 2 | `d` |
+| 10 | 1.00 | 4 | `d` |
+| 11 | el escalón más alto que haya cabido | 6 | `d`, **solo para validar** |
+
+- **Objetivo.** Las diez primeras dan la curva. La 11 comprueba la única suposición del método.
+- **Comando** (cambiando los dos números en cada corrida):
+
+```bash
+ssh -t deepracer@192.168.0.101 "sudo -i bash -c 'source /opt/ros/jazzy/setup.bash && source /opt/aws/deepracer/lib/setup.bash && python3 ~deepracer/sostener_traccion.py --throttle 0.60 --marcha 2 --tope 1.0 --quietud 2'"
+```
+
+- **Resultado esperado.** Antes de tocar el vehículo imprime el resumen, que es donde se confirma
+  que los argumentos llegaron bien —ensayado en el portátil el 2026-09-22—:
+
+```
+1 tramo(s) de 2 s: 0.6
+Quietud 2 s a cada lado. Empieza en 5 s, dura 11 s en total.
+```
+
+  Después, cuenta atrás de 5 s, `quieto_inicial`, `marcha throttle=0.600`, `quieto_final`, y el
+  programa sale solo. El carro arranca, rueda y se para sin que nadie toque nada. Once segundos por
+  corrida con `--marcha 2`, trece con `--marcha 4`: **las once corridas son tres minutos de
+  vehículo**; el resto de la sesión es flexómetro.
+- **Si falla.**
+  - *«`throttle 1.0` pasa del tope 0.35»* → falta `--tope 1.0`. Ver el recuadro de abajo.
+  - *El carro no se mueve y la pantalla imprime las fases con normalidad* → es la trampa de dueños
+    del §2 de S23: se te fue el `sudo -i`. **Publicar con el dueño equivocado no da error, da
+    silencio.**
+  - *`no se pudo importar ROS o los mensajes del DeepRacer`* → falta el segundo `source`, el de
+    `/opt/aws/deepracer/lib/setup.bash`.
+  - *El carro se va de lado* → para el barrido. La dirección se descentró y todas las distancias
+    quedan subestimadas (§8 de S23). Recalibrar antes de seguir, no después.
+- **Criterio de cierre.** Diez `d` anotadas, cinco velocidades calculadas, y la 11 confirmando la
+  del escalón que le toca.
+
+> **`--tope 1.0` es obligatorio aquí, y la herramienta avisa de ello a propósito.** Su tope por
+> defecto es 0,35, el mismo `limite_normal` que `teleop_mando.py` da a una persona con el mando en
+> la mano, y su comentario dice que subirlo a mano en un barrido «es como se lanza un carro contra
+> una pared». **El aviso es correcto y hay que obedecer lo que pide: subirlo a conciencia.** Lo que
+> lo hace admisible aquí es que los valores 0,60–1,00 *son el mensurando* —no se puede medir el
+> techo por debajo del techo— y que el riesgo se compensa con lo de abajo, no con optimismo.
+
+#### El plan de parada, porque no hay freno
+
+**Ctrl-C no frena el carro.** Publica ceros, que es lo mismo que soltar el acelerador: el carro
+sigue rodando. Lo único que para de verdad un DeepRacer a 1,00 es la distancia que tenga por
+delante. De ahí las tres reglas:
+
+1. **Nadie dentro de la recta.** El operador se queda **detrás de la marca de salida**; los 5 s de
+   cuenta atrás existen exactamente para eso.
+2. **Regla de parada del barrido:** si una corrida acaba pasada **la mitad** de la recta
+   disponible, **no subas al escalón siguiente**. Se cierra con lo medido y se anota hasta dónde se
+   llegó. Media tabla medida vale; una tabla entera con un carro estrellado, no.
+3. **Nunca dos corridas seguidas sin recoger el carro** a la marca de salida. La distancia se mide
+   desde la marca, y un carro que arranca dos metros más allá invalida la resta.
+
+#### Al volver: la cuenta
+
+Para cada escalón, `v = (d₄ − d₂) / 2`, en metros por segundo. Y la comprobación de la corrida 11:
+`(d₆ − d₄) / 2` tiene que dar **lo mismo** que `(d₄ − d₂) / 2` de ese escalón, dentro del error del
+flexómetro.
+
+- **Si coincide:** la velocidad estable se alcanza antes de los 2 s y las cinco cifras valen.
+- **Si `(d₆ − d₄)/2` sale claramente mayor:** el carro todavía aceleraba en el segundo 2. Entonces
+  la buena es `(d₆ − d₄)/2`, y hay que anotar que las demás filas quedan **subestimadas** —sirven
+  como cota inferior, que para decidir si un escalón supera el umbral de arranque sigue bastando.
+
+Estas cinco cifras entran en la tabla del §4 de
+[`S24_analisis_previo_RF11.md`](Evidencia/S24_analisis_previo_RF11.md), que ya tiene calculado qué
+`throttle` produce cada par `(MAX_SPEED, MAX_SPEED_PCT)`. **La decisión no se toma en el pasillo.**
+
 ### 10.4 Qué significa cada resultado, decidido antes de medir
 
 | Lo que salga | Qué quiere decir |

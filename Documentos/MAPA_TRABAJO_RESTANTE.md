@@ -77,6 +77,16 @@ suscriptor y `/set_max_speed` en el grafo. Hizo falta un arreglo de compatibilid
 `NavThrottleSrv`, que es idéntico campo a campo—, y **ese fallo no lo detecta `colcon`**: compiló
 limpio y murió al arrancar. Queda pendiente sólo la parte que exige mover el vehículo.
 
+**Y esa parte ya tiene guion, con un defecto de método corregido por el camino.** El punto 3 de
+arriba daba por bueno sustituir rf2o por «flexómetro y cronómetro». Al escribir los comandos se vio
+que `sostener_traccion.py` **no frena** —publica ceros y el carro rueda por inercia—, de modo que la
+distancia hasta donde el carro queda quieto incluye un término desconocido que crece con la
+velocidad; y que su `--rampa` encadena tramos sin quietud entre ellos, así que sin odometría no se
+puede atribuir distancia a cada escalón. **Se mide cada escalón dos veces, con 2 s y con 4 s**, y la
+resta cancela arranque e inercia. Las once corridas, el plan de parada y los criterios están en el
+**§10.3-ter** de [`HOJA_CAMPO_G2.md`](HOJA_CAMPO_G2.md): **tres minutos de vehículo**, el resto es
+flexómetro.
+
 ### 2.2 Las cinco piezas de la cadena, en orden de dependencia
 
 1. **`base_link`, y `base_link → laser`.** No corre `robot_state_publisher` en la tarjeta, así que

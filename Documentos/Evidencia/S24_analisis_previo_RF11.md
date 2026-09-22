@@ -278,6 +278,44 @@ levantamiento del candado de G2 y el barrido desde 0,60—:
 Con eso, la rampa deja de depender del camino crítico y **se puede correr el primer día que haya
 carro y pasillo**, sin esperar a la decisión de odometría.
 
+### 5.2 Rectificación, la misma tarde: sí hacía falta un guion, y por un defecto de método
+
+El §5.1 dice «no se redacta un guion nuevo». **Es falso, y merece la pena decir por qué**, porque al
+bajar a escribir los comandos apareció un defecto que ninguno de los dos procedimientos anteriores
+contempla.
+
+`sostener_traccion.py` **no frena**. Al acabar el tramo publica ceros, y el carro *rueda por
+inercia*. La distancia entre la marca de salida y donde el carro queda quieto es, entonces, el
+tramo **más la inercia**, y la inercia crece con la velocidad. Sustituir rf2o por «flexómetro y
+cronómetro», como propone el §5.1, deja ese término dentro de la medida sin decirlo. A 0,60 no se
+nota —el punto de S23 recorre menos de 1 m—; a 1,00, que es justo el valor que falta, puede ser la
+mitad de la cifra.
+
+Y el `--rampa` de la herramienta tampoco sirve: encadena los tramos **sin quietud entre ellos**
+(`segmentos()` solo mete quietud al principio y al final), de modo que sin odometría no hay forma
+de atribuir distancia a cada escalón. La rampa es un instrumento para *ver con los ojos* dónde
+arranca el carro —para lo que se escribió—, no para levantar una curva con flexómetro.
+
+**Lo que resuelve las dos cosas es medir cada escalón dos veces**, con 2 s y con 4 s de marcha:
+arranque e inercia son idénticos en las dos corridas, así que la resta los cancela y deja
+exactamente 2 s de velocidad de crucero. Cuesta cinco corridas más —de once segundos cada una— y
+convierte una cifra contaminada en una medida.
+
+El guion completo, con las once corridas, el plan de parada y qué hacer si algo falla, queda
+en el **§10.3-ter** de [`HOJA_CAMPO_G2.md`](../HOJA_CAMPO_G2.md), junto a los procedimientos que
+sustituye. Los comandos se ensayaron en el portátil el 2026-09-22: la validación rechaza 0,60 sin
+`--tope` con el mensaje que el guion cita, y lo acepta con `--tope 1.0`.
+
+> **De paso, un dato que hay que leer del carro y no del repositorio.** El §5 de
+> [`S23_campo_traccion_RF14.md`](S23_campo_traccion_RF14.md) anota el centro de dirección del
+> `amss-jgm9` como `1 000 000 / 1 290 000 / 2 000 000`, guardado a las 20:17 del 2026-09-17. El
+> `calibration.json` del vehículo está escrito a las **20:53** de esa noche y dice
+> `1 200 000 / 1 320 000 / 1 800 000`; el `servo_node` vivo dice lo mismo. Hubo una tercera pasada de
+> calibración que no se anotó. No se corrige S23 —es el registro de lo que pasó aquel día—, pero el
+> guion lee el valor del vehículo antes de medir. Lo que importa para RF-14 se mantiene: el centro
+> **no** cae en el punto medio geométrico (1 500 000), así que está medido contra las ruedas y el
+> prerrequisito del §8 de S23 se cumple.
+
 ---
 
 ## 6. Veredictos preinscritos
