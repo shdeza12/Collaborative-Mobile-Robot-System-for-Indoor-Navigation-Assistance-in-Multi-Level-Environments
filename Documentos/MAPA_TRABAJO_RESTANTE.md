@@ -70,6 +70,13 @@ apareció que **la prueba, tal como estaba redactada, no puede pasar**. Análisi
 Así que RF-11 sigue sin bloqueo *de otro requisito*, pero **tiene una precondición propia**, y es la
 misma medida que cierra el pendiente de RF-14.
 
+**Y la mitad que no dependía de esa decisión se hizo el mismo día.** El puente está **desplegado y
+compilado en los dos carros**, con el mismo md5 que el repositorio, y **arranca**: `/cmd_vel` con un
+suscriptor y `/set_max_speed` en el grafo. Hizo falta un arreglo de compatibilidad —el
+`deepracer_interfaces_pkg` del vehículo no trae `SetMaxSpeedSrv`, así que el nodo cae en
+`NavThrottleSrv`, que es idéntico campo a campo—, y **ese fallo no lo detecta `colcon`**: compiló
+limpio y murió al arrancar. Queda pendiente sólo la parte que exige mover el vehículo.
+
 ### 2.2 Las cinco piezas de la cadena, en orden de dependencia
 
 1. **`base_link`, y `base_link → laser`.** No corre `robot_state_publisher` en la tarjeta, así que
