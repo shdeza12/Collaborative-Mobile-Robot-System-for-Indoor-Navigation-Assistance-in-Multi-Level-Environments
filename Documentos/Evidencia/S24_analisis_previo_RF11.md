@@ -3,7 +3,8 @@
 **Fecha:** martes 2026-09-22, trabajo de escritorio.
 **Vehículos consultados:** `amss-jgm9` (192.168.0.101) y `amss-ez9n` (192.168.0.102), sólo lectura.
 **Naturaleza:** análisis de código y de configuración cruzado con medidas ya existentes en el
-repositorio. **No se movió ningún vehículo y no se modificó ninguna constante.**
+repositorio, y —en el §1.2— el despliegue del puente sobre los dos vehículos. **No se movió ningún
+vehículo y no se modificó ninguna constante del mapeo.**
 
 ---
 
@@ -50,6 +51,62 @@ del repositorio no tiene. `servo_pkg` está compilado contra la versión del veh
 con sourcear `/opt/aws/deepracer/lib/setup.bash` **por debajo** del workspace antes de compilar. Si
 alguien copiase nuestro `deepracer_interfaces_pkg` al workspace, la superposición ganaría y el
 mensaje dejaría de cruzar — otra vez sin error, sólo silencio.
+
+### 1.2 Desplegado el mismo día. Y a la primera **no arrancó**
+
+El despliegue se hizo en el acto, porque no depende de la decisión de constantes del §4 y quita de
+la sesión de campo lo único que puede fallar por razones de compilación. Copiado a
+`~/coordinacion_ws/src` de los dos carros y compilado con el overlay de AWS por debajo:
+`colcon` devolvió **0** y `stderr.log` de **0 bytes** en ambos, con el ejecutable instalado.
+
+**Y al arrancarlo, se murió antes de crear un solo extremo:**
+
+```
+ImportError: cannot import name 'SetMaxSpeedSrv' from 'deepracer_interfaces_pkg.srv'
+```
+
+El `deepracer_interfaces_pkg` de fábrica del vehículo declara **30 servicios y `SetMaxSpeedSrv` no
+es ninguno**. El del repositorio sí lo tiene, por eso en simulación nunca se notó. Es exactamente el
+mismo género de diferencia que `S19` §2.4 había registrado para `ServoCtrlMsg`, y **compilar limpio
+no lo detecta**: `ament_python` no resuelve imports en tiempo de compilación.
+
+> **Esto es lo que habría pasado en campo:** llegar con los carros, compilar sin un aviso, y
+> descubrir allí que el nodo no levanta. La media hora que costó encontrarlo aquí habría costado
+> media sesión de vehículo.
+
+**Arreglo, y por qué éste y no otro.** Superponer nuestro paquete de interfaces al del carro no es
+opción —`servo_pkg` está compilado contra el suyo—. Lo que el vehículo sí trae es `NavThrottleSrv`,
+**estructuralmente idéntico**: un `float32` de entrada y un `int32 error` de salida, y su comentario
+en el `.srv` dice literalmente *«Throttle percentage scale value»*. Así que el nodo resuelve el tipo
+en tiempo de importación —`resolver_servicio_velocidad`—, prefiere `SetMaxSpeedSrv` cuando existe
+para no cambiar nada en simulación, cae en `NavThrottleSrv` cuando no, y **arranca igual sin
+servicio** si no hubiera ninguno: convertir `/cmd_vel` es lo esencial y el ajuste en caliente es un
+extra. El campo se lee por nombre, porque se llama distinto en cada uno.
+
+Diez comprobaciones nuevas en `test/prueba_servicio_velocidad.py` fijan los tres casos —los dos
+tipos, sólo el del carro, ninguno— y comprueban contra los `.srv` reales que los dos son
+intercambiables campo a campo, no sólo de nombre. Las 19 del mapeo siguen pasando.
+
+**Resultado sobre hardware, medido en los dos carros:**
+
+| Comprobación | `amss-jgm9` | `amss-ez9n` |
+|---|---|---|
+| `colcon build` | `returncode: 0`, `stderr.log` 0 bytes | ídem |
+| md5 del paquete entero, repositorio contra carro | `702719f8…` idéntico | idéntico |
+| El nodo arranca | **Sí** | **Sí** |
+| Tipo de servicio resuelto | `NavThrottleSrv`, campo `throttle` | ídem |
+| `/cmd_vel` | **Subscription count: 1** | **Subscription count: 1** |
+| `/set_max_speed` en el grafo | **Sí** (77 servicios) | no comprobado |
+| `servo_node` presente en `/ctrl_pkg/servo_msg` | **Sí** | no comprobado |
+
+**Dos apuntes menores, registrados para que no se lean como avería:**
+
+- `ros2 service list` dio la lista **sin** `/set_max_speed` la primera vez. Era el **demonio
+  rancio**, el mismo de esta mañana; con `ros2 daemon stop` antes de medir aparece. Tercera vez hoy.
+- Al matarlo con `timeout`, `main()` termina con `RCLError: rcl_shutdown already called`. Es la
+  plantilla de AWS llamando a `rclpy.shutdown()` después de que el `SIGTERM` ya cerró el contexto.
+  **No afecta al funcionamiento**, pero hace que el proceso salga con código distinto de cero al
+  pararlo, y eso sí puede leerse mal en un guion de campo.
 
 ---
 
@@ -159,9 +216,13 @@ Sólo dos constantes gobiernan la escalera. Calculado ejecutando las funciones r
 | 1,0 | 0,90 | 0,633 · 0,865 · 0,959 | 0,633 | 0,959 |
 | **1,0** | **1,00** | 0,800 · 0,992 · 1,000 | **0,800** | **1,000** |
 
-`MAX_SPEED_PCT` **se puede cambiar en caliente**: el nodo expone el servicio `set_max_speed`
-(`cmdvel_to_servo_node.py`:68–70), así que no exige recompilar. `MAX_SPEED` sí es constante de
-código.
+`MAX_SPEED_PCT` **se puede cambiar en caliente, y desde hoy también en el vehículo**: el nodo
+expone el servicio `set_max_speed`, que sobre hardware es de tipo `NavThrottleSrv` con el campo
+`throttle` (§1.2). Antes del arreglo de hoy no se podía, porque el nodo ni siquiera arrancaba allí.
+`MAX_SPEED` sí es constante de código y exige recompilar.
+
+Eso importa para la rampa del §5: **el barrido de `MAX_SPEED_PCT` se puede hacer en una sola
+sesión**, sin recompilar entre punto y punto.
 
 **Pero la tabla no basta para decidir**, y conviene ser explícito sobre por qué:
 
@@ -235,12 +296,19 @@ Escritos **antes** de correr. No se ajustan después.
 
 ## 7. Lo que este documento **no** establece
 
-- **No mide nada.** Todo lo del §2 es lectura de código y de configuración cruzada con medidas
-  ajenas, todas del `amss-jgm9`. El `amss-ez9n` sólo tiene el dato de banco (0,60 rompe inercia con
-  las ruedas en el aire, [`S24_sonda_actuacion_amss_ez9n.md`](S24_sonda_actuacion_amss_ez9n.md) §4.4).
-- **No cambia el estado de RF-11**, que sigue 🟡.
-- **No toca ninguna constante.** La elección del §4 es una decisión con consecuencias sobre RF-14 y
-  sobre Nav2, y se toma con la curva del §5 delante, no antes.
+- **El §2 no mide nada.** Es lectura de código y de configuración cruzada con medidas ajenas, todas
+  del `amss-jgm9`. El `amss-ez9n` sólo tiene el dato de banco (0,60 rompe inercia con las ruedas en
+  el aire, [`S24_sonda_actuacion_amss_ez9n.md`](S24_sonda_actuacion_amss_ez9n.md) §4.4). Lo del §1.2
+  sí está medido, pero mide **despliegue**, no locomoción.
+- **No cambia el estado de RF-11**, que sigue 🟡. Lo que el §1.2 deja probado es que el nodo
+  **existe, compila y levanta sus dos extremos** en los dos carros; el requisito pide que el
+  vehículo **se desplace**, y eso no se ha intentado.
+- **No toca ninguna constante del mapeo.** La elección del §4 es una decisión con consecuencias
+  sobre RF-14 y sobre Nav2, y se toma con la curva del §5 delante, no antes. El cambio de hoy en
+  `cmdvel_to_servo_node.py` es de **compatibilidad de tipos**, no de comportamiento: las 19
+  comprobaciones del mapeo dan el mismo resultado.
+- **No se ha publicado nada en `/cmd_vel`.** El nodo se arrancó y se paró; ocioso no emite un solo
+  mensaje al servo.
 
 ### 7.1 Una discrepancia que se deja anotada, no corregida
 
@@ -260,7 +328,11 @@ documentos.
 
 | Afirmación | Dónde comprobarla |
 |---|---|
-| El puente no está en ningún carro | `ls /opt/aws/deepracer/lib/` en `.101` y `.102`, 2026-09-22 (§1) |
+| El puente no estaba en ningún carro | `ls /opt/aws/deepracer/lib/` en `.101` y `.102`, 2026-09-22 (§1) |
+| El vehículo no trae `SetMaxSpeedSrv` | `dir(deepracer_interfaces_pkg.srv)` en `.101`: 30 servicios, ninguno es ése |
+| `NavThrottleSrv` sirve de respaldo | `ros2 interface show` en el carro y los dos `.srv` del repositorio; `test/prueba_servicio_velocidad.py` §4 lo comprueba campo a campo |
+| El nodo arranca en los dos carros | Registro del nodo: `cmdvel_to_servo_node started.` y `Servicio 'set_max_speed' de tipo NavThrottleSrv, campo 'throttle'.` |
+| El puente es idéntico en los tres destinos | md5 del árbol completo: `702719f8…` (§1.2) |
 | El workspace no trae `deepracer_interfaces_pkg` | `ls ~/coordinacion_ws/src/` en `.101`, 2026-09-22 |
 | La escalera real es 0,425 · 0,624 · 0,734 | `get_mapped_throttle` + `get_rescaled_manual_speed`, ejecutadas con `MAX_SPEED_PCT = 0.68` |
 | El umbral sobre el suelo | [`S23_campo_traccion_RF14.md`](S23_campo_traccion_RF14.md) §4 |

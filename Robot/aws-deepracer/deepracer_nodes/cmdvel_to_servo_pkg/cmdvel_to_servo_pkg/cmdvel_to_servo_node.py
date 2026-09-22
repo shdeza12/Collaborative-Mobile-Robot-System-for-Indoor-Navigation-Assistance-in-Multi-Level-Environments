@@ -36,10 +36,42 @@ from rclpy.qos import (QoSProfile,
 
 import geometry_msgs.msg
 from deepracer_interfaces_pkg.msg import ServoCtrlMsg
-from deepracer_interfaces_pkg.srv import SetMaxSpeedSrv
+from deepracer_interfaces_pkg import srv as deepracer_srv
 from cmdvel_to_servo_pkg import constants
 import math
 import threading
+
+
+def resolver_servicio_velocidad(modulo_srv):
+    """Elige con que tipo de servicio se ajusta 'max_speed_pct' en caliente.
+
+    El 'deepracer_interfaces_pkg' de fabrica del vehiculo NO trae
+    'SetMaxSpeedSrv' -comprobado el 2026-09-22 sobre los dos carros: declara 30
+    servicios y ese no esta-, asi que importarlo directamente impedia arrancar
+    el nodo en hardware. Superponer nuestro paquete de interfaces al del carro
+    no es opcion: 'servo_pkg' esta compilado contra el suyo y 'ServoCtrlMsg'
+    difiere entre los dos (S19_spike_p1_p2_hardware.md seccion 2.4).
+
+    'NavThrottleSrv', que el vehiculo si trae, es estructuralmente identico -un
+    'float32' de entrada, un 'int32 error' de salida- y su campo se llama
+    'throttle'. Se usa como respaldo.
+
+    Args:
+        modulo_srv: el modulo 'deepracer_interfaces_pkg.srv' del destino.
+
+    Returns:
+        (tipo, nombre_del_campo), o (None, None) si no hay ninguno compatible.
+        Con (None, None) el nodo arranca igual, sin el servicio: convertir
+        /cmd_vel es lo esencial y el ajuste en caliente es un extra.
+    """
+    if hasattr(modulo_srv, "SetMaxSpeedSrv"):
+        return modulo_srv.SetMaxSpeedSrv, "max_speed_pct"
+    if hasattr(modulo_srv, "NavThrottleSrv"):
+        return modulo_srv.NavThrottleSrv, "throttle"
+    return None, None
+
+
+TIPO_VELOCIDAD_MAXIMA, CAMPO_VELOCIDAD_MAXIMA = resolver_servicio_velocidad(deepracer_srv)
 
 
 class CmdvelToServoNode(Node):
@@ -65,10 +97,21 @@ class CmdvelToServoNode(Node):
                                                       constants.ACTION_PUBLISH_TOPIC,
                                                       qos_profile)
 
-        # Service to dynamically set MAX_SPEED_PCT.
-        self.set_max_speed_service = self.create_service(SetMaxSpeedSrv,
-                                                         constants.SET_MAX_SPEED_SERVICE_NAME,
-                                                         self.set_max_speed_cb)
+        # Service to dynamically set MAX_SPEED_PCT. El tipo no es el mismo en el
+        # portatil y en el vehiculo: ver 'resolver_servicio_velocidad'.
+        if TIPO_VELOCIDAD_MAXIMA is None:
+            self.set_max_speed_service = None
+            self.get_logger().warning(
+                "Sin SetMaxSpeedSrv ni NavThrottleSrv en deepracer_interfaces_pkg: "
+                "el nodo arranca sin el servicio de velocidad maxima. La conversion "
+                "de /cmd_vel no se ve afectada.")
+        else:
+            self.set_max_speed_service = self.create_service(TIPO_VELOCIDAD_MAXIMA,
+                                                             constants.SET_MAX_SPEED_SERVICE_NAME,
+                                                             self.set_max_speed_cb)
+            self.get_logger().info(
+                f"Servicio '{constants.SET_MAX_SPEED_SERVICE_NAME}' de tipo "
+                f"{TIPO_VELOCIDAD_MAXIMA.__name__}, campo '{CAMPO_VELOCIDAD_MAXIMA}'.")
 
         # Linear velocity in X received on command (m/s).
         self.target_linear = 0.0
@@ -80,20 +123,23 @@ class CmdvelToServoNode(Node):
 
     def set_max_speed_cb(self, req, res):
         """Callback which dynamically sets the max_speed_pct.
+
+        El campo de la peticion se llama 'max_speed_pct' con 'SetMaxSpeedSrv' y
+        'throttle' con 'NavThrottleSrv', que es el respaldo en el vehiculo. Por
+        eso se lee por nombre y no por atributo fijo.
+
         Args:
-            req (SetMaxSpeedSrv.Request): Request object with the updated
-                                                  max speed percentage.
-            res (SetMaxSpeedSrv.Response): Response object with error(int) flag
-                                                   indicating successful max speed pct
-                                                   update.
+            req: peticion con el porcentaje de velocidad maxima, en el campo que
+                 'resolver_servicio_velocidad' haya determinado.
+            res: respuesta con la bandera error(int).
         Returns:
-            SetMaxSpeedSrv.Response: Response object with error(int) flag indicating
-                                             successful max speed pct update.
+            La respuesta con error(int): 0 si se aplico, 1 si no.
         """
         with self.lock:
             try:
-                self.max_speed_pct = req.max_speed_pct
-                self.get_logger().info(f"Incoming request: max_speed_pct: {req.max_speed_pct}")
+                self.max_speed_pct = getattr(req, CAMPO_VELOCIDAD_MAXIMA)
+                self.get_logger().info(
+                    f"Incoming request: max_speed_pct: {self.max_speed_pct}")
                 res.error = 0
             except Exception as ex:
                 self.get_logger().error(f"Failed set max speed pct: {ex}")
