@@ -285,11 +285,11 @@ Escritos **antes** de correr. No se ajustan después.
 
 | Pregunta abierta | Qué haría falta para cerrarla |
 |---|---|
-| ¿La avería de `amss-jgm9` del 2026-09-21 era real, o el mismo artefacto del §7? | Repetir en `amss-jgm9` las tres llamadas del §4.3 **como `root`**. El vehículo estaba apagado al descubrirse la causa raíz. Es la primera medida de la próxima sesión |
+| ~~¿La avería de `amss-jgm9` del 2026-09-21 era real, o el mismo artefacto del §7?~~ | **Cerrada el mismo día.** §8: era el artefacto. `amss-jgm9` responde |
 | ~~¿Actúan de verdad los servos de `amss-ez9n`?~~ | **Cerrada el mismo día.** §4.4: dirección y tracción en los dos sentidos, parada por debajo de 1 s |
 | ¿Dónde vive la regla de dueños para que no vuelva a perderse? | Está en las guías de pasada, no en el material de diagnóstico, y es la tercera vez que cuesta una tarde. Llevarla a `GUIA_EJECUCION.md` con el síntoma por delante: «`SALIDA=124` o `waiting for service to become available` ⇒ mira el dueño y el transporte» |
 | ¿Puede el portátil (Humble) hablar con los carros (Jazzy) a través de la red? | Entre máquinas distintas no hay memoria compartida, así que el §7 no aplica. Pero quedan sin explicar los nueve `sequence size exceeds remaining buffer` del §4.1, que apuntan a la mezcla de distribuciones. Se prueba llamando al mismo servicio desde el portátil |
-| ¿Por qué `ctrl_node` y `servo_node` no aparecen en `ros2 node list` ni siquiera como `root`? | Los 17 nodos que sí aparecen no los incluyen, pese a que sus procesos corren y sus servicios responden. Comparar cómo los lanza `deepracer_launcher.py` frente al resto |
+| ~~¿Por qué `ctrl_node` y `servo_node` no aparecen en `ros2 node list` ni siquiera como `root`?~~ | **Cerrada el mismo día.** §8: con el perfil solo-UDP aparecen los dos. La ausencia era un tercer síntoma de la misma causa, no un defecto de lanzamiento |
 | ¿Se degrada el enlace inalámbrico de forma sistemática? | Se midió 15 ms / 0 % al empezar y 106 ms / 50 % a media sesión. Hace falta una medida repetida antes de fiarse de cualquier prueba que cruce la red |
 
 ---
@@ -446,3 +446,90 @@ Hay dos remedios, y **el segundo es el que adopta el proyecto**:
 
 La alternativa de fondo — cambiar los permisos con que `deepracer-core` crea los segmentos — no se
 toma: obligaría a modificar un servicio de AWS que se reinstala con cada actualización.
+
+---
+
+## 8. Contraprueba sobre `amss-jgm9`: la avería del 2026-09-21 no existe
+
+Esta sección se añade el mismo día, tras cerrar el §7. Era la primera pregunta del §6 y resultó la
+más barata de contestar: quince minutos y ningún montaje físico.
+
+**Por qué se hace.** El 2026-09-21 se dio a `amss-jgm9` por averiado a partir de los mismos
+`SALIDA=124` que el §7 acaba de explicar como artefacto de transporte. Si la causa es la misma, el
+vehículo está sano y el proyecto recupera el segundo carro antes del corte del viernes. Si responde
+igualmente mal con el transporte corregido, entonces sí hay algo que reparar y se sabe a tres días
+del corte, no después.
+
+**Predicción escrita antes de correr:** responde. Si no lo hubiera hecho, la avería quedaría
+confirmada y el §7 no la explicaría.
+
+### 8.1 Medición pareada, misma máquina y mismo minuto
+
+Se instala el perfil del §7.3.1 en `/tmp/udp_only.xml` del propio vehículo y se pide la lista de
+nodos dos veces, con y sin él. Todo como usuario `deepracer`, **sin `sudo`**.
+
+| `ros2 node list` sobre `amss-jgm9` | Nodos |
+|---|---|
+| Sin perfil (memoria compartida) | **3** — `battery_node`, `rplidar_node`, `usb_monitor_node` |
+| Con perfil solo-UDP | **21** |
+
+Los 3 del caso degradado son justo los que en el §4.2 se habían tomado por «entorno sano»: el
+control de batería del §4.2 medía uno de esos tres, y por eso no detectó nada.
+
+**Atribución, que aquí es el punto delicado.** `ros2 node list` consulta el dominio entero, y el
+`.102` estaba encendido con su pila activa — confundir eso costó la sesión del 2026-09-21. Los 21
+nombres **no se repiten ni una vez**, y los dos vehículos corren la misma pila sin namespaces ni
+`ROS_DOMAIN_ID`, de modo que ver a los dos produciría cada nombre duplicado. Además, `ps` sobre el
+propio `.101` cuenta 24 procesos de nodo, cifra compatible con una sola pila. Los 21 son suyos.
+De paso queda registrado que **desde `.101` no se ve a `.102`**, lo que apunta a las reglas `ufw`
+por IP que siguen pendientes de limpieza.
+
+### 8.2 Los dos nodos que «no aparecían» aparecen
+
+Entre los 21 están `/ctrl_pkg/ctrl_node` y `/servo_pkg/servo_node`. La última pregunta abierta del
+§6 —por qué no salían en la lista ni siquiera como `root`— **no tenía respuesta en el lanzamiento:
+era un tercer síntoma de la misma causa.** Como `root` el §7.2 arregla los permisos pero sigue
+usando memoria compartida; solo al quitar ese transporte aparece el grafo completo.
+
+### 8.3 `servo_pkg` responde
+
+```
+# FASTRTPS_DEFAULT_PROFILES_FILE=/tmp/udp_only.xml, usuario deepracer, sin sudo
+# ros2 service call /servo_pkg/get_calibration ... '{cal_type: 0}'
+response: max=1800000, mid=1320000, min=1200000, polarity=1, error=0
+SALIDA=0
+
+# ros2 service call /servo_pkg/get_calibration ... '{cal_type: 1}'
+response: max=1603500, mid=1446000, min=1311000, polarity=-1, error=0
+SALIDA=0
+```
+
+**Veredicto: `amss-jgm9` no tiene avería.** El nodo que se dio por caído responde a su propio
+servicio con `error=0` en las dos calibraciones. Lo que falló el 2026-09-21 fue la medición.
+
+El fichero `/opt/aws/deepracer/calibration.json` del vehículo confirma además la correspondencia de
+`cal_type`, que hasta hoy se venía suponiendo: **`0` es `Servo` (dirección) y `1` es `Motor`
+(tracción)**. Los valores del fichero coinciden exactamente con los que devuelve el servicio, luego
+las etiquetas del §4.3 son correctas.
+
+### 8.4 Una discrepancia que se deja anotada, no resuelta
+
+La dirección de `amss-jgm9` calibra `1200000 / 1320000 / 1800000`, marcadamente asimétrica, mientras
+que la de `amss-ez9n` da `1300000 / 1450000 / 1700000` (§4.3). La tracción, en cambio, es idéntica
+en los dos vehículos. Ninguna de las dos cifras de dirección coincide con el
+`1000000 / 1290000 / 2000000` que [`S23_campo_traccion_RF14.md`](S23_campo_traccion_RF14.md)
+registra como resultado de una recalibración. **No se interpreta aquí**: puede ser que aquella
+recalibración se hiciera sobre otro vehículo, que se haya vuelto a tocar después, o que el registro
+de S23 atribuyera mal la máquina, que es el error que este documento ya corrigió una vez. Antes de
+usar cualquier número de dirección en una medida hay que releer la calibración del vehículo
+concreto, no fiarse del documento.
+
+### 8.5 Qué falta para cerrar la compuerta G-1 en este vehículo
+
+Lo que el §8 prueba es que el vehículo **habla**. Que **actúe** —las cinco observaciones del §4.4—
+no se ha comprobado, y no se comprueba sin el operador presente, por una razón de seguridad que ya
+está documentada: `S23_campo_traccion_RF14.md` registra que **una sola orden de tracción movió los
+dos carros**, porque comparten dominio y `/ctrl_pkg/servo_msg` no lleva namespace. Publicar en ese
+tópico con los dos encendidos es un riesgo físico mientras no haya namespaces. La sonda sobre
+`amss-jgm9` exige, por tanto: un solo vehículo encendido, carro en alto, batería de tracción
+conectada y el operador delante.
