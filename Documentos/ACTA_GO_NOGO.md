@@ -114,6 +114,34 @@ registro, y el conjunto se publica tal como quede.
 del 20 % rigen tal como están escritos, y si parte de las corridas falla por construcción, eso se
 reporta como resultado. Cambiarlos ahora sería mover el criterio después de conocer el problema.
 
+### 4.1 Resultados declarados
+
+El §4 exige que cada hito «se declara alcanzado o no alcanzado, **con su registro**». Esta es esa
+declaración. Se añade sin tocar una sola palabra de los criterios de arriba, que quedan como se
+escribieron antes de correr.
+
+| Hito | Estado | Fecha | Registro |
+|---|---|---|---|
+| **G-1 · Actuación** | **ALCANZADO** | 2026-09-22 | [`S24_sonda_actuacion_amss_ez9n.md`](Evidencia/S24_sonda_actuacion_amss_ez9n.md), §9.3 |
+| **G-2 · Odometría** | Pendiente | — | — |
+| **G-3 · Navegación de uno** | Pendiente | — | — |
+| **G-4 · Dos en el mismo grafo** | **ALCANZADO** | 2026-09-22 | [`S24_compuerta_G4_dos_en_el_grafo.md`](Evidencia/S24_compuerta_G4_dos_en_el_grafo.md) |
+| **G-5 · Protocolo completo** | Pendiente | — | — |
+| **G-6 · RF-27** | Pendiente | — | — |
+
+**G-1 se alcanzó por encima de su criterio.** El criterio pedía que `.102` moviera las ruedas y que
+`.101` «se recupere o se diagnostique»; lo que ocurrió es que **los dos** vehículos completaron la
+sonda de actuación entera, con el operador delante y el carro en alto.
+
+**G-4 se adelantó diecisiete días** sobre su corte C-2 porque **no depende de G-2 ni de G-3**: el
+`agente` publica su estado aunque la TF falle, y el coordinador crea sus clientes de navegación sin
+que exista servidor al otro lado. Adelantarlo saca de la ruta crítica la única compuerta que puede
+tumbar el GO pleno por una razón de arquitectura en vez de por un sensor.
+
+**Lo que esto no cambia.** Las dos compuertas alcanzadas son las que **no** dependen de la
+odometría. **G-2 sigue siendo la ruta crítica** y su corte, C-1 del viernes 2 de octubre, sigue
+siendo el que decide entre GO pleno y NO-GO. Cerrar dos de seis no adelanta esa decisión.
+
 ## 5. Los puntos de corte, con fecha
 
 Intentar el GO pleno sin fecha de reversión no es ambición: es quedarse sin semanas para escribir. La
