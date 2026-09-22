@@ -89,6 +89,15 @@ resto es flexómetro. El carro de la curva es el **`amss-ez9n`**, que es el que 
 dos de esas trece corridas vuelven a medir el `0.50`: el umbral de arranque en que se apoya el punto
 2 de arriba se midió sobre el otro vehículo.
 
+**Corrido el 2026-09-22, y la curva no salió**
+([`S24_campo_traccion_ez9n.md`](Evidencia/S24_campo_traccion_ez9n.md)). Las trece corridas se
+hicieron enteras, y **la corrida de control refutó el supuesto del método**: a `throttle 1,00` el
+vehículo seguía acelerando en el segundo 4, así que las restas no dan velocidades. Queda medido el
+umbral en este carro —el `0.50` lo mueve, apenas— y queda **refutado** el `0,60 → menos de 0,25 m/s`
+sobre el que se apoyaba el punto 2 de arriba: son 4,20 m en 4 s, factor tres. Tres corridas de
+`--marcha 6` a 0,60 · 0,70 · 0,80 validarían la mitad baja de la curva; el escalón de 1,00 **no cabe
+en la recta de 20 m** y necesita otro instrumento.
+
 ### 2.2 Las cinco piezas de la cadena, en orden de dependencia
 
 1. **`base_link`, y `base_link → laser`.** No corre `robot_state_publisher` en la tarjeta, así que

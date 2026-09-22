@@ -869,6 +869,24 @@ Estas cinco cifras entran en la tabla del §4 de
 [`S24_analisis_previo_RF11.md`](Evidencia/S24_analisis_previo_RF11.md), que ya tiene calculado qué
 `throttle` produce cada par `(MAX_SPEED, MAX_SPEED_PCT)`. **La decisión no se toma en el pasillo.**
 
+> **Corrido el 2026-09-22. Resultados en
+> [`S24_campo_traccion_ez9n.md`](Evidencia/S24_campo_traccion_ez9n.md).** Las trece corridas se
+> hicieron enteras y sin incidentes, y **la corrida 13 refutó el supuesto del método**: a
+> `throttle 1,00` la ventana \[4 s, 6 s] da 4,250 m/s frente a los 2,900 m/s de la \[2 s, 4 s], así
+> que el vehículo seguía acelerando en el segundo 4 y **de este barrido no sale la curva de
+> velocidades**. Sí salen el umbral de arranque anclado en este carro (el 0,50 lo mueve, apenas) y
+> la refutación del `0,60 → menos de 0,25 m/s` de S23.
+>
+> Y hay que corregir una frase de este mismo guion: *«las demás filas quedan subestimadas —sirven
+> como cota inferior»* daba por hecho que la inercia se sigue cancelando al restar. **No se cancela
+> justo cuando el supuesto falla**, porque el vehículo suelta el acelerador más rápido en la corrida
+> larga y rueda más lejos. La conclusión probablemente se sostenga por magnitudes; el argumento que
+> la sostenía, no. Detalle en el §3.1 de aquel documento.
+>
+> **Antes de repetir nada, leer el §7 de allí**: tres corridas de `--marcha 6` a 0,60 · 0,70 · 0,80
+> validan o tumban la mitad baja de la curva, y el escalón de 1,00 **no cabe en esta recta** —
+> `--marcha 8` pediría 27,8 m de los 20 m marcados.
+
 ### 10.4 Qué significa cada resultado, decidido antes de medir
 
 | Lo que salga | Qué quiere decir |

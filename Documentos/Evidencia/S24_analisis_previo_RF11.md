@@ -156,6 +156,14 @@ valor pedido es el que recibe el servo):
 | **0,60** | **siempre** | < 1 m en 4 s (< 0,25 m/s) |
 | 1,00 | — | sin medir |
 
+> **Esta tabla no se reproduce sobre el `amss-ez9n` (medido el 2026-09-22,
+> [`S24_campo_traccion_ez9n.md`](S24_campo_traccion_ez9n.md)).** El `0,50` **sí** mueve aquel
+> vehículo —apenas, un tirón que no sostiene—, y el `0,60` recorre **4,20 m en 4 s**, no «menos de
+> 1 m»: un factor de tres que la inercia no puede explicar. La reconciliación estaba escrita de
+> antemano en el §8 de S23, que avisó de que un carro con la dirección descentrada *«subestima la
+> velocidad por una cantidad desconocida»* — y el `amss-jgm9` de aquella tarde la tenía descentrada.
+> **Todo lo que este documento deduce de esta tabla queda condicionado a eso**, incluido el §2.3.
+
 ### 2.3 El cruce
 
 | Parámetro de Nav2 | Fichero | Velocidad | Escalón | Recibe el servo | Umbral 0,50–0,60 | Resultado |
@@ -337,6 +345,29 @@ sólo el PWM, lo fijan el motor, el variador, la batería y el rozamiento. **Raz
 Por eso el guion sube de once corridas a trece: las dos primeras son `0.50`, y anclan el umbral en
 el vehículo que produce la curva. **Veintidós segundos.** Si resultara que el `0.50` sí mueve a este
 carro, no es un contratiempo sino un hallazgo, y cambia la conclusión del §2.3.
+
+---
+
+### 5.4 Corrida el mismo día: la curva no salió, y por qué
+
+Las trece corridas se hicieron el 2026-09-22 sobre el `amss-ez9n`. Registro completo en
+[`S24_campo_traccion_ez9n.md`](S24_campo_traccion_ez9n.md). En una línea: **la corrida de control
+refutó el único supuesto del método** —a `throttle 1,00` el vehículo seguía acelerando en el segundo
+4—, así que **la curva `throttle → velocidad` que este §5 declaraba como *la medida que decide*
+sigue sin existir**.
+
+Lo que sí quedó medido, y que cambia este documento:
+
+| Resultado | Qué toca de aquí |
+|---|---|
+| El `0,50` mueve el `amss-ez9n` | Debilita el ancla del §2.2 y con ella el §2.3 |
+| `0,60 → 4,20 m en 4 s`, no «< 1 m» | Refuta la fila que sostenía el cruce del §2.3 |
+| A `1,00` el vehículo recorre 19,3 m en 6 s de acelerador | Apunta a que `MAX_SPEED = 4,0` **no** era absurdo, al revés de lo que el §4 daba por probable |
+| El escalón de `1,00` no cabe en la recta de 20 m | El techo no es medible con flexómetro; haría falta tiempo de paso entre marcas |
+
+**La decisión del par `(MAX_SPEED, MAX_SPEED_PCT)` sigue abierta y sigue siendo de los autores.** El
+veredicto preinscrito que la habilitaba pedía *«se fija con la medida al lado»*, y la medida no
+está.
 
 ---
 
