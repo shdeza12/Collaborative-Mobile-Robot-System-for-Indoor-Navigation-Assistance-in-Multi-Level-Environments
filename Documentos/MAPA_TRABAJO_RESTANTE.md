@@ -41,11 +41,17 @@ restantes son de vehículo físico:
 | **RF-12** `/<ns>/scan` utilizable | segunda mitad: mapa de costos local | RF-13 |
 | **RF-13** odometría en `/<ns>/odom` | **no hay fuente en el vehículo** | decisión §3.5 |
 | **RF-14** comando desde ROS 2 | campo: rampa, escalones, vídeo | batería medida |
-| **RF-16** mismo código en los dos destinos | compilar en Jazzy, nunca intentado | nada |
+| **RF-16** mismo código en los dos destinos | ~~compilar en Jazzy, nunca intentado~~ **hecho el 2026-09-22 en los dos carros**: 22 ficheros de fuente con el mismo md5, `stderr` de 0 bytes, cinco baterías en los tres destinos. Falta la **segunda mitad** del criterio, una misión en cada mundo | **G-3** |
 | **RF-27** demostración física N = 5–10 | todo lo anterior | los cinco de arriba |
 
 Dos de los seis —RF-11 y RF-16— **no están bloqueados por nada**. Eso es lo que permite trabajar en
 paralelo mientras se desempata la decisión del §3.5.
+
+**Actualización del 2026-09-22.** Esa vía en paralelo se recorrió: a RF-16 se le cerró la mitad que
+no dependía de nadie, y lo que le queda ya sí cuelga de G-3. **RF-11 es ahora el único de los seis
+sin bloqueo**, y su pendiente está acotado: el recorrido del 28-ago se mandó por
+`/ctrl_pkg/servo_msg` y el requisito pide `/<ns>/cmd_vel`, un puente que nunca se ha ejercitado
+sobre hardware.
 
 ### 2.2 Las cinco piezas de la cadena, en orden de dependencia
 
@@ -216,9 +222,14 @@ Ordenado por dependencia:
    ([`GUIA_PASADA_LOCALIZACION.md`](GUIA_PASADA_LOCALIZACION.md), 680 líneas) pero corre la cadena
    **en el escritorio desde un bag**, no a bordo: sigue siendo válida y sigue sin ejecutarse.
 5. **Las pruebas atómicas del §4.1.**
-6. **`ros2 node list` entre máquinas** y la **declaración escrita de R11**.
-7. **Espacios de nombres `/robot1` y `/robot2` sobre hardware**, nunca ejercitados fuera de
-   simulación.
+6. ~~**`ros2 node list` entre máquinas**~~ **medido el 2026-09-22, con respuesta negativa:**
+   `ros2 node list` **no es utilizable** como instrumento aquí —devolvió 21, 15, 10, 0 y «un nodo
+   habiendo tres» en corridas sucesivas del mismo día—. Lo fiable es `ros2 topic info --verbose`,
+   que nombra nodo y espacio de nombres de cada extremo. **La declaración escrita de R11 sigue
+   pendiente**, pero ya tiene con qué escribirse.
+7. ~~**Espacios de nombres `/robot1` y `/robot2` sobre hardware**~~ **ejercitados el 2026-09-22**:
+   es lo que mide la compuerta G-4 ([`Evidencia/S24_compuerta_G4_dos_en_el_grafo.md`](Evidencia/S24_compuerta_G4_dos_en_el_grafo.md)),
+   con dos nodos llamados igual conviviendo por espacio de nombres.
 
 ---
 
