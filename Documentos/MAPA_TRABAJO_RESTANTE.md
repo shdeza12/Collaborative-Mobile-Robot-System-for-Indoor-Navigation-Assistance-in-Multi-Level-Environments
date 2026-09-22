@@ -53,6 +53,23 @@ sin bloqueo**, y su pendiente está acotado: el recorrido del 28-ago se mandó p
 `/ctrl_pkg/servo_msg` y el requisito pide `/<ns>/cmd_vel`, un puente que nunca se ha ejercitado
 sobre hardware.
 
+**Segunda actualización del 2026-09-22, la misma tarde.** Al preparar el guion de ese puente
+apareció que **la prueba, tal como estaba redactada, no puede pasar**. Análisis completo en
+[`S24_analisis_previo_RF11.md`](Evidencia/S24_analisis_previo_RF11.md). En corto:
+
+1. `cmdvel_to_servo_pkg` **no está en ningún carro** — sólo los 17 paquetes de fábrica de AWS. La
+   tarea es desplegar y compilar, no correr.
+2. Con las constantes actuales, `desired_linear_vel = 0,50 m/s` de Nav2 produce un `throttle` de
+   **0,4247**, y el `0,50` publicado directo **no arrancó ninguna de cinco veces** sobre el suelo
+   ([`S23_campo_traccion_RF14.md`](Evidencia/S23_campo_traccion_RF14.md) §4). La otra configuración,
+   `max_vel_x = 0,26`, produce un **cero exacto**.
+3. Lo que desbloquea es **una sola medida**: la curva `throttle → velocidad real` de 0,60 a 1,00.
+   Su procedimiento ya existe —Bloque 7 de [`HOJA_CAMPO_G2.md`](HOJA_CAMPO_G2.md) §10— y **no
+   necesita G-2**: con flexómetro y cronómetro basta.
+
+Así que RF-11 sigue sin bloqueo *de otro requisito*, pero **tiene una precondición propia**, y es la
+misma medida que cierra el pendiente de RF-14.
+
 ### 2.2 Las cinco piezas de la cadena, en orden de dependencia
 
 1. **`base_link`, y `base_link → laser`.** No corre `robot_state_publisher` en la tarjeta, así que
