@@ -3,6 +3,28 @@
 *Tarea 1.3 del `MAPA_TRABAJO_RESTANTE.md`. Carro `.101` (`amss-jgm9`), 2026-09-21.
 Este documento **no cierra la tarea**: la deja acotada y deja una anomalía abierta con nombre.*
 
+> ## ⚠ Leer antes que nada: dos conclusiones de este documento están invalidadas
+>
+> El 2026-09-22 se encontró la causa raíz de los `SALIDA=124` que sostienen buena parte de lo que
+> sigue. No era una avería del vehículo: la orden `ros2` se invocaba como usuario `deepracer`
+> mientras los nodos de AWS corren como `root`, y los segmentos de memoria compartida de Fast DDS
+> son de `root` con permisos `0644`. El cliente nunca empareja, y **no da error: se queda esperando**.
+>
+> | Afirmación de este documento | Estado |
+> |---|---|
+> | «El 2 son los dos carros encendidos viéndose en el dominio 0» (§0) | **Falsa.** Con los dos carros encendidos el contador marca **4**: son dos publicadores por vehículo, del mismo proceso `ctrl_node` |
+> | «`servo_pkg` dejó de atender» (título y §5) | **Sin sustento.** El mismo `SALIDA=124` se reproduce a voluntad en un vehículo sano |
+> | «`i2c_pkg` responde, luego el entorno queda descartado» (§8) | **Invalidada como control.** Expiró igual al repetirla, y respondió al corregir el transporte |
+> | «Los 186 servicios son de un carro» (§8.1) | **Falsa.** Eran los dos |
+>
+> El 2026-09-22 se midió además que `amss-ez9n` **actúa**: dirección y tracción en los dos
+> sentidos, con parada por debajo de 1 s. La avería de `amss-jgm9` vuelve a estar **abierta y sin
+> diagnóstico**, pendiente de repetir estas llamadas con el dueño correcto.
+>
+> Todo ello en
+> [`S24_sonda_actuacion_amss_ez9n.md`](S24_sonda_actuacion_amss_ez9n.md). El presente documento se
+> conserva sin reescribir, porque el error de método que registra es parte de la evidencia.
+
 ## 0. La pregunta y lo que la respondió
 
 La tarea 1.3 decía que RF-11 «no depende de nada»: publicar en `/<ns>/cmd_vel`, medir con
