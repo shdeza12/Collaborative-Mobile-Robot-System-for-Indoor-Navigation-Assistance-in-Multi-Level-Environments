@@ -447,6 +447,13 @@ Hay dos remedios, y **el segundo es el que adopta el proyecto**:
 La alternativa de fondo — cambiar los permisos con que `deepracer-core` crea los segmentos — no se
 toma: obligaría a modificar un servicio de AWS que se reinstala con cada actualización.
 
+> **Corrección del mismo día, medida en el §9.2: esta tabla estaba mal.** El perfil solo-UDP sirve
+> para **leer** servicios, pero **no basta para actuar**: publicando en `/ctrl_pkg/servo_msg` con el
+> perfil y sin privilegios, el vehículo no se mueve, y sí lo hace con `root`. La frase de la fila
+> primera —«privilegios que el nodo de coordinación no necesita»— **es falsa tal como está escrita**.
+> El remedio que el proyecto adopta pasa a ser `root` para la ruta de actuación, y queda pendiente
+> encontrar uno sin privilegios antes de desplegar el coordinador.
+
 ---
 
 ## 8. Contraprueba sobre `amss-jgm9`: la avería del 2026-09-21 no existe
@@ -533,3 +540,88 @@ dos carros**, porque comparten dominio y `/ctrl_pkg/servo_msg` no lleva namespac
 tópico con los dos encendidos es un riesgo físico mientras no haya namespaces. La sonda sobre
 `amss-jgm9` exige, por tanto: un solo vehículo encendido, carro en alto, batería de tracción
 conectada y el operador delante.
+
+---
+
+## 9. Sonda de actuación sobre `amss-jgm9`, y la corrección que trae
+
+Corrida el mismo día, con el operador delante, `amss-jgm9` en alto y **el `deepracer-core` del
+`amss-ez9n` detenido por `systemctl`** — no apagado: el interruptor no corta la placa, y parar el
+servicio quita su `servo_node` del grafo de forma reversible por `ssh`. El instrumento es el mismo
+fichero que dio resultado en `amss-ez9n`, copiado y verificado por `md5sum`, no uno nuevo.
+
+### 9.1 Cierre de la atribución, ahora sin depender de contar nombres
+
+El §8.1 atribuyó a `amss-jgm9` sus 21 nodos contando que ningún nombre se repetía. **Ese argumento
+no es fiable**, y se descubrió al repetir: `ros2 node list` devuelve 21, luego 15, luego 10 y luego
+0 según la corrida, porque el descubrimiento con el perfil solo-UDP es lento y parcial, y el demonio
+de `ros2` sirve además una vista caducada — hay que usar `--no-daemon`.
+
+La atribución se rehízo con un criterio que no depende de la lista, **parando el `servo_pkg` del
+otro vehículo**, de modo que solo un nodo en toda la red puede contestar:
+
+| | Respuesta del servicio | `calibration.json` en disco |
+|---|---|---|
+| `amss-jgm9` | `1200000 / 1320000 / 1800000` | `1200000 / 1320000 / 1800000` ✓ |
+| `amss-ez9n` | — (núcleo detenido) | `1300000 / 1450000 / 1700000` ✗ |
+
+La respuesta coincide con el disco de `amss-jgm9` y **difiere** del de `amss-ez9n`. **Contestó
+`amss-jgm9`**, y con ello el §8.3 queda confirmado por una vía mejor que la que lo escribió. De paso
+se cierra la discrepancia que el §8.4 dejó anotada: los dos vehículos **tienen** calibraciones de
+dirección distintas, y cada servicio devuelve la suya.
+
+### 9.2 Cuatro corridas que separan dos factores, y desmienten un indicador
+
+La sonda de dirección se lanzó cuatro veces variando dos cosas: el usuario y el tiempo de espera
+entre crear el publicador y empezar a publicar.
+
+| Corrida | Usuario | Espera | ¿Se movieron las ruedas? | Suscriptores que veía el publicador |
+|---|---|---|---|---|
+| 1 | `deepracer` + perfil solo-UDP | 2 s | **No** | 1 |
+| 2 | `root` | 2 s | **No** | 1 |
+| 3 | `root` | 5 s | **Sí** | 1 |
+| 4 | `deepracer` + perfil solo-UDP | 5 s | **No** | 1 |
+
+**Dos conclusiones, y la segunda es la incómoda.**
+
+**(a) Hacen falta las dos condiciones a la vez: `root` y espera suficiente.** Ni el privilegio solo
+(corrida 2) ni el tiempo solo (corrida 4) mueven el vehículo. La sonda original esperaba 2 s, que
+alcanzaba en `amss-ez9n` y no aquí; se amplió a 6 s para la tracción.
+
+**(b) `get_subscription_count()` marcó 1 en las cuatro, incluidas las tres que no movieron nada.**
+Ese contador **no sirve como prueba de que el enlace funciona** — es exactamente el mismo género de
+error que el §4.1 corrigió con los contadores de publicadores, reaparecido en otro contador. Se dejó
+escrito antes de seguir: cualquier verificación futura del enlace tiene que observar el efecto, no
+el contador.
+
+**(c) Esto corrige el §7.5.** Allí se adoptó el perfil solo-UDP como remedio del proyecto y se
+concluyó que «el factor es el transporte, no el usuario, luego el nodo de coordinación no necesitará
+`root`». Para **leer servicios** eso sigue siendo cierto y está medido. Para **actuar** es falso: la
+corrida 4 publica con el perfil, sin privilegios, ve su suscriptor, y el carro no se mueve.
+**Mientras no aparezca otro remedio, la ruta de actuación del coordinador necesita `root`**, y eso
+es un requisito de despliegue que hay que resolver antes de la demostración, no durante.
+
+### 9.3 Las cinco observaciones, y la compuerta
+
+Con `root` y 6 s de espera, sobre `amss-jgm9` en alto:
+
+| # | Observación | Resultado |
+|---|---|---|
+| 1 | Las ruedas delanteras giran a izquierda y a derecha y vuelven al centro | **Sí** |
+| 2 | Las ruedas traseras giran hacia adelante a `throttle 0,60` | **Sí** |
+| 3 | Paran al recibir `0,00` | **Sí** |
+| 4 | Giran hacia atrás a `throttle −0,60` | **Sí** |
+| 5 | La parada final es inmediata, por debajo de 1 s | **Sí** |
+
+**Veredicto: la compuerta G-1 de [`ACTA_GO_NOGO.md`](../ACTA_GO_NOGO.md) §4 queda ALCANZADA también
+sobre `amss-jgm9`.** Es la primera de las seis compuertas del GO pleno que se cierra en los **dos**
+vehículos, y se cierra tres días antes del corte C-0.
+
+### 9.4 Regla de seguridad que esta corrida ejerció
+
+`S23_campo_traccion_RF14.md` registra que una sola orden de tracción movió los dos carros, porque
+comparten dominio y `/ctrl_pkg/servo_msg` no lleva namespace. Aquí se respetó **deteniendo el
+servicio del otro vehículo**, no apagándolo, y verificando por `ps` que su `servo_node` había
+desaparecido antes de publicar. Al terminar se restituyó con `systemctl start` y se comprobó que
+volvía a `active`. **Ese es el procedimiento mientras no existan namespaces**, y es más barato y más
+reversible que apagar una placa.
