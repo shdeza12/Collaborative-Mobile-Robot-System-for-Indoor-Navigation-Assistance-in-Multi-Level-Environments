@@ -81,8 +81,8 @@ al cruzarlo con el umbral medido sobre el suelo.
 > [`HOJA_CAMPO_G2.md`](../HOJA_CAMPO_G2.md) §10.1 y el encabezado de
 > [`medir_escala_traccion.py`](../../herramientas/medir_escala_traccion.py) tabulan **0,5 · 0,8 ·
 > 1,0**, que son los escalones *nominales*: los dos omiten el reescalado por `MAX_SPEED_PCT`. Los
-> valores que el servo recibe de verdad son **0,4247 · 0,6242 · 0,7341**, un 15 % más bajos. Queda
-> anotado para corregirlos; el argumento de fondo de los dos —que `MAX_SPEED = 4,0 m/s` es una
+> valores que el servo recibe de verdad son **0,4247 · 0,6242 · 0,7341**, un 15 % más bajos.
+> **Corregidos los dos el mismo día**; el argumento de fondo de ambos —que `MAX_SPEED = 4,0 m/s` es una
 > suposición heredada de AWS y de ella cuelga toda la tabla— **es correcto y anterior a este
 > documento**, y este análisis lo confirma en lugar de descubrirlo.
 
@@ -204,7 +204,9 @@ No se redacta un guion nuevo. La rampa es el **Bloque 7** de
 —«una tabla de `throttle` contra velocidad medida, con al menos un punto por debajo de 0,25 m/s»—
 sigue valiendo tal cual.
 
-Lo que este análisis le cambia son **tres cosas**, y las tres lo abaratan:
+Lo que este análisis le cambia son **tres cosas**, y las tres lo abaratan. **Aplicadas al Bloque 7
+el mismo 2026-09-22** —§10.1 con la tabla real y el aviso de corrección, §10.1.1 nuevo con el
+levantamiento del candado de G2 y el barrido desde 0,60—:
 
 | Lo que dice el Bloque 7 hoy | Lo que hay que cambiarle | Por qué |
 |---|---|---|

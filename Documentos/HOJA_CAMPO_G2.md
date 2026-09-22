@@ -542,18 +542,36 @@ coinciden hoy, y RF-14 lleva desde el 28-ago esperando exactamente eso. Está en
 
 ### 10.1 Qué falta, con los números del código y no de memoria
 
-`cmdvel_to_servo_node.py` convierte `/cmd_vel` en `ServoCtrlMsg` por escalones, y los tres
-umbrales salen de dividir por `MAX_SPEED = 4,0 m/s` (`cmdvel_to_servo_pkg/constants.py`):
+`cmdvel_to_servo_node.py` convierte `/cmd_vel` en `ServoCtrlMsg` en **dos pasos**, no en uno.
+Primero `get_mapped_throttle` categoriza `|v| / MAX_SPEED` con `MAX_SPEED = 4,0 m/s`
+(`cmdvel_to_servo_pkg/constants.py`:40); después `get_rescaled_manual_speed`
+(`cmdvel_to_servo_node.py`:235) **reescala** con `MAX_SPEED_PCT = 0,68` (`constants.py`:82).
 
-| Velocidad pedida en `/cmd_vel` | `throttle` que sale |
-|---|---|
-| **< 0,40 m/s** | **0,0 — nada** |
-| 0,40 – 1,20 m/s | 0,5 |
-| 1,20 – 2,00 m/s | 0,8 |
-| ≥ 2,00 m/s | 1,0 |
+> **Corregido el 2026-09-22.** Hasta esa fecha esta tabla daba los escalones **nominales** —0,5 ·
+> 0,8 · 1,0—, que son los que salen del primer paso y **no** los que recibe `servo_pkg`. El
+> reescalado estaba descrito desde el 17-sep en
+> [`S23_campo_traccion_RF14.md`](Evidencia/S23_campo_traccion_RF14.md) §3 y no había llegado aquí.
+> Los valores reales son un **15 % más bajos**, y esa diferencia es justo la que cruza el umbral de
+> arranque. Razonamiento completo en
+> [`S24_analisis_previo_RF11.md`](Evidencia/S24_analisis_previo_RF11.md) §2.
+
+| Velocidad pedida en `/cmd_vel` | Escalón nominal | **`throttle` que recibe `servo_pkg`** |
+|---|---|---|
+| **< 0,40 m/s** | — | **0,0000 — nada** |
+| 0,40 – 1,199 m/s | 0,5 | **0,4247** |
+| 1,20 – 1,999 m/s | 0,8 | **0,6242** |
+| ≥ 2,00 m/s | 1,0 | **0,7341** |
 
 Nav2 pide **0,25 m/s en curva y 0,05 en la aproximación**. Las dos caen en la primera fila, así que
 **la cadena devuelve cero justo donde Nav2 la usa**.
+
+**Y la velocidad de crucero tampoco sirve, que es peor.** `desired_linear_vel = 0,50 m/s`
+(`nav2_params.yaml`:78) cae en el escalón bajo, **0,4247** — y el `0,50` publicado directo al servo
+**no arrancó ninguna de cinco veces** sobre el suelo
+([`S23_campo_traccion_RF14.md`](Evidencia/S23_campo_traccion_RF14.md) §4). La otra configuración,
+`max_vel_x = 0,26` (`nav2_slam_params.yaml`:70), da un **cero exacto**. Es decir: **con las
+constantes de hoy, las dos configuraciones de Nav2 del repositorio producen un vehículo inmóvil**,
+y ninguna emite error.
 
 Los dos defectos de **mapeo** están corregidos desde el 27-ago, con 19 comprobaciones en
 `prueba_mapeo_servo.py`. Lo que queda es la **escala**, y no se arregla leyendo código:
@@ -564,6 +582,23 @@ Si el carro real no hace 4 m/s, la tabla entera está corrida.
 
 **Criterio de cierre**, tomado del `PLAN_S22.md`: una tabla de `throttle` contra velocidad medida,
 **con al menos un punto por debajo de 0,25 m/s**.
+
+### 10.1.1 Este bloque ya no depende de que G2 esté cerrado
+
+El encabezado del §10 lo condiciona a tener el G2 grabado. Ese candado existe **sólo** porque
+`medir_escala_traccion.py` saca la velocidad de la trayectoria de rf2o, que necesita el LiDAR y su
+pasada. Pero el criterio de cierre pide *velocidad medida*, no *velocidad estimada por rf2o*: **una
+recta con flexómetro y un cronómetro da la misma tabla**, y el §1.3 de
+[`MAPA_TRABAJO_RESTANTE.md`](MAPA_TRABAJO_RESTANTE.md) ya aceptaba el flexómetro para RF-11.
+
+Con eso, la rampa **se puede correr el primer día que haya carro y pasillo**, sin esperar a la
+decisión de odometría. Dos ajustes al barrido, con lo que ya está medido:
+
+- **Arrancar en 0,60**, no por debajo. El umbral de arranque ya está medido —0,60 rompe inercia
+  siempre, 0,50 no arrancó ninguna de cinco—. Lo que falta no es dónde arranca, sino **cuánta
+  velocidad da cada valor por encima**: 0,60 · 0,70 · 0,80 · 0,90 · 1,00.
+- **El punto por debajo de 0,25 m/s del criterio de cierre ya existe**: 0,60 recorrió menos de 1 m
+  en 4 s. El resto de la curva es lo nuevo.
 
 ### 10.2 La trampa de dueños muerde aquí de otra forma
 

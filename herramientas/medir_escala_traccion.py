@@ -3,18 +3,33 @@
 
 QUE PREGUNTA RESPONDE, Y POR QUE HACE FALTA
 -------------------------------------------
-'cmdvel_to_servo_node.py' convierte /cmd_vel en ServoCtrlMsg por escalones, y
-los tres umbrales salen de dividir por 'MAX_SPEED = 4,0 m/s'
-(cmdvel_to_servo_pkg/constants.py):
+'cmdvel_to_servo_node.py' convierte /cmd_vel en ServoCtrlMsg en DOS pasos, no
+en uno. Primero 'get_mapped_throttle' categoriza |v| / MAX_SPEED con
+'MAX_SPEED = 4,0 m/s' (constants.py:40); despues 'get_rescaled_manual_speed'
+(cmdvel_to_servo_node.py:235) REESCALA con 'MAX_SPEED_PCT = 0,68'
+(constants.py:82). Lo que llega al servo es el segundo numero:
 
-    < 0,40 m/s        -> throttle 0,0   (nada)
-    0,40 - 1,20 m/s   -> throttle 0,5
-    1,20 - 2,00 m/s   -> throttle 0,8
-    >= 2,00 m/s       -> throttle 1,0
+    velocidad pedida      escalon nominal   lo que recibe servo_pkg
+    < 0,40 m/s            -                 0,0000   (nada)
+    0,40 - 1,199 m/s      0,5               0,4247
+    1,20 - 1,999 m/s      0,8               0,6242
+    >= 2,00 m/s           1,0               0,7341
+
+CORREGIDO el 2026-09-22. Hasta esa fecha este encabezado tabulaba los escalones
+NOMINALES -0,5 / 0,8 / 1,0-, que son los del primer paso y no los que recibe el
+servo. Los reales son un 15 % mas bajos, y esa diferencia es justo la que cruza
+el umbral de arranque. Detalle en Documentos/Evidencia/S24_analisis_previo_RF11.md.
 
 Nav2 pide 0,25 m/s en curva y 0,05 en la aproximacion. Las dos caen en la
 primera fila, o sea que la cadena devuelve CERO justo donde Nav2 la usa. Eso es
 lo que mantiene RF-14 en amarillo.
+
+Y la velocidad de crucero tampoco sirve, que es peor: 'desired_linear_vel =
+0,50 m/s' (nav2_params.yaml:78) cae en el escalon bajo, 0,4247, y el 0,50
+publicado directo al servo NO ARRANCO NINGUNA DE CINCO VECES sobre el suelo
+(Documentos/Evidencia/S23_campo_traccion_RF14.md seccion 4). Con las constantes
+de hoy, las dos configuraciones de Nav2 del repositorio dejan el carro inmovil,
+y ninguna emite error.
 
 Ese 'MAX_SPEED = 4,0 m/s' es una SUPOSICION heredada de AWS, y de ella cuelgan
 los tres umbrales. Si el carro real no hace 4 m/s, la tabla entera esta corrida
