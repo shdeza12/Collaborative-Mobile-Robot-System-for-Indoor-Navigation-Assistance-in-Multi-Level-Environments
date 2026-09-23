@@ -76,15 +76,32 @@ Los dos bloques son **el mismo procedimiento** en dos sitios distintos.
 
 | | Sitio A (control) | Sitio B (pasillo) |
 |---|---|---|
-| Qué es | espacio con esquinas, puertas y muebles a menos de 12 m — el hall del piso 2 sirve | el pasillo |
+| Qué es | espacio con esquinas, puertas y muebles **a menos de ~6 m durante toda la pasada** — el hall del piso 2 sirve, pero solo **sin alejarse de él** | el pasillo |
 | Qué contesta | ¿la cadena rf2o funciona? Aquí **debe** acertar | ¿cuánto se degrada en el sitio real? |
 | Nombres de los bags | `recta_control_1` … `_3` | `recta_pasillo_1` … `_3` |
 
 ### 2.1 · Marcar la recta
 
 Marca con cinta un punto de salida y uno de llegada **en línea recta** y mide la
-separación con flexómetro. **15–20 m si el sitio lo permite.** Anota la longitud
-con dos decimales. El mínimo de G-2 son 5 m, pero lo que manda no son los metros:
+separación con flexómetro. Anota la longitud con dos decimales. **La longitud
+buena no es la misma en los dos sitios, y en el A conviene que sea corta:**
+
+| | Sitio A (control) | Sitio B (pasillo) |
+|---|---|---|
+| Longitud | **6–8 m** | **15–20 m** si el sitio lo permite |
+| Por qué | la recta tiene que **quedarse dentro** de la zona con estructura. El efecto de un hall **muere entre los 5 y los 6 m** —medido el 17-sep en piso 2: 17,5 % a 2,2 m, 9,2 % a 4,2 m, 5,9 % pasados los 6,2 m, que es ya el fondo del pasillo—. Una recta larga que se aleja del hall **graba pasillo en su segunda mitad** y el bag de control deja de ser control | aquí interesa justo lo contrario: el tubo liso, que es lo que se quiere caracterizar |
+
+> **Corolario que ahorra una discusión en campo:** el sitio A no se elige a ojo
+> ni se defiende con argumentos. `medir_informacion_avance.py` da un número
+> sobre el bag ya grabado, y hay referencias: caja cerrada de 7,70 m **13,8 %**
+> → mapa aceptado; pasillo simulado **6,8 %** → rechazado; pasillos reales de
+> piso 1 y 2, **5,1 %** y **5,9 %**. Si el sitio A sale por debajo de ~10 %
+> **no era un control, era un segundo pasillo**, y el Bloque A pierde su
+> función: ya no puede decir «la cadena funciona». Los dos bloques son
+> comparables entre sí porque los dos son recta pura, que es la única
+> condición de uso que tiene la herramienta.
+
+El mínimo de G-2 son 5 m, pero lo que manda no son los metros:
 
 > **Cada pasada tiene que durar 60 s de movimiento**, porque el comprobador
 > rechaza por debajo de eso. **20 m empujados a 0,5 m/s son 40 s y los rechaza
