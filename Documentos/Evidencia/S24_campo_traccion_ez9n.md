@@ -189,12 +189,23 @@ calibración se rehízo esa misma noche. **La sesión de hoy se hizo sobre el ve
 elegido por esa razón.** «Una cantidad desconocida» es precisamente lo que hoy se cifra en un factor
 de tres o más.
 
-> **Consecuencia que no se resuelve aquí.** El §9 de S23 cierra RF-14 diciendo que *«el criterio del
-> §10 pedía al menos un punto por debajo de 0,25 m/s, y está medido»*, y ese punto es esta fila. Si
-> la fila mide un vehículo con la dirección descentrada en vez de una limitación de la plataforma,
-> **el cierre de RF-14 se apoya en un dato que hoy no se reproduce**. No se edita S23: es el
-> registro de aquel día, y su §8 ya contenía la advertencia. Queda para decisión de los dos autores,
-> igual que se hizo con la discrepancia de calibración del §5.
+> **Y S23 no queda en falso: queda confirmado.** Es tentador leer esto como que aquel documento se
+> equivocó, y no es lo que pasó. Su §9.3 escribió, sin que nadie se lo pidiera: *«la tabla que se
+> publique hoy documenta el extremo inferior de un vehículo con la dirección sin calibrar, **no la
+> escala del sistema**»*. Lo de hoy **cobra esa reserva**: la cantidad desconocida era un factor de
+> tres. Lo que sí decae es el uso que se le dio después — el criterio de cierre de su §10 pedía *«al
+> menos un punto por debajo de 0,25 m/s»* y lo dio por medido, y ese punto describe aquel vehículo
+> en aquel estado, no el techo de la plataforma. **RF-14 no cambia de color por esto**:
+> [`REQUISITOS.md`](../REQUISITOS.md):117 lo tiene en 🟡 con la escala por calibrar, que es
+> exactamente donde sigue.
+>
+> **Lo que sí se refuerza es el diagnóstico de fondo del §9.2 de S23**, y conviene verlo porque va
+> en contra de la intuición. Aquel documento concluyó que *«subir `MAX_SPEED_PCT` no cierra RF-14 …
+> el problema de fondo es que cuatro escalones no cubren el rango que Nav2 usa»*. Si este vehículo
+> recorre 19,3 m en 6 s de acelerador, **el rango que los cuatro escalones tienen que repartir es
+> aún más ancho de lo que se creía**, y por tanto el problema de resolución es **peor**, no mejor.
+> El hallazgo de hoy, que a primera vista alivia —el carro corre más de lo que pensábamos—, en
+> realidad agrava el defecto que de verdad bloquea RF-14.
 
 ### 4.3 La escalera de tracción es monótona y utilizable de 0,60 arriba
 
