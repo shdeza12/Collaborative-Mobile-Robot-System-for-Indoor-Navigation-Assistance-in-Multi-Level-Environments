@@ -292,6 +292,22 @@ Segmentado en ventanas de 2 s, la firma aparece desde el segundo 2 y se mantiene
 hasta el final; en los primeros 2 s no discrimina porque los dos carros estaban
 juntos y veían casi la misma escena.
 
+**Cuarta confirmación, y con otro instrumento.** Todo lo anterior mira la
+diferencia *entre* barridos, así que comparte un supuesto. `medir_informacion_avance.py`
+no: es geometría de **un solo barrido** y nunca compara dos. Aplicada por
+separado a los barridos pares y a los impares:
+
+| | pares | impares | brecha |
+|---|---|---|---|
+| `bag_ez9n` | 29,9 % | **50,7 %** | **20,8 pts** |
+| `sin_caparazon` | 34,5 % | 35,4 % | 0,9 pts |
+
+Veintitrés veces más separación en el contaminado. Un solo sensor quieto no
+puede dar una geometría a los barridos pares y otra distinta a los impares; dos
+sensores en sitios distintos, sí. Que una medida construida para otra cosa, y
+que no comparte el supuesto de las anteriores, dé el mismo veredicto es lo que
+convierte esto en un hecho y no en un artefacto del método.
+
 ### 5.3 · Qué queda retirado
 
 | Afirmación de hoy | Estado |
@@ -320,6 +336,30 @@ estática y sana.
 3. **`herramientas/odometria_desde_bag.sh`**, nueva, con la regla barata en el
    encabezado: correr la cadena **dos veces**; con entrada sana da el mismo
    número, y si no lo da el problema es el bag.
+4. **`medir_informacion_avance.py` ya abre los bags del vehículo.** Deducía el
+   motor de almacenamiento de la extensión del nombre y le daba `sqlite3` a
+   cualquier carpeta. Los bags del carro son carpetas con un `.mcap` dentro, así
+   que fallaba con `file is not a database` — que suena a bag corrupto y no lo
+   es. Ahora lo lee del `metadata.yaml`, que es quien lo sabe.
+
+### 5.5 · La única cifra nueva que el bag limpio sí permite
+
+Con el bag limpio se puede medir la **información de avance** del sitio, porque
+esa medida es geométrica y de un solo barrido y no necesita que el carro se
+mueva. Es además la primera vez que se mide sobre el **driver de fábrica**, de
+360 muestras, y no en simulación:
+
+| entorno | muestras | información de avance |
+|---|---|---|
+| pasillo 46,9 m donde el mapa salió corto (sim.) | 1328 | 5–7 % |
+| caja cerrada 7,70 m, control bueno (sim.) | 1328 | 12,5–13,8 % |
+| **sitio interior real, `sin_caparazon`** | **360** | **34,7 %** (p10–p90: 29,9–40,0) |
+
+**Qué dice y qué no.** Dice que bajar a 360 muestras no rompe la medida, y da un
+punto de referencia real contra el que comparar el sitio de la recta. **No dice
+nada del pasillo de la recta**: el carro estaba quieto en un sitio cerrado, y un
+espacio cerrado sube el índice por sí solo — que es exactamente el mismo sesgo
+que invalidó el §2.2. El número del sitio de la recta hay que medirlo allí.
 
 ---
 
@@ -377,9 +417,11 @@ ninguna herramienta trae de serie.
 - **Comprobación visual del yaw en los dos carros.** Es lo único de la geometría
   que sigue abierto, y no lo cierra el flexómetro (§2.1). Un soporte montado al
   revés rota *todos* los barridos; se ve a simple vista y es sí/no.
-- **Re-medir la fracción de rayos con información de avance**, sin caparazón y
-  con 360 muestras. El 5,1 % / 5,9 % / 17,5 % de S23 salió de geometría densa y
-  simulada: no es comparable y no puede citarse como si lo fuera.
+- **Medir la información de avance EN EL SITIO DE LA RECTA.** El 5,1 % / 5,9 % /
+  17,5 % de S23 salió de geometría densa y simulada: no es comparable y no puede
+  citarse como si lo fuera. Ya hay un punto de referencia real a 360 muestras
+  —34,7 %, §5.5—, pero es de un sitio cerrado con el carro quieto y **no
+  sustituye** a la medida del pasillo.
 - ~~Corregir `HOJA_CAMPO_G2.md:185` y `:190`~~ — hecho el 2026-09-23.
 - ~~Corregir `MAPA_TRABAJO_RESTANTE.md` §2.3~~ — hecho el 2026-09-23.
 - **Decisión de los directores** sobre sitio de la etapa 3 y N de RF-27. Hasta

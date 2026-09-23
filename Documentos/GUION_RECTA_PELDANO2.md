@@ -226,16 +226,31 @@ apariencia pero con una incidencia no anotada envenena el promedio.
 2. Compararlo con la longitud del flexómetro. **Criterio de G-2: error ≤ 10 %.**
 3. Medir la deriva en los dos tramos quietos. Si un sensor parado acumula
    avance, eso es un hallazgo mayor y hay que escribirlo aparte.
-4. Re-medir la fracción de rayos con información de avance, **ahora sin
-   caparazón y con 360 muestras**. El 5,1 % / 5,9 % / 17,5 % de
-   `Evidencia/S23_informacion_avance_piso2.md` salió de geometría densa y
-   simulada; no es comparable y no se puede citar como si lo fuera.
+4. Medir la información de avance **del sitio de la recta**, con el bag ya
+   grabado:
+
+   ```
+   python3 herramientas/medir_informacion_avance.py <bag> /rplidar_ros/scan
+   ```
+
+   Los valores contra los que se lee, todos ya medidos:
+
+   | referencia | muestras | índice |
+   |---|---|---|
+   | pasillo de 46,9 m, donde el mapa salió corto (sim.) | 1328 | 5–7 % |
+   | caja cerrada de 7,70 m, control bueno (sim.) | 1328 | 12,5–13,8 % |
+   | sitio interior real, bag `sin_caparazon` | 360 | 34,7 % |
+
+   Si el sitio de la recta cae cerca del 5–7 %, el desplazamiento medido va a
+   salir corto y eso **no** será un fallo de la grabación. El 5,1 % / 5,9 % /
+   17,5 % de `Evidencia/S23_informacion_avance_piso2.md` es de geometría densa y
+   simulada: no es comparable y no se cita como si lo fuera.
 
 ---
 
 ## 6. Criterio de cierre del guion completo
 
-Tres bags por sitio, en el portátil, con la longitud de la recta anotada y la
-altura del LiDAR re-medida en los dos carros. Con eso, el análisis no necesita
-volver a tocar un carro — que es el objetivo, porque los carros solo están entre
-semana y el análisis no.
+Tres bags por sitio, en el portátil, con la longitud de la recta anotada y el
+yaw comprobado a ojo en los dos carros. Con eso, el análisis no necesita volver a
+tocar un carro — que es el objetivo, porque los carros solo están entre semana y
+el análisis no.

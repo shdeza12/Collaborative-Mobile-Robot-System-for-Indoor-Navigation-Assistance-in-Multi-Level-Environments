@@ -99,6 +99,7 @@ USO
     topico_scan    por defecto '/scan'
 """
 import math
+import os
 import statistics
 import sys
 
@@ -177,6 +178,24 @@ def fraccion_informativa(m):
     return (n_informa / n_normal, n_normal, n_validos)
 
 
+def almacenamiento(ruta):
+    """Que motor abre este bag: lo dice el bag, no la extension del nombre.
+
+    Adivinarlo por el nombre -'.mcap' o sqlite3- era cierto mientras todos los
+    bags del proyecto fueran sqlite3. Los que graba el vehiculo son CARPETAS
+    con un .mcap dentro, y la regla por extension les asignaba sqlite3: el
+    error que sale es "file is not a database", que suena a bag corrupto y no
+    lo es. El 'metadata.yaml' lleva el dato escrito.
+    """
+    meta = os.path.join(ruta, 'metadata.yaml')
+    if os.path.isfile(meta):
+        with open(meta) as f:
+            for linea in f:
+                if 'storage_identifier' in linea:
+                    return linea.split(':', 1)[1].strip().strip('"\'')
+    return 'mcap' if ruta.endswith('.mcap') else 'sqlite3'
+
+
 def main():
     if len(sys.argv) < 2:
         print(__doc__.split('\nUSO\n')[-1].replace('\n    ', '\n'))
@@ -185,8 +204,7 @@ def main():
     topico = sys.argv[2] if len(sys.argv) > 2 else '/scan'
 
     lector = SequentialReader()
-    almacen = 'mcap' if ruta.endswith('.mcap') else 'sqlite3'
-    lector.open(StorageOptions(uri=ruta, storage_id=almacen),
+    lector.open(StorageOptions(uri=ruta, storage_id=almacenamiento(ruta)),
                 ConverterOptions('', ''))
 
     total = 0
