@@ -58,6 +58,36 @@ indices found, falling back to reading in file order`, que es justamente la
 explicacion de la metadata ausente: el indice y la `metadata.yaml` se escriben
 al cerrar limpio, luego esa grabacion se corto de golpe.
 
+EL CAMPO QUE SE BORRA, Y POR QUE ESO ES ACEPTABLE
+-------------------------------------------------
+De cada topico se quita `type_description_hash`, y no es un campo cualquiera:
+es justamente el que Jazzy anadio para **detectar que la definicion de un
+mensaje cambio entre distros**. Al borrarlo se pierde esa red de seguridad. Un
+bag cuyo tipo hubiera divergido se abriria igual y **deserializaria mal, en
+silencio** -- sin error, con numeros creibles y falsos.
+
+No se puede conservar: Humble no conoce ese campo ni sabe comprobarlo. Asi que
+la comprobacion se hace fuera, a mano, y se repite si algun dia se graba un tipo
+nuevo. Hecha el **2026-09-23** contra el carro `.102`, comparando la definicion
+de campos con los comentarios quitados:
+
+    ros2 interface show <tipo> | sed 's/#.*//' | grep -v '^[[:space:]]*$' | md5sum
+
+| Tipo                        | Humble vs Jazzy |
+|-----------------------------|-----------------|
+| sensor_msgs/msg/LaserScan   | identico        |
+| nav_msgs/msg/Odometry       | identico        |
+| geometry_msgs/msg/Twist     | identico        |
+| tf2_msgs/msg/TFMessage      | identico        |
+
+Son los cuatro tipos que este proyecto graba. Para ellos, borrar el hash no
+esconde nada porque no hay nada que esconder.
+
+Cuidado al repetirlo: hay que quitar los comentarios **indentados**. Un filtro
+`grep -v '^#'` los deja pasar y `TFMessage` sale distinto en los dos lados; la
+unica diferencia real son dos lineas `#` de documentacion dentro de
+`TransformStamped`, que no tocan el formato de cable.
+
 COMO SE COMPRUEBA QUE UN BAG SE LEE -- Y COMO NO
 ------------------------------------------------
 `ros2 bag info` **no vale**: lee la `metadata.yaml` y no abre el `.mcap`, asi

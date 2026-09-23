@@ -135,7 +135,7 @@ Estado por peldaño:
 
 | # | Peldaño | Simulación | Vehículo real |
 |---|---|---|---|
-| 1 | TF `map → odom → base_link → laser` | ✅ | ❌ no existe ningún TF |
+| 1 | TF `map → odom → base_link → laser` | ✅ | ⚠️ `base_link → laser` de pie en **los dos carros** — `[0.029, 0.000, 0.185]`, RPY −180°, del mismo URDF (md5 `ccd781f4…`): `.101` el 21-sep, `.102` el 23-sep. Falta `map → odom → base_link`, que cuelga del peldaño 2 |
 | 2 | odometría publicada y validada sola | ✅ verdad del motor de física | ❌ sin fuente |
 | 3 | `/scan` con marco y estampas correctas | ✅ | ✅ 1,0228 m contra 1,000 m de flexómetro, 10/10 barridos, σ 2,8 mm |
 | 4 | mapa | ✅ | ⚠️ el mapa existe; nunca se ha cargado en el carro |
@@ -146,6 +146,10 @@ Estado por peldaño:
 El proyecto midió el peldaño 3 con rigor de laboratorio y caracterizó el 4 con herramientas propias,
 y **nunca construyó el 1 ni el 2**. No fue desorden: el 2 resultó ser un problema de física y se
 descubrió tarde. Todo el trabajo de S22 y S23 fue, sin saberlo, la investigación del peldaño 2.
+
+*Actualización 2026-09-23.* La mitad baja del peldaño 1 ya está construida en los dos vehículos
+(fila 1 de la tabla). Lo que sigue faltando del peldaño 1 es justo lo que produce el peldaño 2, así
+que **la escalera sigue cortada en el mismo sitio**: el 2 es el que manda.
 
 ---
 

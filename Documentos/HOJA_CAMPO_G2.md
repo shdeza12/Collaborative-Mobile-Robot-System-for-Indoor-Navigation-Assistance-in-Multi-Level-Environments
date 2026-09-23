@@ -182,12 +182,22 @@ Guía de mapeo, **Pasos 2.2 a 2.5**. Resumen de lo que no se puede saltar:
 4. **Comprueba que es `/scan` y no `/rplidar_ros/scan`.** Si sale el segundo, arrancaste por la vía
    de AWS: párala y vuelve al Paso 2.3. Es exactamente el error que hundió los bags del 28-ago.
 
-> **`/rplidar_ros/scan` va a aparecer en la lista de tópicos, y está vacío.** Es el driver de
-> `deepracer-core`, que arranca solo con el carro. Comprobado el 2026-09-04 **como `root`**, para
-> que el negativo valga: tiene `/dev/ttyUSB0` abierto y **no publica ni un barrido**. Los dos
-> drivers acaban con el mismo puerto serie abierto a la vez, cosa fea que nadie ha resuelto, pero
-> **no impide grabar**: el del Paso 2.3 arranca igual, anuncia `current scan mode: Express` y
-> publica a ~6 Hz. **No pierdas tiempo intentando grabar `/rplidar_ros/scan`.**
+> **CORREGIDO EL 2026-09-23: `/rplidar_ros/scan` SÍ publica.** Lo que decía este recuadro —que
+> el tópico aparece vacío— se comprobó falso en los dos vehículos: publica a **7,6–9,9 Hz**,
+> `frame_id: laser`, **360 muestras**, apertura 359°, 0,15–12,0 m, con 68,9 % (`.101`) y 71,1 %
+> (`.102`) de rayos válidos. El puerto lo tiene el PID `rplidar_node` de `deepracer-core`.
+> Detalle en `Evidencia/S24_dos_carros_listos.md` §3.
+>
+> El negativo del 2026-09-04 se tomó **como `root`** y por eso se dio por bueno. La explicación
+> más probable es que en aquel momento el driver del Paso 2.3 ya tenía el puerto y el nodo de
+> fábrica no podía leer de él — es decir, midió la consecuencia de haber arrancado los dos, no
+> una propiedad del tópico. **No está confirmado.**
+>
+> **Qué cambia en la práctica.** Se puede grabar `/rplidar_ros/scan` sin parar `deepracer-core`
+> ni disputar `/dev/ttyUSB0`. Pero son **360 muestras y 12 m** frente a las **1328 y 16 m** del
+> driver del proyecto: **3,7× menos resolución angular**. Un índice de información de avance
+> medido sobre este barrido **no es comparable** con el 5,1 % / 5,9 % / 17,5 % de
+> `Evidencia/S23_informacion_avance_piso2.md`, que salieron de la geometría densa.
 5. Levanta el demonio (Paso 2.5) y comprueba que `ros2 topic list | wc -l` da **22 tres veces
    seguidas**.
 
