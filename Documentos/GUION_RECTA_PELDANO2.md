@@ -59,39 +59,34 @@ proyecto; ese es justamente uno de los desconocidos que esta prueba resuelve.
 
 ---
 
-## 1. Bloque A — re-medir la geometría (los dos carros)
+## 1. Bloque A — el yaw, que es lo único que queda abierto
+
+**La altura ya está cerrada, no la vuelvas a medir.** Salió 190 mm de altura
+total en los dos carros, el mismo número que con el caparazón puesto el 21-sep
+(§0.1). Lo que queda es un sí/no mirando, sin instrumento:
 
 | | |
 |---|---|
-| **Objetivo** | Saber si quitar el caparazón movió el LiDAR respecto al URDF. |
-| **Cómo** | Flexómetro desde el piso hasta la **ranura por donde sale el haz**. No la cara superior de la carcasa: eso da 189–190 mm y es el error que ya costó una medida el 21-sep (`Evidencia/S24_tf_hardware_peldano_1.md` §5). |
-| **Esperado** | **175,7 mm ± 3 mm** en los dos carros. |
-| **Si falla** | Anótalo y **sigue adelante**: la altura no entra en la medida (ver el recuadro). Lo que sí para la prueba es que los **dos carros discrepen entre sí**, porque eso ya no es el montaje sino un carro torcido. |
-| **Cierre** | Dos números anotados, con el nombre del carro al lado. |
+| **Objetivo** | Que el LiDAR esté asentado **igual de invertido en los dos carros**. El montaje es a 180° (`qz=1, qw=0` en la TF). |
+| **Cómo** | Míralos uno al lado del otro. El soporte es atornillado: no admite un ángulo arbitrario, o está asentado o no. El fallo realista no es «rotado 7°», es «montado al revés», y es discreto. |
+| **Esperado** | Los dos iguales. |
+| **Si falla** | **Para y corrígelo antes de grabar.** Esto sí es compuerta: un error de yaw rota *todos* los barridos y la trayectoria sale girada, no desplazada — y nada de lo que se grabe después se puede salvar en análisis. |
+| **Cierre** | «Iguales» anotado, con la fecha. |
 
-> **Corregido el 2026-09-23: la altura no invalida la medida.** Este guion decía
-> que sin regenerar el URDF «rf2o trabajará sobre una geometría falsa».
-> **Es falso.** En `CLaserOdometry2D.cpp`, el incremento de movimiento solo
-> escribe x e y (líneas 955–956); la altura entra como desplazamiento constante
-> en `robot_pose_` y no toca el desplazamiento estimado. Un error de z no
-> cambia el resultado de G-2.
->
-> Lo que sí lo cambia es el **yaw** —rota todos los barridos— y el `x` del brazo
-> de palanca. La medida de altura se toma igual, porque hace falta para los
-> costmaps del peldaño 6 y porque es barata, pero **no es una compuerta**.
+> **Por qué el yaw sí y la altura no.** En `CLaserOdometry2D.cpp` el incremento
+> de movimiento solo escribe las componentes de traslación 0 y 1 (líneas
+> 955–956): la altura entra como desplazamiento constante en `robot_pose_` y **no
+> toca el desplazamiento estimado**, que es la cifra de G-2. El yaw, en cambio,
+> rota cada barrido antes de compararlo con el anterior. El flexómetro mide
+> precisamente el parámetro que no pesa, y no ve el que sí.
 
-> **Cuidado con el punto de referencia, que ya costó una medida.** Con el
-> caparazón puesto se midieron **175 mm** a la ranura del haz y **189–190 mm** a
-> la cara superior del disco: la cara superior va **14–15 mm por encima** de la
-> ranura, y esa distancia es del sensor, no del caparazón.
->
-> Si el número que sacas no cuadra, mide **las dos cosas** y apunta las dos. La
-> diferencia entre ellas tiene que salir 14–15 mm; si sale eso, sabes cuál es
-> cuál sin discutirlo.
-
-Mira también, sin instrumento, si el LiDAR quedó **asentado igual en los dos**:
-el montaje es invertido (yaw −180°). Es un sí/no visual y es el parámetro que
-más pesa — un error de yaw rota *todos* los barridos, y el flexómetro no lo ve.
+> **Si algún día hay que volver a medir la altura, el punto de referencia.** Con
+> el caparazón puesto se midieron **175 mm** a la ranura del haz y **189–190 mm**
+> a la cara superior del disco: la cara superior va **14–15 mm por encima** de la
+> ranura, y esa distancia es del sensor, no del caparazón. Mide las dos cosas y
+> apunta las dos; si la diferencia sale 14–15 mm, sabes cuál es cuál sin
+> discutirlo. Esa confusión ya costó una medida el 21-sep
+> (`Evidencia/S24_tf_hardware_peldano_1.md` §5).
 
 ---
 

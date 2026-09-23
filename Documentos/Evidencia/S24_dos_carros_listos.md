@@ -18,17 +18,17 @@ preparar nada.
 | Graba un `.mcap` no vacío | sí (516 208 B) | sí (578 935 B) | tamaño ≫ 5123 B de mcap vacío |
 | El bag se lee en el PC Humble | — | **sí**, §4 | `SequentialReader.read_next()` |
 | Batería | nivel 9 | nivel 9 | `/i2c_pkg/battery_level` |
-| Flexómetro contra el URDF | hecho 21-sep, **caducado** | pendiente | ver el recuadro de §2.1 |
+| Flexómetro contra el URDF | hecho 21-sep, **sigue vigente** | **cerrado hoy** | altura total, §2.3 |
+| Yaw del LiDAR igual en los dos | pendiente | pendiente | inspección visual, §2.1 |
 
 El criterio de cierre de la sesión se da por cumplido en todo lo que depende del
-software. La geometría, en cambio, **volvió a quedar abierta el mismo día**: se
-retiró el caparazón de los vehículos, lo que caduca la medida del 21-sep y obliga
-a re-medir los dos carros. El recuadro al final de §2.1 lo explica.
+software. La geometría **se abrió y se volvió a cerrar el mismo día**: se retiró
+el caparazón de los vehículos, lo que parecía caducar la medida del 21-sep, y la
+altura total del vehículo demostró horas después que el LiDAR no se había movido.
+El §2.3 lo desarrolla.
 
-Si se hace: piso → la **ranura por donde sale el haz**, esperado
-**175 mm ± 3 mm**. No es la cara superior de la carcasa (189–190 mm); esa
-confusión ya costó una medida el 21-sep y está anotada en
-`S24_tf_hardware_peldano_1.md` §5.
+Lo único que queda abierto de la geometría es el **yaw**, y no lo cierra el
+flexómetro: lo cierra mirar los dos soportes. Está razonado en §2.1.
 
 ---
 
@@ -89,19 +89,21 @@ que era el otro sitio por donde podía entrar una asimetría.
 barrido de `.102` en un pasillo conocido sale rotado respecto al de `.101`, se
 nota de inmediato. Hasta entonces no se gasta una salida de campo en esto.
 
-> **REVERTIDO el mismo 2026-09-23, horas después.** Se decidió **retirar el
-> caparazón** de los vehículos para que el LiDAR lea los 360° sin obstrucción.
-> Eso cambia la premisa entera de este apartado: los 175 mm se midieron **con el
-> caparazón puesto**, así que si el soporte del LiDAR se apoyaba en él, el URDF
-> describe una configuración que ya no existe.
+> **Revertido y vuelto a confirmar, todo el 2026-09-23.** Horas después de
+> escribir lo de arriba se retiró el **caparazón** de los vehículos, para que el
+> LiDAR lea los 360° sin obstrucción. Eso parecía tumbar la premisa entera: los
+> 175 mm se midieron con el caparazón puesto, de modo que si el soporte del LiDAR
+> se apoyaba en él, el URDF describiría un carro que ya no existe. Se declaró el
+> flexómetro obligatorio en los dos vehículos.
 >
-> El flexómetro vuelve a ser **obligatorio, y en los dos carros**, no solo en el
-> `.102`. Procedimiento en `GUION_RECTA_PELDANO2.md` §1.
+> **La medida se hizo esa misma tarde y salió a favor: el LiDAR no se movió.**
+> El desarrollo está en §2.3. Con eso, la decisión original de este apartado
+> —no gastar una salida de campo en el flexómetro— vuelve a estar en pie, y
+> además el `.102` ya tiene su propia medida física, que era lo que le faltaba.
 >
-> Lo que sigue valiendo de este apartado es el orden de importancia de los tres
-> parámetros —el yaw pesa mucho más que la altura y el flexómetro no lo ve— y la
-> observación de que el soporte atornillado hace el fallo discreto. Lo que ya no
-> vale es la conclusión de no gastar una salida en medirlo.
+> Lo que nunca dejó de valer, y es lo que hay que leerse de aquí, es el orden de
+> importancia de los tres parámetros: **el yaw pesa mucho más que la altura y el
+> flexómetro no lo ve.** Esa sigue siendo la única compuerta abierta.
 
 ### 2.2 · Se intentó medir el efecto del caparazón, y no se pudo concluir
 
@@ -136,6 +138,39 @@ Esto no bloquea nada: la fracción de rayos con **información de avance**, que 
 la cifra que decide G-2, se re-mide igual en la recta del peldaño 2. Queda
 escrito para que el cambio de hardware a mitad de campaña no aparezca como un
 supuesto sin respaldo.
+
+### 2.3 · El caparazón no movió el LiDAR — la alarma se cierra
+
+La alarma de §2.1 y de §1 era concreta y comprobable: *si el soporte del LiDAR se
+apoyaba en el caparazón, quitarlo bajó el sensor y el URDF quedó obsoleto*. La
+medida que la decide no es la altura del haz, que es incómoda de tomar, sino la
+**altura total del vehículo**, que es un solo apoyo del flexómetro y se compara
+contra un número ya registrado:
+
+| | con caparazón (21-sep, `.101`) | sin caparazón (23-sep, los dos) |
+|---|---|---|
+| Piso → punto más alto del carro | 189–190 mm | **190 mm** |
+
+El mismo número. Si el caparazón hubiera estado sosteniendo algo, al quitarlo la
+altura total habría bajado; no bajó, luego el caparazón nunca fue el punto más
+alto y el LiDAR sigue donde estaba. **La geometría del 21-sep sigue vigente y el
+URDF no se toca** (`deepracer_stereo_cameras_and_lidar_urdf.xacro`, `0.16145`
+respecto a `chassis`, que compuesto da 184,699 mm sobre `base_link`).
+
+Efecto secundario que conviene anotar: la medida se tomó en **los dos carros**,
+así que el `.102` deja de depender de «es el mismo archivo copiado» y pasa a
+tener comprobación física propia. Esa era la objeción de §2.1.
+
+**Discrepancia menor, anotada y no perseguida.** Tomando el LiDAR como una pieza
+de 20 mm con el haz en su mitad, el rayo saldría a 180 mm. Midiendo la ranura
+directamente el 21-sep salió a 175 mm, que es lo que dice el URDF (175,7 mm). Las
+dos medidas directas de ese día —190 arriba, 175 a la ranura— sitúan el haz a
+14–15 mm de la tapa, no a 10. No se resuelve porque **no cambia nada**: rf2o
+compone la pose en 3D pero el incremento de movimiento solo escribe las
+componentes de traslación 0 y 1 (`CLaserOdometry2D.cpp:955-956`), de modo que la
+altura entra como desplazamiento constante y **no afecta el desplazamiento
+estimado**, que es la cifra de G-2. Quien quiera cerrarla: una medida de la cara
+superior del LiDAR a la ranura.
 
 ---
 
@@ -336,10 +371,12 @@ ninguna herramienta trae de serie.
 
 ## 7. Qué queda pendiente de esta sesión
 
-- **Flexómetro en los DOS carros** (175 mm ± 3 mm a la ranura del haz), porque
-  se retiró el caparazón y la medida del 21-sep caducó. Es lo primero del
-  `GUION_RECTA_PELDANO2.md`; sin esto, lo que se grabe va sobre una geometría
-  que no se sabe si es cierta.
+- ~~**Flexómetro en los DOS carros**, porque se retiró el caparazón~~ — **hecho
+  el 2026-09-23 y cerrado en §2.3**: la altura total sale 190 mm con y sin
+  caparazón, luego el LiDAR no se movió y el URDF sigue siendo cierto.
+- **Comprobación visual del yaw en los dos carros.** Es lo único de la geometría
+  que sigue abierto, y no lo cierra el flexómetro (§2.1). Un soporte montado al
+  revés rota *todos* los barridos; se ve a simple vista y es sí/no.
 - **Re-medir la fracción de rayos con información de avance**, sin caparazón y
   con 360 muestras. El 5,1 % / 5,9 % / 17,5 % de S23 salió de geometría densa y
   simulada: no es comparable y no puede citarse como si lo fuera.
