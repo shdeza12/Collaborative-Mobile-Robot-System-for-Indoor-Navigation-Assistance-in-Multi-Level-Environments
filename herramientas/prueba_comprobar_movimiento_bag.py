@@ -16,7 +16,8 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from comprobar_movimiento_bag import (MOVIMIENTO_MINIMO_S, QUIETO_MAXIMO_FRAC,
-                                      diferencia, repartir, veredicto)
+                                      detectar_intercalado, diferencia,
+                                      repartir, veredicto)
 
 FALLOS = []
 
@@ -133,6 +134,36 @@ comprobar("una decima por encima del maximo de quieto, falla", not sirve)
 sirve, motivos = veredicto(10.0, float("nan"), float("nan"))
 comprobar("sin pares comparables no sirve y lo dice",
           not sirve and len(motivos) == 1)
+
+print("detectar_intercalado()")
+
+# Dos sensores quietos en sitios distintos, grabados en el mismo bag. Es el
+# caso real de 'bag_ez9n': los alternos coinciden, los consecutivos no.
+dos = serie([[2.0] * 20 if i % 2 == 0 else [3.0] * 20 for i in range(40)],
+            hz=14.0)
+hay, d1, d2 = detectar_intercalado(dos)
+comprobar("dos sensores intercalados se detectan", hay, f"-> {d1:.3f}/{d2:.3f}")
+comprobar("y los alternos salen identicos", d2 == 0.0, f"-> {d2}")
+
+# Un solo sensor quieto. Las dos medianas son ruido y no se delata nada.
+quieto = serie([[2.0 + 0.001 * (i % 3)] * 20 for i in range(40)])
+hay, d1, d2 = detectar_intercalado(quieto)
+comprobar("un sensor quieto no se confunde con dos", not hay,
+          f"-> {d1:.4f}/{d2:.4f}")
+
+# Un sensor que avanza 0,1 m por barrido: los alternos discrepan el DOBLE que
+# los consecutivos, que es justo lo contrario del intercalado.
+avanza = serie([[10.0 - 0.1 * i] * 20 for i in range(40)])
+hay, d1, d2 = detectar_intercalado(avanza)
+comprobar("un sensor en movimiento no se confunde con dos", not hay,
+          f"-> {d1:.3f}/{d2:.3f}")
+comprobar("y en movimiento los alternos discrepan mas que los consecutivos",
+          d2 > d1, f"-> {d1:.3f} vs {d2:.3f}")
+
+# Un bag corto no da para decidir, y callar es mejor que acusar en falso.
+hay, d1, d2 = detectar_intercalado(serie([[2.0] * 5, [9.0] * 5, [2.0] * 5]))
+comprobar("con menos de 8 barridos no se pronuncia",
+          not hay and math.isnan(d1))
 
 print()
 if FALLOS:

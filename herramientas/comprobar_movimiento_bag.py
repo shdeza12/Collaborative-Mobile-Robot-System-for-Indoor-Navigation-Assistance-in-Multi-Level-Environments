@@ -57,6 +57,42 @@ Se fija por la geometria de la prueba, no por el dato:
 Un bag que no cumple las dos NO se lleva a la cadena de mapeo: el mapa saldria
 malo y costaria media hora descubrir por que.
 
+LO QUE ESTA MEDIDA NO VEIA, Y COSTO UNA TARDE EL 2026-09-23
+-----------------------------------------------------------
+Sobre `S24_verificacion_carros/bag_ez9n` esta herramienta contesto **59,1 % de
+movimiento**, y los dos vehiculos estaban quietos sobre una mesa. No fue un
+fallo del umbral: la entrada estaba contaminada.
+
+Los dos carros publican `/rplidar_ros/scan` -mismo nombre, sin namespace- y
+ninguno define `ROS_DOMAIN_ID`, asi que los dos caen en el dominio 0. El
+`ros2 bag record` lanzado en el `.102` grabo **tambien el LiDAR del `.101`**.
+El bag alterna entre dos sensores en sitios distintos, y para una medida que
+compara barridos separados 1 s eso es indistinguible de un sensor que viaja.
+
+La medida que lo separa es comparar consecutivos contra ALTERNOS:
+
+    | comparacion        | bag_ez9n  | sin_caparazon |
+    |--------------------|-----------|---------------|
+    | barrido i con i+1  | 0,9210 m  | 0,0030 m      |
+    | barrido i con i+2  | 0,0050 m  | 0,0030 m      |
+
+En `bag_ez9n` los alternos coinciden en 5 mm y los consecutivos discrepan en
+casi un metro: es un ida y vuelta entre dos sitios, no un recorrido. En un bag
+sano las dos columnas se parecen -sensor quieto- o la de alternos es la MAYOR
+-sensor en movimiento: mas tiempo, mas desplazamiento-. Que la de alternos sea
+diez veces menor no lo puede producir ningun movimiento.
+
+Confirmado por otras tres vias en el mismo bag: 14,68 Hz cuando un RPLidar da
+7-10 Hz; intervalo minimo entre mensajes de 0,0000 s, imposible con un solo
+publicador; y los primeros intervalos a 7,7 Hz antes de duplicarse.
+
+En el campo se previene antes de grabar, que es mas barato que detectarlo
+despues:
+
+    ros2 topic info /rplidar_ros/scan --verbose | grep 'Publisher count'
+
+Tiene que decir **1**. Si dice 2, apaga el otro vehiculo.
+
 USO
 ---
     python3 herramientas/comprobar_movimiento_bag.py mapas/bag_mapa_1451
@@ -81,6 +117,13 @@ UMBRAL_QUIETO_M = 0.05
 # Criterio de aceptacion. Derivado de la geometria de G2, no del dato.
 MOVIMIENTO_MINIMO_S = 60.0
 QUIETO_MAXIMO_FRAC = 0.40
+
+# Cuantas veces tiene que superar la diferencia entre barridos CONSECUTIVOS a la
+# de los ALTERNOS para declarar que el bag trae dos sensores intercalados. Diez
+# es holgado a proposito: ningun movimiento real puede dejar los alternos por
+# debajo de los consecutivos, asi que el margen solo protege del ruido. Medido:
+# 184 veces en 'bag_ez9n', 1,0 en 'sin_caparazon'.
+FACTOR_INTERCALADO = 10.0
 
 
 class ErrorLectura(Exception):
@@ -143,6 +186,34 @@ def diferencia(a, b):
     return statistics.median(d) if d else float("nan")
 
 
+def detectar_intercalado(barridos):
+    """Dice si el bag mezcla dos sensores. Devuelve (hay_dos, d_consec, d_alt).
+
+    Compara la mediana de la diferencia entre barridos CONSECUTIVOS con la de
+    los ALTERNOS. Ver el encabezado: solo una fuente doble deja los alternos
+    muy por debajo de los consecutivos.
+    """
+    if len(barridos) < 8:
+        return False, float("nan"), float("nan")
+
+    consec, alt = [], []
+    for i in range(len(barridos) - 2):
+        d1 = diferencia(barridos[i][1], barridos[i + 1][1])
+        d2 = diferencia(barridos[i][1], barridos[i + 2][1])
+        if not math.isnan(d1):
+            consec.append(d1)
+        if not math.isnan(d2):
+            alt.append(d2)
+    if not consec or not alt:
+        return False, float("nan"), float("nan")
+
+    m1, m2 = statistics.median(consec), statistics.median(alt)
+    # El piso de UMBRAL_QUIETO_M evita delatar como intercalado un bag de
+    # sensor quieto donde las dos medianas son ruido puro.
+    hay_dos = m1 > UMBRAL_QUIETO_M and m1 > FACTOR_INTERCALADO * max(m2, 1e-4)
+    return hay_dos, m1, m2
+
+
 def repartir(barridos, umbral=UMBRAL_QUIETO_M):
     """Reparte la duracion del bag en segundos quieto y en movimiento.
 
@@ -194,6 +265,7 @@ def informe(ruta):
 
     duracion, quieto, movimiento, hz = repartir(barridos)
     sirve, motivos = veredicto(duracion, quieto, movimiento)
+    dos_sensores, d_consec, d_alt = detectar_intercalado(barridos)
 
     print(f"{ruta}")
     print(f"  topico de barrido : {topico}")
@@ -210,11 +282,35 @@ def informe(ruta):
               "de linea con rf2o.")
     print(f"  barridos          : {len(barridos)} a {hz:.2f} Hz")
     print(f"  duracion          : {duracion:.1f} s")
+
+    if dos_sensores:
+        print()
+        print("  BAG CONTAMINADO: trae DOS sensores intercalados.")
+        print(f"    diferencia entre barridos consecutivos : {d_consec:.4f} m")
+        print(f"    diferencia entre barridos alternos     : {d_alt:.4f} m")
+        print("    Los alternos coinciden y los consecutivos no: el bag salta")
+        print("    entre dos sitios. Ningun movimiento real hace eso.")
+        print()
+        print("    Causa conocida: los dos vehiculos publican "
+              "'/rplidar_ros/scan'")
+        print("    sin namespace y sin ROS_DOMAIN_ID, asi que graban el uno al")
+        print("    otro. Apaga el segundo vehiculo y vuelve a grabar.")
+        print("    Antes de grabar, comprueba en el carro:")
+        print("      ros2 topic info /rplidar_ros/scan --verbose "
+              "| grep 'Publisher count'")
+        print("    Tiene que decir 1.")
+        print()
+        print("  Las cifras de movimiento de abajo NO significan nada en este")
+        print("  bag: el salto entre los dos sensores se cuenta como avance.")
+
     print(f"  sensor quieto     : {quieto:.1f} s  "
           f"({100 * quieto / duracion:.1f} %)")
     print(f"  sensor en movim.  : {movimiento:.1f} s  "
           f"({100 * movimiento / duracion:.1f} %)")
     print()
+    if dos_sensores:
+        print("  NO SIRVE: el bag esta contaminado por un segundo sensor.")
+        return 1
     if sirve:
         print("  SIRVE para construir un mapa.")
         return 0

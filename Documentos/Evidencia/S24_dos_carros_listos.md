@@ -105,6 +105,13 @@ nota de inmediato. Hasta entonces no se gasta una salida de campo en esto.
 
 ### 2.2 · Se intentó medir el efecto del caparazón, y no se pudo concluir
 
+> **RETIRADO ENTERO — ver §5.3.** El «antes» de esta comparación es el bag
+> `bag_ez9n`, que resultó estar **contaminado por el LiDAR del otro vehículo**.
+> El 71,1 % no es la fracción de rayos válidos del `.102`: es la de los dos
+> carros mezclados. La conclusión de abajo —*no concluyente*— sigue siendo
+> correcta, pero por una razón más grave que la que se escribió, y ninguna de
+> las cifras del párrafo siguiente se puede citar.
+
 Retirar el caparazón debería aumentar los rayos válidos. Se intentó cuantificar
 comparando el barrido de antes (191 barridos) con uno nuevo de después (71), los
 dos en el `.102`.
@@ -210,7 +217,78 @@ que hizo salir `TFMessage` falsamente distinto en la primera pasada.
 
 ---
 
-## 5. Errores cometidos hoy, y el cambio de método
+## 5. Los dos carros se graban el uno al otro
+
+Es el hallazgo mayor del día y lo detectó el usuario, no la instrumentación: al
+ver una trayectoria de 11 m en un bag grabado con los dos vehículos **quietos
+sobre la mesa**, preguntó si no se habrían solapado los dos carros. Sí se
+solaparon.
+
+### 5.1 · El mecanismo
+
+Los dos vehículos publican `/rplidar_ros/scan` —el mismo nombre, sin namespace—
+y ninguno define `ROS_DOMAIN_ID`, así que los dos caen en el dominio 0. El
+`ros2 bag record` lanzado en el `.102` grabó **también el LiDAR del `.101`**. El
+bag resultante alterna entre dos sensores situados en sitios distintos.
+
+Es la manifestación concreta del pendiente de namespaces (`/robot1`, `/robot2`)
+que el `README` de `Robot/` arrastra desde el planteamiento colaborativo. Hasta
+hoy era un requisito de diseño; ahora es un defecto que produce evidencia falsa.
+
+### 5.2 · La medida que lo demuestra
+
+Comparar barridos **consecutivos** contra **alternos**:
+
+| comparación | `bag_ez9n` | `sin_caparazon` |
+|---|---|---|
+| barrido *i* con *i+1* | **0,9210 m** | 0,0030 m |
+| barrido *i* con *i+2* | **0,0050 m** | 0,0030 m |
+
+En `bag_ez9n` los alternos coinciden en 5 mm y los consecutivos discrepan casi
+un metro: el bag va y viene entre dos sitios. Ningún movimiento real produce
+eso —con el sensor en marcha los alternos discrepan **más** que los
+consecutivos, porque media más tiempo—. Los 5 mm entre alternos dicen además que
+cada uno de los dos sensores estaba quieto, que es lo que el usuario afirmaba.
+
+Tres confirmaciones independientes en el mismo bag: **14,68 Hz** cuando un
+RPLidar da 7–10 Hz; intervalo mínimo entre mensajes de **0,0000 s**, imposible
+con un solo publicador; y los primeros intervalos a 7,7 Hz antes de duplicarse.
+Segmentado en ventanas de 2 s, la firma aparece desde el segundo 2 y se mantiene
+hasta el final; en los primeros 2 s no discrimina porque los dos carros estaban
+juntos y veían casi la misma escena.
+
+### 5.3 · Qué queda retirado
+
+| Afirmación de hoy | Estado |
+|---|---|
+| «rf2o converge con 360 muestras y 12 m» (151 poses) | **Retirada.** Las 151 poses salieron del bag contaminado. rf2o *corrió*, pero no se demostró nada sobre 360 muestras |
+| «el desplazamiento de 1,66 m es real, no deriva» | **Retirada.** Se apoyó en el 59,1 % de movimiento, que es el falso positivo |
+| «rf2o no es reproducible: 1,04 / 1,83 / 3,14 m sobre el mismo bag» | **Retirada como propiedad de rf2o.** Es la contaminación. Sobre el bag limpio, dos corridas dan **0,0042 m las dos, idéntico** |
+| 71,1 % de rayos válidos del §2.2 | **Retirada.** Sale del mismo bag contaminado, y mezcla los dos vehículos |
+
+Lo que **sí** queda en pie, medido sobre el bag limpio `sin_caparazon`: la cadena
+de análisis es **determinista** —dos corridas idénticas al milímetro— y un
+sensor quieto durante 8 s acumula **4 mm** de deriva. Es poco tiempo para
+concluir sobre deriva, pero descarta que rf2o invente avance sobre una escena
+estática y sana.
+
+### 5.4 · Lo que se cambió para que no vuelva a pasar
+
+1. **`comprobar_movimiento_bag.py` ahora lo detecta.** Es la barrera del
+   proyecto contra el desastre del 28-ago y se dejó engañar: contestó «59,1 % de
+   movimiento» sobre dos sensores quietos. Se le añadió `detectar_intercalado()`
+   con el contraste consecutivos/alternos, un factor de 10 —medido: 184 en el
+   bag contaminado, 1,0 en el limpio—, y seis casos de prueba.
+2. **`GUION_RECTA_PELDANO2.md` §0.1 bis** exige un solo carro encendido y la
+   comprobación `ros2 topic info /rplidar_ros/scan --verbose` → `Publisher
+   count: 1` antes de cada grabación.
+3. **`herramientas/odometria_desde_bag.sh`**, nueva, con la regla barata en el
+   encabezado: correr la cadena **dos veces**; con entrada sana da el mismo
+   número, y si no lo da el problema es el bag.
+
+---
+
+## 6. Errores cometidos hoy, y el cambio de método
 
 Se registran porque el patrón importa más que los errores sueltos.
 
@@ -239,9 +317,24 @@ desde cero un problema que el repositorio ya tenía resuelto y documentado desde
 el 2026-09-01. No es lectura parcial sino **no haber mirado primero lo que ya
 existe**, y se corrige igual de barato: antes de diagnosticar, `ls herramientas/`.
 
+Y un sexto, el del §5, que es el más caro de los seis porque produjo cuatro
+afirmaciones falsas encadenadas. Aquí sí verifiqué antes de reportar —pasé el
+bag por `comprobar_movimiento_bag.py` en vez de fiarme de mi lectura—, y aun así
+concluí mal, porque **la herramienta de verificación compartía el punto ciego**:
+las dos miden diferencias entre barridos separados en el tiempo, y ninguna
+preguntaba de qué sensor venía cada barrido.
+
+La lección no es «verificar más», que ya se hacía. Es que **una verificación que
+usa la misma medida que la afirmación no verifica nada**. La comprobación que
+sirvió fue de otra naturaleza: contrastar la frecuencia contra la física del
+sensor, y los consecutivos contra los alternos. Y la pregunta que la
+desencadenó vino del usuario, que contrastó el resultado contra lo que había
+visto con los ojos —el carro no se movió—. Ese contraste con el mundo es el que
+ninguna herramienta trae de serie.
+
 ---
 
-## 6. Qué queda pendiente de esta sesión
+## 7. Qué queda pendiente de esta sesión
 
 - **Flexómetro en los DOS carros** (175 mm ± 3 mm a la ranura del haz), porque
   se retiró el caparazón y la medida del 21-sep caducó. Es lo primero del
