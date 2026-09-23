@@ -195,9 +195,10 @@ que distingue «rf2o no sirve» de «el sitio no se deja medir».
 
 | | |
 |---|---|
-| **Comando** (en el carro, por SSH) | `ssh deepracer@192.168.0.102 "source /opt/ros/jazzy/setup.bash && cd /tmp && ros2 bag record -s mcap -o recta_control_1 /rplidar_ros/scan"` |
-| **Esperado** | Al cortar, `ros2 bag info` en el carro debe dar **más de 100 mensajes** y una duración parecida a lo que tardaste. |
+| **Comando** (en el carro, por SSH) | `ssh deepracer@192.168.0.102 "source /opt/ros/jazzy/setup.bash && cd ~ && ros2 bag record -s mcap -o recta_control_1 /rplidar_ros/scan"` |
+| **Esperado** | Al cortar, `ros2 bag info` en el carro debe dar **más de 100 mensajes** y una duración parecida a lo que tardaste. Ensayado el 23-sep: el comando es literal y funciona, 58 mensajes en 6,2 s. |
 | **Si falla** | Si sale 0 mensajes, comprueba que `deepracer-core` está vivo: `ros2 topic hz /rplidar_ros/scan` debe dar 7–10 Hz. |
+| **Dónde graba** | En el **home** del carro, no en `/tmp`. Es donde ya viven los bags de las campañas anteriores y donde el §3.1 y el Bloque D los buscan. `.102` tiene 19 GB libres; una pasada de 70 s pesa ~1,6 MB, así que las seis son ~10 MB. |
 | **Cierre** | Tres carpetas por sitio, con nombres que digan sitio y número: `recta_control_1..3`, `recta_pasillo_1..3`. |
 
 ### 3.1 · Revisa la primera pasada antes de hacer las otras cinco
@@ -235,8 +236,10 @@ apariencia pero con una incidencia no anotada envenena el promedio.
 
 | | |
 |---|---|
-| **Comando** | `scp -r deepracer@192.168.0.102:/tmp/recta_* ~/tesis_evidencia/S24_recta_peldano2/` |
+| **Comando** | `mkdir -p ~/tesis_evidencia/S24_recta_peldano2 && scp -r deepracer@192.168.0.102:recta_\* ~/tesis_evidencia/S24_recta_peldano2/` |
+| **Por qué así, y no más corto** | Tres detalles, los tres comprobados contra el carro el 23-sep. **(1)** Los bags están en el **home** del carro, no en `/tmp`: es donde los deja el Bloque C. **(2)** El `mkdir -p` no sobra: con varios orígenes, `scp` exige que el destino ya exista; si no, aborta y **no copia nada**. **(3)** El `\*` va escapado para que el comodín lo resuelva el **carro**. Sin escapar lo resuelve el portátil, que busca `recta_*` en tu directorio actual y no lo encuentra. |
 | **Esperado** | Cada carpeta con su `metadata.yaml` y su `.mcap` de bastante más de 5123 B. |
+| **Si falla** | El mensaje será `No such file or directory` en los dos casos posibles, así que **no basta con leerlo**. Si acaba en `/`, falta el destino: relanza con el `mkdir -p`. Si no, los bags no están donde el Bloque C dijo, y se comprueba con `ssh deepracer@192.168.0.102 "ls -d ~/recta_*"`. **No borres nada del carro hasta que los seis estén en el portátil y abiertos.** |
 | **Después** | Los bags vienen en formato Jazzy y no se abren en el PC tal cual. Se adaptan con `python3 herramientas/adaptar_bag_jazzy.py <carpeta> -o <carpeta>_humble`. Eso lo hago yo. |
 | **Cierre** | Los bags en el portátil. A partir de aquí ya es trabajo de escritorio y se puede hacer de noche o el fin de semana. |
 
