@@ -406,6 +406,58 @@ vehículos y se probó allí, bajo Jazzy y sobre el bag nativo sin adaptar:
 Las mismas cifras que en el portátil, lo que de paso vuelve a cruzar
 `adaptar_bag_jazzy.py`: la adaptación no altera los datos.
 
+### 5.7 · Ensayar el comando de grabación encontró dos defectos que arruinaban la campaña
+
+El guion se escribió sin haber ejecutado nunca su propio comando de grabación.
+Al ensayarlo contra `.102` aparecieron dos fallos, los dos silenciosos, los dos
+capaces de perder las seis pasadas de un día de campo.
+
+**Primero: `Ctrl-C` no corta la grabación, la huerfaniza.** El comando está
+escrito como `ssh deepracer@… "orden"`, sin `-t`, así que no hay terminal
+remota. Al pulsar `Ctrl-C` muere el cliente de `ssh` en el portátil, pero la
+señal **no llega** al grabador, que queda vivo en el carro. Medido:
+
+| | tras `Ctrl-C` | tras `pkill` sobre el huérfano |
+|---|---|---|
+| `metadata.yaml` | **no existe** | 1301 B |
+| `.mcap` | **0 bytes** | 662 579 B |
+| grabadores vivos | **1** | 0 |
+
+El bag es ilegible mientras el huérfano viva, porque `rosbag2` no vuelca la
+caché ni escribe el `metadata.yaml` hasta el cierre. Lo peligroso no es la
+pasada perdida: es que el huérfano **sigue grabando**, de modo que la pasada
+siguiente cae dentro del mismo bag y las dos quedan mezcladas. En campo se
+habrían visto seis carpetas con un `.mcap` vacío cada una y ninguna pista de la
+causa.
+
+Se corrige con `timeout -s INT 100` delante del `ros2 bag record`. Esa señal sí
+la recibe el grabador: sale `Recording stopped`, se escribe el `metadata.yaml` y
+no queda ningún proceso vivo. Se descartó antes la opción aparentemente obvia,
+`ros2 bag record -d`: en Jazzy ese parámetro es `--max-bag-duration` y **parte**
+el bag en trozos, no detiene la grabación.
+
+**Segundo: el grabador descarta los primeros ~5,5 s.** Dos corridas:
+
+| reloj | bag | descartado |
+|---|---|---|
+| 8 s | 2,46 s, 20 mensajes | 5,5 s |
+| 12 s | 6,57 s, 61 mensajes | 5,4 s |
+
+No es el descubrimiento DDS del §5.6: en la segunda corrida el grabador anunció
+`Subscribed to topic '/rplidar_ros/scan'` a los **0,3 s** y aun así perdió 5,4 s.
+Es la misma separación entre descubrimiento y entrega de datos que ya se midió
+allí, ahora del lado del grabador. **El mensaje de suscripción no sirve como
+señal de que ya se está grabando.**
+
+La consecuencia sobre el guion era concreta: mandaba esperar 5 s quietos antes
+de empujar, y esos 5 s caían enteros dentro del tramo descartado. El tramo
+quieto inicial —con el que el §5 separa la deriva del sensor parado del avance
+real— sencillamente no habría existido en ninguno de los seis bags, y el
+defecto no se habría notado hasta el escritorio. La espera pasó a 15 s.
+
+Las dos correcciones están en el Bloque C del guion, con la cuenta de los 100 s
+desglosada.
+
 ---
 
 ## 6. Errores cometidos hoy, y el cambio de método

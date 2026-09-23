@@ -180,14 +180,21 @@ directores); tres basta para ver si la dispersión es pequeña o enorme.
 **Por cada pasada:**
 
 1. Pon el carro con su eje delantero sobre la marca de salida.
-2. Arranca la grabación (comando abajo) y **espera 5 s quieto**.
+2. Arranca la grabación (comando abajo) y **espera 15 s quieto**, no 5. Diez de
+   esos quince son puro descarte: el grabador **no escribe nada durante los
+   primeros ~5,5 s**, aunque ya haya dicho `Subscribed to topic`. Medido dos
+   veces el 23-sep sobre `.102`: 8 s de reloj dieron 2,46 s de bag, y 12 s
+   dieron 6,57 s. Los otros cinco son el tramo quieto de verdad, el que el §5
+   usa para medir la deriva. Con los 5 s de antes, el tramo quieto no habría
+   existido: se lo habría comido el arranque.
 3. Empuja el carro **despacio y a velocidad pareja** hasta la marca de llegada,
    con el cronómetro corriendo: **no menos de 70 s**. Despacio importa dos
    veces: por el umbral de los 60 s del recuadro anterior, y porque la hoja de
    campo midió parones de hasta ~600 ms en la frecuencia del LiDAR, y a empujón
    rápido esos huecos se comen el movimiento.
 4. **Espera 5 s quieto** en la llegada.
-5. Corta la grabación con `Ctrl-C`.
+5. **No cortes nada.** La grabación se corta sola a los 100 s. Si terminas
+   antes, quédate quieto hasta que la consola diga `Recording stopped`.
 
 Los dos tramos quietos no son adorno: **enmarcan el movimiento**. Con ellos se
 puede separar la deriva del sensor parado del avance real, que es exactamente lo
@@ -195,9 +202,11 @@ que distingue «rf2o no sirve» de «el sitio no se deja medir».
 
 | | |
 |---|---|
-| **Comando** (en el carro, por SSH) | `ssh deepracer@192.168.0.102 "source /opt/ros/jazzy/setup.bash && cd ~ && ros2 bag record -s mcap -o recta_control_1 /rplidar_ros/scan"` |
-| **Esperado** | Al cortar, `ros2 bag info` en el carro debe dar **más de 100 mensajes** y una duración parecida a lo que tardaste. Ensayado el 23-sep: el comando es literal y funciona, 58 mensajes en 6,2 s. |
-| **Si falla** | Si sale 0 mensajes, comprueba que `deepracer-core` está vivo: `ros2 topic hz /rplidar_ros/scan` debe dar 7–10 Hz. |
+| **Comando** (en el carro, por SSH) | `ssh deepracer@192.168.0.102 "source /opt/ros/jazzy/setup.bash && cd ~ && timeout -s INT 100 ros2 bag record -s mcap -o recta_control_1 /rplidar_ros/scan"` |
+| **El `timeout -s INT` no es un adorno: sin él no hay bag** | Ensayado el 23-sep. Con `Ctrl-C` sobre un `ssh host "orden"` —sin `-t`, que es como está escrito— **la señal no llega al grabador**: muere el cliente de `ssh` en el portátil y el grabador sigue vivo en el carro, huérfano. Lo que queda en disco es un `.mcap` de **0 bytes y sin `metadata.yaml`**, o sea ilegible; y el huérfano sigue grabando, así que la pasada siguiente se le mezcla dentro. Con `timeout -s INT` la señal sí llega: sale `Recording stopped`, se escribe el `metadata.yaml` y no queda ningún proceso vivo. |
+| **La cuenta de los 100 s** | ~6 de arranque en vacío + 5 quieto + 70 de empuje + 5 quieto ≈ 86, y el resto es holgura. Sobra tiempo a propósito: si la grabación se corta antes de que llegues, la pasada no sirve, mientras que unos segundos quietos de más al final no estorban. |
+| **Esperado** | `ros2 bag info` en el carro debe dar **más de 100 mensajes**. A los 7–10 Hz medidos, 100 s de reloj son ~700 mensajes y una duración de bag de ~94 s, no de 100. |
+| **Si falla** | Si sale 0 mensajes, comprueba que `deepracer-core` está vivo: `ros2 topic hz /rplidar_ros/scan` debe dar 7–10 Hz. Si sale un `.mcap` de 0 bytes y sin `metadata.yaml`, es que se cortó a mano: queda un grabador huérfano y se mata con `pkill -f 'ros2 bag record'` —al morir, vuelca lo grabado y escribe el `metadata.yaml`, así que **mátalo antes de repetir**, no después. |
 | **Dónde graba** | En el **home** del carro, no en `/tmp`. Es donde ya viven los bags de las campañas anteriores y donde el §3.1 y el Bloque D los buscan. `.102` tiene 19 GB libres; una pasada de 70 s pesa ~1,6 MB, así que las seis son ~10 MB. |
 | **Cierre** | Tres carpetas por sitio, con nombres que digan sitio y número: `recta_control_1..3`, `recta_pasillo_1..3`. |
 
