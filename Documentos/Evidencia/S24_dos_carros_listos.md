@@ -289,8 +289,11 @@ Tres confirmaciones independientes en el mismo bag: **14,68 Hz** cuando un
 RPLidar da 7–10 Hz; intervalo mínimo entre mensajes de **0,0000 s**, imposible
 con un solo publicador; y los primeros intervalos a 7,7 Hz antes de duplicarse.
 Segmentado en ventanas de 2 s, la firma aparece desde el segundo 2 y se mantiene
-hasta el final; en los primeros 2 s no discrimina porque los dos carros estaban
-juntos y veían casi la misma escena.
+hasta el final. Escribí que en los primeros 2 s no discriminaba «porque los dos
+carros estaban juntos y veían casi la misma escena». **Era una conjetura y es
+falsa.** La causa real se midió esa misma tarde y está en §5.6: el
+descubrimiento DDS tarda unos segundos, así que durante el arranque el grabador
+solo conoce su propio LiDAR. El bag empieza limpio y se contamina solo.
 
 **Cuarta confirmación, y con otro instrumento.** Todo lo anterior mira la
 diferencia *entre* barridos, así que comparte un supuesto. `medir_informacion_avance.py`
@@ -360,6 +363,48 @@ punto de referencia real contra el que comparar el sitio de la recta. **No dice
 nada del pasillo de la recta**: el carro estaba quieto en un sitio cerrado, y un
 espacio cerrado sube el índice por sí solo — que es exactamente el mismo sesgo
 que invalidó el §2.2. El número del sitio de la recta hay que medirlo allí.
+
+### 5.6 · Con los dos carros encendidos: no hay comprobación en vivo que valga
+
+Por la tarde del mismo 23-sep los dos vehículos estaban encendidos y en red, que
+son las condiciones exactas del fallo. Se aprovecharon para probar los remedios
+**antes** de escribirlos en el guion como si funcionaran. Ninguno de los tres
+sirve:
+
+| Remedio probado | Medida | Veredicto |
+|---|---|---|
+| `ros2 topic info … \| grep 'Publisher count'` recién arrancado | **1** durante los primeros ~5 s, **2** a partir de ahí | **Falso negativo.** El descubrimiento DDS tarda. Leerlo deprisa tranquiliza sin motivo |
+| El mismo comando, ya asentado | **2** en los dos carros, recibiendo cada uno 7,4 y 7,7 Hz — un solo sensor | **Falso positivo.** Descubrir no es recibir |
+| `ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST` al grabar | Bag con **0 barridos**, dos veces | **Inservible.** Existe en Jazzy —no en Humble— y aísla tanto que bloquea el driver del propio carro, que se anuncia por la interfaz de red y no por *loopback* |
+
+La cuenta de publicadores se vigiló 90 s seguidos con una vista en vivo que no
+pasa por el demonio de `ros2`: **1 en t=0, 2 desde t=5 s y estable hasta el
+final**, con dos GID distintos. Esa latencia es la que explica por qué el bag
+contaminado de la mañana sale limpio en su primera ventana de 2 s (§5.2).
+
+El cortafuegos se descartó como causa de la asimetría: `.101` admite toda la
+subred `192.168.0.0/24` y `.102` admite a `.101` y al portátil, así que los dos
+sentidos están abiertos.
+
+**Lo que queda, y es lo que manda en el guion:** el cruce de datos es
+**intermitente** —por la mañana un bag de `.102` traía los dos sensores a
+14,68 Hz; por la tarde los dos carros se descubrían y ninguno recibía datos del
+otro—, de modo que **no se puede predecir mirando**. La regla sigue siendo apagar
+el otro carro, y la verificación es sobre el bag ya grabado.
+
+**Eso sí quedó operativo.** `comprobar_movimiento_bag.py` está copiado en los dos
+vehículos y se probó allí, bajo Jazzy y sobre el bag nativo sin adaptar:
+
+```
+=========== prueba_scan ===========
+  barridos          : 191 a 14.60 Hz
+    diferencia entre barridos consecutivos : 0.9210 m
+    diferencia entre barridos alternos     : 0.0050 m
+  NO SIRVE: el bag esta contaminado por un segundo sensor.
+```
+
+Las mismas cifras que en el portátil, lo que de paso vuelve a cruzar
+`adaptar_bag_jazzy.py`: la adaptación no altera los datos.
 
 ---
 

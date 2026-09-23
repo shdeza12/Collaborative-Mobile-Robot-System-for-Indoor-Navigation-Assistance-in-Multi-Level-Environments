@@ -44,13 +44,30 @@ No es una hipótesis: le pasó al bag `bag_ez9n` del 23-sep. Los dos carros
 quietos sobre la mesa y el análisis contestó «59,1 % de movimiento» y una
 trayectoria de 11 m.
 
-**Antes de cada grabación**, en el carro que va a grabar:
+**La regla es apagar el otro carro. No hay comprobación en vivo que la
+sustituya**, y esto se midió con los dos carros encendidos el mismo 23-sep:
+
+| Lo que se probó | Resultado | Por qué no sirve |
+|---|---|---|
+| `ros2 topic info … \| grep 'Publisher count'` | Dice **1** los primeros ~5 s de cualquier proceso recién arrancado, y **2** después | El descubrimiento DDS tarda. Leerlo rápido da un 1 tranquilizador y falso |
+| El mismo comando, ya asentado | Dice **2** aunque no esté entrando ni un dato del otro carro | Sobre-avisa: descubrir no es recibir. Los dos carros veían 2 publicadores y cada uno recibía 7,4–7,7 Hz, o sea **un** sensor |
+| `ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST` al grabar | El bag sale con **0 barridos** | Existe en Jazzy y aísla de verdad — tanto que bloquea también el driver del propio carro, que anuncia por la interfaz de red y no por *loopback* |
+
+Lo peor del caso es que **el cruce de datos es intermitente**: esta mañana un bag
+grabado en `.102` salió a 14,68 Hz con los dos sensores dentro, y por la tarde
+los dos carros se descubrían y **ninguno** recibía los datos del otro. No se
+puede predecir mirando.
+
+**Por eso la comprobación no es antes, es después, y sobre el bag ya grabado:**
 
 ```
-ros2 topic info /rplidar_ros/scan --verbose | grep 'Publisher count'
+python3 ~/comprobar_movimiento_bag.py ~/<bag>
 ```
 
-Tiene que decir **1**. Si dice 2, apaga el otro carro antes de seguir.
+Se corre **en el propio carro**, sobre el bag nativo y sin adaptarlo — probado
+bajo Jazzy el 23-sep, con las mismas cifras que en el portátil. Si dice
+`el bag esta contaminado por un segundo sensor`, esa pasada se repite. El
+comprobador ya está copiado en los dos vehículos.
 
 **0.2 · Se graba `/rplidar_ros/scan`, no `/scan`.** Lo publica el driver de
 fábrica que arranca solo con `deepracer-core`. No hay que pararlo ni disputar
@@ -193,11 +210,16 @@ bag nativo, sin traerlo ni adaptarlo — verificado hoy contra `~/prueba_scan` d
 
 | | |
 |---|---|
-| **Antes de salir, una vez** | `scp herramientas/comprobar_movimiento_bag.py deepracer@192.168.0.102:/tmp/` |
-| **Tras la primera pasada** | `ssh deepracer@192.168.0.102 "source /opt/ros/jazzy/setup.bash && python3 /tmp/comprobar_movimiento_bag.py /tmp/recta_control_1"` |
-| **Esperado** | `sensor en movim.` por encima de **60 s**, y `sensor quieto` por debajo del **40 %**. |
-| **Si falla** | Repite **esa** pasada más despacio antes de grabar las demás. No sigas con las otras dos: saldrían con el mismo defecto. |
+| **Antes de salir** | Nada. El comprobador **ya está en los dos carros**, copiado el 23-sep en `~/comprobar_movimiento_bag.py`. |
+| **Tras la primera pasada** | `ssh deepracer@192.168.0.102 "source /opt/ros/jazzy/setup.bash && python3 ~/comprobar_movimiento_bag.py ~/recta_control_1"` |
+| **Esperado** | `sensor en movim.` por encima de **60 s**, `sensor quieto` por debajo del **40 %**, y **ningún** aviso de contaminación. |
+| **Si falla por tiempo** | Repite **esa** pasada más despacio antes de grabar las demás. No sigas con las otras dos: saldrían con el mismo defecto. |
+| **Si falla por contaminación** | El otro carro está encendido. Apágalo y repite la pasada. No se salva en análisis. |
 | **Cierre** | Una pasada que el comprobador acepta. A partir de ahí, las otras dos con el mismo ritmo. |
+
+**Y pásale el comprobador a las otras cinco también.** Cuesta veinte segundos por
+bag y es la única defensa real contra la contaminación, que es intermitente y no
+avisa (§0.1 bis).
 
 El aviso `no es '/scan'` que saldrá es esperado y no es un problema: rf2o
 escucha `/scan` y el remapeo se hace al reproducir, en el escritorio.
