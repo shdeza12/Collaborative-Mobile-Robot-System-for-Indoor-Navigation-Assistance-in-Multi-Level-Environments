@@ -15,11 +15,24 @@ sola es la trampa que el mapa §2.3 lleva advirtiendo desde S23.
 
 ## 0. Antes de salir — dos cosas que cambiaron hoy
 
-**0.1 · Se quitó el caparazón.** Los 175 mm del URDF se midieron el 2026-09-21
-**con el caparazón puesto**. Si el soporte del LiDAR se apoyaba en él, la
-geometría cambió y el URDF describe un carro que ya no existe. **Hay que
-re-medir los dos carros antes de grabar nada.** Sin esto, todo lo que se grabe
-hoy queda contaminado y no se puede defender.
+**0.1 · Se quitó el caparazón — y RESUELTO: no movió el LiDAR.** Se temía que el
+soporte se apoyara en el caparazón y que al quitarlo cambiara la geometría, lo
+que dejaría el URDF describiendo un carro que ya no existe. **No pasó.** La
+medida de cierre es la altura total del vehículo:
+
+| | con caparazón (21-sep) | sin caparazón (23-sep) |
+|---|---|---|
+| Piso → punto más alto del carro | 189–190 mm | **190 mm** |
+
+El mismo número. El caparazón nunca fue el punto más alto, y el LiDAR no se
+movió. **La geometría del 21-sep sigue vigente y el URDF no se toca.**
+
+Queda una discrepancia menor, anotada y sin consecuencia: midiendo el LiDAR como
+una pieza de 20 mm con el haz en su mitad, el rayo saldría a 180 mm; midiendo la
+ranura directamente el 21-sep salió a **175 mm**, que es lo que el URDF dice
+(175,7 mm). Las dos medidas directas de ese día —190 arriba y 175 a la ranura—
+sitúan el haz a 14–15 mm de la tapa, no a 10. No se persigue: los 5 mm no entran
+en el desplazamiento estimado (ver el recuadro del Bloque A).
 
 **0.1 bis · SOLO UN CARRO ENCENDIDO. Esto arruina la prueba entera si falla.**
 Los dos vehículos publican `/rplidar_ros/scan` con **el mismo nombre**, sin
