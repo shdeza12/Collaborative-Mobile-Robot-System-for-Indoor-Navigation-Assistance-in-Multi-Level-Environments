@@ -52,9 +52,29 @@ proyecto; ese es justamente uno de los desconocidos que esta prueba resuelve.
 |---|---|
 | **Objetivo** | Saber si quitar el caparazón movió el LiDAR respecto al URDF. |
 | **Cómo** | Flexómetro desde el piso hasta la **ranura por donde sale el haz**. No la cara superior de la carcasa: eso da 189–190 mm y es el error que ya costó una medida el 21-sep (`Evidencia/S24_tf_hardware_peldano_1.md` §5). |
-| **Esperado** | **175 mm ± 3 mm** en los dos carros. |
-| **Si falla** | Anota el valor real de cada carro y **para aquí**. Hay que regenerar el URDF con la altura nueva antes de grabar; si no, rf2o trabajará sobre una geometría falsa. Avísame con los dos números y lo regenero. |
+| **Esperado** | **175,7 mm ± 3 mm** en los dos carros. |
+| **Si falla** | Anótalo y **sigue adelante**: la altura no entra en la medida (ver el recuadro). Lo que sí para la prueba es que los **dos carros discrepen entre sí**, porque eso ya no es el montaje sino un carro torcido. |
 | **Cierre** | Dos números anotados, con el nombre del carro al lado. |
+
+> **Corregido el 2026-09-23: la altura no invalida la medida.** Este guion decía
+> que sin regenerar el URDF «rf2o trabajará sobre una geometría falsa».
+> **Es falso.** En `CLaserOdometry2D.cpp`, el incremento de movimiento solo
+> escribe x e y (líneas 955–956); la altura entra como desplazamiento constante
+> en `robot_pose_` y no toca el desplazamiento estimado. Un error de z no
+> cambia el resultado de G-2.
+>
+> Lo que sí lo cambia es el **yaw** —rota todos los barridos— y el `x` del brazo
+> de palanca. La medida de altura se toma igual, porque hace falta para los
+> costmaps del peldaño 6 y porque es barata, pero **no es una compuerta**.
+
+> **Cuidado con el punto de referencia, que ya costó una medida.** Con el
+> caparazón puesto se midieron **175 mm** a la ranura del haz y **189–190 mm** a
+> la cara superior del disco: la cara superior va **14–15 mm por encima** de la
+> ranura, y esa distancia es del sensor, no del caparazón.
+>
+> Si el número que sacas no cuadra, mide **las dos cosas** y apunta las dos. La
+> diferencia entre ellas tiene que salir 14–15 mm; si sale eso, sabes cuál es
+> cuál sin discutirlo.
 
 Mira también, sin instrumento, si el LiDAR quedó **asentado igual en los dos**:
 el montaje es invertido (yaw −180°). Es un sí/no visual y es el parámetro que
