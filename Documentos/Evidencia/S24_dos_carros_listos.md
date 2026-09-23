@@ -18,11 +18,12 @@ preparar nada.
 | Graba un `.mcap` no vacío | sí (516 208 B) | sí (578 935 B) | tamaño ≫ 5123 B de mcap vacío |
 | El bag se lee en el PC Humble | — | **sí**, §4 | `SequentialReader.read_next()` |
 | Batería | nivel 9 | nivel 9 | `/i2c_pkg/battery_level` |
-| Flexómetro contra el URDF | hecho 21-sep | pendiente, **no bloquea** — §2.1 | medida a mano |
+| Flexómetro contra el URDF | hecho 21-sep, **caducado** | pendiente | ver el recuadro de §2.1 |
 
-El criterio de cierre de la sesión se da por cumplido. La medida con flexómetro
-en `.102` queda pendiente como confirmación barata, no como compuerta; el
-razonamiento está en §2.1.
+El criterio de cierre de la sesión se da por cumplido en todo lo que depende del
+software. La geometría, en cambio, **volvió a quedar abierta el mismo día**: se
+retiró el caparazón de los vehículos, lo que caduca la medida del 21-sep y obliga
+a re-medir los dos carros. El recuadro al final de §2.1 lo explica.
 
 Si se hace: piso → la **ranura por donde sale el haz**, esperado
 **175 mm ± 3 mm**. No es la cara superior de la carcasa (189–190 mm); esa
@@ -87,6 +88,47 @@ que era el otro sitio por donde podía entrar una asimetría.
 **Decisión:** la comprobación de verdad llega gratis con la primera pasada. Si el
 barrido de `.102` en un pasillo conocido sale rotado respecto al de `.101`, se
 nota de inmediato. Hasta entonces no se gasta una salida de campo en esto.
+
+> **REVERTIDO el mismo 2026-09-23, horas después.** Se decidió **retirar el
+> caparazón** de los vehículos para que el LiDAR lea los 360° sin obstrucción.
+> Eso cambia la premisa entera de este apartado: los 175 mm se midieron **con el
+> caparazón puesto**, así que si el soporte del LiDAR se apoyaba en él, el URDF
+> describe una configuración que ya no existe.
+>
+> El flexómetro vuelve a ser **obligatorio, y en los dos carros**, no solo en el
+> `.102`. Procedimiento en `GUION_RECTA_PELDANO2.md` §1.
+>
+> Lo que sigue valiendo de este apartado es el orden de importancia de los tres
+> parámetros —el yaw pesa mucho más que la altura y el flexómetro no lo ve— y la
+> observación de que el soporte atornillado hace el fallo discreto. Lo que ya no
+> vale es la conclusión de no gastar una salida en medirlo.
+
+### 2.2 · Se intentó medir el efecto del caparazón, y no se pudo concluir
+
+Retirar el caparazón debería aumentar los rayos válidos. Se intentó cuantificar
+comparando el barrido de antes (191 barridos) con uno nuevo de después (71), los
+dos en el `.102`.
+
+En bruto sube: **71,1 % → 74,7 %** de rayos válidos. **Ese número no vale.** Entre
+las dos grabaciones el carro se movió a un sitio más cerrado —la mediana pasó de
+2,2 m a 1,47 m y el alcance máximo de 12 m a 7,1 m—, y un espacio estrecho sube
+la fracción de válidos por sí solo.
+
+La distribución angular tampoco discrimina. Un bloqueo retirado daría uno o dos
+sectores contiguos cayendo fuerte y el resto casi quieto; lo que hay son deltas
+en los dos sentidos (−20,8 en −120..−90, pero +10,7 en −30..0 y +10,2 en 90..120),
+que es la firma de un cambio de escena. El −20,8 aislado y rodeado de subidas se
+explica mejor por una pared más cercana que por desbloqueo.
+
+**Conclusión: no concluyente.** No se afirma que quitar el caparazón mejore la
+lectura; se afirma que la medición hecha no puede decidirlo. El experimento
+limpio —mismo carro, misma posición, con y sin caparazón— se propuso y se
+descartó por tiempo.
+
+Esto no bloquea nada: la fracción de rayos con **información de avance**, que es
+la cifra que decide G-2, se re-mide igual en la recta del peldaño 2. Queda
+escrito para que el cambio de hardware a mitad de campaña no aparezca como un
+supuesto sin respaldo.
 
 ---
 
@@ -201,11 +243,14 @@ existe**, y se corrige igual de barato: antes de diagnosticar, `ls herramientas/
 
 ## 6. Qué queda pendiente de esta sesión
 
-- **Flexómetro en `.102`** (175 mm ± 3 mm a la ranura del haz). Confirmación
-  barata, no compuerta: ver §2.1. El montaje se comprueba de verdad en la
-  primera pasada, comparando el barrido de `.102` con el de `.101`.
-- **Corregir `HOJA_CAMPO_G2.md:185` y `:190`**, que afirman lo contrario de §3.
-- **Corregir `MAPA_TRABAJO_RESTANTE.md` §2.3**, que todavía marca el peldaño 1
-  como ❌ sobre hardware cuando se cerró el 2026-09-21.
+- **Flexómetro en los DOS carros** (175 mm ± 3 mm a la ranura del haz), porque
+  se retiró el caparazón y la medida del 21-sep caducó. Es lo primero del
+  `GUION_RECTA_PELDANO2.md`; sin esto, lo que se grabe va sobre una geometría
+  que no se sabe si es cierta.
+- **Re-medir la fracción de rayos con información de avance**, sin caparazón y
+  con 360 muestras. El 5,1 % / 5,9 % / 17,5 % de S23 salió de geometría densa y
+  simulada: no es comparable y no puede citarse como si lo fuera.
+- ~~Corregir `HOJA_CAMPO_G2.md:185` y `:190`~~ — hecho el 2026-09-23.
+- ~~Corregir `MAPA_TRABAJO_RESTANTE.md` §2.3~~ — hecho el 2026-09-23.
 - **Decisión de los directores** sobre sitio de la etapa 3 y N de RF-27. Hasta
   que no esté por escrito no se corre la etapa 3, según §6 del acta.
