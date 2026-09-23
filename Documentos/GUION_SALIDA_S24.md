@@ -74,11 +74,47 @@ habría decidido nada.
 
 Los dos bloques son **el mismo procedimiento** en dos sitios distintos.
 
+### 2.0 · Para qué existe el sitio A, que es lo que decide cómo elegirlo
+
+El Bloque B graba el pasillo. Si sale mal, hay **dos explicaciones y ningún modo
+de distinguirlas**: que el pasillo no le dé información de avance a rf2o —que es
+el hallazgo—, o que la cadena de medida esté rota. Solo con el bag del pasillo,
+un resultado malo **no decide nada**. Ya ocurrió: hasta el 2026-09-08 no existía
+ningún mapa aceptado con esta cadena, y esa ausencia hacía indistinguible un
+fallo del sitio de un fallo del instrumento.
+
+El sitio A es el sitio donde la cadena **tiene que** acertar.
+
+| A | B | Qué se concluye |
+|---|---|---|
+| bien | mal | **El pasillo es la causa.** Es el resultado que se busca |
+| bien | bien | La cadena sirve también en el pasillo. También es resultado |
+| mal | — | **El instrumento está roto.** B no dice nada; arreglar antes de seguir |
+
+Por eso el Bloque A **no se sacrifica nunca** (§1): sin él, el Bloque B no vale
+para nada aunque esté impecablemente grabado.
+
 | | Sitio A (control) | Sitio B (pasillo) |
 |---|---|---|
-| Qué es | espacio con esquinas, puertas y muebles **a menos de ~6 m durante toda la pasada** — el hall del piso 2 sirve, pero solo **sin alejarse de él** | el pasillo |
+| Qué es | **un cuarto, no un pasillo**: un espacio que se cierra, con superficies **a menos de ~6 m durante toda la pasada**. El molde es la referencia medida: caja cerrada de **7,70 × 2,70 m**, índice 13,8 %, el único mapa que este proyecto ha aceptado con SLAM. Un **salón vacío** es mejor que un hall —cerrado por los cuatro lados y con pupitres—; el hall del piso 2 sirve **sin alejarse de él** | el pasillo |
 | Qué contesta | ¿la cadena rf2o funciona? Aquí **debe** acertar | ¿cuánto se degrada en el sitio real? |
 | Nombres de los bags | `recta_control_1` … `_3` | `recta_pasillo_1` … `_3` |
+
+**Medidas que hay que tomar con flexómetro antes de grabar nada en el sitio A:**
+
+| Qué | Medida | Cómo se comprueba allí mismo |
+|---|---|---|
+| Recta libre para empujar | **6–8 m** | entre las dos cintas |
+| Pared, puerta o mueble **de frente** al llegar | **≤ 6 m** desde la marca de llegada | desde la cinta de llegada hacia delante |
+| Lo mismo **al salir**, a la espalda | **≤ 6 m** desde la marca de salida | desde la cinta de salida hacia atrás |
+| Ancho | no manda; entre 2,5 y 5 m está bien | a ojo |
+| Gente moviéndose | **ninguna** | mirar |
+
+> **Por qué las dos filas del medio son las que deciden.** Lo que informa del
+> avance son **superficies encaradas a la marcha**: al avanzar, su distancia
+> cambia. Las paredes laterales **no** cambian de distancia porque avances, y
+> por eso un pasillo falla. Un espacio abierto sin nada delante falla por la
+> misma razón aunque sea enorme.
 
 ### 2.1 · Marcar la recta
 
