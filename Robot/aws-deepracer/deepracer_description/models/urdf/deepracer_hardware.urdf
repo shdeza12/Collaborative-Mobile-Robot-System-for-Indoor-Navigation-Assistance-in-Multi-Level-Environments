@@ -1,0 +1,132 @@
+<?xml version="1.0"?>
+<!--
+  deepracer_hardware.urdf — descripcion minima para el vehiculo REAL.
+
+  Para que existe
+  ===============
+  NO para cerrar el peldano 1: eso ya se hizo el 2026-09-21 y esta en
+  `Documentos/Evidencia/S24_tf_hardware_peldano_1.md`. Se hizo generando el URDF
+  plano del xacro de simulacion con una linea de `xacro` y copiandolo a las dos
+  tarjetas. Funciona. El problema es que ese archivo **no esta versionado**:
+  existe en `~/deepracer_hw.urdf` de cada tarjeta y en ningun sitio mas, y
+  reproducirlo exige acordarse de la invocacion exacta. Este archivo pone la
+  misma cadena en el repositorio, reducida a lo que el hardware realmente tiene.
+
+  El mismo enlace se venia supliendo ademas con un `static_transform_publisher`
+  suelto dentro de `mapear_desde_bag.sh`, con los numeros compuestos a mano. Son
+  tres copias de la misma geometria. Esta es la unica que se puede revisar.
+
+  Por que no basta con el URDF generado del xacro
+  ===============================================
+  Aquel trae 14 eslabones, 13 juntas y 20 bloques <gazebo> con un sensor
+  simulado (600 muestras, 300 grados, 10 m) y la cadena de `ros2_control` con
+  siete controladores. Nada de eso existe en la tarjeta: ahi el `/scan` lo
+  publica el driver `rplidar_ros` y los servos `servo_pkg`, y los bloques
+  <gazebo> son inertes. Mas serio: **seis de sus juntas son `continuous`** —las
+  cuatro ruedas y las dos bisagras de direccion—. La evidencia del 21-sep dice
+  que «los trece joints del URDF son fijos»; eso es falso, y se comprueba
+  contando `type="continuous"` en el xacro. La conclusion de aquel dia se
+  sostiene igual, porque la rama `base_link -> chassis -> laser` si es fija y
+  viaja entera por `/tf_static`, pero el arbol queda con seis juntas que nadie
+  puede publicar: el vehiculo no tiene encoders y nadie emite `/joint_states`.
+
+  El sensor real, medido (no supuesto)
+  ====================================
+  Del bag `S24_mapa_cuarto/mapa_cuarto_3` grabado en `amss-ez9n` el 2026-09-23,
+  topico `/rplidar_ros/scan`:
+
+      muestras           360
+      angle_min/max      -179.00 / 180.00 grados  (barrido completo)
+      angle_increment    1.0000 grado
+      range_min/max      0.150 / 12.000 m
+      scan_time          0.06555 s  ->  15.26 Hz
+      frame_id           laser
+
+  Esto CORRIGE la nota de `MAPA_TRABAJO_RESTANTE.md` §2.2, que decia "1328
+  muestras y 16 m": esos son los numeros de la hoja de datos del RPLIDAR, no
+  los que publica el driver tal como esta configurado a bordo. Para este URDF
+  la cifra es indiferente —en hardware el URDF solo aporta TF, no simula el
+  sensor— pero se deja escrita para que nadie vuelva a discutirla.
+
+  Origen de las medidas geometricas
+  =================================
+  Copiadas literalmente del xacro de simulacion, que a su vez viene del CAD de
+  AWS. No se invento ningun numero:
+
+      base_link_joint   base_link -> chassis   xyz 0 0 0.023249      rpy 0 0 0
+      hokuyo_joint      chassis   -> laser     xyz 0.02913 0 0.16145 rpy 0 0 3.1416
+
+  Compuesto, `base_link -> laser` = xyz 0.02913 0 0.184699, yaw pi. Es
+  exactamente el static TF que ya validamos mapeando el cuarto de 1.60 x 0.76 m
+  (el mapa midio 1.55 x 0.80 m: una celda de error). El giro de pi no es un
+  error de signo: el sensor va montado al reves, con su cuña ciega apuntando
+  hacia adelante.
+
+  Por que no estan las ruedas
+  ===========================
+  Sus juntas son `continuous`, y `robot_state_publisher` no puede publicar la
+  TF de una junta movil sin recibir `/joint_states`. El vehiculo real no tiene
+  encoders: nadie publicaria ese topico. Declararlas dejaria el arbol de TF
+  incompleto para siempre y con avisos permanentes. Se declara solo lo que es
+  cierto y fijo. Cuando RF-13 resuelva la fuente de odometria se revisara.
+
+  Como se carga
+  =============
+  Con `deepracer_bringup/launch/hardware_description.launch.py`. En la tarjeta,
+  donde el paquete no esta compilado, se copian los dos archivos sueltos:
+
+    ros2 launch /tmp/hardware_description.launch.py urdf:=/tmp/deepracer_hardware.urdf
+
+  Pasarlo como override suelto, que es lo que se hizo el 21-sep con el URDF
+  generado del xacro, SOBRE ESTE ARCHIVO falla:
+
+    ros2 run robot_state_publisher robot_state_publisher [ros-args] \
+      -p robot_description:="$(cat deepracer_hardware.urdf)"
+
+    -> failed to initialize rcl: Couldn't parse parameter override rule
+
+  Donde [ros-args] son los dos guiones seguidos de `ros-args`. No se escriben
+  literales aqui porque XML prohibe el doble guion dentro de un comentario:
+  con el, `xml.dom.minidom` aborta con `not well-formed (invalid token)` en
+  esta misma linea. TinyXML, que es lo que usa `robot_state_publisher`, lo
+  acepta igual, asi que el archivo cargaba bien en la tarjeta y el defecto solo
+  salio al pasar el verificador. Detectado el 2026-09-24.
+
+  El motivo, aislado por bisección el 2026-09-24: el valor de un `-p` se
+  interpreta como **YAML**, no como texto plano. Dos puntos seguidos de espacio
+  abren un mapa y una almohadilla abre un comentario, asi que cualquier
+  `algo: algo` o ` #` dentro del archivo rompe el analisis. No es cosa del XML
+  multilinea —un URDF sin comentarios pasa sin problema—, es cosa de la
+  documentacion que lleva dentro. Comprobado con cuatro archivos de una sola
+  linea de comentario: raya, eñe y comillas pasan; `frame_id: laser` y
+  `esto # falla` abortan.
+
+  Por eso este archivo se carga por launch y no por `-p`. Conservar los
+  comentarios vale mas que la comodidad del `-p`: el launch entrega el texto ya
+  tipado y el problema no existe.
+-->
+<robot name="deepracer_hardware">
+
+  <!-- Raiz del vehiculo. Es el `robot_base_frame` que espera Nav2. -->
+  <link name="base_link"/>
+
+  <!-- Chasis. Se conserva como eslabon intermedio para que las medidas sean
+       las mismas del xacro de simulacion y se puedan comparar una a una. -->
+  <link name="chassis"/>
+
+  <joint name="base_link_joint" type="fixed">
+    <origin xyz="0 0 0.023249" rpy="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="chassis"/>
+  </joint>
+
+  <!-- LiDAR. `frame_id` del `/scan` real: debe llamarse exactamente `laser`. -->
+  <link name="laser"/>
+
+  <joint name="hokuyo_joint" type="fixed">
+    <origin xyz="0.02913 0 0.16145" rpy="0 0 3.1416"/>
+    <parent link="chassis"/>
+    <child link="laser"/>
+  </joint>
+
+</robot>

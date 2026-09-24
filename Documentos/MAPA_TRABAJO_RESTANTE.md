@@ -100,13 +100,33 @@ en la recta de 20 m** y necesita otro instrumento.
 
 ### 2.2 Las cinco piezas de la cadena, en orden de dependencia
 
-1. **`base_link`, y `base_link → laser`.** No corre `robot_state_publisher` en la tarjeta, así que
-   no hay URDF cargado y nadie declara dónde está el sensor respecto al chasis. Hace falta una
-   **variante de hardware del URDF**, no el de simulación: el sensor real da **360°, 1328 muestras
-   y 16 m** donde `deepracer.xacro` declara 300°, 600 y 10 m, y el `hokuyo_joint` va montado con
-   `rpy="0 0 3.1416"` —girado π, con la cuña ciega de 60° apuntando a la dirección de avance—.
-   Nota: `config/static_tf.yaml` existe pero es un cascarón, solo trae `use_sim_time: false`.
-   *Dificultad baja. No espera ninguna decisión.*
+1. **`base_link`, y `base_link → laser`. — CERRADA el 2026-09-21; versionada el 2026-09-24.**
+   Este párrafo estaba desactualizado: decía que no corre `robot_state_publisher` en la tarjeta,
+   y sí corre desde el 21-sep (`Evidencia/S24_tf_hardware_peldano_1.md`). Se cerró generando el
+   URDF plano del xacro de simulación con una línea de `xacro` y copiándolo a las dos tarjetas
+   como `~/deepracer_hw.urdf`. `tf2_echo base_link laser` responde `[0.029, 0.000, 0.185]`,
+   RPY −180°, en los dos carros.
+   Lo que faltaba, y se hizo el 24-sep, es que **ese archivo no estaba versionado**: vivía solo en
+   el home de cada tarjeta, y reproducirlo exigía recordar la invocación exacta de `xacro`. Ahora
+   está en `deepracer_description/models/urdf/deepracer_hardware.urdf`, reducido a los tres
+   eslabones que el hardware realmente tiene —`base_link → chassis → laser`, todos fijos—, y se
+   carga con `deepracer_bringup/launch/hardware_description.launch.py`, que acepta `urdf:=` para
+   correr en la tarjeta sin compilar el paquete allí. Mismo resultado en `tf2_echo`, ahora
+   revisable.
+   **Dos correcciones de cifra.**
+   *(a)* Este documento decía que el sensor real da *1328 muestras y 16 m*. Eso es la hoja de
+   datos y lo que se le pasó a `xacro` el 21-sep; no es lo que publica el driver. Medido sobre el
+   bag `S24_mapa_cuarto/mapa_cuarto_3`, `/rplidar_ros/scan` entrega **360 muestras, incremento de
+   1,00°, de −179,00° a 180,00°, alcance 0,15–12,00 m, a 15,26 Hz**, con `frame_id: laser`. Da
+   igual para la TF —en hardware el bloque `<gazebo><sensor>` es inerte, como ya señalaba la
+   evidencia del 21-sep— pero queda escrito.
+   *(b)* `S24_tf_hardware_peldano_1.md` §4 afirma que «los trece joints del URDF son fijos». Son
+   siete fijos y **seis `continuous`**: las cuatro ruedas y las dos bisagras de dirección
+   (`grep -c 'type="continuous"'` sobre el xacro). La conclusión de aquel día no cambia, porque la
+   rama `base_link → chassis → laser` sí es fija y viaja por `/tf_static`; pero el árbol que está
+   cargado en las tarjetas arrastra seis juntas que nadie puede publicar, porque el vehículo no
+   tiene encoders y nadie emite `/joint_states`. El URDF nuevo no las declara.
+   Nota: `config/static_tf.yaml` sigue siendo un cascarón, solo trae `use_sim_time: false`.
 2. **`odom → base_link`.** El nudo. Detalle de arquitectura que conviene no confundir: **AMCL
    publica `map → odom`, no `map → base_link`**; da por hecho que otro sostiene
    `odom → base_link`. Sin esa pieza AMCL no se degrada, no arranca. *Dificultad alta, y no es de
