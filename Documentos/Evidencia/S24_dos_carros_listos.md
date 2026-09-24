@@ -375,7 +375,38 @@ sirve:
 |---|---|---|
 | `ros2 topic info … \| grep 'Publisher count'` recién arrancado | **1** durante los primeros ~5 s, **2** a partir de ahí | **Falso negativo.** El descubrimiento DDS tarda. Leerlo deprisa tranquiliza sin motivo |
 | El mismo comando, ya asentado | **2** en los dos carros, recibiendo cada uno 7,4 y 7,7 Hz — un solo sensor | **Falso positivo.** Descubrir no es recibir |
-| `ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST` al grabar | Bag con **0 barridos**, dos veces | **Inservible.** Existe en Jazzy —no en Humble— y aísla tanto que bloquea el driver del propio carro, que se anuncia por la interfaz de red y no por *loopback* |
+| `ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST` al grabar | Bag con **0 barridos**, dos veces | ~~**Inservible.** Existe en Jazzy —no en Humble— y aísla tanto que bloquea el driver del propio carro, que se anuncia por la interfaz de red y no por *loopback*~~ **Confundido: ver la corrección de abajo** |
+
+> **Corrección del 2026-09-24: la fila tachada atribuye a `LOCALHOST` un cero que
+> también produce otra causa, y esta sesión no puede separarlas.** Ese día se midió
+> que **un `ros2 bag record` lanzado como `deepracer` da un bag vacío por sí solo**,
+> sin ninguna variable de entorno de por medio: una pasada de 198 s dejó **un solo
+> mensaje**. La causa es la regla del dueño —`deepracer-core` corre como `root` y sus
+> segmentos `/dev/shm/fastrtps_*` no son escribibles por otro usuario, de modo que
+> Fast DDS no cierra el canal de memoria compartida—. **Y este documento no registra
+> con qué usuario se corrió ninguna de sus órdenes**: no aparece `sudo` ni `root` en
+> todo el texto, luego todo fue como `deepracer`. Así que los «0 barridos, dos veces»
+> admiten dos explicaciones y **el experimento no las distingue**. Rehacerlo costaría
+> dos pasadas con `sudo -n`, pero **no se rehace, porque no cambiaría ninguna
+> decisión**: el veredicto operativo —`LOCALHOST` no se usa— sigue en pie por el
+> segundo motivo escrito en la fila, que es de diseño y no de medición, y el guion ya
+> no lo propone.
+>
+> **Lo que esta corrección NO toca, y conviene decirlo explícitamente.** Los
+> resultados **positivos** del documento se sostienen enteros, porque recibir datos no
+> se puede falsear por falta de permisos: los 7,4 y 7,7 Hz de la fila anterior, el bag
+> contaminado a 14,68 Hz, y sobre todo **la contaminación cruzada con sus cuatro
+> confirmaciones**, incluida la partición por paridad de
+> `medir_informacion_avance.py`. Lo que queda en cuarentena es lo contrario: **todo
+> resultado de este documento que consista en “no se recibió nada” deja de ser
+> atribuible**, porque el usuario sin privilegios lo explica igual de bien.
+>
+> **Y el propio 23-sep es la prueba de por qué la regla del dueño es tan traicionera:**
+> ese día, como `deepracer`, los bags **sí traían datos**. Al día siguiente, el mismo
+> usuario y el mismo carro, **cero**. El canal de memoria compartida se renegocia cada
+> vez que reinicia cualquiera de los dos extremos, así que la misma orden funciona o
+> no según cuándo arrancó el publicador. **Una corrida en la que “esta vez sí se vio”
+> no refuta la regla de permisos**, y esa es la lección que hay que llevarse.
 
 La cuenta de publicadores se vigiló 90 s seguidos con una vista en vivo que no
 pasa por el demonio de `ros2`: **1 en t=0, 2 desde t=5 s y estable hasta el

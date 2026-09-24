@@ -103,9 +103,22 @@ Dos detalles de lectura que conviene dejar escritos para no perder tiempo la pr�
 
 - El `Invalid frame ID "base_link"` de la primera línea es una carrera de arranque, no un fallo:
   `tf2_echo` se suscribió antes de que llegara `/tf_static`. Se resuelve solo.
-- `At time 0.0` es la firma de una transformada **estática**. Los trece joints del URDF son
-  fijos, así que todo viaja por `/tf_static` y nada depende de `joint_states` — que la tarjeta
+- `At time 0.0` es la firma de una transformada **estática**. ~~Los trece joints del URDF son
+  fijos~~, así que todo viaja por `/tf_static` y nada depende de `joint_states` — que la tarjeta
   no publica. Es justo lo que permite cerrar 1.1 sin ruedas girando.
+
+  > **Corrección del 2026-09-24: la afirmación tachada es falsa, y la conclusión se sostiene
+  > igual.** De los trece joints, **siete son `fixed` y seis son `continuous`** —las cuatro ruedas
+  > y las dos bisagras de dirección: `left/right_rear_wheel_joint`,
+  > `left/right_front_wheel_joint`, `left/right_steering_hinge_joint`—. Se comprueba contando
+  > `type="continuous"` en `deepracer_stereo_cameras_and_lidar_urdf.xacro`, que es el xacro del
+  > que se generó este URDF plano. **Lo que no cambia es el cierre del peldaño 1**, porque la
+  > rama que se midió —`base_link → chassis → laser`— sí es enteramente fija y sí viaja por
+  > `/tf_static`; el `At time 0.0` que se observó es correcto y significa lo que dice. **Lo que
+  > sí cambia es el diagnóstico del árbol completo:** las seis juntas móviles quedan sin publicar
+  > para siempre, porque el vehículo no tiene encoders y nadie emite `/joint_states`. Por eso el
+  > URDF versionado el 24-sep —`deepracer_hardware.urdf`— **no las declara**: declara solo los
+  > tres eslabones y las dos juntas fijas que el hardware realmente tiene.
 
 ## 5. El flexómetro, y un error de instrucción que casi se atribuye al robot
 

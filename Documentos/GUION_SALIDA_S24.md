@@ -177,8 +177,23 @@ El mínimo de G-2 son 5 m, pero lo que manda no son los metros:
 **Grabar** (cambia el nombre en cada pasada):
 
 ```
-ssh deepracer@192.168.0.102 "source /opt/ros/jazzy/setup.bash && cd ~ && timeout -s INT 100 ros2 bag record -s mcap -o recta_control_1 /rplidar_ros/scan"
+ssh deepracer@192.168.0.102 "sudo -n bash -c 'source /opt/ros/jazzy/setup.bash && cd ~deepracer && timeout -s INT 100 ros2 bag record -s mcap -o recta_control_1 /rplidar_ros/scan; chown -R deepracer:deepracer ~deepracer/recta_control_1'"
 ```
+
+> **El grabador SÍ necesita `root`, y es la trampa más cara del carro.**
+> Este guion mandaba grabar como `deepracer` hasta el **2026-09-24**, cuando se
+> midió que eso no funciona: una pasada de **198 s** dejó un bag con **un solo
+> mensaje** —el `/tf_static` retenido— y **cero** barridos, aunque el grabador
+> había anunciado `Subscribed to topic`. La causa es la regla del dueño:
+> `deepracer-core` corre como `root`, sus segmentos de `/dev/shm/fastrtps_*`
+> son `-rw-r--r-- root root`, y Fast DDS necesita **escribir** en ellos para
+> cerrar el canal de memoria compartida. Un suscriptor no-root se queda mudo
+> **sin un solo error en ningún registro**. El detalle está en el §2 de
+> [`GUION_NAV2_HARDWARE.md`](GUION_NAV2_HARDWARE.md).
+>
+> El `chown` del final —con `;` y no con `&&`, para que corra aunque el
+> `timeout` devuelva distinto de cero— deja el bag a nombre de `deepracer`, que
+> es lo que permite traérselo luego por `scp` sin privilegios.
 
 **Comprobar, en el propio carro, antes de seguir:**
 
@@ -186,12 +201,17 @@ ssh deepracer@192.168.0.102 "source /opt/ros/jazzy/setup.bash && cd ~ && timeout
 ssh deepracer@192.168.0.102 "source /opt/ros/jazzy/setup.bash && python3 ~/comprobar_movimiento_bag.py ~/recta_control_1"
 ```
 
+Esta orden **sí va como `deepracer`, y está bien así**: lee un fichero del disco,
+no se asoma al grafo, de modo que la regla del dueño no la toca. No le pongas
+`sudo` por simetría con la de grabar.
+
 | | |
 |---|---|
 | **Esperado** | `sensor en movim.` por encima de **60 s**, `sensor quieto` por debajo del **40 %**, y **ningún** aviso de contaminación |
+| **Antes que nada, cuenta los mensajes** | `ssh deepracer@192.168.0.102 "source /opt/ros/jazzy/setup.bash && ros2 bag info ~/recta_control_1 \| grep -i messages"`. Una pasada sana trae **cientos** de barridos: el LiDAR va a 7–8 Hz y la ventana útil son ~95 s, o sea **del orden de 700**. **Un puñado —o uno— significa que el grabador no era `root`**, y ninguna otra comprobación lo dirá: el bag existe, se abre y el comprobador lo procesa sin quejarse |
 | **Si falla por tiempo** | Repite **esa** pasada más despacio. No sigas con las otras dos: saldrían con el mismo defecto |
 | **Si falla por contaminación** | El otro carro está encendido. Apágalo y repite. No se salva en análisis |
-| **Si sale `.mcap` de 0 bytes** | Se cortó a mano. Mata el huérfano con `ssh deepracer@192.168.0.102 "pkill -f 'ros2 bag record'"` — al morir vuelca lo grabado. **Mátalo antes de repetir, no después** |
+| **Si sale `.mcap` de 0 bytes** | Se cortó a mano. Mata el huérfano con `ssh deepracer@192.168.0.102 "sudo -n pkill -f 'ros2 [b]ag record'"` — al morir vuelca lo grabado. **Mátalo antes de repetir, no después**. Los corchetes no son adorno: sin ellos el patrón coincide con la línea de órdenes del propio `pkill` remoto y **se mata a sí mismo** sin tocar al grabador. Y el `sudo` tampoco: desde el 24-sep el grabador corre como `root`, así que un `pkill` sin privilegios no lo alcanza |
 | **Cierre** | Una pasada aceptada. A partir de ahí, las otras dos con el mismo ritmo |
 
 **Pásale el comprobador a las seis, no solo a la primera.** Cuesta veinte
