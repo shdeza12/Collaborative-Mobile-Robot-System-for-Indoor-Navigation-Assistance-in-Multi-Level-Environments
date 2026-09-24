@@ -1,0 +1,269 @@
+\documentclass[12pt,letterpaper]{article}
+
+% --- Paquetes Requeridos ---
+\usepackage[utf8]{inputenc}
+\usepackage[spanish,es-tabla]{babel}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{titlesec}
+\usepackage{setspace}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{enumitem}
+\usepackage{listings}
+\usepackage{xcolor}
+
+% --- Configuración de Párrafo ---
+\onehalfspacing
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1em}
+
+% --- Rutas de búsqueda de imágenes ---
+\graphicspath{{./}{../Evidencia/}{Evidencia/}{imagenes/}}
+
+% --- Configuración de listings ---
+\lstset{
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,
+    frame=single,
+    captionpos=b,
+    showstringspaces=false
+}
+
+% --- Inicio del Documento ---
+\begin{document}
+
+% --- PORTADA ---
+\begin{titlepage}
+    \centering
+
+    {\Large \textbf{UNIVERSIDAD SANTO TOMÁS}} \\[1cm]
+
+    {\Large \textbf{Sistema colaborativo de robots móviles para asistencia de orientación en entornos interiores con múltiples pisos}} \\[2cm]
+
+    {\large \textbf{Realizado por:}} \\
+    {\large Santiago Hernández Ávila} \\
+    {\large Jonny Alejandro Mejía León} \\[1cm]
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.6\textwidth]{Logos Uni.png}
+        \label{Logo Universidad Santo Tomas y facultad de ingenieria electronica}
+    \end{figure}
+
+    \vfill
+
+    {\large \textbf{Informe de Avance --- Marco Teórico y Marco Conceptual}} \\
+    {\large Fase 5: Integración del sistema y realización de pruebas} \\[1.5cm]
+
+    \textbf{Dirigido por:} \\
+    Ing. Armando Mateus Rojas, Msc. \\
+    Ing. Nestor Ivan Ospina, Msc. \\
+    Ing. Oscar Mauricio Gélvez Lizarazo, Msc. \\[1.0cm]
+
+    \vfill
+
+    {\large GED (Grupo de Estudio y Desarrollo en Robótica)} \\
+    {\large Facultad de Ingeniería Electrónica} \\
+    {\large División de Ingenierías} \\
+    {\large Bogotá, septiembre de 2026}
+\end{titlepage}
+
+% --- CONTENIDO ---
+
+\section{Introducción}
+
+Este documento es un \textbf{informe de avance}, no el documento final del proyecto de grado --que se redacta en las Semanas 29 a 32, según el cronograma del anteproyecto--. Su propósito es presentar, de forma consolidada, el marco teórico y el marco conceptual con los que el proyecto opera hoy, a la altura de la Semana 23 de 32, con la Semana 22 cerrada el 2026-09-11 y su criterio de cierre cumplido: una misión operada desde un teléfono móvil real completó el guiado con relevo entre los dos niveles del edificio sin intervención manual \cite{estado_proyecto}.
+
+El documento se organiza en tres partes. La Sección \ref{sec:marco_teorico} expone el marco teórico vigente del proyecto: el middleware, la arquitectura de navegación, la arquitectura multi-robot y el tratamiento experimental que sustentan el sistema construido hasta ahora. La Sección \ref{sec:marco_conceptual} reúne el marco conceptual --el vocabulario técnico necesario para leer el resto de la documentación del proyecto-- organizado en las mismas seis categorías del Capítulo 6 del anteproyecto. La Sección \ref{sec:avances} resume, de forma breve, el estado de avance por objetivo específico.
+
+\section{Marco teórico}
+\label{sec:marco_teorico}
+
+\subsection{Robot móvil, sistema multi-robot y navegación}
+
+El sistema es un conjunto de dos robots móviles terrestres que operan como agentes colaborativos, cada uno dedicado a un nivel del edificio, y que en conjunto conforman un sistema multi-robot (MRS) \cite{varghese_mrs}. La tarea que ejecutan --guiar a una persona desde un punto de origen hasta un destino, con selección de la tarea a través de una interfaz móvil-- constituye interacción humano-robot (HRI) \cite{jimenez_hri}.
+
+La navegación de cada agente se apoya en tres pilares: localización, que determina la posición y orientación del robot respecto al entorno; planificación de trayectorias, que calcula una ruta factible respetando las restricciones físicas del vehículo; y control de movimiento, que genera las señales necesarias para ejecutar esa ruta. Los tres se alimentan de percepción continua del entorno, provista en este sistema por un sensor LiDAR planar. Sobre esta base general, las secciones siguientes describen las decisiones concretas de arquitectura y las propiedades del sistema que se derivan de ellas.
+
+\subsection{ROS 2 como capa de integración, en dos distribuciones}
+
+El sistema usa ROS 2 \cite{macenski_ros2} como middleware de comunicación entre todos sus componentes, en dos distribuciones simultáneas: \textbf{ROS 2 Humble} en la simulación --porque el paquete de integración físico-simulada, \texttt{gazebo\_ros2\_control}, no está liberado sobre distribuciones posteriores-- y \textbf{ROS 2 Jazzy} en los vehículos físicos, sobre Ubuntu Server 24.04 en una Raspberry Pi 4, confirmado sobre el hardware el 2026-08-14.
+
+Esto fija una restricción teórica que gobierna buena parte de la arquitectura: \texttt{nav2\_msgs/NavigateToPose}, la única vía de mando del contrato de interfaces del sistema, tiene definición distinta entre Humble y Jazzy, de modo que un coordinador compilado en una distribución no puede mandar directamente a un agente compilado en la otra. La compatibilidad de código fuente entre distribuciones de ROS 2 no implica compatibilidad de mensajes en tiempo de ejecución. La mitigación vigente mantiene una variante de configuración por distribución, derivada de una base común, y dejó pendiente únicamente la conversión de mensajes entre las dos definiciones del tipo de acción.
+
+Sobre esa capa de middleware, la arquitectura de coordinación es \textbf{centralizada}: un único nodo coordinador actúa como cliente de acción hacia cada agente (\texttt{navigate\_to\_pose}) y como servidor de acción hacia la interfaz de usuario (\texttt{GuiarUsuario.action}, definida en el paquete propio \texttt{coordinacion\_msgs}). En la taxonomía de asignación de tareas de Gerkey y Matarić \cite{gerkey_taxonomy}, corresponde a una asignación centralizada e instantánea: el coordinador determina el agente responsable en el momento de aceptar la solicitud, a partir del nivel del punto de origen y del punto de destino, sin negociación entre agentes.
+
+\subsection{Navegación autónoma sobre cinemática tipo automóvil}
+
+La navegación de cada agente se ejecuta sobre \textbf{Nav2}, el framework de navegación estándar de ROS 2 \cite{sojan_autonomous_navigator}. El DeepRacer sigue un modelo cinemático tipo automóvil (dirección Ackermann): no holonómico, no puede girar sobre su propio eje. La configuración por defecto de Nav2 asume un robot de tracción diferencial, así que dos de sus tres capas se sustituyen:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Planificación global:} \texttt{Smac Hybrid-A*}, con modelo de movimiento \texttt{Reeds-Shepp}, que admite marcha atrás y genera explícitamente las maniobras de inversión de marcha --las \textbf{cúspides}-- que un vehículo no holonómico necesita para alcanzar orientaciones que su geometría no permite alcanzar de frente.
+    \item \textbf{Control de seguimiento:} \texttt{RegulatedPurePursuitController} con \texttt{allow\_reversing: true}, que ejecuta físicamente las cúspides que el planificador propuso.
+\end{itemize}
+
+Esta configuración tiene un límite conocido y caracterizado con evidencia propia: el controlador reduce dinámicamente su distancia de anticipación cuando el vehículo se aproxima a una cúspide muy cercana al punto objetivo, y por debajo de un umbral geométrico concreto (una distancia al cuadrado de $10^{-3}$ m², equivalente a 3,16 cm) una guarda de seguridad del propio \texttt{RegulatedPurePursuitController} anula la curvatura calculada: el vehículo sigue invirtiendo el sentido de marcha, pero la dirección deja de responder, lo que produce episodios de decenas de maniobras en el mismo punto \cite{r12_cuspides}. Es un límite documentado del controlador de referencia de Nav2 en el borde de su propio dominio de validez, no un defecto del planificador ni del coordinador.
+
+\subsection{Localización y mapeo: observabilidad en un corredor uniforme}
+
+La localización se apoya en AMCL sobre el mapa del entorno, y el mapa se construye con \texttt{slam\_toolbox} a partir de la odometría láser (\texttt{rf2o\_laser\_odometry}). En un corredor recto y de sección uniforme, la posición \textbf{longitudinal} del robot no es observable a partir de un LiDAR planar combinado con un algoritmo de correspondencia de barridos (\textit{scan matching}): cada barrido sucesivo es indistinguible del anterior a lo largo del eje del pasillo, así que el estimador devuelve un desplazamiento cercano a cero y \textbf{acierta} desde el punto de vista de la información disponible --la ausencia de estructura lateral variable elimina la información necesaria para estimar el avance, no la pierde por error de ajuste.
+
+Esta propiedad distingue un \textbf{error de calibración}, corregible ajustando parámetros, de una \textbf{inobservabilidad estructural}, que ningún ajuste de parámetros corrige porque la información no está en la señal. La condición de aceptación de un mapa se define, en consecuencia, no como un porcentaje de cobertura fijo, sino como la exigencia de que el entorno aporte estructura no uniforme, verificable con un banco de prueba controlado, dentro del alcance del sensor a lo largo de todo el recorrido \cite{mapeo_pasillo}.
+
+\subsection{Simulación multi-robot: aislamiento por espacio de nombres}
+
+La simulación multi-robot se implementa sobre \textbf{Gazebo Classic}, con un \texttt{gzserver} independiente por robot y un único dominio DDS compartido entre ambos; el aislamiento entre agentes se logra por \textbf{espacio de nombres} (\texttt{/robot1}, \texttt{/robot2}, incluido el marco \texttt{map} de cada robot), no por segmentación de dominio. Un \texttt{ROS\_DOMAIN\_ID} distinto por robot --la alternativa más directa para aislar tópicos-- bloquea el descubrimiento DDS entre el coordinador y los agentes salvo configuración adicional, de modo que la separación por dominios y la comunicación entre agentes resultan mutuamente excluyentes bajo la configuración por defecto. La arquitectura vigente quedó verificada sobre las 30 misiones de la campaña de evaluación sin un solo instante de movimiento cruzado entre agentes.
+
+\subsection{La interfaz humano-robot como frontera de protocolo}
+
+La interfaz web se comunica con ROS 2 a través de \texttt{rosbridge\_suite}, que expone las acciones de ROS 2 como un protocolo JSON sobre WebSocket (\texttt{send\_action\_goal}, \texttt{action\_feedback}, \texttt{action\_result}, \texttt{cancel\_action\_goal}). Este protocolo es distinto del que implementa la librería de cliente más conocida en el ecosistema web de ROS, \texttt{roslib.js}, cuyo cliente de acciones habla \textit{actionlib} de ROS 1 --incompatible con las acciones de ROS 2--. La interfaz de este proyecto es, por esa razón, un cliente JavaScript propio escrito directamente sobre el protocolo de \texttt{rosbridge} 2.x, sin dependencias de red (RF-20 exige que funcione sin salida a internet, lo que además descarta cualquier CDN).
+
+Un segundo principio de arquitectura rige la interfaz: \textbf{no redacta lógica de negocio}. El campo \texttt{mensaje\_usuario} de cada estado de misión lo redacta el coordinador en español y la interfaz lo muestra literal (RF-18). Es una aplicación directa del principio de separación de responsabilidades entre lógica de dominio y capa de presentación: si el navegador interpretara la etapa numérica para decidir qué texto mostrar, duplicaría en JavaScript una lógica que ya existe en el planificador, con riesgo de que las dos copias diverjan.
+
+\subsection{Evaluación experimental: métricas, significancia estadística y falsabilidad}
+
+La evaluación experimental se rige por cuatro métricas con definición operativa --tiempo de respuesta, tiempo de asignación, tasa de éxito y continuidad de servicio entre niveles--, medidas sobre una campaña de N = 30 misiones sorteadas, con protocolo fijado \textit{antes} de instrumentar el sistema \cite{protocolo_experimental}. Dos principios rigen su tratamiento.
+
+El primero es estadístico: con N = 30 y una proporción de éxito observada, el intervalo de confianza apropiado para una proporción binomial es el de \textbf{Wilson}, no la aproximación normal, que subestima el error para muestras de este tamaño. Es la diferencia entre poder afirmar «la tasa de éxito supera el 70 \%» --defendible con el intervalo de Wilson obtenido-- y afirmar «la tasa de éxito es del 86,7 \%» --no defendible, por ser el punto medio de un intervalo considerablemente más ancho.
+
+El segundo es metodológico: un criterio de aceptación experimental solo constituye evidencia si \textbf{puede fallar}. El criterio de continuidad entre niveles --la variable de respuesta principal del objetivo 4-- está definido de forma que ninguna ejecución posible del sistema puede incumplirlo, porque sus dos únicos productores de un valor de incumplimiento ocurren, por construcción del código, fuera de la ventana temporal en la que el criterio se evalúa. Treinta verificaciones en verde de un criterio que no puede dar «no» no son evidencia de que el sistema mantenga la continuidad; son evidencia de que el criterio está mal planteado \cite{barrido_falsabilidad}. La corrección que rige la redacción de resultados no inventa una ruta de fallo artificial --que equivaldría a instrumentar el experimento para que pareciera más informativo de lo que es--, sino que reformula la afirmación de continuidad como un invariante estructural del diseño, respaldado por una magnitud que sí varía y sí puede reportarse: el hueco temporal del relevo entre agentes.
+
+\section{Marco conceptual}
+\label{sec:marco_conceptual}
+
+Esta sección reúne el vocabulario técnico necesario para leer el resto de la documentación del proyecto, organizado en las mismas seis categorías del Capítulo 6 del anteproyecto.
+
+\subsection{Navegación y percepción}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Navegación autónoma:} desplazamiento sin intervención humana que integra percepción, localización y control.
+    \item \textbf{Odometría:} estimación de posición por integración de mediciones de actuadores o de sensores exteroceptivos.
+    \item \textbf{Zona de transición:} punto crítico para el cambio de nivel en edificaciones con múltiples pisos.
+    \item \textbf{Mapa de costos (\textit{costmap}):} representación del entorno usada por Nav2 para la planificación, que asigna a cada celda un costo de tránsito en lugar de un simple estado libre/ocupado; existe una capa global (todo el mapa) y una local (el entorno inmediato del robot).
+    \item \textbf{AMCL (\textit{Adaptive Monte Carlo Localization}):} algoritmo de localización basado en un filtro de partículas que estima la posición y orientación del robot combinando la odometría con las lecturas del LiDAR contra un mapa conocido.
+    \item \textbf{Verificador de meta (\textit{goal checker}):} componente de Nav2 que decide si el robot alcanzó su objetivo, comparando posición y, opcionalmente, orientación contra una tolerancia.
+    \item \textbf{Observabilidad de un estado:} propiedad de una variable física de poder estimarse a partir de las mediciones disponibles; una variable puede ser matemáticamente inobservable en una configuración de entorno y sensor concreta, sin que exista error de calibración que lo corrija.
+    \item \textbf{Modelo de movimiento Reeds-Shepp:} conjunto de trayectorias óptimas para un vehículo con curvatura acotada que puede moverse hacia adelante y hacia atrás, usado por el planificador híbrido para generar maniobras de inversión de marcha.
+    \item \textbf{Cúspide:} punto de una trayectoria planificada en el que el vehículo invierte el sentido de marcha.
+\end{itemize}
+
+\subsection{Control y locomoción}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Cinemática de robots móviles:} modelo matemático del movimiento en función de las velocidades de los actuadores.
+    \item \textbf{Modelo cinemático tipo automóvil (dirección Ackermann):} representación geométrica y matemática de un vehículo de cuatro ruedas con dirección en el eje delantero, como el DeepRacer, que relaciona el ángulo de giro del servomotor con el radio de giro del vehículo.
+    \item \textbf{PWM (\textit{Pulse Width Modulation}):} técnica para controlar motores o servos mediante ciclo de trabajo.
+    \item \textbf{Control PID:} algoritmo de control por retroalimentación proporcional-integral-derivativo.
+    \item \textbf{Planificador híbrido A* (\textit{Smac Hybrid-A*}):} algoritmo de búsqueda de rutas que opera sobre el espacio continuo de posición y orientación, respetando las restricciones cinemáticas del vehículo, a diferencia de un planificador de cuadrícula que ignora la orientación.
+    \item \textbf{Controlador de seguimiento regulado (\textit{Regulated Pure Pursuit}):} algoritmo de control que persigue un punto móvil sobre la trayectoria planificada, regulando su velocidad según la curvatura y la proximidad a obstáculos.
+\end{itemize}
+
+\subsection{Comunicación y sistemas distribuidos}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Middleware robótico:} capa de software para comunicación entre módulos del sistema.
+    \item \textbf{ROS (Robot Operating System):} middleware con nodos, tópicos (pub/sub), servicios (petición/respuesta) y acciones.
+    \item \textbf{DDS (\textit{Data Distribution Service}):} protocolo de transporte publicación/suscripción sobre el que ROS 2 implementa sus tópicos, servicios y acciones, con descubrimiento automático de participantes en la red.
+    \item \textbf{Dominio ROS (\texttt{ROS\_DOMAIN\_ID}):} identificador numérico que segmenta el descubrimiento DDS; dos procesos con distinto dominio no se ven entre sí salvo configuración explícita.
+    \item \textbf{Espacio de nombres (\textit{namespace}):} prefijo aplicado a los tópicos, servicios y acciones de un nodo (por ejemplo, \texttt{/robot1/}), usado para aislar a cada agente dentro de un mismo dominio DDS.
+    \item \textbf{Acción ROS:} patrón de comunicación asíncrona de ROS 2 para tareas de larga duración, compuesto por un objetivo (\textit{goal}), retroalimentación periódica (\textit{feedback}) y un resultado final (\textit{result}), con posibilidad explícita de cancelación.
+    \item \textbf{Servidor / cliente de acción:} nodo que ofrece una acción (servidor) y nodo que la invoca (cliente); en este sistema el coordinador es cliente de \texttt{navigate\_to\_pose} ante cada agente y servidor de \texttt{GuiarUsuario} ante la interfaz.
+    \item \textbf{Callback de cancelación:} función que un servidor de acción debe registrar explícitamente para poder aceptar solicitudes de cancelación; sin ella, ROS 2 las rechaza por defecto.
+    \item \textbf{Calidad de servicio (QoS):} conjunto de políticas de entrega de un tópico o servicio DDS (por ejemplo, \texttt{transient\_local}, que conserva el último mensaje para un suscriptor tardío).
+    \item \textbf{Puente \textit{rosbridge}:} servidor que traduce entre el protocolo nativo de ROS 2 y un protocolo JSON sobre WebSocket, permitiendo que un cliente web --sin dependencias de ROS-- publique, se suscriba y opere acciones.
+\end{itemize}
+
+\subsection{Arquitectura del sistema}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Asignación de tareas:} distribución de actividades entre robots según disponibilidad y ubicación.
+    \item \textbf{Protocolo de relevo:} transferencia secuencial de responsabilidad entre agentes en puntos definidos.
+    \item \textbf{Máquina de estados de misión (\textit{etapa}):} conjunto de valores discretos y ordenados que describen el progreso de una misión (\texttt{RECIBIDA}, \texttt{TRAMO\_1}, \texttt{TRANSFERENCIA}, \texttt{TRAMO\_2}, \texttt{ESPERANDO\_CONFIRMACION}, \texttt{COMPLETADA}, \texttt{FALLIDA}), publicados para que la interfaz y el registro de evaluación conozcan el punto de ejecución.
+    \item \textbf{Planificador puro:} componente que calcula la secuencia de tramos de una misión a partir del catálogo de puntos y del par origen-destino, sin depender de ROS ni de ningún estado externo, lo que permite verificarlo con cientos de casos en milisegundos y sin simulador.
+    \item \textbf{Punto de transferencia:} punto de interés marcado en el catálogo como el lugar físico --típicamente una escalera-- en el que un agente entrega y otro recibe la continuidad del guiado al cambiar de nivel.
+    \item \textbf{Registro de misión:} documento estructurado, compuesto a partir de la grabación de la misión y validado contra un esquema formal, que constituye la evidencia primaria de una ejecución para efectos de la evaluación experimental.
+\end{itemize}
+
+\subsection{Interacción humano-robot}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Interfaz gráfica de usuario (GUI):} entorno visual para interacción humano-máquina.
+    \item \textbf{HRI (\textit{Human-Robot Interaction}):} diseño y evaluación de sistemas robóticos para interactuar con personas.
+    \item \textbf{Solicitud de servicio:} petición de usuario para recibir asistencia de guiado.
+    \item \textbf{Interfaz responsiva de selección:} componente de interfaz que permite ubicar un punto de interés por nombre mediante búsqueda incremental, sin perder la capacidad de mostrar el catálogo completo.
+    \item \textbf{Retroalimentación literal:} principio de diseño según el cual el texto mostrado al usuario se redacta íntegramente en el componente que conoce el estado del sistema --el coordinador-- y se presenta sin reinterpretación en la interfaz.
+\end{itemize}
+
+\subsection{Métricas de evaluación}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Tiempo de respuesta:} intervalo entre la solicitud del usuario y el inicio de la tarea por el robot.
+    \item \textbf{Tasa de éxito:} proporción de solicitudes completadas exitosamente.
+    \item \textbf{Continuidad de servicio:} capacidad de mantener asistencia durante transiciones entre niveles.
+    \item \textbf{Intervalo de confianza de Wilson:} método para estimar el intervalo de confianza de una proporción que se comporta de forma más confiable que la aproximación normal cuando el tamaño de muestra es pequeño o la proporción está cerca de 0 o de 1.
+    \item \textbf{Falsabilidad de un criterio experimental:} propiedad de un criterio de aceptación de poder, en principio, arrojar un resultado negativo bajo alguna ejecución posible del sistema; un criterio que no puede fallar no aporta evidencia, sin importar cuántas veces se verifique en verde.
+    \item \textbf{Invariante estructural:} propiedad que se cumple siempre por el propio diseño del código, y que por tanto no debe presentarse como un resultado experimental medido, sino declararse como tal.
+    \item \textbf{Cota superior por misión:} forma de reportar una métrica cuando el instrumento de medición no tiene resolución suficiente para dar un valor exacto (por ejemplo, un reloj de simulación que actualiza a 10 Hz), reportando el límite superior que el instrumento sí puede garantizar.
+\end{itemize}
+
+\section{Avances del proyecto a la fecha}
+\label{sec:avances}
+
+Este apartado resume, de forma breve, el estado de avance verificado en el tablero de trazabilidad del proyecto \cite{estado_proyecto}.
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Avance por objetivo específico al cierre de la Semana 22 (2026-09-11).}
+    \label{tab:avance_oe}
+    \begin{tabular}{@{}cp{2.2cm}p{10.5cm}@{}}
+        \toprule
+        \textbf{ID} & \textbf{Avance} & \textbf{Estado} \\ \midrule
+        OE1 & \textbf{100 \%} & Arquitectura funcional cerrada: 10 de 10 requisitos verificados, protocolo de relevo, catálogo de puntos y mensajería propia comprobados por transmisión real. \\ \addlinespace
+        OE2 & 55 \% & Un vehículo operando en Gazebo y en hardware, cadena de sensado y control caracterizada, cadena de mapeo validada con el primer mapa aceptado del proyecto. Pendiente principal: el segundo vehículo físico. \\ \addlinespace
+        OE3 & 90 \% & Interfaz web verificada de extremo a extremo, incluida una misión operada desde un teléfono real con relevo entre niveles (RF-17 a RF-20). El defecto de cancelación identificado en el cierre de S22 ya tiene corrección implementada y verificada en simulación, en revisión antes de integrarse a la rama principal. \\ \addlinespace
+        OE4 & 85 \% & Campaña de evaluación ejecutada: 30 misiones sorteadas, veredicto \texttt{VALIDA}, 0 descartes. Tasa de éxito 86,7 \% (IC95 de Wilson: 70,3--94,7 \%); continuidad entre niveles 100 \% (14/14). Pendiente: redacción del capítulo de resultados sobre el hallazgo de falsabilidad de la Sección \ref{sec:marco_teorico}. \\ \bottomrule
+    \end{tabular}
+\end{table}
+
+El avance técnico agregado sin ponderar es del \textbf{82,5 \%}, por encima del \textbf{71,9 \%} del calendario transcurrido (Semana 22 de 32). El vehículo adicional --bloqueado desde el 2026-08-14 por intervención técnica (riesgo R11)-- ya está físicamente disponible en el laboratorio; su distribución reportada es también ROS 2 Jazzy, aunque su caracterización directa por el equipo todavía está pendiente.
+
+A la fecha de este documento el proyecto se encuentra en la \textbf{Semana 23, de congelación de código} (14--20 de septiembre): a partir del 20 de septiembre no se incorpora funcionalidad nueva, y el trabajo restante se concentra en verificación, corrección de fallas y en preparar el capítulo de resultados sobre las cifras ya obtenidas. El documento final del proyecto, con el capítulo de resultados completo, se redacta en las Semanas 29 a 32.
+
+\section*{Anexos}
+\addcontentsline{toc}{section}{Anexos}
+
+Las afirmaciones técnicas de este documento proceden de los documentos de evidencia y del tablero de trazabilidad versionados en el repositorio del proyecto, referenciados en cada caso.
+
+\begin{thebibliography}{99}
+
+\bibitem{gerkey_taxonomy}
+B. P. Gerkey and M. J. Matarić, ``A formal analysis and taxonomy of task allocation in multi-robot systems,'' \textit{Int. J. Robot. Res.}, vol. 23, no. 9, pp. 939--954, Sep. 2004. doi: 10.1177/0278364904045564.
+
+\bibitem{macenski_ros2}
+S. Macenski, T. Foote, B. Gerkey, C. Lalancette, and W. Woodall, ``Robot Operating System 2: Design, architecture, and uses in the wild,'' \textit{Sci. Robot.}, vol. 7, no. 66, p. eabm6074, May 2022. doi: 10.1126/scirobotics.abm6074.
+
+\bibitem{sojan_autonomous_navigator}
+A. Sojan, C. Thomas, B. Raj, S. A. Simon, S. K. John, and A. A. Jose, ``Autonomous indoor navigator,'' in \textit{2025 11th International Conference on Smart Computing and Communication (ICSCC)}, 2025, pp. 1--6. doi: 10.1109/ICSCC66177.2025.11233830.
+
+\bibitem{varghese_mrs}
+G. T. Varghese et al., ``Multi-robot system for mapping and localization,'' in \textit{2023 8th International Conference on Robotics and Automation Engineering (ICRAE)}, 2023, pp. 1--6. doi: 10.1109/ICRAE59816.2023.10458504.
+
+\bibitem{jimenez_hri}
+M. Jiménez Muñoz, ``Arquitectura cognitiva para integración de usuarios humanos dentro de un sistema de mapas multinivel en una plataforma robótica asistencial,'' M.S. thesis, Dept. Ing. Ind., Univ. Politécnica de Madrid, Madrid, España, 2024.
+
+\bibitem{estado_proyecto}
+S. Hernández Ávila y J. A. Mejía León, ``Estado del proyecto --- tablero de trazabilidad,'' Repositorio del proyecto, \texttt{ESTADO.md}, actualizado al 2026-09-11.
+
+\bibitem{protocolo_experimental}
+S. Hernández Ávila y J. A. Mejía León, ``Protocolo experimental --- definiciones operativas de las cuatro métricas, criterio de éxito y causas de descarte,'' Repositorio del proyecto, \texttt{Documentos/PROTOCOLO\_EXPERIMENTAL.md}, agosto de 2026.
+
+\bibitem{r12_cuspides}
+S. Hernández Ávila, ``R12 --- la misión de 85 cúspides: mecanismo y caso de control,'' Repositorio del proyecto, \texttt{Documentos/Evidencia/S22\_R12\_85\_cuspides.md}, septiembre de 2026.
+
+\bibitem{mapeo_pasillo}
+S. Hernández Ávila y J. A. Mejía León, ``Mapeo del pasillo: cuatro pasadas rechazadas, mecanismo medido y primer mapa aceptado,'' Repositorio del proyecto, \texttt{Documentos/Evidencia/S22\_mapeo\_pasillo\_fallido.md}, septiembre de 2026.
+
+\bibitem{barrido_falsabilidad}
+S. Hernández Ávila, ``Barrido del protocolo: qué criterios no pueden fallar,'' Repositorio del proyecto, \texttt{Documentos/Evidencia/S22\_barrido\_criterios\_infalsables.md}, septiembre de 2026.
+
+\end{thebibliography}
+
+\end{document}
