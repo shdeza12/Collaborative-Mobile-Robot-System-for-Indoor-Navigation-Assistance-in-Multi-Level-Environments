@@ -40,13 +40,25 @@ umbral de arranque medido de este carro esta justo en 0,50 y con el
 **El driver del LiDAR.** Lo arranca `deepracer-core` al encender y publica en
 `/rplidar_ros/scan`. No hay que pararlo ni disputarle `/dev/ttyUSB0`.
 
+Los parametros: la variante de Jazzy, no la de Humble
+-----------------------------------------------------
+El vehiculo corre Jazzy, y `nav2_params.yaml` es la configuracion de Humble: en
+Jazzy no arranca —el planificador y los comportamientos se declaran con «::» y no
+con «/», y la lista `plugin_lib_names` repite nodos que Jazzy ya carga, con lo que
+el `bt_navigator` no configura—. Por eso el valor por defecto de `params` es
+`nav2_params_jazzy.yaml`, derivado del de Humble con solo esos cambios de
+distribucion y ningun otro. Que no diverjan en nada mas lo exige
+`herramientas/prueba_nav2_params_jazzy.py`; la lista de cambios, con su fuente,
+esta en la cabecera del propio archivo.
+
+Los arboles de `behavior_trees/` se usan los mismos que en simulacion. En Jazzy
+imprimen un aviso por no llevar `BTCPP_format="4"`: es esperado y no impide
+cargarlos (BT.CPP 4.6.2 solo avisa).
+
 Los tres ajustes de hardware, y por que son justo estos tres
 -----------------------------------------------------------
-`nav2_params.yaml` se usa tal cual: es la configuracion Ackermann buena —RPP con
-`use_rotate_to_heading: false` y Smac Hibrido con `minimum_turning_radius: 0.35`—
-y no se duplica. El propio archivo advierte en su cabecera que dos copias que
-divergen hacen que una corrida de un resultado distinto segun quien la lance.
-Aqui se reescriben unas pocas claves con `RewrittenYaml`, sobre la misma fuente:
+Lo que es propio del vehiculo, y no de la distribucion, no va en el YAML: se
+reescribe aqui con `RewrittenYaml`, sobre el archivo de Jazzy:
 
 1. `min_approach_linear_velocity` 0,05 -> 0,40
 2. `regulated_linear_scaling_min_speed` 0,25 -> 0,40
@@ -86,6 +98,10 @@ from nav2_common.launch import RewrittenYaml
 VELOCIDAD_MINIMA_UTIL = '0.40'
 
 TOPICO_SCAN = '/rplidar_ros/scan'
+
+# Parametros de Nav2 para Jazzy. El de Humble ('nav2_params.yaml') no arranca en
+# el vehiculo; ver la cabecera de este modulo.
+PARAMS_JAZZY = 'nav2_params_jazzy.yaml'
 
 
 def _ruta_en_paquete(paquete, *partes):
@@ -225,8 +241,8 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'params',
             default_value=_ruta_en_paquete('deepracer_bringup', 'config',
-                                           'nav2_params.yaml'),
-            description='YAML de Nav2. Obligatorio en la tarjeta.'),
+                                           PARAMS_JAZZY),
+            description='YAML de Nav2 para Jazzy. Obligatorio en la tarjeta.'),
         DeclareLaunchArgument(
             'slam_params',
             default_value=_ruta_en_paquete('deepracer_bringup', 'config',

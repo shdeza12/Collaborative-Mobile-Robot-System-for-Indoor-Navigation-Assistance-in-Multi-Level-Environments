@@ -90,6 +90,14 @@ las dos.
 > La nivelación de los dos carros ya está hecha (24-sep): mismo Nav2 1.3.13,
 > mismo `slam_toolbox` 2.8.5, `rf2o` compilado en los dos, `~/tesis/` con los
 > mismos md5. **Da igual cuál se use.** Enciende uno.
+>
+> **Salvo un archivo, añadido después:** `nav2_params_jazzy.yaml` (24-sep por la
+> tarde). Hasta entonces el guion copiaba `nav2_params.yaml`, que es la
+> configuración de **Humble** y en Jazzy no arranca: el planificador y los
+> comportamientos se declaran con «::» y no con «/», y `plugin_lib_names` repite
+> nodos que Jazzy ya carga, con lo que el `bt_navigator` no configura. Nunca se
+> vio porque hasta hoy no se había lanzado `nav:=true` en un carro. La copia del
+> §1 lo lleva ya, **a los dos carros**.
 
 ---
 
@@ -102,7 +110,7 @@ arrastra `gazebo_ros_pkgs`.
 | | |
 |---|---|
 | **Objetivo** | Que `~/tesis/` del carro tenga la cadena completa. |
-| **Comando** (desde la raíz del repositorio, con `NN` = 101 o 102) | `scp Robot/aws-deepracer/deepracer_description/models/urdf/deepracer_hardware.urdf Robot/aws-deepracer/deepracer_bringup/launch/nav2_hardware.launch.py Robot/aws-deepracer/deepracer_bringup/launch/hardware_description.launch.py Robot/aws-deepracer/deepracer_bringup/config/nav2_params.yaml Robot/aws-deepracer/deepracer_bringup/config/slam_toolbox.yaml deepracer@192.168.0.NN:~/tesis/ && scp -r Robot/aws-deepracer/deepracer_bringup/behavior_trees deepracer@192.168.0.NN:~/tesis/` |
+| **Comando** (desde la raíz del repositorio, con `NN` = 101 o 102) | `scp Robot/aws-deepracer/deepracer_description/models/urdf/deepracer_hardware.urdf Robot/aws-deepracer/deepracer_bringup/launch/nav2_hardware.launch.py Robot/aws-deepracer/deepracer_bringup/launch/hardware_description.launch.py Robot/aws-deepracer/deepracer_bringup/config/nav2_params_jazzy.yaml Robot/aws-deepracer/deepracer_bringup/config/slam_toolbox.yaml deepracer@192.168.0.NN:~/tesis/ && scp -r Robot/aws-deepracer/deepracer_bringup/behavior_trees deepracer@192.168.0.NN:~/tesis/` |
 | **Esperado** | En `~/tesis/` del carro: cinco archivos y la carpeta `behavior_trees` con sus dos XML. |
 | **Si falla** | `Permission denied` → la carpeta no existe: `ssh deepracer@192.168.0.NN "mkdir -p ~/tesis"`. |
 | **Cierre** | **A los dos carros, en la misma sesión.** Es la regla de `CLAUDE.md`: si el segundo está apagado, queda anotado como pendiente explícito y se cierra en cuanto se encienda. |
@@ -151,7 +159,7 @@ ssh deepracer@192.168.0.NN "sudo -n kill <PID>"
 **Terminal 1 — deja esto corriendo:**
 
 ```
-ssh deepracer@192.168.0.NN "sudo -n bash -c 'D=~deepracer/tesis; source /opt/ros/jazzy/setup.bash && source ~deepracer/nav_ws/install/setup.bash && ros2 launch \$D/nav2_hardware.launch.py urdf:=\$D/deepracer_hardware.urdf params:=\$D/nav2_params.yaml slam_params:=\$D/slam_toolbox.yaml behavior_trees:=\$D/behavior_trees'"
+ssh deepracer@192.168.0.NN "sudo -n bash -c 'D=~deepracer/tesis; source /opt/ros/jazzy/setup.bash && source ~deepracer/nav_ws/install/setup.bash && ros2 launch \$D/nav2_hardware.launch.py urdf:=\$D/deepracer_hardware.urdf params:=\$D/nav2_params_jazzy.yaml slam_params:=\$D/slam_toolbox.yaml behavior_trees:=\$D/behavior_trees'"
 ```
 
 Sin `slam:=` ni `nav:=`, o sea los dos en `false`: arranca solo
@@ -250,7 +258,7 @@ Sin `slam:=` ni `nav:=`, o sea los dos en `false`: arranca solo
 Corta la terminal 1 con `Ctrl-C` y relánzala con `slam:=true`:
 
 ```
-ssh deepracer@192.168.0.NN "sudo -n bash -c 'D=~deepracer/tesis; source /opt/ros/jazzy/setup.bash && source ~deepracer/nav_ws/install/setup.bash && ros2 launch \$D/nav2_hardware.launch.py slam:=true urdf:=\$D/deepracer_hardware.urdf params:=\$D/nav2_params.yaml slam_params:=\$D/slam_toolbox.yaml behavior_trees:=\$D/behavior_trees'"
+ssh deepracer@192.168.0.NN "sudo -n bash -c 'D=~deepracer/tesis; source /opt/ros/jazzy/setup.bash && source ~deepracer/nav_ws/install/setup.bash && ros2 launch \$D/nav2_hardware.launch.py slam:=true urdf:=\$D/deepracer_hardware.urdf params:=\$D/nav2_params_jazzy.yaml slam_params:=\$D/slam_toolbox.yaml behavior_trees:=\$D/behavior_trees'"
 ```
 
 **Y en cuanto arranque, actívalo a mano.** `sync_slam_toolbox_node` es en Jazzy un
@@ -337,10 +345,17 @@ ssh deepracer@192.168.0.NN "sudo -n bash -c 'source /opt/ros/jazzy/setup.bash &&
 Relanza la terminal 1 con `slam:=true nav:=true`:
 
 ```
-ssh deepracer@192.168.0.NN "sudo -n bash -c 'D=~deepracer/tesis; source /opt/ros/jazzy/setup.bash && source ~deepracer/nav_ws/install/setup.bash && ros2 launch \$D/nav2_hardware.launch.py slam:=true nav:=true urdf:=\$D/deepracer_hardware.urdf params:=\$D/nav2_params.yaml slam_params:=\$D/slam_toolbox.yaml behavior_trees:=\$D/behavior_trees'"
+ssh deepracer@192.168.0.NN "sudo -n bash -c 'D=~deepracer/tesis; source /opt/ros/jazzy/setup.bash && source ~deepracer/nav_ws/install/setup.bash && ros2 launch \$D/nav2_hardware.launch.py slam:=true nav:=true urdf:=\$D/deepracer_hardware.urdf params:=\$D/nav2_params_jazzy.yaml slam_params:=\$D/slam_toolbox.yaml behavior_trees:=\$D/behavior_trees'"
 ```
 
-Espera a que el gestor de ciclo de vida diga `Managed nodes are active`. Luego,
+Espera a que el gestor de ciclo de vida diga `Managed nodes are active`. Por el
+camino saldrá dos veces `Warnings: The first tag of the XML (<root>) should
+contain the attribute [BTCPP_format="4"]`: **es esperado**. Los árboles son los
+mismos de la simulación, en formato de BT.CPP 3, y BT.CPP 4 solo avisa; todos sus
+nodos existen en Jazzy. Si en vez de eso sale `Failed to bring up all requested
+nodes`, busca más arriba qué nodo no configuró: con `nav2_params.yaml` en lugar
+de `nav2_params_jazzy.yaml` serían el `planner_server`, el `behavior_server` y el
+`bt_navigator`. Luego,
 **terminal 2**, un destino a **4 m por delante** del carro, en línea recta:
 
 ```
@@ -359,7 +374,7 @@ ssh deepracer@192.168.0.NN "sudo -n bash -c 'source /opt/ros/jazzy/setup.bash &&
 |---|---|
 | **Esperado** | El vehículo **avanza siguiendo el plan**. Llegar a la meta sería excelente, pero **no es el criterio**: el criterio es que planifique y que se mueva mandado por el planificador. |
 | **Si planifica pero no se mueve** | Mira `ros2 topic echo /cmd_vel`. Si `linear.x` sale **por debajo de 0,40**, es la banda muerta: el puente traduce a throttle **0,0000** exacto y nada lo reporta. El launch ya sube `min_approach_linear_velocity` y `regulated_linear_scaling_min_speed` a 0,40 por esto; si aun así aparece un valor menor, **anota cuál** — hay un tercer camino que no conocemos y ese es el hallazgo. |
-| **Si no planifica** | `ros2 topic echo /plan` vacío. Causas por probabilidad: (a) la meta cae fuera del mapa que SLAM ha construido —empuja el carro primero para que el mapa cubra los 4 m—; (b) `allow_unknown: false` en el planificador impide planificar sobre celdas no exploradas, que es exactamente el caso anterior; (c) el costmap global está en resolución 0,06 y el mapa de SLAM en 0,05. Prueba (a) primero: es gratis. |
+| **Si no planifica** | `ros2 topic echo /plan` vacío. Causas por probabilidad: (a) la meta cae fuera del mapa que SLAM ha construido —empuja el carro primero para que el mapa cubra los 4 m—; (b) `allow_unknown: false` en el planificador impide planificar sobre celdas no exploradas, que es exactamente el caso anterior. Prueba (a) primero: es gratis. **Lo que no es causa:** que el costmap global esté configurado a 0,06 y el mapa de SLAM llegue a 0,05. La capa estática redimensiona el costmap a la resolución del mapa que recibe (`static_layer.cpp:199-213`, rama jazzy) y lo anuncia con `StaticLayer: Resizing costmap to ... at 0.050000 m/pix`. |
 | **Si se planta a ~0,6 m de la meta** | Sería la banda muerta de aproximación otra vez. Anota el `linear.x` que se estaba publicando. |
 | **Cierre** | El vídeo del intento, el `linear.x` observado, y el bag (§5). |
 

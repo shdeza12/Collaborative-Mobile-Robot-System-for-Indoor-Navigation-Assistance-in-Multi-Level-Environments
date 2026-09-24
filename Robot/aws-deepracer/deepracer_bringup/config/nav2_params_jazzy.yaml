@@ -1,0 +1,364 @@
+# Parametros de Nav2 para el VEHICULO REAL (ROS 2 Jazzy, Nav2 1.3.x).
+#
+# Derivado de nav2_params.yaml (Humble), que sigue siendo la fuente. Existe
+# porque la configuracion de Humble NO ARRANCA en Jazzy: el spike del 2026-08-18
+# (Documentos/Evidencia/S19_spike_p4_humble_jazzy.md §3) midio las diferencias y
+# dejo decidido derivar esta variante, y nadie la habia hecho. Cada cambio se
+# contrasto el 2026-09-24 con el fuente de la rama jazzy de ros-navigation y de
+# BehaviorTree.CPP 4.6.2, no de memoria.
+#
+# REGLA: este archivo difiere del de Humble SOLO en lo que cambia la
+# distribucion. Todo lo demas -valores Ackermann, tolerancias, costmaps- es
+# identico, y herramientas/prueba_nav2_params_jazzy.py falla si deja de serlo.
+# Lo que es propio del HARDWARE (suelo de velocidad del puente, topico del LiDAR,
+# use_sim_time, rutas de los arboles) no va aqui: lo reescribe
+# nav2_hardware.launch.py al lanzar, sobre este mismo archivo.
+#
+# Las diferencias, marcadas en su sitio con «Jazzy:»:
+#   1. bt_navigator: sin plugin_lib_names. Jazzy ya carga los nodos BT de Nav2
+#      y la lista se SUMA a los suyos (bt_navigator.cpp:76-83); repetirlos hace
+#      que BT.CPP lance «ID [...] already registered» (bt_factory.cpp:146) y el
+#      bt_navigator no configura. Los 25 de la lista de Humble estan todos en
+#      el registro de Jazzy.
+#   2. bt_navigator: sin los tres parametros de Groot, que Jazzy ya no declara.
+#   3. controller_server: progress_checker_plugins, en plural y como lista. En
+#      Humble la clave era el singular (lo declara libcontroller_server_core.so
+#      de Humble); Jazzy declara el plural (controller_server.cpp:56) e ignora
+#      el singular. No rompia nada porque el identificador por defecto coincide
+#      con el nombre del bloque, pero la linea quedaba muerta.
+#      'goal_checker_plugin' NO se toca: ya era una linea muerta en Humble, cuya
+#      clave es 'goal_checker_plugins', y cambiarla aqui seria una diferencia que
+#      no viene de la distribucion. Funciona en las dos por el mismo motivo: el
+#      identificador por defecto es 'goal_checker'.
+#   4. planner_server: nav2_smac_planner::SmacPlannerHybrid, con «::». Es el
+#      nombre que declara smac_plugin_hybrid.xml en Jazzy; con «/» pluginlib no
+#      encuentra la clase y el planner_server no configura.
+#   5. behavior_server: nav2_behaviors::Spin|BackUp|Wait, con «::», por la misma
+#      razon (behavior_plugin.xml).
+#   6. behavior_server: local_frame y global_frame por separado, y los topicos
+#      del costmap con los nombres que Jazzy declara (behavior_server.cpp:34-69).
+#      En Humble 'global_frame: odom' era el marco local; en Jazzy significaria
+#      otra cosa.
+#
+# Los dos arboles de behavior_trees/ se usan tal cual, sin copia para Jazzy: no
+# llevan BTCPP_format="4" y BT.CPP 4.6.2 solo imprime un aviso por eso
+# (xml_parsing.cpp:239-246), y todos sus nodos existen en Jazzy. Duplicarlos para
+# callar el aviso abriria dos copias que pueden divergir, sin ganar nada.
+
+bt_navigator:
+  ros__parameters:
+    use_sim_time: True
+    global_frame: map
+    robot_base_frame: base_link
+    # Rutas reescritas en tiempo de lanzamiento por RewrittenYaml (nav2_hardware.launch.py)
+    default_nav_to_pose_bt_xml: ""
+    default_nav_through_poses_bt_xml: ""
+    # Jazzy: sin plugin_lib_names ni parametros de Groot (diferencias 1 y 2).
+
+bt_navigator_rclcpp_node:
+  ros__parameters:
+    use_sim_time: True
+
+
+controller_server:
+  ros__parameters:
+    use_sim_time: True
+    controller_frequency: 20.0
+    min_x_velocity_threshold: 0.001
+    min_y_velocity_threshold: 0.5
+    min_theta_velocity_threshold: 0.001
+    progress_checker_plugins: ["progress_checker"]   # Jazzy: plural y lista (diferencia 3)
+    goal_checker_plugin: "goal_checker"              # muerta en las dos distribuciones; ver diferencia 3
+    controller_plugins: ["FollowPath"]
+
+    progress_checker:
+      plugin: "nav2_controller::SimpleProgressChecker"
+      required_movement_radius: 0.5
+      movement_time_allowance: 10.0
+    # R12, medido el 2026-08-24: con 'stateful: True' el checker deja de mirar la
+    # posicion en cuanto la cumple una vez, y solo exige rumbo. El razonamiento
+    # completo esta en nav2_params_nav_amcl_sim_demo.yaml. Estos valores son los
+    # mismos que en la variante de Humble, y la prueba lo exige.
+    goal_checker:
+      plugin: "nav2_controller::SimpleGoalChecker"
+      xy_goal_tolerance: 0.25
+      yaw_goal_tolerance: 3.15
+      stateful: False
+    FollowPath:
+      plugin: "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController"
+      desired_linear_vel: 0.5
+      lookahead_dist: 0.6
+      min_lookahead_dist: 0.3
+      max_lookahead_dist: 0.9
+      lookahead_time: 1.5
+      transform_tolerance: 0.1
+      use_velocity_scaled_lookahead_dist: false
+      min_approach_linear_velocity: 0.05
+      approach_velocity_scaling_dist: 0.6
+      use_collision_detection: true
+      max_allowed_time_to_collision_up_to_carrot: 1.0
+      use_regulated_linear_velocity_scaling: true
+      use_cost_regulated_linear_velocity_scaling: false
+      # Radio minimo fisico del vehiculo = distancia_entre_ejes / tan(max_steer)
+      #                                  = 0.164 m / tan(0.5236 rad) = 0.284 m
+      regulated_linear_scaling_min_radius: 0.9
+      regulated_linear_scaling_min_speed: 0.25
+      # Ackermann: el vehiculo no puede girar sobre su propio eje.
+      # Con use_rotate_to_heading habilitado, RPP comanda velocidad angular pura
+      # y el vehiculo queda inmovil. Debe permanecer en false.
+      use_rotate_to_heading: false
+      # Debe ir acompanado de use_rotate_to_heading: false.
+      allow_reversing: true
+      cost_scaling_dist: 0.3
+      cost_scaling_gain: 1.0
+      inflation_cost_scaling_factor: 3.0
+
+controller_server_rclcpp_node:
+  ros__parameters:
+    use_sim_time: True
+
+local_costmap:
+  local_costmap:
+    ros__parameters:
+      update_frequency: 5.0
+      publish_frequency: 2.0
+      global_frame: odom
+      robot_base_frame: base_link
+      use_sim_time: True
+      rolling_window: true
+      width: 3
+      height: 3
+      resolution: 0.05
+      footprint: '[[0.140, 0.095], [0.140, -0.095], [-0.140, -0.095], [-0.140, 0.095]]'
+      plugins: ["voxel_layer", "inflation_layer"]
+      inflation_layer:
+        plugin: "nav2_costmap_2d::InflationLayer"
+        cost_scaling_factor: 3.0
+        inflation_radius: 0.55
+      voxel_layer:
+        plugin: "nav2_costmap_2d::VoxelLayer"
+        enabled: True
+        publish_voxel_map: True
+        origin_z: 0.0
+        z_resolution: 0.05
+        z_voxels: 16
+        max_obstacle_height: 2.0
+        mark_threshold: 0
+        observation_sources: scan
+        scan:
+          topic: /scan
+          max_obstacle_height: 2.0
+          clearing: True
+          marking: True
+          data_type: "LaserScan"
+          raytrace_max_range: 2.0
+          raytrace_min_range: 0.0
+          obstacle_max_range: 1.5
+          obstacle_min_range: 0.0
+      static_layer:
+        map_subscribe_transient_local: True
+      always_send_full_costmap: True
+  local_costmap_client:
+    ros__parameters:
+      use_sim_time: True
+  local_costmap_rclcpp_node:
+    ros__parameters:
+      use_sim_time: True
+
+
+global_costmap:
+  global_costmap:
+    ros__parameters:
+      update_frequency: 1.0
+      publish_frequency: 1.0
+      global_frame: map
+      robot_base_frame: base_link
+      use_sim_time: True
+      footprint: '[[0.140, 0.095], [0.140, -0.095], [-0.140, -0.095], [-0.140, 0.095]]'
+      # En el vehiculo el mapa lo publica slam_toolbox a 0.05, y la capa estatica
+      # redimensiona el costmap global a la resolucion del mapa que recibe
+      # (static_layer.cpp:199-213, rama jazzy). El 0.06 no choca con nada.
+      resolution: 0.06
+      track_unknown_space: true
+      plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
+      obstacle_layer:
+        plugin: "nav2_costmap_2d::ObstacleLayer"
+        enabled: True
+        observation_sources: scan
+        scan:
+          topic: /scan
+          max_obstacle_height: 2.0
+          clearing: True
+          marking: True
+          data_type: "LaserScan"
+          raytrace_max_range: 2.5
+          raytrace_min_range: 0.0
+          obstacle_max_range: 2.0
+          obstacle_min_range: 0.0
+      inflation_layer:
+        plugin: "nav2_costmap_2d::InflationLayer"
+        cost_scaling_factor: 3.0
+        inflation_radius: 0.55
+      always_send_full_costmap: True
+  global_costmap_client:
+    ros__parameters:
+      use_sim_time: True
+  global_costmap_rclcpp_node:
+    ros__parameters:
+      use_sim_time: True
+
+planner_server:
+  ros__parameters:
+    planner_plugins: ["GridBased"]
+    use_sim_time: True
+
+    GridBased:
+      plugin: "nav2_smac_planner::SmacPlannerHybrid"   # Jazzy: «::» (diferencia 4)
+      tolerance: 0.5
+      downsample_costmap: false
+      downsampling_factor: 1
+      allow_unknown: false
+      max_iterations: -1
+      max_on_approach_iterations: 1000
+      max_planning_time: 2.0
+      smooth_path: false
+      # Ackermann: REEDS_SHEPP habilita primitivas de marcha atras, necesarias para
+      # invertir el sentido de marcha en pasillo (maniobra en varios tiempos).
+      motion_model_for_search: "REEDS_SHEPP"
+      angle_quantization_bins: 72
+      minimum_turning_radius: 0.35
+      reverse_penalty: 2.1
+      change_penalty: 0.20
+      non_straight_penalty: 1.05
+      cost_penalty: 1.3
+
+      smoother:
+        smoother:
+          w_curve: 30.0
+          w_dist: 0.0
+          w_smooth: 30000.0
+          w_cost: 0.025
+          cost_scaling_factor: 10.0
+        optimizer:
+          max_time: 0.10
+          max_iterations: 500
+          debug_optimizer: false
+          gradient_tol: 1.0e-10
+          fn_tol: 1.0e-20
+          param_tol: 1.0e-15
+          advanced:
+            min_line_search_step_size: 1.0e-20
+            max_num_line_search_step_size_iterations: 50
+            line_search_sufficient_function_decrease: 1.0e-20
+            max_num_line_search_direction_restarts: 10
+            max_line_search_step_expansion: 50
+
+planner_server_rclcpp_node:
+  ros__parameters:
+    use_sim_time: True
+
+robot_state_publisher:
+  ros__parameters:
+    use_sim_time: True
+
+behavior_server:
+  ros__parameters:
+    # Jazzy: los topicos del costmap llevan el prefijo local_ (diferencia 6).
+    local_costmap_topic: local_costmap/costmap_raw
+    local_footprint_topic: local_costmap/published_footprint
+    cycle_frequency: 10.0
+    # 'spin' se mantiene registrado porque el bt_navigator exige que el action
+    # server exista al cargar los arboles. La exclusion de la maniobra de giro en
+    # sitio se hace en los arboles Ackermann (behavior_trees/), no aqui.
+    behavior_plugins: ["spin", "backup", "wait"]
+    spin:
+      plugin: "nav2_behaviors::Spin"      # Jazzy: «::» (diferencia 5)
+    backup:
+      plugin: "nav2_behaviors::BackUp"    # Jazzy: «::» (diferencia 5)
+    wait:
+      plugin: "nav2_behaviors::Wait"      # Jazzy: «::» (diferencia 5)
+    # Jazzy: marco local y global por separado (diferencia 6). BackUp y Wait
+    # trabajan en el local, que es el 'odom' que Humble llamaba global_frame.
+    local_frame: odom
+    global_frame: map
+    robot_base_frame: base_link
+    transform_timeout: 0.1
+    use_sim_time: True
+    simulate_ahead_time: 2.0
+    max_rotational_vel: 1.0
+    min_rotational_vel: 0.4
+    rotational_acc_lim: 3.2
+
+waypoint_follower:
+  ros__parameters:
+    loop_rate: 20
+    stop_on_failure: false
+    waypoint_task_executor_plugin: "wait_at_waypoint"
+    wait_at_waypoint:
+      plugin: "nav2_waypoint_follower::WaitAtWaypoint"
+      enabled: True
+      waypoint_pause_duration: 200
+
+amcl:
+  ros__parameters:
+    use_sim_time: True
+    set_initial_pose: true
+    # nav2_hardware.launch.py no arranca AMCL (se localiza con slam_toolbox en
+    # vivo). El bloque se conserva igual que en Humble para que la prueba de no
+    # divergencia pueda comparar los dos archivos enteros.
+    initial_pose:
+      x: 0.0
+      y: 0.0
+      z: 0.0
+      yaw: 0.0
+    alpha1: 0.2
+    alpha2: 0.2
+    alpha3: 0.2
+    alpha4: 0.2
+    alpha5: 0.2
+    base_frame_id: "base_link"
+    beam_skip_distance: 0.5
+    beam_skip_error_threshold: 0.9
+    beam_skip_threshold: 0.3
+    do_beamskip: false
+    global_frame_id: "map"
+    lambda_short: 0.1
+    laser_likelihood_max_dist: 2.0
+    laser_max_range: 100.0
+    laser_min_range: -1.0
+    laser_model_type: "likelihood_field"
+    max_beams: 60
+    max_particles: 2000
+    min_particles: 500
+    odom_frame_id: "odom"
+    pf_err: 0.05
+    pf_z: 0.99
+    recovery_alpha_fast: 0.0
+    recovery_alpha_slow: 0.0
+    resample_interval: 1
+    robot_model_type: "nav2_amcl::DifferentialMotionModel"
+    save_pose_rate: 0.5
+    sigma_hit: 0.2
+    tf_broadcast: true
+    transform_tolerance: 1.0
+    update_min_a: 0.2
+    update_min_d: 0.25
+    z_hit: 0.5
+    z_max: 0.05
+    z_rand: 0.5
+    z_short: 0.05
+    scan_topic: scan
+
+amcl_map_client:
+  ros__parameters:
+    use_sim_time: True
+
+amcl_rclcpp_node:
+  ros__parameters:
+    use_sim_time: True
+
+map_server:
+  ros__parameters:
+    use_sim_time: True
+    yaml_filename: primer_piso_definitivo.yaml
+    frame_id: map

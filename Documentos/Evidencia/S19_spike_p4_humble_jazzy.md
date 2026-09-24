@@ -124,6 +124,28 @@ que no es el que se cree. Es exactamente el patrón que este proyecto ya ha paga
 —`initial_pose` como lista muerta, `/scan` absoluto bajo namespace, `--set-state start`— y por eso
 existe la regla del 12 de agosto de no aceptar un `SUCCEEDED` como evidencia.
 
+> **Aplicado el 2026-09-24, y con dos precisiones a esta tabla.** La variante de Jazzy que el §7
+> dejaba decidida no se había hecho, y el lanzador de hardware cargaba el YAML de Humble; se vio al
+> preparar el primer `nav:=true` en un carro. Existe desde hoy como
+> `deepracer_bringup/config/nav2_params_jazzy.yaml`, derivada del de Humble solo con los cambios de
+> distribución, y `herramientas/prueba_nav2_params_jazzy.py` falla si diverge en algo más. Cada
+> cambio se contrastó contra el fuente de la rama `jazzy` de ros-navigation y de BT.CPP 4.6.2, y
+> eso corrige dos filas:
+>
+> - **Fila 6 exageraba.** Un árbol sin `BTCPP_format="4"` **no deja de cargar**: BT.CPP 4.6.2 solo
+>   imprime un aviso (`xml_parsing.cpp:239-246`), y los dos árboles del proyecto solo usan nodos que
+>   existen en Jazzy. Se usan los mismos archivos en los dos destinos, sin copia.
+> - **Fila 2 es cierta pero no muerde aquí.** El singular se ignora en Jazzy, pero el identificador
+>   por defecto es `progress_checker`, el mismo nombre que el bloque del proyecto, así que su
+>   configuración se aplica igual. Se escribe el plural para que la línea no quede muerta. De paso
+>   apareció que `goal_checker_plugin`, en singular, **ya era una línea muerta en Humble**, cuya
+>   clave es el plural: funciona en las dos por el mismo motivo y no se toca.
+>
+> Las filas 1 y 3 se confirman tal cual, y son las que habrían impedido arrancar: con `/`, pluginlib
+> de Jazzy no encuentra el planificador ni los comportamientos, porque sus XML ya no declaran ese
+> nombre; y los 25 nodos de `plugin_lib_names` están todos en el registro de Jazzy, así que
+> repetirlos lanza `ID [...] already registered` (`bt_factory.cpp:146`).
+
 ---
 
 ## 4. Lo que **no** cambia
