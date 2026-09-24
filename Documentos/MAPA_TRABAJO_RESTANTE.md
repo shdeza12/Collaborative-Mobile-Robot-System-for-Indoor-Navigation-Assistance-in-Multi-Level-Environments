@@ -39,7 +39,7 @@ restantes son de vehículo físico:
 |---|---|---|
 | **RF-11** locomoción por `/<ns>/cmd_vel` | recorrido medido sobre el carro | nada |
 | **RF-12** `/<ns>/scan` utilizable | segunda mitad: mapa de costos local | RF-13 |
-| **RF-13** odometría en `/<ns>/odom` | **no hay fuente en el vehículo** | decisión §3.5 |
+| **RF-13** odometría en `/<ns>/odom` | ~~no hay fuente en el vehículo~~ **hay fuente desde el 2026-09-24**: `rf2o` publica y mide, 3/3 dentro del ±10 % sobre 3,00 m ([`S24_peldano2_odometria_hardware.md`](Evidencia/S24_peldano2_odometria_hardware.md)). Falta la medida sobre **≥ 5 m** que pide G-2, y el espacio de nombres `/<ns>/` | el sitio de ≥ 5 m (segmento encajonado) |
 | **RF-14** comando desde ROS 2 | campo: rampa, escalones, vídeo | batería medida |
 | **RF-16** mismo código en los dos destinos | ~~compilar en Jazzy, nunca intentado~~ **hecho el 2026-09-22 en los dos carros**: 22 ficheros de fuente con el mismo md5, `stderr` de 0 bytes, cinco baterías en los tres destinos. Falta la **segunda mitad** del criterio, una misión en cada mundo | **G-3** |
 | **RF-27** demostración física N = 5–10 | todo lo anterior | los cinco de arriba |
@@ -156,7 +156,7 @@ Estado por peldaño:
 | # | Peldaño | Simulación | Vehículo real |
 |---|---|---|---|
 | 1 | TF `map → odom → base_link → laser` | ✅ | ⚠️ `base_link → laser` de pie en **los dos carros** — `[0.029, 0.000, 0.185]`, RPY −180°, del mismo URDF (md5 `ccd781f4…`): `.101` el 21-sep, `.102` el 23-sep. Falta `map → odom → base_link`, que cuelga del peldaño 2 |
-| 2 | odometría publicada y validada sola | ✅ verdad del motor de física | ❌ sin fuente |
+| 2 | odometría publicada y validada sola | ✅ verdad del motor de física | ✅ **2026-09-24: `rf2o` publica y MIDE.** Tres pasadas de 3,00 m contra flexómetro en el cuarto del extintor: razones **0,963 · 1,019 · 0,966**, media 0,982, σ 0,032 — **las tres dentro del ±10 %** del criterio M1. Sin deriva en parado (6–19 mm en 20–24 s). Detalle y salvedades en [`S24_peldano2_odometria_hardware.md`](Evidencia/S24_peldano2_odometria_hardware.md) |
 | 3 | `/scan` con marco y estampas correctas | ✅ | ✅ 1,0228 m contra 1,000 m de flexómetro, 10/10 barridos, σ 2,8 mm |
 | 4 | mapa | ✅ | ⚠️ el mapa existe; nunca se ha cargado en el carro |
 | 5 | localización (AMCL) | ✅ | ❌ nunca ejecutado |
@@ -170,6 +170,23 @@ descubrió tarde. Todo el trabajo de S22 y S23 fue, sin saberlo, la investigaci�
 *Actualización 2026-09-23.* La mitad baja del peldaño 1 ya está construida en los dos vehículos
 (fila 1 de la tabla). Lo que sigue faltando del peldaño 1 es justo lo que produce el peldaño 2, así
 que **la escalera sigue cortada en el mismo sitio**: el 2 es el que manda.
+
+*Actualización 2026-09-24 — **la escalera deja de estar cortada en el 2**.* `rf2o` publica
+`odom → base_link` en el vehículo y el desplazamiento que registra **pasa el criterio**: tres
+pasadas de 3,00 m con razones 0,963 · 1,019 · 0,966 (media 0,982, σ 0,032), las tres dentro del
+±10 %. Con el peldaño 2 de pie, el 1 queda completo y los peldaños 4–7 dejan de estar bloqueados
+*por esta causa*. **Lo que esto no mueve, y hay que leerlo junto:** la medida es de 3 m —G-2 exige
+≥ 5— y se tomó en un cuarto de 3,50 × 1,20 m con estructura encarada por los cuatro lados, o sea la
+geometría buena. **No dice nada sobre el pasillo**, que sigue en 5,1 % y 5,9 % de información de
+avance. El §5 de [`S24_peldano2_odometria_hardware.md`](Evidencia/S24_peldano2_odometria_hardware.md)
+enumera las cuatro cosas que el resultado NO demuestra.
+
+*Lección de método que se cobró la misma tarde, y que afecta a cómo se mide de aquí en adelante:*
+con empujones de **1 m** las razones salían 0,883 y 0,828 —fallando el criterio— y parecían un
+defecto del vehículo. No lo eran: el déficit es **fijo** (~0,10–0,15 m, del orden de media
+carrocería) y no escala con la distancia, así que sobre 1 m vale el 15 % y sobre 3 m el 3 %.
+**La longitud de la prueba es parte del instrumento**, y una pasada de 1 m no puede validar esta
+cadena.
 
 ---
 
