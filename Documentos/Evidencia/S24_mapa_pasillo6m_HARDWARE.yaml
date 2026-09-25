@@ -1,0 +1,7 @@
+image: S24_mapa_pasillo6m_HARDWARE.pgm
+mode: trinary
+resolution: 0.050000
+origin: [-7.561992, -3.229298, 0.0]
+negate: 0
+occupied_thresh: 0.65
+free_thresh: 0.10

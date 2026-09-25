@@ -292,6 +292,24 @@ sin configurar.
 > toca hoy: cambiarlo a la vez que se estrena la cadena impediría saber a qué
 > atribuir un resultado.
 
+> ### Para guardar el mapa, `map_saver_cli` no sirve — añadido el 24-sep, noche
+>
+> Se rinde a los **2,03 s** con `Failed to spin map subscription`, y ese es su
+> plazo por defecto. La causa no es el guardado sino el §3 de más arriba:
+> `slam_toolbox` solo publica `/map` tras 0,15 m o 0,3 rad de movimiento, así que
+> **con el vehículo detenido no llega ningún mensaje nuevo** y el suscriptor
+> expira. El mapa está construido y el guardado falla igual.
+>
+> La vía que sí funciona es grabar `/map` en el bag y extraerlo después con
+> [`extraer_mapa.py`](../herramientas/extraer_mapa.py). Además lo hace repetible:
+> si hay que cambiar un umbral se cambia en el escritorio, sin repetir la salida.
+> Así se recuperó el mapa de 6 m del 24-sep después de que el guardado fallara.
+>
+> Todo ello, junto con otros tres fallos silenciosos de la misma noche, en
+> [`S24_mapeo_6m_hardware.md`](Evidencia/S24_mapeo_6m_hardware.md). Y el
+> procedimiento de campo ya corregido, en
+> [`GUION_CAMPO_PISO2.md`](GUION_CAMPO_PISO2.md).
+
 ---
 
 ## 4. Peldaños 6–7 — que el carro obedezca un destino
