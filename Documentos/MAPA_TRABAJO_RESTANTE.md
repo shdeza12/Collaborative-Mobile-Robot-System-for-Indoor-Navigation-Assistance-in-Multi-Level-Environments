@@ -160,8 +160,8 @@ Estado por peldaño:
 | 3 | `/scan` con marco y estampas correctas | ✅ | ✅ 1,0228 m contra 1,000 m de flexómetro, 10/10 barridos, σ 2,8 mm |
 | 4 | mapa | ✅ | ⚠️ el mapa existe; nunca se ha cargado en el carro |
 | 5 | localización (AMCL) | ✅ | ❌ nunca ejecutado |
-| 6 | mapas de costos | ✅ | ❌ imposible sin 1 y 2 |
-| 7 | planificador y controlador | ✅ | ❌ |
+| 6 | mapas de costos | ✅ | ✅ **2026-09-24 noche:** la capa estática carga el mapa guardado en el vehículo (`Resizing costmap to 447 X 108`). Hizo falta activar `map_server` **antes** de lanzar Nav2; al revés la capa queda vacía y el planificador aborta con `"Start occupied"` en cualquier meta. Ver [`S24_nav2_navegacion_mapa_guardado.md`](Evidencia/S24_nav2_navegacion_mapa_guardado.md) |
+| 7 | planificador y controlador | ✅ | 🟡 **2026-09-24 noche: navega, pero no llega con precisión.** Meta a 5,50 m sobre mapa guardado + AMCL: avanzó **4,837 m** con el plan consumiéndose (59→7 poses) y `angular.z` entre ±1,3 —o sea dirección viva—, pero paró a **0,412 m** de la meta contra una tolerancia de 0,25. La causa está medida: la banda muerta obliga a aproximarse a 0,40 m/s y **no hay régimen de aproximación fina**. Detalle en [`S24_nav2_navegacion_mapa_guardado.md`](Evidencia/S24_nav2_navegacion_mapa_guardado.md) |
 
 El proyecto midió el peldaño 3 con rigor de laboratorio y caracterizó el 4 con herramientas propias,
 y **nunca construyó el 1 ni el 2**. No fue desorden: el 2 resultó ser un problema de física y se
