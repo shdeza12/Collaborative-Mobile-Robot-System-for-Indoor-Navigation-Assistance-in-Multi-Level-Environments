@@ -98,6 +98,10 @@ sobre el que se apoyaba el punto 2 de arriba: son 4,20 m en 4 s, factor tres. Tr
 `--marcha 6` a 0,60 · 0,70 · 0,80 validarían la mitad baja de la curva; el escalón de 1,00 **no cabe
 en la recta de 20 m** y necesita otro instrumento.
 
+*Actualización 2026-09-25 — la vía que abre la navegación en el edificio.* Con los peldaños 6 y 7 ya cruzados sobre un mapa guardado, **navegar el pasillo real no exige resolver el SLAM**: basta un mapa válido. Y puede haberlo ya, porque el §4 de [`ENTORNO_DE_EVALUACION.md`](ENTORNO_DE_EVALUACION.md) afirma que `primer_piso_v2.world` corresponde a la primera planta del edificio. **Pero el §10 del mismo documento declara esa correspondencia «un supuesto no verificado»**, y la validación que preveía —un mapa SLAM del pasillo real— está bloqueada por la inobservabilidad de avance. La vía barata que nadie intentó es **contrastar el modelo con flexómetro**: diez medidas, media hora, criterio ≤ 2 %. Si pasa, se navega el edificio sin SLAM; si no pasa, el §4 pierde su «argumento más fuerte» y la etapa 3 necesita otra vía. Guion completo con las diez cifras del modelo en [`GUION_NAVEGACION_USTA.md`](GUION_NAVEGACION_USTA.md).
+
+---
+
 ### 2.2 Las cinco piezas de la cadena, en orden de dependencia
 
 1. **`base_link`, y `base_link → laser`. — CERRADA el 2026-09-21; versionada el 2026-09-24.**
