@@ -19,6 +19,68 @@ un bloque tachado con razón vale más que un bloque borrado.
 
 ---
 
+## 0. Lo que queda de verdad, al viernes 2026-09-25
+
+Esta sección va encima de todo porque **el §1 dejó de ser cierto el 24-sep**: la ruta crítica que
+nombra —publicar `odom → base_link` en el vehículo— está hecha y medida, y esa misma noche Nav2
+navegó el carro. Lo que sigue es lo que falta, con lo que lo cierra y de qué depende. El resto del
+documento se conserva como estaba, porque su razonamiento sigue valiendo aunque su punto de partida
+haya avanzado.
+
+### 0.1 · Las compuertas del acta
+
+| | Estado | Lo que hay | Lo que la cierra | Depende de |
+|---|---|---|---|---|
+| **G-1** actuación | ✅ 2026-09-22 | — | — | — |
+| **G-4** dos en el grafo | ✅ 2026-09-22 | — | — | — |
+| **G-2** odometría | ⏳ **C-1, vie 2-oct** | rf2o publica y mide: 3 de 3 dentro del ±10 % sobre **3 m**, empujando a mano ([`S24_peldano2_odometria_hardware.md`](Evidencia/S24_peldano2_odometria_hardware.md)). Corridas de 6 m bajo motor, **sin cinta** | **Corridas de 5 m con flexómetro.** Cada corrida de la campaña es una medida de G-2 | nada: hay mapa, sitio, herramientas y guía |
+| **G-3** navegación de uno | ⏳ **C-1, vie 2-oct** | **Nav2 navegó el carro una vez** (Jonny, 24-sep) y paró a **0,412 m** de la meta contra 0,25 ([`S24_nav2_navegacion_mapa_guardado.md`](Evidencia/S24_nav2_navegacion_mapa_guardado.md)) | la campaña, con la llegada verificada contra `/odom` y cinta | **la tolerancia de llegada, por escrito y antes de correr** (directores) |
+| **G-5** protocolo completo | ⏳ | — | una misión con relevo sobre los dos vehículos | G-3 |
+| **G-6** RF-27 | ⏳ | — | N entre 5 y 10 corridas con registro | la campaña; para el protocolo completo, G-5 |
+
+**Lo que lo cierra todo es una sola campaña**, y está montada:
+[`GUIA_CAMPANA_NAV2_HARDWARE.md`](GUIA_CAMPANA_NAV2_HARDWARE.md). La vía hermana, la del edificio
+sobre el mapa derivado del modelo de Gazebo, es la de
+[`GUION_NAVEGACION_USTA.md`](GUION_NAVEGACION_USTA.md), de Jonny: su primer bloque es validar el
+modelo contra el edificio con flexómetro, y si pasa, **se navega el edificio sin SLAM**. Las dos
+comparten el arranque, [`nav2_mapa_guardado.sh`](../herramientas/nav2_mapa_guardado.sh). Una corrida de 5 m con cinta
+da a la vez un dato de G-2, uno de G-3 y cuenta para RF-27. El mapa del pasillo de piso 2 admite
+**5,45 m** de avance para el ancho del carro, así que no hace falta volver a mapear si el sitio se
+reproduce.
+
+### 0.2 · Las dos decisiones que van por escrito ANTES de la campaña
+
+1. **La tolerancia de llegada.** Es 0,25 m y está cuestionada desde los dos lados: la campaña OE4
+   en simulación se quedó corta 0,28–0,35 m y la navegación del 24-sep se pasó 0,412 m. Es de los
+   directores, como la del criterio original. **No se decide viendo los resultados.**
+2. **La velocidad de la campaña** (`max_speed_pct`). Con 0,68 el `throttle` es 0,4247, que movió
+   el carro el 24-sep a 0,14–0,26 m/s; con 0,90 es 0,6327. Ir más despacio **puede** reducir el
+   error de llegada, y es una de las cosas que la campaña mide. Se fija una y no se cambia a mitad.
+
+### 0.3 · Lo que la primera corrida tiene que validar, porque no se ha ejecutado nunca en el vehículo
+
+| Pieza | Probada en | Riesgo si falla |
+|---|---|---|
+| [`nav2_mapa_guardado.sh`](../herramientas/nav2_mapa_guardado.sh), el arranque | codifica la secuencia manual que funcionó el 24-sep; como script, sin ejecución registrada | la corrida no arranca; la secuencia manual de Jonny sigue valiendo |
+| `corrida_nav2.py` | Nav2 real en Gazebo: 4 corridas y 3 guardas | se pierde la corrida; los datos del bag se conservan |
+| La capa de obstáculos escuchando `/rplidar_ros/scan` | portátil, ejecutando la reescritura del launch: los dos costmaps quedan en `/rplidar_ros/scan`. La línea de log que hizo pensar lo contrario imprime el nombre de la fuente, no el tópico | **seguridad**: sin ella el carro no ve obstáculos nuevos. Se comprueba en el carro con `ros2 topic info --verbose` (guía §4.3) y pasillo despejado hasta verlo |
+
+### 0.4 · El resto de lo pendiente
+
+| | Qué | Por qué importa |
+|---|---|---|
+| 1 | **Copiar los ficheros nuevos a `~/tesis/` de los dos carros** | la regla de `CLAUDE.md`; los paquetes ya están nivelados desde el 24-sep, los ficheros de esta guía no |
+| 2 | **Entregables de S23 y S24**: no están en el repositorio; el último es el de la semana 22 | el corte formal de los viernes los exige |
+| 3 | **La velocidad no es repetible**: 0,261 y 0,149 m/s con el mismo mando | hasta explicarlo, la cifra de RF-14 es un rango; primer sospechoso, la batería |
+| 4 | **RF-14, la escala de `/cmd_vel`**: el launch esquiva la banda muerta, no la corrige | calibrar `MAX_SPEED` en el puente ([`S24_analisis_previo_RF11.md`](Evidencia/S24_analisis_previo_RF11.md) §4) |
+| 5 | **Una esquina** | nadie ha mapeado ni navegado una en el vehículo; el guiado real las tiene |
+| 6 | **El pasillo abierto** | el tramo de la campaña está encajonado; los pasillos abiertos miden 5,1 % y 5,9 % de información de avance |
+| 7 | **Ver en vivo** | no funciona desde el portátil (Humble ↔ Jazzy); la vía por WebSocket está descrita y **sin validar**. La campaña no la necesita |
+| 8 | **La declaración escrita de R11** | sigue pendiente (§5, punto 6) |
+| 9 | **R15: el mapa de la campaña OE4 leía como libre lo desconocido** (Jonny, 25-sep) | decidir si se comprueba sobre los bags conservados o se declara la limitación en el capítulo de resultados |
+
+---
+
 ## 1. La lectura de una frase
 
 Hay **una sola ruta crítica**, y no es la campaña experimental: es publicar el TF

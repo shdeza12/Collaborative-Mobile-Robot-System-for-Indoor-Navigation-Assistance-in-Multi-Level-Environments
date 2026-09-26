@@ -51,9 +51,19 @@ movimiento fuera la causa, `2046` sería el mejor. Con el movimiento cubriendo t
 suave a brusco y el fallo presente en los cuatro casos, **más pasadas no aportan información**: por
 eso la salida se cerró en vez de repetir.
 
-Imágenes: [`S22_mapa_2046_fallido.png`](S22_mapa_2046_fallido.png) —dos manchas separadas más de un
-kilómetro—, [`S22_mapa_2029_fallido.png`](S22_mapa_2029_fallido.png) y
-[`S22_mapa_2009_fallido.png`](S22_mapa_2009_fallido.png). Ninguno dibuja una pared.
+Ninguno de los tres dibuja una pared:
+
+![Mapa de la pasada 2046: dos manchas separadas más de un kilómetro](S22_mapa_2046_fallido.png)
+
+*`S22_mapa_2046_fallido.png` — dos manchas separadas más de un kilómetro.*
+
+![Mapa de la pasada 2029, sin ninguna pared reconocible](S22_mapa_2029_fallido.png)
+
+*`S22_mapa_2029_fallido.png`*
+
+![Mapa de la pasada 2009, sin ninguna pared reconocible](S22_mapa_2009_fallido.png)
+
+*`S22_mapa_2009_fallido.png`*
 
 ---
 
@@ -191,8 +201,11 @@ lados— contra la extensión del mapa ya aceptado, **46,9 m X × 10,6 m Y**.
 | desviación | **−61,8 % · NO PASA** | −3,3 % · pasa |
 
 **La cadena falla también en simulación**, con datos perfectos, TF correcta y verdad conocida. Pero
-**falla al revés que en el pasillo**: allí el mapa reventaba a 1166 m, aquí **se encoge**. Imagen:
-[`S22_mapa_simulacion_encogido.png`](S22_mapa_simulacion_encogido.png).
+**falla al revés que en el pasillo**: allí el mapa reventaba a 1166 m, aquí **se encoge**:
+
+![El mapa del pasillo simulado de 46,9 m, encogido a 17,9 m](S22_mapa_simulacion_encogido.png)
+
+*`S22_mapa_simulacion_encogido.png` — 17,90 m de mapa para 46,9 m de pasillo.*
 
 ### 7.3 De quién es el encogimiento: se grabó la odometría de rf2o
 
@@ -326,7 +339,13 @@ movimiento para que la única variable del ensayo sea la geometría del entorno.
 | veredicto de `verificar_mapa.py` | RECHAZADO | **ACEPTADO** |
 
 **Es el primer mapa que este proyecto acepta con SLAM.** Queda en
-`Documentos/Evidencia/S22_mapa_caja_SIMULACION_aceptado.{pgm,yaml,png}` y vuelve a verificar desde ahí.
+`Documentos/Evidencia/S22_mapa_caja_SIMULACION_aceptado.{pgm,yaml,png}` y vuelve a verificar desde ahí:
+
+![La caja cerrada de 7,70 × 2,70 m mapeada con rf2o y slam_toolbox: el primer mapa aceptado](S22_mapa_caja_SIMULACION_aceptado.png)
+
+*`S22_mapa_caja_SIMULACION_aceptado.png` — la misma cadena que falló en el pasillo, en una caja que
+le da información de avance. Es el control que permite decir que lo que falla es el sitio, no la
+cadena.*
 
 ### 8.5 Dos defectos reales que salieron del ensayo
 

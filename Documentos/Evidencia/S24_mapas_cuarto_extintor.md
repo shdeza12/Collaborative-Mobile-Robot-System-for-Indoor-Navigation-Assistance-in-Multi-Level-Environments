@@ -43,6 +43,19 @@ celdas `254`**, no sobre el lienzo ni sobre el umbral de una imagen.
 | [`S24_mapa_cuarto_HARDWARE.png`](S24_mapa_cuarto_HARDWARE.png) | 75 × 35 | 2,30 × 0,85 m | Limpio |
 | [`S24_mapa_extintor_HARDWARE.png`](S24_mapa_extintor_HARDWARE.png) | 70 × 24 | 2,35 × 0,95 m | Limpio, con el obstáculo |
 
+![Primer intento: trazos barridos sin una pared recta, la firma de una pose que deriva](S24_mapa_cuarto_HARDWARE_derivado.png)
+
+*`S24_mapa_cuarto_HARDWARE_derivado.png` — el que falla. Se conserva porque enseña a qué se parece
+aquí un mapa malo.*
+
+![El cuarto de 1,60 × 0,76 m, con el lóbulo de la izquierda](S24_mapa_cuarto_HARDWARE.png)
+
+*`S24_mapa_cuarto_HARDWARE.png` — la sala y el lóbulo de ~0,78 × 0,38 m del §5.*
+
+![El mismo sitio con el extintor como obstáculo aislado](S24_mapa_extintor_HARDWARE.png)
+
+*`S24_mapa_extintor_HARDWARE.png` — la mancha aislada del §6 es el extintor.*
+
 **El primero es basura y conviene conservarlo**, porque es el contraste que hace creíbles a los
 otros dos: son trazos diagonales barridos, sin una sola pared recta ni un contorno cerrado, la
 firma de una pose que deriva. **Así es como se ve un mapa que falló.** Los otros dos no se parecen

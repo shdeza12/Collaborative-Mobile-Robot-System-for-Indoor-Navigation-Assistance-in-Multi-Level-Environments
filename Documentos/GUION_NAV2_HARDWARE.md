@@ -342,6 +342,13 @@ Esperado: `NavThrottleSrv_Response(error=0)`.
 > está roto. Con 0,90 sale **0,6327**, junto al escalón 0,60, el único cuyo
 > comportamiento está medido (4,20 m en 4 s).
 
+> **Revisado el 2026-09-25.** El 24-sep el mismo carro anduvo 6 m con `max_speed_pct` 0,68, o sea
+> con `throttle` **0,4247**, en tres corridas y 3227 órdenes: el umbral de arranque «justo en 0,50»
+> no es estable. Y la navegación de esa noche **se pasó 0,412 m de la meta** con una impresión de
+> que iba demasiado rápido. Para una campaña donde importa llegar, empezar por 0,68 —la más lenta
+> que se sabe que mueve este carro— y subir solo si no arranca:
+> [`GUIA_CAMPANA_NAV2_HARDWARE.md`](GUIA_CAMPANA_NAV2_HARDWARE.md) §4.3.
+
 ### 4.2 · La comprobación barata, antes de Nav2
 
 Dos segundos de `/cmd_vel` a mano. Si esto no mueve el carro, Nav2 tampoco lo

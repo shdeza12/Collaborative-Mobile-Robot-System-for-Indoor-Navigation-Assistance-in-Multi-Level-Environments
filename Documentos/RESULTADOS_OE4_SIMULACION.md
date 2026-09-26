@@ -457,6 +457,23 @@ El resto de lo que bloquea RF-27 no es de medición sino de plataforma, y está 
 [`MAPA_TRABAJO_RESTANTE.md`](MAPA_TRABAJO_RESTANTE.md): la ruta crítica es publicar `odom → base_link`
 en el vehículo.
 
+**Actualización del 2026-09-25.** Esa ruta crítica ya no lo es: `rf2o` publica y mide sobre el
+vehículo desde el 24-sep, y esa misma noche Nav2 navegó el carro sobre un mapa guardado
+([`S24_nav2_navegacion_mapa_guardado.md`](Evidencia/S24_nav2_navegacion_mapa_guardado.md)). El
+procedimiento de la campaña física está en
+[`GUIA_CAMPANA_NAV2_HARDWARE.md`](GUIA_CAMPANA_NAV2_HARDWARE.md), y recoge dos de las tres cosas de
+arriba: la verdad de terreno la da el **flexómetro**, que resuelve al medio centímetro —cinco veces
+más fino que los 2,5 cm que pide el punto 2—, y cada corrida deja en su registro, como columnas
+numéricas, el error de llegada según AMCL, según `/odom` y según la cinta, que es el campo del
+punto 1. Cada misión deja además una imagen como esta, sacada del bag por
+[`dibujar_corrida_nav2.py`](../herramientas/dibujar_corrida_nav2.py):
+
+![La misión S21_OE4_01 de esta campaña, dibujada sobre el mapa del piso 1](Evidencia/S24_dibujo_corrida_oe4_simulacion.png)
+
+*`S21_OE4_01`: el primer plan de Nav2 en verde, AMCL en azul y `/odom` alineado en la salida en
+naranja. La separación entre azul y naranja es la deriva de la odometría simulada que AMCL corrige.
+Es una misión de varias metas; la X marca la última.*
+
 ---
 
 ## 8. Trazabilidad

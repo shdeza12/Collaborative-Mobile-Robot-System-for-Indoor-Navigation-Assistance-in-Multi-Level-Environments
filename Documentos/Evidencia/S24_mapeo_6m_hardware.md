@@ -29,6 +29,13 @@ Tres corridas, todas con `throttle 0,4247` en el servo —comprobado en el log d
 | B | 6,00 m | **6,093 m** | 23,35 s | 0,261 m/s | alcanzó; sin mapa (defecto 1) |
 | C | 6,00 m | **6,032 m** | 40,51 s | 0,149 m/s | alcanzó, **con mapa** |
 
+![Mapa del pasillo de piso 2 en metros, con los dos muros y las dos cajas probables](S24_mapa_pasillo6m_HARDWARE.png)
+
+*Añadida el 2026-09-25, dibujada en metros desde el `.pgm`. Los muros se midieron sobre el mapa: sur
+en `y = −1,10`, norte en `y = 1,60`, o sea **2,70 m** de pasillo. Las dos cajas son probables: son
+los dos objetos aislados sobre el eje y el tramo libre termina en ellos, pero no se apuntó su
+posición en el sitio.*
+
 El mapa de la corrida C está en
 [`S24_mapa_pasillo6m_HARDWARE.pgm`](S24_mapa_pasillo6m_HARDWARE.pgm): 447 × 108
 celdas a 5 cm, 1017 ocupadas y 12 638 libres, con una zona explorada de
@@ -57,7 +64,8 @@ es la razón de ser del guion de campo que acompaña a este registro.
 
 **No valida la geometría del mapa.** El cuarto de 1,60 m se pudo contrastar
 contra un flexómetro y dio 1,55 × 0,80 m frente a 1,60 × 0,76 m, una celda de
-error. Aquí no hay contraste: el ancho entre paredes que da el mapa —unos 2,8 m
+error. Aquí no hay contraste: el ancho entre paredes que da el mapa —**2,70 m**, medido sobre el
+mapa el 2026-09-25; «unos 2,8 m» fue la estimación a ojo de la noche anterior
 en el tramo central— no se ha comparado con el pasillo.
 
 ---
@@ -186,16 +194,34 @@ efectivamente enviadas. Un cero ahí es inequívoco.
 | 1 | **Flexómetro contra los 6 m.** Sin verdad de terreno no hay G-2 | guion de campo de piso 2 |
 | 2 | El ancho del pasillo que da el mapa, contrastado con el sitio | ídem |
 | 3 | La velocidad no es repetible: 0,261 contra 0,149 m/s | ídem, con batería anotada |
-| 4 | Nav2 no puede navegar todavía: cuatro defectos de configuración | `nav2_slam_params.yaml`, sin tocar aún |
-| 5 | `amss-jgm9` (`.101`) **no tiene** Nav2, `slam_toolbox` ni rf2o | pendiente explícito de nivelación |
+| ~~4~~ | ~~Nav2 no puede navegar todavía: cuatro defectos de configuración~~ | **falso, ver abajo** |
+| ~~5~~ | ~~`amss-jgm9` (`.101`) **no tiene** Nav2, `slam_toolbox` ni rf2o~~ | **falso, ver abajo** |
 
-El punto 5 incumple la regla de `CLAUDE.md` de tocar los dos carros en la misma
-sesión. No se hizo porque el `.101` estaba **en uso por Jonny** esa noche, y
-cambiar paquetes por debajo de alguien que trabaja es peor que la divergencia.
-Queda anotado para cerrarse en cuanto el vehículo esté libre.
+> ### Corregido el 2026-09-25: los puntos 4 y 5 eran falsos cuando se escribieron
+>
+> **El 5.** `amss-jgm9` sí tenía Nav2, `slam_toolbox` y rf2o. La nivelación de los dos carros se
+> había hecho ese mismo día —mismo Nav2 1.3.13, mismo `slam_toolbox` 2.8.5, rf2o compilado en los
+> dos, `~/tesis/` con los mismos md5, según el §0 de
+> [`GUION_NAV2_HARDWARE.md`](../GUION_NAV2_HARDWARE.md)— y rf2o **ya había medido sobre
+> `amss-jgm9`** esa tarde ([`S24_peldano2_odometria_hardware.md`](S24_peldano2_odometria_hardware.md)).
+> Se afirmó sin comprobarlo en el vehículo, que estaba ocupado, deduciéndolo de que en esta sesión
+> solo se había instalado en el otro. Esas instalaciones del `.102` quedaron redundantes con la
+> nivelación.
+>
+> **El 4.** Los cuatro defectos de abajo son **reales, pero de un fichero que el vehículo no usa**.
+> `nav2_hardware.launch.py` carga `nav2_params_jazzy.yaml`, que planifica con Smac Híbrido y radio
+> de giro mínimo, controla con Regulated Pure Pursuit, recupera con los árboles `ackermann_*.xml`
+> —sin `Spin`— y sube a 0,40 las dos velocidades mínimas por la banda muerta. La prueba de que la
+> conclusión era falsa llegó la misma noche: **Jonny navegó el carro con Nav2**
+> ([`S24_nav2_navegacion_mapa_guardado.md`](S24_nav2_navegacion_mapa_guardado.md)). Se analizó
+> `nav2_slam_params.yaml` porque era el nombre que aparecía en una deuda antigua, sin comprobar qué
+> fichero cargaba el arranque de hardware.
+>
+> Los dos errores tienen la misma forma: una conclusión sobre el vehículo sacada de lo que había a
+> mano, sin mirar lo que el repositorio ya decía. Se conserva la tabla porque `nav2_slam_params.yaml`
+> sigue existiendo y sigue teniendo esos valores, aunque no gobierne el carro.
 
-Sobre el punto 4, los cuatro defectos de `nav2_slam_params.yaml`, medidos y no
-corregidos:
+Los cuatro valores de `nav2_slam_params.yaml`, que siguen ahí pero **no se usan en el vehículo**:
 
 | Línea | Qué dice | Por qué rompe en el vehículo |
 |---|---|---|

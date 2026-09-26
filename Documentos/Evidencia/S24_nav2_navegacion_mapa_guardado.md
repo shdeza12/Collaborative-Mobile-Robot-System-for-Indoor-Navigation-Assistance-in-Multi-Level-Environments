@@ -29,6 +29,12 @@ SLAM en vivo— y `nav2_params_jazzy.yaml`:
 | **Error de llegada** | **0,412 m** |
 | Tolerancia (`xy_goal_tolerance`) | 0,25 m → **FUERA** |
 
+![La navegación sobre el mapa guardado: salida, meta pedida y parada](S24_nav2_navegacion_mapa_guardado.png)
+
+*Figura añadida el 2026-09-25, dibujada sobre el mapa en metros con las cifras de la tabla. La
+franja verde es el tramo útil para el ancho del carro (x = 0,61 a 6,06), medido con
+`zona_libre_mapa.py`; coincide con el «libre limpio de x = 0,5 a x = 6,0» del §3.*
+
 **La navegación funciona; la precisión de llegada no.** Las dos mitades importan y se
 reportan juntas.
 
@@ -146,3 +152,22 @@ de pedir una meta, conviene medir si está en zona libre del mapa.**
   que cuantifica la banda muerta y hoy no existe en ningún documento.
 - **Una esquina.** Nadie ha mapeado ninguna, y es lo que falta para que la navegación
   demostrada sea la del guiado real.
+
+---
+
+## 6. Añadido el 2026-09-25: lo que se hizo con esto
+
+- **Los cinco defectos del §3 quedan resueltos en código**, no en la memoria de quien arranca, en
+  [`nav2_mapa_guardado.sh`](../../herramientas/nav2_mapa_guardado.sh), que Jonny escribió el 25-sep
+  con la misma secuencia de esta corrida.
+- **Sobre el punto 4 del §4 hay una segunda lectura, y se deja escrita.** Ejecutando en el portátil
+  la reescritura que hace `nav2_hardware.launch.py`, **los dos costmaps quedan escuchando
+  `/rplidar_ros/scan`**; y la línea `Subscribed to Topics: scan` **imprime el nombre de la fuente de
+  observación, no el tópico** —en la simulación el YAML dice `/scan` y el log dice `scan`—. Si los
+  servidores de esta corrida se arrancaron por el launch, lo esperable es que el costmap sí
+  escuchara el LiDAR del carro. Lo zanja `ros2 topic info /rplidar_ros/scan --verbose` en el
+  vehículo, y la guía de campaña manda hacerlo antes de mover nada.
+- **Los «5 m» que se dijeron al día siguiente no son una medida**: son la distancia entre las cajas
+  y la impresión de que el carro llegó cerca. La corrida sigue sin verdad de terreno.
+- Todo el procedimiento para repetir esto N veces y medirlo está en
+  [`GUIA_CAMPANA_NAV2_HARDWARE.md`](../GUIA_CAMPANA_NAV2_HARDWARE.md).

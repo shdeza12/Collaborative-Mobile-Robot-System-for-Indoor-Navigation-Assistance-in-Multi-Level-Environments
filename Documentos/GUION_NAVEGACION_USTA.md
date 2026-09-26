@@ -182,6 +182,15 @@ de seguridad, no de precisión.** Verificar antes de correr:
 ros2 topic info /rplidar_ros/scan --verbose | grep -c "Subscription"
 ```
 
+> *Nota añadida el 2026-09-25, después de escribirse este apartado.* La línea
+> `Subscribed to Topics: scan` **imprime el nombre de la fuente de observación, no el
+> tópico**: en la simulación el YAML dice `topic: /scan` y el log dice `scan`, sin la barra. Y
+> ejecutando en el portátil la reescritura de `nav2_hardware.launch.py`, los dos costmaps
+> quedan con `topic: /rplidar_ros/scan`. Así que la corrida del 24-sep pudo escuchar bien; la
+> orden de arriba es la que lo decide, y vale más mirar los **nombres** de los nodos
+> suscritos —`--verbose` sin el `grep -c`— que contarlos. Detalle en el §4.3 de
+> [`GUIA_CAMPANA_NAV2_HARDWARE.md`](GUIA_CAMPANA_NAV2_HARDWARE.md).
+
 ---
 
 ## 3. Bloque 2 — la navegación, con la cadena que ya está probada

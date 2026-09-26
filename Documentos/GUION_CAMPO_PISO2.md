@@ -12,11 +12,15 @@ corra **Jonny** sin haber estado en la sesión donde se armó.
 2. **¿El mapa que construye el vehículo en el pasillo de piso 2 se parece al
    pasillo?** Es lo que decide si se puede navegar sobre un mapa propio.
 
-**Qué NO es.** No es una prueba de Nav2. Nav2 está instalado en el vehículo pero
-su configuración tiene cuatro defectos medidos y **sin corregir** —§6 de
-[`S24_mapeo_6m_hardware.md`](Evidencia/S24_mapeo_6m_hardware.md)—, empezando por
-que la velocidad que pide se traduce en tracción cero. Intentar navegar hoy
-consume la tarde y no deja nada.
+**Para navegar sobre el mapa que sale de aquí**, el procedimiento es otro:
+[`GUIA_CAMPANA_NAV2_HARDWARE.md`](GUIA_CAMPANA_NAV2_HARDWARE.md).
+
+**Qué NO es.** No es una prueba de Nav2.
+
+> *Corregido el 2026-09-25.* Aquí decía que Nav2 no podía navegar por «cuatro defectos de
+> configuración sin corregir». Era falso: esos defectos son de `nav2_slam_params.yaml`, que el
+> vehículo no usa, y esa misma noche Jonny navegó el carro con Nav2. Detalle en el §6 de
+> [`S24_mapeo_6m_hardware.md`](Evidencia/S24_mapeo_6m_hardware.md).
 
 ---
 
@@ -46,13 +50,15 @@ todo lo que había allí.
 | **Si falla** | Falta `rf2o_laser_odometry`: se compila con `ssh deepracer@192.168.0.102 "source /opt/ros/jazzy/setup.bash && cd ~/nav_ws && colcon build --symlink-install --packages-select rf2o_laser_odometry"`, tarda **3 minutos**. Faltan `slam_toolbox` o Nav2: `ssh deepracer@192.168.0.102 "sudo -n apt-get update && sudo -n DEBIAN_FRONTEND=noninteractive apt-get install -y ros-jazzy-navigation2 ros-jazzy-nav2-bringup"`, son 261 paquetes y **hace falta internet en el vehículo**. |
 | **Cierre** | Las tres presentes. |
 
-### 0.3 · El otro vehículo no está listo, y hay que saberlo
+### 0.3 · El otro vehículo
 
-`amss-jgm9` (`.101`) **no tiene** Nav2, ni `slam_toolbox`, ni rf2o. Todo lo de
-este guion se preparó sobre el `.102`. Si vas a usar el `.101`, corre antes los
-dos comandos del §0.2 apuntando a `192.168.0.101` y **anótalo**: la regla de
-`CLAUDE.md` pide los dos vehículos nivelados en la misma sesión, y ahora mismo no
-lo están.
+Los dos vehículos tienen Nav2, `slam_toolbox` y rf2o desde la nivelación del 24-sep
+([`GUION_NAV2_HARDWARE.md`](GUION_NAV2_HARDWARE.md) §0). **Lo que cambia de uno a otro son
+los ficheros de `~/tesis/`**: copia los del §0.1 a los dos, que es lo que pide la regla de
+`CLAUDE.md`, y comprueba con el §0.2 el que vayas a usar.
+
+> *Corregido el 2026-09-25.* Aquí decía que `amss-jgm9` no tenía esos paquetes. Era falso
+> cuando se escribió; ver el §6 de [`S24_mapeo_6m_hardware.md`](Evidencia/S24_mapeo_6m_hardware.md).
 
 ### 0.4 · Qué llevar
 
@@ -192,6 +198,10 @@ Para sacar el ancho del mapa en el escritorio:
 ```bash
 python3 -c "from PIL import Image; import numpy as np; a=np.array(Image.open('mapa.pgm')); p=np.argwhere(a<50); print('ocupado: %.2f x %.2f m' % ((np.ptp(p[:,1])+1)*0.05, (np.ptp(p[:,0])+1)*0.05))"
 ```
+
+Así salió la corrida del 24-sep, dibujada en metros:
+
+![Mapa del pasillo de piso 2 construido conduciendo 6 m](Evidencia/S24_mapa_pasillo6m_HARDWARE.png)
 
 > **Ojo con la extensión del mapa.** La corrida del 24-sep recorrió 6 m y el mapa
 > salió de 21,75 m de largo. No es un error: es lo que el LiDAR alcanzó a ver

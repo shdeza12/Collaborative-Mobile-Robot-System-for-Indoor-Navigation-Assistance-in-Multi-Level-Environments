@@ -34,7 +34,7 @@
 # dispara una persona mirando el carro. Al terminar imprime el comando.
 #
 # USO
-#     CARRO=192.168.0.102 MAPA=/home/deepracer/tesis/mapa.yaml bash nav2_mapa_guardado.sh
+#     CARRO=192.168.0.102 MAPA=/home/deepracer/tesis/mapa.yaml bash nav2_mapa_guardado.sh   (ruta fija del vehiculo)
 #     bash nav2_mapa_guardado.sh --estado
 #     bash nav2_mapa_guardado.sh --parar
 #
@@ -44,15 +44,17 @@ set -uo pipefail
 
 CARRO="${CARRO:-192.168.0.102}"
 USUARIO=deepracer
-D=/home/deepracer/tesis
-MAPA="${MAPA:-/home/deepracer/mapeo_235028/mapa.yaml}"
+# Rutas del VEHICULO, no del portatil: van absolutas porque la tilde no se
+# expande dentro de 'urdf:=~deepracer/...' (solo al principio de palabra).
+D=/home/deepracer/tesis   # ruta fija del vehiculo
+MAPA="${MAPA:-/home/deepracer/mapeo_235028/mapa.yaml}"   # ruta fija del vehiculo
 POSE_X="${POSE_X:-1.0}"
 POSE_Y="${POSE_Y:-0.0}"
 LOGS=/tmp/nav2_campo
 
 # Los tres 'source' que hacen falta, en una sola cadena reutilizable.
-FUENTES='source /opt/ros/jazzy/setup.bash && source /home/deepracer/nav_ws/install/setup.bash'
-FUENTES_PUENTE='source /opt/ros/jazzy/setup.bash && source /home/deepracer/coordinacion_ws/install/setup.bash'
+FUENTES='source /opt/ros/jazzy/setup.bash && source /home/deepracer/nav_ws/install/setup.bash'   # ruta fija del vehiculo
+FUENTES_PUENTE='source /opt/ros/jazzy/setup.bash && source /home/deepracer/coordinacion_ws/install/setup.bash'   # ruta fija del vehiculo
 
 rojo()  { printf '\033[31m%s\033[0m\n' "$*"; }
 verde() { printf '\033[32m%s\033[0m\n' "$*"; }
@@ -171,7 +173,7 @@ arrancar() {
   "Start occupied" = la salida cae en celda no libre: mueve el carro o corrige la pose.
 
   GRABA, y despues manda la meta:
-    ssh $USUARIO@$CARRO "sudo -n bash -c 'cd /home/deepracer && timeout -s INT 150 ros2 bag record -s mcap -o nav2_usta_01 /rplidar_ros/scan /odom /cmd_vel /tf /tf_static /plan /map /amcl_pose; chown -R deepracer:deepracer /home/deepracer/nav2_usta_01'"
+    ssh $USUARIO@$CARRO "sudo -n bash -c 'cd ~deepracer && timeout -s INT 150 ros2 bag record -s mcap -o nav2_usta_01 /rplidar_ros/scan /odom /cmd_vel /tf /tf_static /plan /map /amcl_pose; chown -R deepracer:deepracer ~deepracer/nav2_usta_01'"
 
   LA META (el script NO la manda: la mandas tu mirando el carro):
     ssh $USUARIO@$CARRO "sudo -n bash -c '$FUENTES && ros2 action send_goal --feedback /navigate_to_pose nav2_msgs/action/NavigateToPose \"{pose: {header: {frame_id: map}, pose: {position: {x: 6.0, y: 0.0, z: 0.0}, orientation: {w: 1.0}}}}\"'"
