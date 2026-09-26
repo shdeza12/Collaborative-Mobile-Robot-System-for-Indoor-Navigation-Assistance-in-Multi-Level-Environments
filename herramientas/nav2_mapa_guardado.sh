@@ -53,8 +53,11 @@ POSE_Y="${POSE_Y:-0.0}"
 LOGS=/tmp/nav2_campo
 
 # Los tres 'source' que hacen falta, en una sola cadena reutilizable.
-FUENTES='source /opt/ros/jazzy/setup.bash && source /home/deepracer/nav_ws/install/setup.bash'   # ruta fija del vehiculo
-FUENTES_PUENTE='source /opt/ros/jazzy/setup.bash && source /home/deepracer/coordinacion_ws/install/setup.bash'   # ruta fija del vehiculo
+# La particion del vehiculo, si esta instalada: sin ella, tras aplicar
+# Documentos/DISENO_AISLAMIENTO_DOS_CARROS.md, nada de lo que se lanza ve el laser
+# ni llega a los servos. Si no esta, no hace nada.
+FUENTES='[ -f /etc/deepracer-tesis/particion.xml ] && export FASTRTPS_DEFAULT_PROFILES_FILE=/etc/deepracer-tesis/particion.xml; source /opt/ros/jazzy/setup.bash && source /home/deepracer/nav_ws/install/setup.bash'   # ruta fija del vehiculo
+FUENTES_PUENTE='[ -f /etc/deepracer-tesis/particion.xml ] && export FASTRTPS_DEFAULT_PROFILES_FILE=/etc/deepracer-tesis/particion.xml; source /opt/ros/jazzy/setup.bash && source /home/deepracer/coordinacion_ws/install/setup.bash'   # ruta fija del vehiculo
 
 rojo()  { printf '\033[31m%s\033[0m\n' "$*"; }
 verde() { printf '\033[32m%s\033[0m\n' "$*"; }

@@ -472,6 +472,13 @@ una corrida física completa. Repositorio etiquetado.
 
 ### S25 · 28 sep – 4 oct — Campaña experimental física
 
+> **Replanificado el 2026-09-25 contra las fechas del acta**, en [`PLAN_S25.md`](PLAN_S25.md). La campaña
+> de RF-27 exige el protocolo completo sobre los dos carros, que es G-5, y G-5 exige antes resolver que
+> con los dos carros encendidos una orden mueve los dos ([`DISENO_AISLAMIENTO_DOS_CARROS.md`](DISENO_AISLAMIENTO_DOS_CARROS.md)).
+> Así que S25 queda para las compuertas G-2 y G-3 (corte C-1, vie 2 oct) y para montar el sistema
+> real; **G-5 pasa a S26 y la campaña de RF-27 a S27**, dentro del corte C-3 del 16 de octubre que el
+> acta ya fijaba. El vídeo de la demostración se graba con la campaña.
+
 | Actividad |
 |---|
 | Ejecutar entre 5 y 10 repeticiones con los vehículos reales **en el pasillo de la USTA, en dos plantas** (etapa 3). El laboratorio GED es la compuerta previa —etapa 2, `ENTORNO_DE_EVALUACION.md` §6—, no el sitio de la campaña: no tiene discontinuidad vertical, así que ahí la continuidad entre niveles no se puede medir |

@@ -96,7 +96,7 @@ El acta de decisión fija seis compuertas con fecha. Su estado al cierre de la s
         G-2 odometría & Error $\leq$ 10~\% sobre un recorrido medido de $\geq$ 5~m & Medida sobre 3~m; falta la de 5~m con cinta \\ \addlinespace
         G-3 navegación de uno & Punto a punto con Nav2, llegada verificada & Navegó una vez; paró a 0,412~m con tolerancia de 0,25~m \\ \addlinespace
         G-5 protocolo completo & Una misión con relevo sobre los dos vehículos & Pendiente \\ \addlinespace
-        G-6 RF-27 & Entre 5 y 10 corridas con registro & Campaña montada \\ \bottomrule
+        G-6 RF-27 & Entre 5 y 10 misiones con el protocolo completo & Pide primero G-5 \\ \bottomrule
     \end{tabular}
 \end{table}
 
@@ -185,20 +185,21 @@ Esa misma noche se cargó ese mapa y \textbf{Nav2 llevó el vehículo de forma a
 
 Que fue navegación y no un empujón lo dicen tres cosas de la grabación: el plan \textbf{se fue consumiendo} (de 59 a 7 poses), \textbf{la dirección trabajó} ---corrigiendo el rumbo cuando el carro se desviaba--- y las órdenes salieron del planificador. \textbf{La precisión de llegada no}: 0,412~m contra una tolerancia de 0,25. La causa está medida: por debajo de 0,40~m/s el vehículo no se mueve, así que se aproxima a la meta sin poder frenar antes, y la sobrepasa.
 
-\section{La campaña física, montada y documentada}
+\section{Las compuertas, montadas; el bloqueo del sistema real, diseñado}
 \label{sec:campana}
 
-El 25 de septiembre quedó lista la campaña que convierte esa navegación en G-2, G-3 y RF-27 a la vez, en \texttt{GUIA\_CAMPANA\_NAV2\_HARDWARE.md}, escrita para que la ejecute cualquiera que descargue el repositorio (Figura \ref{fig:campana}).
+El 25 de septiembre quedó lista la sesión que convierte esa navegación en G-2 y G-3, en \texttt{GUIA\_CAMPANA\_NAV2\_HARDWARE.md}, escrita para que la ejecute cualquiera que descargue el repositorio (Figura \ref{fig:campana}).
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{S24_campana_disposicion_pasillo6m.png}
-    \caption{Disposición de la campaña sobre el mapa. El tramo útil para el ancho del carro mide 5,45~m, así que caben corridas de 5~m ---lo que pide G-2--- sin volver a mapear.}
+    \caption{Disposición de la sesión de compuertas sobre el mapa. El tramo útil para el ancho del carro mide 5,45~m, así que caben corridas de 5~m ---lo que pide G-2--- sin volver a mapear.}
     \label{fig:campana}
 \end{figure}
 
 \begin{itemize}[leftmargin=*]
-    \item \textbf{Una corrida de 5~m con cinta da a la vez un dato de G-2, uno de G-3 y cuenta para RF-27.}
+    \item \textbf{Tres corridas de 5~m con cinta cierran G-2 y dan G-3.} No cuentan para RF-27, que pide el protocolo completo sobre los dos carros.
+    \item \textbf{El bloqueo del sistema real, diseñado.} Con los dos carros encendidos, una orden mueve los dos y cada odometría recibe el láser del otro, porque los tópicos de fábrica no llevan espacio de nombres. La solución ---una partición DDS por vehículo para esos tópicos, sin tocar el software de AWS--- pasó \textbf{9 de 9} en el portátil y se confirma en los carros el lunes 28 (\texttt{DISENO\_AISLAMIENTO\_DOS\_CARROS.md}).
     \item La herramienta que ejecuta cada corrida se \textbf{ensayó contra Nav2 en simulación} con los vehículos apagados. El ensayo encontró que la pose de AMCL, al parar, puede ir \textbf{hasta 25~cm atrasada}; forzando su corrección, AMCL y la odometría quedan a \textbf{1,7~cm}.
     \item En paralelo se escribió \texttt{GUION\_NAVEGACION\_USTA.md}, la vía hermana: navegar el edificio sobre el mapa del modelo de Gazebo, \textbf{validando antes el modelo contra el edificio con flexómetro} ($\leq$ 2~\%). Las dos comparten el arranque, \texttt{nav2\_mapa\_guardado.sh}.
     \item Ver la corrida después, en RViz, funciona. \textbf{Verla en vivo desde el portátil no}: las dos distribuciones de ROS se descubren pero no intercambian datos, y está medido.
@@ -206,13 +207,14 @@ El 25 de septiembre quedó lista la campaña que convierte esa navegación en G-
 
 \section{Lo que la semana corrigió de sí misma}
 
-Cuatro conclusiones de esta misma semana resultaron falsas, y se publican corregidas en vez de borrarse:
+Cinco conclusiones de esta misma semana resultaron falsas, y se publican corregidas en vez de borrarse:
 
 \begin{enumerate}[leftmargin=*]
     \item \textbf{La ``avería'' del segundo vehículo} (21 de septiembre) no existía: era la regla del dueño de la Sección \ref{sec:causa}.
     \item \textbf{Que el LiDAR se podía leer sin privilegios} (24 de septiembre, mañana) se refutó esa misma tarde con cero barridos en 20~s.
     \item \textbf{Que \texttt{amss-jgm9} no tenía Nav2 ni rf2o, y que Nav2 no podía navegar por cuatro defectos de configuración} (24 de septiembre, noche): falso las dos veces. El vehículo estaba nivelado ese día, y los defectos eran de un fichero que el vehículo no carga. Nav2 navegó esa misma noche.
     \item \textbf{Que el carro ``avanzó 5~m''} (25 de septiembre): es la distancia entre las cajas y la impresión de que llegó cerca, no una medida.
+    \item \textbf{Que las corridas de un solo carro contaban para RF-27} (25 de septiembre): RF-27 pide el protocolo completo, con los dos carros y el relevo entre pisos.
 \end{enumerate}
 
 \section{Aporte de la semana a los objetivos específicos}
@@ -233,7 +235,7 @@ Cuatro conclusiones de esta misma semana resultaron falsas, y se publican correg
         G-1 y G-4 & OE2 & Actuación y dos vehículos en el mismo grafo, verificados \\ \addlinespace
         Odometría medida sobre 3~m & OE2 & Primera evidencia física de RF-13 \\ \addlinespace
         SLAM y Nav2 sobre el vehículo & OE2, OE4 & La navegación autónoma física existe \\ \addlinespace
-        Campaña física montada & OE4 & Deja RF-27 ejecutable y medible \\ \addlinespace
+        Sesión de compuertas y diseño del aislamiento & OE2, OE4 & Deja G-2 y G-3 medibles antes del corte, y desbloquea el sistema real \\ \addlinespace
         Consolidación de datos & OE4 & Criterio de cierre de la semana \\ \bottomrule
     \end{tabular}
 \end{table}
@@ -251,7 +253,7 @@ Cuatro conclusiones de esta misma semana resultaron falsas, y se publican correg
         OE1 & 100~\% & --- & --- \\ \addlinespace
         OE2 & \textbf{65~\%}, sin cambio & G-1, G-4, odometría, SLAM y Nav2 sobre el vehículo & Ninguno de sus cinco requisitos parciales cerró todavía \\ \addlinespace
         OE3 & 100~\% & --- & --- \\ \addlinespace
-        OE4 & \textbf{85~\%}, sin cambio & Datos consolidados; campaña física montada & RF-27, y la decisión sobre R15 \\ \bottomrule
+        OE4 & \textbf{85~\%}, sin cambio & Datos consolidados & RF-27, que pide el sistema completo; y la decisión sobre R15 \\ \bottomrule
     \end{tabular}
 \end{table}
 
@@ -283,7 +285,7 @@ Las tres actividades planificadas se cumplieron: consolidar los datos, escribir 
 
 \subsection{Trabajo previsto para la Semana 25}
 
-La campaña física ---entre 5 y 10 corridas--- con el corte C-1 del \textbf{viernes 2 de octubre} para G-2 y G-3; \textbf{antes de correr}, la decisión escrita de los directores sobre la tolerancia de llegada; y el vídeo de la demostración.
+Con el plan día a día en \texttt{PLAN\_S25.md}: la sesión de compuertas G-2 y G-3 antes del corte C-1 del \textbf{viernes 2 de octubre}; aislar los dos carros y montar la pila con espacio de nombres; validar con cinta el modelo del edificio y medir la red entre pisos; y pedir por escrito a los directores el sitio de la etapa 3, el N de RF-27 y la tolerancia de llegada. \textbf{El sistema real ---G-5--- va en la Semana 26 y la campaña de RF-27 en la 27}, con cierre de datos el 16 de octubre.
 
 \section{Conclusiones de la Semana}
 
@@ -292,8 +294,8 @@ La campaña física ---entre 5 y 10 corridas--- con el corte C-1 del \textbf{vie
     \item \textbf{Una sola causa explicaba tres semanas de síntomas}, y encontrarla desbloqueó dos compuertas el mismo día.
     \item \textbf{La odometría del vehículo mide}: tres de tres dentro del $\pm$10~\% sobre 3~m. Falta la medida de 5~m con cinta, que es G-2.
     \item \textbf{La navegación funciona y la precisión de llegada no}, con el mecanismo medido. La tolerancia es decisión de los directores y tiene que tomarse antes de la campaña.
-    \item \textbf{La campaña que cierra G-2, G-3 y RF-27 está montada, ensayada en simulación y documentada} para que la repita cualquiera.
-    \item \textbf{Cuatro conclusiones de la semana se corrigieron dentro de la misma semana}, y se publican corregidas.
+    \item \textbf{La sesión que cierra G-2 y G-3 está montada, ensayada en simulación y documentada}, y el bloqueo que impide el sistema real ---los dos carros pisándose--- tiene un diseño probado en el portátil.
+    \item \textbf{Cinco conclusiones de la semana se corrigieron dentro de la misma semana}, y se publican corregidas.
 \end{enumerate}
 
 \section{Anexos}

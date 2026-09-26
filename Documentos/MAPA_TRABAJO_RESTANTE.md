@@ -36,26 +36,43 @@ haya avanzado.
 | **G-2** odometría | ⏳ **C-1, vie 2-oct** | rf2o publica y mide: 3 de 3 dentro del ±10 % sobre **3 m**, empujando a mano ([`S24_peldano2_odometria_hardware.md`](Evidencia/S24_peldano2_odometria_hardware.md)). Corridas de 6 m bajo motor, **sin cinta** | **Corridas de 5 m con flexómetro.** Cada corrida de la campaña es una medida de G-2 | nada: hay mapa, sitio, herramientas y guía |
 | **G-3** navegación de uno | ⏳ **C-1, vie 2-oct** | **Nav2 navegó el carro una vez** (Jonny, 24-sep) y paró a **0,412 m** de la meta contra 0,25 ([`S24_nav2_navegacion_mapa_guardado.md`](Evidencia/S24_nav2_navegacion_mapa_guardado.md)) | la campaña, con la llegada verificada contra `/odom` y cinta | **la tolerancia de llegada, por escrito y antes de correr** (directores) |
 | **G-5** protocolo completo | ⏳ | — | una misión con relevo sobre los dos vehículos | G-3 |
-| **G-6** RF-27 | ⏳ | — | N entre 5 y 10 corridas con registro | la campaña; para el protocolo completo, G-5 |
+| **G-6** RF-27 | ⏳ | — | N entre 5 y 10 misiones **con el protocolo completo** | G-5, y la decisión de N de los directores |
 
-**Lo que lo cierra todo es una sola campaña**, y está montada:
-[`GUIA_CAMPANA_NAV2_HARDWARE.md`](GUIA_CAMPANA_NAV2_HARDWARE.md). La vía hermana, la del edificio
-sobre el mapa derivado del modelo de Gazebo, es la de
-[`GUION_NAVEGACION_USTA.md`](GUION_NAVEGACION_USTA.md), de Jonny: su primer bloque es validar el
-modelo contra el edificio con flexómetro, y si pasa, **se navega el edificio sin SLAM**. Las dos
-comparten el arranque, [`nav2_mapa_guardado.sh`](../herramientas/nav2_mapa_guardado.sh). Una corrida de 5 m con cinta
-da a la vez un dato de G-2, uno de G-3 y cuenta para RF-27. El mapa del pasillo de piso 2 admite
-**5,45 m** de avance para el ancho del carro, así que no hace falta volver a mapear si el sitio se
-reproduce.
+**G-2 y G-3 los cierra una sesión corta**, de tres corridas de 5 m con cinta, montada en
+[`GUIA_CAMPANA_NAV2_HARDWARE.md`](GUIA_CAMPANA_NAV2_HARDWARE.md). El mapa del pasillo de piso 2
+admite **5,45 m** de avance para el ancho del carro, así que no hace falta volver a mapear.
 
-### 0.2 · Las dos decisiones que van por escrito ANTES de la campaña
+**G-5 y G-6 son el sistema real**, y antes de intentarlos hay dos cosas que hoy lo impiden: con los
+dos carros encendidos **una orden mueve los dos y cada odometría recibe el láser del otro**, y toda la
+navegación sobre hardware se ha hecho **sin espacio de nombres**, cuando el coordinador los necesita.
+La primera tiene diseño, probado en el portátil:
+[`DISENO_AISLAMIENTO_DOS_CARROS.md`](DISENO_AISLAMIENTO_DOS_CARROS.md). **El plan de la semana, día a
+día, está en [`PLAN_S25.md`](PLAN_S25.md).**
 
-1. **La tolerancia de llegada.** Es 0,25 m y está cuestionada desde los dos lados: la campaña OE4
-   en simulación se quedó corta 0,28–0,35 m y la navegación del 24-sep se pasó 0,412 m. Es de los
-   directores, como la del criterio original. **No se decide viendo los resultados.**
-2. **La velocidad de la campaña** (`max_speed_pct`). Con 0,68 el `throttle` es 0,4247, que movió
-   el carro el 24-sep a 0,14–0,26 m/s; con 0,90 es 0,6327. Ir más despacio **puede** reducir el
-   error de llegada, y es una de las cosas que la campaña mide. Se fija una y no se cambia a mitad.
+La vía hermana para los mapas, la del edificio sobre el modelo de Gazebo, es la de
+[`GUION_NAVEGACION_USTA.md`](GUION_NAVEGACION_USTA.md), de Jonny: su primer bloque valida el modelo
+contra el edificio con flexómetro, y si pasa, **se navega el edificio sin SLAM**.
+
+> *Corregido el 2026-09-25, el mismo día.* Este apartado decía que una corrida de 5 m con cinta
+> «cuenta para RF-27». Es falso: RF-27 pide el protocolo completo sobre los dos carros.
+
+### 0.2 · Lo que decide otro, y va por escrito ANTES de correr
+
+Tres decisiones son **de los directores** —dos las fija el §6 del acta y la tercera la trae la
+navegación del 24-sep— y **la casilla «comunicada a los directores» del acta está vacía**: el acta
+nunca se les ha enviado. Todo se pide el lunes 28, con un borrador ya escrito en el §6 de
+[`PLAN_S25.md`](PLAN_S25.md).
+
+1. **El sitio de la etapa 3.** El acta dice que *no se corre nada de la etapa 3 hasta que esté por
+   escrito*, y el sistema real con relevo entre pisos **es** la etapa 3.
+2. **N = 5 o N = 10 en RF-27.**
+3. **La tolerancia de llegada.** Es 0,25 m y está cuestionada desde los dos lados: la campaña OE4
+   en simulación se quedó corta 0,28–0,35 m y la navegación del 24-sep se pasó 0,412 m. **No se decide
+   viendo los resultados.**
+
+Y una que es nuestra: **la velocidad** (`max_speed_pct`). Con 0,68 el `throttle` es 0,4247, que movió
+el carro el 24-sep a 0,14–0,26 m/s; con 0,90 es 0,6327. Ir más despacio **puede** reducir el error de
+llegada, y es de lo que se mide. Se fija una y no se cambia a mitad.
 
 ### 0.3 · Lo que la primera corrida tiene que validar, porque no se ha ejecutado nunca en el vehículo
 
@@ -69,13 +86,14 @@ reproduce.
 
 | | Qué | Por qué importa |
 |---|---|---|
+| 0 | **Aislar los dos carros y montar la pila con espacio de nombres** | sin ello el sistema real no puede correr: es lo primero de [`PLAN_S25.md`](PLAN_S25.md), bloques A y C |
 | 1 | **Copiar los ficheros nuevos a `~/tesis/` de los dos carros** | la regla de `CLAUDE.md`; los paquetes ya están nivelados desde el 24-sep, los ficheros de esta guía no |
 | 2 | ~~**Entregables de S23 y S24**~~ **emitidos el 2026-09-25**, en `.tex` y en `.md` ([`Entregable_semana_24.md`](Entregables/Entregable_semana_24.md)) | — |
 | 3 | **La velocidad no es repetible**: 0,261 y 0,149 m/s con el mismo mando | hasta explicarlo, la cifra de RF-14 es un rango; primer sospechoso, la batería |
 | 4 | **RF-14, la escala de `/cmd_vel`**: el launch esquiva la banda muerta, no la corrige | calibrar `MAX_SPEED` en el puente ([`S24_analisis_previo_RF11.md`](Evidencia/S24_analisis_previo_RF11.md) §4) |
 | 5 | **Una esquina** | nadie ha mapeado ni navegado una en el vehículo; el guiado real las tiene |
-| 6 | **El pasillo abierto** | el tramo de la campaña está encajonado; los pasillos abiertos miden 5,1 % y 5,9 % de información de avance |
-| 7 | **Ver en vivo** | no funciona desde el portátil (Humble ↔ Jazzy); la vía por WebSocket está descrita y **sin validar**. La campaña no la necesita |
+| 6 | **El pasillo abierto** | el tramo de las compuertas está encajonado; los pasillos abiertos miden 5,1 % y 5,9 % de información de avance |
+| 7 | **Ver en vivo** | no funciona desde el portátil (Humble ↔ Jazzy); la vía por WebSocket está descrita y **sin validar**. Nada de lo planificado la necesita |
 | 8 | **La declaración escrita de R11** | sigue pendiente (§5, punto 6) |
 | 9 | **R15: el mapa de la campaña OE4 leía como libre lo desconocido** (Jonny, 25-sep) | decidir si se comprueba sobre los bags conservados o se declara la limitación en el capítulo de resultados |
 

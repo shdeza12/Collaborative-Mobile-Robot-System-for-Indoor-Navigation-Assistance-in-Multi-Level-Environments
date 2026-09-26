@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Saca G-2, G-3 y la tasa de exito de una campana del vehiculo real.
+"""Saca G-2 y G-3 de una sesion de corridas del vehiculo real.
 
     analizar_campana_nav2.py <campana.csv> [--tolerancia 0.25] [--minimo 5.0]
 
@@ -20,7 +20,10 @@ G-3 (ACTA_GO_NOGO.md:105): llegada verificada contra /odom, no contra el
     herramienta y la de cinta- y se cuenta como llegada la que cae dentro de
     la tolerancia SEGUN LA CINTA.
 
-RF-27: N entre 5 y 10 repeticiones con registro. Se informa el N con cinta.
+RF-27 NO SE CALCULA AQUI. Pide que la demostracion fisica ejecute el protocolo
+    completo -los dos vehiculos, el coordinador y el relevo entre pisos-, y una
+    corrida de un solo vehiculo en recta no lo es. Una version anterior de esta
+    herramienta informaba «N con cinta» como si fuera el N de RF-27; era falso.
 
 LO QUE NO HACE
 --------------
@@ -138,9 +141,8 @@ def main():
     print('- Nav2 declaró SUCCEEDED en %d de %d. **No es el criterio**: G-3 pide'
           ' verificar la llegada, no creer a Nav2.' % (exitos, n))
     print()
-    print('## RF-27')
-    print()
-    print('- N con registro y cinta: **%d** (el requisito pide entre 5 y 10).' % n)
+    print('> Estas corridas **no cuentan para RF-27**, que pide el protocolo completo')
+    print('> sobre los dos vehiculos. Ver Documentos/PLAN_S25.md.')
     return 0
 
 

@@ -30,7 +30,7 @@ El acta de decisión fija seis compuertas con fecha. Al cierre de la semana:
 | **G-2** odometría | error ≤ 10 % sobre un recorrido medido de ≥ 5 m | ⏳ medida sobre 3 m; falta la de 5 m con cinta |
 | **G-3** navegación de uno | punto a punto con Nav2, llegada verificada | ⏳ navegó una vez; paró a 0,412 m con tolerancia de 0,25 |
 | **G-5** protocolo completo | una misión con relevo sobre los dos vehículos | ⏳ |
-| **G-6** RF-27 | 5 a 10 corridas con registro | ⏳ campaña montada |
+| **G-6** RF-27 | 5 a 10 misiones con el protocolo completo | ⏳ pide primero G-5 |
 
 G-2 y G-3 tienen fecha: **corte C-1, viernes 2 de octubre**.
 
@@ -124,17 +124,22 @@ Que fue navegación y no un empujón lo dicen tres cosas de la grabación: el pl
 0,25. La causa está medida: por debajo de 0,40 m/s el vehículo no se mueve, así que se aproxima a la
 meta sin poder frenar antes, y la sobrepasa.
 
-## 7. La campaña física, montada y documentada
+## 7. Las compuertas, montadas; el bloqueo del sistema real, diseñado
 
-El 25-sep quedó lista la campaña que convierte esa navegación en G-2, G-3 y RF-27 a la vez, en
+El 25-sep quedó lista la sesión que convierte esa navegación en G-2 y G-3, en
 `GUIA_CAMPANA_NAV2_HARDWARE.md`, escrita para que la ejecute cualquiera que descargue el repositorio:
 
-![Disposición de la campaña sobre el mapa](../Evidencia/S24_campana_disposicion_pasillo6m.png)
+![Disposición de la sesión de compuertas sobre el mapa](../Evidencia/S24_campana_disposicion_pasillo6m.png)
 
 *Figura 3. El tramo útil para el ancho del carro mide 5,45 m, así que caben corridas de 5 m —lo que
 pide G-2— sin volver a mapear.*
 
-- **Una corrida de 5 m con cinta da a la vez un dato de G-2, uno de G-3 y cuenta para RF-27.**
+- **Tres corridas de 5 m con cinta cierran G-2 y dan G-3.** No cuentan para RF-27, que pide el
+  protocolo completo sobre los dos carros.
+- **El bloqueo del sistema real, diseñado.** Con los dos carros encendidos, una orden mueve los dos y
+  cada odometría recibe el láser del otro, porque los tópicos de fábrica no llevan espacio de nombres.
+  La solución —una partición DDS por vehículo para esos tópicos, sin tocar el software de AWS— pasó
+  **9 de 9** en el portátil y se confirma en los carros el lunes 28 (`DISENO_AISLAMIENTO_DOS_CARROS.md`).
 - La herramienta que ejecuta cada corrida se **ensayó contra Nav2 en simulación** con los vehículos
   apagados. El ensayo encontró que la pose de AMCL, al parar, puede ir **hasta 25 cm atrasada**; forzando
   su corrección, AMCL y la odometría quedan a **1,7 cm**.
@@ -146,7 +151,7 @@ pide G-2— sin volver a mapear.*
 
 ## 8. Lo que la semana corrigió de sí misma
 
-Cuatro conclusiones de esta misma semana resultaron falsas, y se publican corregidas en vez de
+Cinco conclusiones de esta misma semana resultaron falsas, y se publican corregidas en vez de
 borrarse:
 
 1. **La «avería» del segundo vehículo** (21-sep) no existía: era la regla del dueño del §4.
@@ -157,6 +162,8 @@ borrarse:
    defectos eran de un fichero que el vehículo no carga. Jonny navegó esa misma noche.
 4. **Que el carro «avanzó 5 m»** (25-sep): es la distancia entre las cajas y la impresión de que llegó
    cerca, no una medida.
+5. **Que las corridas de un solo carro contaban para RF-27** (25-sep): RF-27 pide el protocolo
+   completo, con los dos carros y el relevo entre pisos.
 
 ## 9. Aporte de la semana a los objetivos específicos
 
@@ -167,7 +174,7 @@ borrarse:
 | G-1 y G-4 | OE2 | Actuación y dos vehículos en el mismo grafo, verificados |
 | Odometría medida sobre 3 m | OE2 | Primera evidencia física de RF-13 |
 | SLAM y Nav2 sobre el vehículo | OE2, OE4 | La navegación autónoma física existe |
-| Campaña física montada | OE4 | Deja RF-27 ejecutable y medible |
+| Sesión de compuertas y diseño del aislamiento | OE2, OE4 | Deja G-2 y G-3 medibles antes del corte, y desbloquea el sistema real |
 | Consolidación de datos | OE4 | Criterio de cierre de la semana |
 
 | ID | Avance | Cubierto esta semana | Lo que lo mantiene detenido |
@@ -175,7 +182,7 @@ borrarse:
 | OE1 | 100 % | — | — |
 | OE2 | **65 %** (sin cambio) | G-1, G-4, odometría, SLAM y Nav2 sobre el vehículo | Ninguno de sus cinco requisitos parciales cerró todavía |
 | OE3 | 100 % | — | — |
-| OE4 | **85 %** (sin cambio) | Datos consolidados; campaña física montada | RF-27; y la decisión sobre R15 |
+| OE4 | **85 %** (sin cambio) | Datos consolidados | RF-27, que pide el sistema completo; y la decisión sobre R15 |
 
 El avance agregado sin ponderar sigue en **87,5 %**, frente a un **75,0 %** del calendario (semana 24 de
 32). **Veintinueve de treinta y seis requisitos verificados**, los mismos que la semana anterior.
@@ -198,9 +205,11 @@ resultados —adelantado a la Semana 23— y emitir el informe de S23. **Todo el
 real no estaba planificado para esta semana** y se declara como tal: el cronograma lo situaba en S25,
 y lo que se hizo aquí es la preparación que lo hace posible.
 
-**Para la Semana 25 (28 sep – 4 oct):** la campaña física —entre 5 y 10 corridas— con el corte C-1 del
-**viernes 2 de octubre** para G-2 y G-3; **antes de correr**, la decisión escrita de los directores
-sobre la tolerancia de llegada; y el vídeo de la demostración.
+**Para la Semana 25**, con el plan día a día en `PLAN_S25.md`: la sesión de compuertas G-2 y G-3
+antes del corte C-1 del **viernes 2 de octubre**; aislar los dos carros y montar la pila con espacio
+de nombres; validar con cinta el modelo del edificio y medir la red entre pisos; y pedir por escrito a
+los directores el sitio de la etapa 3, el N de RF-27 y la tolerancia de llegada. **El sistema real
+—G-5— va en la Semana 26 y la campaña de RF-27 en la 27**, con cierre de datos el 16 de octubre.
 
 ## 11. Conclusiones
 
@@ -212,9 +221,9 @@ sobre la tolerancia de llegada; y el vídeo de la demostración.
    5 m con cinta, que es G-2.
 4. **La navegación funciona y la precisión de llegada no**, con el mecanismo medido. La tolerancia
    es decisión de los directores y tiene que tomarse antes de la campaña.
-5. **La campaña que cierra G-2, G-3 y RF-27 está montada, ensayada en simulación y documentada** para
-   que la repita cualquiera.
-6. **Cuatro conclusiones de la semana se corrigieron dentro de la misma semana**, y se publican
+5. **La sesión que cierra G-2 y G-3 está montada, ensayada en simulación y documentada**, y el bloqueo
+   que impide el sistema real —los dos carros pisándose— tiene un diseño probado en el portátil.
+6. **Cinco conclusiones de la semana se corrigieron dentro de la misma semana**, y se publican
    corregidas.
 
 ## Anexo — evidencia citada
@@ -232,3 +241,4 @@ sobre la tolerancia de llegada; y el vídeo de la demostración.
 | `Documentos/Evidencia/S24_nav2_navegacion_mapa_guardado.md` | §6, Nav2 |
 | `Documentos/Evidencia/S24_consolidacion_datos_oe4.md` | §2 |
 | `Documentos/GUIA_CAMPANA_NAV2_HARDWARE.md` y `GUION_NAVEGACION_USTA.md` | §7 |
+| `Documentos/DISENO_AISLAMIENTO_DOS_CARROS.md` y `PLAN_S25.md` | §7 y §10 |

@@ -1,4 +1,4 @@
-# Guía — campaña de navegación con Nav2 sobre el vehículo real
+# Guía — sesión de compuertas G-2 y G-3: navegación con Nav2 sobre el vehículo real
 
 **Redactada:** 2026-09-25 (S24).
 **Para quién:** cualquiera que clone el repositorio. No hace falta haber estado en ninguna sesión
@@ -7,15 +7,19 @@ anterior: todo lo que se necesita está aquí o enlazado desde aquí.
 Si hoy tiene otra, sustitúyela en todas las órdenes; `ssh deepracer@<ip> hostname` debe contestar
 `amss-ez9n`. Con el otro vehículo también vale, copiando antes los ficheros: ver §0.2.
 
-**Qué contesta una campaña así, de una sola vez:**
+**Qué contesta, con tres corridas:**
 
 | Pregunta | Criterio | Fuente |
 |---|---|---|
 | **G-2** · ¿cuánto se equivoca la odometría? | error ≤ 10 % sobre un recorrido **medido** de ≥ 5 m | [`ACTA_GO_NOGO.md`](ACTA_GO_NOGO.md):104 |
 | **G-3** · ¿llega el vehículo adonde se le manda? | llegada verificada contra `/odom`, **no** contra el `SUCCEEDED` de Nav2 | [`ACTA_GO_NOGO.md`](ACTA_GO_NOGO.md):105 |
-| **RF-27** · ¿se repite? | N entre 5 y 10 corridas con registro | [`REQUISITOS.md`](REQUISITOS.md) |
+Las dos son del corte **C-1 del viernes 2 de octubre**: si no se alcanzan, el acta revierte a NO-GO.
 
-Las tres son del corte **C-1 del viernes 2 de octubre** o cuelgan de él.
+> **Corregido el 2026-09-25.** Una versión anterior de esta guía decía que estas corridas contaban
+> para **RF-27**. Es falso: RF-27 pide que la demostración física *ejecute el protocolo completo*
+> —los dos carros, el coordinador y el relevo entre pisos—, y una corrida de un solo carro en recta no
+> lo es. Por eso esto dejó de ser una campaña de 5 a 10 corridas: son **tres**, y cierran compuertas.
+> El camino al sistema real está en [`PLAN_S25.md`](PLAN_S25.md).
 
 **Esta guía y [`GUION_NAVEGACION_USTA.md`](GUION_NAVEGACION_USTA.md) son complementarias.** Esta
 navega sobre el mapa que el propio carro construyó, en un tramo encajonado, y mide G-2 y G-3. La de
@@ -38,7 +42,7 @@ Esta tabla va primero porque es lo que decide cuánto fiarse de cada paso.
 | [`zona_libre_mapa.py`](../herramientas/zona_libre_mapa.py): dónde se puede pedir una meta | **probado** sobre el mapa real del pasillo | 2026-09-25 |
 | [`ver_bag_rviz.sh`](../herramientas/ver_bag_rviz.sh): ver la corrida en RViz después | **probado** con un bag real de Jazzy | 2026-09-25 |
 | [`dibujar_corrida_nav2.py`](../herramientas/dibujar_corrida_nav2.py): imagen de la corrida | **probado** con un bag de la campaña OE4; lectura de bags de Jazzy comprobada | 2026-09-25 |
-| [`analizar_campana_nav2.py`](../herramientas/analizar_campana_nav2.py): G-2, G-3 y RF-27 del CSV | **probado** con valores conocidos, cuentas verificadas a mano | 2026-09-25 |
+| [`analizar_campana_nav2.py`](../herramientas/analizar_campana_nav2.py): G-2 y G-3 del CSV | **probado** con valores conocidos, cuentas verificadas a mano | 2026-09-25 |
 | **Ver el vehículo en vivo desde el portátil** | **no funciona, y está medido** | §6.2 |
 
 Lo que se deduce: **la primera corrida de la primera campaña es también la validación del script
@@ -360,10 +364,11 @@ tres columnas `CINTA_*` del CSV (§7).
 ### 5.5 · Devolver el carro y repetir
 
 A mano, a la línea de salida, en la misma postura. Siguiente corrida con el identificador siguiente
-(`c1_02`, `c1_03`…) y **la misma orden**. RF-27 pide entre 5 y 10.
+(`c1_02`, `c1_03`) y **la misma orden**. **Tres corridas** bastan para las compuertas; más corridas
+de un solo carro no aportan a RF-27, que pide el protocolo completo.
 
 **Después de la primera corrida, antes de seguir: mírala** (§6.1). Es la única forma de saber que
-AMCL localiza bien antes de gastar nueve corridas más.
+AMCL localiza bien antes de gastar las otras dos.
 
 ---
 
@@ -432,7 +437,7 @@ X marca la última. En el vehículo, la separación entre esas dos trazas es la 
 
 ---
 
-## 7. Al volver: sacar G-2, G-3 y RF-27
+## 7. Al volver: sacar G-2 y G-3
 
 **1. Traer todo:**
 
@@ -458,7 +463,7 @@ hoja de cálculo o editor; la coma decimal se acepta.
 python3 herramientas/analizar_campana_nav2.py ~/tesis_evidencia/campana_c1/campana_c1.csv
 ```
 
-Sale una tabla por corrida y el resumen de G-2, G-3 y RF-27, en Markdown, listo para pegar en el
+Sale una tabla por corrida y el resumen de G-2 y G-3, en Markdown, listo para pegar en el
 registro de evidencia. Las corridas **sin cinta no cuentan**, y la herramienta las nombra.
 
 > **La tolerancia de llegada no se toca aquí.** Es 0,25 m y está cuestionada desde los dos lados:

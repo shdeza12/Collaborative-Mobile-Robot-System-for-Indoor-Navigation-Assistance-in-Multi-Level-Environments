@@ -29,6 +29,12 @@
 #     ... lo que sea ...
 #     cerrar_bag
 
+# Particion del vehiculo (Documentos/DISENO_AISLAMIENTO_DOS_CARROS.md). Si esta
+# instalada, este proceso TIENE que cargarla: sin ella no ve /rplidar_ros/scan ni
+# /tf ni llega a los servos, y no da ningun error. Si no esta instalada -antes de
+# aplicar el diseno, o en el portatil-, esto no hace nada.
+[ -f /etc/deepracer-tesis/particion.xml ] && export FASTRTPS_DEFAULT_PROFILES_FILE=/etc/deepracer-tesis/particion.xml
+
 arrancar_bag() {
     local destino="$1"; shift
     set -m

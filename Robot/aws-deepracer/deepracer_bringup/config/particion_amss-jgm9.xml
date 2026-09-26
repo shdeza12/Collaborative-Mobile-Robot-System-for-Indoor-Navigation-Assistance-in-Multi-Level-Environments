@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Particion DDS del vehiculo amss-jgm9. Se instala EN ESE vehiculo como
+  /etc/deepracer-tesis/particion.xml -el mismo nombre en los dos, para que ningun
+  script tenga que saber en que carro corre- y la carga todo proceso de ese
+  vehiculo mediante FASTRTPS_DEFAULT_PROFILES_FILE: el servicio deepracer-core,
+  por un drop-in de systemd, y todo lo nuestro (Nav2, rf2o, el puente, el grabador).
+
+  QUE AISLA Y POR QUE. Los cinco topicos de abajo tienen nombre GLOBAL y los dos
+  vehiculos los publican igual, en el mismo dominio 0. Sin esta particion:
+    /ctrl_pkg/servo_msg, /ctrl_pkg/raw_pwm   una orden mueve LOS DOS carros (17-sep)
+    /rplidar_ros/scan                         la odometria de cada carro recibe
+                                              tambien el laser del otro (23-sep)
+    /tf, /tf_static                           el marco 'laser' del driver de AWS
+                                              tendria dos padres
+  Con ella, cada carro solo ve los suyos. Todo lo demas -los /robotN/*, el
+  coordinador, la interfaz- sigue en la particion por defecto y se ve entre
+  vehiculos como antes: G-4 y RF-15 no cambian.
+
+  UN PROCESO SIN ESTE PERFIL NO VE ESTOS TOPICOS, Y NO DA ERROR. Es lo que se
+  quiere para las ordenes -nadie mueve el carro por accidente- y es una trampa
+  para depurar: un 'ros2 topic echo /rplidar_ros/scan' sin el perfil no recibe
+  nada. Comprobado en el portatil el 2026-09-25 (Humble); falta en el vehiculo
+  (Jazzy). Diseno completo: Documentos/DISENO_AISLAMIENTO_DOS_CARROS.md.
+
+  Las etiquetas <publisher>/<subscriber> valen en Fast DDS 2.6 (Humble) y 2.14
+  (Jazzy). Fast DDS 3 las renombra a <data_writer>/<data_reader>.
+-->
+<dds xmlns="http://www.eprosima.com/XMLSchemas/fastRTPS_Profiles">
+  <profiles>
+    <publisher profile_name="/ctrl_pkg/servo_msg"><qos><partition><names><name>amss-jgm9</name></names></partition></qos></publisher>
+    <subscriber profile_name="/ctrl_pkg/servo_msg"><qos><partition><names><name>amss-jgm9</name></names></partition></qos></subscriber>
+    <publisher profile_name="/ctrl_pkg/raw_pwm"><qos><partition><names><name>amss-jgm9</name></names></partition></qos></publisher>
+    <subscriber profile_name="/ctrl_pkg/raw_pwm"><qos><partition><names><name>amss-jgm9</name></names></partition></qos></subscriber>
+    <publisher profile_name="/rplidar_ros/scan"><qos><partition><names><name>amss-jgm9</name></names></partition></qos></publisher>
+    <subscriber profile_name="/rplidar_ros/scan"><qos><partition><names><name>amss-jgm9</name></names></partition></qos></subscriber>
+    <publisher profile_name="/tf"><qos><partition><names><name>amss-jgm9</name></names></partition></qos></publisher>
+    <subscriber profile_name="/tf"><qos><partition><names><name>amss-jgm9</name></names></partition></qos></subscriber>
+    <publisher profile_name="/tf_static"><qos><partition><names><name>amss-jgm9</name></names></partition></qos></publisher>
+    <subscriber profile_name="/tf_static"><qos><partition><names><name>amss-jgm9</name></names></partition></qos></subscriber>
+  </profiles>
+</dds>

@@ -12,6 +12,11 @@ corra **Jonny** sin haber estado en la sesión donde se armó.
 2. **¿El mapa que construye el vehículo en el pasillo de piso 2 se parece al
    pasillo?** Es lo que decide si se puede navegar sobre un mapa propio.
 
+> **Sustituido para G-2 el 2026-09-25.** Las corridas de 6 m de este guion ya no hacen falta: el mapa
+> del pasillo existe y admite 5 m, y G-2 se mide con las tres corridas de la sesión de compuertas de
+> [`GUIA_CAMPANA_NAV2_HARDWARE.md`](GUIA_CAMPANA_NAV2_HARDWARE.md). Este guion queda para **volver a
+> mapear** si el sitio cambia. El plan de la semana está en [`PLAN_S25.md`](PLAN_S25.md).
+
 **Para navegar sobre el mapa que sale de aquí**, el procedimiento es otro:
 [`GUIA_CAMPANA_NAV2_HARDWARE.md`](GUIA_CAMPANA_NAV2_HARDWARE.md).
 

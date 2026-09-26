@@ -460,9 +460,11 @@ en el vehículo.
 **Actualización del 2026-09-25.** Esa ruta crítica ya no lo es: `rf2o` publica y mide sobre el
 vehículo desde el 24-sep, y esa misma noche Nav2 navegó el carro sobre un mapa guardado
 ([`S24_nav2_navegacion_mapa_guardado.md`](Evidencia/S24_nav2_navegacion_mapa_guardado.md)). El
-procedimiento de la campaña física está en
-[`GUIA_CAMPANA_NAV2_HARDWARE.md`](GUIA_CAMPANA_NAV2_HARDWARE.md), y recoge dos de las tres cosas de
-arriba: la verdad de terreno la da el **flexómetro**, que resuelve al medio centímetro —cinco veces
+procedimiento de las compuertas previas, G-2 y G-3, está en
+[`GUIA_CAMPANA_NAV2_HARDWARE.md`](GUIA_CAMPANA_NAV2_HARDWARE.md). **No es la campaña de RF-27**, que
+pide el protocolo completo sobre los dos carros y va en S27 según
+[`PLAN_S25.md`](PLAN_S25.md); pero deja probadas dos de las tres cosas de arriba, que la campaña
+heredará: la verdad de terreno la da el **flexómetro**, que resuelve al medio centímetro —cinco veces
 más fino que los 2,5 cm que pide el punto 2—, y cada corrida deja en su registro, como columnas
 numéricas, el error de llegada según AMCL, según `/odom` y según la cinta, que es el campo del
 punto 1. Cada misión deja además una imagen como esta, sacada del bag por
