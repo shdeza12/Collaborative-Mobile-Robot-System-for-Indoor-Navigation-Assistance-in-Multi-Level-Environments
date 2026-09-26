@@ -70,7 +70,7 @@ reproduce.
 | | Qué | Por qué importa |
 |---|---|---|
 | 1 | **Copiar los ficheros nuevos a `~/tesis/` de los dos carros** | la regla de `CLAUDE.md`; los paquetes ya están nivelados desde el 24-sep, los ficheros de esta guía no |
-| 2 | **Entregables de S23 y S24**: no están en el repositorio; el último es el de la semana 22 | el corte formal de los viernes los exige |
+| 2 | ~~**Entregables de S23 y S24**~~ **emitidos el 2026-09-25**, en `.tex` y en `.md` ([`Entregable_semana_24.md`](Entregables/Entregable_semana_24.md)) | — |
 | 3 | **La velocidad no es repetible**: 0,261 y 0,149 m/s con el mismo mando | hasta explicarlo, la cifra de RF-14 es un rango; primer sospechoso, la batería |
 | 4 | **RF-14, la escala de `/cmd_vel`**: el launch esquiva la banda muerta, no la corrige | calibrar `MAX_SPEED` en el puente ([`S24_analisis_previo_RF11.md`](Evidencia/S24_analisis_previo_RF11.md) §4) |
 | 5 | **Una esquina** | nadie ha mapeado ni navegado una en el vehículo; el guiado real las tiene |

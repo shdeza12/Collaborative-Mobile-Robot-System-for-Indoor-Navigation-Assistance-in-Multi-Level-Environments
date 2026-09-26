@@ -329,11 +329,16 @@ del proyecto: sin ellos no hay resultado que sustentar.
 | Objetivo | Requisitos | Verificados | Pendientes | Semana de cierre |
 |---|---|---|---|---|
 | OE1 | RF-01 a RF-10 | **10** | **0** | ~~S20–S21~~ ~~**S21**, salvo RF-08~~ **S22 — cerrado** |
-| OE2 | RF-11 a RF-16 | 0 (**5** parciales) | **1** (RF-15) | S19–S22 |
+| OE2 | RF-11 a RF-16 | **1** (RF-15) y **5** parciales | **0** | S19–S22 |
 | OE3 | RF-17 a RF-20, RF-28, RF-29 | **6** | **0** | ~~**S22 — cerrado**~~ reabierto el 2026-09-14 por RF-29 y **cerrado el mismo día** al verificarlo |
 | OE4 | RF-21 a RF-27 | **6** | 1 | ~~S20–S25~~ **S21**, salvo RF-27 (física) |
 | Restricciones | RNF-01 a RNF-07 | 6 | 1 parcial | — |
-| **Total** | **36** | **28** | **2 + 6 parciales** | |
+| **Total** | **36** | **29** | **1 + 6 parciales** | |
+
+> **Corregido el 2026-09-25, recontando fila por fila:** la fila de OE2 seguía dando RF-15 como
+> pendiente y el total en 28, aunque RF-15 se verificó el 2026-09-14 y su propia fila lo dice. Son
+> **29 verificados**, 6 parciales —RF-11 a RF-14, RF-16 y RNF-03— y un solo pendiente, **RF-27**.
+> Es el mismo tipo de errata que la del 2026-09-11: un total arrastrado en vez de recontado.
 
 > **El total sube de 34 a 35 el 2026-09-10** con la entrada de **RF-28**, que no estaba en el
 > anteproyecto: lo pidió el director como situación de experiencia de usuario. Es **funcionalidad

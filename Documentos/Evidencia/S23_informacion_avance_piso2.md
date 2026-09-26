@@ -134,6 +134,11 @@ p10 / p90    5,8 / 19,2 %
 | −9 | 7,5 % | 5,2 – 6,2 m |
 | **−8 … +6** | **5,9 %** | más de 6,2 m |
 
+![La información de avance cae del 17,5 % junto al hall al 5,9 % a partir de 6,2 m](S23_decaimiento_informacion_avance.png)
+
+*Figura añadida el 2026-09-25, dibujada con las cifras de esta tabla; las líneas de referencia son
+la caja cerrada simulada (13,8 %, mapa aceptado) y el pasillo simulado de 46,9 m (6,8 %, rechazado).*
+
 ```
 MESETA  x = [-8, +6]   n = 849   mediana 5,9 %   p10 5,7 %   p90 6,6 %   max 9,7 %
 ```

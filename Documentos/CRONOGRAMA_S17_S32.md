@@ -463,9 +463,9 @@ una corrida física completa. Repositorio etiquetado.
 | Actividad |
 |---|
 | ✅ **Hecho el 2026-09-05:** ejecutar N = 30 repeticiones del protocolo completo con registro automático de las cuatro métricas |
-| Consolidar y versionar el conjunto de datos |
-| Redactar el capítulo de resultados sobre las métricas de la campaña |
-| Emitir el entregable S23 |
+| ✅ **Hecho el 2026-09-21:** consolidar y versionar el conjunto de datos |
+| ✅ **Hecho el 2026-09-19, adelantado a S23:** redactar el capítulo de resultados sobre las métricas de la campaña |
+| ✅ **Hecho el 2026-09-25:** emitir el entregable S23, en `.tex` y en `.md` |
 
 **Criterio de cierre:** 30 corridas registradas y conjunto de datos versionado en el repositorio.
 **Las corridas ya cumplen el criterio desde el 2026-09-05**; falta la parte de consolidación.
@@ -476,7 +476,7 @@ una corrida física completa. Repositorio etiquetado.
 |---|
 | Ejecutar entre 5 y 10 repeticiones con los vehículos reales **en el pasillo de la USTA, en dos plantas** (etapa 3). El laboratorio GED es la compuerta previa —etapa 2, `ENTORNO_DE_EVALUACION.md` §6—, no el sitio de la campaña: no tiene discontinuidad vertical, así que ahí la continuidad entre niveles no se puede medir |
 | Grabar y editar el video de la demostración |
-| Emitir el entregable S24 |
+| ✅ **Adelantado al 2026-09-25:** emitir el entregable S24, en `.tex` y en `.md` |
 
 **Criterio de cierre:** corridas físicas registradas con la misma instrumentación que en
 simulación; video de la demostración listo.
@@ -547,9 +547,9 @@ por requisito.
 | H3 | Dos agentes navegando en niveles separados | S19 | Nodo de coordinación | ✅ **Cerrado el 25-ago**, simultáneo y a los dos puntos de transferencia: 0,281 m y 0,143 m contra `/odom` |
 | H4 | Asignación dinámica de tareas funcionando | S20 | Protocolo de relevo | 🟡 **El coordinador asigna y el registrador mide (24 y 27-ago).** El planificador agota las **992** combinaciones del catálogo real sin simulador, y una misión de condición A produce un registro validado con sus marcas. **Probado con destino en el nivel 2 el 29-ago** —dos solicitudes a niveles distintos produjeron dos agentes distintos— y ejercitado **30 veces** en la campaña del 05-sep. ✅ **Cerrado.** |
 | H5 | Relevo completo con métricas en simulación | S21 | Campaña experimental | ✅ **Cerrado el 30-ago y medido el 05-sep.** El bloqueo de dominios DDS que lo impedía se levantó el 30-ago (un dominio, dos `gzserver`, separación por nombres) y ese mismo día corrió el relevo con los dos robots vivos. Las métricas ya no son de una corrida: **15 misiones de condición B** en la campaña sorteada, **14 aciertos (93,3 %)** y **continuidad entre niveles 14/14**, con salto de relevo de mediana 0,100 s |
-| H6 | Sistema integrado de extremo a extremo | S22 | Verificación | 🔴 No iniciado |
-| H7 | Implementación congelada | S23 | Campañas experimentales | 🔴 No iniciado |
-| H8 | Conjunto de datos completo | S25 | Análisis | 🔴 No iniciado |
+| H6 | Sistema integrado de extremo a extremo | S22 | Verificación | ✅ **Cerrado el 10-sep**: misión desde un teléfono real con relevo entre niveles y sin intervención (`Evidencia/registros/S22_RF20_telefono_C_02.json`). *La casilla decía «No iniciado» hasta el 2026-09-25* |
+| H7 | Implementación congelada | S23 | Campañas experimentales | ✅ **Cerrado el 18-sep** con la etiqueta `v0.4-implementacion-congelada`. *La casilla decía «No iniciado» hasta el 2026-09-25* |
+| H8 | Conjunto de datos completo | S25 | Análisis | 🟡 **Mitad de simulación consolidada el 21-sep** (`Evidencia/S24_consolidacion_datos_oe4.md`); falta la campaña física de S25 |
 | H9 | Sustentación | S28–S29 | Documento final | 🔴 No iniciado |
 
 ---
