@@ -40,7 +40,7 @@
 #     NS=robot2 CARRO=192.168.0.102 MAPA=... bash nav2_mapa_guardado.sh   (bloque C: todo bajo /robot2)
 #     POSE_X=24.45 POSE_Y=1.21 POSE_YAW=3.1416 CARRO=... MAPA=... bash nav2_mapa_guardado.sh
 #         (salida del vehiculo en el mapa; POSE_YAW en radianes, 0 por defecto)
-#     ESCALA=1.0 CARRO=... MAPA=... bash nav2_mapa_guardado.sh   (escala del puente; 0.9 por defecto)
+#     ESCALA=1.0 CARRO=... MAPA=... bash nav2_mapa_guardado.sh   (escala del puente; por defecto, la de cada vehiculo: racey 0.9, deepy 0.85; ESCALA_REVERSA=, solo marcha atras: racey 0.75, deepy 1.0)
 #     MARGEN=0.5 CARRO=... MAPA=... bash nav2_mapa_guardado.sh   (margen de llegada de Nav2; 1.0 por defecto)
 #     IMU=true CARRO=... MAPA=... bash nav2_mapa_guardado.sh
 #
@@ -76,7 +76,19 @@ D=/home/deepracer/tesis   # ruta fija del vehiculo
 MAPA="${MAPA:-/home/deepracer/mapeo_235028/mapa.yaml}"   # ruta fija del vehiculo
 POSE_X="${POSE_X:-1.0}"
 POSE_Y="${POSE_Y:-0.0}"
-ESCALA="${ESCALA:-0.9}"
+# Escala del puente de cada vehiculo (RF-14). Con Nav2 navegando a 0,50 m/s, la
+# velocidad real depende solo de ella. Se calibra en el pasillo midiendo el avance
+# con flexometro y el tiempo de Nav2 de cada tramo. ESCALA= la anula.
+# ESCALA_REVERSA multiplica el acelerador solo en marcha atras: con la misma orden
+# el motor retrocede mas rapido de lo que avanza (parametro escala_reversa del
+# puente). ESCALA_REVERSA= la anula.
+case "$CARRO" in
+  192.168.0.104) ESCALA_VEHICULO=0.9; REVERSA_VEHICULO=0.75 ;;   # amss-jgm9 (racey): con 1,0 iba a ~1,2 m/s y se paso de la meta; en reversa, 1,1-1,7 m/s con escala_reversa 1,0 (7-oct)
+  192.168.0.102) ESCALA_VEHICULO=0.85; REVERSA_VEHICULO=1.0 ;;   # amss-ez9n (deepy): con 0,9 llego a 1,58 m/s (2-oct); reversa sin medir
+  *)             ESCALA_VEHICULO=0.9; REVERSA_VEHICULO=1.0 ;;
+esac
+ESCALA="${ESCALA:-$ESCALA_VEHICULO}"
+ESCALA_REVERSA="${ESCALA_REVERSA:-$REVERSA_VEHICULO}"
 IMU="${IMU:-false}"
 MARGEN="${MARGEN:-1.0}"
 # Rumbo de la salida en radianes (3.1416 = mirando hacia -x). Va en la pose
@@ -196,7 +208,7 @@ arrancar() {
   info "2/6 · el puente (el launch NO lo arranca)"
   # La suscripcion del puente es absoluta ('/cmd_vel'): el espacio de nombres no
   # la alcanza, y sin el remapeo los dos puentes escucharian el mismo topico.
-  lanzar_en_carro puente "$FUENTES_PUENTE && ros2 run cmdvel_to_servo_pkg cmdvel_to_servo_node${NS:+ --ros-args $ARGS_NS -r /cmd_vel:=$P/cmd_vel}"
+  lanzar_en_carro puente "$FUENTES_PUENTE && ros2 run cmdvel_to_servo_pkg cmdvel_to_servo_node --ros-args -p escala_reversa:=$ESCALA_REVERSA${NS:+ $ARGS_NS -r /cmd_vel:=$P/cmd_vel}"
   sleep 6
   local esc
   esc=$(en_carro "$FUENTES_PUENTE && timeout 20 ros2 service call $P/set_max_speed deepracer_interfaces_pkg/srv/NavThrottleSrv \"{throttle: $ESCALA}\" 2>/dev/null | tail -2")

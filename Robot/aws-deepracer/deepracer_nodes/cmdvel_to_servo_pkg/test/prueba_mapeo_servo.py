@@ -93,6 +93,35 @@ comprueba("-0.05 m/s (retroceso de recuperacion) tambien",
 comprueba("por debajo de MIN_MOVING_SPEED sigue siendo cero",
           throttle(None, V.MIN_MOVING_SPEED / 2), A.DEFAULT_OUTPUT)
 
+print("\n6. escala_reversa solo toca la marcha atras (desde el 2026-10-07)")
+# En amss-jgm9 la misma orden daba ~0,6 m/s adelante y 1,1-1,7 m/s atras, y la
+# media vuelta de Nav2 terminaba contra la pared (p4r_11). Un nodo a medias, sin
+# rclpy.init(): plan_action solo lee estos atributos.
+
+
+class NodoSinRos:
+    get_mapped_throttle = CmdvelToServoNode.get_mapped_throttle
+    get_mapped_steering = CmdvelToServoNode.get_mapped_steering
+    get_rescaled_manual_speed = CmdvelToServoNode.get_rescaled_manual_speed
+    plan_action = CmdvelToServoNode.plan_action
+
+    def __init__(self, reversa):
+        self.max_speed_pct, self.escala_reversa = 0.9, reversa
+
+    def accion(self, v, w=0.0):
+        self.target_linear, self.target_rot = v, w
+        return self.plan_action()
+
+
+sin, con = NodoSinRos(1.0), NodoSinRos(0.75)
+comprueba("con 1,0 la reversa es el espejo del avance",
+          round(sin.accion(-0.4)[1], 9), round(-sin.accion(0.4)[1], 9))
+comprueba("con 0,75 la reversa baja a tres cuartos",
+          round(con.accion(-0.4)[1], 9), round(0.75 * sin.accion(-0.4)[1], 9))
+comprueba("y el avance no cambia", con.accion(0.4)[1], sin.accion(0.4)[1])
+comprueba("ni la direccion en reversa", con.accion(-0.4, 1.5)[0], sin.accion(-0.4, 1.5)[0])
+comprueba("parado sigue en cero", con.accion(0.0)[1], 0.0)
+
 print("\n" + "=" * 62)
 if FALLOS:
     print(f"{FALLOS} comprobaciones FALLAN de {OK + FALLOS}")

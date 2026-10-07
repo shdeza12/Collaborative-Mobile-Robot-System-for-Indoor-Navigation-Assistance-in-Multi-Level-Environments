@@ -35,6 +35,7 @@ from rclpy.qos import (QoSProfile,
                        QoSReliabilityPolicy)
 
 import geometry_msgs.msg
+from rcl_interfaces.msg import SetParametersResult
 from deepracer_interfaces_pkg.msg import ServoCtrlMsg
 from deepracer_interfaces_pkg import srv as deepracer_srv
 from cmdvel_to_servo_pkg import constants
@@ -120,6 +121,27 @@ class CmdvelToServoNode(Node):
         # Max speed pct for throttle output to be rescaled with respect to.
         self.max_speed_pct = constants.MAX_SPEED_PCT
         self.lock = threading.Lock()
+        # Factor que multiplica el acelerador SOLO en marcha atras. El puente manda la
+        # misma magnitud en los dos sentidos, pero el motor no responde igual: en
+        # amss-jgm9, con escala 0,9, iba a ~0,6 m/s hacia adelante y a 1,1-1,7 m/s
+        # hacia atras (p4r_11, 2026-10-07), y cada correccion de Nav2 se pasaba de
+        # largo. 1,0 deja el comportamiento de antes. Se cambia en caliente con
+        # 'ros2 param set /cmdvel_to_servo_node escala_reversa 0.7'.
+        self.escala_reversa = self.declare_parameter('escala_reversa', 1.0).value
+        self.add_on_set_parameters_callback(self.parametros_cb)
+        self.get_logger().info(f"escala_reversa: {self.escala_reversa}")
+
+    def parametros_cb(self, parametros):
+        """Acepta 'escala_reversa' entre 0 (excluido) y 1; rechaza lo demas."""
+        for p in parametros:
+            if p.name == 'escala_reversa':
+                if not isinstance(p.value, (int, float)) or not 0.0 < p.value <= 1.0:
+                    return SetParametersResult(
+                        successful=False, reason='escala_reversa va de 0 (excluido) a 1')
+                with self.lock:
+                    self.escala_reversa = float(p.value)
+                self.get_logger().info(f"escala_reversa: {self.escala_reversa}")
+        return SetParametersResult(successful=True)
 
     def set_max_speed_cb(self, req, res):
         """Callback which dynamically sets the max_speed_pct.
@@ -282,6 +304,8 @@ class CmdvelToServoNode(Node):
         target_throttle_signed = target_throttle_mapped * math.copysign(1.0, self.target_linear)
         # Get rescaled throttle.
         throttle = self.get_rescaled_manual_speed(target_throttle_signed, self.max_speed_pct)
+        if throttle < 0.0:
+            throttle *= self.escala_reversa
         # geometry_msgs/Twist define angular.z como velocidad angular en rad/s, no como
         # angulo de direccion. Pasarlo directo al servo dejaba la ganancia del volante
         # en funcion de la velocidad. Modelo de bicicleta: delta = atan(wz * L / v).
