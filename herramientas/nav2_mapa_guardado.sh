@@ -232,19 +232,24 @@ arrancar() {
   en_carro "$FUENTES && timeout 15 ros2 topic pub --once $P/initialpose geometry_msgs/msg/PoseWithCovarianceStamped \"{header: {frame_id: ${F}map}, pose: {pose: {position: {x: $POSE_X, y: $POSE_Y, z: 0.0}, orientation: {z: $QZ, w: $QW}}, covariance: [0.25,0,0,0,0,0, 0,0.25,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0.07]}}\"" >/dev/null
   sleep 4
   for n in map_server amcl planner_server controller_server bt_navigator behavior_server; do
-    printf "   %-20s %s\n" "$n" "$(en_carro "$FUENTES && timeout 8 ros2 service call $P/$n/get_state lifecycle_msgs/srv/GetState \"{}\" 2>/dev/null | grep -o \"label='[a-z]*'\" | tail -1")"
+    # 25 s y no 8: con la tarjeta recien arrancada la llamada tarda, y con 8 salia
+    # vacio el estado de los seis (2026-10-07).
+    printf "   %-20s %s\n" "$n" "$(en_carro "$FUENTES && timeout 25 ros2 service call $P/$n/get_state lifecycle_msgs/srv/GetState \"{}\" 2>/dev/null | grep -o \"label='[a-z]*'\" | tail -1")"
   done
   local subs
   subs=$(en_carro "$FUENTES && timeout 20 ros2 topic info $P/cmd_vel 2>/dev/null | grep -c 'Subscription count: 1'")
   [ "${subs:-0}" -ge 1 ] && verde "   alguien escucha $P/cmd_vel" || rojo "   NADIE escucha $P/cmd_vel"
   if [ "$IMU" = true ]; then
-    # Sin imu/data el EKF no gira el rumbo y no da ningun error: se comprueba aqui.
-    local hz
-    for t in imu/data odom; do
-      hz=$(en_carro "$FUENTES && timeout 15 ros2 topic hz $P/$t 2>/dev/null | head -4 | grep -m1 'average rate'")
-      if echo "$hz" | grep -q "average rate"; then verde "   $P/$t: $hz"
-      else rojo "   $P/$t NO publica: mira $LOGS/launch.log (imu_bmi160, ekf_filter_node)"; fi
-    done
+    # Sin imu/data el EKF no gira el rumbo, y sin odom_rf2o no avanza; ninguno de
+    # los dos da error. Se mide con medir_odom_imu.py y no con 'ros2 topic hz': con
+    # la tarjeta recien arrancada, 'hz' no llegaba a descubrir el topico en 15 s y
+    # daba «NO publica» con los dos publicando (2026-10-07).
+    local med
+    med=$(en_carro "$FUENTES && python3 $D/medir_odom_imu.py 8 ${NS:+--ns $NS} 2>&1 | grep -E 'Hz|ABORTA|sin datos' | cut -c1-80")
+    echo "$med" | sed 's/^/   /'
+    if echo "$med" | grep -qE 'ABORTA|sin datos|imu/data: 0\.0 Hz'; then
+      rojo "   la IMU, rf2o o el filtro NO publican: mira $LOGS/launch.log (imu_bmi160, rf2o, ekf_filter_node)"
+    else verde "   IMU, rf2o y filtro publicando"; fi
   fi
 
   echo
