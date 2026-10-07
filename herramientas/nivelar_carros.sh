@@ -93,7 +93,7 @@ comparar() {
   local ip="$1" nombre="$2" remoto lista distintos=0 f d esperado actual
   lista=""
   for f in "${ARCHIVOS[@]}"; do lista+=" ~/tesis/$(destino "$f")"; done
-  remoto=$(en_carro "$ip" "md5sum $lista 2>/dev/null; echo RF2O \$(md5sum ~/nav_ws/src/rf2o_laser_odometry/src/CLaserOdometry2DNode.cpp 2>/dev/null | cut -c1-12); echo PART \$(sudo -n md5sum /etc/deepracer-tesis/particion.xml 2>/dev/null | cut -c1-32); echo CAMS \$(md5sum /etc/udev/rules.d/90-tesis-camaras-desactivadas.rules 2>/dev/null | cut -c1-32) \$(ls /dev/video* 2>/dev/null | wc -l)")
+  remoto=$(en_carro "$ip" "md5sum $lista 2>/dev/null; echo RF2O \$(md5sum ~/nav_ws/src/rf2o_laser_odometry/src/CLaserOdometry2DNode.cpp 2>/dev/null | cut -c1-12); echo PART \$(sudo -n md5sum /etc/deepracer-tesis/particion.xml 2>/dev/null | cut -c1-32); echo CAMS \$(md5sum /etc/udev/rules.d/90-tesis-camaras-desactivadas.rules 2>/dev/null | cut -c1-32) \$(ls /dev/video* 2>/dev/null | wc -l); echo AWSENV \$(grep -c opt/aws/deepracer/lib ~/coordinacion_ws/install/setup.bash 2>/dev/null)")
   FALTAN=()
   for f in "${ARCHIVOS[@]}"; do
     d=$(destino "$f")
@@ -135,6 +135,10 @@ comparar() {
   actual=$(echo "$remoto" | awk '$1 == "CAMS" {print $2, $3}')
   if [ "$actual" = "$esperado 0" ]; then verde "   camaras: desactivadas por la regla de udev (ningun /dev/video)"
   else rojo "   camaras: regla de udev ausente o distinta, o hay /dev/video (${actual:-no se pudo leer})"; AVISOS=$((AVISOS + 1)); fi
+  # El workspace del puente tiene que encadenar el entorno de AWS (ver copiar()).
+  actual=$(echo "$remoto" | awk '$1 == "AWSENV" {print $2}')
+  if [ "${actual:-0}" -ge 1 ]; then verde "   coordinacion_ws: encadena el entorno de AWS (el puente encuentra sus mensajes)"
+  else rojo "   coordinacion_ws: NO encadena /opt/aws/deepracer/lib; el puente no arranca. Recompilar con: source /opt/aws/deepracer/lib/setup.bash"; AVISOS=$((AVISOS + 1)); fi
   return "$distintos"
 }
 
@@ -159,7 +163,12 @@ copiar() {
   paquetes="coordinacion"
   printf '%s\n' "${FALTAN_C[@]}" | grep -q 'coordinacion_msgs/' && paquetes="coordinacion_msgs coordinacion"
   echo "   compilando $paquetes en el vehiculo..."
-  en_carro "$ip" "cd ~/coordinacion_ws && source /opt/ros/jazzy/setup.bash && colcon build --symlink-install --packages-select $paquetes 2>&1 | tail -1"
+  # Con el entorno de AWS, no solo el de ROS: el puente (cmdvel_to_servo_pkg) usa
+  # los mensajes de deepracer_interfaces_pkg, que viven en /opt/aws/deepracer/lib,
+  # y colcon reescribe install/setup.bash con los entornos cargados al compilar.
+  # Compilado solo con /opt/ros/jazzy, el puente moria con «No module named
+  # 'deepracer_interfaces_pkg'» y el vehiculo no se movia (2026-10-07).
+  en_carro "$ip" "cd ~/coordinacion_ws && source /opt/aws/deepracer/lib/setup.bash && colcon build --symlink-install --packages-select $paquetes 2>&1 | tail -1"
 }
 
 imu() {

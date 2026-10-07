@@ -52,9 +52,15 @@
 #          El vehiculo no se toca durante el arranque: el nodo mide el sesgo del
 #          giroscopio. El paso 6 comprueba que imu/data y odom publiquen)
 #
-# Antes de arrancar apaga la camara y la fusion de sensores del fabricante, que
-# el proyecto no usa: con las dos encendidas la tarjeta llego a carga 22 y el
-# gestor desactivo Nav2 (amss-jgm9, 2-oct).
+# Antes de arrancar para los procesos de la pila de AWS que el proyecto no usa
+# (AWS_SOBRANTES): con la camara y la fusion encendidas la tarjeta llego a carga
+# 22 y el gestor desactivo Nav2 (amss-jgm9, 2-oct), y sin los doce de la lista la
+# tarjeta pasa del 21-34 % al 8-10 % en reposo (2026-10-07).
+#
+# Si se cambia la IP del vehiculo despues de encenderlo, hay que reiniciar su
+# pila ('sudo systemctl restart deepracer-core'): sus nodos siguen anunciandose
+# con la IP vieja, se descubren pero no entregan datos, y el paso 1 lo detecta
+# como «el laser NO publica» (amss-ez9n, 2026-10-07).
 #     bash nav2_mapa_guardado.sh --estado
 #     bash nav2_mapa_guardado.sh --parar
 #
@@ -79,6 +85,8 @@ POSE_YAW="${POSE_YAW:-0.0}"
 QZ=$(awk -v a="$POSE_YAW" 'BEGIN{printf "%.6f", sin(a/2)}')
 QW=$(awk -v a="$POSE_YAW" 'BEGIN{printf "%.6f", cos(a/2)}')
 LOGS=/tmp/nav2_campo
+# Procesos de AWS que se paran al arrancar (ver el paso 0 de arrancar()).
+AWS_SOBRANTES="camera_node sensor_fusion_n web_video_serve inference_node model_optimizer model_loader_no software_update bag_log_node_cp device_info_nod device_status_n usb_monitor_nod deepracer_navig status_led_node"
 
 # Espacio de nombres (bloque C de Documentos/PLAN_S25.md). Vacio, que es el valor
 # por defecto, deja cada orden exactamente como antes: los tres prefijos de abajo
@@ -165,9 +173,15 @@ encender_lifecycle() {
 arrancar() {
   info "0/6 · limpiando restos"
   en_carro "for p in cmdvel_to_serv rf2o_laser_odom sync_slam_toolb robot_state_pub controller_serv planner_server bt_navigator behavior_server waypoint_follow lifecycle_manag map_server amcl ekf_node; do pkill -9 \$p 2>/dev/null; done; pkill -9 -f nav2_hardware.launch 2>/dev/null; pkill -9 -f imu_bmi160.py 2>/dev/null; pkill -f registrar_carga.py 2>/dev/null; true" >/dev/null
-  # Camara y fusion fuera: el proyecto no las usa y cargan la tarjeta. Por nombre
-  # de proceso (15 caracteres), nunca con 'pkill -f'.
-  en_carro "pkill -x camera_node; pkill -x sensor_fusion_n; true" >/dev/null
+  # Procesos de la pila de AWS que el proyecto no usa, fuera: cargan la tarjeta.
+  # Por nombre de proceso (15 caracteres), nunca con 'pkill -f'. Medido el
+  # 2026-10-07 en los dos vehiculos, sin nada nuestro corriendo: la tarjeta pasa
+  # del 21-34 % al 8-10 % y la memoria de 1060 a 680 MB. Se quedan los que si se
+  # usan o sirven para recuperar el vehiculo: rplidar_node, servo_node,
+  # ctrl_node, battery_node, otg_control_nod (red por USB), network_monitor,
+  # deepracer_syste y webserver_publi (la consola web). Vuelven todos al
+  # reiniciar el vehiculo o con 'sudo systemctl restart deepracer-core'.
+  en_carro "for p in $AWS_SOBRANTES; do pkill -x \$p; done; true" >/dev/null
   sleep 3
 
   info "1/6 · el laser publica?"
