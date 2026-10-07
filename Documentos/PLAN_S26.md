@@ -275,25 +275,34 @@ siguiente.
 | Paso | Qué | Comando o acción | Esperado | Cierre |
 |---|---|---|---|---|
 | 1 | Colocar el vehículo | Centro a 1,00 m de la pared sur y a 1,25 m de la pared este, mirando al norte | — | Vehículo en la salida |
-| 2 | Arrancar Nav2 en racey. En la cadena con IMU se antepone `IMU=true MARGEN=0.5` | `CARRO=192.168.0.104 MAPA=/home/deepracer/tesis/piso4.yaml POSE_X=24.45 POSE_Y=1.21 POSE_YAW=3.1416 ESCALA=1.0 bash herramientas/nav2_mapa_guardado.sh   # ruta fija del vehiculo` | `Managed nodes are active` en 3 a 5 min | Nav2 activo |
+| 2 | Arrancar Nav2 en racey, con IMU y margen de 0,5 m. No tocar el vehículo durante el arranque: la IMU mide su sesgo | `IMU=true MARGEN=0.5 CARRO=192.168.0.104 MAPA=/home/deepracer/tesis/piso4.yaml POSE_X=24.45 POSE_Y=1.21 POSE_YAW=3.1416 ESCALA=1.0 bash herramientas/nav2_mapa_guardado.sh   # ruta fija del vehiculo` | `CADENA LISTA`, con `imu/data` y `odom` publicando, y `registrando la carga de la tarjeta en /home/deepracer/carga_...csv` | Nav2 activo |
+| 2b | Carga en vivo, en otra terminal, mientras dura la cadena | `ssh -t deepracer@192.168.0.104 htop` | La tarjeta, con todo cargado | Ver el porcentaje de cada núcleo y qué procesos lo ocupan |
 | 3 | Comprobar las rutas sin mover el vehículo | `compute_path_to_pose` a los tres salones (§4.3 de [`GUIA_PISOS_3_Y_4.md`](GUIA_PISOS_3_Y_4.md)) | `SUCCEEDED` | Tres rutas |
 | 4 | Tramo 1, con la pose inicial | `ssh deepracer@192.168.0.104 "sudo -n bash ~deepracer/tesis/correr_corrida_nav2.sh p4r_04 --salida 24.45 1.21 3.1416 --meta 17.22 2.06 3.1416 --mapa /home/deepracer/tesis/piso4.yaml --csv ~deepracer/campana_s26_racey.csv"` (ruta fija del vehículo) | Fila en el CSV | Marca en el piso junto al centro del vehículo; avance desde la salida y distancia a la pared oeste |
 | 5 | Tramo 2, sin pose inicial | La misma orden con `p4r_05`, `--sin-pose-inicial` en lugar de `--salida` y `--meta 9.31 2.15 3.1416` | Fila en el CSV; AMCL no se reinicia | Marca nueva; avance medido de marca a marca y distancia a la pared oeste |
 | 6 | Tramo 3, sin pose inicial | Igual, `p4r_06` y `--meta 6.20 2.03 3.1416` | Igual | Igual |
-| 7 | La misma cadena con deepy | `CARRO=192.168.0.102`, `ESCALA=0.85`, ids `p4d_03` a `p4d_05` y `campana_s26_deepy.csv` | Igual | Igual |
+| 7 | Parar y copiar | `CARRO=192.168.0.104 bash herramientas/nav2_mapa_guardado.sh --parar`; después `scp deepracer@192.168.0.104:campana_s26_racey.csv ~/tesis_evidencia/`, `scp 'deepracer@192.168.0.104:carga_*.csv' ~/tesis_evidencia/` y `scp -r 'deepracer@192.168.0.104:campana_p4r_0*' ~/tesis_evidencia/` | El CSV de la campaña, el de la carga y las grabaciones en el portátil | `python3 herramientas/registrar_carga.py --resumen ~/tesis_evidencia/carga_<fecha>.csv` |
+| 8 | La misma cadena con deepy | `CARRO=192.168.0.102`, `ESCALA=0.85`, ids `p4d_03` a `p4d_05` y `campana_s26_deepy.csv` | Igual | Igual |
 
-Si la IMU quedó lista el martes, cada vehículo hace la cadena dos veces. Primero sin IMU y con el
-margen de 1,0 m, con los ids de la tabla. Después con `IMU=true MARGEN=0.5` en el paso 2, con los ids
-`p4r_07` a `p4r_09` (deepy, `p4d_06` a `p4d_08`). Entre las dos cadenas se para Nav2 con `--parar`
-y el vehículo vuelve a la salida. El margen ya no se edita en el lanzador: es el argumento
-`margen_llegada`, y los dos vehículos quedan nivelados.
+Decisión del 7-oct: la cadena se corre directamente con IMU y margen de 0,5 m, una sola vez por
+vehículo, que es como funcionará el sistema. La referencia sin IMU son las corridas del piso 4 del
+2-oct (+3,3 % y −4,6 % de error de avance, llegadas a 0,57 m y 0,62 m con margen de 1,0 m;
+[`S25_pisos34_campo.md`](Evidencia/S25_pisos34_campo.md)). Durante la cadena se mide cuánto se llena
+la tarjeta con todo cargado: Nav2, AMCL, rf2o, IMU, filtro, puente y grabador. Se mira en vivo con
+`htop` (paso 2b), y queda el registro que deja `nav2_mapa_guardado.sh` en
+`/home/deepracer/carga_<fecha>_<hora>.csv` (ruta fija del vehículo): una fila cada 5 s con el procesador por proceso, la carga,
+la memoria y la temperatura.
+
+Un vehículo cada vez: si los dos están encendidos, solo uno corre la cadena (sin espacio de nombres
+se mezclarían sus `/odom` e `/imu/data`).
 
 Odometría: error de 10 % o menos en los tramos de 5 m o más (tramos 1 y 2), medido de marca a
 marca. G-2 ya está alcanzada; esto la confirma en misiones encadenadas. Cierre de G-3: llegada a
 0,5 m o menos. Se anota además si el error de llegada crece del tramo 1 al 3.
 
-Punto de decisión a las 12:00. Si la IMU no mejora la llegada en las cadenas de la mañana, se quita
-(`IMU=false`, el valor por defecto) y se sigue con el margen de 1,0 m. G-3 se reporta con su cifra.
+Punto de decisión a las 12:00. Se vuelve a `IMU=false` y al margen de 1,0 m en dos casos: si con
+IMU y margen de 0,5 m las llegadas no mejoran respecto al 2-oct, o si la tarjeta no sostiene la
+carga (Nav2 desactivado por el gestor, o el controlador fuera de su frecuencia). G-3 se reporta con su cifra.
 
 ### 3.3 · Media vuelta para ir a recoger a un usuario
 

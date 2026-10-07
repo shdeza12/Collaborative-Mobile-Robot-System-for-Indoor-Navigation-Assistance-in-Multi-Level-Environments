@@ -43,6 +43,11 @@
 #     ESCALA=1.0 CARRO=... MAPA=... bash nav2_mapa_guardado.sh   (escala del puente; 0.9 por defecto)
 #     MARGEN=0.5 CARRO=... MAPA=... bash nav2_mapa_guardado.sh   (margen de llegada de Nav2; 1.0 por defecto)
 #     IMU=true CARRO=... MAPA=... bash nav2_mapa_guardado.sh
+#
+# Desde el 2026-10-07 cada arranque deja, ademas, un registro de la carga de la
+# tarjeta en /home/deepracer/carga_<fecha>_<hora>.csv (ruta fija del vehiculo; registrar_carga.py, una
+# fila cada 5 s); --parar lo cierra. Se resume con
+#     python3 herramientas/registrar_carga.py --resumen <csv>
 #         (IMU de la tarjeta + EKF, imu:=true en el lanzador; false por defecto.
 #          El vehiculo no se toca durante el arranque: el nodo mide el sesgo del
 #          giroscopio. El paso 6 comprueba que imu/data y odom publiquen)
@@ -136,7 +141,7 @@ parar() {
   info "matando la cadena"
   # Por nombre de ejecutable, NUNCA con 'pkill -f' sobre el patron completo:
   # el patron coincide tambien con la propia linea de sudo y se mata a si mismo.
-  en_carro "for p in cmdvel_to_serv rf2o_laser_odom sync_slam_toolb robot_state_pub controller_serv planner_server bt_navigator behavior_server waypoint_follow lifecycle_manag map_server amcl ekf_node; do pkill -9 \$p 2>/dev/null; done; pkill -9 -f nav2_hardware.launch 2>/dev/null; pkill -9 -f imu_bmi160.py 2>/dev/null; true"
+  en_carro "for p in cmdvel_to_serv rf2o_laser_odom sync_slam_toolb robot_state_pub controller_serv planner_server bt_navigator behavior_server waypoint_follow lifecycle_manag map_server amcl ekf_node; do pkill -9 \$p 2>/dev/null; done; pkill -9 -f nav2_hardware.launch 2>/dev/null; pkill -9 -f imu_bmi160.py 2>/dev/null; pkill -f registrar_carga.py 2>/dev/null; true"
   sleep 2
   verde "listo. Comprueba con: bash $0 --estado"
 }
@@ -159,7 +164,7 @@ encender_lifecycle() {
 
 arrancar() {
   info "0/6 · limpiando restos"
-  en_carro "for p in cmdvel_to_serv rf2o_laser_odom sync_slam_toolb robot_state_pub controller_serv planner_server bt_navigator behavior_server waypoint_follow lifecycle_manag map_server amcl ekf_node; do pkill -9 \$p 2>/dev/null; done; pkill -9 -f nav2_hardware.launch 2>/dev/null; pkill -9 -f imu_bmi160.py 2>/dev/null; true" >/dev/null
+  en_carro "for p in cmdvel_to_serv rf2o_laser_odom sync_slam_toolb robot_state_pub controller_serv planner_server bt_navigator behavior_server waypoint_follow lifecycle_manag map_server amcl ekf_node; do pkill -9 \$p 2>/dev/null; done; pkill -9 -f nav2_hardware.launch 2>/dev/null; pkill -9 -f imu_bmi160.py 2>/dev/null; pkill -f registrar_carga.py 2>/dev/null; true" >/dev/null
   # Camara y fusion fuera: el proyecto no las usa y cargan la tarjeta. Por nombre
   # de proceso (15 caracteres), nunca con 'pkill -f'.
   en_carro "pkill -x camera_node; pkill -x sensor_fusion_n; true" >/dev/null
@@ -199,6 +204,11 @@ arrancar() {
   encender_lifecycle amcl "$FUENTES && ros2 run nav2_amcl amcl --ros-args${ARGS_NS:+ $ARGS_NS} --params-file $params_amcl -p use_sim_time:=false -p scan_topic:=/rplidar_ros/scan${marcos_amcl:+ $marcos_amcl}" || exit 1
 
   info "5/6 · el launch, AHORA que /map ya esta activo (imu:=$IMU, margen $MARGEN m)"
+  # Registro de carga de toda la sesion (2026-10-07): la tarjeta de dos nucleos es
+  # el limite conocido, y htop solo muestra el momento.
+  local carga=/home/deepracer/carga_$(date +%Y%m%d_%H%M%S).csv   # ruta fija del vehiculo
+  lanzar_en_carro carga "python3 $D/registrar_carga.py $carga --cada 5"
+  echo "   registrando la carga de la tarjeta en $carga"
   [ "$IMU" = true ] && echo "   no toque el vehiculo: la IMU mide el sesgo del giroscopio al arrancar"
   lanzar_en_carro launch "$FUENTES && ros2 launch $D/nav2_hardware.launch.py slam:=false nav:=true urdf:=$D/deepracer_hardware.urdf params:=$D/nav2_params_jazzy.yaml slam_params:=$D/slam_toolbox.yaml behavior_trees:=$D/behavior_trees imu:=$IMU margen_llegada:=$MARGEN${NS:+ namespace:=$NS}"
   echo "   esperando 55 s a que configuren los costmaps..."
