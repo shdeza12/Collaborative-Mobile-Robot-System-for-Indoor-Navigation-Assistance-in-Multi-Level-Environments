@@ -55,6 +55,14 @@ W = 1.5
 HORIZONTE_M = 0.40
 PASO_M = 0.05
 
+#: Pero al soltar, el vehiculo sigue rodando, y recto (el puente pone la
+#: direccion al centro con la orden cero). MEDIDO EL 2026-10-08 en amss-ez9n:
+#: tras una reversa a 0,9 m/s rodo 0,8 m en 0,9 s. El tramo revisado crece con
+#: la velocidad medida: RODADA_BASE_M + RODADA_S * |v|, y nunca menos que
+#: HORIZONTE_M. A 0,9 m/s son 1,06 m.
+RODADA_BASE_M = 0.25
+RODADA_S = 0.9
+
 #: Distancia minima entre la huella y un obstaculo en ese recorrido.
 MARGEN_LIDAR_M = 0.10
 MARGEN_MAPA_M = 0.10
@@ -131,13 +139,18 @@ def cercanos(puntos, alcance=ALCANCE_M):
     return puntos[np.hypot(puntos[:, 0], puntos[:, 1]) <= alcance]
 
 
-def holgura_por_delante(puntos, marcha, giro):
+def horizonte_por_velocidad(v):
+    """Recorrido que se revisa por delante, segun la velocidad medida (m/s)."""
+    return max(HORIZONTE_M, RODADA_BASE_M + RODADA_S * abs(v or 0.0))
+
+
+def holgura_por_delante(puntos, marcha, giro, horizonte=HORIZONTE_M):
     """La menor holgura de la huella en el recorrido que viene (puntos en el marco del vehiculo)."""
-    puntos = cercanos(puntos)
+    puntos = cercanos(puntos, max(ALCANCE_M, horizonte + 0.6))
     if len(puntos) == 0:
         return math.inf
     return min(holgura(a_marco(puntos, x, y, th))
-               for x, y, th in poses_predichas(marcha, giro))
+               for x, y, th in poses_predichas(marcha, giro, horizonte=horizonte))
 
 
 def elegir_giro(puntos_mapa):
@@ -230,7 +243,7 @@ class Maniobra:
 
 
 def ejecutar(leer_yaw, leer_obstaculos, mandar, giro=None, objetivo=GIRO_POR_DEFECTO,
-             reloj=time.monotonic, dormir=time.sleep, log=print):
+             reloj=time.monotonic, dormir=time.sleep, log=print, leer_velocidad=None):
     """Ejecuta la media vuelta. Devuelve (ok, mensaje).
 
     leer_yaw() -> rumbo actual (rad) o None. leer_obstaculos() -> (lidar, mapa),
@@ -264,14 +277,15 @@ def ejecutar(leer_yaw, leer_obstaculos, mandar, giro=None, objetivo=GIRO_POR_DEF
             lidar, mapa = leer_obstaculos()
             bloqueado = None
             marcha = m.marcha
+            horizonte = horizonte_por_velocidad(leer_velocidad() if leer_velocidad else 0.0)
             if lidar is None:
                 bloqueado = 'LiDAR sin datos'
             else:
-                h = holgura_por_delante(lidar, marcha, giro)
+                h = holgura_por_delante(lidar, marcha, giro, horizonte)
                 if h < MARGEN_LIDAR_M:
                     bloqueado = f'LiDAR a {h:.2f} m'
                 elif mapa is not None and len(mapa):
-                    hm = holgura_por_delante(mapa, marcha, giro)
+                    hm = holgura_por_delante(mapa, marcha, giro, horizonte)
                     if hm < MARGEN_MAPA_M:
                         bloqueado = f'mapa a {hm:.2f} m'
             v, w, estado = m.paso(reloj(), giro * acumulado, bloqueado)
@@ -310,6 +324,7 @@ class ConexionMediaVuelta:
         self.marco_mapa, self.marco_base = marco_mapa, marco_base
         self.Twist = Twist
         self.yaw = None
+        self.v = 0.0
         self.scan = None
         self.celdas = None              # celdas ocupadas del mapa, en el marco del mapa
         self.pub = nodo.create_publisher(Twist, topico_cmd, 10)
@@ -324,6 +339,7 @@ class ConexionMediaVuelta:
     def _odom(self, m):
         q = m.pose.pose.orientation
         self.yaw = math.atan2(2.0 * (q.w * q.z + q.x * q.y), 1.0 - 2.0 * (q.y * q.y + q.z * q.z))
+        self.v = m.twist.twist.linear.x
 
     def _scan(self, m):
         self.scan = m
@@ -400,4 +416,4 @@ class ConexionMediaVuelta:
         log = self.nodo.get_logger().info
         self.esperar_datos()
         return ejecutar(lambda: self.yaw, self.obstaculos, self.mandar, giro=giro,
-                        objetivo=objetivo, log=log)
+                        objetivo=objetivo, log=log, leer_velocidad=lambda: self.v)

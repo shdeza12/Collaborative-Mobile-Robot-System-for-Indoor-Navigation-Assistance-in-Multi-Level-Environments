@@ -18,6 +18,8 @@ QUE COMPRUEBA
   2. Desde el waypoint de la escalera del piso 4, mirando al sur: elige el giro
      cuya reversa se aleja de la escalera, completa al menos 160 grados y la
      huella nunca toca una pared ni la lamina.
+  2b. Lo mismo con una reversa a 1,0 m/s que rueda 0,9 s al soltar, como deepy
+     el 2026-10-08 (rodo 0,8 m tras la orden de parar).
   3. Lo mismo con un vehiculo simetrico (0,8 m): menos tiempos.
   4. Desde la salida (1,56 m de la pared oeste), como en p4r_11c.
   5. En un pasillo de 1,2 m con 1,5 m de radio no cabe: se detiene sin tocar nada.
@@ -58,10 +60,11 @@ def salida_piso4():
 class Vehiculo:
     """Bicicleta con radio por lado, retardo al arrancar y rodadura al soltar."""
 
-    def __init__(self, x, y, yaw, r_izq, r_der, v_ade=0.65, v_rev=0.45):
+    def __init__(self, x, y, yaw, r_izq, r_der, v_ade=0.65, v_rev=0.45, rodada_s=0.3):
         self.x, self.y, self.yaw = x, y, yaw
         self.r_izq, self.r_der = r_izq, r_der
         self.v_ade, self.v_rev = v_ade, v_rev
+        self.rodada_s = rodada_s
         self.v = 0.0
         self.orden = (0.0, 0.0)
 
@@ -72,11 +75,13 @@ class Vehiculo:
         v_cmd, w_cmd = self.orden
         objetivo = 0.0 if v_cmd == 0 else (self.v_ade if v_cmd > 0 else -self.v_rev)
         # Arranca en 0,2 s y para en 0,3 s: rueda de 0,07 a 0,1 m al soltar.
-        tasa = (abs(objetivo) / 0.2) if objetivo else (max(self.v_ade, self.v_rev) / 0.3)
+        tasa = (abs(objetivo) / 0.2) if objetivo else (max(self.v_ade, self.v_rev) / self.rodada_s)
         self.v += max(-tasa * dt, min(tasa * dt, objetivo - self.v))
         if v_cmd != 0 and w_cmd != 0:
             # Lado de la direccion como en el puente: signo de w / v.
             self.lado = 1 if (w_cmd / v_cmd) > 0 else -1
+        elif v_cmd == 0:
+            self.lado = 0      # con la orden cero el puente centra la direccion: rueda recto
         lado = getattr(self, 'lado', 0)
         if lado:
             r = self.r_izq if lado > 0 else self.r_der
@@ -101,7 +106,8 @@ def correr(paredes, vehiculo, giro=None):
         estado['t'] += dt
 
     ok, msg = mv.ejecutar(lambda: vehiculo.yaw, leer_obstaculos, vehiculo.mandar, giro=giro,
-                          reloj=lambda: estado['t'], dormir=dormir, log=lambda *_: None)
+                          reloj=lambda: estado['t'], dormir=dormir, log=lambda *_: None,
+                          leer_velocidad=lambda: vehiculo.v)
     for _ in range(20):                    # lo que rueda despues de terminar
         dormir(0.05)
     return ok, msg, estado['holgura_min']
@@ -152,6 +158,11 @@ def main():
                     f'y no hacia la escalera ({der:.2f} m)')
     print('   Con el lado debil al reves (1,5 m / 0,6 m)')
     caso('lado debil al reves', Vehiculo(24.39, 0.82, 0.0, 1.5, 0.6))
+
+    print('2b. Como deepy el 8-oct: reversa a 1,0 m/s que rueda 0,9 s al soltar, junto a la escalera')
+    caso('rodada larga en la escalera', Vehiculo(24.39, 0.82, 0.0, 0.6, 1.5, v_rev=1.0, rodada_s=0.9))
+    caso('rodada larga, lado debil al reves', Vehiculo(24.39, 0.82, 0.0, 1.5, 0.6, v_rev=1.0, rodada_s=0.9))
+    caso('rodada larga desde la salida', Vehiculo(24.25, 1.49, 0.0, 0.6, 1.5, v_rev=1.0, rodada_s=0.9))
 
     print('3. Vehiculo simetrico (0,8 m)')
     caso('simetrico', Vehiculo(24.39, 0.82, 0.0, 0.8, 0.8))
