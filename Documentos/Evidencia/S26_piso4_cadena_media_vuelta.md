@@ -173,6 +173,20 @@ promedió 74 % con un máximo de 83 %. Por grupo, en porcentaje de un núcleo:
 Desde la mañana, `nav2_mapa_guardado.sh` detiene doce procesos de AWS que la cadena no usa. Con eso,
 la tarjeta en reposo bajó del 21–34 % al 8–10 % (commit `69421e1`).
 
+En el ensayo de la mañana, sin mover los vehículos, se miró la carga con `htop` en los dos a la vez:
+
+- A las 11:21, con la cadena arrancando, los dos núcleos estaban entre el 92 % y el 100 % en los dos
+  vehículos. La carga media de 1 min era de 20,3 en racey y de 11,8 en deepy, con 716 MB y 584 MB de
+  memoria.
+- A las 11:28, con la cadena detenida, los núcleos bajaron al 3–5 %, con 561 MB y 560 MB.
+
+El arranque satura la tarjeta durante unos minutos, en buena parte por la tabla que el planificador
+precalcula. Después la carga se estabiliza alrededor del 50 %, como en la tarde.
+
+![htop en racey (izquierda) y deepy (derecha) a las 11:21, con la cadena arrancando](S26_htop_dos_vehiculos_arranque.png)
+
+![htop en racey (izquierda) y deepy (derecha) a las 11:28, con la cadena detenida](S26_htop_dos_vehiculos_reposo.png)
+
 ## 5. Cambios en el código
 
 Todos los cambios entraron en el commit `1927614`:
