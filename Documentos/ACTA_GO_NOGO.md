@@ -124,7 +124,7 @@ escribieron antes de correr.
 |---|---|---|---|
 | **G-1 · Actuación** | **ALCANZADO** | 2026-09-22 | [`S24_sonda_actuacion_amss_ez9n.md`](Evidencia/S24_sonda_actuacion_amss_ez9n.md), §9.3 |
 | **G-2 · Odometría** | **ALCANZADO** | 2026-10-02 | [`S25_pisos34_campo.md`](Evidencia/S25_pisos34_campo.md), §6, conclusión 1 |
-| **G-3 · Navegación de uno** | No alcanzado en C-1; sigue abierto (§6.2) | 2026-10-02 | [`S25_pisos34_campo.md`](Evidencia/S25_pisos34_campo.md), §6, conclusión 2 |
+| **G-3 · Navegación de uno** | **ALCANZADO** (no alcanzado en C-1, abierto por el §6.2) | 2026-10-07 | [`S26_piso4_cadena_media_vuelta.md`](Evidencia/S26_piso4_cadena_media_vuelta.md), §2 y §3.1 |
 | **G-4 · Dos en el mismo grafo** | **ALCANZADO** | 2026-09-22 | [`S24_compuerta_G4_dos_en_el_grafo.md`](Evidencia/S24_compuerta_G4_dos_en_el_grafo.md) |
 | **G-5 · Protocolo completo** | Pendiente | — | — |
 | **G-6 · RF-27** | Pendiente | — | — |
@@ -148,6 +148,15 @@ sobre 6,68 m, dentro del 10 % del criterio. Las dos llegadas quedaron a 0,57 m y
 medidas con flexómetro, fuera de los 0,5 m de G-3 (§6.1, punto 3). Nav2 da la meta por alcanzada a
 1,0 m, y los dos vehículos se detuvieron al cruzar ese margen. Lo que resolvieron los directores
 sobre el corte está en el §6.2.
+
+**Alcance de G-3, 7 de octubre.** En el piso 4, con la IMU integrada en la odometría y el margen de
+llegada de Nav2 reducido a 0,5 m, el vehículo `amss-jgm9` recorrió tres tramos encadenados sin que
+nadie lo tocara y después regresó a la salida. Las llegadas se verificaron con flexómetro, una
+referencia más exigente que `/odom`: la del Salón 401 quedó a 0,06 m de la meta, la de la salida a
+0,34 m y la del Salón 402 a 0,45 m, las tres dentro de la tolerancia de 0,5 m. Las del 401 y el 402
+se midieron de marca a marca y dependen de una estimación de la llegada al Salón 403, que no se
+midió; la de la salida se midió contra las paredes y no depende de esa estimación. El error de
+avance de la odometría fue de +1,9 % y +4,9 %, dentro del 10 % de G-2.
 
 ## 5. Los puntos de corte, con fecha
 

@@ -40,7 +40,7 @@
 #     NS=robot2 CARRO=192.168.0.102 MAPA=... bash nav2_mapa_guardado.sh   (bloque C: todo bajo /robot2)
 #     POSE_X=24.45 POSE_Y=1.21 POSE_YAW=3.1416 CARRO=... MAPA=... bash nav2_mapa_guardado.sh
 #         (salida del vehiculo en el mapa; POSE_YAW en radianes, 0 por defecto)
-#     ESCALA=1.0 CARRO=... MAPA=... bash nav2_mapa_guardado.sh   (escala del puente; por defecto, la de cada vehiculo: racey 0.9, deepy 0.85; ESCALA_REVERSA=, solo marcha atras: racey 0.75, deepy 1.0)
+#     ESCALA=1.0 CARRO=... MAPA=... bash nav2_mapa_guardado.sh   (escala del puente; por defecto, la de cada vehiculo: racey 0.9, deepy 0.85; ESCALA_REVERSA=, solo marcha atras: 0.75 en los dos)
 #     MARGEN=0.5 CARRO=... MAPA=... bash nav2_mapa_guardado.sh   (margen de llegada de Nav2; 1.0 por defecto)
 #     IMU=true CARRO=... MAPA=... bash nav2_mapa_guardado.sh
 #
@@ -84,7 +84,7 @@ POSE_Y="${POSE_Y:-0.0}"
 # puente). ESCALA_REVERSA= la anula.
 case "$CARRO" in
   192.168.0.104) ESCALA_VEHICULO=0.9; REVERSA_VEHICULO=0.75 ;;   # amss-jgm9 (racey): con 1,0 iba a ~1,2 m/s y se paso de la meta; en reversa, 1,1-1,7 m/s con escala_reversa 1,0 (7-oct)
-  192.168.0.102) ESCALA_VEHICULO=0.85; REVERSA_VEHICULO=1.0 ;;   # amss-ez9n (deepy): con 0,9 llego a 1,58 m/s (2-oct); reversa sin medir
+  192.168.0.102) ESCALA_VEHICULO=0.85; REVERSA_VEHICULO=0.75 ;;  # amss-ez9n (deepy): con 0,9 llego a 1,58 m/s (2-oct); reversa sin medir, la misma de racey (decision del 8-oct)
   *)             ESCALA_VEHICULO=0.9; REVERSA_VEHICULO=1.0 ;;
 esac
 ESCALA="${ESCALA:-$ESCALA_VEHICULO}"
