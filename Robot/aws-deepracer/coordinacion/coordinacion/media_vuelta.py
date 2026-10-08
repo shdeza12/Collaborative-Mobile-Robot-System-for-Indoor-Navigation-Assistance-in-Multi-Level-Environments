@@ -349,7 +349,7 @@ class ConexionMediaVuelta:
         return (t.transform.translation.x, t.transform.translation.y,
                 math.atan2(2.0 * (q.w * q.z + q.x * q.y), 1.0 - 2.0 * (q.y * q.y + q.z * q.z)))
 
-    def obstaculos(self):
+    def obstaculos(self, avisar=True):
         """(lidar, mapa) en el marco del vehiculo; None donde no hay dato."""
         lidar = mapa = None
         m = self.scan
@@ -363,14 +363,16 @@ class ConexionMediaVuelta:
                 c, s = math.cos(th), math.sin(th)
                 lidar = np.column_stack((x + c * px - s * py, y + s * px + c * py))
             except Exception as e:  # TF todavia no disponible
-                self.nodo.get_logger().warn(f'media vuelta: sin TF del LiDAR ({e})')
+                if avisar:
+                    self.nodo.get_logger().warn(f'media vuelta: sin TF del LiDAR ({e})')
         if self.celdas is not None:
             try:
                 x, y, th = self._transformada(self.marco_mapa, self.marco_base)
                 cerca = self.celdas[np.hypot(self.celdas[:, 0] - x, self.celdas[:, 1] - y) <= ALCANCE_M + 0.5]
                 mapa = a_marco(cerca, x, y, th)
             except Exception as e:
-                self.nodo.get_logger().warn(f'media vuelta: sin TF del mapa ({e})')
+                if avisar:
+                    self.nodo.get_logger().warn(f'media vuelta: sin TF del mapa ({e})')
         return lidar, mapa
 
     def mandar(self, v, w):
@@ -378,7 +380,24 @@ class ConexionMediaVuelta:
         t.linear.x, t.angular.z = float(v), float(w)
         self.pub.publish(t)
 
+    def esperar_datos(self, segundos=10.0):
+        """Espera a tener LiDAR y mapa en el marco del vehiculo.
+
+        MEDIDO EL 2026-10-08 en amss-ez9n: lanzada recien creado el nodo, la TF
+        del LiDAR ('laser') y la del mapa aun no habian llegado, y la maniobra
+        se nego con 'sin LiDAR'. Era lo seguro, pero no lo que se queria.
+        """
+        fin = time.monotonic() + segundos
+        while time.monotonic() < fin:
+            lidar, mapa = self.obstaculos(avisar=False)
+            if lidar is not None and (self.celdas is None or mapa is not None):
+                return True
+            time.sleep(0.2)
+        self.obstaculos(avisar=True)    # deja en el log por que no
+        return False
+
     def ejecutar(self, giro=None, objetivo=GIRO_POR_DEFECTO):
         log = self.nodo.get_logger().info
+        self.esperar_datos()
         return ejecutar(lambda: self.yaw, self.obstaculos, self.mandar, giro=giro,
                         objetivo=objetivo, log=log)
