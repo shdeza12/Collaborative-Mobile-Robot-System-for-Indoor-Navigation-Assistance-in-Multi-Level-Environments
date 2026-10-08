@@ -50,6 +50,7 @@ from nav2_msgs.action import NavigateToPose
 from nav2_msgs.srv import ClearEntireCostmap
 from nav_msgs.msg import Odometry
 from std_msgs.msg import String
+from std_srvs.srv import Trigger
 from rclpy.action import ActionClient, ActionServer, CancelResponse
 from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.node import Node
@@ -104,6 +105,14 @@ class _Cancelada(Exception):
 # vieja es aceptarla sin mirar.
 EDAD_MAXIMA_POSE_S = 2.0
 
+#: Media vuelta antes de navegar (desde el 2026-10-08). Si la meta queda a mas
+#: de ANGULO_MEDIA_VUELTA del rumbo del vehiculo y a mas de
+#: DISTANCIA_MEDIA_VUELTA_M, se le pide al agente que de la media vuelta
+#: (media_vuelta.py) antes de mandar el goal a Nav2. Ver _media_vuelta_si_hace_falta.
+ANGULO_MEDIA_VUELTA = math.radians(110.0)
+DISTANCIA_MEDIA_VUELTA_M = 1.5
+ESPERA_MEDIA_VUELTA_S = 120.0
+
 # Niveles que el coordinador sabe asignar. El 1 y el 2 son los de la simulacion
 # (pisos 1 y 2); el 3 y el 4, los pisos del vehiculo desde el 2026-10-02 (acta
 # §6.2). Un nivel con el parametro vacio no se asigna.
@@ -133,6 +142,10 @@ class Coordinador(Node):
         # coordinador en una demostracion sin ensuciar el disco.
         self.declare_parameter("ruta_registros", "")
         self.declare_parameter("condicion", "simulacion")
+        # 'auto': media vuelta del agente en el vehiculo y no en simulacion, para
+        # no cambiar en silencio las corridas de simulacion ya hechas. 'si' o 'no'
+        # la fuerzan.
+        self.declare_parameter("media_vuelta", "auto")
 
         # Los niveles 3 y 4 van vacios por defecto, asi que en simulacion la
         # asignacion es {1: robot1, 2: robot2}, la de siempre.
@@ -147,6 +160,13 @@ class Coordinador(Node):
             raise ValueError(f"condicion debe ser 'simulacion' o 'hardware', "
                              f"no {self.condicion!r}")
         self.tolerancia_llegada_m = TOLERANCIA_POR_CONDICION[self.condicion]
+        mv = self.get_parameter("media_vuelta").value
+        if mv not in ("auto", "si", "no"):
+            raise ValueError(f"media_vuelta debe ser 'auto', 'si' o 'no', no {mv!r}")
+        self.usar_media_vuelta = mv == "si" or (mv == "auto" and self.condicion == "hardware")
+        self.get_logger().info(
+            f"media vuelta del agente antes de navegar: "
+            f"{'si' if self.usar_media_vuelta else 'no'} (media_vuelta={mv})")
         self.get_logger().info(
             f"condicion '{self.condicion}': la llegada se acepta a "
             f"{self.tolerancia_llegada_m} m o menos (§3.3 del protocolo)")
@@ -211,6 +231,11 @@ class Coordinador(Node):
             }
             for ns in set(self.asignacion.values())
         }
+
+        self.clientes_media_vuelta = {
+            ns: self.create_client(Trigger, f"/{ns}/media_vuelta", callback_group=self.grupo)
+            for ns in set(self.asignacion.values())
+        } if self.usar_media_vuelta else {}
 
         self.servidor = ActionServer(
             self, GuiarUsuario, "/coordinacion/guiar_usuario",
@@ -720,6 +745,8 @@ class Coordinador(Node):
                 f"del desajuste Humble/Jazzy descrito en la cabecera de este "
                 f"archivo")
 
+        self._media_vuelta_si_hace_falta(robot, punto)
+
         objetivo = NavigateToPose.Goal()
         objetivo.pose = PoseStamped()
         # El §3 del contrato: todos los marcos llevan el prefijo del namespace,
@@ -767,6 +794,52 @@ class Coordinador(Node):
         self.get_logger().info(
             f"    llegada verificada contra {self.fuente_pose}: {d:.3f} m")
         return True, ""
+
+    def _media_vuelta_si_hace_falta(self, robot, punto):
+        """Pide al agente la media vuelta si la meta queda detras del vehiculo.
+
+        POR QUE. En la salida del piso 4 la media vuelta de Nav2 aborto dos veces
+        contra la pared (p4r_11 y p4r_11b, 2026-10-07): el vehiculo no gira sobre
+        si mismo y Nav2 replanifica cada segundo con otra maniobra. Y entre
+        misiones nadie reubica los vehiculos (acta §6.2), asi que casi cada
+        mision empieza con una media vuelta, muchas veces junto a la escalera. La
+        del agente se corta por espacio con el LiDAR y con el mapa, donde la
+        escalera esta cerrada con una lamina (media_vuelta.py).
+
+        Si el agente no ofrece el servicio, o la maniobra no se completa, se sigue
+        con Nav2 como antes y se avisa: no es peor que no tenerla.
+        """
+        if not self.usar_media_vuelta:
+            return
+        pose = self._pose(robot)
+        if pose is None:
+            return
+        dx = float(punto["pose"]["x"]) - pose[0]
+        dy = float(punto["pose"]["y"]) - pose[1]
+        if math.hypot(dx, dy) < DISTANCIA_MEDIA_VUELTA_M:
+            return
+        delta = abs(_normalizar(math.atan2(dy, dx) - pose[2]))
+        if delta < ANGULO_MEDIA_VUELTA:
+            return
+        cliente = self.clientes_media_vuelta.get(robot)
+        if cliente is None or not cliente.wait_for_service(timeout_sec=2.0):
+            self.get_logger().warn(
+                f"    la meta queda a {math.degrees(delta):.0f} grados del rumbo de "
+                f"'{robot}', pero su agente no ofrece media_vuelta: la maniobra "
+                f"queda en manos de Nav2")
+            return
+        self.get_logger().info(
+            f"    la meta queda a {math.degrees(delta):.0f} grados del rumbo de "
+            f"'{robot}': media vuelta del agente antes de navegar")
+        res = self._esperar(cliente.call_async(Trigger.Request()),
+                            timeout=ESPERA_MEDIA_VUELTA_S)
+        if res is None:
+            self.get_logger().warn(
+                f"    la media vuelta no respondio en {ESPERA_MEDIA_VUELTA_S:.0f} s; sigue Nav2")
+        elif res.success:
+            self.get_logger().info(f"    {res.message}")
+        else:
+            self.get_logger().warn(f"    media vuelta no completada ({res.message}); sigue Nav2")
 
     def _esperar_resultado_nav2(self, gh_nav2, goal_handle_top, robot):
         """Como _esperar(), pero ademas vigila la cancelacion del goal de arriba.

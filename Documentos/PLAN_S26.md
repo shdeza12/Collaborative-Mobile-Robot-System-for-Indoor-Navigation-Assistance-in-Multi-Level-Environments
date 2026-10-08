@@ -343,6 +343,22 @@ Estado del 7-oct, con racey y sin el radio real en el planificador.
 - La reversa de racey quedó en 0,75 (`escala_reversa`).
 - Detalle en [`S26_piso4_cadena_media_vuelta.md`](Evidencia/S26_piso4_cadena_media_vuelta.md).
 
+Estado del 8-oct: la media vuelta pasa al agente, protegida
+([`media_vuelta.py`](../Robot/aws-deepracer/coordinacion/coordinacion/media_vuelta.py)).
+
+- Alterna reversa y avance con la dirección a tope hasta girar 180°. Corta cada tiempo cuando el
+  LiDAR o el mapa (con la lámina de la escalera) dejan menos de 0,10 m en el sentido de la marcha.
+- El primer tiempo va hacia el costado con más espacio. Desde la escalera del piso 4 se aleja del
+  vano. No necesita el radio de giro.
+- El coordinador la pide antes de una meta que queda detrás del vehículo. Si no se completa, sigue
+  Nav2 como antes.
+- En el vehículo el agente necesita `-p topico_scan:=/rplidar_ros/scan` (§4.2, paso 3).
+- Pruebas: [`prueba_media_vuelta.py`](../herramientas/prueba_media_vuelta.py), con un vehículo
+  simulado de radios distintos por lado en la salida del piso 4, 18 de 18; y
+  [`prueba_media_vuelta_ros.py`](../herramientas/prueba_media_vuelta_ros.py), con el agente real y
+  un mundo mínimo, 9 de 9.
+- En el campo se comprueba dentro de las misiones de G-5, sin una prueba aparte.
+
 ### 3.4 · Una corrida en el piso 3 con deepy
 
 Salida: frente a las escaleras y mirando al norte, con el centro del vehículo a 3,23 m de la pared sur
@@ -397,8 +413,8 @@ corre en racey. El paso 3 comprueba que el portátil reciba los mensajes de los 
 | Paso | Qué | Comando | Esperado | Si falla |
 |---|---|---|---|---|
 | 1 | Coordinador y agente iguales al repositorio en los dos | `herramientas/nivelar_carros.sh` | `coordinacion_ws: los ... archivos del coordinador y del agente iguales al repositorio` en los dos | `herramientas/nivelar_carros.sh --copiar`, que copia y recompila |
-| 2 | Nav2 con espacio de nombres en los dos | deepy: `NS=robot1 IMU=true MARGEN=0.5 CARRO=192.168.0.102 MAPA=/home/deepracer/tesis/piso3.yaml POSE_X=22.10 POSE_Y=1.06 POSE_YAW=3.1416 ESCALA=0.85 bash herramientas/nav2_mapa_guardado.sh` (ruta fija del vehículo). racey: `NS=robot2 IMU=true MARGEN=0.5 CARRO=192.168.0.104 MAPA=/home/deepracer/tesis/piso4.yaml POSE_X=24.45 POSE_Y=1.21 POSE_YAW=3.1416 ESCALA=1.0 bash herramientas/nav2_mapa_guardado.sh` (ruta fija del vehículo) | `CADENA LISTA` en los dos, con `imu/data` y `odom` publicando | El aviso en rojo del guion dice qué pieza falló |
-| 3 | Un agente en cada vehículo | racey: `ssh deepracer@192.168.0.104 "sudo -n bash -c 'export FASTRTPS_DEFAULT_PROFILES_FILE=/etc/deepracer-tesis/particion.xml; source /opt/ros/jazzy/setup.bash; source /home/deepracer/coordinacion_ws/install/setup.bash; setsid nohup ros2 run coordinacion agente --ros-args -r __ns:=/robot2 -p nivel:=4 > /tmp/agente.log 2>&1 &'"` (ruta fija del vehículo). deepy: lo mismo con `192.168.0.102`, `/robot1` y `nivel:=3`. En el portátil: `ros2 topic echo --once /robot2/estado --field pose` | La pose cerca de la salida del mapa, (24,45, 1,21) en racey y (22,10, 1,06) en deepy, con `frame_id: robot2/map`. Que llegue al portátil confirma que Humble recibe los mensajes de Jazzy | Pose en (0, 0): es `odom`, no el mapa; revisar AMCL. Nada en el portátil: probar el mismo `echo` dentro de racey; si allí llega, es la comunicación entre distribuciones, y `rosbridge` tendría que ir en racey (traer el paquete sin internet) |
+| 2 | Nav2 con espacio de nombres en los dos | deepy: `NS=robot1 IMU=true MARGEN=0.5 CARRO=192.168.0.102 MAPA=/home/deepracer/tesis/piso3.yaml POSE_X=22.10 POSE_Y=1.06 POSE_YAW=3.1416 bash herramientas/nav2_mapa_guardado.sh` (ruta fija del vehículo). racey: `NS=robot2 IMU=true MARGEN=0.5 CARRO=192.168.0.104 MAPA=/home/deepracer/tesis/piso4.yaml POSE_X=24.45 POSE_Y=1.21 POSE_YAW=3.1416 bash herramientas/nav2_mapa_guardado.sh` (ruta fija del vehículo). Sin `ESCALA=`: cada vehículo toma la suya (racey 0,9, deepy 0,85, y 0,75 en reversa) | `CADENA LISTA` en los dos, con `imu/data` y `odom` publicando | El aviso en rojo del guion dice qué pieza falló |
+| 3 | Un agente en cada vehículo | racey: `ssh deepracer@192.168.0.104 "sudo -n bash -c 'export FASTRTPS_DEFAULT_PROFILES_FILE=/etc/deepracer-tesis/particion.xml; source /opt/ros/jazzy/setup.bash; source /home/deepracer/coordinacion_ws/install/setup.bash; setsid nohup ros2 run coordinacion agente --ros-args -r __ns:=/robot2 -p nivel:=4 -p topico_scan:=/rplidar_ros/scan > /tmp/agente.log 2>&1 &'"` (ruta fija del vehículo). `topico_scan` es para la media vuelta: el LiDAR del vehículo publica fuera del espacio de nombres. deepy: lo mismo con `192.168.0.102`, `/robot1` y `nivel:=3`. En el portátil: `ros2 topic echo --once /robot2/estado --field pose` | La pose cerca de la salida del mapa, (24,45, 1,21) en racey y (22,10, 1,06) en deepy, con `frame_id: robot2/map`. Que llegue al portátil confirma que Humble recibe los mensajes de Jazzy | Pose en (0, 0): es `odom`, no el mapa; revisar AMCL. Nada en el portátil: probar el mismo `echo` dentro de racey; si allí llega, es la comunicación entre distribuciones, y `rosbridge` tendría que ir en racey (traer el paquete sin internet) |
 | 4 | Coordinador en racey | `ssh deepracer@192.168.0.104 "sudo -n bash -c 'export FASTRTPS_DEFAULT_PROFILES_FILE=/etc/deepracer-tesis/particion.xml; source /opt/ros/jazzy/setup.bash; source /home/deepracer/coordinacion_ws/install/setup.bash; mkdir -p /home/deepracer/registros; setsid nohup ros2 run coordinacion coordinador --ros-args -p condicion:=hardware -p ruta_puntos:=/home/deepracer/tesis/puntos_interes_pisos34.yaml -p robot_nivel_3:=robot1 -p robot_nivel_4:=robot2 -p ruta_registros:=/home/deepracer/registros > /tmp/coordinador.log 2>&1 &'"` (ruta fija del vehículo), y `ssh deepracer@192.168.0.104 "sudo -n grep -E 'condicion|listo' /tmp/coordinador.log"` | `condicion 'hardware': la llegada se acepta a 0.5 m o menos` y `Coordinador listo`, con la asignación de los niveles 3 y 4 | `GUARDIAN`: ya hay otro coordinador; pararlo con `sudo -n pkill -f "coordinacion[/]coordinador"` |
 | 5 | `rosbridge` y la interfaz en el portátil | En una terminal, `ros2 launch rosbridge_server rosbridge_websocket_launch.xml send_action_goals_in_new_thread:=true`; en otra, `python3 -m http.server 8000 --directory interfaz_web` | `Rosbridge WebSocket server started on port 9090` | — |
 | 6 | La interfaz desde el teléfono | El teléfono en la red de los vehículos, `http://192.168.0.105:8000/` | La lista de destinos de los pisos 3 y 4 y los dos robots | Sin destinos: el portátil no recibe `/coordinacion/puntos_interes`; volver al paso 3 |

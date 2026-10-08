@@ -10,6 +10,16 @@ Interfaces, segun §4 de Documentos/CONTRATO_INTERFACES.md:
     /<ns>/estado                              EstadoRobot a 2 Hz   (lo publica)
     /<ns>/navigate_to_pose/_action/status     GoalStatusArray      (lo lee)
     TF <ns>/map -> <ns>/base_link                                  (la lee)
+    /<ns>/media_vuelta                        std_srvs/Trigger     (lo ofrece)
+
+MEDIA VUELTA (desde el 2026-10-08). El coordinador la pide antes de mandar a
+Nav2 una meta que queda detras del vehiculo: la media vuelta de Nav2 aborto dos
+veces contra la pared en la salida del piso 4 (p4r_11 y p4r_11b). La hace el
+agente y no el coordinador porque el LiDAR y la TF de cada vehiculo son
+privados de su particion. La logica esta en media_vuelta.py; aqui solo el
+servicio. El servicio bloquea mientras dura la maniobra, asi que el nodo gira
+con un executor multihilo y el servicio va en su propio grupo: el estado sigue
+saliendo a 2 Hz (RF-08). Para desactivarlo: 'media_vuelta:=false'.
 
 Se lanza DENTRO del namespace del robot. Todos los nombres de arriba son
 relativos a proposito: ROS los cuelga solo de /robot1/ o /robot2/. Escribirlos
@@ -45,11 +55,15 @@ import rclpy
 import tf2_ros
 from action_msgs.msg import GoalStatusArray
 from coordinacion_msgs.msg import EstadoRobot
+from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
+from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from rclpy.qos import qos_profile_action_status_default
+from std_srvs.srv import Trigger
 
 from coordinacion.estado_agente import (
-    PERIODO_S, TOPICO_ESTADO, TOPICO_STATUS_ACCION, MaquinaEstado)
+    LIBRE, PERIODO_S, TOPICO_ESTADO, TOPICO_STATUS_ACCION, MaquinaEstado)
+from coordinacion.media_vuelta import ConexionMediaVuelta
 
 #: Niveles del edificio que un agente puede atender: 1 y 2 en simulacion, 3 y 4
 #: en los pisos del vehiculo desde el 2026-10-02 (acta §6.2).
@@ -75,6 +89,10 @@ class Agente(Node):
         self.declare_parameter("nivel", 0)
         self.declare_parameter("marco_mapa", f"{ns}/map" if ns else "map")
         self.declare_parameter("marco_base", f"{ns}/base_link" if ns else "base_link")
+        # El LiDAR del vehiculo publica en /rplidar_ros/scan, fuera del
+        # namespace; el de la simulacion, en /<ns>/scan.
+        self.declare_parameter("topico_scan", "scan")
+        self.declare_parameter("media_vuelta", True)
 
         self.robot_id = self.get_parameter("robot_id").value or ns
         self.nivel = int(self.get_parameter("nivel").value)
@@ -116,6 +134,15 @@ class Agente(Node):
 
         self.create_timer(PERIODO_S, self._publicar)
 
+        self.maniobrando = False
+        self.media_vuelta = None
+        if self.get_parameter("media_vuelta").value:
+            self.media_vuelta = ConexionMediaVuelta(
+                self, self.buffer_tf, self.marco_mapa, self.marco_base,
+                topico_scan=self.get_parameter("topico_scan").value)
+            self.create_service(Trigger, "media_vuelta", self._media_vuelta,
+                                callback_group=MutuallyExclusiveCallbackGroup())
+
         self.get_logger().info(
             f"Agente '{self.robot_id}' publicando {TOPICO_ESTADO} a "
             f"{1.0 / PERIODO_S:.1f} Hz; lee {TOPICO_STATUS_ACCION} y la TF "
@@ -125,6 +152,25 @@ class Agente(Node):
     def _status(self, msg):
         """Llega el status de navigate_to_pose. Es la unica fuente del estado."""
         self.maquina.actualizar([g.status for g in msg.status_list])
+
+    def _media_vuelta(self, _peticion, respuesta):
+        """Hace la media vuelta (media_vuelta.py). Bloquea hasta que termina."""
+        if self.maquina.estado != LIBRE:
+            respuesta.success = False
+            respuesta.message = (f"no se hace: el robot no esta libre (estado "
+                                 f"{self.maquina.estado}); Nav2 tiene una meta activa")
+            return respuesta
+        self.maniobrando = True
+        self.get_logger().info("media vuelta pedida")
+        try:
+            respuesta.success, respuesta.message = self.media_vuelta.ejecutar()
+        except Exception as e:  # nunca dejar el vehiculo con una orden puesta
+            self.media_vuelta.mandar(0.0, 0.0)
+            respuesta.success, respuesta.message = False, f"fallo: {e}"
+        finally:
+            self.maniobrando = False
+        self.get_logger().info(respuesta.message)
+        return respuesta
 
     def _leer_pose(self):
         """Devuelve (pose, motivo). La pose es None si la TF no esta.
@@ -175,6 +221,8 @@ class Agente(Node):
             msg.detalle = self.motivo_tf and f"pose caducada; {self.motivo_tf}"
         else:
             msg.detalle = self.motivo_tf
+        if self.maniobrando:
+            msg.detalle = "media vuelta en curso" + (f"; {msg.detalle}" if msg.detalle else "")
 
         self.pub.publish(msg)
 
@@ -183,7 +231,8 @@ def main(args=None):
     rclpy.init(args=args)
     nodo = Agente()
     try:
-        rclpy.spin(nodo)
+        # Multihilo por el servicio de media vuelta, que bloquea (cabecera).
+        rclpy.spin(nodo, MultiThreadedExecutor(num_threads=3))
     except KeyboardInterrupt:
         pass
     finally:

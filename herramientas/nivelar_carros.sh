@@ -64,6 +64,7 @@ ARCHIVOS=(
   "herramientas/probar_imu.py"
   "herramientas/medir_odom_imu.py"
   "herramientas/registrar_carga.py"
+  "herramientas/media_vuelta.py"
   "$B/scripts/imu_bmi160.py"
 )
 
@@ -71,8 +72,12 @@ ARCHIVOS=(
 # con --symlink-install. Hasta el 2026-10-05 nadie lo comparaba, y los dos
 # vehiculos tenian el coordinador del 13-sep, sin la tolerancia de llegada del
 # 28-sep.
-mapfile -t COORD < <(git -C "$REPO" ls-files Robot/aws-deepracer/coordinacion Robot/aws-deepracer/coordinacion_msgs)
-destino_coord() { echo "${1#Robot/aws-deepracer/}"; }
+# El puente (cmdvel_to_servo_pkg) vive en el mismo workspace, y hasta el
+# 2026-10-08 tampoco se comparaba: el factor de reversa (escala_reversa) llego a
+# racey copiado a mano y deepy se quedo sin el.
+mapfile -t COORD < <(git -C "$REPO" ls-files Robot/aws-deepracer/coordinacion Robot/aws-deepracer/coordinacion_msgs \
+  Robot/aws-deepracer/deepracer_nodes/cmdvel_to_servo_pkg/cmdvel_to_servo_pkg)
+destino_coord() { local d="${1#Robot/aws-deepracer/}"; echo "${d#deepracer_nodes/}"; }
 
 # Ruta dentro de ~/tesis: los arboles van en su carpeta, el resto suelto.
 destino() {
@@ -162,6 +167,7 @@ copiar() {
   # necesitan compilar. Se compila siempre: es un minuto y evita adivinar.
   paquetes="coordinacion"
   printf '%s\n' "${FALTAN_C[@]}" | grep -q 'coordinacion_msgs/' && paquetes="coordinacion_msgs coordinacion"
+  printf '%s\n' "${FALTAN_C[@]}" | grep -q 'cmdvel_to_servo_pkg/' && paquetes="$paquetes cmdvel_to_servo_pkg"
   echo "   compilando $paquetes en el vehiculo..."
   # Con el entorno de AWS, no solo el de ROS: el puente (cmdvel_to_servo_pkg) usa
   # los mensajes de deepracer_interfaces_pkg, que viven en /opt/aws/deepracer/lib,

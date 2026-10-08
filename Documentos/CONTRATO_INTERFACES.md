@@ -31,10 +31,21 @@ Consecuencia práctica: `/robot1` puede ser un robot simulado y `/robot2` uno f�
 | `/<ns>/navigate_to_pose` | acción `nav2_msgs/NavigateToPose` | **el coordinador la llama** | interfaz única de mando |
 | `/<ns>/estado` | `coordinacion_msgs/EstadoRobot` | sale del robot | 2 Hz. Con `condicion:=hardware` el coordinador toma de aquí la pose en el mapa, para el rumbo y la verificación de llegada (desde el 2026-10-05, `PLAN_S26.md` §4.1) |
 | `/<ns>/initialpose` | `geometry_msgs/PoseWithCovarianceStamped` | entra | inicialización de AMCL |
+| `/<ns>/media_vuelta` | servicio `std_srvs/Trigger` | **el coordinador lo llama** | desde el 2026-10-08: el agente da la media vuelta antes de una meta que queda detrás del vehículo. Ver la excepción de abajo |
 
 **El coordinador manda a un robot de una sola forma: llamando su acción `navigate_to_pose`.** No publica `cmd_vel`. No llama servicios internos de Nav2. Si algo no se puede expresar como "ve a esta pose", no entra en la coordinación.
 
 Esto es lo que hace que un robot físico sea intercambiable con uno simulado sin tocar el coordinador.
+
+Excepción desde el 2026-10-08. Antes de mandar una meta que queda a más de 110° del rumbo del
+vehículo y a más de 1,5 m, el coordinador llama `/<ns>/media_vuelta`. La media vuelta de Nav2 abortó
+dos veces contra la pared en la salida del piso 4
+([`S26_piso4_cadena_media_vuelta.md`](Evidencia/S26_piso4_cadena_media_vuelta.md), §3), y entre
+misiones nadie reubica los vehículos (acta §6.2). La maniobra la ejecuta el agente en el vehículo,
+con su LiDAR y su mapa ([`media_vuelta.py`](../Robot/aws-deepracer/coordinacion/coordinacion/media_vuelta.py)).
+El coordinador sigue sin publicar `cmd_vel`. Si el agente no ofrece el servicio, el coordinador
+deja la maniobra a Nav2, como antes. En simulación queda apagada por defecto (`media_vuelta:=auto`
+la activa solo con `condicion:=hardware`).
 
 > ⚠️ **Refutado el 2026-08-18, y se deja escrito en vez de borrarlo.** La frase anterior es cierta
 > **dentro de una distribución** y falsa entre ellas. `nav2_msgs/NavigateToPose` —la única vía de
