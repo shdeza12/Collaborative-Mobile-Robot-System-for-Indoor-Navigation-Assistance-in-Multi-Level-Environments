@@ -304,6 +304,17 @@ Punto de decisión a las 12:00. Se vuelve a `IMU=false` y al margen de 1,0 m en 
 IMU y margen de 0,5 m las llegadas no mejoran respecto al 2-oct, o si la tarjeta no sostiene la
 carga (Nav2 desactivado por el gestor, o el controlador fuera de su frecuencia). G-3 se reporta con su cifra.
 
+Estado del 7-oct, con racey: hecho
+([`S26_piso4_cadena_media_vuelta.md`](Evidencia/S26_piso4_cadena_media_vuelta.md)).
+
+- Los tres tramos terminaron en SUCCEEDED, con llegadas a 0,26 m (estimada, sin cinta), 0,45 m y
+  0,06 m.
+- El filtro tuvo un error de avance de +1,9 % y +4,9 %.
+- La escala de racey quedó en 0,9 (con 1,0 iba a 1,36 m/s).
+- La tarjeta no se saturó: 83 % como máximo durante las corridas.
+- Se sigue con IMU y margen de 0,5 m.
+- Falta deepy (paso 8).
+
 ### 3.3 · Media vuelta para ir a recoger a un usuario
 
 Con el radio de giro real ya en el planificador (§3.1), el vehículo va del Salón 401, donde terminó
@@ -320,6 +331,17 @@ recoger a un usuario que está al sur. Para eso da media vuelta en el tramo anch
 Si la media vuelta no sale ni con la meta intermedia, queda como limitación declarada de un
 vehículo Ackermann en pasillos de 2,3 m. En ese caso G-5 se hace en la variante sin media vuelta
 (§5.1).
+
+Estado del 7-oct, con racey y sin el radio real en el planificador.
+
+- `p4r_10`, en el tramo ancho: SUCCEEDED en 62,8 s, con 6 recuperaciones. Llegó a 0,34 m de la
+  salida, medido con cinta.
+- En la salida, con 2,5 m de ancho, la media vuelta de Nav2 abortó dos veces (`p4r_11` y `p4r_11b`).
+- Salió con la media vuelta en dos tiempos de
+  [`herramientas/media_vuelta.py`](../herramientas/media_vuelta.py): 182° y luego SUCCEEDED al 403
+  (`p4r_11c`).
+- La reversa de racey quedó en 0,75 (`escala_reversa`).
+- Detalle en [`S26_piso4_cadena_media_vuelta.md`](Evidencia/S26_piso4_cadena_media_vuelta.md).
 
 ### 3.4 · Una corrida en el piso 3 con deepy
 
