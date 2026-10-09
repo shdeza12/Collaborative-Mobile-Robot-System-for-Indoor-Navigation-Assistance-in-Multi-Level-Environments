@@ -385,6 +385,17 @@ def _lanzar(context, *args, **kwargs):
     hay_slam = IfCondition(LaunchConfiguration('slam'))
     hay_nav = IfCondition(LaunchConfiguration('nav'))
 
+    # Descubrimiento (2026-10-08). nav2_mapa_guardado.sh lanza todo con
+    # descubrimiento local (ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST): con las dos
+    # cadenas anunciandose por difusion en el WiFi, racey llego a carga 33 y su
+    # WiFi a ~2000 paquetes/s. Solo cruzan la red los nodos que la topologia
+    # necesita desde otro vehiculo: los que llama el coordinador (navegacion y
+    # limpieza de costmaps) y los que graba la mision en racey (odometria). Lo
+    # hacen por pares conocidos, sin difusion. Vacio: sin cambios.
+    pares = LaunchConfiguration('pares_ros').perform(context).strip()
+    red = {'ROS_STATIC_PEERS': pares.replace(',', ';')} if pares else {}
+    CRUZAN_LA_RED = ('bt_navigator', 'planner_server', 'controller_server')
+
     nodos_nav2 = [
         ('nav2_controller', 'controller_server'),
         ('nav2_planner', 'planner_server'),
@@ -423,7 +434,9 @@ def _lanzar(context, *args, **kwargs):
                               'odom_frame_id': f'{prefijo}odom',
                               'init_pose_from_topic': '',
                               'freq': 20.0,
-                              'use_sim_time': False}])]),
+                              'use_sim_time': False}],
+                 # Sin la IMU, rf2o publica /<ns>/odom, que se graba desde racey.
+                 additional_env={} if con_imu else red)]),
 
         # Peldanos 4-5 - mapa y localizacion en una sola pieza. Se usa SLAM en
         # vivo y no mapa guardado + AMCL porque AMCL exige una pose inicial que
@@ -444,6 +457,7 @@ def _lanzar(context, *args, **kwargs):
                  parameters=[{'frame_id': f'{prefijo}imu_link', 'use_sim_time': False}]),
             Node(package='robot_localization', executable='ekf_node',
                  name='ekf_filter_node', output='screen', namespace=ns_nodo,
+                 additional_env=red,           # publica /<ns>/odom
                  parameters=[parametros_ekf(prefijo, ns)],
                  remappings=[('odometry/filtered', 'odom')]),
         ]
@@ -468,7 +482,8 @@ def _lanzar(context, *args, **kwargs):
             parametros.append({'default_server_timeout': PLAZO_SERVIDOR_MS})
         acciones.append(Node(package=paquete, executable=ejecutable,
                              name=ejecutable, output='screen', namespace=ns_nodo,
-                             parameters=parametros, condition=hay_nav))
+                             parameters=parametros, condition=hay_nav,
+                             additional_env=red if ejecutable in CRUZAN_LA_RED else {}))
 
     acciones.append(
         Node(package='nav2_lifecycle_manager', executable='lifecycle_manager',
@@ -530,6 +545,11 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'imu_nodo', default_value=_junto_al_lanzador(NODO_IMU),
             description='Ruta de imu_bmi160.py. Por defecto, junto al lanzador.'),
+        DeclareLaunchArgument(
+            'pares_ros', default_value='',
+            description='IP de los otros equipos separadas por comas. Con ellas, '
+                        'los nodos que se usan desde otro vehiculo se descubren por '
+                        'pares conocidos. Vacio: sin cambios.'),
         DeclareLaunchArgument(
             'nav', default_value='false',
             description='Arranca planificador y control (peldanos 6-7). '

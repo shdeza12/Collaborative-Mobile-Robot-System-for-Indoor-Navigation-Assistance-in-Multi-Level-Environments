@@ -44,6 +44,10 @@ if [ -e "$DESTINO" ]; then
 fi
 
 source /opt/ros/jazzy/setup.bash
+# Descubrimiento (2026-10-08): local y por pares conocidos, como el coordinador.
+# Lo de deepy (/robot1/...) llega por esos pares, sin difusion en el WiFi.
+export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
+export ROS_STATIC_PEERS="${PARES_ROS:-192.168.0.102;192.168.0.104;192.168.0.105}"
 # Sin el workspace del coordinador, 'ros2 bag record' no conoce EstadoMision ni
 # EstadoRobot y no los graba: justo los topicos de los que salen las marcas.
 source ~deepracer/coordinacion_ws/install/setup.bash

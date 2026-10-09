@@ -117,6 +117,21 @@ ARGS_NS="${NS:+-r __ns:=/$NS}"           # para 'ros2 run'
 FUENTES='[ -f /etc/deepracer-tesis/particion.xml ] && export FASTRTPS_DEFAULT_PROFILES_FILE=/etc/deepracer-tesis/particion.xml; source /opt/ros/jazzy/setup.bash && source /home/deepracer/nav_ws/install/setup.bash'   # ruta fija del vehiculo
 FUENTES_PUENTE='[ -f /etc/deepracer-tesis/particion.xml ] && export FASTRTPS_DEFAULT_PROFILES_FILE=/etc/deepracer-tesis/particion.xml; source /opt/ros/jazzy/setup.bash && source /home/deepracer/coordinacion_ws/install/setup.bash'   # ruta fija del vehiculo
 
+# Descubrimiento (2026-10-08). Con las dos cadenas completas anunciandose por
+# difusion en el WiFi, racey llego a carga 33 y no levantaba Nav2; sin la cadena
+# de deepy, su WiFi bajo de ~2000 a ~240 paquetes/s. 'local' (por defecto): todo
+# se descubre solo dentro del vehiculo, y lo que la topologia usa desde otro
+# equipo (navegacion, odometria y AMCL, que graba racey) va por pares conocidos,
+# PARES_ROS, sin difusion. 'red': como antes del 8-oct.
+DESCUBRIMIENTO="${DESCUBRIMIENTO:-local}"
+PARES_ROS="${PARES_ROS:-192.168.0.102,192.168.0.104,192.168.0.105}"   # deepy, racey, portatil
+PARES_LANZADOR=""
+if [ "$DESCUBRIMIENTO" = local ]; then
+  FUENTES="export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST; $FUENTES"
+  FUENTES_PUENTE="export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST; $FUENTES_PUENTE"
+  PARES_LANZADOR=" pares_ros:=$PARES_ROS"
+fi
+
 rojo()  { printf '\033[31m%s\033[0m\n' "$*"; }
 verde() { printf '\033[32m%s\033[0m\n' "$*"; }
 info()  { printf '\033[36m==\033[0m %s\n' "$*"; }
@@ -231,7 +246,14 @@ arrancar() {
       || { rojo "   no se pudo escribir $params_amcl en el carro (¿se corto el ssh?); vuelve a lanzar el guion"; exit 1; }
     marcos_amcl="-p base_frame_id:=${F}base_link -p odom_frame_id:=${F}odom -p global_frame_id:=${F}map"
   fi
-  encender_lifecycle amcl "$FUENTES && ros2 run nav2_amcl amcl --ros-args${ARGS_NS:+ $ARGS_NS} --params-file $params_amcl -p use_sim_time:=false -p scan_topic:=/rplidar_ros/scan${marcos_amcl:+ $marcos_amcl}" || exit 1
+  # AMCL tambien cruza la red: su pose se graba en racey. Los pares van en un
+  # archivo para no meter el ';' que los separa en la orden.
+  local red_amcl=""
+  if [ "$DESCUBRIMIENTO" = local ]; then
+    en_carro "mkdir -p $LOGS && printf '%s\n' 'export ROS_STATIC_PEERS=\"$(echo "$PARES_ROS" | tr , ';')\"' > $LOGS/pares.sh" >/dev/null
+    red_amcl=" && source $LOGS/pares.sh"
+  fi
+  encender_lifecycle amcl "$FUENTES$red_amcl && ros2 run nav2_amcl amcl --ros-args${ARGS_NS:+ $ARGS_NS} --params-file $params_amcl -p use_sim_time:=false -p scan_topic:=/rplidar_ros/scan${marcos_amcl:+ $marcos_amcl}" || exit 1
 
   info "5/6 · el launch, AHORA que /map ya esta activo (imu:=$IMU, margen $MARGEN m)"
   # Registro de carga de toda la sesion (2026-10-07): la tarjeta de dos nucleos es
@@ -240,7 +262,7 @@ arrancar() {
   lanzar_en_carro carga "python3 $D/registrar_carga.py $carga --cada 5"
   echo "   registrando la carga de la tarjeta en $carga"
   [ "$IMU" = true ] && echo "   no toque el vehiculo: la IMU mide el sesgo del giroscopio al arrancar"
-  lanzar_en_carro launch "$FUENTES && ros2 launch $D/nav2_hardware.launch.py slam:=false nav:=true urdf:=$D/deepracer_hardware.urdf params:=$D/nav2_params_jazzy.yaml slam_params:=$D/slam_toolbox.yaml behavior_trees:=$D/behavior_trees imu:=$IMU margen_llegada:=$MARGEN${NS:+ namespace:=$NS}"
+  lanzar_en_carro launch "$FUENTES && ros2 launch $D/nav2_hardware.launch.py slam:=false nav:=true urdf:=$D/deepracer_hardware.urdf params:=$D/nav2_params_jazzy.yaml slam_params:=$D/slam_toolbox.yaml behavior_trees:=$D/behavior_trees imu:=$IMU margen_llegada:=$MARGEN${NS:+ namespace:=$NS}$PARES_LANZADOR"
   echo "   esperando 55 s a que configuren los costmaps..."
   sleep 55
 
