@@ -390,10 +390,13 @@ def _lanzar(context, *args, **kwargs):
     # cadenas anunciandose por difusion en el WiFi, racey llego a carga 33 y su
     # WiFi a ~2000 paquetes/s. Solo cruzan la red los nodos que la topologia
     # necesita desde otro vehiculo: los que llama el coordinador (navegacion y
-    # limpieza de costmaps) y los que graba la mision en racey (odometria). Lo
-    # hacen por pares conocidos, sin difusion. Vacio: sin cambios.
-    pares = LaunchConfiguration('pares_ros').perform(context).strip()
-    red = {'ROS_STATIC_PEERS': pares.replace(',', ';')} if pares else {}
+    # limpieza de costmaps) y los que graba la mision en racey (odometria). Esos
+    # vuelven al descubrimiento normal. Se probo antes con pares conocidos
+    # (ROS_STATIC_PEERS) y no sirvio: Fast DDS solo se anuncia a los participantes
+    # 0 a 3 de cada maquina, y con ~15 procesos por vehiculo el coordinador no
+    # encontro la navegacion de deepy (2026-10-08). Falso: sin cambios.
+    cruzan = IfCondition(LaunchConfiguration('cruzan_la_red')).evaluate(context)
+    red = {'ROS_AUTOMATIC_DISCOVERY_RANGE': 'SUBNET'} if cruzan else {}
     CRUZAN_LA_RED = ('bt_navigator', 'planner_server', 'controller_server')
 
     nodos_nav2 = [
@@ -546,10 +549,10 @@ def generate_launch_description():
             'imu_nodo', default_value=_junto_al_lanzador(NODO_IMU),
             description='Ruta de imu_bmi160.py. Por defecto, junto al lanzador.'),
         DeclareLaunchArgument(
-            'pares_ros', default_value='',
-            description='IP de los otros equipos separadas por comas. Con ellas, '
-                        'los nodos que se usan desde otro vehiculo se descubren por '
-                        'pares conocidos. Vacio: sin cambios.'),
+            'cruzan_la_red', default_value='false',
+            description='true: los nodos que se usan desde otro vehiculo vuelven al '
+                        'descubrimiento por la red aunque el resto se lance con '
+                        'descubrimiento local. false: sin cambios.'),
         DeclareLaunchArgument(
             'nav', default_value='false',
             description='Arranca planificador y control (peldanos 6-7). '
