@@ -44,8 +44,19 @@ verde() { printf '\033[32m%s\033[0m\n' "$*"; }
 info()  { printf '\033[36m==\033[0m %s\n' "$*"; }
 
 parar_demonio() {
-  # El demonio de ros2 del portatil es un participante mas: fuera.
-  (source /opt/ros/humble/setup.bash 2>/dev/null && ros2 daemon stop >/dev/null 2>&1) || true
+  # El demonio de ros2 del portatil es un participante mas: fuera. 'set +u' porque
+  # el setup.bash de ROS lee variables sin definir y con 'set -u' aborta en silencio.
+  (set +u; source /opt/ros/humble/setup.bash 2>/dev/null && ros2 daemon stop >/dev/null 2>&1) || true
+}
+
+lanzar() {
+  # Lanza ORDEN en su propia sesion, con su registro y sin heredar nada de esta
+  # terminal. Probado el 2026-10-09: con '( cd ... && setsid nohup ... & )' el
+  # subproceso intermedio se quedaba con la salida de quien llama, y un
+  # 'guion | tee' no terminaba nunca. La orden corre en un bash nuevo, sin 'set -u'.
+  local registro="$1" orden="$2"
+  setsid nohup bash -c "$orden" > "$registro" 2>&1 < /dev/null &
+  disown 2>/dev/null || true
 }
 
 construir() {
@@ -80,13 +91,13 @@ interfaz() {
   info "rosbridge (puerto 9090) y la pagina (puerto 8000)"
   pkill -f '[r]osbridge_websocket' ; pkill -f '[r]osapi_node' ; pkill -f '[h]ttp.server 8000'
   # Con 'ros2 run' y no con 'ros2 launch': el lanzador crea un nodo propio, que
-  # seria un quinto participante (ver la cabecera).
-  ( source /opt/ros/humble/setup.bash && source "$HOME/deepracer_sim_ws/install/setup.bash" \
-      && setsid nohup ros2 run rosbridge_server rosbridge_websocket --ros-args \
-           -p send_action_goals_in_new_thread:=true > /tmp/rosbridge.log 2>&1 < /dev/null & )
+  # seria un quinto participante (ver la cabecera). Los dos con coordinacion_msgs
+  # cargado, para que la pagina pueda pedir la forma de esos mensajes.
+  local humble="source /opt/ros/humble/setup.bash && source $HOME/deepracer_sim_ws/install/setup.bash"
+  lanzar /tmp/rosbridge.log "$humble && exec ros2 run rosbridge_server rosbridge_websocket --ros-args -p send_action_goals_in_new_thread:=true"
   sleep 2
-  ( source /opt/ros/humble/setup.bash && setsid nohup ros2 run rosapi rosapi_node > /tmp/rosapi.log 2>&1 < /dev/null & )
-  ( cd "$REPO" && setsid nohup python3 -m http.server 8000 --directory interfaz_web > /tmp/http_interfaz.log 2>&1 < /dev/null & )
+  lanzar /tmp/rosapi.log "$humble && exec ros2 run rosapi rosapi_node"
+  lanzar /tmp/http_interfaz.log "cd '$REPO' && exec python3 -m http.server 8000 --directory interfaz_web"
   sleep 6
   ss -ltn | grep -q ':9090' && verde "   rosbridge en el puerto 9090" || rojo "   rosbridge no arranco: /tmp/rosbridge.log"
   ss -ltn | grep -q ':8000' && verde "   la pagina en http://$(hostname -I | cut -d' ' -f1):8000/" || rojo "   la pagina no arranco"
