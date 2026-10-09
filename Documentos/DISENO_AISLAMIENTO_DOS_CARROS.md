@@ -33,7 +33,7 @@ espacio de nombres, y los dos vehículos están en el mismo dominio de ROS 2, el
 |---|---|
 | **No tocar `/opt/aws/`**: el servicio de AWS no se edita | una actualización de AWS lo revertiría en silencio (criterio de S20) |
 | **Un solo dominio para todo el sistema** | G-4 y RF-15 se alcanzaron con el coordinador y los dos agentes en el mismo grafo; separar dominios los rompe |
-| **El coordinador corre en un vehículo** | decisión D6: la acción de Nav2 no es el mismo tipo en Humble y en Jazzy |
+| **El coordinador corre en un vehículo** | decisión D6: la acción de Nav2 no es el mismo tipo en Humble y en Jazzy. **Superada el 2026-10-09:** el coordinador corre en el portátil, en un contenedor con Jazzy ([`coordinador_portatil.sh`](../herramientas/coordinador_portatil.sh)), porque en racey, con las dos cadenas en la red, las tarjetas se saturaron el 8-oct |
 | **Marcos con prefijo**: el coordinador manda las metas en `robotN/map` | `coordinador.py:631`, igual que en simulación |
 | **Código congelado desde el 18-sep** | la solución tiene que ser de despliegue —configuración y lanzadores—, no funcionalidad nueva |
 | **Todo lo que toque el hardware corre como `root`** | regla del dueño de Fast DDS (22-sep) |

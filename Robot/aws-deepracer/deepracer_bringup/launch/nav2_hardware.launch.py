@@ -389,14 +389,22 @@ def _lanzar(context, *args, **kwargs):
     # descubrimiento local (ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST): con las dos
     # cadenas anunciandose por difusion en el WiFi, racey llego a carga 33 y su
     # WiFi a ~2000 paquetes/s. Solo cruzan la red los nodos que la topologia
-    # necesita desde otro vehiculo: los que llama el coordinador (navegacion y
-    # limpieza de costmaps) y los que graba la mision en racey (odometria). Esos
-    # vuelven al descubrimiento normal. Se probo antes con pares conocidos
-    # (ROS_STATIC_PEERS) y no sirvio: Fast DDS solo se anuncia a los participantes
-    # 0 a 3 de cada maquina, y con ~15 procesos por vehiculo el coordinador no
-    # encontro la navegacion de deepy (2026-10-08). Falso: sin cambios.
-    cruzan = IfCondition(LaunchConfiguration('cruzan_la_red')).evaluate(context)
-    red = {'ROS_AUTOMATIC_DISCOVERY_RANGE': 'SUBNET'} if cruzan else {}
+    # necesita desde fuera: los que llama el coordinador (navegacion y limpieza de
+    # costmaps) y los que graba la mision (odometria). Desde el 2026-10-09 el
+    # coordinador y el grabador corren en el portatil: esos nodos lo tienen como
+    # unico par conocido (ROS_STATIC_PEERS) y los vehiculos nunca se descubren
+    # entre si. Fast DDS solo se anuncia a los participantes 0 a 3 de la maquina
+    # par; el portatil tiene cuatro procesos ROS (herramientas/coordinador_portatil.sh).
+    # Entre dos vehiculos, con ~15 procesos cada uno, eso no alcanzo (8-oct).
+    #   'false' o vacio: sin cambios.   'subnet': descubrimiento normal, por la red.
+    #   IP (o varias, con comas): esas, como pares conocidos.
+    cruce = LaunchConfiguration('cruzan_la_red').perform(context).strip().lower()
+    if cruce in ('', 'false'):
+        red = {}
+    elif cruce in ('true', 'subnet'):
+        red = {'ROS_AUTOMATIC_DISCOVERY_RANGE': 'SUBNET'}
+    else:
+        red = {'ROS_STATIC_PEERS': cruce.replace(',', ';')}
     CRUZAN_LA_RED = ('bt_navigator', 'planner_server', 'controller_server')
 
     nodos_nav2 = [
@@ -550,9 +558,9 @@ def generate_launch_description():
             description='Ruta de imu_bmi160.py. Por defecto, junto al lanzador.'),
         DeclareLaunchArgument(
             'cruzan_la_red', default_value='false',
-            description='true: los nodos que se usan desde otro vehiculo vuelven al '
-                        'descubrimiento por la red aunque el resto se lance con '
-                        'descubrimiento local. false: sin cambios.'),
+            description="Nodos que se usan desde fuera del vehiculo: 'false' sin "
+                        "cambios; 'subnet' descubrimiento por la red; una IP (o varias, "
+                        'con comas), pares conocidos: la del portatil.'),
         DeclareLaunchArgument(
             'nav', default_value='false',
             description='Arranca planificador y control (peldanos 6-7). '

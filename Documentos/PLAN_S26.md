@@ -405,18 +405,23 @@ el tipo: `ros2 topic echo --once /robot2/estado coordinacion_msgs/msg/EstadoRobo
 aún no descubrió el tópico. Cada mensaje de Jazzy imprime en el portátil `sequence size exceeds
 remaining buffer`, sin perderse ninguno.
 
-`rosbridge_server` no está instalado en los vehículos, y sin internet no se puede instalar allí. Va
-en el portátil, que lo tiene (Humble). Según el estudio de S19, los mensajes de `coordinacion_msgs` son los mismos
-en Humble y en Jazzy. Lo único distinto es la acción de Nav2, y esa la llama el coordinador, que
-corre en racey. El paso 3 comprueba que el portátil reciba los mensajes de los vehículos.
+Desde el 9-oct el coordinador y el grabador corren en el portátil, en un contenedor con Jazzy
+([`coordinador_portatil.sh`](../herramientas/coordinador_portatil.sh)), y no en racey. El 8-oct, con
+los dos en racey y las dos cadenas en la red, las tarjetas llegaron a carga 22–33 y G-5 no se pudo
+correr. Con Jazzy en el contenedor, el coordinador habla la misma acción de Nav2 que los vehículos
+(la razón de D6 desaparece). Cada vehículo tiene al portátil como único par conocido y los vehículos
+no se descubren entre sí. En el portátil pueden correr como máximo cuatro procesos ROS, en este
+orden: coordinador, `rosbridge`, `rosapi` y grabador. Durante una misión no se usa `ros2` en el
+portátil. `rosbridge` y la página siguen en el portátil (Humble): los mensajes de
+`coordinacion_msgs` son los mismos en Humble y en Jazzy (S19).
 
 | Paso | Qué | Comando | Esperado | Si falla |
 |---|---|---|---|---|
 | 1 | Coordinador y agente iguales al repositorio en los dos | `herramientas/nivelar_carros.sh` | `coordinacion_ws: los ... archivos del coordinador y del agente iguales al repositorio` en los dos | `herramientas/nivelar_carros.sh --copiar`, que copia y recompila |
 | 2 | Nav2 con espacio de nombres en los dos | deepy: `NS=robot1 IMU=true MARGEN=0.5 CARRO=192.168.0.102 MAPA=/home/deepracer/tesis/piso3.yaml POSE_X=22.10 POSE_Y=1.06 POSE_YAW=3.1416 bash herramientas/nav2_mapa_guardado.sh` (ruta fija del vehículo). racey: `NS=robot2 IMU=true MARGEN=0.5 CARRO=192.168.0.104 MAPA=/home/deepracer/tesis/piso4.yaml POSE_X=24.45 POSE_Y=1.21 POSE_YAW=3.1416 bash herramientas/nav2_mapa_guardado.sh` (ruta fija del vehículo). Sin `ESCALA=`: cada vehículo toma la suya (racey 0,9, deepy 0,85, y 0,75 en reversa) | `CADENA LISTA` en los dos, con `imu/data` y `odom` publicando | El aviso en rojo del guion dice qué pieza falló |
 | 3 | Un agente en cada vehículo | racey: `ssh deepracer@192.168.0.104 "sudo -n bash -c 'export FASTRTPS_DEFAULT_PROFILES_FILE=/etc/deepracer-tesis/particion.xml; source /opt/ros/jazzy/setup.bash; source /home/deepracer/coordinacion_ws/install/setup.bash; export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST; source /tmp/nav2_campo/pares.sh; setsid nohup ros2 run coordinacion agente --ros-args -r __ns:=/robot2 -p nivel:=4 -p topico_scan:=/rplidar_ros/scan > /tmp/agente.log 2>&1 &'"` (ruta fija del vehículo). `topico_scan` es para la media vuelta: el LiDAR del vehículo publica fuera del espacio de nombres. Desde el 8-oct, lo interno de cada vehículo se descubre solo dentro de él; agente y coordinador siguen con el descubrimiento por la red (`/tmp/nav2_campo/pares.sh`, que deja el arranque del paso 2). deepy: lo mismo con `192.168.0.102`, `/robot1` y `nivel:=3`. En el portátil: `ros2 topic echo --once /robot2/estado --field pose` | La pose cerca de la salida del mapa, (24,45, 1,21) en racey y (22,10, 1,06) en deepy, con `frame_id: robot2/map`. Que llegue al portátil confirma que Humble recibe los mensajes de Jazzy | Pose en (0, 0): es `odom`, no el mapa; revisar AMCL. Nada en el portátil: probar el mismo `echo` dentro de racey; si allí llega, es la comunicación entre distribuciones, y `rosbridge` tendría que ir en racey (traer el paquete sin internet) |
-| 4 | Coordinador en racey | `ssh deepracer@192.168.0.104 "sudo -n bash -c 'export FASTRTPS_DEFAULT_PROFILES_FILE=/etc/deepracer-tesis/particion.xml; source /opt/ros/jazzy/setup.bash; source /home/deepracer/coordinacion_ws/install/setup.bash; export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST; source /tmp/nav2_campo/pares.sh; mkdir -p /home/deepracer/registros; setsid nohup ros2 run coordinacion coordinador --ros-args -p condicion:=hardware -p ruta_puntos:=/home/deepracer/tesis/puntos_interes_pisos34.yaml -p robot_nivel_3:=robot1 -p robot_nivel_4:=robot2 -p ruta_registros:=/home/deepracer/registros > /tmp/coordinador.log 2>&1 &'"` (ruta fija del vehículo), y `ssh deepracer@192.168.0.104 "sudo -n grep -E 'condicion|listo' /tmp/coordinador.log"` | `condicion 'hardware': la llegada se acepta a 0.5 m o menos` y `Coordinador listo`, con la asignación de los niveles 3 y 4 | `GUARDIAN`: ya hay otro coordinador; pararlo con `sudo -n pkill -f "coordinacion[/]coordinador"` |
-| 5 | `rosbridge` y la interfaz en el portátil | En una terminal, `ros2 launch rosbridge_server rosbridge_websocket_launch.xml send_action_goals_in_new_thread:=true`; en otra, `python3 -m http.server 8000 --directory interfaz_web` | `Rosbridge WebSocket server started on port 9090` | — |
+| 4 | Coordinador en el portátil, antes que `rosbridge` | `bash herramientas/coordinador_portatil.sh arrancar` (la primera vez, con internet: `bash herramientas/coordinador_portatil.sh construir`) | `condicion 'hardware': la llegada se acepta a 0.5 m o menos` y `coordinador listo`, con la asignación de los niveles 3 y 4 | `bash herramientas/coordinador_portatil.sh registro` |
+| 5 | `rosbridge` y la interfaz en el portátil | `bash herramientas/coordinador_portatil.sh interfaz` | `rosbridge en el puerto 9090` y la dirección de la página | `/tmp/rosbridge.log` |
 | 6 | La interfaz desde el teléfono | El teléfono en la red de los vehículos, `http://192.168.0.105:8000/` | La lista de destinos de los pisos 3 y 4 y los dos robots | Sin destinos: el portátil no recibe `/coordinacion/puntos_interes`; volver al paso 3 |
 
 ### 4.3 · Una misión dentro de un solo piso
@@ -427,16 +432,17 @@ corre en racey. El paso 3 comprueba que el portátil reciba los mensajes de los 
 | Esperado | racey llega; la interfaz muestra el avance y el final |
 | Cierre | El registro de la misión, compuesto como dice la tabla de abajo |
 
-Cada misión coordinada se graba en racey, que lleva el coordinador: así todas las marcas salen de un
-mismo reloj, porque las tarjetas no tienen la hora sincronizada. `grabar_mision.sh` no sirve en el
-vehículo, porque exige `/clock`.
+Cada misión coordinada se graba en el portátil, junto al coordinador: así todas las marcas salen de
+un mismo reloj, porque las tarjetas no tienen la hora sincronizada. Hasta el 8-oct se grababa en racey
+con `grabar_mision_vehiculo.sh`. La `/tf`, la IMU y rf2o de cada vehículo no llegan al portátil: son
+internos del vehículo, y la pose en el mapa de los dos va en `/robotN/estado`.
 
 | Paso | Comando | Esperado |
 |---|---|---|
-| 1. Antes de pedir la misión | `ssh -t deepracer@192.168.0.104 "sudo -n bash /home/deepracer/tesis/grabar_mision_vehiculo.sh P4_01"` (ruta fija del vehículo) | `== grabando /home/deepracer/mision_P4_01 (19 topicos)`. Si dice `ABORTA: nadie publica /coordinacion/estado_mision`, el coordinador no está vivo (§4.2, paso 4) |
+| 1. Antes de pedir la misión | `bash herramientas/coordinador_portatil.sh grabar P4_01` | `== grabando ~/tesis_evidencia/mision_P4_01 (19 topicos)` |
 | 2. Pedir la misión desde el teléfono y, al terminar, pulsar Enter en esa terminal | — | `== listo` |
 | 3. Medir la llegada con flexómetro, desde la marca en el piso | — | La distancia al destino, anotada |
-| 4. Copiar al portátil | `scp -r deepracer@192.168.0.104:mision_P4_01 ~/tesis_evidencia/` | La carpeta con el `.mcap` y `metadata.yaml` |
+| 4. Ya está en el portátil | — | `~/tesis_evidencia/mision_P4_01`, con el `.mcap` y `metadata.yaml` |
 | 5. Hacerla legible en Humble | `python3 herramientas/adaptar_bag_jazzy.py ~/tesis_evidencia/mision_P4_01 -o ~/tesis_evidencia/mision_P4_01_humble` | La copia adaptada |
 | 6. Componer el registro | `python3 herramientas/componer_registro.py ~/tesis_evidencia/mision_P4_01_humble --banco fisico --campana S26 --distro jazzy --catalogo Robot/aws-deepracer/deepracer_bringup/config/puntos_interes_pisos34.yaml --error-posicion-m <medida> --medido-por Santiago --salida Documentos/Evidencia/registros/P4_01.json` | `Registro escrito en ...` |
 

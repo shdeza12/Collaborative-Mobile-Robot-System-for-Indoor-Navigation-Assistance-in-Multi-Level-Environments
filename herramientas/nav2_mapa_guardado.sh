@@ -120,17 +120,22 @@ FUENTES_PUENTE='[ -f /etc/deepracer-tesis/particion.xml ] && export FASTRTPS_DEF
 # Descubrimiento (2026-10-08). Con las dos cadenas completas anunciandose por
 # difusion en el WiFi, racey llego a carga 33 y no levantaba Nav2; sin la cadena
 # de deepy, su WiFi bajo de ~2000 a ~240 paquetes/s. 'local' (por defecto): todo
-# se descubre solo dentro del vehiculo, y solo lo que la topologia usa desde
-# otro equipo (navegacion, odometria y AMCL, que graba racey; agente, coordinador
-# y grabador) sigue con el descubrimiento normal. Con pares conocidos no
-# funciono: Fast DDS solo se anuncia a los participantes 0 a 3 de cada maquina.
-# 'red': todo como antes del 8-oct.
+# se descubre solo dentro del vehiculo. Lo que se usa desde fuera (navegacion,
+# odometria, AMCL y el agente) tiene al portatil como unico par conocido: el
+# coordinador y el grabador corren alli desde el 2026-10-09
+# (herramientas/coordinador_portatil.sh), y los vehiculos no se descubren entre
+# si. PORTATIL: su IP en la red de los vehiculos; por defecto, la que usa este
+# portatil para llegar al vehiculo. CRUCE=subnet: esos nodos por la red, sin
+# pares. 'red': todo como antes del 8-oct.
 DESCUBRIMIENTO="${DESCUBRIMIENTO:-local}"
+PORTATIL="${PORTATIL:-$(ip -4 route get "$CARRO" 2>/dev/null | grep -oE 'src [0-9.]+' | cut -d' ' -f2)}"
+CRUCE="${CRUCE:-$PORTATIL}"
 PARES_LANZADOR=""
 if [ "$DESCUBRIMIENTO" = local ]; then
+  [ -n "$CRUCE" ] || { echo "no se pudo saber la IP del portatil: PORTATIL=192.168.0.x"; exit 1; }
   FUENTES="export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST; $FUENTES"
   FUENTES_PUENTE="export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST; $FUENTES_PUENTE"
-  PARES_LANZADOR=" cruzan_la_red:=true"
+  PARES_LANZADOR=" cruzan_la_red:=$CRUCE"
 fi
 
 rojo()  { printf '\033[31m%s\033[0m\n' "$*"; }
@@ -217,7 +222,9 @@ arrancar() {
   # 'average rate' sale en la linea 1 o en la 2, segun 'hz' imprima antes o no el
   # aviso «does not appear to be published yet». Tomar siempre la linea 2 aborto
   # con el laser a 9,9 Hz (amss-jgm9, 2026-09-29).
-  scan=$(en_carro "$FUENTES && timeout 20 ros2 topic hz /rplidar_ros/scan 2>/dev/null | head -4 | grep -m1 'average rate'")
+  # Con descubrimiento local, 'ros2 topic hz' a veces no ve el laser aunque
+  # publique (2026-10-08, amss-jgm9): se cuentan los barridos con un nodo propio.
+  scan=$(en_carro "$FUENTES && timeout 30 python3 -c \"import rclpy, time; from rclpy.qos import qos_profile_sensor_data as q; from sensor_msgs.msg import LaserScan; rclpy.init(); n = rclpy.create_node('comprobar_laser'); c = [0]; n.create_subscription(LaserScan, '/rplidar_ros/scan', lambda m: c.__setitem__(0, c[0] + 1), q); t = time.time(); exec('while time.time() - t < 8: rclpy.spin_once(n, timeout_sec=0.1)'); print('average rate: %.3f' % (c[0] / 8.0)) if c[0] > 16 else print('sin barridos: %d en 8 s' % c[0])\" 2>/dev/null")
   if echo "$scan" | grep -q "average rate"; then verde "   $scan"
   else rojo "   el laser NO publica. sudo systemctl restart deepracer-core, espera 30 s"; exit 1; fi
 
@@ -251,7 +258,11 @@ arrancar() {
   # tambien el agente, el coordinador y el grabador (§4.2 de PLAN_S26.md).
   local red_amcl=""
   if [ "$DESCUBRIMIENTO" = local ]; then
-    en_carro "mkdir -p $LOGS && echo 'export ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET' > $LOGS/pares.sh" >/dev/null
+    if [ "$CRUCE" = subnet ]; then
+      en_carro "mkdir -p $LOGS && echo 'export ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET' > $LOGS/pares.sh" >/dev/null
+    else
+      en_carro "mkdir -p $LOGS && printf '%s\n' 'export ROS_STATIC_PEERS=\"$(echo "$CRUCE" | tr , ';')\"' > $LOGS/pares.sh" >/dev/null
+    fi
     red_amcl=" && source $LOGS/pares.sh"
   fi
   encender_lifecycle amcl "$FUENTES$red_amcl && ros2 run nav2_amcl amcl --ros-args${ARGS_NS:+ $ARGS_NS} --params-file $params_amcl -p use_sim_time:=false -p scan_topic:=/rplidar_ros/scan${marcos_amcl:+ $marcos_amcl}" || exit 1

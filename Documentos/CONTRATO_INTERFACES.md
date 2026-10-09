@@ -43,7 +43,7 @@ dos veces contra la pared en la salida del piso 4
 ([`S26_piso4_cadena_media_vuelta.md`](Evidencia/S26_piso4_cadena_media_vuelta.md), §3), y entre
 misiones nadie reubica los vehículos (acta §6.2). La maniobra la ejecuta el agente en el vehículo,
 con su LiDAR y su mapa ([`media_vuelta.py`](../Robot/aws-deepracer/coordinacion/coordinacion/media_vuelta.py)).
-El coordinador sigue sin publicar `cmd_vel`. Si el agente no ofrece el servicio, el coordinador
+El coordinador sigue sin publicar `cmd_vel`. Desde el 2026-10-09 el coordinador corre en el portátil, en un contenedor con Jazzy, y no en un vehículo. Si el agente no ofrece el servicio, el coordinador
 deja la maniobra a Nav2, como antes. En simulación queda apagada por defecto (`media_vuelta:=auto`
 la activa solo con `condicion:=hardware`).
 
