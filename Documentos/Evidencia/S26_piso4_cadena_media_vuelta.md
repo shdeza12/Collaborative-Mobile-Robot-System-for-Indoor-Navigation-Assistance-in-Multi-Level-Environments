@@ -171,7 +171,7 @@ promedió 74 % con un máximo de 83 %. Por grupo, en porcentaje de un núcleo:
 - Filtro: 4 %.
 
 Desde la mañana, `nav2_mapa_guardado.sh` detiene doce procesos de AWS que la cadena no usa. Con eso,
-la tarjeta en reposo bajó del 21–34 % al 8–10 % (commit `69421e1`).
+la tarjeta en reposo bajó del 21–34 % al 8–10 % (commit `abcc241`).
 
 En el ensayo de la mañana, sin mover los vehículos, se miró la carga con `htop` en los dos a la vez:
 
@@ -189,7 +189,7 @@ precalcula. Después la carga se estabiliza alrededor del 50 %, como en la tarde
 
 ## 5. Cambios en el código
 
-Todos los cambios entraron en el commit `1927614`:
+Todos los cambios entraron en el commit `e4b267b`:
 
 - `cmdvel_to_servo_node.py`: parámetro `escala_reversa`, que multiplica el acelerador solo en
   marcha atrás. Por defecto vale 1,0, el comportamiento de antes, y se ajusta sin reiniciar el puente.

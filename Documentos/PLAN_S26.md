@@ -469,7 +469,7 @@ hay dos variantes, y la que se corre depende del resultado del miércoles (§3.3
 | Misión | Desde el teléfono: origen el Salón 302 y destino el Salón 402 |
 | Esperado | deepy va al origen y guía hasta las escaleras del piso 3; la interfaz pide subir y confirmar la llegada al piso 4; racey guía desde las escaleras del piso 4 hasta el Salón 402 |
 | Segunda misión | Sin tocar los vehículos, otra misión desde el teléfono; cada robot sale de donde quedó (§6.2 del acta). En la variante B, una que no pide media vuelta: en el piso 4, del Salón 402 al Salón 401. En la variante A, la que el equipo elija con lo medido el miércoles |
-| Medidas | Llegada de cada vehículo con flexómetro, desde marcas en el piso; una grabación por misión con `grabar_mision_vehiculo.sh` en racey (§4.3) |
+| Medidas | Llegada de cada vehículo con flexómetro, desde marcas en el piso; una grabación por misión con `coordinador_portatil.sh grabar` en el portátil (§4.3) |
 | Si falla | Anotar en qué fase falló y por qué; se repite el lunes 12 |
 | Cierre | Los registros de las dos misiones compuestos como en la §4.3 y validados: G-5 alcanzada |
 
