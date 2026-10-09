@@ -11,6 +11,15 @@
 # repositorio. El contexto de construccion es Robot/aws-deepracer.
 FROM ros:jazzy-ros-base
 
+# Repositorios por https: la red de la universidad responde 403 a apt por http
+# (filtra por el agente de usuario de apt; por https no lo ve). packages.ros.org no
+# tiene certificado valido para https, asi que ROS sale del espejo oficial de la
+# Universidad de Maryland. Comprobado el 2026-10-09.
+RUN for f in /etc/apt/sources.list /etc/apt/sources.list.d/*.sources /etc/apt/sources.list.d/*.list; do \
+        [ -f "$f" ] && sed -i -e 's|http://|https://|g' \
+            -e 's|https://packages.ros.org|https://mirror.umd.edu/packages.ros.org|g' "$f"; \
+    done; true
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
         ros-jazzy-nav2-msgs \
         ros-jazzy-rosbag2-storage-mcap \
