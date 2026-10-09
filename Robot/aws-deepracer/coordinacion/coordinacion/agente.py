@@ -17,9 +17,11 @@ Nav2 una meta que queda detras del vehiculo: la media vuelta de Nav2 aborto dos
 veces contra la pared en la salida del piso 4 (p4r_11 y p4r_11b). La hace el
 agente y no el coordinador porque el LiDAR y la TF de cada vehiculo son
 privados de su particion. La logica esta en media_vuelta.py; aqui solo el
-servicio. El servicio bloquea mientras dura la maniobra, asi que el nodo gira
-con un executor multihilo y el servicio va en su propio grupo: el estado sigue
-saliendo a 2 Hz (RF-08). Para desactivarlo: 'media_vuelta:=false'.
+servicio. La maniobra bloquea mientras dura, asi que corre en un hilo aparte y el
+servicio la espera de forma asincrona: el nodo gira con un solo hilo y el estado
+sigue saliendo a 2 Hz (RF-08). Con un executor multihilo, como hasta el
+2026-10-09, el agente gastaba un 60 % mas de procesador (8 % frente a 5 % de un
+nucleo en el portatil). Para desactivarlo: 'media_vuelta:=false'.
 
 Se lanza DENTRO del namespace del robot. Todos los nombres de arriba son
 relativos a proposito: ROS los cuelga solo de /robot1/ o /robot2/. Escribirlos
@@ -50,14 +52,15 @@ que es el peor sintoma posible:
 """
 
 import sys
+import threading
 
 import rclpy
 import tf2_ros
 from action_msgs.msg import GoalStatusArray
 from coordinacion_msgs.msg import EstadoRobot
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
-from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
+from rclpy.task import Future
 from rclpy.qos import qos_profile_action_status_default
 from std_srvs.srv import Trigger
 
@@ -153,8 +156,14 @@ class Agente(Node):
         """Llega el status de navigate_to_pose. Es la unica fuente del estado."""
         self.maquina.actualizar([g.status for g in msg.status_list])
 
-    def _media_vuelta(self, _peticion, respuesta):
-        """Hace la media vuelta (media_vuelta.py). Bloquea hasta que termina."""
+    async def _media_vuelta(self, _peticion, respuesta):
+        """Hace la media vuelta (media_vuelta.py) y responde cuando termina.
+
+        Asincrono: mientras la maniobra corre en su hilo, el ejecutor (de un solo
+        hilo) sigue atendiendo el temporizador del estado y las suscripciones que
+        la maniobra lee. Las suscripciones se abren y se cierran aqui, en el hilo
+        del ejecutor.
+        """
         if self.maquina.estado != LIBRE:
             respuesta.success = False
             respuesta.message = (f"no se hace: el robot no esta libre (estado "
@@ -162,12 +171,21 @@ class Agente(Node):
             return respuesta
         self.maniobrando = True
         self.get_logger().info("media vuelta pedida")
+        hecho = Future()
+
+        def trabajar():
+            try:
+                hecho.set_result(self.media_vuelta.maniobrar())
+            except Exception as e:  # nunca dejar el vehiculo con una orden puesta
+                self.media_vuelta.mandar(0.0, 0.0)
+                hecho.set_result((False, f"fallo: {e}"))
+
+        self.media_vuelta.abrir()
         try:
-            respuesta.success, respuesta.message = self.media_vuelta.ejecutar()
-        except Exception as e:  # nunca dejar el vehiculo con una orden puesta
-            self.media_vuelta.mandar(0.0, 0.0)
-            respuesta.success, respuesta.message = False, f"fallo: {e}"
+            threading.Thread(target=trabajar, daemon=True).start()
+            respuesta.success, respuesta.message = await hecho
         finally:
+            self.media_vuelta.cerrar()
             self.maniobrando = False
         self.get_logger().info(respuesta.message)
         return respuesta
@@ -231,8 +249,7 @@ def main(args=None):
     rclpy.init(args=args)
     nodo = Agente()
     try:
-        # Multihilo por el servicio de media vuelta, que bloquea (cabecera).
-        rclpy.spin(nodo, MultiThreadedExecutor(num_threads=3))
+        rclpy.spin(nodo)
     except KeyboardInterrupt:
         pass
     finally:

@@ -418,15 +418,29 @@ class ConexionMediaVuelta:
         self.obstaculos(avisar=True)    # deja en el log por que no
         return False
 
+    def abrir(self):
+        """Se suscribe al LiDAR y a la odometria. Desde el hilo del ejecutor."""
+        if not self.suscripciones:
+            self.suscripciones = self._suscribir()
+
+    def cerrar(self):
+        """Deja de escuchar el LiDAR y la odometria. Desde el hilo del ejecutor."""
+        for s in self.suscripciones:
+            self.nodo.destroy_subscription(s)
+        self.suscripciones = []
+        self.yaw, self.scan, self.v = None, None, 0.0
+
+    def maniobrar(self, giro=None, objetivo=GIRO_POR_DEFECTO):
+        """La maniobra, con las suscripciones ya abiertas. Bloquea: va en su propio hilo."""
+        self.esperar_datos()
+        return ejecutar(lambda: self.yaw, self.obstaculos, self.mandar, giro=giro,
+                        objetivo=objetivo, log=self.nodo.get_logger().info,
+                        leer_velocidad=lambda: self.v)
+
     def ejecutar(self, giro=None, objetivo=GIRO_POR_DEFECTO):
-        log = self.nodo.get_logger().info
-        self.suscripciones = self._suscribir()
+        """abrir + maniobrar + cerrar, para quien gira el nodo en otro hilo (media_vuelta.py de herramientas)."""
+        self.abrir()
         try:
-            self.esperar_datos()
-            return ejecutar(lambda: self.yaw, self.obstaculos, self.mandar, giro=giro,
-                            objetivo=objetivo, log=log, leer_velocidad=lambda: self.v)
+            return self.maniobrar(giro, objetivo)
         finally:
-            for s in self.suscripciones:
-                self.nodo.destroy_subscription(s)
-            self.suscripciones = []
-            self.yaw, self.scan, self.v = None, None, 0.0
+            self.cerrar()
