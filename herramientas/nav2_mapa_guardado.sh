@@ -96,6 +96,9 @@ MARGEN="${MARGEN:-1.0}"
 POSE_YAW="${POSE_YAW:-0.0}"
 QZ=$(awk -v a="$POSE_YAW" 'BEGIN{printf "%.6f", sin(a/2)}')
 QW=$(awk -v a="$POSE_YAW" 'BEGIN{printf "%.6f", cos(a/2)}')
+# Plazo para que Nav2 active sus nodos en el paso 5 (el 2026-10-08, a carga 22,
+# el planificador tardo 271 s en configurarse).
+ESPERA_NAV2_S="${ESPERA_NAV2_S:-300}"
 LOGS=/tmp/nav2_campo
 # Procesos de AWS que se paran al arrancar (ver el paso 0 de arrancar()).
 AWS_SOBRANTES="camera_node sensor_fusion_n web_video_serve inference_node model_optimizer model_loader_no software_update bag_log_node_cp device_info_nod device_status_n usb_monitor_nod deepracer_navig status_led_node"
@@ -140,7 +143,8 @@ fi
 
 rojo()  { printf '\033[31m%s\033[0m\n' "$*"; }
 verde() { printf '\033[32m%s\033[0m\n' "$*"; }
-info()  { printf '\033[36m==\033[0m %s\n' "$*"; }
+# Con la hora: lo que tarda cada paso queda en el registro del arranque.
+info()  { printf '\033[36m==\033[0m %s  (%s)\n' "$*" "$(date +%H:%M:%S)"; }
 
 # Ejecuta una orden en el carro, como root y con ROS cargado.
 en_carro() {
@@ -275,17 +279,41 @@ arrancar() {
   echo "   registrando la carga de la tarjeta en $carga"
   [ "$IMU" = true ] && echo "   no toque el vehiculo: la IMU mide el sesgo del giroscopio al arrancar"
   lanzar_en_carro launch "$FUENTES && ros2 launch $D/nav2_hardware.launch.py slam:=false nav:=true urdf:=$D/deepracer_hardware.urdf params:=$D/nav2_params_jazzy.yaml slam_params:=$D/slam_toolbox.yaml behavior_trees:=$D/behavior_trees imu:=$IMU margen_llegada:=$MARGEN${NS:+ namespace:=$NS}$PARES_LANZADOR"
-  echo "   esperando 55 s a que configuren los costmaps..."
-  sleep 55
+  # Hasta que el gestor de Nav2 diga que activo todo, y no 55 s fijos. Con 55 s
+  # el guion daba la cadena por lista con el planificador todavia configurandose
+  # (2026-10-09, laboratorio); con la tarjeta saturada la configuracion llego a
+  # tardar 271 s (2026-10-08).
+  echo "   esperando a que Nav2 active sus nodos (hasta ${ESPERA_NAV2_S} s)..."
+  local nav2
+  nav2=$(en_carro "for i in \$(seq $((ESPERA_NAV2_S / 3))); do grep -q 'Managed nodes are active' $LOGS/launch.log 2>/dev/null && { echo si; exit 0; }; sleep 3; done; echo no")
+  if [ "$nav2" = si ]; then verde "   Nav2 activo"
+  else rojo "   Nav2 no activo sus nodos en ${ESPERA_NAV2_S} s: mira $LOGS/launch.log"; fi
 
   info "6/6 · pose inicial en ($POSE_X, $POSE_Y, rumbo $POSE_YAW rad) y comprobaciones"
   en_carro "$FUENTES && timeout 15 ros2 topic pub --once $P/initialpose geometry_msgs/msg/PoseWithCovarianceStamped \"{header: {frame_id: ${F}map}, pose: {pose: {position: {x: $POSE_X, y: $POSE_Y, z: 0.0}, orientation: {z: $QZ, w: $QW}}, covariance: [0.25,0,0,0,0,0, 0,0.25,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0.07]}}\"" >/dev/null
   sleep 4
-  for n in map_server amcl planner_server controller_server bt_navigator behavior_server; do
-    # 25 s y no 8: con la tarjeta recien arrancada la llamada tarda, y con 8 salia
-    # vacio el estado de los seis (2026-10-07).
-    printf "   %-20s %s\n" "$n" "$(en_carro "$FUENTES && timeout 25 ros2 service call $P/$n/get_state lifecycle_msgs/srv/GetState \"{}\" 2>/dev/null | grep -o \"label='[a-z]*'\" | tail -1")"
-  done
+  # Los seis estados en una sola llamada, a la vez: con 'ros2 service call' eran
+  # seis arranques de la herramienta en la tarjeta, uno tras otro. 30 s de plazo:
+  # con la tarjeta recien arrancada la respuesta tarda (2026-10-07).
+  en_carro "$FUENTES && timeout 40 python3 - <<'PY' 2>/dev/null
+import rclpy, time
+from lifecycle_msgs.srv import GetState
+rclpy.init()
+n = rclpy.create_node('estado_cadena')
+nodos = ['map_server', 'amcl', 'planner_server', 'controller_server', 'bt_navigator', 'behavior_server']
+cl = {x: n.create_client(GetState, '$P/' + x + '/get_state') for x in nodos}
+fut = {}
+fin = time.time() + 30
+while time.time() < fin and not (len(fut) == len(nodos) and all(f.done() for f in fut.values())):
+    for x, c in cl.items():
+        if x not in fut and c.service_is_ready():
+            fut[x] = c.call_async(GetState.Request())
+    rclpy.spin_once(n, timeout_sec=0.1)
+for x in nodos:
+    f = fut.get(x)
+    e = f.result().current_state.label if f is not None and f.done() else None
+    print('   %-20s %s' % (x, \"label='%s'\" % e if e else '(sin respuesta)'))
+PY"
   local subs
   subs=$(en_carro "$FUENTES && timeout 20 ros2 topic info $P/cmd_vel 2>/dev/null | grep -c 'Subscription count: 1'")
   [ "${subs:-0}" -ge 1 ] && verde "   alguien escucha $P/cmd_vel" || rojo "   NADIE escucha $P/cmd_vel"
