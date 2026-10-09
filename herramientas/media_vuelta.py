@@ -89,12 +89,11 @@ def main():
                 print('ABORTA: AMCL no converge con la pose dada; no se mueve el vehiculo')
                 return 1
             print(f'pose inicial puesta; AMCL con sigma {sigma["v"]:.2f} m')
+        # El LiDAR y la odometria los escucha ejecutar() mientras dura la maniobra;
+        # aqui solo se espera el mapa.
         limite = time.monotonic() + 15.0
-        while (con.yaw is None or con.scan is None or con.celdas is None) and time.monotonic() < limite:
+        while con.celdas is None and time.monotonic() < limite:
             time.sleep(0.2)
-        if con.yaw is None or con.scan is None:
-            print(f'ABORTA: sin odometria o sin LiDAR ({a.scan}) en 15 s')
-            return 1
         if con.celdas is None:
             print('AVISO: sin mapa; solo protege el LiDAR, que no ve la escalera')
         giro = {'auto': None, 'izquierda': 1, 'derecha': -1}[a.giro]

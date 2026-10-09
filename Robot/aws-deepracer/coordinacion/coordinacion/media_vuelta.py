@@ -328,9 +328,14 @@ class ConexionMediaVuelta:
         self.scan = None
         self.celdas = None              # celdas ocupadas del mapa, en el marco del mapa
         self.pub = nodo.create_publisher(Twist, topico_cmd, 10)
-        nodo.create_subscription(Odometry, topico_odom, self._odom, 20, callback_group=grupo)
-        nodo.create_subscription(LaserScan, topico_scan, self._scan,
-                                 qos_profile_sensor_data, callback_group=grupo)
+        # El LiDAR y la odometria solo se escuchan mientras dura la maniobra: en
+        # el agente, suscrito todo el tiempo, gastaba el 22 % de un nucleo de
+        # amss-ez9n (2026-10-08). El mapa llega una vez y se queda.
+        self._suscribir = lambda: [
+            nodo.create_subscription(Odometry, topico_odom, self._odom, 20, callback_group=grupo),
+            nodo.create_subscription(LaserScan, topico_scan, self._scan,
+                                     qos_profile_sensor_data, callback_group=grupo)]
+        self.suscripciones = []
         nodo.create_subscription(
             OccupancyGrid, topico_mapa, self._mapa,
             QoSProfile(depth=1, durability=QoSDurabilityPolicy.TRANSIENT_LOCAL,
@@ -406,7 +411,8 @@ class ConexionMediaVuelta:
         fin = time.monotonic() + segundos
         while time.monotonic() < fin:
             lidar, mapa = self.obstaculos(avisar=False)
-            if lidar is not None and (self.celdas is None or mapa is not None):
+            if (self.yaw is not None and lidar is not None
+                    and (self.celdas is None or mapa is not None)):
                 return True
             time.sleep(0.2)
         self.obstaculos(avisar=True)    # deja en el log por que no
@@ -414,6 +420,13 @@ class ConexionMediaVuelta:
 
     def ejecutar(self, giro=None, objetivo=GIRO_POR_DEFECTO):
         log = self.nodo.get_logger().info
-        self.esperar_datos()
-        return ejecutar(lambda: self.yaw, self.obstaculos, self.mandar, giro=giro,
-                        objetivo=objetivo, log=log, leer_velocidad=lambda: self.v)
+        self.suscripciones = self._suscribir()
+        try:
+            self.esperar_datos()
+            return ejecutar(lambda: self.yaw, self.obstaculos, self.mandar, giro=giro,
+                            objetivo=objetivo, log=log, leer_velocidad=lambda: self.v)
+        finally:
+            for s in self.suscripciones:
+                self.nodo.destroy_subscription(s)
+            self.suscripciones = []
+            self.yaw, self.scan, self.v = None, None, 0.0

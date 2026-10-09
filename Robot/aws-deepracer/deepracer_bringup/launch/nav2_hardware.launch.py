@@ -83,7 +83,7 @@ reescribe aqui con `RewrittenYaml`, sobre el archivo de Jazzy:
    La tarjeta de 2 nucleos no sostiene 20 Hz: el 2026-09-29, en `amss-jgm9`, el
    lazo corrio entre 1 y 6 Hz con `Control loop missed its desired rate`.
 
-5. `bond_timeout` del gestor del ciclo de vida, 4 -> 20 s
+5. `bond_timeout` del gestor del ciclo de vida, 4 -> 60 s (20 s hasta el 2026-10-08)
 
    No esta en el YAML sino en los parametros del gestor, abajo. Con la tarjeta a
    carga 18, el latido de `controller_server` no llego en 4 s y el gestor
@@ -474,11 +474,14 @@ def _lanzar(context, *args, **kwargs):
         Node(package='nav2_lifecycle_manager', executable='lifecycle_manager',
              name='lifecycle_manager_navigation', output='screen',
              namespace=ns_nodo,
-             # bond_timeout 20 s y no los 4 de fabrica: con la tarjeta de 2 nucleos a
+             # bond_timeout 60 s y no los 4 de fabrica: con la tarjeta de 2 nucleos a
              # carga 18, el latido de controller_server no llego en 4 s y el gestor
              # desactivo todo Nav2 35 s despues de activarlo (amss-jgm9, 2026-09-29).
+             # Con 20 s tampoco alcanzo el 2026-10-08, con los dos vehiculos en la
+             # red: carga 22, 271 s para configurar planner_server, y el arranque se
+             # aborto al activar controller_server.
              parameters=[{'use_sim_time': False, 'autostart': True,
-                          'bond_timeout': 20.0,
+                          'bond_timeout': 60.0,
                           'node_names': [n for _, n in nodos_nav2]}],
              condition=hay_nav))
 

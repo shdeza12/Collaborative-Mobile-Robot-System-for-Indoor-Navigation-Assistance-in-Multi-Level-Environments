@@ -224,7 +224,11 @@ arrancar() {
     # El YAML tiene claves sueltas ('amcl:') que solo casan con el nodo '/amcl'.
     # Bajo /robot2 hay que anidarlo, como hace 'root_key' en el lanzador.
     params_amcl=$LOGS/nav2_params_$NS.yaml
-    en_carro "mkdir -p $LOGS && python3 -c \"import yaml; d = yaml.safe_load(open('$D/nav2_params_jazzy.yaml')); yaml.safe_dump({'$NS': d}, open('$params_amcl', 'w'))\"" >/dev/null
+    # Se comprueba que el archivo quedo escrito: el 2026-10-08 esta orden no se
+    # ejecuto en amss-jgm9 y AMCL murio con «Couldn't parse params file», sin que
+    # el guion dijera por que.
+    en_carro "mkdir -p $LOGS && python3 -c \"import yaml; d = yaml.safe_load(open('$D/nav2_params_jazzy.yaml')); yaml.safe_dump({'$NS': d}, open('$params_amcl', 'w'))\" && test -s $params_amcl" >/dev/null \
+      || { rojo "   no se pudo escribir $params_amcl en el carro (¿se corto el ssh?); vuelve a lanzar el guion"; exit 1; }
     marcos_amcl="-p base_frame_id:=${F}base_link -p odom_frame_id:=${F}odom -p global_frame_id:=${F}map"
   fi
   encender_lifecycle amcl "$FUENTES && ros2 run nav2_amcl amcl --ros-args${ARGS_NS:+ $ARGS_NS} --params-file $params_amcl -p use_sim_time:=false -p scan_topic:=/rplidar_ros/scan${marcos_amcl:+ $marcos_amcl}" || exit 1
