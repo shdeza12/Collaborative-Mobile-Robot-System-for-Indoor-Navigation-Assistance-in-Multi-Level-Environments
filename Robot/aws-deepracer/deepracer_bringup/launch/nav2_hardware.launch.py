@@ -113,6 +113,23 @@ reescribe aqui con `RewrittenYaml`, sobre el archivo de Jazzy:
    0,5 m (acta 6.1), medido con flexometro. Se cambia sin editar el archivo con
    `margen_llegada:=0.5`, para comparar con la IMU sin desnivelar los vehiculos.
 
+9. rf2o solo escribe errores (`--log-level error`)
+
+   rf2o escribe cuatro lineas INFO por barrido y, como su lazo va a 20 Hz y el
+   LiDAR a unos 7, un WARN «Waiting for laser_scans» unas 13 veces por segundo.
+   El 2026-10-09, en el laboratorio, eran 19 993 de las ultimas 20 000 lineas del
+   registro de la cadena, y cada una pasa por el proceso de `ros2 launch`. No cambia ningun
+   calculo: el arranque ya comprueba que rf2o publique.
+
+10. `lookup_table_size` del planificador Smac, 20 -> 10 m
+
+   Es la ventana de distancias Reeds-Shepp que el planificador calcula por
+   adelantado al configurarse. Con 20 m (el valor por defecto) la configuracion
+   tardo 81 s en racey (2026-10-09, laboratorio), de los 115 que tardaba Nav2 en
+   quedar activo. Mas alla de la ventana la distancia se calcula al planificar,
+   asi que las rutas largas del pasillo (hasta 18 m) siguen siendo posibles.
+   Va aparte, como el 6, porque la clave no esta en el YAML.
+
 `use_sim_time` pasa a falso en todo el arbol, que es lo que separa esta corrida
 de una de Gazebo.
 
@@ -182,6 +199,8 @@ RETARDO_RF2O_S = 8.0
 MARGEN_LLEGADA_NAV2_M = '1.0'
 # Plazo para que un servidor de Nav2 confirme una peticion del arbol (ajuste 6).
 PLAZO_SERVIDOR_MS = 1000
+# Ventana que el planificador Smac calcula por adelantado al configurarse (ajuste 10).
+TABLA_PLANIFICADOR_M = 10.0
 
 TOPICO_SCAN = '/rplidar_ros/scan'
 
@@ -446,6 +465,8 @@ def _lanzar(context, *args, **kwargs):
                               'init_pose_from_topic': '',
                               'freq': 20.0,
                               'use_sim_time': False}],
+                 # Ajuste 9: solo errores; sus INFO y WARN llenaban el registro.
+                 arguments=['--ros-args', '--log-level', 'error'],
                  # Sin la IMU, rf2o publica /<ns>/odom, que se graba desde racey.
                  additional_env={} if con_imu else red)]),
 
@@ -491,6 +512,9 @@ def _lanzar(context, *args, **kwargs):
             # Ajuste 6. Va aparte y no en la reescritura porque la clave no esta
             # en el YAML, y RewrittenYaml solo cambia claves que ya existen.
             parametros.append({'default_server_timeout': PLAZO_SERVIDOR_MS})
+        elif ejecutable == 'planner_server':
+            # Ajuste 10, aparte por lo mismo: la clave no esta en el YAML.
+            parametros.append({'GridBased.lookup_table_size': TABLA_PLANIFICADOR_M})
         acciones.append(Node(package=paquete, executable=ejecutable,
                              name=ejecutable, output='screen', namespace=ns_nodo,
                              parameters=parametros, condition=hay_nav,

@@ -74,13 +74,17 @@ NODOS_NAV2 = {'controller_server', 'planner_server', 'behavior_server', 'bt_navi
 # nombres a proposito, asi que se comprueban aparte y se quitan antes de comparar.
 # 'default_server_timeout' es el ajuste 6 del lanzador (2026-09-29, noche); el
 # retraso de rf2o, el 7, y el margen de llegada de Nav2, el 8 (2026-09-30).
-AJUSTES_POSTERIORES = {'bt_navigator': {'default_server_timeout': 1000}}
+# 'GridBased.lookup_table_size' es el ajuste 10 (2026-10-09).
+AJUSTES_POSTERIORES = {'bt_navigator': {'default_server_timeout': 1000},
+                       'planner_server': {'GridBased.lookup_table_size': 10.0}}
 EJECUTABLE_RETRASADO = 'rf2o_laser_odometry_node'
 # xy_goal_tolerance: valor del YAML (el de REFERENCIA) y valor del ajuste 8.
 MARGEN_YAML, MARGEN_AJUSTE = 0.25, 1.0
 # bond_timeout del gestor: el de REFERENCIA (20 s) y el del 2026-10-08 (60 s), con
 # el que racey ya no aborta el arranque a carga 22.
 BOND_REFERENCIA, BOND_AJUSTE = 20.0, 60.0
+# Ajuste 9 (2026-10-09): rf2o solo escribe errores; llenaba el registro de la cadena.
+ARGS_RF2O = ['--ros-args', '--log-level', 'error']
 
 
 def cargar(ruta):
@@ -152,6 +156,11 @@ def quitar_ajustes(nodos, exigir):
         exigir(nodo['retrasado'] == (nodo['ejecutable'] == EJECUTABLE_RETRASADO),
                f"{nodo['ejecutable']}: retraso de arranque inesperado o ausente")
         nodo['retrasado'] = False
+        # Ajuste 9: solo rf2o lleva el nivel de registro en error.
+        if nodo['ejecutable'] == EJECUTABLE_RETRASADO:
+            exigir(list(nodo['args'] or []) == ARGS_RF2O,
+                   f"rf2o: argumentos {nodo['args']!r}, se esperaba {ARGS_RF2O!r}")
+            nodo['args'] = None
         # Ajuste 8: el YAML de Nav2 llega con el margen de llegada a 1 m.
         for fichero in nodo['params']:
             for padre, clave in margenes(fichero):
