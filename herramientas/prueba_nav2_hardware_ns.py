@@ -78,6 +78,9 @@ AJUSTES_POSTERIORES = {'bt_navigator': {'default_server_timeout': 1000}}
 EJECUTABLE_RETRASADO = 'rf2o_laser_odometry_node'
 # xy_goal_tolerance: valor del YAML (el de REFERENCIA) y valor del ajuste 8.
 MARGEN_YAML, MARGEN_AJUSTE = 0.25, 1.0
+# bond_timeout del gestor: el de REFERENCIA (20 s) y el del 2026-10-08 (60 s), con
+# el que racey ya no aborta el arranque a carga 22.
+BOND_REFERENCIA, BOND_AJUSTE = 20.0, 60.0
 
 
 def cargar(ruta):
@@ -155,6 +158,14 @@ def quitar_ajustes(nodos, exigir):
                 exigir(padre[clave] == MARGEN_AJUSTE,
                        f"{nodo['ejecutable']}: xy_goal_tolerance vale {padre[clave]!r}")
                 padre[clave] = MARGEN_YAML
+        # El plazo del latido del gestor, 20 -> 60 s.
+        for fichero in nodo['params']:
+            for v in fichero.values():
+                rp = v.get('ros__parameters') if isinstance(v, dict) else None
+                if isinstance(rp, dict) and 'bond_timeout' in rp:
+                    exigir(rp['bond_timeout'] == BOND_AJUSTE,
+                           f"{nodo['ejecutable']}: bond_timeout vale {rp['bond_timeout']!r}")
+                    rp['bond_timeout'] = BOND_REFERENCIA
         esperado = AJUSTES_POSTERIORES.get(nodo['ejecutable'])
         if not esperado:
             continue
@@ -300,7 +311,7 @@ def con_ns(nodos, exigir):
     gestor = del_nodo(por_ejecutable['lifecycle_manager']['params'])
     exigir(all(not n.startswith('/') for n in gestor['node_names']),
            'el gestor lleva nombres absolutos: no encontraria los nodos del espacio de nombres')
-    exigir(gestor['bond_timeout'] == 20.0, 'el latido del gestor no es 20 s')
+    # bond_timeout: lo comprueba quitar_ajustes(), en los dos modos, antes de llegar aqui.
 
 
 def con_imu(nodos, ns, exigir):
