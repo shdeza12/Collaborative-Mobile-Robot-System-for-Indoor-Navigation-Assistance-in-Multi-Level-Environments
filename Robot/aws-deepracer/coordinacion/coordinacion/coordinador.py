@@ -105,6 +105,15 @@ class _Cancelada(Exception):
 # vieja es aceptarla sin mirar.
 EDAD_MAXIMA_POSE_S = 2.0
 
+# Con condicion:=hardware, cuanto se espera tras el SUCCEEDED de Nav2 antes de
+# verificar la llegada. Nav2 responde en cuanto el vehiculo entra en su margen,
+# y el vehiculo sigue rodando: el 7-oct, en racey, estaba a 0,53-0,62 m de la
+# meta en la ultima orden de avance y a 0,09-0,53 m un segundo despues, ya
+# quieto. Con la pose a 2 Hz, verificar al recibir SUCCEEDED era mirarlo 0,5 a
+# 1 m antes de donde se paraba (2026-10-13). Se espera una pose RECIBIDA
+# despues de este plazo; si no llega en EDAD_MAXIMA_POSE_S mas, decide _pose().
+ASENTAR_LLEGADA_S = 1.5
+
 #: Media vuelta antes de navegar (desde el 2026-10-08). Si la meta queda a mas
 #: de ANGULO_MEDIA_VUELTA del rumbo del vehiculo y a mas de
 #: DISTANCIA_MEDIA_VUELTA_M, se le pide al agente que de la media vuelta
@@ -656,6 +665,20 @@ class Coordinador(Node):
         fb.estado = self.estado
         goal_handle.publish_feedback(fb)
 
+    def _esperar_pose_asentada(self, robot):
+        """Hasta tener una pose del agente recibida ASENTAR_LLEGADA_S despues de ahora.
+
+        Ver ASENTAR_LLEGADA_S. El executor es multihilo, asi que _estado_agente
+        sigue guardando poses mientras esto espera. time.monotonic() y no
+        self._ahora(), como en _esperar: es un plazo, no una marca de metrica.
+        """
+        t0 = time.monotonic()
+        while time.monotonic() - t0 < ASENTAR_LLEGADA_S + EDAD_MAXIMA_POSE_S:
+            p = self.pose_agente.get(robot)
+            if p is not None and p[3] >= t0 + ASENTAR_LLEGADA_S:
+                return
+            time.sleep(0.05)
+
     def _distancia(self, robot, punto):
         pose = self._pose(robot)
         if pose is None:
@@ -779,6 +802,9 @@ class Coordinador(Node):
 
         if resultado.status != GoalStatus.STATUS_SUCCEEDED:
             return False, f"Nav2 termino con estado {resultado.status}"
+
+        if self.condicion == "hardware":
+            self._esperar_pose_asentada(robot)
 
         # Y ahora la comprobacion que de verdad decide.
         d = self._distancia(robot, punto)

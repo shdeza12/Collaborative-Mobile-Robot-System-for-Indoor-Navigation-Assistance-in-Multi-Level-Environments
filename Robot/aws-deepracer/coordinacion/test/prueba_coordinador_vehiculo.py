@@ -85,6 +85,9 @@ from std_msgs.msg import String  # noqa: E402
 from coordinacion.planificador import ESPERANDO_CONFIRMACION  # noqa: E402
 
 ERROR_LLEGADA_M = 0.20      # lo que se queda corto cada robot falso
+# 2026-10-13: racey, el 7-oct, seguia rodando 0,3 a 0,5 m durante el segundo
+# siguiente a la ultima orden de avance de Nav2, que ya habia dicho SUCCEEDED.
+INERCIA_M = 0.45
 VELOCIDAD_FALSA = 10.0      # m/s: la prueba no espera lo que tardaria el vehiculo
 SALIDAS = {"robot1": (22.10, 1.06, math.pi), "robot2": (24.45, 1.21, math.pi)}
 NIVELES = {"robot1": 3, "robot2": 4}
@@ -121,6 +124,7 @@ class RobotFalso(Node):
         self.x, self.y, self.yaw = self.salida
         self.v = 0.0
         self.mudo = False
+        self.inercia_m = 0.0          # >0: SUCCEEDED con el vehiculo aun rodando
         self.metas = []                 # (x, y, yaw) pedidos, en orden
         self.meta_recibida = threading.Event()
         grupo = ReentrantCallbackGroup()
@@ -165,9 +169,9 @@ class RobotFalso(Node):
         self.meta_recibida.set()
         dx, dy = p.position.x - self.x, p.position.y - self.y
         d = math.hypot(dx, dy)
-        recorrido = max(0.0, d - ERROR_LLEGADA_M)
+        recorrido = max(0.0, d - ERROR_LLEGADA_M - self.inercia_m)
+        ux, uy = (dx / d, dy / d) if d > 0 else (0.0, 0.0)
         if recorrido > 0:
-            ux, uy = dx / d, dy / d
             self.yaw = math.atan2(uy, ux)
             x0, y0 = self.x, self.y
             pasos = max(1, int(recorrido / VELOCIDAD_FALSA / 0.05))
@@ -181,9 +185,23 @@ class RobotFalso(Node):
                 self.x = x0 + ux * recorrido * i / pasos
                 self.y = y0 + uy * recorrido * i / pasos
             self.v = 0.0
+        if self.inercia_m > 0:
+            # Como Nav2 en el vehiculo: SUCCEEDED en cuanto entra en su margen, y
+            # el vehiculo sigue rodando hasta asentarse.
+            goal_handle.succeed()
+            threading.Thread(target=self._rodar, args=(ux, uy), daemon=True).start()
+            return NavigateToPose.Result()
         time.sleep(0.6)     # que llegue al menos una pose del agente ya parado
         goal_handle.succeed()
         return NavigateToPose.Result()
+
+
+    def _rodar(self, ux, uy):
+        x0, y0 = self.x, self.y
+        for i in range(1, 17):         # 0,8 s
+            time.sleep(0.05)
+            self.x = x0 + ux * self.inercia_m * i / 16
+            self.y = y0 + uy * self.inercia_m * i / 16
 
 
 class Usuario(Node):
@@ -355,10 +373,31 @@ def con_simulacion(clase):
             desmontar(ejecutor)
 
 
+def con_inercia(clase):
+    """Nav2 responde SUCCEEDED con el vehiculo aun rodando (2026-10-13).
+
+    Con la pose del agente a 2 Hz, verificar la llegada en el instante de
+    SUCCEEDED es mirar el vehiculo 0,5 a 1 m antes de donde se para.
+    """
+    with tempfile.TemporaryDirectory() as registros:
+        robots, usuario, _coord, ejecutor = montar("hardware", registros, clase)
+        for r in robots.values():
+            r.inercia_m = INERCIA_M
+        try:
+            print("7. Con inercia: SUCCEEDED a 0,65 m y 0,45 m mas rodando (racey, 7-oct)")
+            estado, res = usuario.pedir("piso3_salon_302", "piso4_salon_402")
+            comprueba("la llegada se verifica con el vehiculo asentado, no al recibir SUCCEEDED",
+                      estado == GoalStatus.STATUS_SUCCEEDED and res is not None and res.exito,
+                      f"(estado {estado}, motivo {res.motivo_fallo if res else None!r})")
+        finally:
+            desmontar(ejecutor)
+
+
 def main():
     ruta = sys.argv[1] if len(sys.argv) > 1 else None
     clase = cargar_coordinador(ruta)
     con_hardware(clase)
+    con_inercia(clase)
     con_simulacion(clase)
     print("=" * 62)
     if FALLOS:

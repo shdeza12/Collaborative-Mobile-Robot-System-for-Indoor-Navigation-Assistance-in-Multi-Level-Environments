@@ -86,6 +86,30 @@ hizo a mano el 9-oct. Ocupa un proceso ROS mientras corre, así que va antes de 
 Estado del 13-oct: hecho, y probado sin vehículos: tarda hasta 40 s, informa lo que falta y sale
 con error si falta algo.
 
+### 1.5 · La verificación de llegada del coordinador (hecho el 13-oct)
+
+Ninguna misión coordinada había llegado a destino con los vehículos. Al reconstruir la pose del mapa de
+las llegadas de racey del 7-oct (TF de sus grabaciones), el vehículo estaba a 0,53-0,62 m de la meta
+en la última orden de avance de Nav2 y a 0,09-0,53 m un segundo después, ya quieto. El coordinador
+verificaba la llegada al recibir `SUCCEEDED`, con la última pose del agente (2 Hz): habría visto 0,53
+a 0,96 m y rechazado las cuatro llegadas.
+
+| Llegada del 7-oct | Cinta | Pose del mapa al parar | Un segundo después |
+|---|---|---|---|
+| Salón 403 | sin medir | 0,62 m | 0,23 m |
+| Salón 402 | 0,45 m | 0,53 m | 0,53 m |
+| Salón 401 | 0,06 m | 0,58 m | 0,09 m |
+| Salida | 0,34 m | 0,57 m | 0,18 m |
+
+Arreglo en `coordinador.py`: con `condicion:=hardware`, tras `SUCCEEDED` espera una pose del agente
+recibida 1,5 s después (`ASENTAR_LLEGADA_S`) y entonces mide. `prueba_coordinador_vehiculo.py` tiene
+un escenario con inercia (`SUCCEEDED` a 0,65 m y 0,45 m más rodando): falla con el código anterior y
+pasa con el nuevo, 16 de 16, en Humble y en el contenedor con Jazzy. La imagen del contenedor está
+reconstruida. El jueves, el paso 3 del arranque copia el coordinador nuevo a los vehículos.
+
+Queda abierto: la llegada al 402 se habría rechazado igual (0,53 m según la pose del mapa, 0,45 m
+con cinta). Es el error de AMCL, no el momento de medir.
+
 ### 1.4 · Baterías y material
 
 - [ ] Batería de la tarjeta y de tracción de los dos vehículos, cargadas el miércoles en la noche.

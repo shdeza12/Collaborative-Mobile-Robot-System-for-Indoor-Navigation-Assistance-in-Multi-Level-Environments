@@ -29,7 +29,7 @@ Consecuencia práctica: `/robot1` puede ser un robot simulado y `/robot2` uno f�
 | `/<ns>/scan` | `sensor_msgs/LaserScan` | sale del robot | ya es relativo (`~/out:=scan`) |
 | `/<ns>/joint_states` | `sensor_msgs/JointState` | sale del robot | vía `joint_state_broadcaster` |
 | `/<ns>/navigate_to_pose` | acción `nav2_msgs/NavigateToPose` | **el coordinador la llama** | interfaz única de mando |
-| `/<ns>/estado` | `coordinacion_msgs/EstadoRobot` | sale del robot | 2 Hz. Con `condicion:=hardware` el coordinador toma de aquí la pose en el mapa, para el rumbo y la verificación de llegada (desde el 2026-10-05, `PLAN_S26.md` §4.1) |
+| `/<ns>/estado` | `coordinacion_msgs/EstadoRobot` | sale del robot | 2 Hz. Con `condicion:=hardware` el coordinador toma de aquí la pose en el mapa, para el rumbo y la verificación de llegada (desde el 2026-10-05, `PLAN_S26.md` §4.1). La llegada se verifica con una pose recibida 1,5 s después del `SUCCEEDED` de Nav2, con el vehículo ya asentado (desde el 2026-10-13, `PLAN_S27.md` §1.5) |
 | `/<ns>/initialpose` | `geometry_msgs/PoseWithCovarianceStamped` | entra | inicialización de AMCL |
 | `/<ns>/media_vuelta` | servicio `std_srvs/Trigger` | **el coordinador lo llama** | desde el 2026-10-08: el agente da la media vuelta antes de una meta que queda detrás del vehículo. Ver la excepción de abajo |
 
