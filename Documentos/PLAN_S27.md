@@ -110,6 +110,16 @@ reconstruida. El jueves, el paso 3 del arranque copia el coordinador nuevo a los
 Queda abierto: la llegada al 402 se habría rechazado igual (0,53 m según la pose del mapa, 0,45 m
 con cinta). Es el error de AMCL, no el momento de medir.
 
+### 1.6 · La media vuelta pedida por el coordinador (probada el 13-oct)
+
+La cadena completa no había corrido nunca: ninguna prueba ofrecía el servicio `media_vuelta`, en el
+laboratorio las metas quedaban al frente y el 8-oct la maniobra se lanzó a mano con
+`herramientas/media_vuelta.py`. `prueba_coordinador_vehiculo.py` tiene ahora robots falsos que ofrecen
+el servicio. En G-5, robot1 recibe la meta al 302 sin maniobra, la media vuelta y la meta a la
+escalera, y robot2 no recibe ninguna. Pasa 19 de 19 en Humble y en el contenedor con Jazzy; con el
+coordinador anterior a la media vuelta (`dbd29d9^`) falla. En el campo, la primera media vuelta
+pedida por el coordinador es la de deepy en el Salón 302, dentro de G-5.
+
 ### 1.4 · Baterías y material
 
 - [ ] Batería de la tarjeta y de tracción de los dos vehículos, cargadas el miércoles en la noche.

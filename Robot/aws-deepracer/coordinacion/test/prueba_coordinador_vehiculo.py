@@ -81,6 +81,7 @@ from rclpy.callback_groups import ReentrantCallbackGroup  # noqa: E402
 from rclpy.executors import MultiThreadedExecutor  # noqa: E402
 from rclpy.node import Node  # noqa: E402
 from std_msgs.msg import String  # noqa: E402
+from std_srvs.srv import Trigger  # noqa: E402
 
 from coordinacion.planificador import ESPERANDO_CONFIRMACION  # noqa: E402
 
@@ -117,7 +118,7 @@ def yaw_de(q):
 class RobotFalso(Node):
     """Nav2, rf2o y el agente de un vehiculo, reducidos a lo que el coordinador mira."""
 
-    def __init__(self, ns):
+    def __init__(self, ns, con_media_vuelta=False):
         super().__init__(f"falso_{ns}")
         self.ns = ns
         self.salida = SALIDAS[ns]
@@ -126,6 +127,7 @@ class RobotFalso(Node):
         self.mudo = False
         self.inercia_m = 0.0          # >0: SUCCEEDED con el vehiculo aun rodando
         self.metas = []                 # (x, y, yaw) pedidos, en orden
+        self.eventos = []               # 'meta' y 'media_vuelta', en el orden en que llegan
         self.meta_recibida = threading.Event()
         grupo = ReentrantCallbackGroup()
         self.pub_odom = self.create_publisher(Odometry, f"/{ns}/odom", 10)
@@ -135,6 +137,17 @@ class RobotFalso(Node):
         self.servidor = ActionServer(
             self, NavigateToPose, f"/{ns}/navigate_to_pose", self._navegar,
             cancel_callback=lambda _gh: CancelResponse.ACCEPT, callback_group=grupo)
+        if con_media_vuelta:
+            # El servicio del agente (coordinacion/media_vuelta.py), reducido a girar.
+            self.create_service(Trigger, f"/{ns}/media_vuelta", self._media_vuelta,
+                                callback_group=grupo)
+
+    def _media_vuelta(self, _peticion, respuesta):
+        self.eventos.append("media_vuelta")
+        time.sleep(0.3)
+        self.yaw = normalizar(self.yaw + math.pi)
+        respuesta.success, respuesta.message = True, "media vuelta: 180 grados (falsa)"
+        return respuesta
 
     def _odom(self):
         # Como rf2o: origen y rumbo 0 en la salida, sea cual sea la salida en el mapa.
@@ -166,6 +179,7 @@ class RobotFalso(Node):
     def _navegar(self, goal_handle):
         p = goal_handle.request.pose.pose
         self.metas.append((p.position.x, p.position.y, yaw_de(p.orientation)))
+        self.eventos.append("meta")
         self.meta_recibida.set()
         dx, dy = p.position.x - self.x, p.position.y - self.y
         d = math.hypot(dx, dy)
@@ -255,12 +269,12 @@ def cargar_coordinador(ruta):
     return modulo.Coordinador
 
 
-def montar(condicion, registros, clase):
+def montar(condicion, registros, clase, con_media_vuelta=False):
     rclpy.init(args=[
         "--ros-args", "-p", f"ruta_puntos:={CATALOGO}", "-p", "robot_nivel_3:=robot1",
         "-p", "robot_nivel_4:=robot2", "-p", f"condicion:={condicion}",
         "-p", f"ruta_registros:={registros}", "-p", "espera_servidor_s:=5.0"])
-    robots = {ns: RobotFalso(ns) for ns in SALIDAS}
+    robots = {ns: RobotFalso(ns, con_media_vuelta) for ns in SALIDAS}
     usuario = Usuario()
     coordinador = clase()
     ejecutor = MultiThreadedExecutor(num_threads=12)
@@ -393,11 +407,37 @@ def con_inercia(clase):
             desmontar(ejecutor)
 
 
+def con_media_vuelta(clase):
+    """La cadena completa: el coordinador pide la media vuelta al agente y despues navega.
+
+    Hasta el 2026-10-13 ninguna prueba la recorria: los robots falsos no
+    ofrecian el servicio, el coordinador avisaba y dejaba la vuelta a Nav2, y en
+    el campo la maniobra se lanzo a mano con herramientas/media_vuelta.py.
+    """
+    with tempfile.TemporaryDirectory() as registros:
+        robots, usuario, _coord, ejecutor = montar("hardware", registros, clase,
+                                                   con_media_vuelta=True)
+        r1, r2 = robots["robot1"], robots["robot2"]
+        try:
+            print("8. Media vuelta del agente, pedida por el coordinador: Salon 302 -> Salon 402")
+            estado, res = usuario.pedir("piso3_salon_302", "piso4_salon_402")
+            comprueba("la mision se completa", estado == GoalStatus.STATUS_SUCCEEDED
+                      and res is not None and res.exito,
+                      f"(estado {estado}, motivo {res.motivo_fallo if res else None!r})")
+            comprueba("robot1: meta al 302 (al frente), media vuelta y meta a la escalera (detras)",
+                      r1.eventos == ["meta", "media_vuelta", "meta"], f"({r1.eventos})")
+            comprueba("robot2: sin media vuelta (escalera a 0,39 m y el 402 al frente)",
+                      r2.eventos == ["meta", "meta"], f"({r2.eventos})")
+        finally:
+            desmontar(ejecutor)
+
+
 def main():
     ruta = sys.argv[1] if len(sys.argv) > 1 else None
     clase = cargar_coordinador(ruta)
     con_hardware(clase)
     con_inercia(clase)
+    con_media_vuelta(clase)
     con_simulacion(clase)
     print("=" * 62)
     if FALLOS:
