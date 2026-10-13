@@ -365,6 +365,15 @@ Salida: frente a las escaleras y mirando al norte, con el centro del vehículo a
 y a 1,26 m de la pared este. En el mapa es (22,10, 1,06). Meta: Salón 302 (9,31, 2,21). Es la primera
 vez que un vehículo navega en el piso 3; sirve para comprobar el mapa antes de G-5.
 
+Estado del 8-oct, con deepy
+([`S26_piso3_deepy_y_saturacion.md`](Evidencia/S26_piso3_deepy_y_saturacion.md)):
+
+- Cinco corridas encadenadas (salida → 303 → 302 → 301 → escalera → 303), todas en SUCCEEDED y
+  sin recuperaciones. No se midieron con flexómetro.
+- Al recalcular AMCL al final de cada una, la pose saltó entre 0,61 y 0,86 m.
+- Medias vueltas del agente: 160° frente al 301 y 167° junto a la escalera, en un tiempo.
+- G-5 no se corrió: con las dos cadenas en la red, la tarjeta de deepy llegó a carga 33 de media.
+
 ---
 
 ## 4. Jueves 8

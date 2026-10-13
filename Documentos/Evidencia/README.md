@@ -364,7 +364,11 @@ que el propio documento sostiene:
 
 **Semana 26**
 
+- [`S26_bucle_capa2_y_red_dos_AP.md`](S26_bucle_capa2_y_red_dos_AP.md) — Bucle de capa 2 y red con dos puntos de acceso (7 de octubre)
 - [`S26_integracion_imu_vehiculos.md`](S26_integracion_imu_vehiculos.md) — Integración de la IMU en los dos vehículos y ensayo del coordinador (5 de octubre, noche)
+- [`S26_laboratorio_carga_dos_vehiculos.md`](S26_laboratorio_carga_dos_vehiculos.md) — Carga y ajustes del sistema completo con los dos vehículos en el laboratorio (9 de octubre, noche)
+- [`S26_piso3_deepy_y_saturacion.md`](S26_piso3_deepy_y_saturacion.md) — Piso 3 con deepy, primeras medias vueltas del agente e intento de G-5 (8 de octubre, tarde)
+- [`S26_piso4_cadena_media_vuelta.md`](S26_piso4_cadena_media_vuelta.md) — Cadena del piso 4 con racey y media vuelta en la salida (7 de octubre, tarde)
 - [`S26_pruebas_imu.md`](S26_pruebas_imu.md) — Pruebas de la IMU en los dos vehículos (5 de octubre)
 - [`S26_red_5ghz_regulatorio.md`](S26_red_5ghz_regulatorio.md) — La WiFi de los dos vehículos no podía transmitir en 5 GHz (5 de octubre)
 - [`S26_simulacion_tras_actualizacion_ros.md`](S26_simulacion_tras_actualizacion_ros.md) — La simulación de dos robots después de la actualización de ROS del 6 de octubre
