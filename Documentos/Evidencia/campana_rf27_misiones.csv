@@ -1,0 +1,21 @@
+# campana: RF-27 - vehiculos reales (G-6)
+# protocolo: Documentos/PROTOCOLO_EXPERIMENTAL.md §6.2 y §6.3
+# sorteado: 2026-10-13
+# semilla: 20261013
+# catalogo: Robot/aws-deepracer/deepracer_bringup/config/puntos_interes_pisos34.yaml
+# catalogo_sha256: e638a2aaaac712d3d342d9e385ccd5169fe07eb8ee976588e42b861ac2292b62
+# orden: el de este archivo, sin reordenar (§6.3)
+# estratos: B34=5, B43=5
+# racha_maxima: 3 misiones seguidas del mismo estrato (§6.3, decision 5)
+# n: 10
+n,condicion,estrato,origen_id,destino_id,origen_nombre,destino_nombre
+1,B,B34,piso3_ascensor,piso4_salon_403,Ascensor,Salón 403
+2,B,B34,piso3_salon_302,piso4_salon_401,Salón 302,Salón 401
+3,B,B43,piso4_salon_401,piso3_salon_302,Salón 401,Salón 302
+4,B,B43,piso4_salon_403,piso3_salon_303,Salón 403,Salón 303
+5,B,B43,piso4_salon_402,piso3_salon_301,Salón 402,Salón 301
+6,B,B34,piso3_salon_301,piso4_salon_401,Salón 301,Salón 401
+7,B,B43,piso4_ascensor,piso3_salon_301,Ascensor,Salón 301
+8,B,B34,piso3_salon_302,piso4_salon_403,Salón 302,Salón 403
+9,B,B34,piso3_salon_303,piso4_salon_402,Salón 303,Salón 402
+10,B,B43,piso4_salon_403,piso3_ascensor,Salón 403,Ascensor

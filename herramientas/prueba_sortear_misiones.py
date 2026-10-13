@@ -380,6 +380,43 @@ def pruebas_estratificadas_sobre_el_catalogo_real():
           f"-> {[(x['origen_id'], x['destino_id']) for x in repetidos]}")
 
 
+def pruebas_de_la_campana_fisica():
+    """G-6 (RF-27): misiones con relevo entre los pisos 3 y 4, en los dos sentidos.
+
+    Sobre el catalogo real de esos pisos, con el reparto que se usa: 5 de
+    subida (B34) y 5 de bajada (B43).
+    """
+    cat = cargar_catalogo(os.path.join(
+        REPO, "Robot", "aws-deepracer", "deepracer_bringup", "config",
+        "puntos_interes_pisos34.yaml"))
+    nivel = {p["id"]: int(p["nivel"]) for p in cat}
+    m = sortear_estratificado(cat, {"B34": 5, "B43": 5}, semilla=20261013)
+
+    check("salen 10, 5 de subida y 5 de bajada",
+          len(m) == 10 and sum(x["estrato"] == "B34" for x in m) == 5,
+          f"-> {len(m)}")
+    check("todas cambian de piso, del 3 al 4 o del 4 al 3",
+          all({nivel[x["origen_id"]], nivel[x["destino_id"]]} == {3, 4}
+              for x in m))
+    check("ninguna empieza ni termina en una escalera (punto de relevo)",
+          all("escalera" not in x["origen_id"] + x["destino_id"] for x in m))
+    check("todos los pares son distintos",
+          len({(x["origen_id"], x["destino_id"]) for x in m}) == 10)
+    check(f"ningun sentido mas de {RACHA_MAXIMA} veces seguidas",
+          maxima_racha([x["estrato"] for x in m]) <= RACHA_MAXIMA)
+    check("16 pares posibles en cada sentido",
+          len(elegibles(cat, 3)) * len(elegibles(cat, 4)) == 16)
+    # La asignacion con la que corre el coordinador en el portatil
+    # (coordinador_portatil.sh): deepy (robot1) en el 3 y racey (robot2) en el 4.
+    asignacion = {1: "robot1", 2: "robot2", 3: "robot1", 4: "robot2"}
+    relevos = [planificar(cat, x["origen_id"], x["destino_id"], asignacion)[1]
+               for x in m]
+    check("el coordinador planifica las 10 con un relevo",
+          relevos == [1] * 10, f"-> {relevos}")
+    otra = sortear_estratificado(cat, {"B34": 5, "B43": 5}, semilla=20261013)
+    check("la misma semilla da el mismo listado", otra == m)
+
+
 def pruebas_de_estrato_de():
     """El estrato de una mision se deduce de los niveles, no se anota a mano.
 
@@ -564,6 +601,8 @@ print("Sorteo estratificado: lo que tiene que rechazar")
 pruebas_de_negativas_estratificadas()
 print("Sorteo estratificado sobre el catalogo real")
 pruebas_estratificadas_sobre_el_catalogo_real()
+print("Campana fisica de RF-27 en los pisos 3 y 4")
+pruebas_de_la_campana_fisica()
 
 print()
 if fallos:

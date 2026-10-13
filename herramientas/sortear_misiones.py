@@ -110,6 +110,11 @@ ESTRATOS = {
     "A2": (2, 2, "A"),
     "B12": (1, 2, "B"),
     "B21": (2, 1, "B"),
+    # Campana fisica de RF-27 (G-6), en los pisos 3 y 4 del acta §6.2: solo
+    # misiones con relevo, en los dos sentidos. Se sortean con el catalogo
+    # puntos_interes_pisos34.yaml y --campana (2026-10-13).
+    "B34": (3, 4, "B"),
+    "B43": (4, 3, "B"),
 }
 
 # Ningun estrato puede aparecer mas de tres veces seguidas en el orden de
@@ -251,8 +256,8 @@ def estrato_de(catalogo, origen_id, destino_id):
             return nombre
     raise ValueError(
         f"La mision {origen_id} -> {destino_id} va del piso {par[0]} al "
-        f"{par[1]} y ningun estrato cubre ese caso. El edificio del §6.1 solo "
-        f"tiene dos pisos.")
+        f"{par[1]} y ningun estrato cubre ese caso. Los definidos son "
+        f"{', '.join(sorted(ESTRATOS))}.")
 
 
 def leer_csv(ruta):
@@ -462,6 +467,9 @@ def main(argv=None):
                         "quedan excluidos del sorteo nuevo.")
     p.add_argument("--conservar", type=int, default=0,
                    help="Cuantas misiones de --continuar-de ya se corrieron.")
+    p.add_argument("--campana", default="OE4 - simulacion (RF-26)",
+                   help="Nombre de la campana en la cabecera del CSV. Para la "
+                        "fisica: 'RF-27 - vehiculos reales (G-6)'.")
     args = p.parse_args(argv)
 
     if args.continuar_de and not args.estratos:
@@ -497,7 +505,7 @@ def main(argv=None):
     huella = sha256_de(args.catalogo)
 
     meta = {
-        "campana": "OE4 - simulacion (RF-26)",
+        "campana": args.campana,
         "protocolo": "Documentos/PROTOCOLO_EXPERIMENTAL.md §6.2 y §6.3",
         "sorteado": datetime.date.today().isoformat(),
         "semilla": args.semilla,
