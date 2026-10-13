@@ -45,7 +45,9 @@ La comunicación sigue tres reglas que no se rompen:
 
 \begin{enumerate}[leftmargin=*]
   \item El coordinador manda a un agente \textbf{solo} mediante la acción de
-    navegación de ROS~2. No publica velocidades directamente.
+    navegación de ROS~2. No publica velocidades directamente. Desde octubre de
+    2026 puede pedirle además una media vuelta, que el agente ejecuta por su
+    cuenta antes de navegar (§3.2.9).
   \item La interfaz habla \textbf{solo} con el coordinador. Nunca con los
     agentes.
   \item El texto que ve el usuario lo redacta el coordinador. La interfaz lo
@@ -231,11 +233,107 @@ propia cadena anulaba.
 
 El efecto es que \textbf{el vehículo se aproxima a la meta a 0,40~m/s y no puede
 ir más despacio}. No tiene régimen de aproximación fina. Es un límite de la
-plataforma, no del software, y no se corrige afinando el controlador: las dos
-salidas son bajar el umbral de arranque del vehículo —por mecánica o por
-calibración de los servos— o fijar la tolerancia de llegada en un valor
-compatible con la plataforma, con justificación previa. Las dos son decisiones,
-no ajustes, y por eso quedan planteadas en el capítulo de trabajos futuros.
+plataforma, no del software, y no se corrige afinando el controlador. Desde el 29
+de septiembre el puente envía las órdenes inferiores a 0,40~m/s con el escalón de
+tracción más bajo, de modo que el vehículo ya no se detiene en la fase final. La
+aproximación sigue siendo a esa velocidad.
+
+Quedaban dos salidas, y las dos eran decisiones y no ajustes. La tolerancia de
+llegada en los vehículos reales la fijó el director en 0,5~m el 28 de septiembre,
+mientras la simulación conserva 0,25~m. Bajar el umbral de arranque del vehículo,
+por mecánica o por calibración de los servos, queda planteado en el capítulo de
+trabajos futuros.
+
+\subsection{La unidad de medición inercial de la tarjeta}
+
+Hasta octubre el vehículo estimaba también su rumbo con la odometría del láser, y
+en un pasillo recto esa estimación pierde los giros igual que pierde el avance.
+Con el vehículo quieto, el rumbo de la odometría del láser derivó hasta 5,9$^\circ$ por
+minuto, y en un giro de 90$^\circ$ hecho a mano registró 19,1$^\circ$.
+
+La tarjeta de los dos vehículos incluye una unidad de medición inercial (IMU,
+con giroscopio y acelerómetro), una Bosch BMI160 que el software del fabricante
+no usa. Se comprobó leyéndola directamente: el giroscopio midió giros de 90$^\circ$ y
+360$^\circ$ con un error de 0,1~\% a 1,3~\%, y quieto no se desvió más de 0,3$^\circ$ en 60~s.
+
+Se integró con un filtro de Kalman extendido, que combina las dos fuentes según
+lo que cada una mide bien: de la odometría del láser toma el avance y de la IMU
+el giro. Para no sobrecargar la tarjeta, la IMU publica a 25~Hz y el filtro corre
+a 15~Hz. En un giro de 90$^\circ$ contra una línea del piso, el filtro midió 90,17$^\circ$ en
+un vehículo y 88,38$^\circ$ en el otro, y con el vehículo quieto su rumbo se movió 0,3$^\circ$
+o menos por minuto. La posición no mejora con la IMU, porque el filtro la sigue
+tomando del láser.
+
+Con el rumbo estable se pudo reducir de 1,0~m a 0,5~m el margen en el que Nav2 da
+la meta por alcanzada, y con ese margen se alcanzó la compuerta de navegación
+(§4.2.2).
+
+\subsection{Los dos vehículos en la misma red}
+
+Con los dos vehículos encendidos aparecieron dos problemas que con uno solo no
+existían. El primero era de nombres. Los tópicos del software del fabricante no
+llevan espacio de nombres, así que una orden de movimiento llegaba a los dos
+vehículos y la odometría de cada uno recibía el láser del otro. Desde el 28 de
+septiembre cada vehículo tiene una partición de comunicaciones propia, que deja
+esos mensajes dentro del vehículo, y la cadena del proyecto corre en los espacios
+de nombres \texttt{/robot1} y \texttt{/robot2}.
+
+El segundo apareció el 8 de octubre, en el primer intento de misión con relevo
+con los dos vehículos. Los programas de ROS~2 se encuentran entre sí anunciándose
+por la red, y con las dos cadenas completas eran unos cuarenta anunciándose a
+todos los demás por la red inalámbrica. La tarjeta de un vehículo pasó de una
+carga de 6 a una de entre 17 y 33, con el procesador al 84-95~\%, y Nav2 no
+llegaba a arrancar. El aumento estaba en los procesos que hablan con la red,
+mientras la navegación gastaba menos que antes.
+
+La solución fue volver a la topología del diseño, en estrella alrededor del
+servidor central. Los procesos internos de cada vehículo solo se buscan dentro de
+él. Lo que el coordinador necesita de un vehículo (su navegación, su estado y su
+media vuelta) solo se anuncia al computador portátil, y los vehículos no se ven
+entre sí. El coordinador y el grabador de las misiones pasaron del vehículo al
+portátil. El portátil tiene ROS~2 Humble y los vehículos ROS~2 Jazzy, cuya acción
+de navegación no es compatible con la de Humble. Por eso el coordinador corre en
+un contenedor, un entorno aislado del portátil con su propia versión de ROS.
+
+Probado el 9 de octubre en el laboratorio con todo el sistema, cada tarjeta quedó
+al 54~\% y al 59~\% en reposo, y al 68~\% y al 74~\% navegando. El controlador de
+Nav2, que corre a 10~Hz, se atrasó una vez en un vehículo y cinco en el otro, sin
+bajar de 5,5~Hz.
+
+En el vehículo, el coordinador comprueba cada llegada con la pose que publica el
+agente, que la toma de la localización. Nav2 declara la llegada en cuanto el
+vehículo entra en su margen, y el vehículo sigue rodando. En las llegadas del 7
+de octubre estaba a entre 0,53 y 0,62~m de la meta en la última orden de avance, y
+un segundo después, ya quieto, a entre 0,09 y 0,53~m. Por eso el coordinador
+espera 1,5~s antes de medir.
+
+\subsection{La media vuelta en varios tiempos}
+
+Entre misiones el vehículo no vuelve a su punto de partida: cada misión empieza
+donde terminó la anterior, por acuerdo con los directores. Con frecuencia el
+siguiente usuario está detrás del vehículo, y un vehículo con dirección de tipo
+Ackermann no puede girar en el sitio. En pasillos de 2,5 a 3,2~m de ancho tiene
+que dar la vuelta en varios tiempos.
+
+El 7 de octubre, en la salida del piso 4, de 2,5~m de ancho, la media vuelta de
+Nav2 abortó dos veces contra la pared: el planificador proponía cada segundo una
+maniobra distinta. Además, con la misma orden de velocidad el motor retrocedía a
+unas 1,7 veces la velocidad con que avanzaba, y se añadió al puente una escala
+para la marcha atrás, fijada en 0,75.
+
+La media vuelta se escribió entonces como una maniobra propia del agente.
+Alterna marcha atrás y avance con la dirección a tope, siempre en el mismo
+sentido de giro. Cada tiempo se corta cuando la huella prevista del vehículo queda
+a menos de 0,10~m de un obstáculo, visto por el láser o marcado en el mapa. El
+láser no ve el borde de una escalera, así que en el mapa la escalera está
+cerrada. El primer tiempo va hacia el costado con más espacio, y el giro se mide
+con el rumbo del filtro.
+
+El coordinador la pide antes de enviar una meta que queda a más de 110$^\circ$ del
+rumbo del vehículo. Si el agente no la completa, sigue Nav2 como antes. La
+maniobra giró 160$^\circ$ frente a un salón del piso 3 y 167$^\circ$ junto a la escalera, en un
+solo tiempo cada vez. La cadena completa, del coordinador al agente y de ahí a
+Nav2, está verificada en las pruebas del coordinador.
 
 % ---------------------------------------------------------------------
 \section{Interfaz humano-robot (OE3)}

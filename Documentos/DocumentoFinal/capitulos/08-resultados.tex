@@ -1,7 +1,8 @@
 % =====================================================================
 %  RESULTADOS
 %  Cifras de RESULTADOS_OE4_SIMULACION.md y de la evidencia de hardware
-%  S24_peldano2 / S24_nav2_navegacion / S25_pisos34_campo.
+%  S24_peldano2 / S24_nav2_navegacion / S25_pisos34_campo /
+%  S26_piso4_cadena_media_vuelta / S26_piso3_deepy_y_saturacion.
 %
 %  Las tres cosas que hay que escribir con cuidado van en §4.4:
 %   - R14: la continuidad es un invariante, no un resultado experimental
@@ -11,7 +12,7 @@
 \chapter{Resultados}
 
 \begin{notaavance}[la toma de datos cierra el 16 de octubre de 2026]
-Las cifras de este capítulo son las disponibles al \textbf{5 de octubre de
+Las cifras de este capítulo son las disponibles al \textbf{13 de octubre de
 2026}. Las dos mitades están en situaciones distintas y conviene no leerlas
 igual:
 
@@ -19,11 +20,12 @@ igual:
   \item El §4.1, \textbf{simulación}, está \textbf{cerrado}. La campaña de
     treinta misiones corrió el 5 de septiembre, el analizador la dictaminó
     válida y sus números no van a cambiar.
-  \item El §4.2, \textbf{hardware}, \textbf{va por mitades}. La odometría
-    (compuerta G-2) cerró el 5 de octubre y se reporta. La precisión de llegada
-    (G-3) no se alcanzó en el corte C-1 y sigue abierta, así que ese apartado
-    queda sin redactar hasta el corte del \textbf{viernes 16 de octubre},
-    después del cual el acta de directores no admite más datos.
+  \item El §4.2, \textbf{hardware}, \textbf{va por partes}. La odometría
+    (compuerta G-2) y la navegación de un vehículo (G-3) están alcanzadas y se
+    reportan. La misión con relevo entre los dos vehículos (G-5) y la campaña
+    física (G-6) se corren el 15 y el 16 de octubre. El §4.2.3 queda sin
+    redactar hasta el corte de ese \textbf{viernes 16}, después del cual el acta
+    de directores no admite más datos.
 \end{itemize}
 
 El §4.3 trata de las limitaciones de la campaña de simulación, así que cierra
@@ -125,18 +127,19 @@ aparte en banco: mediana entre 154 y 175~\textmu s, máximo 306~\textmu s.
 
 \section{Evaluación sobre hardware}
 
-\begin{notaavance}[G-2 cerrada el 5 de octubre; G-3 sigue abierta]
-De las dos compuertas que esta sección tiene que responder, una cerró y la otra
-no, así que se reportan de forma distinta:
+\begin{notaavance}[G-2 y G-3 alcanzadas; G-5 y G-6 se corren el 15 y el 16 de
+octubre]
+Las compuertas de esta sección se reportan de forma distinta según su estado:
 
 \begin{itemize}[leftmargin=*,nosep]
-  \item \textbf{G-2, la odometría}, quedó \textbf{alcanzada} en el acta de
-    directores del 5 de octubre de 2026, con las medidas del 2 de octubre en el
-    piso 4. Sus cifras son definitivas y se reportan en el §4.2.1.
-  \item \textbf{G-3, la precisión de llegada}, \textbf{no se alcanzó} en el
-    corte C-1 y sigue abierta. El §4.2.2 queda sin redactar: la toma de datos
-    continúa hasta el corte del \textbf{16 de octubre}, y escribir ahora unas
-    cifras que van a cambiar obligaría a corregirlas después.
+  \item \textbf{G-2, la odometría}, quedó \textbf{alcanzada} el 2 de octubre,
+    con las medidas del piso 4, y se reporta en el §4.2.1.
+  \item \textbf{G-3, la navegación de un vehículo}, quedó \textbf{alcanzada} el
+    7 de octubre, y se reporta en el §4.2.2.
+  \item \textbf{G-5 y G-6}, el protocolo completo con los dos vehículos, se
+    corren el 15 y el 16 de octubre. El §4.2.3 queda sin redactar hasta
+    entonces: escribir ahora unas cifras que van a cambiar obligaría a
+    corregirlas después.
 \end{itemize}
 \end{notaavance}
 
@@ -158,7 +161,9 @@ La tabla~\ref{tab:odometria} reúne lo que se midió en cada entorno:
     Hall del piso 2 & 6 m & 73 \% & falla \\
     Cuarto cerrado, empujado a mano & 3 m & 96,3 -- 101,9 \% & \textbf{cumple} \\
     \textbf{Pasillo del piso 4} & \textbf{6,68 m} & \textbf{95,4 \%} & \textbf{cumple} \\
-    \textbf{Pasillo del piso 4} & \textbf{14,57 m} & \textbf{103,3 \%} & \textbf{cumple} \\ \bottomrule
+    \textbf{Pasillo del piso 4} & \textbf{14,57 m} & \textbf{103,3 \%} & \textbf{cumple} \\
+    Pasillo del piso 4, con la IMU & 8,08 m & 101,9 \% & cumple \\
+    Pasillo del piso 4, con la IMU & 2,82 m & 104,9 \% & cumple \\ \bottomrule
   \end{tabular}
 \end{table}
 
@@ -168,33 +173,79 @@ dato del sensor, y ningún ajuste la recupera. En un pasillo con hornacinas,
 lockers y quiebres —ocho cambios de perfil en 25~m— la misma odometría, sin tocar
 un parámetro, queda dentro del $\pm$5~\%.
 
-Sobre esas dos últimas filas, las del piso 4, los directores declararon
+Sobre las dos filas del 2 de octubre, en el piso 4, los directores declararon
 \textbf{G-2 alcanzada}. Es la compuerta que el proyecto llevaba desde septiembre
 señalando como su única ruta crítica.
 
-\subsection{La navegación y la precisión de llegada (G-3), pendientes}
+Las dos últimas filas son del 7 de octubre, ya con la IMU integrada (§3.2.7): el
+avance lo estima el filtro, que lo toma de la misma odometría del láser. El
+segundo tramo mide 2,82~m, por debajo de los 5~m que pide el criterio de G-2, y
+se incluye como dato de la misma cadena.
+
+\subsection{La navegación y la precisión de llegada (G-3)}
+
+La compuerta G-3 pide un recorrido de punto a punto con Nav2 y la llegada
+verificada con flexómetro, a 0,5~m o menos del destino, que es la tolerancia que
+fijó el director para los vehículos reales.
+
+El 2 de octubre, en el piso 4, las dos llegadas medidas quedaron a 0,57~m y
+0,62~m, cortas. Nav2 daba entonces la meta por alcanzada a 1,0~m, y los dos
+vehículos se detuvieron al cruzar ese margen. Con la IMU integrada (§3.2.7) el
+margen bajó a 0,5~m. El 7 de octubre uno de los vehículos recorrió en el piso 4
+tres tramos encadenados, sin que nadie lo tocara entre uno y otro, y después
+regresó a la salida (tabla~\ref{tab:g3} y figura~\ref{fig:cadena}).
+
+\begin{table}[H]
+  \centering\small
+  \caption{Cadena del piso 4 del 7 de octubre: llegada de cada tramo.}
+  \label{tab:g3}
+  \begin{tabular}{@{}llcccl@{}}
+    \toprule
+    \textbf{Tramo} & \textbf{Destino} & \textbf{Tiempo} & \textbf{Recuperaciones} & \textbf{A la meta} & \textbf{Medida} \\ \midrule
+    1 & Salón 403 & 13,5 s & 1 & 0,26 m & estimada \\
+    2 & Salón 402 & 27,8 s & 1 & 0,45 m & flexómetro \\
+    3 & Salón 401 & 5,2 s & 0 & 0,06 m & flexómetro \\
+    Regreso & Salida & 62,8 s & 6 & 0,34 m & flexómetro \\ \bottomrule
+  \end{tabular}
+\end{table}
+
+Las llegadas medidas quedaron dentro de la tolerancia de 0,5~m, y G-3 se declaró
+alcanzada en el acta ese mismo día. La del Salón 403 no se midió porque en ese
+momento no había flexómetro, y se estimó con el error de los otros dos tramos. El
+regreso a la salida incluyó una media vuelta en el tramo ancho frente a los
+salones, que Nav2 resolvió con seis recuperaciones.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{imagenes/cadena_piso4.png}
+  \caption{Cadena de tres tramos en el piso 4 y regreso a la salida, el 7 de
+    octubre: recorrido según la localización, llegadas medidas con flexómetro,
+    la llegada estimada al Salón 403 y la pose de la localización al terminar
+    cada tramo.}
+  \label{fig:cadena}
+\end{figure}
+
+El 8 de octubre el otro vehículo recorrió el piso 3 en cinco tramos encadenados,
+con dos medias vueltas entre ellos, y los cinco terminaron con éxito y sin
+recuperaciones. Esas llegadas no se midieron con flexómetro. Al terminar cada
+tramo se forzó a la localización a recalcular su pose, y esta se desplazó entre
+0,61 y 0,86~m. La pose que publica al detenerse el vehículo va atrasada, y por eso
+la llegada que vale es la medida con cinta.
+
+Lo que condiciona la precisión de llegada sigue siendo la banda muerta de
+tracción (§3.2.6): el vehículo se aproxima a la meta a 0,40~m/s y no tiene
+régimen de aproximación fina.
+
+\subsection{El sistema completo con los dos vehículos (G-5 y G-6)}
 
 \begin{notaavance}[apartado sin redactar: la toma de datos cierra el 16 de
 octubre de 2026]
-Aquí irán dos cosas, y ninguna se adelanta:
-
-\begin{enumerate}[leftmargin=*,nosep]
-  \item \textbf{La navegación}: evidencia, a partir del registro de cada
-    corrida, de que el planificador traza y el controlador sigue sobre el
-    vehículo real.
-  \item \textbf{La precisión de llegada} (G-3): distancia medida con flexómetro
-    entre la parada del vehículo y el destino del catálogo, contra la tolerancia
-    de 0,5~m que fijó el director.
-\end{enumerate}
-
-Hay sesiones de campo realizadas y sus medidas están registradas en el
-repositorio, pero \textbf{no se reportan todavía como resultado}: G-3 no se
-alcanzó en el corte C-1 y la demostración continúa. Lo que haya el 16 de octubre
-es lo que se defiende.
-
-Lo que sí está medido, y no depende de cuántas corridas más se hagan, es el
-mecanismo que condiciona esa llegada: la banda muerta de tracción del vehículo,
-documentada en el §3.2.6.
+Aquí irán la misión con relevo entre los dos vehículos (G-5), del Salón 302 al
+Salón 402, y la campaña física de RF-27 (G-6). Son diez misiones con relevo
+entre los pisos 3 y 4, sorteadas con semilla antes de correr y ejecutadas sin
+reubicar los vehículos. Se reportan con las métricas del protocolo y la tolerancia de 0,5~m,
+siempre por separado de la campaña en simulación. Lo que haya el 16 de octubre es
+lo que se defiende.
 \end{notaavance}
 
 \section{Limitaciones de la medición}
