@@ -60,6 +60,9 @@ TICK_CLOCK_S = 0.1
 # viene resuelto en el registro-; solo sirve para contar cuantas llegadas caen
 # por encima, que es el dato que hace falta para la decision del criterio.
 UMBRAL_LLEGADA_M = 0.25
+# Acta §6.1 (2026-09-28): 0,5 m en los vehiculos; la simulacion conserva 0,25.
+# Es la misma tabla que TOLERANCIA_POR_BANCO de componer_registro.py.
+UMBRAL_LLEGADA_POR_BANCO = {"simulacion": UMBRAL_LLEGADA_M, "fisico": 0.50}
 
 # RF-26 / §6.1.
 N_SIMULACION = 30
@@ -349,6 +352,20 @@ def analizar(registros, incluir_pilotos=False):
                            "afirma que la asignacion tarda menos de un tick de "
                            "/clock (< 100 ms) en las N misiones. El valor "
                            "puntual sale del banco de banco_tiempo_asignacion.py.")}
+    if banco == "fisico":
+        # Sin /clock: las marcas son la hora de recepcion del grabador, un
+        # reloj continuo. Un valor > 0 es lo normal y se reporta tal cual; el
+        # §3.2.2 y su alerta son de la cuantizacion de la simulacion.
+        valores = [v for _, v in asign if v is not None]
+        asignacion = {"cota_s": None, "n": len(valores),
+                      "media": statistics.mean(valores) if valores else None,
+                      "mediana": statistics.median(valores) if valores else None,
+                      "maximo": max(valores) if valores else None,
+                      "por_encima_del_tick": [],
+                      "nota": ("Banco fisico: reloj de pared del grabador, sin "
+                               "cuantizar. Incluye el transporte del mensaje de "
+                               "estado hasta el grabador.")}
+        altos = []
     if altos:
         alertas.append(
             f"Tiempo de asignacion > 0 en {len(altos)} mision(es) "
@@ -418,9 +435,12 @@ def analizar(registros, incluir_pilotos=False):
     errs = [r.get("verdad_de_terreno", {}).get("error_posicion_m")
             for r in validas]
     llegada = resumen_continuo(errs)
-    llegada["umbral_m"] = UMBRAL_LLEGADA_M
+    umbral = UMBRAL_LLEGADA_POR_BANCO.get(banco, UMBRAL_LLEGADA_M)
+    llegada["umbral_m"] = umbral
+    # El nombre de la clave es de cuando solo existia la simulacion; cuenta
+    # contra el umbral del banco del lote.
     llegada["por_encima_de_025"] = sum(1 for e in errs
-                                       if e is not None and e > UMBRAL_LLEGADA_M)
+                                       if e is not None and e > umbral)
 
     # --- RNF-01: constancia de z, con umbral ------------------------------
     # Una pareja por ROBOT y por mision, no una por mision: la afirmacion del
@@ -528,7 +548,8 @@ def formatear(inf):
     L.append("=" * 78)
 
     t = inf["exito"]
-    L.append("\nRF-23 · Tasa de exito  (§3.3: posicion <= 0,25 m + COMPLETADA "
+    umbral = f"{inf['llegada']['umbral_m']:.2f}".replace(".", ",")
+    L.append(f"\nRF-23 · Tasa de exito  (§3.3: posicion <= {umbral} m + COMPLETADA "
              "sin FALLIDA + relevo)")
     if t["n"]:
         L.append(f"  {t['exitos']}/{t['n']} = {t['tasa']:.1%}"
@@ -552,13 +573,22 @@ def formatear(inf):
     L.append(_linea_continua("t_respuesta", inf["respuesta"]))
 
     a = inf["asignacion"]
-    L.append("\nRF-22 · Tiempo de asignacion (§3.2.2: cota, no valor)")
-    L.append(f"  < {a['cota_s'] * 1000:.0f} ms en las {a['n']} misiones "
-             f"con marcas completas")
-    if a["por_encima_del_tick"]:
-        L.append(f"  POR ENCIMA DEL TICK: {', '.join(a['por_encima_del_tick'])}")
-    L.append("  El valor puntual se caracteriza en banco, no aqui "
-             "(banco_tiempo_asignacion.py).")
+    if a["cota_s"] is None:
+        L.append("\nRF-22 · Tiempo de asignacion (banco fisico: reloj de pared)")
+        if a["n"]:
+            L.append(f"  n={a['n']}   mediana={a['mediana'] * 1000:.1f} ms   "
+                     f"media={a['media'] * 1000:.1f} ms   "
+                     f"max={a['maximo'] * 1000:.1f} ms")
+        else:
+            L.append("  sin datos")
+    else:
+        L.append("\nRF-22 · Tiempo de asignacion (§3.2.2: cota, no valor)")
+        L.append(f"  < {a['cota_s'] * 1000:.0f} ms en las {a['n']} misiones "
+                 f"con marcas completas")
+        if a["por_encima_del_tick"]:
+            L.append(f"  POR ENCIMA DEL TICK: {', '.join(a['por_encima_del_tick'])}")
+        L.append("  El valor puntual se caracteriza en banco, no aqui "
+                 "(banco_tiempo_asignacion.py).")
 
     c = inf["continuidad"]
     b = c["binaria"]

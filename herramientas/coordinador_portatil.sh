@@ -6,6 +6,7 @@
 # USO (en el portatil, desde la raiz del repositorio)
 #     bash herramientas/coordinador_portatil.sh construir     # con internet; y tras cambiar coordinacion
 #     bash herramientas/coordinador_portatil.sh arrancar      # 1.º el coordinador
+#     bash herramientas/coordinador_portatil.sh comprobar     # lo que el portatil ve de los dos robots
 #     bash herramientas/coordinador_portatil.sh interfaz      # 2.º rosbridge y la pagina (puerto 8000)
 #     bash herramientas/coordinador_portatil.sh grabar G5_01  # 3.º antes de pedir la mision; Enter al terminar
 #     bash herramientas/coordinador_portatil.sh registro      # ultimas lineas del coordinador
@@ -86,6 +87,48 @@ arrancar() {
   docker logs coordinador 2>&1 | grep -q 'Coordinador listo' && verde "   coordinador listo" || { rojo "   el coordinador no arranco: bash $0 registro"; exit 1; }
 }
 
+comprobar() {
+  # Lo que el coordinador necesita de cada robot, buscado desde el contenedor:
+  # la accion de Nav2, el servicio de media vuelta y el estado con la pose en el
+  # mapa. Es la comprobacion que se hizo a mano el 2026-10-09 en el laboratorio.
+  # Ocupa un proceso ROS mientras dura (hasta 40 s): va ANTES de 'interfaz' y
+  # nunca con una mision en curso (ver la cabecera).
+  docker ps --format '{{.Names}}' | grep -qx coordinador || { rojo "el coordinador no esta corriendo: bash $0 arrancar"; exit 1; }
+  info "lo que el portatil ve de robot1 y robot2 (hasta 40 s)"
+  docker exec -i coordinador bash -c "$ENTORNO && python3 -" <<'PY'
+import sys, time
+import rclpy
+from rclpy.action import ActionClient
+from nav2_msgs.action import NavigateToPose
+from std_srvs.srv import Trigger
+from coordinacion_msgs.msg import EstadoRobot
+rclpy.init()
+n = rclpy.create_node('comprobar_topologia')
+robots = ('robot1', 'robot2')
+estado = {}
+for r in robots:
+    n.create_subscription(EstadoRobot, f'/{r}/estado', lambda m, r=r: estado.__setitem__(r, m), 10)
+nav = {r: ActionClient(n, NavigateToPose, f'/{r}/navigate_to_pose') for r in robots}
+mv = {r: n.create_client(Trigger, f'/{r}/media_vuelta') for r in robots}
+listo = lambda: len(estado) == 2 and all(nav[r].server_is_ready() and mv[r].service_is_ready() for r in robots)
+fin = time.monotonic() + 40
+while time.monotonic() < fin and not listo():
+    rclpy.spin_once(n, timeout_sec=0.2)
+for r in robots:
+    e = estado.get(r)
+    pose = (f'({e.pose.pose.position.x:.2f}, {e.pose.pose.position.y:.2f}) en {e.pose.header.frame_id}'
+            if e else 'SIN ESTADO')
+    print(f"   {r}: navigate_to_pose {'si' if nav[r].server_is_ready() else 'NO'}"
+          f" · media_vuelta {'si' if mv[r].service_is_ready() else 'NO'} · estado {pose}")
+ok = listo()
+n.destroy_node()
+rclpy.shutdown()
+sys.exit(0 if ok else 1)
+PY
+  if [ $? -eq 0 ]; then verde "   el coordinador ve los dos robots"
+  else rojo "   falta algo de un robot: su cadena o su agente no cruzan la red (PLAN_S27.md §2.2, pasos 4 y 5)"; exit 1; fi
+}
+
 interfaz() {
   parar_demonio
   info "rosbridge (puerto 9090) y la pagina (puerto 8000)"
@@ -145,6 +188,7 @@ parar() {
 case "${1:-}" in
   construir) construir ;;
   arrancar)  arrancar ;;
+  comprobar) comprobar ;;
   interfaz)  interfaz ;;
   grabar)    [ $# -eq 2 ] || { echo "uso: $0 grabar NOMBRE"; exit 2; }; grabar "$2" ;;
   registro)  registro "${2:-30}" ;;

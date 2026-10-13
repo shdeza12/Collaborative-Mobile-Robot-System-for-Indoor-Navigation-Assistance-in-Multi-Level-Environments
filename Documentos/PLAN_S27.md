@@ -72,11 +72,19 @@ Cierre: `prueba_componer_registro.py` y `prueba_analizar_campana.py` con comprob
 banco físico, y un registro de prueba que diga `piso3.yaml`, `piso4.yaml` y
 `puntos_interes_pisos34.yaml`.
 
+Estado del 13-oct: hecho. El escenario de cada robot sale del piso del punto al que lo mandó el
+coordinador. Con la grabación de prueba, el registro dice `piso3.world`, `piso3.yaml`,
+`puntos_interes_pisos34.yaml` y reloj `pared`, y el analizador escribe 0,50 m. Las dos pruebas
+suman 6 comprobaciones del banco físico.
+
 ### 1.3 · Comprobación de la topología desde el portátil
 
 `coordinador_portatil.sh comprobar`: desde el contenedor, busca `/robotN/navigate_to_pose`,
 `/robotN/media_vuelta` y `/robotN/estado` de los dos robots y escribe la pose de cada uno. Es lo que se
 hizo a mano el 9-oct. Ocupa un proceso ROS mientras corre, así que va antes de `interfaz`.
+
+Estado del 13-oct: hecho, y probado sin vehículos: tarda hasta 40 s, informa lo que falta y sale
+con error si falta algo.
 
 ### 1.4 · Baterías y material
 

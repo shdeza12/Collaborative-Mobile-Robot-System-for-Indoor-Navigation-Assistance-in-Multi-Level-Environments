@@ -911,6 +911,22 @@ def pruebas_del_vehiculo(esquema):
               reg["marcas"]["t_inicio_tramo2"] is not None
               and abs(reg["marcas"]["t_inicio_tramo2"] - 90.5) < 1e-6,
               f"-> {reg['marcas']['t_inicio_tramo2']}")
+        # 2026-10-13: la procedencia del banco fisico salia de la simulacion
+        # (mundo_definitivo_piso1, puntos_interes.yaml, reloj /clock).
+        esc = reg["procedencia"].get("escenario_por_robot", {})
+        check("cada robot lleva el mapa y el modelo de SU piso, no los de la simulacion",
+              {r: (e["mundo"], os.path.basename(e["mapa"])) for r, e in esc.items()}
+              == {"robot1": ("piso3.world", "piso3.yaml"),
+                  "robot2": ("piso4.world", "piso4.yaml")}, f"-> {esc}")
+        check("mundo y mapa sueltos son los del robot que inicia",
+              reg["procedencia"]["mundo"] == "piso3.world"
+              and reg["procedencia"]["mapa"].endswith("piso3.yaml"),
+              f"-> {reg['procedencia']['mundo']}, {reg['procedencia']['mapa']}")
+        check("el catalogo se anota con su nombre",
+              reg["procedencia"]["catalogo_puntos"] == "puntos_interes_pisos34.yaml",
+              f"-> {reg['procedencia']['catalogo_puntos']}")
+        check("el reloj del banco fisico es el de pared, no /clock",
+              reg["marcas"]["reloj"] == "pared", f"-> {reg['marcas']['reloj']}")
     finally:
         componer_registro.CATALOGO = None
         shutil.rmtree(tmp, ignore_errors=True)
@@ -936,6 +952,10 @@ def pruebas_de_bag(esquema):
               valida(reg, esquema), _por_que(reg, esquema))
         check("saca la condicion B del propio bag",
               reg["mision"]["condicion"] == "B")
+        check("en simulacion el reloj sigue siendo /clock y el catalogo el de los pisos 1 y 2",
+              reg["marcas"]["reloj"] == "/clock"
+              and reg["procedencia"]["catalogo_puntos"] == "puntos_interes.yaml",
+              f"-> {reg['marcas']['reloj']}, {reg['procedencia']['catalogo_puntos']}")
         check("t_inicio_tramo2 sale del odom del segundo robot",
               abs(reg["marcas"]["t_inicio_tramo2"] - 41.5) < 1e-6,
               f"-> {reg['marcas']['t_inicio_tramo2']}")

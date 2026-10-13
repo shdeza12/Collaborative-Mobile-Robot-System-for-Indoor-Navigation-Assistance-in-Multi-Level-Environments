@@ -335,6 +335,17 @@ def pruebas_de_asignacion():
           any("asignacion" in x.lower() for x in inf["alertas"]),
           f"-> {inf['alertas']}")
 
+    # 2026-10-13: en los vehiculos no hay /clock; el reloj es continuo.
+    fisicos = [reg(n=i + 1, banco="fisico", campana="RF27", t_solicitud=100.0,
+                   t_robot_activo=100.0 + 0.004 * (i + 1)) for i in range(5)]
+    inf = analizar(fisicos)
+    a = inf["asignacion"]
+    check("en el banco fisico la asignacion se reporta como valor, sin cota de /clock",
+          a["cota_s"] is None and cerca(a["mediana"], 0.012, 1e-6), f"-> {a}")
+    check("...y un valor > 0 no es una alerta en el banco fisico",
+          not any("asignacion" in x.lower() for x in inf["alertas"]),
+          f"-> {inf['alertas']}")
+
 
 # --------------------------------------------------------------------------
 # 8. RF-24: lo que el esquema 1.0.0 no permite medir
@@ -416,6 +427,15 @@ def pruebas_de_llegada():
     check("se cuenta cuantas caen por encima de los 0,25 m",
           inf["llegada"]["por_encima_de_025"] == 2,
           f"-> {inf['llegada']['por_encima_de_025']}")
+
+    # Acta §6.1: en los vehiculos el umbral es 0,5 m.
+    fisicos = [reg(n=i + 1, banco="fisico", campana="RF27", exito=e <= 0.5,
+                   error_m=e) for i, e in enumerate([0.06, 0.34, 0.45, 0.55])]
+    inf = analizar(fisicos)
+    check("en el banco fisico el umbral de llegada es 0,5 m y cuenta contra el",
+          cerca(inf["llegada"]["umbral_m"], 0.5)
+          and inf["llegada"]["por_encima_de_025"] == 1,
+          f"-> {inf['llegada']['umbral_m']}, {inf['llegada']['por_encima_de_025']}")
 
 
 # --------------------------------------------------------------------------

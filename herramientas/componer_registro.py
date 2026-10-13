@@ -561,6 +561,17 @@ def componer(ruta_bag, banco, campana, error_posicion_m=None, rtf=None,
     destino = next((m.destino_id for _, m in crudos if m.destino_id), "")
     condicion = _condicion(niveles.get(origen), niveles.get(destino), etapas)
 
+    # El piso de cada robot: el nivel del punto al que el coordinador lo mando.
+    # En el banco fisico de el sale su escenario (ver _escenario_fisico).
+    # Sin destino_actual, el del tramo: el primero va por el usuario en el piso
+    # de origen y el segundo lo lleva en el de destino.
+    nivel_de_robot = {}
+    for _, m in crudos:
+        punto = m.destino_actual.id if m.destino_actual.id in niveles else \
+            {TRAMO_1: origen, TRAMO_2: destino}.get(m.etapa, "")
+        if m.robot_activo and punto in niveles:
+            nivel_de_robot.setdefault(m.robot_activo, niveles[punto])
+
     # Dos vistas del mismo /odom: 'movimientos' es lo que decide las marcas y
     # 'poses' lo que va a la verdad de terreno y a la traza.
     movimientos, poses = {}, {}
@@ -573,6 +584,10 @@ def componer(ruta_bag, banco, campana, error_posicion_m=None, rtf=None,
                           _yaw_de(m.pose.pose.orientation)) for t, m in muestras]
 
     marcas = marcas_de(estados, movimientos, condicion)
+    if banco == "fisico":
+        # En el vehiculo no hay /clock: las marcas son la hora a la que el
+        # grabador recibio cada mensaje (leer_bag), un reloj de pared.
+        marcas["reloj"] = "pared"
     # 'is not None' y no truthiness: un t_inicio_tramo2 de 0,0 s es una marca
     # valida, y con 'if marcas[...]' contaria como que no hubo relevo.
     relevos = 1 if condicion == "B" and marcas["t_inicio_tramo2"] is not None else 0
@@ -639,7 +654,7 @@ def componer(ruta_bag, banco, campana, error_posicion_m=None, rtf=None,
             "semilla": semilla, "es_piloto": es_piloto,
         },
         "procedencia": _procedencia(ruta_bag, distro, mundo, mapa,
-                                    _robots_de(estados)),
+                                    _robots_de(estados), banco, nivel_de_robot),
         "solicitud": solicitud,
         "marcas": marcas,
         "verdad_de_terreno": _verdad(banco, error_posicion_m, pose_llegada,
@@ -787,7 +802,28 @@ def _git(*args):
         return ""
 
 
-def _procedencia(ruta_bag, distro=None, mundo=None, mapa=None, robots=()):
+def _escenario_fisico(nivel_de_robot):
+    """{robot: {mundo, mapa}} de una mision en los vehiculos (2026-10-13).
+
+    En el banco fisico no hay Gazebo ni pose_por_defecto: cada robot corre en
+    su piso con el mapa de ese piso (nav2_mapa_guardado.sh, MAPA=.../pisoN.yaml)
+    y el 'mundo' es el modelo del sitio, piso3.world o piso4.world, que sale del
+    mismo levantamiento que el mapa. Hasta este dia se derivaba con
+    _escenario_de() y el registro decia mundo_definitivo_piso1, el de la
+    simulacion. Como en _escenario_de(), un robot sin los dos archivos se deja
+    fuera antes que inventarle una escena.
+    """
+    mapas = os.path.join("Robot", "aws-deepracer", "deepracer_bringup", "maps")
+    escenario = {}
+    for robot, nivel in nivel_de_robot.items():
+        mundo, mapa = f"piso{nivel}.world", os.path.join(mapas, f"piso{nivel}.yaml")
+        if all(os.path.exists(os.path.join(_raiz(), r)) for r in (mundo, mapa)):
+            escenario[robot] = {"mundo": mundo, "mapa": mapa}
+    return escenario
+
+
+def _procedencia(ruta_bag, distro=None, mundo=None, mapa=None, robots=(),
+                 banco="simulacion", nivel_de_robot=None):
     """De donde salio esta medida. Sin esto no se puede reproducir en S26."""
     import hashlib
     with open(_catalogo(), "rb") as f:
@@ -806,8 +842,12 @@ def _procedencia(ruta_bag, distro=None, mundo=None, mapa=None, robots=()):
             f"jazzy. Sourcear ROS, o pasar --distro si se esta componiendo en "
             f"el PC un bag grabado en el carro.")
 
-    # La escena completa, un mundo y un mapa por robot. Ver _escenario_de().
-    escenario = _escenario_de(robots)
+    # La escena completa, un mundo y un mapa por robot. Ver _escenario_de() y,
+    # en los vehiculos, _escenario_fisico().
+    if banco == "fisico":
+        escenario = _escenario_fisico(nivel_de_robot or {})
+    else:
+        escenario = _escenario_de(robots)
 
     # 'mundo' y 'mapa' sueltos son los del robot que INICIA. Se quedan porque el
     # esquema los exige desde 1.0.0 y porque en condicion A -un solo robot- son
@@ -836,7 +876,7 @@ def _procedencia(ruta_bag, distro=None, mundo=None, mapa=None, robots=()):
         "mapa": _relativa(mapa or os.environ.get("TESIS_MAPA", "")
                           or primero.get("mapa", "")),
         **({"escenario_por_robot": escenario} if escenario else {}),
-        "catalogo_puntos": "puntos_interes.yaml",
+        "catalogo_puntos": os.path.basename(_catalogo()),
         # Las poses del catalogo se movieron tres veces en agosto. Un registro
         # que no lo fije no se puede comparar con otro: 'ETM1' puede no ser el
         # mismo punto.
