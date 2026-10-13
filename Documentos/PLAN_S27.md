@@ -263,7 +263,7 @@ La misión se anota en la hoja y su registro queda pendiente.
 | Evidencia del 8-oct: piso 3 con deepy (cinco corridas), primeras medias vueltas del agente (160° y 167°) e intento de G-5 con la saturación de las tarjetas | [`S26_piso3_deepy_y_saturacion.md`](Evidencia/S26_piso3_deepy_y_saturacion.md) | Hecha el 13-oct con los registros del portátil; las grabaciones de deepy se agregan el jueves |
 | Estado del 8-oct en `PLAN_S26.md` §3.4 | `PLAN_S26.md` | Hecho el 13-oct |
 | Videos del 7-oct | `S26_piso4_cadena_media_vuelta.md`, punto 4 | Los sube el equipo |
-| Documento final: capítulo 7 (IMU, media vuelta, coordinador en el portátil, aislamiento) y capítulo 8 (G-2 con el filtro, G-3, carga de las tarjetas) | `DocumentoFinal/capitulos/` | Pendiente; G-5 y G-6 después del viernes |
+| Documento final: capítulo 7 (IMU, media vuelta, coordinador en el portátil, aislamiento) y capítulo 8 (G-2 con el filtro, G-3, carga de las tarjetas) | `DocumentoFinal/capitulos/` | Hecho el 13-oct (`3edf3a3`), sin compilar; G-5 y G-6 después del viernes |
 | Matriz de requisitos: RF-11, RF-12 y RF-13 tienen el estado de agosto y septiembre; G-2, G-3 y la cadena de Nav2 en el vehículo pueden moverlos | `REQUISITOS.md` | Decisión del equipo; mueve el avance de OE2 |
 | Conclusiones y presentación (cronograma de S27) | `DocumentoFinal/capitulos/09-conclusiones.tex` | Después del corte C-3 |
 
