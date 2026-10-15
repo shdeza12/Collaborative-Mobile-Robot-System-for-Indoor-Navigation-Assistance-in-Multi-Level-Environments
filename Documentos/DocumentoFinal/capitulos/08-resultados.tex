@@ -177,12 +177,13 @@ Sobre las dos filas del 2 de octubre, en el piso 4, los directores declararon
 \textbf{G-2 alcanzada}. Es la compuerta que el proyecto llevaba desde septiembre
 señalando como su única ruta crítica.
 
-Las dos últimas filas son del 7 de octubre, ya con la IMU integrada (§3.2.7): el
+Las dos últimas filas son del 7 de octubre, ya con la IMU integrada (§\ref{sec:imu}): el
 avance lo estima el filtro, que lo toma de la misma odometría del láser. El
 segundo tramo mide 2,82~m, por debajo de los 5~m que pide el criterio de G-2, y
 se incluye como dato de la misma cadena.
 
 \subsection{La navegación y la precisión de llegada (G-3)}
+\label{sec:res-g3}
 
 La compuerta G-3 pide un recorrido de punto a punto con Nav2 y la llegada
 verificada con flexómetro, a 0,5~m o menos del destino, que es la tolerancia que
@@ -190,7 +191,7 @@ fijó el director para los vehículos reales.
 
 El 2 de octubre, en el piso 4, las dos llegadas medidas quedaron a 0,57~m y
 0,62~m, cortas. Nav2 daba entonces la meta por alcanzada a 1,0~m, y los dos
-vehículos se detuvieron al cruzar ese margen. Con la IMU integrada (§3.2.7) el
+vehículos se detuvieron al cruzar ese margen. Con la IMU integrada (§\ref{sec:imu}) el
 margen bajó a 0,5~m. El 7 de octubre uno de los vehículos recorrió en el piso 4
 tres tramos encadenados, sin que nadie lo tocara entre uno y otro, y después
 regresó a la salida (tabla~\ref{tab:g3} y figura~\ref{fig:cadena}).
@@ -233,7 +234,7 @@ tramo se forzó a la localización a recalcular su pose, y esta se desplazó ent
 la llegada que vale es la medida con flexómetro.
 
 Lo que condiciona la precisión de llegada sigue siendo la banda muerta de
-tracción (§3.2.6): el vehículo se aproxima a la meta a 0,40~m/s y no tiene
+tracción (§\ref{sec:banda-muerta}): el vehículo se aproxima a la meta a 0,40~m/s y no tiene
 régimen de aproximación fina.
 
 \subsection{El sistema completo con los dos vehículos (G-5 y G-6)}
