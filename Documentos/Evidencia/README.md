@@ -373,6 +373,65 @@ que el propio documento sostiene:
 - [`S26_red_5ghz_regulatorio.md`](S26_red_5ghz_regulatorio.md) — La WiFi de los dos vehículos no podía transmitir en 5 GHz (5 de octubre)
 - [`S26_simulacion_tras_actualizacion_ros.md`](S26_simulacion_tras_actualizacion_ros.md) — La simulación de dos robots después de la actualización de ROS del 6 de octubre
 
+**Semana 27**
+
+- [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) — Capturas del proyecto, por fase (recuperadas el 15 de octubre)
+
+---
+
+## Capturas recuperadas el 15 de octubre de 2026
+
+Capturas de pantalla del portátil, de abril a octubre, que no habían entrado al repositorio. El
+catálogo [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) las muestra por fase, con el lugar del
+documento final donde servirían.
+
+| Archivo | Qué muestra | Informe que la cita |
+|---|---|---|
+| `S10_donkeycar_simulador.jpg` | Simulador de DonkeyCar con su interfaz web de conducción | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S11_urdf_donkeycar_rviz.png` | Primer modelo URDF del DonkeyCar en RViz | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S11_arbol_tf_donkeycar.png` | Árbol de transformaciones (view_frames) del modelo del DonkeyCar | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S11_urdf_donkeycar_ruedas.png` | Modelo del DonkeyCar con ruedas y dirección en RViz | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S11_f1tenth_gym_rviz.png` | Simulador F1TENTH (gym_ros) en RViz, evaluado como alternativa | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S11_cronograma_semestre1.png` | Cronograma por fases del primer semestre (febrero a junio) | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S12_sim_car_gazebo.png` | Vehículo de prueba en un entorno de pasillos en Gazebo | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S13_building_editor_pasillo.png` | Editor de edificios de Gazebo con el primer muro del pasillo | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S13_pasillo_usta_lidar.png` | Modelo del pasillo USTA con el barrido del LiDAR del vehículo | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S13_pasillo_usta_deepracer.png` | DeepRacer en el pasillo USTA simulado, con su LiDAR | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S13_pasillo_grande_lidar.jpg` | Pasillo grande (15 x 5 m) con texturas y el LiDAR del vehículo | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S13_primer_piso_gazebo.jpg` | Primer piso con muros de ladrillo y el vehículo en Gazebo | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S15_carla_control_manual.jpg` | Simulador CARLA con control manual, evaluado como alternativa | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S15_carla_trayectoria.png` | Trayectoria de un vehículo en CARLA trazada desde Python | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S16_portatil_especificaciones.png` | Características del portátil de desarrollo (Ubuntu 22.04.5, Ryzen 5 PRO 5650U, 16 GB) | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S17_gazebo_primer_piso_v2.png` | Mundo primer_piso_v2 en Gazebo para el simulador multi-robot | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S17_lsusb_lidar_cp210x.png` | lsusb con el puente CP210x del LiDAR conectado | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S17_raspberry_pi_imager.png` | Grabación de Ubuntu Server 24.04 con Raspberry Pi Imager, antes de saber que la tarjeta es Intel | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S18_rviz_nav2_mapa.png` | RViz con el mapa y Nav2 en la simulación | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S18_rviz_costmap.jpg` | Mapa de costos de Nav2 alrededor del vehículo simulado | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S18_rviz_robot1_espacio_nombres.png` | robot1 en RViz con sus marcos con prefijo y su mapa de costos | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S18_gazebo_dos_robots.png` | Dos vehículos en el mismo mundo de Gazebo | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S18_navigate_to_pose_dos_robots.png` | Metas NavigateToPose a robot1 y robot2 terminadas en SUCCEEDED | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S18_cmd_vel_odom_dos_robots.png` | cmd_vel y odom de robot1 y robot2 por separado | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S18_gazebo_pasillo_lidar.png` | Pasillo con muros de ladrillo y el LiDAR del vehículo | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S19_rviz_gazebo_maniobra.jpg` | Maniobra en RViz y Gazebo a la vez | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S19_servo_ctrl_amss_ez9n.png` | Órdenes de servo publicadas en amss-ez9n desde ROS 2 | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S19_barrido_throttle_amss_ez9n.png` | Barrido de tracción en amss-ez9n para encontrar el umbral de arranque | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S19_ufw_multicast_portatil_carro.png` | Reglas de ufw y prueba de multidifusión entre el portátil y el vehículo | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S19_ros2_portatil_carro.png` | Mensajes de ROS 2 entre el portátil y el vehículo en los dos sentidos | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S19_mundo_definitivo_gazebo.png` | Vista superior del mundo de dos pisos en Gazebo | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S19_gazebo_mundo_por_nivel.png` | Un mundo de Gazebo por nivel, uno para cada robot | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S20_gazebo_robot_pasillo.png` | Vehículo en el pasillo simulado con su LiDAR | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S20_cargador_bateria.png` | Cargador de balance de la batería de tracción del vehículo | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S20_mision_relevo_simulacion.png` | Misión con relevo en los dos mundos, terminada con exito: true y un relevo | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S22_intervalo_wilson.png` | Cálculo del intervalo de Wilson de la tasa de éxito (26 de 30) | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S22_cronograma_gantt.png` | Cronograma en Gantt de los dos semestres con el estado de cada actividad | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S22_hri_mision_sigueme.png` | Interfaz web durante una misión: tramo 1, «Sígueme» | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S22_hri_confirmacion_piso.png` | Interfaz web pidiendo confirmar el cambio de piso («¿Ya subió?») | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S22_hri_camino_bloqueado.png` | Interfaz web con una misión fallida y su motivo («Camino bloqueado») | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S23_gazebo_pasillo_superior.png` | Vista superior del pasillo simulado con el LiDAR | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S24_rviz_mapa_cuarto.png` | Mapa del cuarto construido por el vehículo, en RViz | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S25_fiberhome_red_deepracer.png` | Red DEEPRACER-PRO configurada en el punto de acceso del piso | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+| `S25_fiberhome_5ghz.png` | Ajustes de 5 GHz del punto de acceso | [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) |
+
 ---
 
 ## Lo que no se puede rastrear
