@@ -3,8 +3,9 @@
 Última semana de toma de datos. El corte C-3 del viernes 16
 ([`ACTA_GO_NOGO.md`](ACTA_GO_NOGO.md)) pide G-5, una misión con relevo entre los dos vehículos, y
 G-6, las repeticiones de RF-27. Después del viernes no se toman más datos: se reporta lo corrido con
-su n real. El campo es el jueves 15 y el viernes 16 (decisión del equipo, 13-oct). El resto de la
-semana es preparación y documentación.
+su n real. El campo estaba previsto el jueves 15 y el viernes 16 (decisión del equipo, 13-oct). El
+15-oct el equipo aplazó el jueves: G-5, G-6 y el cierre de datos se hacen el viernes 16, en un solo
+día. El resto de la semana es preparación y documentación.
 
 Desde la semana 26 la cadena completa con los dos vehículos funciona en el laboratorio, con el
 coordinador en el portátil
@@ -18,8 +19,8 @@ está alcanzada. Las misiones de G-6 están sorteadas
 |---|---|---|---|
 | Mar 13 | Sorteo de G-6 (hecho). Este plan. Arreglos de `componer_registro.py` y `analizar_campana.py` para el banco físico (§1.2). Subcomando `comprobar` (§1.3) | no | Herramientas listas y probadas en el portátil |
 | Mié 14 | Evidencia del 8-oct (§5). Documento final, capítulos 7 y 8 (§5). Revisión de la matriz de requisitos (§5, decisión del equipo). Baterías cargadas (§1.4) | no | Todo cargado y la documentación de la semana 26 cerrada |
-| Jue 15 | Marcas de los destinos (§2.1), arranque (§2.2), G-5 (§2.3), G-6 misiones 1 a 5 (§2.4), copiar los datos de deepy del 8-oct (§2.5) | los dos | G-5 con registro; las misiones que se alcancen, con registro |
-| Vie 16 | Arranque (§2.2), G-6 desde donde se quedó el jueves (§3.1). Cierre de datos (§3.2) y corte semanal (§3.3) | los dos | Datos cerrados; acta, `ESTADO.md` y análisis al día |
+| Jue 15 | Campo aplazado. Revisión de la matriz de OE2 (§5), capturas al índice de evidencias (§5) y este plan ajustado a un día. Baterías cargadas en la noche (§1.4) | no | OE2 cerrado en la matriz; todo cargado |
+| Vie 16 | Marcas de los destinos (§2.1), arranque (§2.2), G-5 (§2.3), G-6 desde la misión 1 (§2.4), datos de deepy del 8-oct (§2.5), cierre de datos (§3.2). Corte semanal en la noche (§3.3) | los dos | G-5 y G-6 con registro y los datos cerrados; acta, `ESTADO.md` y análisis al día |
 
 Reglas de toda la semana, además de las de [`PLAN_S26.md`](PLAN_S26.md) §0:
 
@@ -34,7 +35,7 @@ Reglas de toda la semana, además de las de [`PLAN_S26.md`](PLAN_S26.md) §0:
 - En el portátil, como máximo cuatro procesos ROS durante las misiones: coordinador, `rosbridge`,
   `rosapi` y grabador. Nada de `ros2 topic` mientras una misión corre.
 
-## 1. Antes del jueves
+## 1. Antes del campo
 
 ### 1.1 · Sorteo de las misiones de G-6 (hecho el 13-oct)
 
@@ -105,7 +106,7 @@ Arreglo en `coordinador.py`: con `condicion:=hardware`, tras `SUCCEEDED` espera 
 recibida 1,5 s después (`ASENTAR_LLEGADA_S`) y entonces mide. `prueba_coordinador_vehiculo.py` tiene
 un escenario con inercia (`SUCCEEDED` a 0,65 m y 0,45 m más rodando): falla con el código anterior y
 pasa con el nuevo, 16 de 16, en Humble y en el contenedor con Jazzy. La imagen del contenedor está
-reconstruida. El jueves, el paso 3 del arranque copia el coordinador nuevo a los vehículos.
+reconstruida. El viernes, el paso 3 del arranque copia el coordinador nuevo a los vehículos.
 
 Queda abierto: la llegada al 402 se habría rechazado igual (0,53 m según la pose del mapa, 0,45 m
 con cinta). Es el error de AMCL, no el momento de medir.
@@ -122,12 +123,12 @@ pedida por el coordinador es la de deepy en el Salón 302, dentro de G-5.
 
 ### 1.4 · Baterías y material
 
-- [ ] Batería de la tarjeta y de tracción de los dos vehículos, cargadas el miércoles en la noche.
+- [ ] Batería de la tarjeta y de tracción de los dos vehículos, cargadas el jueves en la noche.
 - [ ] Flexómetro, cinta de enmascarar y marcador.
 - [ ] Dos teléfonos con la grabación de pantalla probada, uno por piso ([`HOJA_CAPTURA_S26.md`](HOJA_CAPTURA_S26.md), fila de G-5).
 - [ ] La hoja de la campaña impresa (§4).
 
-## 2. Jueves 15
+## 2. Viernes 16: campo
 
 Reparto propuesto, que confirma el equipo: Santiago en el piso 3 con el portátil y Jonny en el piso 4.
 El usuario de cada misión es la persona del piso de origen. Pide la misión desde el teléfono, sigue al
@@ -183,12 +184,15 @@ La misión fija de [`PLAN_S26.md`](PLAN_S26.md) §5.1, variante A.
 Cada misión repite los pasos 1 a 5 de G-5, con el nombre `G6_NN` y el origen y el destino del
 listado (§1.1), sin reubicar los vehículos. Entre una misión y la siguiente:
 
-1. Anotar en la hoja la medida, la duración que muestra la página y cualquier incidencia.
-2. Revisar la batería de los dos vehículos. Con menos de un tercio, parar (§2.6) y seguir el viernes
-   desde la misión siguiente.
+1. Anotar en la hoja la medida, la duración que muestra la página y cualquier incidencia. Entre las
+   incidencias van las personas que pasaron por el pasillo durante la misión: RNF-03 las registra
+   como observación cualitativa.
+2. Revisar la batería de los dos vehículos. Con menos de un tercio, parar (§2.6), cargar y reanudar
+   el mismo día desde la misión siguiente (§3.1).
 
-El jueves se apunta a las misiones 1 a 5. Si se alcanzan, se sigue con las demás mientras haya
-batería y tiempo.
+G-6 necesita al menos cinco misiones con registro (acta §4, decisión D1). Se corren en el orden del
+listado, hasta la décima, mientras haya batería y tiempo. Una misión que falla cuenta en el n igual
+que una que llega: se registra con su causa y se sigue con la siguiente.
 
 ### 2.5 · Datos del 8-oct de deepy
 
@@ -205,17 +209,17 @@ Cierre: el CSV y las grabaciones `campana_p3d_01` a `05` y `mv_p3d_04`, `04b` y 
 2. `NS=robot1 CARRO=192.168.0.102 bash herramientas/nav2_mapa_guardado.sh --parar`, y lo mismo con
    `robot2` y `192.168.0.104`.
 3. Los agentes, en los dos (`.102` y `.104`): `ssh deepracer@192.168.0.102 "sudo -n pkill -f '[c]oordinacion/agente'"`.
-4. `mkdir -p ~/tesis_evidencia/campo_2026-10-15` y copiar los registros de carga de los dos:
-   `scp 'deepracer@192.168.0.102:carga_*.csv' ~/tesis_evidencia/campo_2026-10-15/` (y `.104`).
+4. `mkdir -p ~/tesis_evidencia/campo_2026-10-16` y copiar los registros de carga de los dos:
+   `scp 'deepracer@192.168.0.102:carga_*.csv' ~/tesis_evidencia/campo_2026-10-16/` (y `.104`).
 5. Marcar en el piso la posición y el rumbo de cada vehículo antes de recogerlo (§3.1).
 
-## 3. Viernes 16
+## 3. Viernes 16: reanudar y cerrar
 
-### 3.1 · Misiones restantes
+### 3.1 · Reanudar después de cargar las baterías
 
-Arranque como el jueves (§2.2), con cada vehículo en el destino donde terminó el jueves y con el rumbo
-con que llegó. El jueves se marca su posición antes de recogerlo, y el viernes se pone en esa marca.
-La pose inicial del paso 4 es la de ese destino en el catálogo (§2.1). El rumbo es `POSE_YAW=3.1416`
+Solo si hubo que parar por batería (§2.4). Arranque como en el §2.2, con cada vehículo en el destino
+donde terminó y con el rumbo con que llegó: antes de recogerlo se marca su posición (§2.6, paso 5) y
+después se pone en esa marca. La pose inicial del paso 4 es la de ese destino en el catálogo (§2.1). El rumbo es `POSE_YAW=3.1416`
 si llegó yendo hacia el norte y `POSE_YAW=0.0` si llegó yendo hacia el sur. Se sigue el listado desde la misión
 siguiente a la última corrida.
 
@@ -260,11 +264,12 @@ La misión se anota en la hoja y su registro queda pendiente.
 
 | Qué | Dónde | Estado |
 |---|---|---|
-| Evidencia del 8-oct: piso 3 con deepy (cinco corridas), primeras medias vueltas del agente (160° y 167°) e intento de G-5 con la saturación de las tarjetas | [`S26_piso3_deepy_y_saturacion.md`](Evidencia/S26_piso3_deepy_y_saturacion.md) | Hecha el 13-oct con los registros del portátil; las grabaciones de deepy se agregan el jueves |
+| Evidencia del 8-oct: piso 3 con deepy (cinco corridas), primeras medias vueltas del agente (160° y 167°) e intento de G-5 con la saturación de las tarjetas | [`S26_piso3_deepy_y_saturacion.md`](Evidencia/S26_piso3_deepy_y_saturacion.md) | Hecha el 13-oct con los registros del portátil; las grabaciones de deepy se agregan el viernes |
 | Estado del 8-oct en `PLAN_S26.md` §3.4 | `PLAN_S26.md` | Hecho el 13-oct |
 | Videos del 7-oct | `S26_piso4_cadena_media_vuelta.md`, punto 4 | Los sube el equipo |
 | Documento final: capítulo 7 (IMU, media vuelta, coordinador en el portátil, aislamiento) y capítulo 8 (G-2 con el filtro, G-3, carga de las tarjetas) | `DocumentoFinal/capitulos/` | Hecho el 13-oct (`3edf3a3`), sin compilar; G-5 y G-6 después del viernes |
-| Matriz de requisitos: RF-11, RF-12 y RF-13 tienen el estado de agosto y septiembre; G-2, G-3 y la cadena de Nav2 en el vehículo pueden moverlos | `REQUISITOS.md` | Decisión del equipo; mueve el avance de OE2 |
+| Matriz de requisitos: RF-11 a RF-14 y RF-16 con la evidencia de campo de G-2, G-3 y del laboratorio del 9-oct | [`REQUISITOS.md`](REQUISITOS.md), revisión del 15 de octubre en el §3 | Hecha el 15-oct: los cinco verificados y OE2 en 100 %, con dos decisiones del equipo (RF-12 y RF-14) |
+| Capturas de las semanas 10 a 25, con su uso en el documento final | [`CAPTURAS_POR_FASE.md`](Evidencia/CAPTURAS_POR_FASE.md) | Hecho el 15-oct (`766186d`) |
 | Conclusiones y presentación (cronograma de S27) | `DocumentoFinal/capitulos/09-conclusiones.tex` | Después del corte C-3 |
 
 ## 6. Riesgos y salidas
@@ -275,5 +280,6 @@ La misión se anota en la hoja y su registro queda pendiente.
 | Vehículo atascado o cerca del vano de la escalera | La persona junto al vehículo lo ve | Cancelar la misión desde la página: el vehículo vuelve a la escalera (RF-29). Anotar la causa |
 | El LiDAR deja de publicar | `CADENA LISTA` no llega o el paso 1 del guion falla | `sudo systemctl restart deepracer-core` en el vehículo, esperar 30 s y relanzar su cadena |
 | La página pierde la conexión | Se queda en «conectando» | Recargar; si sigue, `bash herramientas/coordinador_portatil.sh interfaz` |
-| La batería no alcanza | Menos de un tercio entre misiones | Parar (§2.6) y seguir el viernes |
-| No se alcanzan las diez misiones | Viernes en la tarde | Se reporta el n real (acta, C-3) |
+| La batería no alcanza | Menos de un tercio entre misiones | Parar (§2.6), cargar y reanudar el mismo día (§3.1) |
+| G-5 no completa | La misión 302 → 402 falla | Se registra con su causa y se sigue con G-6, sin repetirla. El criterio de G-5 en el acta (§4) es una misión con relevo de extremo a extremo sobre los dos vehículos, con su registro compuesto: lo cumple también una misión de G-6 que complete |
+| No se alcanzan las diez misiones | Viernes en la tarde | Se reporta el n real (acta, C-3). Con menos de cinco, G-6 queda no alcanzada |

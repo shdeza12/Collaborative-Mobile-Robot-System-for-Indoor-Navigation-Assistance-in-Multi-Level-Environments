@@ -5,46 +5,49 @@
 \chapter*{Conclusiones}
 \addcontentsline{toc}{chapter}{CONCLUSIONES}
 
-\begin{notaavance}[conclusiones parciales: dos de los cuatro objetivos siguen
-abiertos]
-Estas conclusiones se emiten el \textbf{5 de octubre de 2026}, con el proyecto
-todavía en curso, y por eso \textbf{no están todas}. Se escriben solo las que
-descansan sobre algo cerrado:
+\begin{notaavance}[conclusiones parciales: uno de los cuatro objetivos sigue
+abierto]
+Estas conclusiones se actualizaron el \textbf{15 de octubre de 2026}, con el
+proyecto todavía en curso. Se escriben solo las que descansan sobre algo
+cerrado:
 
 \begin{itemize}[leftmargin=*,nosep]
-  \item \textbf{OE1} y \textbf{OE3} están verificados, así que sus
-    conclusiones son definitivas.
-  \item \textbf{OE2} y \textbf{OE4} dependen de la campaña física. Una parte
-    de ella ya cerró: la compuerta G-2, la odometría, quedó alcanzada en el acta
-    del 5 de octubre y se concluye. Lo que falta es la precisión de llegada
-    (G-3), que cierra el \textbf{16 de octubre}.
+  \item \textbf{OE1}, \textbf{OE2} y \textbf{OE3} están verificados, así que sus
+    conclusiones son definitivas. OE2 cerró el 15 de octubre, al revisar sus
+    seis requisitos contra la evidencia de las compuertas G-2 y G-3.
+  \item \textbf{OE4} depende de la campaña física con los dos vehículos (G-5 y
+    G-6), que se corre el \textbf{16 de octubre}. Después de ese día el acta de
+    directores no admite más datos.
   \item El \textbf{objetivo general} se enuncia, porque descansa en la campaña
-    de simulación, que ya cerró. Lo que falta no es el esquema sino su
-    verificación sobre hardware.
+    de simulación, que ya cerró, y en la navegación de cada vehículo, que ya se
+    verificó. Falta ejecutar el relevo con los dos vehículos reales.
 \end{itemize}
 \end{notaavance}
 
 \textbf{Sobre OE1, la arquitectura funcional.} El objetivo se cumplió. El sistema
-tiene un contrato de interfaces escrito, treinta y cuatro requisitos numerados con
+tiene un contrato de interfaces escrito, treinta y seis requisitos numerados con
 su prueba, y una capa de coordinación que ejecuta el relevo entre niveles. Escribir el
 planificador como función pura, sin depender del middleware, resultó más valioso
 de lo previsto. Permite verificar 930 combinaciones de origen y destino en
 milisegundos. Y encontró defectos que una corrida en el simulador no habría
 delatado, como planes que mandaban al mismo robot dos veces a la misma pose.
 
-\textbf{Sobre OE2, la plataforma robótica. Cumplido en su mitad medida;
-abierto en la otra.} Los dos vehículos están integrados y Nav2 quedó
+\textbf{Sobre OE2, la plataforma robótica.} El objetivo se cumplió. Los dos vehículos están integrados y Nav2 quedó
 reconfigurado para cinemática tipo automóvil, con el planificador, el controlador
 y el árbol de comportamiento sustituidos por los que esa cinemática admite
 (§3.2). La \textbf{odometría cumple su criterio}: entre $-4{,}6$~\% y
 $+3{,}3$~\% sobre recorridos de 6,68 y 14,57~m, con lo que los directores
 declararon alcanzada la compuerta G-2 el 5 de octubre. Era la única ruta crítica
-que el proyecto se reconocía desde septiembre.
+que el proyecto se reconocía desde septiembre. La navegación de un vehículo con
+la llegada verificada (G-3) se alcanzó el 7 de octubre: en una cadena de tres
+tramos sin intervención, las llegadas medidas con cinta quedaron entre 0,06 y
+0,45~m de la meta, dentro de la tolerancia de 0,5~m (§4.2.2). Con esa evidencia,
+los seis requisitos del objetivo quedaron verificados sobre los vehículos.
 
-Queda abierta la \textbf{precisión de llegada} (G-3), que no se alcanzó en el
-corte C-1. Lo que ya se sabe de ella no es un resultado sino un mecanismo, y está
-medido: la banda muerta de tracción del vehículo (§3.2.6). El juicio sobre esa
-mitad del objetivo se emite al cerrar la toma de datos, el 16 de octubre.
+El límite que queda es la banda muerta de tracción (§3.2.6). El vehículo no
+avanza por debajo de 0,40~m/s y no tiene régimen de aproximación fina, y por eso
+la tolerancia de llegada sobre hardware es de 0,5~m y no de 0,25~m, como en
+simulación.
 
 \textbf{Sobre OE3, la interfaz humano-robot.} El objetivo se cumplió. La interfaz
 funciona desde el navegador de un teléfono, sin instalación y sin salida a
@@ -58,19 +61,18 @@ acción rechazaba las solicitudes en silencio.
 hardware.} La campaña de treinta misiones sorteadas dio veredicto válido con cero
 descartes, y permite afirmar que \textbf{la tasa de éxito supera el 70~\%} con
 95~\% de confianza. Esa mitad del objetivo está cerrada y sus cifras no van a
-cambiar. Sobre hardware, la medición de la odometría también cerró, con la
-compuerta G-2 alcanzada. Lo que sigue tomando datos hasta el 16 de octubre es la
-precisión de llegada, y se concluye entonces (§4.2.2).
+cambiar. Sobre hardware ya cerraron la odometría (G-2) y la navegación de un
+vehículo con la llegada verificada (G-3). Falta la campaña física con los dos
+vehículos, que se corre el 16 de octubre y se concluye entonces (§4.2.3).
 
 \textbf{Sobre el objetivo general.} El esquema de relevo \textbf{es viable}. Dos
 robots dedicados cada uno a un nivel pueden repartirse el guiado de una persona
 que cambia de piso. Ninguno atraviesa la zona de transición vertical, y el
 edificio no se modifica. Eso quedó demostrado en simulación, con una campaña
-medida y con veredicto válido. \textbf{Lo que queda abierto no es el esquema sino
-la precisión con que los vehículos reales lo ejecutan.} La pieza que durante
-meses hizo dudar de que fuera ejecutable sobre hardware —la odometría— dejó de
-estar en duda el 5 de octubre. El esquema de relevo, en cambio, ya no está a
-prueba.
+medida y con veredicto válido. Sobre los vehículos reales están verificadas la
+odometría y la navegación de cada uno, que durante meses hicieron dudar de que el
+esquema fuera ejecutable sobre hardware. Falta ejecutar el relevo con los dos
+vehículos, que es la campaña del 16 de octubre.
 
 \textbf{Una conclusión de método, que el trabajo defiende con el mismo peso.} La
 parte más costosa del proyecto no fue construir el sistema sino averiguar qué

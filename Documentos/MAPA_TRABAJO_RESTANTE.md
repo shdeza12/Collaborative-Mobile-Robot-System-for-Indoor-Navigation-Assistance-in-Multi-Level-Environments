@@ -21,6 +21,11 @@ un bloque tachado con razón vale más que un bloque borrado.
 
 ## 0. Lo que queda de verdad, al viernes 2026-09-25
 
+> **Al 2026-10-15.** De los seis requisitos abiertos del §2.1, cinco quedaron verificados con la
+> evidencia de campo: RF-11 a RF-14 y RF-16 (revisión del 15 de octubre en el §3 de
+> [`REQUISITOS.md`](REQUISITOS.md)). Queda RF-27, la compuerta G-6, que se corre el viernes 16 con
+> [`PLAN_S27.md`](PLAN_S27.md). Lo que sigue se conserva como estaba el 25-sep.
+
 Esta sección va encima de todo porque **el §1 dejó de ser cierto el 24-sep**: la ruta crítica que
 nombra —publicar `odom → base_link` en el vehículo— está hecha y medida, y esa misma noche Nav2
 navegó el carro. Lo que sigue es lo que falta, con lo que lo cierra y de qué depende. El resto del
