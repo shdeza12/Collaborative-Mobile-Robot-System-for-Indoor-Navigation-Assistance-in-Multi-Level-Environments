@@ -34,7 +34,7 @@ con ella.
 
 Los resultados llegan de dos campañas distintas. La primera, en simulación, con
 treinta misiones sorteadas. La segunda, sobre los vehículos reales en los
-pasillos del edificio. Se reportan por separado porque miden cosas distintas: la
+pasillos del edificio. Se reportan por separado porque miden aspectos distintos: la
 de simulación mide el sistema completo con relevo, la de hardware mide hasta
 dónde llega la plataforma física.
 
@@ -47,9 +47,10 @@ válida}, con \textbf{cero descartes} contra un techo admitido del 20~\%.
 
 \subsection{Tasa de éxito (RF-23)}
 
-Una misión es exitosa si cumple dos cosas. Que la pose final quede a 0,25~m o
-menos del destino, medida contra la odometría y no contra el resultado de Nav2.
-Y que la misión llegue a completarse sin pasar por fallo.
+Una misión es exitosa si cumple dos condiciones. La primera, que la pose final
+quede a 0,25~m o menos del destino, medida contra la odometría y no contra el
+resultado de Nav2. La segunda, que la misión llegue a completarse sin pasar por
+fallo.
 
 \begin{table}[H]
   \centering\small
@@ -229,7 +230,7 @@ con dos medias vueltas entre ellos, y los cinco terminaron con éxito y sin
 recuperaciones. Esas llegadas no se midieron con flexómetro. Al terminar cada
 tramo se forzó a la localización a recalcular su pose, y esta se desplazó entre
 0,61 y 0,86~m. La pose que publica al detenerse el vehículo va atrasada, y por eso
-la llegada que vale es la medida con cinta.
+la llegada que vale es la medida con flexómetro.
 
 Lo que condiciona la precisión de llegada sigue siendo la banda muerta de
 tracción (§3.2.6): el vehículo se aproxima a la meta a 0,40~m/s y no tiene
@@ -269,7 +270,8 @@ Un criterio que no puede dar resultado negativo no aporta evidencia, por muchas
 veces que se verifique. La corrección no fue inventar una ruta de fallo. Eso habría sido instrumentar el
 experimento para que pareciera más informativo. Lo que se hizo fue
 \textbf{declarar la continuidad como invariante estructural del diseño} y apoyar
-la afirmación en una magnitud que sí varía: el hueco temporal del relevo. En las
+la afirmación en una magnitud que sí varía: el intervalo de tiempo del relevo,
+entre el final del tramo de un vehículo y el inicio del tramo del otro. En las
 quince misiones entre niveles tuvo mediana de 0,1~s y máximo de 0,2~s.
 
 \subsection{El intervalo de confianza es ancho por diseño}

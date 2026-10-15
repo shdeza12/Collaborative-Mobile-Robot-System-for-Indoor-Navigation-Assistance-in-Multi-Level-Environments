@@ -66,7 +66,7 @@ hay que ejecutar. No importa el middleware ni mantiene estado.
 
 La razón es de verificabilidad. Si el relevo viviera dentro del nodo, mezclado
 con clientes de acción, la única forma de comprobarlo sería levantar dos
-simuladores y mirar si el carro llega. Eso es lento y frágil. Como función pura
+simuladores y observar si el vehículo llega. Eso es lento y frágil. Como función pura
 se agota en milisegundos: \textbf{la prueba recorre 930 combinaciones de
 origen-destino y verifica cada plan, sin simulador}.
 
@@ -186,6 +186,7 @@ de perfil en 25~m, uno cada tres metros. Con la misma odometría y sin tocar un
 parámetro, el error cayó a menos del 5~\%.
 
 \subsection{Los mapas, derivados de medidas y no de SLAM}
+\label{sec:mapas}
 
 El proyecto intentó durante semanas construir el mapa con SLAM y no lo consiguió
 en ningún pasillo, por la misma razón del apartado anterior. La vía que
@@ -218,6 +219,7 @@ avance.
 \end{figure}
 
 \subsection{La banda muerta de tracción, y lo que obliga a configurar}
+\label{sec:banda-muerta}
 
 Al integrar la cadena de tracción apareció una característica de la plataforma
 que condiciona toda la aproximación al destino. \textbf{El vehículo no se mueve
@@ -269,6 +271,7 @@ la meta por alcanzada, y con ese margen se alcanzó la compuerta de navegación
 (§4.2.2).
 
 \subsection{Los dos vehículos en la misma red}
+\label{sec:dos-vehiculos}
 
 Con los dos vehículos encendidos aparecieron dos problemas que con uno solo no
 existían. El primero era de nombres. Los tópicos del software del fabricante no
@@ -308,6 +311,7 @@ un segundo después, ya quieto, a entre 0,09 y 0,53~m. Por eso el coordinador
 espera 1,5~s antes de medir.
 
 \subsection{La media vuelta en varios tiempos}
+\label{sec:media-vuelta}
 
 Entre misiones el vehículo no vuelve a su punto de partida: cada misión empieza
 donde terminó la anterior, por acuerdo con los directores. Con frecuencia el
@@ -379,6 +383,7 @@ en curso regresa a su escalera antes de que la misión cierre.
 
 % ---------------------------------------------------------------------
 \section{Protocolo experimental (OE4)}
+\label{sec:protocolo}
 
 El protocolo se escribió \textbf{antes} de instrumentar el sistema, y esa
 secuencia es deliberada. Fija las cuatro métricas con definición operativa, el
