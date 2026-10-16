@@ -4,118 +4,111 @@
 %  S24_peldano2 / S24_nav2_navegacion / S25_pisos34_campo /
 %  S26_piso4_cadena_media_vuelta / S26_piso3_deepy_y_saturacion.
 %
-%  Las tres cosas que hay que escribir con cuidado van en §4.4:
-%   - R14: la continuidad es un invariante, no un resultado experimental
-%   - El intervalo de Wilson: «supera el 70 %», no «es del 86,7 %»
-%   - R15: la campaña corrió con un mapa que leía libre lo desconocido
+%  2026-10-15: escrito para el lector de la tesis, sin códigos del
+%  repositorio (compuertas, requisitos, condiciones A/B), sin «§» y sin
+%  fechas de bitácora. Las tres cosas que hay que escribir con cuidado van
+%  en la sección de limitaciones: la continuidad es un invariante; el
+%  intervalo de Wilson sostiene «supera el 70 %», no «es del 86,7 %»; y la
+%  campaña corrió con un mapa que leía libre lo desconocido.
 % =====================================================================
 \chapter{Resultados}
+\label{cap:resultados}
 
 \begin{notaavance}[la toma de datos cierra el 16 de octubre de 2026]
-Las cifras de este capítulo son las disponibles al \textbf{13 de octubre de
-2026}. Las dos mitades están en situaciones distintas y conviene no leerlas
-igual:
-
-\begin{itemize}[leftmargin=*,nosep]
-  \item El §4.1, \textbf{simulación}, está \textbf{cerrado}. La campaña de
-    treinta misiones corrió el 5 de septiembre, el analizador la dictaminó
-    válida y sus números no van a cambiar.
-  \item El §4.2, \textbf{hardware}, \textbf{va por partes}. La odometría
-    (compuerta G-2) y la navegación de un vehículo (G-3) están alcanzadas y se
-    reportan. La misión con relevo entre los dos vehículos (G-5) y la campaña
-    física (G-6) se corren el \textbf{viernes 16 de octubre}. El §4.2.3 queda
-    sin redactar hasta el corte de ese día, después del cual el acta
-    de directores no admite más datos.
-\end{itemize}
-
-El §4.3 trata de las limitaciones de la campaña de simulación, así que cierra
-con ella.
+Las dos partes de este capítulo están en situaciones distintas. La
+sección~\ref{sec:res-sim}, de simulación, está cerrada: la campaña de treinta
+misiones fue dictaminada válida y sus números no van a cambiar. La
+sección~\ref{sec:res-hw}, con los vehículos, va por partes. La odometría y la
+navegación de un vehículo superaron sus pruebas de verificación y se reportan. La
+misión con relevo entre los dos vehículos y la campaña con los vehículos se
+corren el 16 de octubre, y la sección~\ref{sec:res-completo} queda sin redactar
+hasta entonces. Después de esa fecha no se toman más datos.
 \end{notaavance}
 
 Los resultados llegan de dos campañas distintas. La primera, en simulación, con
 treinta misiones sorteadas. La segunda, sobre los vehículos reales en los
-pasillos del edificio. Se reportan por separado porque miden aspectos distintos: la
-de simulación mide el sistema completo con relevo, la de hardware mide hasta
-dónde llega la plataforma física.
+pasillos del edificio. Se reportan por separado porque miden aspectos distintos:
+la de simulación mide el sistema completo con relevo, y la de los vehículos mide
+hasta dónde llega la plataforma física.
 
 % ---------------------------------------------------------------------
 \section{Evaluación en simulación}
+\label{sec:res-sim}
 
-La campaña corrió treinta misiones sorteadas, quince de control dentro de un
-mismo nivel y quince entre niveles. El analizador dictaminó \textbf{campaña
-válida}, con \textbf{cero descartes} contra un techo admitido del 20~\%.
+La campaña corrió treinta misiones sorteadas: quince de control, con origen y
+destino en el mismo piso, y quince entre pisos, con un relevo. El analizador la
+dictaminó válida, sin ningún descarte, frente a un máximo admitido del 20~\%.
 
-\subsection{Tasa de éxito (RF-23)}
+\subsection{Tasa de éxito}
 
 Una misión es exitosa si cumple dos condiciones. La primera, que la pose final
 quede a 0,25~m o menos del destino, medida contra la odometría y no contra el
 resultado de Nav2. La segunda, que la misión llegue a completarse sin pasar por
-fallo.
+fallo. La tabla~\ref{tab:exito} da la tasa de cada grupo con su intervalo de
+confianza de Wilson al 95~\% \autocite{wilson1927probable}.
 
 \begin{table}[H]
   \centering\small
-  \caption{Tasa de éxito de la campaña, con intervalo de confianza de Wilson.}
+  \caption{Tasa de éxito de la campaña en simulación, con intervalo de confianza
+    de Wilson al 95~\%.}
   \label{tab:exito}
   \begin{tabular}{@{}lcccc@{}}
     \toprule
-    & \textbf{n} & \textbf{éxitos} & \textbf{tasa} & \textbf{IC 95 \% (Wilson)} \\ \midrule
-    Campaña completa & 30 & 26 & \textbf{86,7 \%} & \textbf{70,3 -- 94,7 \%} \\
-    Condición A — control & 15 & 12 & 80,0 \% & 54,8 -- 93,0 \% \\
-    Condición B — inter-nivel & 15 & 14 & 93,3 \% & 70,2 -- 98,8 \% \\ \bottomrule
+    \textbf{Misiones} & \textbf{n} & \textbf{éxitos} & \textbf{tasa} & \textbf{intervalo al 95~\%} \\ \midrule
+    Campaña completa & 30 & 26 & 86,7 \% & 70,3 -- 94,7 \% \\
+    Mismo piso (control) & 15 & 12 & 80,0 \% & 54,8 -- 93,0 \% \\
+    Entre pisos, con relevo & 15 & 14 & 93,3 \% & 70,2 -- 98,8 \% \\ \bottomrule
   \end{tabular}
 \end{table}
 
-\textbf{La afirmación defendible es que la tasa de éxito supera el 70~\%}, no que
-sea del 86,7~\%. Con treinta misiones el intervalo mide 24 puntos porcentuales de
-ancho, y ese límite es de diseño: no se arregla trabajando más, se arreglaría con
-más muestra. El 86,7~\% es el estimador puntual y se reporta siempre junto a su
-intervalo.
+Lo que se puede afirmar es que la tasa de éxito supera el 70~\%, no que sea del
+86,7~\%. Con treinta misiones el intervalo mide 24 puntos porcentuales de ancho,
+y ese límite es de diseño: solo se reduce con más muestra. El 86,7~\% es el
+estimador puntual y se reporta siempre junto a su intervalo.
 
-Los dos intervalos de las condiciones se solapan, así que \textbf{la comparación
-entre ellas no sostiene ninguna conclusión}. Conviene decirlo porque el estimador
-puntual apunta en contra de la intuición: la condición con relevo salió mejor que
-la de control.
+Los intervalos de los dos grupos se solapan, así que la comparación entre ellos
+no sostiene ninguna conclusión. Conviene decirlo porque el estimador puntual
+apunta en contra de la intuición: las misiones con relevo salieron mejor que las
+de control.
 
-\subsection{Los cuatro fallos son un solo modo}
+\subsection{Causa común de los cuatro fallos}
 
 Las cuatro misiones fallidas quedaron a 0,295, 0,284, 0,311 y 0,347~m del
-destino, contra una tolerancia de 0,25~m. Las cuatro se quedaron \emph{cortas},
-ninguna se pasó ni terminó en otro sitio.
+destino, frente a una tolerancia de 0,25~m. Las cuatro se quedaron cortas:
+ninguna se pasó del destino ni terminó en otro sitio. Los cuatro fallos se deben
+al límite de precisión de la aproximación final, y ninguno a la coordinación. El
+error de llegada del conjunto tiene una mediana de 0,106~m y va de 0,019 a
+0,347~m.
 
-Eso no es un fallo de coordinación: es el límite de precisión de la aproximación
-final. El error de llegada del conjunto tiene mediana \textbf{0,106~m} y recorrido
-de 0,019 a 0,347~m.
+\subsection{Tiempo de respuesta y tiempo de asignación}
 
-\subsection{Tiempo de respuesta (RF-21) y de asignación (RF-22)}
-
-El tiempo de respuesta se reporta por escalones y no con media y desviación, por
-una razón de instrumento:
+El tiempo de respuesta se reporta por escalones, y no con media y desviación, por
+una razón de instrumento (tabla~\ref{tab:respuesta}).
 
 \begin{table}[H]
   \centering\small
-  \caption{Tiempo de respuesta, en escalones del reloj de simulación.}
+  \caption{Tiempo de respuesta de las treinta misiones, en escalones del reloj de
+    la simulación.}
   \label{tab:respuesta}
   \begin{tabular}{@{}lcccc@{}}
     \toprule
-    \textbf{t respuesta} & 0,1 s & 0,2 s & 0,3 s & 0,4 s \\ \midrule
-    misiones & 10 & 15 & 4 & 1 \\ \bottomrule
+    \textbf{Tiempo de respuesta} & 0,1 s & 0,2 s & 0,3 s & 0,4 s \\ \midrule
+    Misiones & 10 & 15 & 4 & 1 \\ \bottomrule
   \end{tabular}
 \end{table}
 
-Los cuatro valores son múltiplos exactos de 100~ms, que es el tic del reloj de
-simulación. \textbf{La resolución del instrumento vale entre el 25~\% y el 100~\%
-de la magnitud medida.} Una mediana de 0,2~s significa «uno o dos tics», no
-«doscientos milisegundos». Dar media y desviación sugeriría una precisión que el
-reloj no entrega.
+Los cuatro valores son múltiplos exactos de 100~ms, que es el paso con que avanza
+el reloj de la simulación. La resolución del instrumento vale entre el 25~\% y el
+100~\% de la magnitud medida. Una mediana de 0,2~s significa «uno o dos pasos del
+reloj», no «doscientos milisegundos», y dar media y desviación sugeriría una
+precisión que el reloj no entrega. Lo que sí se sostiene es la cota, que además es
+lo que le importa a un usuario: el robot arranca en menos de medio segundo.
 
-Lo que sí se sostiene es la cota, que además es lo que le importa a un usuario:
-\textbf{el robot arranca en menos de medio segundo}.
+El tiempo de asignación quedó por debajo de 100~ms en las treinta misiones, varios
+órdenes de magnitud por debajo de un paso del reloj. Por eso se caracterizó
+aparte, en un banco de pruebas con el reloj del sistema: mediana entre 154 y
+175~\textmu s y máximo de 306~\textmu s.
 
-El tiempo de asignación quedó por debajo de 100~ms en las treinta. Como esa cifra
-cae tres órdenes de magnitud por debajo de un tic del reloj, se caracterizó
-aparte en banco: mediana entre 154 y 175~\textmu s, máximo 306~\textmu s.
-
-% ---------------------------------------------------------------------
 \begin{figure}[H]
   \centering
   \includegraphics[width=\textwidth]{imagenes/corrida_simulacion.png}
@@ -126,79 +119,75 @@ aparte en banco: mediana entre 154 y 175~\textmu s, máximo 306~\textmu s.
   \label{fig:simulacion}
 \end{figure}
 
-\section{Evaluación sobre hardware}
+% ---------------------------------------------------------------------
+\section{Evaluación con los vehículos}
+\label{sec:res-hw}
 
-\begin{notaavance}[G-2 y G-3 alcanzadas; G-5 y G-6 se corren el 16 de octubre]
-Las compuertas de esta sección se reportan de forma distinta según su estado:
+La demostración física se organizó en pruebas de verificación sucesivas
+(sección~\ref{sec:pruebas-verificacion}). Esta sección reporta las que se han
+superado y que producen cifras: la de odometría y la de navegación de un
+vehículo.
 
-\begin{itemize}[leftmargin=*,nosep]
-  \item \textbf{G-2, la odometría}, quedó \textbf{alcanzada} el 2 de octubre,
-    con las medidas del piso 4, y se reporta en el §4.2.1.
-  \item \textbf{G-3, la navegación de un vehículo}, quedó \textbf{alcanzada} el
-    7 de octubre, y se reporta en el §4.2.2.
-  \item \textbf{G-5 y G-6}, el protocolo completo con los dos vehículos, se
-    corren el 16 de octubre. El §4.2.3 queda sin redactar hasta
-    entonces: escribir ahora unas cifras que van a cambiar obligaría a
-    corregirlas después.
-\end{itemize}
-\end{notaavance}
+\subsection{La odometría del vehículo}
 
-\subsection{La odometría del vehículo (G-2)}
-
-El vehículo no tiene encoders, así que su odometría sale de comparar barridos
-sucesivos del láser. Durante meses esa pieza no produjo una medida utilizable.
-La tabla~\ref{tab:odometria} reúne lo que se midió en cada entorno:
+El vehículo no tiene codificadores en las ruedas, así que su odometría sale de
+comparar barridos sucesivos del láser. Durante meses esa pieza no produjo una
+medida utilizable. La tabla~\ref{tab:odometria} reúne lo que se midió en cada
+entorno, como fracción del avance real medido con flexómetro.
 
 \begin{table}[H]
   \centering\small
-  \caption{Fracción del avance real que registra la odometría, por entorno.}
+  \caption{Fracción del avance real que registra la odometría, por entorno. El
+    criterio de la prueba es un error de 10~\% o menos.}
   \label{tab:odometria}
   \begin{tabular}{@{}lccl@{}}
     \toprule
-    \textbf{Entorno} & \textbf{Recorrido} & \textbf{Registrado} & \textbf{Criterio $\pm$10 \%} \\ \midrule
-    Pasillo simulado, 46,9 m & largo & 37,9 \% & falla \\
-    Pasillos del edificio (piso 1 y 2) & largo & 5,7 \% y 1,3 \% & falla \\
-    Hall del piso 2 & 6 m & 73 \% & falla \\
-    Cuarto cerrado, empujado a mano & 3 m & 96,3 -- 101,9 \% & \textbf{cumple} \\
-    \textbf{Pasillo del piso 4} & \textbf{6,68 m} & \textbf{95,4 \%} & \textbf{cumple} \\
-    \textbf{Pasillo del piso 4} & \textbf{14,57 m} & \textbf{103,3 \%} & \textbf{cumple} \\
-    Pasillo del piso 4, con la IMU & 8,08 m & 101,9 \% & cumple \\
-    Pasillo del piso 4, con la IMU & 2,82 m & 104,9 \% & cumple \\ \bottomrule
+    \textbf{Entorno} & \textbf{Recorrido} & \textbf{Registrado} & \textbf{Criterio} \\ \midrule
+    Pasillo simulado, 46,9 m & largo & 37,9 \% & no cumple \\
+    Pasillos de los pisos 1 y 2 & largo & 5,7 \% y 1,3 \% & no cumple \\
+    Hall del piso 2 & 6 m & 73 \% & no cumple \\
+    Cuarto cerrado, desplazado a mano & 3 m & 96,3 -- 101,9 \% & cumple \\
+    Pasillo del piso 4 & 6,68 m & 95,4 \% & cumple \\
+    Pasillo del piso 4 & 14,57 m & 103,3 \% & cumple \\
+    Pasillo del piso 4, con la unidad inercial & 8,08 m & 101,9 \% & cumple \\
+    Pasillo del piso 4, con la unidad inercial & 2,82 m & 104,9 \% & cumple \\ \bottomrule
   \end{tabular}
 \end{table}
 
-La lectura importa más que las cifras. \textbf{El estimador no mejoró: cambió el
-entorno.} En un pasillo recto y uniforme la información de avance no está en el
-dato del sensor, y ningún ajuste la recupera. En un pasillo con hornacinas,
-lockers y quiebres —ocho cambios de perfil en 25~m— la misma odometría, sin tocar
-un parámetro, queda dentro del $\pm$5~\%.
+El estimador es el mismo en todas las filas; lo que cambió fue el entorno. En un
+pasillo recto y uniforme la información de avance no está en la señal del
+sensor, y ningún ajuste la recupera (sección~\ref{sec:teo-localizacion}). En un
+pasillo con hornacinas, casilleros y quiebres, con ocho cambios de perfil en
+25~m, la misma odometría queda dentro del $\pm$5~\% sin cambiar un parámetro.
 
-Sobre las dos filas del 2 de octubre, en el piso 4, los directores declararon
-\textbf{G-2 alcanzada}. Es la compuerta que el proyecto llevaba desde septiembre
-señalando como su única ruta crítica.
+Con las dos mediciones del pasillo del piso 4, de 6,68 y 14,57~m, los directores
+dieron por superada la prueba de odometría. Era la condición que el proyecto
+venía señalando como el paso del que dependía todo lo demás sobre los vehículos.
 
-Las dos últimas filas son del 7 de octubre, ya con la IMU integrada (§\ref{sec:imu}): el
+Las dos últimas filas ya incluyen la unidad inercial (sección~\ref{sec:imu}). El
 avance lo estima el filtro, que lo toma de la misma odometría del láser. El
-segundo tramo mide 2,82~m, por debajo de los 5~m que pide el criterio de G-2, y
-se incluye como dato de la misma cadena.
+segundo tramo mide 2,82~m, por debajo de los 5~m que pide el criterio, y se
+incluye como dato de la misma cadena.
 
-\subsection{La navegación y la precisión de llegada (G-3)}
+\subsection{La navegación y la precisión de llegada}
 \label{sec:res-g3}
 
-La compuerta G-3 pide un recorrido de punto a punto con Nav2 y la llegada
-verificada con flexómetro, a 0,5~m o menos del destino, que es la tolerancia que
-fijó el director para los vehículos reales.
+La prueba de navegación de un vehículo pide un recorrido de punto a punto con
+Nav2 y la llegada verificada con flexómetro, a 0,5~m o menos del destino. Esa es
+la tolerancia que fijó el director para los vehículos reales.
 
-El 2 de octubre, en el piso 4, las dos llegadas medidas quedaron a 0,57~m y
+En la primera sesión en el piso 4, las dos llegadas medidas quedaron a 0,57 y
 0,62~m, cortas. Nav2 daba entonces la meta por alcanzada a 1,0~m, y los dos
-vehículos se detuvieron al cruzar ese margen. Con la IMU integrada (§\ref{sec:imu}) el
-margen bajó a 0,5~m. El 7 de octubre uno de los vehículos recorrió en el piso 4
-tres tramos encadenados, sin que nadie lo tocara entre uno y otro, y después
-regresó a la salida (tabla~\ref{tab:g3} y figura~\ref{fig:cadena}).
+vehículos se detuvieron al cruzar ese margen. Con la unidad inercial integrada
+(sección~\ref{sec:imu}) el margen bajó a 0,5~m. En la sesión siguiente, uno de los
+vehículos recorrió en el piso 4 tres tramos encadenados, sin que nadie lo tocara
+entre uno y otro, y después regresó a la salida (tabla~\ref{tab:g3} y
+figura~\ref{fig:cadena}).
 
 \begin{table}[H]
   \centering\small
-  \caption{Cadena del piso 4 del 7 de octubre: llegada de cada tramo.}
+  \caption{Cadena de tres tramos en el piso 4 y regreso a la salida: llegada de
+    cada tramo.}
   \label{tab:g3}
   \begin{tabular}{@{}llcccl@{}}
     \toprule
@@ -210,8 +199,8 @@ regresó a la salida (tabla~\ref{tab:g3} y figura~\ref{fig:cadena}).
   \end{tabular}
 \end{table}
 
-Las llegadas medidas quedaron dentro de la tolerancia de 0,5~m, y G-3 se declaró
-alcanzada en el acta ese mismo día. La del Salón 403 no se midió porque en ese
+Las llegadas medidas quedaron dentro de la tolerancia de 0,5~m, y los directores
+dieron por superada la prueba. La llegada al Salón 403 no se midió porque en ese
 momento no había flexómetro, y se estimó con el error de los otros dos tramos. El
 regreso a la salida incluyó una media vuelta en el tramo ancho frente a los
 salones, que Nav2 resolvió con seis recuperaciones.
@@ -219,78 +208,78 @@ salones, que Nav2 resolvió con seis recuperaciones.
 \begin{figure}[H]
   \centering
   \includegraphics[width=\textwidth]{imagenes/cadena_piso4.png}
-  \caption{Cadena de tres tramos en el piso 4 y regreso a la salida, el 7 de
-    octubre: recorrido según la localización, llegadas medidas con flexómetro,
-    la llegada estimada al Salón 403 y la pose de la localización al terminar
-    cada tramo.}
+  \caption{Cadena de tres tramos en el piso 4 y regreso a la salida: recorrido
+    según la localización, llegadas medidas con flexómetro, la llegada estimada
+    al Salón 403 y la pose de la localización al terminar cada tramo.}
   \label{fig:cadena}
 \end{figure}
 
-El 8 de octubre el otro vehículo recorrió el piso 3 en cinco tramos encadenados,
-con dos medias vueltas entre ellos, y los cinco terminaron con éxito y sin
-recuperaciones. Esas llegadas no se midieron con flexómetro. Al terminar cada
-tramo se forzó a la localización a recalcular su pose, y esta se desplazó entre
-0,61 y 0,86~m. La pose que publica al detenerse el vehículo va atrasada, y por eso
-la llegada que vale es la medida con flexómetro.
+Al día siguiente, el otro vehículo recorrió el piso 3 en cinco tramos
+encadenados, con dos medias vueltas entre ellos, y los cinco terminaron con éxito
+y sin recuperaciones. Esas llegadas no se midieron con flexómetro. Al terminar
+cada tramo se forzó a la localización a recalcular su pose, y esta se desplazó
+entre 0,61 y 0,86~m. La pose que publica la localización al detenerse el vehículo
+va atrasada, y por eso la llegada que vale es la medida con flexómetro.
 
 Lo que condiciona la precisión de llegada sigue siendo la banda muerta de
-tracción (§\ref{sec:banda-muerta}): el vehículo se aproxima a la meta a 0,40~m/s y no tiene
-régimen de aproximación fina.
+tracción (sección~\ref{sec:banda-muerta}): el vehículo se aproxima a la meta a
+0,40~m/s y no tiene régimen de aproximación fina.
 
-\subsection{El sistema completo con los dos vehículos (G-5 y G-6)}
+\subsection{El sistema completo con los dos vehículos}
+\label{sec:res-completo}
 
 \begin{notaavance}[apartado sin redactar: la toma de datos cierra el 16 de
 octubre de 2026]
-Aquí irán la misión con relevo entre los dos vehículos (G-5), del Salón 302 al
-Salón 402, y la campaña física de RF-27 (G-6). Son diez misiones con relevo
-entre los pisos 3 y 4, sorteadas con semilla antes de correr y ejecutadas sin
-reubicar los vehículos. Se reportan con las métricas del protocolo y la tolerancia de 0,5~m,
-siempre por separado de la campaña en simulación. Lo que haya el 16 de octubre es
-lo que se defiende.
+Aquí irán la misión con relevo entre los dos vehículos, del Salón 302 al Salón
+402, y la campaña con los vehículos: diez misiones con relevo entre los pisos 3
+y 4, sorteadas antes de correr y ejecutadas sin reubicar los vehículos. Se
+reportan con las métricas del protocolo y la tolerancia de 0,5~m, siempre por
+separado de la campaña en simulación.
 \end{notaavance}
 
+% ---------------------------------------------------------------------
 \section{Limitaciones de la medición}
 \label{sec:limitaciones}
 
 Tres límites afectan a cómo deben leerse los resultados anteriores. Se declaran
 aquí porque callarlos sería presentar como medida lo que no lo es.
 
-\subsection{La continuidad entre niveles es un invariante, no un resultado}
+\subsection{Naturaleza del criterio de continuidad entre niveles}
 
-La continuidad del servicio es la variable de respuesta principal del objetivo~4,
-y su criterio binario se cumplió en las treinta misiones. \textbf{Ese resultado no
-es evidencia de nada}, y la razón es estructural.
+La continuidad del servicio es la variable de respuesta principal del cuarto
+objetivo, y su criterio binario se cumplió en las treinta misiones. Ese resultado,
+sin embargo, no es evidencia, y la razón es estructural.
 
-El criterio exige que dentro de la ventana de la misión el coordinador nunca esté
-en estado inactivo y nunca tenga el agente sin asignar. Los dos únicos puntos del
-código que producen esos valores ocurren \emph{antes} de que la ventana se abra.
-No existe ejecución posible que lo incumpla: son cero incumplimientos de cero
-posibles.
+El criterio exige que, dentro de la ventana de la misión, el coordinador nunca
+esté en estado inactivo y nunca tenga el agente sin asignar. Los dos únicos
+puntos del código que producen esos valores ocurren antes de que la ventana se
+abra. No existe ejecución posible que lo incumpla: son cero incumplimientos de
+cero posibles. Un criterio que no puede dar resultado negativo no aporta
+evidencia, por muchas veces que se verifique \autocite{popper1959logic}.
 
-Un criterio que no puede dar resultado negativo no aporta evidencia, por muchas
-veces que se verifique. La corrección no fue inventar una ruta de fallo. Eso habría sido instrumentar el
-experimento para que pareciera más informativo. Lo que se hizo fue
-\textbf{declarar la continuidad como invariante estructural del diseño} y apoyar
-la afirmación en una magnitud que sí varía: el intervalo de tiempo del relevo,
-entre el final del tramo de un vehículo y el inicio del tramo del otro. En las
-quince misiones entre niveles tuvo mediana de 0,1~s y máximo de 0,2~s.
+La corrección no consistió en inventar una ruta de fallo, que habría sido
+instrumentar el experimento para que pareciera más informativo. La continuidad se
+declaró como un invariante estructural del diseño. La afirmación se apoyó en una
+magnitud que sí varía: el intervalo de tiempo del relevo, entre el final del
+tramo de un vehículo y el inicio del tramo del otro. En las quince misiones entre
+pisos tuvo una mediana de 0,1~s y un máximo de 0,2~s, es decir, uno o dos pasos
+del reloj de la simulación.
 
-\subsection{El intervalo de confianza es ancho por diseño}
+\subsection{Ancho del intervalo de confianza}
 
-Ya se dijo en la tabla~\ref{tab:exito} y se repite porque es el límite más fácil
-de olvidar al redactar: con treinta misiones, \textbf{lo defendible es una cota
-inferior}, no un valor puntual. Aumentar la confianza exige más muestra, no más
-trabajo.
+Ya se dijo con la tabla~\ref{tab:exito}, y se repite porque es el límite más fácil
+de olvidar al redactar: con treinta misiones, lo que se puede defender es una cota
+inferior, no un valor puntual. Aumentar la confianza exige más muestra.
 
-\subsection{El mapa de la campaña leía como libre lo desconocido}
+\subsection{Espacio desconocido marcado como libre en el mapa}
 
-El mapa con que corrió la campaña declaraba un umbral que hacía que
-\textbf{10\,908 celdas desconocidas —el 14,5~\% del mapa— se cargaran como
-espacio libre}. Con ello, las dos salvaguardas que debían impedir planificar
-sobre lo no explorado quedaban desactivadas de hecho.
+El mapa con que corrió la campaña declaraba un umbral que hacía que 10\,908
+celdas desconocidas, el 14,5~\% del mapa, se cargaran como espacio libre. Con
+ello quedaban desactivadas en la práctica las dos salvaguardas que debían impedir
+planificar sobre lo no explorado.
 
-El alcance de la afirmación, y no más: esto \textbf{no invalida el veredicto}. Los
-cuatro fallos fueron de precisión de llegada, no de trazado, y el pasillo por el
-que se navegó está mapeado como libre de verdad. Lo que no se sabe es si alguna
-trayectoria cruzó una de esas celdas, y es comprobable sobre los registros
-conservados. El defecto está corregido desde el 25 de septiembre.
+Esto no invalida el veredicto de la campaña. Los cuatro fallos fueron de
+precisión de llegada, no de trazado, y el pasillo por el que se navegó está
+mapeado como libre en el mundo real. Lo que no se sabe es si alguna trayectoria
+cruzó una de esas celdas, y es comprobable sobre los registros conservados. El
+defecto se corrigió después de la campaña.

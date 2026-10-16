@@ -1,84 +1,81 @@
 % =====================================================================
-%  CONCLUSIONES  —  un párrafo por objetivo específico, que es la forma
-%  que menos margen deja a la vaguedad con cuatro OE rastreados uno a uno.
+%  CONCLUSIONES  —  un párrafo por objetivo específico, que es una de las
+%  dos formas que admite la plantilla y la que menos margen deja a la
+%  vaguedad. 2026-10-15: sin códigos del repositorio ni fechas de bitácora.
 % =====================================================================
 \chapter*{Conclusiones}
 \addcontentsline{toc}{chapter}{CONCLUSIONES}
 
 \begin{notaavance}[conclusiones parciales: uno de los cuatro objetivos sigue
 abierto]
-Estas conclusiones se actualizaron el \textbf{15 de octubre de 2026}, con el
-proyecto todavía en curso. Se escriben solo las que descansan sobre algo
-cerrado:
-
-\begin{itemize}[leftmargin=*,nosep]
-  \item \textbf{OE1}, \textbf{OE2} y \textbf{OE3} están verificados, así que sus
-    conclusiones son definitivas. OE2 cerró el 15 de octubre, al revisar sus
-    seis requisitos contra la evidencia de las compuertas G-2 y G-3.
-  \item \textbf{OE4} depende de la campaña física con los dos vehículos (G-5 y
-    G-6), que se corre el \textbf{16 de octubre}. Después de ese día el acta de
-    directores no admite más datos.
-  \item El \textbf{objetivo general} se enuncia, porque descansa en la campaña
-    de simulación, que ya cerró, y en la navegación de cada vehículo, que ya se
-    verificó. Falta ejecutar el relevo con los dos vehículos reales.
-\end{itemize}
+Estas conclusiones se escriben con el proyecto todavía en curso, y solo para lo
+que ya está cerrado. Los objetivos primero, segundo y tercero están verificados,
+así que sus conclusiones son definitivas. El cuarto depende de la campaña con los
+dos vehículos, que se corre el 16 de octubre de 2026; después de esa fecha no se
+toman más datos. La conclusión sobre el objetivo general se enuncia porque
+descansa en la campaña de simulación, ya cerrada, y en la navegación de cada
+vehículo, ya verificada; falta ejecutar el relevo con los dos vehículos reales.
 \end{notaavance}
 
-\textbf{Sobre OE1, la arquitectura funcional.} El objetivo se cumplió. El sistema
-tiene un contrato de interfaces escrito, treinta y seis requisitos numerados con
-su prueba, y una capa de coordinación que ejecuta el relevo entre niveles. Escribir el
-planificador como función pura, sin depender del middleware, resultó más valioso
-de lo previsto. Permite verificar 930 combinaciones de origen y destino en
-milisegundos. Y encontró defectos que una corrida en el simulador no habría
-delatado, como planes que mandaban al mismo robot dos veces a la misma pose.
+El primer objetivo específico, modelar la arquitectura funcional del sistema, se
+cumplió. El sistema tiene un contrato de interfaces escrito, treinta y seis
+requisitos con su prueba, y una capa de coordinación que ejecuta el relevo entre
+niveles. Escribir el planificador como función pura, sin depender de la capa de
+comunicaciones de ROS~2, resultó más valioso de lo previsto. Permite verificar las
+930 combinaciones de origen y destino en milisegundos, y encontró defectos que una
+corrida en el simulador no habría delatado, como planes que mandaban al mismo
+robot dos veces a la misma pose. La asignación de tareas es óptima por la
+estructura del problema, con un solo agente admisible por nivel, y el aporte del
+trabajo está en coordinar dos agendas que dependen una de otra durante el relevo.
 
-\textbf{Sobre OE2, la plataforma robótica.} El objetivo se cumplió. Los dos vehículos están integrados y Nav2 quedó
-reconfigurado para cinemática tipo automóvil, con el planificador, el controlador
-y el árbol de comportamiento sustituidos por los que esa cinemática admite
-(§\ref{sec:nav2-ackermann}). La \textbf{odometría cumple su criterio}: entre $-4{,}6$~\% y
-$+3{,}3$~\% sobre recorridos de 6,68 y 14,57~m, con lo que los directores
-declararon alcanzada la compuerta G-2 el 5 de octubre. Era la única ruta crítica
-que el proyecto se reconocía desde septiembre. La navegación de un vehículo con
-la llegada verificada (G-3) se alcanzó el 7 de octubre: en una cadena de tres
-tramos sin intervención, las llegadas medidas con flexómetro quedaron entre 0,06 y
-0,45~m de la meta, dentro de la tolerancia de 0,5~m (§4.2.2). Con esa evidencia,
-los seis requisitos del objetivo quedaron verificados sobre los vehículos.
+El segundo objetivo, la plataforma robótica de dos vehículos, se cumplió. Los dos
+vehículos están integrados, y Nav2 quedó configurado para cinemática tipo
+automóvil, con el planificador, el controlador y el árbol de comportamiento
+sustituidos por los que esa cinemática admite (sección~\ref{sec:nav2-ackermann}).
+La odometría cumple su criterio, con un error entre $-4{,}6$~\% y $+3{,}3$~\% sobre
+recorridos de 6,68 y 14,57~m, y los directores dieron por superada la prueba
+correspondiente. La navegación de un vehículo con la llegada verificada también
+se superó. En una cadena de tres tramos sin intervención, las llegadas medidas con
+flexómetro quedaron entre 0,06 y 0,45~m de la meta, dentro de la tolerancia de
+0,5~m (sección~\ref{sec:res-g3}). Los dos vehículos operan juntos en la misma red,
+con un tiempo de ida y vuelta de los mensajes de 5,99~ms de mediana.
 
-El límite que queda es la banda muerta de tracción (§\ref{sec:banda-muerta}). El vehículo no
-avanza por debajo de 0,40~m/s y no tiene régimen de aproximación fina, y por eso
-la tolerancia de llegada sobre hardware es de 0,5~m y no de 0,25~m, como en
-simulación.
+El límite que queda en la plataforma es la banda muerta de tracción
+(sección~\ref{sec:banda-muerta}). El vehículo no avanza por debajo de 0,40~m/s y no
+tiene régimen de aproximación fina, y por eso la tolerancia de llegada con los
+vehículos es de 0,5~m y no de 0,25~m, como en simulación.
 
-\textbf{Sobre OE3, la interfaz humano-robot.} El objetivo se cumplió. La interfaz
-funciona desde el navegador de un teléfono, sin instalación y sin salida a
-internet, y se operó una misión completa con relevo desde un dispositivo real. Dos
-funciones se añadieron después de ver el sistema en uso. Una es la confirmación
-de cambio de piso, que impide dar por completada una misión con el usuario en el
-nivel equivocado. La otra es la cancelación, que no funcionaba: el servidor de
-acción rechazaba las solicitudes en silencio.
+El tercer objetivo, la interfaz de interacción con el usuario, se cumplió. La
+interfaz funciona desde el navegador de un teléfono, sin instalación y sin salida
+a internet, y se operó con ella una misión completa con relevo desde un
+dispositivo real. Dos funciones se añadieron después de ver el sistema en uso.
+Una es la confirmación de cambio de piso, que impide dar por completada una
+misión con el usuario en el nivel equivocado. La otra es la cancelación, que no
+funcionaba porque el servidor de acción rechazaba las solicitudes sin informar.
 
-\textbf{Sobre OE4, la evaluación. Cumplido en simulación; parcial sobre
-hardware.} La campaña de treinta misiones sorteadas dio veredicto válido con cero
-descartes, y permite afirmar que \textbf{la tasa de éxito supera el 70~\%} con
-95~\% de confianza. Esa mitad del objetivo está cerrada y sus cifras no van a
-cambiar. Sobre hardware ya cerraron la odometría (G-2) y la navegación de un
-vehículo con la llegada verificada (G-3). Falta la campaña física con los dos
-vehículos, que se corre el 16 de octubre y se concluye entonces (§4.2.3).
+El cuarto objetivo, la evaluación experimental, está cumplido en simulación y
+parcialmente con los vehículos. La campaña de treinta misiones sorteadas fue
+válida, sin descartes, y permite afirmar con 95~\% de confianza que la tasa de
+éxito supera el 70~\%. Esa parte del objetivo está cerrada y sus cifras no van a
+cambiar. Con los vehículos ya se superaron las pruebas de odometría y de
+navegación de un vehículo. Falta la campaña con los dos vehículos, que se
+concluye al terminar la toma de datos (sección~\ref{sec:res-completo}).
 
-\textbf{Sobre el objetivo general.} El esquema de relevo \textbf{es viable}. Dos
-robots dedicados cada uno a un nivel pueden repartirse el guiado de una persona
-que cambia de piso. Ninguno atraviesa la zona de transición vertical, y el
-edificio no se modifica. Eso quedó demostrado en simulación, con una campaña
-medida y con veredicto válido. Sobre los vehículos reales están verificadas la
-odometría y la navegación de cada uno, que durante meses hicieron dudar de que el
-esquema fuera ejecutable sobre hardware. Falta ejecutar el relevo con los dos
-vehículos, que es la campaña del 16 de octubre.
+Sobre el objetivo general, el esquema de relevo es viable. Dos robots dedicados
+cada uno a un nivel pueden repartirse el guiado de una persona que cambia de piso,
+sin que ninguno atraviese la zona de transición vertical y sin modificar el
+edificio. Eso quedó demostrado en simulación, con una campaña medida y válida.
+Sobre los vehículos reales están verificadas la odometría y la navegación de cada
+uno, que durante meses hicieron dudar de que el esquema fuera ejecutable fuera de
+la simulación. Falta ejecutar el relevo con los dos vehículos, que es el objeto
+de la campaña con los vehículos.
 
-\textbf{Una conclusión de método, que el trabajo defiende con el mismo peso.} La
-parte más costosa del proyecto no fue construir el sistema sino averiguar qué
-estaba midiendo de verdad. Tres episodios lo muestran. Una métrica valía cero por
-construcción hasta que se saneó. Un criterio de aceptación no podía dar resultado
-negativo, así que sus treinta verificaciones en verde no eran evidencia. Y la
-correspondencia entre el modelo del edificio y el edificio real se daba por
-supuesta desde agosto, y resultó falsa en un 20~\% la primera vez que se midió. Los tres se encontraron preguntando si el criterio podía fallar, y ninguno
-habría aparecido corriendo más experimentos.
+Queda una conclusión de método. En este proyecto costó más averiguar qué medía
+cada prueba que construir el sistema, como muestran tres casos. El tiempo de
+asignación valía cero en todas las grabaciones, porque el reloj de la simulación
+no tenía resolución para medirlo, hasta que se caracterizó en un banco aparte. El
+criterio de continuidad entre niveles no podía dar un resultado negativo, así que
+sus treinta verificaciones no eran evidencia. Y la correspondencia entre el modelo
+del edificio y el edificio real se daba por supuesta, y resultó falsa en un 20~\%
+la primera vez que se midió. Los tres se encontraron preguntando si el criterio
+podía fallar, y ninguno habría aparecido corriendo más experimentos.

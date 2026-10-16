@@ -108,7 +108,7 @@ prueba de larga duración. \textcite{macenski2023survey} recogen,
 desde la experiencia de los propios mantenedores, los algoritmos de
 planificación, control y localización que hoy ofrece el ecosistema, con pruebas
 comparativas entre ellos. Las dos referencias sirvieron para elegir los
-componentes que se describen en el §\ref{sec:teo-planificacion}.
+componentes que se describen en la sección~\ref{sec:teo-planificacion}.
 
 \textcite{varghese2023multirobot} llevan el problema a un escenario cooperativo:
 varios agentes construyen un mapa compartido y mantienen consistente su
@@ -151,8 +151,8 @@ asignación cooperativa de tareas, y \textcite{zhan2025kubernetes} estudian la
 resiliencia del sistema cuando un nodo falla. El marco teórico de la asignación
 de tareas lo fijan \textcite{gerkey2004taxonomy}, cuya taxonomía permite
 clasificar cualquier esquema de reparto según cuántas tareas acepta un robot,
-cuántos robots requiere una tarea y con cuánta anticipación se decide. El
-§\ref{sec:teo-asignacion} usa esa taxonomía, y su extensión por
+cuántos robots requiere una tarea y con cuánta anticipación se decide. La
+sección~\ref{sec:teo-asignacion} usa esa taxonomía, y su extensión por
 \textcite{korsah2013comprehensive}, para situar el esquema de este trabajo.
 
 El antecedente más cercano a la propuesta de este proyecto es
@@ -206,7 +206,7 @@ Sus resultados pesaron en una decisión concreta. La navegación corre completa 
 bordo de cada vehículo, y lo único que se centraliza es la coordinación, que
 intercambia mensajes pequeños y corre en un computador portátil. Además, la
 interfaz debe funcionar sin salida a internet, porque la red del edificio no
-siempre la tiene. El §\ref{sec:teo-ros2} explica cómo esa distribución se
+siempre la tiene. La sección~\ref{sec:teo-ros2} explica cómo esa distribución se
 refleja en la red de comunicaciones.
 
 \subsection{Aporte de este trabajo frente a los antecedentes}
@@ -259,7 +259,7 @@ Aquí se definen los términos necesarios para leer el resto del documento. El
 lector supuesto tiene formación en ingeniería electrónica. Las seis categorías
 son las del anteproyecto, y dentro de cada una se añaden los términos que
 aparecieron durante la implementación. El fundamento teórico de cada concepto
-está en el §\ref{sec:teorico}.
+está en la sección~\ref{sec:teorico}.
 
 \subsection{Navegación y percepción}
 
@@ -293,7 +293,7 @@ inobservable, ningún ajuste de parámetros la recupera, porque la información 
 está en la señal. Para cuantificarla, el proyecto definió la \textbf{información
 de avance} de un barrido: la fracción de los rayos del LiDAR que inciden sobre
 superficies orientadas hacia la dirección de marcha. Solo esos rayos cambian de
-longitud cuando el vehículo avanza. El §\ref{sec:teo-localizacion} desarrolla el
+longitud cuando el vehículo avanza. La sección~\ref{sec:teo-localizacion} desarrolla el
 caso.
 
 El entorno se representa de dos formas complementarias. El \textbf{mapa de
@@ -455,14 +455,13 @@ presentarse como tal. Y la \textbf{cota superior por misión} resuelve qué hace
 cuando el instrumento no tiene resolución para dar el valor exacto: se informa el
 límite que sí se puede garantizar.
 
-La demostración sobre los vehículos reales se organizó con dos conceptos de
-gestión. Una \textbf{compuerta} es una condición verificable que el acta firmada
-con los directores exige antes de pasar a la siguiente etapa de la demostración
-física; por ejemplo, que la odometría registre el avance con un error del 10~\% o
-menos. Un \textbf{corte} es la fecha en que se revisa qué compuertas se
-alcanzaron. La \textbf{verdad de terreno} es la medida independiente con la que
-se contrasta el sistema, que en este trabajo es la distancia tomada con
-flexómetro.
+La demostración sobre los vehículos reales se organizó en \textbf{pruebas de
+verificación}: condiciones comprobables, acordadas con los directores antes de
+correrlas, que había que superar en orden para pasar a la siguiente etapa. Un
+ejemplo es que la odometría registre el avance con un error del 10~\% o menos. Para
+decidir si se superaron hace falta una \textbf{verdad de terreno}, la medida
+independiente con la que se contrasta el sistema, que en este trabajo es la
+distancia tomada con flexómetro.
 
 % =====================================================================
 \section{Marco teórico}
@@ -540,7 +539,7 @@ Por omisión, cada proceso se anuncia en la red y empareja sus publicadores y
 suscriptores con los de todos los demás. Con las dos cadenas de navegación
 completas encendidas, unos cuarenta procesos se anunciaban unos a otros por la
 red inalámbrica, y la carga de la tarjeta de un vehículo pasó de 6 a entre 17 y
-33 (§\ref{sec:dos-vehiculos}). ROS~2 Jazzy permite restringir el
+33 (sección~\ref{sec:dos-vehiculos}). ROS~2 Jazzy permite restringir el
 descubrimiento a los procesos del mismo computador y declarar, además, una lista
 fija de equipos con los que sí se comunica. Con esas dos opciones la red adopta
 la topología en estrella del diseño: dentro de cada vehículo los procesos se
@@ -549,7 +548,7 @@ el coordinador necesita. Los vehículos no se ven entre sí.
 
 Dos mecanismos más separan a los vehículos. La partición de comunicaciones deja
 dentro de cada vehículo los tópicos del software del fabricante, que no llevan
-espacio de nombres. Y el espacio de nombres (\texttt{/robot1}, \texttt{/robot2})
+espacio de nombres. Y un espacio de nombres distinto para cada vehículo
 distingue la navegación, el estado y la maniobra de media vuelta de cada agente
 cuando llegan al portátil.
 
@@ -632,12 +631,12 @@ anula la curvatura calculada. El vehículo sigue invirtiendo la marcha, pero ya 
 dirige, y maniobra decenas de veces en el mismo punto. El origen no está en el
 planificador ni en la coordinación, sino en un controlador de referencia que
 trabaja en el borde de su dominio de validez. Por eso la media vuelta se
-resolvió con una maniobra propia del agente (§\ref{sec:media-vuelta}).
+resolvió con una maniobra propia del agente (sección~\ref{sec:media-vuelta}).
 
 La banda muerta de tracción agrega otro límite. Como el vehículo no se mueve por
 debajo de 0,40~m/s, la velocidad mínima de aproximación del controlador se fijó
 en ese valor, y el vehículo llega a la meta sin una fase de aproximación lenta
-(§\ref{sec:banda-muerta}).
+(sección~\ref{sec:banda-muerta}).
 
 \subsection{Localización, odometría y observabilidad}
 \label{sec:teo-localizacion}
@@ -671,7 +670,7 @@ recupera.
 De ahí sale la diferencia entre dos tipos de error que se parecen. Un error de
 calibración se corrige ajustando parámetros. Una inobservabilidad estructural no
 se corrige así, porque la información no está en la señal. La información de
-avance, definida en el §\ref{sec:conceptual}, mide cuánta hay en cada sitio. El
+avance, definida en la sección~\ref{sec:conceptual}, mide cuánta hay en cada sitio. El
 criterio que el proyecto adoptó para elegir dónde operar es que el entorno ofrezca
 estructura no uniforme dentro del alcance del sensor durante todo el recorrido.
 
@@ -679,7 +678,7 @@ La construcción de mapas comparte el mismo límite. La herramienta de SLAM de
 ROS~2 \autocite{macenski2021slam} construye el mapa a partir de la misma
 odometría del láser, y en un pasillo uniforme no tiene con qué cerrarlo. Por eso
 los mapas de este proyecto se derivaron de un levantamiento con flexómetro
-(§\ref{sec:mapas}).
+(sección~\ref{sec:mapas}).
 
 El rumbo tiene una solución distinta, porque el giroscopio de la IMU lo mide de
 forma directa, sin depender del entorno. Un filtro de Kalman extendido combina
@@ -708,7 +707,7 @@ comunicar a los agentes con el coordinador resultan mutuamente excluyentes.
 
 El tiempo que ven los nodos durante la simulación avanza en saltos de 100~ms, y
 eso fija la resolución con que se pueden medir los tiempos de la campaña. El efecto sobre las métricas se
-discute en el §\ref{sec:limitaciones}.
+discute en la sección~\ref{sec:limitaciones}.
 
 \subsection{La interfaz web como cliente del sistema}
 \label{sec:teo-interfaz}
@@ -768,7 +767,7 @@ cumpla la propiedad. La corrección no fue inventar una ruta de fallo, que habr�
 sido instrumentar el experimento para que pareciera más informativo. Se
 reformuló la afirmación como un invariante estructural del diseño y se respaldó
 con una magnitud que sí varía: el intervalo de tiempo entre el final del tramo
-de un vehículo y el inicio del otro (§\ref{sec:limitaciones}).
+de un vehículo y el inicio del otro (sección~\ref{sec:limitaciones}).
 
 La demostración sobre los vehículos reales sigue otra lógica. La norma ASTM
 F3244-21 \autocite{astm2021f3244} establece un método de prueba para la
@@ -785,8 +784,8 @@ sistema opera sobre los vehículos, pero no estima su tasa de éxito con la
 precisión de la simulación. Por eso las dos campañas se reportan por separado:
 la de simulación produce la evidencia estadística y la física, la demostración. En
 los vehículos la llegada se mide con flexómetro y la tolerancia es de 0,5~m,
-fijada por el director el 28 de septiembre de 2026; la simulación conserva
-0,25~m.
+fijada por el director para las pruebas con los vehículos; la simulación
+conserva 0,25~m.
 
 % =====================================================================
 \section{Marco legal}
