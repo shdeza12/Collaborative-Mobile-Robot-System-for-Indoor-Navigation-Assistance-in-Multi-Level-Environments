@@ -1,0 +1,580 @@
+[INFO] [launch]: All log files can be found below /root/.ros/log/2026-10-16-23-52-00-753186-amss-ez9n-9595
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [robot_state_publisher-1]: process started with pid [9601]
+[INFO] [python3-2]: process started with pid [9602]
+[INFO] [ekf_node-3]: process started with pid [9603]
+[INFO] [static_transform_publisher-4]: process started with pid [9604]
+[INFO] [controller_server-5]: process started with pid [9605]
+[INFO] [planner_server-6]: process started with pid [9606]
+[INFO] [behavior_server-7]: process started with pid [9607]
+[INFO] [bt_navigator-8]: process started with pid [9608]
+[INFO] [lifecycle_manager-9]: process started with pid [9609]
+[robot_state_publisher-1] [INFO] [1792194724.708694709] [robot1.robot_state_publisher]: Robot initialized
+[controller_server-5] [INFO] [1792194727.210989002] [robot1.controller_server]: 
+[controller_server-5] 	controller_server lifecycle node launched. 
+[controller_server-5] 	Waiting on external lifecycle transitions to activate
+[controller_server-5] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[controller_server-5] [INFO] [1792194727.242116185] [robot1.controller_server]: Creating controller server
+[behavior_server-7] [INFO] [1792194727.604282053] [robot1.behavior_server]: 
+[behavior_server-7] 	behavior_server lifecycle node launched. 
+[behavior_server-7] 	Waiting on external lifecycle transitions to activate
+[behavior_server-7] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[lifecycle_manager-9] [INFO] [1792194728.225043968] [robot1.lifecycle_manager_navigation]: Creating
+[static_transform_publisher-4] [INFO] [1792194730.548658206] [robot1.laser_aws]: Spinning until stopped - publishing transform
+[static_transform_publisher-4] translation: ('0.000000', '0.000000', '0.000000')
+[static_transform_publisher-4] rotation: ('0.000000', '0.000000', '0.000000', '1.000000')
+[static_transform_publisher-4] from 'robot1/laser' to 'laser'
+[planner_server-6] [INFO] [1792194730.551558862] [robot1.planner_server]: 
+[planner_server-6] 	planner_server lifecycle node launched. 
+[planner_server-6] 	Waiting on external lifecycle transitions to activate
+[planner_server-6] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[planner_server-6] [INFO] [1792194730.572915291] [robot1.planner_server]: Creating
+[INFO] [rf2o_laser_odometry_node-10]: process started with pid [9730]
+[controller_server-5] [INFO] [1792194731.546946162] [robot1.local_costmap.local_costmap]: 
+[controller_server-5] 	local_costmap lifecycle node launched. 
+[controller_server-5] 	Waiting on external lifecycle transitions to activate
+[controller_server-5] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[controller_server-5] [INFO] [1792194731.836627659] [robot1.local_costmap.local_costmap]: Creating Costmap
+[lifecycle_manager-9] [INFO] [1792194732.207827874] [robot1.lifecycle_manager_navigation]: [34m[1mCreating and initializing lifecycle service clients[0m[0m
+[lifecycle_manager-9] [INFO] [1792194734.228730876] [robot1.lifecycle_manager_navigation]: Waiting for service controller_server/get_state...
+[bt_navigator-8] [INFO] [1792194735.374747231] [robot1.bt_navigator]: 
+[bt_navigator-8] 	bt_navigator lifecycle node launched. 
+[bt_navigator-8] 	Waiting on external lifecycle transitions to activate
+[bt_navigator-8] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[bt_navigator-8] [INFO] [1792194736.005724348] [robot1.bt_navigator]: Creating
+[lifecycle_manager-9] [INFO] [1792194736.229306357] [robot1.lifecycle_manager_navigation]: Waiting for service controller_server/get_state...
+[lifecycle_manager-9] [INFO] [1792194738.232646014] [robot1.lifecycle_manager_navigation]: Waiting for service controller_server/get_state...
+[lifecycle_manager-9] [INFO] [1792194740.233361788] [robot1.lifecycle_manager_navigation]: Waiting for service controller_server/get_state...
+[lifecycle_manager-9] [INFO] [1792194742.244276873] [robot1.lifecycle_manager_navigation]: Waiting for service controller_server/get_state...
+[lifecycle_manager-9] [INFO] [1792194744.245666960] [robot1.lifecycle_manager_navigation]: Waiting for service controller_server/get_state...
+[lifecycle_manager-9] [INFO] [1792194746.247666110] [robot1.lifecycle_manager_navigation]: Waiting for service controller_server/get_state...
+[lifecycle_manager-9] [INFO] [1792194747.931453656] [robot1.lifecycle_manager_navigation]: [34m[1mStarting managed nodes bringup...[0m[0m
+[lifecycle_manager-9] [INFO] [1792194747.931582261] [robot1.lifecycle_manager_navigation]: [34m[1mConfiguring controller_server[0m[0m
+[planner_server-6] [INFO] [1792194754.115149249] [robot1.global_costmap.global_costmap]: 
+[planner_server-6] 	global_costmap lifecycle node launched. 
+[planner_server-6] 	Waiting on external lifecycle transitions to activate
+[planner_server-6] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[planner_server-6] [INFO] [1792194754.151698342] [robot1.global_costmap.global_costmap]: Creating Costmap
+[ekf_node-3] [ERROR] [1792194754.437927251] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.30527253700000001047seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194754.933970498] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.068382992000000003552seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194755.406642023] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.33583240800000002668seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194756.690591572] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.13820398300000000247seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194756.841361718] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.145264284999999993seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[python3-2] [INFO] [1792194757.377536499] [robot1.imu_bmi160]: BMI160 en /dev/i2c-1 0x68; calibrando 3.0 s con el vehiculo quieto
+[ekf_node-3] [ERROR] [1792194757.638565800] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.097072619999999998353seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194757.889453471] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.090433743999999996466seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194757.981580498] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.0840190720000000002seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194758.214201313] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.13439465600000000123seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194758.754635966] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.12360668299999999498seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194758.950593911] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.18343999299999999564seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194759.945433030] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.27950466699999998443seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[python3-2] [INFO] [1792194760.590929269] [robot1.imu_bmi160]: sesgo del giroscopio x=1.110 y=-0.191 z=0.699 grados/s con 136 lecturas; publicando imu/data en robot1/imu_link
+[ekf_node-3] [ERROR] [1792194760.615566091] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.081455769999999996789seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194761.335211517] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.13223353400000001368seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194761.560499609] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.087808914000000001798seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194761.780711975] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.095674571999999999394seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194762.000335979] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.12920011600000000374seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[controller_server-5] [INFO] [1792194762.601711539] [robot1.controller_server]: Configuring controller interface
+[controller_server-5] [INFO] [1792194762.601812902] [robot1.controller_server]: getting progress checker plugins..
+[controller_server-5] [INFO] [1792194762.603829392] [robot1.controller_server]: getting goal checker plugins..
+[controller_server-5] [INFO] [1792194762.607996311] [robot1.controller_server]: Controller frequency set to 10.0000Hz
+[controller_server-5] [INFO] [1792194762.608200895] [robot1.local_costmap.local_costmap]: Configuring
+[controller_server-5] [INFO] [1792194763.147888557] [robot1.local_costmap.local_costmap]: Using plugin "voxel_layer"
+[controller_server-5] [INFO] [1792194763.221311235] [robot1.local_costmap.local_costmap]: Subscribed to Topics: scan
+[controller_server-5] [INFO] [1792194763.562552927] [robot1.local_costmap.local_costmap]: Initialized plugin "voxel_layer"
+[controller_server-5] [INFO] [1792194763.562674555] [robot1.local_costmap.local_costmap]: Using plugin "inflation_layer"
+[controller_server-5] [INFO] [1792194763.585207579] [robot1.local_costmap.local_costmap]: Initialized plugin "inflation_layer"
+[controller_server-5] [INFO] [1792194763.897849918] [robot1.controller_server]: Created progress_checker : progress_checker of type nav2_controller::SimpleProgressChecker
+[controller_server-5] [INFO] [1792194763.908055221] [robot1.controller_server]: Controller Server has progress_checker  progress checkers available.
+[controller_server-5] [INFO] [1792194763.912507408] [robot1.controller_server]: Created goal checker : goal_checker of type nav2_controller::SimpleGoalChecker
+[controller_server-5] [INFO] [1792194763.928799060] [robot1.controller_server]: Controller Server has goal_checker  goal checkers available.
+[controller_server-5] [INFO] [1792194763.942758201] [robot1.controller_server]: Created controller : FollowPath of type nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController
+[controller_server-5] [INFO] [1792194764.223036217] [robot1.controller_server]: Controller Server has FollowPath  controllers available.
+[lifecycle_manager-9] [INFO] [1792194764.570109095] [robot1.lifecycle_manager_navigation]: [34m[1mConfiguring planner_server[0m[0m
+[planner_server-6] [INFO] [1792194764.574652485] [robot1.planner_server]: Configuring
+[planner_server-6] [INFO] [1792194764.574787259] [robot1.global_costmap.global_costmap]: Configuring
+[planner_server-6] [INFO] [1792194765.239463628] [robot1.global_costmap.global_costmap]: Using plugin "static_layer"
+[planner_server-6] [INFO] [1792194765.290893667] [robot1.global_costmap.global_costmap]: Subscribing to the map topic (/robot1/map) with transient local durability
+[planner_server-6] [INFO] [1792194765.313972405] [robot1.global_costmap.global_costmap]: Initialized plugin "static_layer"
+[planner_server-6] [INFO] [1792194765.314089255] [robot1.global_costmap.global_costmap]: Using plugin "obstacle_layer"
+[planner_server-6] [INFO] [1792194765.353954321] [robot1.global_costmap.global_costmap]: Subscribed to Topics: scan
+[planner_server-6] [INFO] [1792194765.477335987] [robot1.global_costmap.global_costmap]: Initialized plugin "obstacle_layer"
+[planner_server-6] [INFO] [1792194765.477477462] [robot1.global_costmap.global_costmap]: Using plugin "inflation_layer"
+[planner_server-6] [INFO] [1792194765.511498714] [robot1.global_costmap.global_costmap]: Initialized plugin "inflation_layer"
+[planner_server-6] [INFO] [1792194766.070906144] [robot1.global_costmap.global_costmap]: StaticLayer: Resizing costmap to 461 X 99 at 0.060000 m/pix
+[planner_server-6] [INFO] [1792194766.119204058] [robot1.planner_server]: Created global planner plugin GridBased of type nav2_smac_planner::SmacPlannerHybrid
+[planner_server-6] [INFO] [1792194766.119392547] [robot1.planner_server]: Configuring GridBased of type SmacPlannerHybrid
+[planner_server-6] [WARN] [1792194766.323009583] [robot1.planner_server]: maximum iteration selected as <= 0, disabling maximum iterations.
+[planner_server-6] [INFO] [1792194766.326519003] [robot1.planner_server]: Even sized heuristic lookup table size set 166.000000, increasing size by 1 to make odd
+[planner_server-6] [INFO] [1792194780.900866664] [robot1.planner_server]: Configured plugin GridBased of type SmacPlannerHybrid with maximum iterations 2147483647, max on approach iterations 1000, and not allowing unknown traversal. Tolerance 0.50.Using motion model: Reeds-Shepp.
+[planner_server-6] [INFO] [1792194780.901027126] [robot1.planner_server]: Planner Server has GridBased  planners available.
+[lifecycle_manager-9] [INFO] [1792194781.074019166] [robot1.lifecycle_manager_navigation]: [34m[1mConfiguring behavior_server[0m[0m
+[behavior_server-7] [INFO] [1792194781.079909788] [robot1.behavior_server]: Configuring
+[behavior_server-7] [INFO] [1792194781.188388640] [robot1.behavior_server]: Creating behavior plugin spin of type nav2_behaviors::Spin
+[behavior_server-7] [INFO] [1792194781.210493649] [robot1.behavior_server]: Creating behavior plugin backup of type nav2_behaviors::BackUp
+[behavior_server-7] [INFO] [1792194781.219737218] [robot1.behavior_server]: Creating behavior plugin wait of type nav2_behaviors::Wait
+[behavior_server-7] [INFO] [1792194781.323366577] [robot1.behavior_server]: Configuring spin
+[behavior_server-7] [INFO] [1792194781.620890630] [robot1.behavior_server]: Configuring backup
+[behavior_server-7] [INFO] [1792194781.724022991] [robot1.behavior_server]: Configuring wait
+[lifecycle_manager-9] [INFO] [1792194781.831646561] [robot1.lifecycle_manager_navigation]: [34m[1mConfiguring bt_navigator[0m[0m
+[bt_navigator-8] [INFO] [1792194781.835971771] [robot1.bt_navigator]: Configuring
+[bt_navigator-8] [INFO] [1792194781.998036778] [robot1.bt_navigator]: Creating navigator id navigate_to_pose of type nav2_bt_navigator::NavigateToPoseNavigator
+[bt_navigator-8] [WARN] [1792194782.097648184] [robot1.bt_navigator]: Error_code parameters were not set. Using default values of: follow_path_error_code compute_path_error_code
+[bt_navigator-8] Make sure these match your BT and there are not other sources of error codes youreported to your application
+[ekf_node-3] [ERROR] [1792194782.212329449] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.079778822999999998711seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[bt_navigator-8] [INFO] [1792194783.429978062] [robot1.bt_navigator]: Creating navigator id navigate_through_poses of type nav2_bt_navigator::NavigateThroughPosesNavigator
+[lifecycle_manager-9] [INFO] [1792194784.724652257] [robot1.lifecycle_manager_navigation]: [34m[1mActivating controller_server[0m[0m
+[controller_server-5] [INFO] [1792194784.727200724] [robot1.controller_server]: Activating
+[controller_server-5] [INFO] [1792194784.729459331] [robot1.local_costmap.local_costmap]: Activating
+[controller_server-5] [INFO] [1792194784.729495585] [robot1.local_costmap.local_costmap]: Checking transform
+[controller_server-5] [INFO] [1792194784.731185148] [robot1.local_costmap.local_costmap]: start
+[controller_server-5] [INFO] [1792194784.954240601] [robot1.controller_server]: Activating controller: FollowPath of type regulated_pure_pursuit_controller::RegulatedPurePursuitController
+[controller_server-5] [INFO] [1792194784.954371914] [robot1.controller_server]: Creating bond (controller_server) to lifecycle manager.
+[lifecycle_manager-9] [INFO] [1792194785.103865628] [robot1.lifecycle_manager_navigation]: Server controller_server connected with bond.
+[lifecycle_manager-9] [INFO] [1792194785.103983163] [robot1.lifecycle_manager_navigation]: [34m[1mActivating planner_server[0m[0m
+[planner_server-6] [INFO] [1792194785.104931840] [robot1.planner_server]: Activating
+[planner_server-6] [INFO] [1792194785.105051401] [robot1.global_costmap.global_costmap]: Activating
+[planner_server-6] [INFO] [1792194785.105090904] [robot1.global_costmap.global_costmap]: Checking transform
+[planner_server-6] [INFO] [1792194785.106188764] [robot1.global_costmap.global_costmap]: start
+[planner_server-6] [INFO] [1792194786.172458597] [robot1.planner_server]: Activating plugin GridBased of type SmacPlannerHybrid
+[planner_server-6] [INFO] [1792194786.233416594] [robot1.planner_server]: Creating bond (planner_server) to lifecycle manager.
+[lifecycle_manager-9] [INFO] [1792194786.395866031] [robot1.lifecycle_manager_navigation]: Server planner_server connected with bond.
+[lifecycle_manager-9] [INFO] [1792194786.395988117] [robot1.lifecycle_manager_navigation]: [34m[1mActivating behavior_server[0m[0m
+[behavior_server-7] [INFO] [1792194786.398117504] [robot1.behavior_server]: Activating
+[behavior_server-7] [INFO] [1792194786.398207533] [robot1.behavior_server]: Activating spin
+[behavior_server-7] [INFO] [1792194786.398282919] [robot1.behavior_server]: Activating backup
+[behavior_server-7] [INFO] [1792194786.398313944] [robot1.behavior_server]: Activating wait
+[behavior_server-7] [INFO] [1792194786.398355629] [robot1.behavior_server]: Creating bond (behavior_server) to lifecycle manager.
+[lifecycle_manager-9] [INFO] [1792194786.560287259] [robot1.lifecycle_manager_navigation]: Server behavior_server connected with bond.
+[lifecycle_manager-9] [INFO] [1792194786.560416635] [robot1.lifecycle_manager_navigation]: [34m[1mActivating bt_navigator[0m[0m
+[bt_navigator-8] [INFO] [1792194786.561359241] [robot1.bt_navigator]: Activating
+[bt_navigator-8] Warnings: The first tag of the XML (<root>) should contain the attribute [BTCPP_format="4"]
+[bt_navigator-8] Please check if your XML is compatible with version 4.x of BT.CPP
+[ekf_node-3] [ERROR] [1792194786.769165678] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.1660922210000000121seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[planner_server-6] [INFO] [1792194786.786932394] [robot1.global_costmap.global_costmap]: Message Filter dropping message: frame 'laser' at time 1792194786.484 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[bt_navigator-8] Warnings: The first tag of the XML (<root>) should contain the attribute [BTCPP_format="4"]
+[bt_navigator-8] Please check if your XML is compatible with version 4.x of BT.CPP
+[bt_navigator-8] [INFO] [1792194789.005209646] [robot1.bt_navigator]: Creating bond (bt_navigator) to lifecycle manager.
+[lifecycle_manager-9] [INFO] [1792194789.187790068] [robot1.lifecycle_manager_navigation]: Server bt_navigator connected with bond.
+[lifecycle_manager-9] [INFO] [1792194789.188487772] [robot1.lifecycle_manager_navigation]: [34m[1mManaged nodes are active[0m[0m
+[lifecycle_manager-9] [INFO] [1792194789.188535689] [robot1.lifecycle_manager_navigation]: [34m[1mCreating bond timer...[0m[0m
+[ekf_node-3] [ERROR] [1792194796.143476435] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.076865266000000001534seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194796.888702608] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.22129879799999999102seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[controller_server-5] [INFO] [1792194796.944908908] [robot1.local_costmap.local_costmap]: Message Filter dropping message: frame 'laser' at time 1792194796.629 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[planner_server-6] [INFO] [1792194797.633570095] [robot1.global_costmap.global_costmap]: Message Filter dropping message: frame 'laser' at time 1792194797.276 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[ekf_node-3] [ERROR] [1792194797.800265705] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.39879286099999999848seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194798.229498222] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.29665136899999999809seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194798.635974354] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.303269029999999995seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194799.411023731] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.53824430300000003502seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[controller_server-5] [INFO] [1792194808.652946641] [robot1.local_costmap.local_costmap]: Message Filter dropping message: frame 'laser' at time 1792194808.335 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[planner_server-6] [INFO] [1792194808.861546146] [robot1.global_costmap.global_costmap]: Message Filter dropping message: frame 'laser' at time 1792194808.461 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[ekf_node-3] [ERROR] [1792194809.118600512] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.49237830199999998992seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194809.426581292] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.084447823000000005189seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194809.618708912] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.07497928700000000557seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194809.704857213] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.081157347000000004678seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194811.417075738] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.082796706999999997167seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[controller_server-5] [INFO] [1792194811.892773126] [robot1.local_costmap.local_costmap]: Message Filter dropping message: frame 'laser' at time 1792194811.582 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[ekf_node-3] [ERROR] [1792194811.893732208] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.22763420400000000665seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194812.079645434] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.08012273699999999943seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194813.244681426] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.14786741999999999941seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194813.436502890] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.099417931000000001052seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[controller_server-5] [INFO] [1792194825.155506705] [robot1.local_costmap.local_costmap]: Message Filter dropping message: frame 'laser' at time 1792194824.844 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[planner_server-6] [INFO] [1792194825.158540537] [robot1.global_costmap.global_costmap]: Message Filter dropping message: frame 'laser' at time 1792194824.844 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[ekf_node-3] [ERROR] [1792194825.792684822] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.71527536999999996592seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194826.346072829] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.47799016799999999305seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194826.793111188] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.38633833899999997508seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194826.935248236] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.12803430099999998926seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194827.068352367] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.13253440899999999192seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194827.335550307] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.20079070700000001271seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194827.469713151] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.070269380000000006281seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[controller_server-5] [INFO] [1792194827.750746626] [robot1.local_costmap.local_costmap]: Message Filter dropping message: frame 'laser' at time 1792194827.444 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[ekf_node-3] [ERROR] [1792194827.819903765] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.22067399700000001062seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[planner_server-6] [INFO] [1792194828.257574395] [robot1.global_costmap.global_costmap]: Message Filter dropping message: frame 'laser' at time 1792194827.830 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[ekf_node-3] [ERROR] [1792194828.461510966] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.59442203599999998698seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194828.727922733] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.18805215799999999704seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194922.739688801] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.074322758000000002654seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194922.897001932] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.12665798799999999913seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[controller_server-5] [INFO] [1792194923.149894410] [robot1.local_costmap.local_costmap]: Message Filter dropping message: frame 'laser' at time 1792194922.838 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[planner_server-6] [INFO] [1792194923.193407003] [robot1.global_costmap.global_costmap]: Message Filter dropping message: frame 'laser' at time 1792194922.838 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[ekf_node-3] [ERROR] [1792194923.337957104] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.33552656199999997266seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194923.686785387] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.22131713999999999554seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194925.220564280] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.082728949999999995546seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194925.494767026] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.071214447000000000165seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[controller_server-5] [INFO] [1792194926.020179077] [robot1.local_costmap.local_costmap]: Message Filter dropping message: frame 'laser' at time 1792194925.700 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[ekf_node-3] [ERROR] [1792194926.101040181] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.16822936299999999288seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[planner_server-6] [INFO] [1792194926.809087344] [robot1.global_costmap.global_costmap]: Message Filter dropping message: frame 'laser' at time 1792194926.476 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[ekf_node-3] [ERROR] [1792194927.582253833] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.11685987899999999984seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194927.670301801] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.087731188000000001614seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194927.962850253] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.15023217199999999716seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194928.363751586] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.069920656999999997172seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194928.582375188] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.1487577330000000031seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194928.815688639] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.081389876999999999363seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[controller_server-5] [INFO] [1792194928.968518241] [robot1.local_costmap.local_costmap]: Message Filter dropping message: frame 'laser' at time 1792194928.174 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[ekf_node-3] [ERROR] [1792194930.600084685] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.13425187899999999064seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194931.213062225] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.079543663000000000562seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[planner_server-6] [INFO] [1792194931.514557161] [robot1.global_costmap.global_costmap]: Message Filter dropping message: frame 'laser' at time 1792194930.903 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[controller_server-5] [INFO] [1792194932.779434812] [robot1.local_costmap.local_costmap]: Message Filter dropping message: frame 'laser' at time 1792194932.460 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[ekf_node-3] [ERROR] [1792194971.518456256] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.11411374300000000359seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[planner_server-6] [INFO] [1792194974.024284967] [robot1.global_costmap.global_costmap]: Message Filter dropping message: frame 'laser' at time 1792194973.684 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[ekf_node-3] [ERROR] [1792194974.110914808] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.080426402999999993537seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[controller_server-5] [INFO] [1792194974.233403957] [robot1.local_costmap.local_costmap]: Message Filter dropping message: frame 'laser' at time 1792194973.812 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[ekf_node-3] [ERROR] [1792194976.281491828] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.1119547449999999944seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194976.485553756] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.085572335999999998846seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[planner_server-6] [INFO] [1792194976.591620155] [robot1.global_costmap.global_costmap]: Message Filter dropping message: frame 'laser' at time 1792194976.284 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[ekf_node-3] [ERROR] [1792194976.987281443] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.18792909199999999204seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[controller_server-5] [INFO] [1792194977.534489781] [robot1.local_costmap.local_costmap]: Message Filter dropping message: frame 'laser' at time 1792194977.196 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[planner_server-6] [INFO] [1792194980.371577340] [robot1.global_costmap.global_costmap]: Message Filter dropping message: frame 'laser' at time 1792194980.060 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[ekf_node-3] [ERROR] [1792194982.775321557] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.10921431400000000678seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[controller_server-5] [INFO] [1792194982.857385298] [robot1.local_costmap.local_costmap]: Message Filter dropping message: frame 'laser' at time 1792194982.543 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[planner_server-6] [INFO] [1792194982.983501808] [robot1.global_costmap.global_costmap]: Message Filter dropping message: frame 'laser' at time 1792194982.672 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[ekf_node-3] [ERROR] [1792194983.127391973] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.35172338300000000055seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194983.541939222] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.20926800900000000483seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194984.243574494] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.10482816000000000356seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194984.428591706] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.16387196400000000884seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194985.397363159] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.32156016999999997852seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[controller_server-5] [INFO] [1792194985.452895613] [robot1.local_costmap.local_costmap]: Message Filter dropping message: frame 'laser' at time 1792194985.140 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[planner_server-6] [INFO] [1792194985.527766862] [robot1.global_costmap.global_costmap]: Message Filter dropping message: frame 'laser' at time 1792194985.140 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[ekf_node-3] [ERROR] [1792194985.779873044] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.11019767399999999546seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194986.009253472] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.076191632999999994724seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194986.212120373] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.14611359099999998712seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194986.357185441] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.09122883900000000601seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194986.613433792] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.14702801500000001189seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194986.913864508] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.11404012800000000449seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194987.174640321] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.17527054300000000087seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194987.731438231] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.26069243600000002736seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792194988.002785150] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.069964870999999997925seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[planner_server-6] [INFO] [1792194991.445138871] [robot1.global_costmap.global_costmap]: Message Filter dropping message: frame 'laser' at time 1792194991.124 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[planner_server-6] [WARN] [1792194991.615352678] [robot1.planner_server]: No planners specified in action call. Server will use only plugin GridBased  in server. This warning will appear once.
+[ekf_node-3] [ERROR] [1792194991.955349052] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.075244088000000000638seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[bt_navigator-8] [INFO] [1792195029.750368537] [robot1.bt_navigator]: Begin navigating from current location (21.81, 0.98) to (16.54, 1.30)
+[controller_server-5] [INFO] [1792195029.818910364] [robot1.controller_server]: Received a goal, begin computing control effort.
+[controller_server-5] [WARN] [1792195029.819048801] [robot1.controller_server]: No goal checker was specified in parameter 'current_goal_checker'. Server will use only plugin loaded goal_checker . This warning will appear once.
+[controller_server-5] [WARN] [1792195029.819153445] [robot1.controller_server]: No progress checker was specified in parameter 'current_progress_checker'. Server will use only plugin loaded progress_checker . This warning will appear once.
+[controller_server-5] [INFO] [1792195030.919667703] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195032.019792638] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195033.119377736] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195034.119544490] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195035.219503631] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195035.819952676] [robot1.controller_server]: Reached the goal!
+[bt_navigator-8] [INFO] [1792195035.856530789] [robot1.bt_navigator]: Goal succeeded
+[bt_navigator-8] [INFO] [1792195041.389511502] [robot1.bt_navigator]: Begin navigating from current location (16.95, 2.59) to (22.10, 0.64)
+[controller_server-5] [INFO] [1792195041.453833787] [robot1.controller_server]: Received a goal, begin computing control effort.
+[controller_server-5] [INFO] [1792195042.554144743] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195043.654165301] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195044.655039940] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195045.754823234] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195046.854494888] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195047.754667941] [robot1.controller_server]: Reached the goal!
+[bt_navigator-8] [INFO] [1792195047.791014486] [robot1.bt_navigator]: Goal succeeded
+[bt_navigator-8] [INFO] [1792195126.090404979] [robot1.bt_navigator]: Begin navigating from current location (21.92, 1.11) to (16.54, 1.30)
+[controller_server-5] [INFO] [1792195126.162841100] [robot1.controller_server]: Received a goal, begin computing control effort.
+[controller_server-5] [INFO] [1792195127.263171468] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195128.363343390] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195129.463250023] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195130.563356886] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195131.563195556] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195131.863327817] [robot1.controller_server]: Reached the goal!
+[bt_navigator-8] [INFO] [1792195131.893270943] [robot1.bt_navigator]: Goal succeeded
+[ekf_node-3] [ERROR] [1792195139.497438950] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.094574730999999995218seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[bt_navigator-8] [INFO] [1792195139.682499884] [robot1.bt_navigator]: Begin navigating from current location (18.04, 1.33) to (22.10, 0.64)
+[controller_server-5] [INFO] [1792195139.725302033] [robot1.controller_server]: Received a goal, begin computing control effort.
+[controller_server-5] [INFO] [1792195140.825673555] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195141.926631352] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195142.925612160] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195143.425789449] [robot1.controller_server]: Reached the goal!
+[bt_navigator-8] [INFO] [1792195143.441935852] [robot1.bt_navigator]: Goal succeeded
+[ekf_node-3] [ERROR] [1792195317.631668918] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.091689467999999996195seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792195317.959031760] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.092819541000000005404seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792195318.390205177] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.06999235400000000662seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792195321.400533720] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.19854277300000000572seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792195322.172979876] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.10544201599999999952seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792195322.372288200] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.18480925800000000403seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[planner_server-6] [INFO] [1792195322.382075266] [robot1.global_costmap.global_costmap]: Message Filter dropping message: frame 'laser' at time 1792195322.051 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[controller_server-5] [INFO] [1792195322.391750786] [robot1.local_costmap.local_costmap]: Message Filter dropping message: frame 'laser' at time 1792195322.051 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[ekf_node-3] [ERROR] [1792195327.177042279] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.084707717000000001817seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792195342.622323369] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.088842286000000006418seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792195668.558975259] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.093830700000000002992seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[controller_server-5] [INFO] [1792195668.740808660] [robot1.local_costmap.local_costmap]: Message Filter dropping message: frame 'laser' at time 1792195668.431 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[planner_server-6] [INFO] [1792195668.744638169] [robot1.global_costmap.global_costmap]: Message Filter dropping message: frame 'laser' at time 1792195668.431 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[ekf_node-3] [ERROR] [1792195669.271548511] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.13912536000000000347seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792195669.667264343] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.066797747000000004536seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792195688.509209015] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.090700565999999996358seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792195690.106055608] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.17986107800000000756seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[planner_server-6] [INFO] [1792195690.304835754] [robot1.global_costmap.global_costmap]: Message Filter dropping message: frame 'laser' at time 1792195689.967 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[ekf_node-3] [ERROR] [1792195690.533676048] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.068232919000000002985seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792195690.805645022] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.07335777899999999796seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792195691.154153070] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.088751965000000002104seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792195691.580237126] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.24034223800000001359seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[controller_server-5] [INFO] [1792195691.609805732] [robot1.local_costmap.local_costmap]: Message Filter dropping message: frame 'laser' at time 1792195691.277 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[ekf_node-3] [ERROR] [1792195691.765939696] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.098949216000000006499seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792195692.674688803] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.075380560999999998706seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792195693.859823370] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.085130111999999993899seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[planner_server-6] [INFO] [1792195695.619619613] [robot1.global_costmap.global_costmap]: Message Filter dropping message: frame 'laser' at time 1792195695.311 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[ekf_node-3] [ERROR] [1792195733.682937757] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.078216428000000004506seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[planner_server-6] [INFO] [1792195733.746631453] [robot1.global_costmap.global_costmap]: Message Filter dropping message: frame 'laser' at time 1792195733.415 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[ekf_node-3] [ERROR] [1792195734.666868330] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.066850717000000003942seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792195734.746682008] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.074699090999999995244seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792195735.556196798] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.090572369999999999268seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792195739.644703709] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.10728429000000000437seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[bt_navigator-8] [INFO] [1792195819.037236648] [robot1.bt_navigator]: Begin navigating from current location (22.89, 1.29) to (16.54, 1.30)
+[controller_server-5] [INFO] [1792195819.090290023] [robot1.controller_server]: Received a goal, begin computing control effort.
+[controller_server-5] [INFO] [1792195820.190665930] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195821.290630671] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195822.393272557] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195823.390664274] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195824.490992895] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195825.490622422] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195825.790901124] [robot1.controller_server]: Reached the goal!
+[bt_navigator-8] [INFO] [1792195825.827407337] [robot1.bt_navigator]: Goal succeeded
+[bt_navigator-8] [INFO] [1792195841.525288770] [robot1.bt_navigator]: Begin navigating from current location (16.04, 1.42) to (16.54, 1.30)
+[controller_server-5] [INFO] [1792195841.582856061] [robot1.controller_server]: Received a goal, begin computing control effort.
+[controller_server-5] [INFO] [1792195842.184810152] [robot1.controller_server]: Reached the goal!
+[bt_navigator-8] [INFO] [1792195842.222041780] [robot1.bt_navigator]: Goal succeeded
+[bt_navigator-8] [INFO] [1792195851.186450646] [robot1.bt_navigator]: Begin navigating from current location (18.13, 0.93) to (22.10, 0.64)
+[controller_server-5] [INFO] [1792195851.278735008] [robot1.controller_server]: Received a goal, begin computing control effort.
+[controller_server-5] [INFO] [1792195852.381455593] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195853.481344530] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195854.481467059] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195855.581207039] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195855.981834305] [robot1.controller_server]: Reached the goal!
+[bt_navigator-8] [INFO] [1792195856.019052094] [robot1.bt_navigator]: Goal succeeded
+[bt_navigator-8] [INFO] [1792195971.440705796] [robot1.bt_navigator]: Begin navigating from current location (22.02, 1.30) to (9.31, 2.21)
+[controller_server-5] [INFO] [1792195971.514835450] [robot1.controller_server]: Received a goal, begin computing control effort.
+[controller_server-5] [INFO] [1792195972.618625501] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195973.725933903] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195974.919292651] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195975.916822653] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195977.017047621] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195978.016765547] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195979.116762359] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195980.117310375] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195981.217038523] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195982.219025579] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195983.316773328] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195984.316851600] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195985.417023537] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195986.417285242] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195987.517045024] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195988.518971108] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195989.616769989] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195990.616796806] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195991.716796899] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195992.717668376] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195993.717251254] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195994.817013078] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195995.817001828] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195996.916765000] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792195997.317579737] [robot1.controller_server]: Reached the goal!
+[bt_navigator-8] [INFO] [1792195997.346917707] [robot1.bt_navigator]: Goal succeeded
+[bt_navigator-8] [INFO] [1792196004.960520379] [robot1.bt_navigator]: Begin navigating from current location (9.45, 1.81) to (9.31, 2.21)
+[controller_server-5] [INFO] [1792196004.997140498] [robot1.controller_server]: Received a goal, begin computing control effort.
+[controller_server-5] [INFO] [1792196004.997453890] [robot1.controller_server]: Reached the goal!
+[bt_navigator-8] [INFO] [1792196005.022320669] [robot1.bt_navigator]: Goal succeeded
+[bt_navigator-8] [INFO] [1792196015.252471636] [robot1.bt_navigator]: Begin navigating from current location (8.12, 1.71) to (22.10, 0.64)
+[controller_server-5] [INFO] [1792196015.558018864] [robot1.controller_server]: Received a goal, begin computing control effort.
+[controller_server-5] [INFO] [1792196017.059294262] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196018.458403410] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196019.758408802] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196021.059030170] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196022.258468423] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196023.458472964] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196024.858670773] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196026.058408101] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196027.159886197] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196028.258672050] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [ERROR] [1792196028.796916660] [robot1.controller_server]: RegulatedPurePursuitController detected collision ahead!
+[controller_server-5] [WARN] [1792196028.797630739] [robot1.controller_server]: [follow_path] [ActionServer] Aborting handle.
+[controller_server-5] [INFO] [1792196028.825635135] [robot1.local_costmap.local_costmap]: Received request to clear entirely the local_costmap
+[controller_server-5] [INFO] [1792196028.832520182] [robot1.controller_server]: Received a goal, begin computing control effort.
+[controller_server-5] [WARN] [1792196029.014783248] [robot1.controller_server]: Control loop missed its desired rate of 10.0000 Hz. Current loop rate is 5.4929 Hz.
+[controller_server-5] [INFO] [1792196029.218653397] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196030.318592993] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196031.318357792] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196031.918671409] [robot1.controller_server]: Reached the goal!
+[bt_navigator-8] [INFO] [1792196031.930759812] [robot1.bt_navigator]: Goal succeeded
+[bt_navigator-8] [INFO] [1792196205.325673695] [robot1.bt_navigator]: Begin navigating from current location (22.01, 0.61) to (22.10, 0.64)
+[controller_server-5] [INFO] [1792196205.357645929] [robot1.controller_server]: Received a goal, begin computing control effort.
+[controller_server-5] [INFO] [1792196205.358647889] [robot1.controller_server]: Reached the goal!
+[bt_navigator-8] [INFO] [1792196205.377897947] [robot1.bt_navigator]: Goal succeeded
+[bt_navigator-8] [INFO] [1792196236.077405426] [robot1.bt_navigator]: Begin navigating from current location (20.85, 1.65) to (9.31, 2.21)
+[controller_server-5] [INFO] [1792196236.120128344] [robot1.controller_server]: Received a goal, begin computing control effort.
+[controller_server-5] [INFO] [1792196237.220486739] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196238.320528903] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196239.420487794] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196240.528051476] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196241.620481528] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196242.720479531] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196243.720612633] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196244.822012346] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196245.920611928] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196246.920770875] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196248.020612614] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196249.120475954] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196250.120740093] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196250.620901231] [robot1.controller_server]: Reached the goal!
+[bt_navigator-8] [INFO] [1792196250.650988885] [robot1.bt_navigator]: Goal succeeded
+[bt_navigator-8] [INFO] [1792196366.227894498] [robot1.bt_navigator]: Begin navigating from current location (9.59, 1.23) to (22.10, 0.64)
+[controller_server-5] [INFO] [1792196366.323805200] [robot1.controller_server]: Received a goal, begin computing control effort.
+[controller_server-5] [INFO] [1792196367.424387874] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196368.524245039] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196369.625050328] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196370.824134208] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196371.824146720] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196372.924151481] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196374.024182228] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196375.024097756] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196376.124102499] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196377.224306918] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196378.224529260] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196379.324403088] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196379.328311032] [robot1.controller_server]: Reached the goal!
+[bt_navigator-8] [INFO] [1792196379.362983621] [robot1.bt_navigator]: Goal succeeded
+[bt_navigator-8] [INFO] [1792196389.015259377] [robot1.bt_navigator]: Begin navigating from current location (21.29, 1.22) to (17.22, 2.00)
+[controller_server-5] [INFO] [1792196389.067741863] [robot1.controller_server]: Received a goal, begin computing control effort.
+[controller_server-5] [INFO] [1792196390.168060881] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196391.270143895] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196392.269419323] [robot1.controller_server]: Passing new path to controller.
+[planner_server-6] [WARN] [1792196393.248191167] [robot1.planner_server]: GridBased plugin failed to plan from (17.94, 2.18) to (17.22, 2.00): "Start occupied"
+[planner_server-6] [WARN] [1792196393.248456159] [robot1.planner_server]: [compute_path_to_pose] [ActionServer] Aborting handle.
+[planner_server-6] [INFO] [1792196393.272083182] [robot1.global_costmap.global_costmap]: Received request to clear entirely the global_costmap
+[controller_server-5] [INFO] [1792196393.370661516] [robot1.controller_server]: Reached the goal!
+[bt_navigator-8] [ERROR] [1792196393.417304719] [robot1.bt_navigator_navigate_to_pose_rclcpp_node]: Failed to get result for compute_path_to_pose in node halt!
+[bt_navigator-8] [INFO] [1792196393.421581453] [robot1.bt_navigator]: Goal succeeded
+[planner_server-6] [INFO] [1792196394.117754816] [robot1.planner_server]: Goal was canceled. Canceling planning action.
+[planner_server-6] [INFO] [1792196394.117935095] [robot1.planner_server]: [compute_path_to_pose] [ActionServer] Client requested to cancel the goal. Cancelling.
+[bt_navigator-8] [INFO] [1792196521.693316946] [robot1.bt_navigator]: Begin navigating from current location (16.37, 1.07) to (22.10, 0.64)
+[controller_server-5] [INFO] [1792196521.748721461] [robot1.controller_server]: Received a goal, begin computing control effort.
+[controller_server-5] [INFO] [1792196522.849129747] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196523.849506184] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196524.949176092] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196526.049333331] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196527.049048415] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196528.149350982] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196528.149908573] [robot1.controller_server]: Reached the goal!
+[bt_navigator-8] [INFO] [1792196528.182683090] [robot1.bt_navigator]: Goal succeeded
+[bt_navigator-8] [INFO] [1792196544.043845625] [robot1.bt_navigator]: Begin navigating from current location (21.84, 1.68) to (6.20, 2.00)
+[controller_server-5] [INFO] [1792196544.086289718] [robot1.controller_server]: Received a goal, begin computing control effort.
+[controller_server-5] [INFO] [1792196545.186995262] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196546.287805737] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196547.386675660] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196548.486720296] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196549.486887246] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196550.586619539] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196551.686629255] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196552.786624254] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196553.886982210] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196554.886807936] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196555.986914303] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196556.986675016] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196558.086660787] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196559.186631047] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196560.186574727] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196560.386762841] [robot1.controller_server]: Reached the goal!
+[bt_navigator-8] [INFO] [1792196560.420879902] [robot1.bt_navigator]: Goal succeeded
+[bt_navigator-8] [INFO] [1792196579.518685406] [robot1.bt_navigator]: Begin navigating from current location (6.10, 2.25) to (6.20, 2.00)
+[controller_server-5] [INFO] [1792196579.576567726] [robot1.controller_server]: Received a goal, begin computing control effort.
+[controller_server-5] [INFO] [1792196579.576867212] [robot1.controller_server]: Reached the goal!
+[bt_navigator-8] [INFO] [1792196579.602401393] [robot1.bt_navigator]: Goal succeeded
+[bt_navigator-8] [INFO] [1792196586.936461361] [robot1.bt_navigator]: Begin navigating from current location (5.72, 1.36) to (22.10, 0.64)
+[controller_server-5] [INFO] [1792196587.048451570] [robot1.controller_server]: Received a goal, begin computing control effort.
+[controller_server-5] [INFO] [1792196588.249101678] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196589.248941136] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196590.348909484] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196591.448867145] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196592.449214695] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196593.549018402] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196594.648852037] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196595.748952407] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196596.749118458] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196597.848982243] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196598.848855818] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196599.948987656] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196600.948850592] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196602.048849375] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196603.150500298] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196604.149143321] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196605.148839327] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196605.749094756] [robot1.controller_server]: Reached the goal!
+[bt_navigator-8] [INFO] [1792196605.784277075] [robot1.bt_navigator]: Goal succeeded
+[bt_navigator-8] [INFO] [1792196756.346317066] [robot1.bt_navigator]: Begin navigating from current location (22.14, 0.71) to (22.10, 0.64)
+[controller_server-5] [INFO] [1792196756.378855061] [robot1.controller_server]: Received a goal, begin computing control effort.
+[controller_server-5] [INFO] [1792196756.379152341] [robot1.controller_server]: Reached the goal!
+[bt_navigator-8] [INFO] [1792196756.409370145] [robot1.bt_navigator]: Goal succeeded
+[bt_navigator-8] [INFO] [1792196780.267603932] [robot1.bt_navigator]: Begin navigating from current location (20.46, 1.36) to (6.20, 2.00)
+[controller_server-5] [INFO] [1792196780.400040657] [robot1.controller_server]: Received a goal, begin computing control effort.
+[controller_server-5] [INFO] [1792196781.502555849] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196782.602434939] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196783.702651563] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196784.802395277] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196785.802423634] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196786.902405980] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196787.902821282] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196789.002535333] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196790.002456629] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196791.102457154] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196792.102852172] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196793.202832387] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196794.202519453] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196795.303566736] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196796.302386627] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196796.304103262] [robot1.controller_server]: Reached the goal!
+[bt_navigator-8] [INFO] [1792196796.350073860] [robot1.bt_navigator]: Goal succeeded
+[bt_navigator-8] [INFO] [1792196829.275097808] [robot1.bt_navigator]: Begin navigating from current location (7.10, 2.30) to (9.31, 2.21)
+[controller_server-5] [INFO] [1792196829.358101484] [robot1.controller_server]: Received a goal, begin computing control effort.
+[controller_server-5] [INFO] [1792196830.459150857] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196831.458509819] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196832.558962612] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196832.758711543] [robot1.controller_server]: Reached the goal!
+[bt_navigator-8] [INFO] [1792196832.790901123] [robot1.bt_navigator]: Goal succeeded
+[bt_navigator-8] [INFO] [1792196834.885794166] [robot1.bt_navigator]: Begin navigating from current location (9.41, 1.98) to (22.10, 0.64)
+[controller_server-5] [INFO] [1792196834.947381053] [robot1.controller_server]: Received a goal, begin computing control effort.
+[controller_server-5] [INFO] [1792196836.050607914] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196837.147831299] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196838.148650512] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196839.247903403] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196840.248296819] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196841.349337885] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196842.348279886] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196843.449306578] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196844.448272944] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196845.550283640] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196846.647841230] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196847.647769560] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196848.747749151] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196849.748594383] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196849.947882695] [robot1.controller_server]: Reached the goal!
+[bt_navigator-8] [INFO] [1792196849.984443491] [robot1.bt_navigator]: Goal succeeded
+[bt_navigator-8] [INFO] [1792196955.498482398] [robot1.bt_navigator]: Begin navigating from current location (22.58, 1.15) to (17.22, 2.00)
+[controller_server-5] [INFO] [1792196955.550781494] [robot1.controller_server]: Received a goal, begin computing control effort.
+[controller_server-5] [INFO] [1792196956.651895819] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196957.751131446] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196958.751186742] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196959.851268137] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196960.951122435] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196961.951715381] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196962.251400692] [robot1.controller_server]: Reached the goal!
+[bt_navigator-8] [INFO] [1792196962.295828503] [robot1.bt_navigator]: Goal succeeded
+[bt_navigator-8] [INFO] [1792196970.392143633] [robot1.bt_navigator]: Begin navigating from current location (16.11, 1.34) to (22.10, 0.64)
+[controller_server-5] [INFO] [1792196970.455602868] [robot1.controller_server]: Received a goal, begin computing control effort.
+[controller_server-5] [INFO] [1792196971.555949313] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196972.656012887] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196973.755938002] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196974.856026619] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196975.855983909] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196976.856136040] [robot1.controller_server]: Passing new path to controller.
+[controller_server-5] [INFO] [1792196977.856316964] [robot1.controller_server]: Reached the goal!
+[bt_navigator-8] [INFO] [1792196977.881681830] [robot1.bt_navigator]: Goal succeeded
+[bt_navigator-8] [INFO] [1792197338.344055141] [robot1.bt_navigator]: Begin navigating from current location (22.02, 0.62) to (22.10, 0.64)
+[controller_server-5] [INFO] [1792197338.380827681] [robot1.controller_server]: Received a goal, begin computing control effort.
+[controller_server-5] [INFO] [1792197338.383794842] [robot1.controller_server]: Reached the goal!
+[bt_navigator-8] [INFO] [1792197338.410583945] [robot1.bt_navigator]: Goal succeeded
+[ekf_node-3] [ERROR] [1792197695.390740816] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.11979310599999999642seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792197695.459870489] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.068792406999999999861seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[controller_server-5] [INFO] [1792197695.720899813] [robot1.local_costmap.local_costmap]: Message Filter dropping message: frame 'laser' at time 1792197695.365 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[ekf_node-3] [ERROR] [1792197695.975471471] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.10635268600000000183seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[planner_server-6] [INFO] [1792197696.043149521] [robot1.global_costmap.global_costmap]: Message Filter dropping message: frame 'laser' at time 1792197695.629 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[ekf_node-3] [ERROR] [1792197697.349680814] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.076968390999999997115seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792197700.338270980] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.14147685700000001141seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[planner_server-6] [INFO] [1792197700.850950119] [robot1.global_costmap.global_costmap]: Message Filter dropping message: frame 'laser' at time 1792197700.473 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[ekf_node-3] [ERROR] [1792197701.178673003] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.15434371899999999034seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.
+[ekf_node-3] [ERROR] [1792197702.834085601] [robot1.ekf_filter_node]: Failed to meet update rate! Took 0.078645144000000000162seconds. Try decreasing the rate, limiting sensor output frequency, or limiting the number of sensors.

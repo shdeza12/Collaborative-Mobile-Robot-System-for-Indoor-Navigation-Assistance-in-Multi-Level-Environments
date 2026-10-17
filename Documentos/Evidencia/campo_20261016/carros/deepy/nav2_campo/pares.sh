@@ -1,0 +1,1 @@
+export ROS_STATIC_PEERS="192.168.0.105"

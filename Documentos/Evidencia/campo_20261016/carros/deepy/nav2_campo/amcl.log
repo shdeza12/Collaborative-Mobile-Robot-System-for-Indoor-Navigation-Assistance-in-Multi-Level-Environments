@@ -1,0 +1,40 @@
+[INFO] [1792194685.406542734] [robot1.amcl]: 
+	amcl lifecycle node launched. 
+	Waiting on external lifecycle transitions to activate
+	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[INFO] [1792194685.407731209] [robot1.amcl]: Creating
+[INFO] [1792194697.243837672] [robot1.amcl]: Configuring
+[INFO] [1792194697.244280825] [robot1.amcl]: initTransforms
+[INFO] [1792194697.344687496] [robot1.amcl]: initPubSub
+[INFO] [1792194697.444713814] [robot1.amcl]: Subscribed to map topic.
+[INFO] [1792194697.503571642] [robot1.amcl]: Received a 461 X 99 map @ 0.060 m/pix
+[INFO] [1792194698.503255789] [robot1.amcl]: Message Filter dropping message: frame 'laser' at time 1792194697.348 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[INFO] [1792194701.077632527] [robot1.amcl]: Message Filter dropping message: frame 'laser' at time 1792194700.077 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[INFO] [1792194703.677436742] [robot1.amcl]: Message Filter dropping message: frame 'laser' at time 1792194702.676 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[INFO] [1792194706.277921257] [robot1.amcl]: Message Filter dropping message: frame 'laser' at time 1792194705.277 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[INFO] [1792194707.441504225] [robot1.amcl]: Activating
+[INFO] [1792194707.441666499] [robot1.amcl]: initialPoseReceived
+[INFO] [1792194707.441985057] [robot1.amcl]: Setting pose (1792194707.441985): 0.000 0.000 0.000
+[INFO] [1792194707.443577621] [robot1.amcl]: Creating bond (amcl) to lifecycle manager.
+[INFO] [1792194708.869856146] [robot1.amcl]: Message Filter dropping message: frame 'laser' at time 1792194707.869 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[INFO] [1792194711.470259895] [robot1.amcl]: Message Filter dropping message: frame 'laser' at time 1792194710.469 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[INFO] [1792194714.069903518] [robot1.amcl]: Message Filter dropping message: frame 'laser' at time 1792194713.068 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[INFO] [1792194716.675811891] [robot1.amcl]: Message Filter dropping message: frame 'laser' at time 1792194715.668 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[INFO] [1792194719.272800125] [robot1.amcl]: Message Filter dropping message: frame 'laser' at time 1792194718.269 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[INFO] [1792194721.869333833] [robot1.amcl]: Message Filter dropping message: frame 'laser' at time 1792194720.868 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[INFO] [1792194724.473953787] [robot1.amcl]: Message Filter dropping message: frame 'laser' at time 1792194723.469 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[INFO] [1792194727.065911684] [robot1.amcl]: Message Filter dropping message: frame 'laser' at time 1792194726.061 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[INFO] [1792194729.668124472] [robot1.amcl]: Message Filter dropping message: frame 'laser' at time 1792194728.665 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[INFO] [1792194732.289689826] [robot1.amcl]: Message Filter dropping message: frame 'laser' at time 1792194731.260 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[INFO] [1792194734.885140150] [robot1.amcl]: Message Filter dropping message: frame 'laser' at time 1792194733.861 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[INFO] [1792194737.484335679] [robot1.amcl]: Message Filter dropping message: frame 'laser' at time 1792194736.463 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[INFO] [1792194740.130481901] [robot1.amcl]: Message Filter dropping message: frame 'laser' at time 1792194739.075 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[INFO] [1792194742.666293569] [robot1.amcl]: Message Filter dropping message: frame 'laser' at time 1792194741.664 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[INFO] [1792194745.255490064] [robot1.amcl]: Message Filter dropping message: frame 'laser' at time 1792194744.252 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[INFO] [1792194747.862568919] [robot1.amcl]: Message Filter dropping message: frame 'laser' at time 1792194746.854 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[INFO] [1792194750.454199831] [robot1.amcl]: Message Filter dropping message: frame 'laser' at time 1792194749.452 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[INFO] [1792194753.055529412] [robot1.amcl]: Message Filter dropping message: frame 'laser' at time 1792194752.052 for reason 'the timestamp on the message is earlier than all the data in the transform cache'
+[INFO] [1792194753.805747699] [robot1.amcl]: createLaserObject
+[INFO] [1792194798.845917211] [robot1.amcl]: initialPoseReceived
+[WARN] [1792194798.847360831] [robot1.amcl]: Failed to transform initial pose in time (Lookup would require extrapolation into the future.  Requested time 1792194798.846901 but the latest data is at time 1792194798.761070, when looking up transform from frame [robot1/base_link] to frame [robot1/odom])
+[INFO] [1792194798.847523694] [robot1.amcl]: Setting pose (1792194798.847523): 22.100 1.060 -3.142

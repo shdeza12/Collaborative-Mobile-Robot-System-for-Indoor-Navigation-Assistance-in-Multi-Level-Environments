@@ -1,0 +1,54 @@
+[INFO] [1792194929.824823010] [robot1.agente]: Agente 'robot1' publicando estado a 2.0 Hz; lee navigate_to_pose/_action/status y la TF robot1/map -> robot1/base_link
+[WARN] [1792194929.941255774] [robot1.agente]: TF robot1/map -> robot1/base_link no disponible: "robot1/map" passed to lookupTransform argument target_frame does not exist. 
+[INFO] [1792194930.110366745] [robot1.agente]: media vuelta: mapa con 29485 celdas ocupadas
+[INFO] [1792195038.274569424] [robot1.agente]: media vuelta pedida
+[INFO] [1792195038.557499146] [robot1.agente]: espacio libre: 0.89 m a la izquierda, 0.90 m a la derecha; giro antihorario: la reversa abre hacia la derecha
+[INFO] [1792195041.210291949] [robot1.agente]: abortada: sin espacio en ningun sentido (LiDAR a 0.00 m). Girado 94 grados. reversa 73 grados (corta: mapa a 0.07 m); avance 0 grados (sin espacio al empezar: LiDAR a 0.09 m); reversa 0 grados (sin espacio al empezar: LiDAR a 0.00 m)
+[INFO] [1792195119.459337088] [robot1.agente]: media vuelta pedida
+[INFO] [1792195119.721847736] [robot1.agente]: espacio libre: 0.00 m a la izquierda, 0.02 m a la derecha; giro antihorario: la reversa abre hacia la derecha
+[INFO] [1792195124.991720269] [robot1.agente]: media vuelta: 160 grados en 3 tiempos. reversa 31 grados (corta: mapa a 0.06 m); avance 72 grados (corta: mapa a 0.07 m); reversa 21 grados (completa el giro)
+[INFO] [1792195134.504740555] [robot1.agente]: media vuelta pedida
+[INFO] [1792195134.765801396] [robot1.agente]: espacio libre: 0.96 m a la izquierda, 0.84 m a la derecha; giro horario: la reversa abre hacia la izquierda
+[INFO] [1792195139.443870325] [robot1.agente]: media vuelta: 163 grados en 2 tiempos. reversa 85 grados (corta: LiDAR a 0.00 m); avance 60 grados (completa el giro)
+[INFO] [1792195815.685584186] [robot1.agente]: media vuelta pedida
+[INFO] [1792195815.950449576] [robot1.agente]: espacio libre: 0.02 m a la izquierda, 0.01 m a la derecha; giro horario: la reversa abre hacia la izquierda
+[INFO] [1792195818.491488130] [robot1.agente]: media vuelta: 163 grados en 1 tiempo. reversa 146 grados (corta: mapa a 0.03 m)
+[INFO] [1792195845.797490453] [robot1.agente]: media vuelta pedida
+[INFO] [1792195846.052726712] [robot1.agente]: espacio libre: 0.98 m a la izquierda, 1.83 m a la derecha; giro antihorario: la reversa abre hacia la derecha
+[INFO] [1792195850.358921855] [robot1.agente]: media vuelta: 164 grados en 2 tiempos. reversa 54 grados (corta: mapa a 0.06 m); avance 92 grados (completa el giro)
+[INFO] [1792195965.519803443] [robot1.agente]: media vuelta pedida
+[INFO] [1792195965.829935809] [robot1.agente]: espacio libre: 0.01 m a la izquierda, 0.02 m a la derecha; giro antihorario: la reversa abre hacia la derecha
+[INFO] [1792195971.336917161] [robot1.agente]: media vuelta: 164 grados en 3 tiempos. reversa 13 grados (corta: mapa a 0.08 m); avance 84 grados (corta: mapa a 0.05 m); reversa 34 grados (completa el giro)
+[INFO] [1792196008.824767214] [robot1.agente]: media vuelta pedida
+[INFO] [1792196009.082308291] [robot1.agente]: espacio libre: 1.25 m a la izquierda, 1.41 m a la derecha; giro antihorario: la reversa abre hacia la derecha
+[INFO] [1792196014.139288868] [robot1.agente]: media vuelta: 163 grados en 3 tiempos. reversa 6 grados (corta: mapa a 0.08 m); avance 49 grados (corta: mapa a 0.07 m); reversa 85 grados (completa el giro)
+[INFO] [1792196231.288010263] [robot1.agente]: media vuelta pedida
+[INFO] [1792196231.556559450] [robot1.agente]: espacio libre: 0.69 m a la izquierda, 0.75 m a la derecha; giro antihorario: la reversa abre hacia la derecha
+[INFO] [1792196235.883053137] [robot1.agente]: media vuelta: 164 grados en 2 tiempos. reversa 86 grados (corta: mapa a 0.07 m); avance 41 grados (corta: LiDAR a 0.10 m)
+[INFO] [1792196360.776807794] [robot1.agente]: media vuelta pedida
+[INFO] [1792196361.039466225] [robot1.agente]: espacio libre: 1.73 m a la izquierda, 0.55 m a la derecha; giro horario: la reversa abre hacia la izquierda
+[INFO] [1792196366.030903136] [robot1.agente]: media vuelta: 161 grados en 3 tiempos. reversa 90 grados (corta: LiDAR a 0.09 m); avance 27 grados (corta: mapa a 0.04 m); reversa 12 grados (completa el giro)
+[INFO] [1792196384.276763567] [robot1.agente]: media vuelta pedida
+[INFO] [1792196384.567175313] [robot1.agente]: espacio libre: 1.72 m a la izquierda, 0.10 m a la derecha; giro horario: la reversa abre hacia la izquierda
+[INFO] [1792196388.905253038] [robot1.agente]: media vuelta: 161 grados en 2 tiempos. reversa 102 grados (corta: LiDAR a 0.06 m); avance 36 grados (completa el giro)
+[INFO] [1792196518.007675100] [robot1.agente]: media vuelta pedida
+[INFO] [1792196518.302302496] [robot1.agente]: espacio libre: 1.95 m a la izquierda, 1.24 m a la derecha; giro horario: la reversa abre hacia la izquierda
+[INFO] [1792196520.982942387] [robot1.agente]: media vuelta: 167 grados en 1 tiempo. reversa 167 grados (completa el giro)
+[INFO] [1792196538.253129007] [robot1.agente]: media vuelta pedida
+[INFO] [1792196538.509803461] [robot1.agente]: espacio libre: 1.73 m a la izquierda, 0.66 m a la derecha; giro horario: la reversa abre hacia la izquierda
+[INFO] [1792196543.860631395] [robot1.agente]: media vuelta: 161 grados en 4 tiempos. reversa 93 grados (corta: LiDAR a 0.07 m); avance 0 grados (sin espacio al empezar: LiDAR a 0.00 m); reversa 1 grados (corta: mapa a 0.02 m); avance 31 grados (corta: mapa a 0.09 m); reversa 1 grados (completa el giro)
+[INFO] [1792196581.673975688] [robot1.agente]: media vuelta pedida
+[INFO] [1792196581.930742719] [robot1.agente]: espacio libre: 0.03 m a la izquierda, 0.03 m a la derecha; giro horario: la reversa abre hacia la izquierda
+[INFO] [1792196584.591941734] [robot1.agente]: media vuelta: 167 grados en 1 tiempo. reversa 167 grados (completa el giro)
+[INFO] [1792196774.299343616] [robot1.agente]: media vuelta pedida
+[INFO] [1792196774.575942981] [robot1.agente]: espacio libre: 1.52 m a la izquierda, 0.85 m a la derecha; giro horario: la reversa abre hacia la izquierda
+[INFO] [1792196779.383002114] [robot1.agente]: media vuelta: 160 grados en 2 tiempos. reversa 77 grados (corta: LiDAR a 0.04 m); avance 56 grados (corta: mapa a 0.07 m)
+[INFO] [1792196819.631402240] [robot1.agente]: media vuelta pedida
+[INFO] [1792196819.900378264] [robot1.agente]: espacio libre: inf m a la izquierda, 0.97 m a la derecha; giro horario: la reversa abre hacia la izquierda
+[INFO] [1792196826.624327755] [robot1.agente]: media vuelta: 162 grados en 4 tiempos. reversa 37 grados (corta: LiDAR a 0.06 m); avance 27 grados (corta: LiDAR a 0.02 m); reversa 33 grados (corta: mapa a 0.06 m); avance 30 grados (completa el giro)
+[INFO] [1792196949.084309238] [robot1.agente]: media vuelta pedida
+[INFO] [1792196949.351282162] [robot1.agente]: espacio libre: 0.10 m a la izquierda, 0.60 m a la derecha; giro antihorario: la reversa abre hacia la derecha
+[INFO] [1792196954.874075575] [robot1.agente]: media vuelta: 167 grados en 3 tiempos. reversa 14 grados (corta: mapa a 0.04 m); avance 89 grados (corta: mapa a 0.03 m); reversa 35 grados (completa el giro)
+[INFO] [1792196964.992137790] [robot1.agente]: media vuelta pedida
+[INFO] [1792196965.237721824] [robot1.agente]: espacio libre: 1.93 m a la izquierda, 1.20 m a la derecha; giro horario: la reversa abre hacia la izquierda
+[INFO] [1792196969.889081349] [robot1.agente]: media vuelta: 164 grados en 2 tiempos. reversa 0 grados (sin espacio al empezar: mapa a 0.09 m); avance 28 grados (corta: mapa a 0.09 m); reversa 128 grados (completa el giro)

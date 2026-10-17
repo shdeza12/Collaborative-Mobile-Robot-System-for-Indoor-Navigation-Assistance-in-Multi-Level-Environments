@@ -1,0 +1,19 @@
+[INFO] [1792195454.551809745] [robot2.map_server]: 
+	map_server lifecycle node launched. 
+	Waiting on external lifecycle transitions to activate
+	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[INFO] [1792195454.552675395] [robot2.map_server]: Creating
+[INFO] [1792195465.181638869] [robot2.map_server]: Configuring
+[INFO] [1792195465.181950778] [map_io]: Loading yaml file: /home/deepracer/tesis/piso4.yaml
+[INFO] [1792195465.182694378] [map_io]: resolution: 0.06
+[INFO] [1792195465.182739883] [map_io]: origin[0]: -1.0758
+[INFO] [1792195465.182765593] [map_io]: origin[1]: -1.2622
+[INFO] [1792195465.182787595] [map_io]: origin[2]: 0
+[INFO] [1792195465.182810147] [map_io]: free_thresh: 0.1
+[INFO] [1792195465.182832627] [map_io]: occupied_thresh: 0.65
+[INFO] [1792195465.182854878] [map_io]: mode: trinary
+[INFO] [1792195465.182876734] [map_io]: negate: 0
+[INFO] [1792195465.184577863] [map_io]: Loading image_file: /home/deepracer/tesis/piso4.pgm
+[INFO] [1792195465.187784211] [map_io]: Read map /home/deepracer/tesis/piso4.pgm: 463 X 98 map @ 0.06 m/cell
+[INFO] [1792195474.694316312] [robot2.map_server]: Activating
+[INFO] [1792195474.694885300] [robot2.map_server]: Creating bond (map_server) to lifecycle manager.

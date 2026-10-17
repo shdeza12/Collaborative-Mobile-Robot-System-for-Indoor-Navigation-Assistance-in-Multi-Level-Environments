@@ -1,0 +1,16 @@
+[36m==[0m 0/6 · limpiando restos  (16:42:32)
+[36m==[0m 1/6 · el laser publica?  (16:42:38)
+[32m   average rate: 7.375[0m
+[36m==[0m 2/6 · el puente (el launch NO lo arranca)  (16:42:50)
+[32m   escala 0.9 puesta[0m
+[36m==[0m 3/6 · map_server con /home/deepracer/tesis/piso4.yaml (use_sim_time=false)  (16:43:02)
+[32m   map_server ACTIVO[0m
+[36m==[0m 4/6 · amcl (use_sim_time=false, scan_topic=/rplidar_ros/scan)  (16:43:34)
+[32m   amcl ACTIVO[0m
+[36m==[0m 5/6 · el launch, AHORA que /map ya esta activo (imu:=true, margen 0.5 m)  (16:44:08)
+   registrando la carga de la tarjeta en /home/deepracer/carga_20261016_164408.csv
+   no toque el vehiculo: la IMU mide el sesgo del giroscopio al arrancar
+   esperando a que Nav2 active sus nodos (hasta 300 s)...
+[32m   Nav2 activo[0m
+[36m==[0m 6/6 · pose inicial en (24.45, 1.21, rumbo 3.1416 rad) y comprobaciones  (16:44:52)
+client_loop: send disconnect: Broken pipe

@@ -1,0 +1,134 @@
+{
+  "veredicto": "INVALIDA",
+  "banco": "fisico",
+  "campana": "RF27",
+  "leidos": 12,
+  "pilotos": 0,
+  "exito": {
+    "n": 5,
+    "exitos": 0,
+    "fallos": 5,
+    "tasa": 0.0,
+    "ic95": [
+      0.0,
+      0.4344824648984954
+    ],
+    "metodo": "Wilson 95 %",
+    "motivos": {
+      "la mision no llego a COMPLETADA sin pasar por FALLIDA": 4,
+      "la mision no llego a COMPLETADA sin pasar por FALLIDA; 0 relevo(s), se esperaba 1": 1
+    }
+  },
+  "descartes": {
+    "n": 0,
+    "sobre": 5,
+    "fraccion": 0.0,
+    "techo": 0.2,
+    "por_causa": {},
+    "valida": true
+  },
+  "respuesta": {
+    "n": 5,
+    "mediana": 3.979665756225586,
+    "media": 3.283637809753418,
+    "sd": 1.3742081093422782,
+    "ee": 0.6145645495441595,
+    "min": 1.4073030948638916,
+    "max": 4.702765226364136,
+    "p90": 4.702765226364136,
+    "ic95": [
+      1.577606620218831,
+      4.989668999288004
+    ],
+    "sin_marca": []
+  },
+  "asignacion": {
+    "cota_s": null,
+    "n": 5,
+    "media": 0.0003070354461669922,
+    "mediana": 0.00029730796813964844,
+    "maximo": 0.0003981590270996094,
+    "por_encima_del_tick": [],
+    "nota": "Banco fisico: reloj de pared del grabador, sin cuantizar. Incluye el transporte del mensaje de estado hasta el grabador."
+  },
+  "continuidad": {
+    "misiones_entre_niveles": 2,
+    "hueco": {
+      "n": 1,
+      "mediana": 0.4554104804992676,
+      "media": 0.4554104804992676,
+      "sd": null,
+      "ee": null,
+      "min": 0.4554104804992676,
+      "max": 0.4554104804992676,
+      "p90": 0.4554104804992676,
+      "ic95": [
+        null,
+        null
+      ],
+      "sin_marca": [
+        "manual_20261016_225623"
+      ]
+    },
+    "binaria": {
+      "medible": false,
+      "n": 0,
+      "continuas": 0,
+      "tasa": null,
+      "ic95": [
+        null,
+        null
+      ],
+      "discontinuas": [],
+      "sin_campo": [],
+      "motivo": ""
+    }
+  },
+  "llegada": {
+    "n": 0,
+    "mediana": null,
+    "media": null,
+    "sd": null,
+    "ee": null,
+    "min": null,
+    "max": null,
+    "p90": null,
+    "ic95": [
+      null,
+      null
+    ],
+    "umbral_m": 0.5,
+    "por_encima_de_025": 0
+  },
+  "rnf01": {
+    "n": 10,
+    "mediana": 0.0,
+    "media": 0.0,
+    "sd": 0.0,
+    "ee": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "p90": 0.0,
+    "ic95": [
+      0.0,
+      0.0
+    ],
+    "umbral_m": 0.05,
+    "fuera": [],
+    "sin_campo": [],
+    "nota": "La cifra es max|z| por robot y mision, una COTA y no una desviacion tipica. Acotarla acota la variacion: dos muestras cualesquiera distan menos del doble."
+  },
+  "errores": [
+    "manual_20261016_223826: exito es null y la corrida no esta descartada. Una corrida sin veredicto no se puede agregar; el §8 dice que por defecto cuenta como fallo, y eso hay que escribirlo en el registro, no suponerlo.",
+    "manual_20261016_224143: exito es null y la corrida no esta descartada. Una corrida sin veredicto no se puede agregar; el §8 dice que por defecto cuenta como fallo, y eso hay que escribirlo en el registro, no suponerlo.",
+    "manual_20261016_224333: exito es null y la corrida no esta descartada. Una corrida sin veredicto no se puede agregar; el §8 dice que por defecto cuenta como fallo, y eso hay que escribirlo en el registro, no suponerlo.",
+    "manual_20261016_224630: exito es null y la corrida no esta descartada. Una corrida sin veredicto no se puede agregar; el §8 dice que por defecto cuenta como fallo, y eso hay que escribirlo en el registro, no suponerlo.",
+    "manual_20261016_224710: exito es null y la corrida no esta descartada. Una corrida sin veredicto no se puede agregar; el §8 dice que por defecto cuenta como fallo, y eso hay que escribirlo en el registro, no suponerlo.",
+    "manual_20261016_225029: exito es null y la corrida no esta descartada. Una corrida sin veredicto no se puede agregar; el §8 dice que por defecto cuenta como fallo, y eso hay que escribirlo en el registro, no suponerlo.",
+    "manual_20261016_225225: exito es null y la corrida no esta descartada. Una corrida sin veredicto no se puede agregar; el §8 dice que por defecto cuenta como fallo, y eso hay que escribirlo en el registro, no suponerlo."
+  ],
+  "alertas": [
+    "1 mision(es) entre niveles sin marcas de relevo (manual_20261016_225623): el hueco no se puede calcular.",
+    "7 registro(s) con errores de integridad; no se cuentan en ningun sitio, asi que el N de arriba no cuadra con los archivos leidos."
+  ]
+}

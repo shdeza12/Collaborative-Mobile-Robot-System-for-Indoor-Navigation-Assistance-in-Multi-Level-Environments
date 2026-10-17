@@ -1,0 +1,12 @@
+mision,hora,origen,destino,resultado_pagina,llegada_medida_m,medias_vueltas,incidencias,medido_por
+G5_01,,Salón 302,Salón 402,,,,,
+G6_01,,Ascensor (piso 3),Salón 403 (piso 4),,,,,
+G6_02,,Salón 302 (piso 3),Salón 401 (piso 4),,,,,
+G6_03,,Salón 401 (piso 4),Salón 302 (piso 3),,,,,
+G6_04,,Salón 403 (piso 4),Salón 303 (piso 3),,,,,
+G6_05,,Salón 402 (piso 4),Salón 301 (piso 3),,,,,
+G6_06,,Salón 301 (piso 3),Salón 401 (piso 4),,,,,
+G6_07,,Ascensor (piso 4),Salón 301 (piso 3),,,,,
+G6_08,,Salón 302 (piso 3),Salón 403 (piso 4),,,,,
+G6_09,,Salón 303 (piso 3),Salón 402 (piso 4),,,,,
+G6_10,,Salón 403 (piso 4),Ascensor (piso 3),,,,,

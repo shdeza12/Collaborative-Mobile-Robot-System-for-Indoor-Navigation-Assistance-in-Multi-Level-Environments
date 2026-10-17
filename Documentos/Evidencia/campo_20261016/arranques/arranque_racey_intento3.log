@@ -1,0 +1,49 @@
+[36m==[0m 0/6 · limpiando restos  (18:50:16)
+[36m==[0m 1/6 · el laser publica?  (18:50:21)
+[32m   average rate: 7.750[0m
+[36m==[0m 2/6 · el puente (el launch NO lo arranca)  (18:50:34)
+[32m   escala 0.9 puesta[0m
+[36m==[0m 3/6 · map_server con /home/deepracer/tesis/piso4.yaml (use_sim_time=false)  (18:50:47)
+[32m   map_server ACTIVO[0m
+[36m==[0m 4/6 · amcl (use_sim_time=false, scan_topic=/rplidar_ros/scan)  (18:51:22)
+[32m   amcl ACTIVO[0m
+[36m==[0m 5/6 · el launch, AHORA que /map ya esta activo (imu:=true, margen 0.5 m)  (18:52:01)
+   registrando la carga de la tarjeta en /home/deepracer/carga_20261016_185201.csv
+   no toque el vehiculo: la IMU mide el sesgo del giroscopio al arrancar
+   esperando a que Nav2 active sus nodos (hasta 300 s)...
+[32m   Nav2 activo[0m
+[36m==[0m 6/6 · pose inicial en (24.45, 1.21, rumbo 3.1416 rad) y comprobaciones  (18:53:36)
+   map_server           label='active'
+   amcl                 label='active'
+   planner_server       (sin respuesta)
+   controller_server    label='active'
+   bt_navigator         label='active'
+   behavior_server      label='active'
+[32m   alguien escucha /robot2/cmd_vel[0m
+   /robot2/odom: 15.9 Hz (128 mensajes)
+   /robot2/odom_rf2o: 6.6 Hz (50 mensajes)
+   /robot2/imu/data: 24.2 Hz; giro integrado por la IMU (z del sensor, que apunta a
+[32m   IMU, rf2o y filtro publicando[0m
+
+[32m=================== CADENA LISTA ===================[0m
+
+  PRUEBA EL PLAN SIN MOVER EL CARRO (esto es lo que ahorra la tarde):
+    ssh deepracer@192.168.0.104 "sudo -n bash -c 'export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST; [ -f /etc/deepracer-tesis/particion.xml ] && export FASTRTPS_DEFAULT_PROFILES_FILE=/etc/deepracer-tesis/particion.xml; source /opt/ros/jazzy/setup.bash && source /home/deepracer/nav_ws/install/setup.bash && ros2 action send_goal /robot2/compute_path_to_pose nav2_msgs/action/ComputePathToPose \"{goal: {header: {frame_id: robot2/map}, pose: {position: {x: 6.0, y: 0.0, z: 0.0}, orientation: {w: 1.0}}}, use_start: false}\"'"
+
+  SUCCEEDED = el planificador puede. ABORTED = mira el log del planner_server:
+    ssh deepracer@192.168.0.104 "sudo -n grep planner_server /tmp/nav2_campo/launch.log | tail -5"
+  "Start occupied" = la salida cae en celda no libre: mueve el carro o corrige la pose.
+
+  GRABA, y despues manda la meta:
+    ssh deepracer@192.168.0.104 "sudo -n bash -c 'export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST; [ -f /etc/deepracer-tesis/particion.xml ] && export FASTRTPS_DEFAULT_PROFILES_FILE=/etc/deepracer-tesis/particion.xml; source /opt/ros/jazzy/setup.bash && source /home/deepracer/nav_ws/install/setup.bash && cd ~deepracer && timeout -s INT 150 ros2 bag record -s mcap -o nav2_usta_01 /rplidar_ros/scan /robot2/odom /robot2/cmd_vel /tf /tf_static /robot2/plan /robot2/map /robot2/amcl_pose; chown -R deepracer:deepracer ~deepracer/nav2_usta_01'"
+
+  LA META (el script NO la manda: la mandas tu mirando el carro):
+    ssh deepracer@192.168.0.104 "sudo -n bash -c 'export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST; [ -f /etc/deepracer-tesis/particion.xml ] && export FASTRTPS_DEFAULT_PROFILES_FILE=/etc/deepracer-tesis/particion.xml; source /opt/ros/jazzy/setup.bash && source /home/deepracer/nav_ws/install/setup.bash && ros2 action send_goal --feedback /robot2/navigate_to_pose nav2_msgs/action/NavigateToPose \"{pose: {header: {frame_id: robot2/map}, pose: {position: {x: 6.0, y: 0.0, z: 0.0}, orientation: {w: 1.0}}}}\"'"
+
+  PARADA DE EMERGENCIA (el carro deja de recibir traccion):
+    ssh deepracer@192.168.0.104 "sudo -n pkill -9 cmdvel_to_serv"
+
+  El carro VA A SOBREPASAR la meta ~0.4 m. Esta explicado y medido: la banda
+  muerta obliga a aproximarse a 0.40 m/s. Anota el error, no lo ajustes.
+
+racey salida 0

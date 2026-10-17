@@ -1,0 +1,94 @@
+{
+  "esquema": "1.1",
+  "mision_id": "manual_20261016_234522",
+  "condicion": "hardware",
+  "solicitud": {
+    "origen_id": "piso3_ascensor",
+    "destino_id": "piso4_salon_403",
+    "t_solicitud": 1792194322.4823222
+  },
+  "asignacion": {
+    "1": "robot1",
+    "2": "robot2",
+    "3": "robot1",
+    "4": "robot2"
+  },
+  "marcas": [
+    {
+      "t": 1792194322.646085,
+      "etapa": "RECIBIDA",
+      "etapa_num": 6,
+      "robot": "",
+      "punto_id": null,
+      "extraordinaria": true
+    },
+    {
+      "t": 1792194322.6463993,
+      "etapa": "TRAMO_1",
+      "etapa_num": 1,
+      "robot": "robot1",
+      "punto_id": "piso3_ascensor",
+      "extraordinaria": true
+    },
+    {
+      "t": 1792194325.372059,
+      "etapa": "FALLIDA",
+      "etapa_num": 5,
+      "robot": "robot1",
+      "punto_id": "piso3_ascensor",
+      "extraordinaria": true
+    }
+  ],
+  "metricas": {
+    "t_respuesta_s": null,
+    "t_asignacion_s": 0.1641,
+    "hueco_relevo_s": null,
+    "continuidad": null,
+    "error_llegada_m": null,
+    "rumbo_llegada_rad": null,
+    "exito": false,
+    "criterios_exito": {
+      "llegada_dentro_de_tolerancia": false,
+      "completada_sin_fallida": false,
+      "relevo_si_entre_niveles": true
+    },
+    "tolerancia_llegada_m": 0.5
+  },
+  "cierre": {
+    "t": 1792194325.374211,
+    "exito_declarado": false,
+    "motivo_fallo": "Nav2 termino con estado 6",
+    "num_relevos": 1,
+    "destino_pose": {
+      "x": 16.54,
+      "y": 1.3,
+      "yaw": 0.0
+    }
+  },
+  "trazas": {
+    "formato": [
+      "t",
+      "x",
+      "y",
+      "z",
+      "v",
+      "yaw"
+    ],
+    "muestras": {}
+  },
+  "entorno": {
+    "verdad_terreno": "odom",
+    "mundo": null,
+    "mapa": null,
+    "rtf": null,
+    "controladores_activos": {},
+    "vehiculo_id": null,
+    "distro": null,
+    "medicion_externa_m": null
+  },
+  "descarte": {
+    "descartada": false,
+    "causa": null,
+    "evidencia": null
+  }
+}

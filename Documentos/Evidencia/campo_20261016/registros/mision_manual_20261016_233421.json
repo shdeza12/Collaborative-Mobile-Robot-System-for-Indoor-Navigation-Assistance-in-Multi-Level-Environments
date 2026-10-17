@@ -1,0 +1,185 @@
+{
+  "esquema": "1.1",
+  "mision_id": "manual_20261016_233421",
+  "condicion": "hardware",
+  "solicitud": {
+    "origen_id": "piso3_ascensor",
+    "destino_id": "piso4_salon_403",
+    "t_solicitud": 1792193661.8263524
+  },
+  "asignacion": {
+    "1": "robot1",
+    "2": "robot2",
+    "3": "robot1",
+    "4": "robot2"
+  },
+  "marcas": [
+    {
+      "t": 1792193661.8280427,
+      "etapa": "RECIBIDA",
+      "etapa_num": 6,
+      "robot": "",
+      "punto_id": null,
+      "extraordinaria": true
+    },
+    {
+      "t": 1792193661.8283803,
+      "etapa": "TRAMO_1",
+      "etapa_num": 1,
+      "robot": "robot1",
+      "punto_id": "piso3_ascensor",
+      "extraordinaria": true
+    },
+    {
+      "t": 1792193664.8447058,
+      "etapa": "FALLIDA",
+      "etapa_num": 5,
+      "robot": "robot1",
+      "punto_id": "piso3_ascensor",
+      "extraordinaria": true
+    }
+  ],
+  "metricas": {
+    "t_respuesta_s": 3.0094,
+    "t_asignacion_s": 0.002,
+    "hueco_relevo_s": null,
+    "continuidad": null,
+    "error_llegada_m": 5.5806,
+    "rumbo_llegada_rad": 3.0425,
+    "exito": false,
+    "criterios_exito": {
+      "llegada_dentro_de_tolerancia": false,
+      "completada_sin_fallida": false,
+      "relevo_si_entre_niveles": true
+    },
+    "tolerancia_llegada_m": 0.5
+  },
+  "cierre": {
+    "t": 1792193664.8464994,
+    "exito_declarado": false,
+    "motivo_fallo": "Nav2 termino con estado 6",
+    "num_relevos": 1,
+    "destino_pose": {
+      "x": 16.54,
+      "y": 1.3,
+      "yaw": 0.0
+    }
+  },
+  "trazas": {
+    "formato": [
+      "t",
+      "x",
+      "y",
+      "z",
+      "v",
+      "yaw"
+    ],
+    "muestras": {
+      "robot1": [
+        [
+          1792193662.0352,
+          22.1027,
+          1.009,
+          0.0,
+          0.0068,
+          3.0434
+        ],
+        [
+          1792193662.393,
+          22.1027,
+          1.009,
+          0.0,
+          0.0103,
+          3.0434
+        ],
+        [
+          1792193664.8358,
+          22.115,
+          1.0088,
+          0.0,
+          0.0339,
+          3.043
+        ],
+        [
+          1792193664.8369,
+          22.1098,
+          1.01,
+          0.0,
+          0.0229,
+          3.0428
+        ],
+        [
+          1792193664.838,
+          22.1053,
+          1.0104,
+          0.0,
+          0.0241,
+          3.0426
+        ],
+        [
+          1792193664.8392,
+          22.1059,
+          1.0092,
+          0.0,
+          0.0439,
+          3.0425
+        ],
+        [
+          1792193664.8402,
+          22.1131,
+          1.0099,
+          0.0,
+          0.046,
+          3.0425
+        ],
+        [
+          1792193664.8417,
+          22.1131,
+          1.0099,
+          0.0,
+          0.0051,
+          3.0425
+        ],
+        [
+          1792193664.8429,
+          22.1131,
+          1.0099,
+          0.0,
+          0.0052,
+          3.0425
+        ],
+        [
+          1792193664.8438,
+          22.1131,
+          1.0099,
+          0.0,
+          0.0019,
+          3.0425
+        ],
+        [
+          1792193664.8451,
+          22.1131,
+          1.0099,
+          0.0,
+          0.0022,
+          3.0425
+        ]
+      ]
+    }
+  },
+  "entorno": {
+    "verdad_terreno": "odom",
+    "mundo": null,
+    "mapa": null,
+    "rtf": null,
+    "controladores_activos": {},
+    "vehiculo_id": null,
+    "distro": null,
+    "medicion_externa_m": null
+  },
+  "descarte": {
+    "descartada": false,
+    "causa": null,
+    "evidencia": null
+  }
+}

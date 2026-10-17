@@ -1,0 +1,3 @@
+AVISO: se descartan los estados residuales de ['manual_20261016_225529'], que terminaron antes de que empezara este bag. La mision de /home/santiago/tesis_evidencia/campo_2026-10-16/misiones/mision_20261016_225623 es manual_20261016_225623.
+AVISO: la mision es de condicion B -dos niveles, dos mundos- y escenario_por_robot trae 1. El registro valida, pero no describe la escena entera.
+Registro escrito en /home/santiago/tesis_evidencia/campo_2026-10-16/registros_compuestos/mision_20261016_225623.json
