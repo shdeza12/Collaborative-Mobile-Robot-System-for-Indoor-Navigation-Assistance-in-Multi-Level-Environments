@@ -1,0 +1,6 @@
+corrida,hora,estado,tiempo_s,recuperaciones,pose_inicial,salida_amcl_x,salida_amcl_y,salida_amcl_yaw,sigma_salida_m,meta_x,meta_y,meta_yaw,avance_pedido_m,amcl_fin_x,amcl_fin_y,error_llegada_amcl_fin_m,llegada_amcl_x,llegada_amcl_y,error_llegada_amcl_m,salto_refresco_m,avance_amcl_m,avance_odom_m,error_long_odom_m,cmdvel_n,cmdvel_bajo_040_n,linx_max,angz_min,angz_max,CINTA_avance_real_m,CINTA_error_longitudinal_m,CINTA_desvio_lateral_m
+p3d_01,23:31:25,SUCCEEDED,10.7,0,si,22.104,1.101,3.137,0.142,17.220,2.000,3.142,4.966,17.637,1.972,0.418,17.005,2.042,0.219,0.635,5.185,5.100,+0.134,105,0,0.500,-0.556,0.605,,,
+p3d_02,23:33:24,SUCCEEDED,9.7,0,no,17.050,2.046,2.957,0.219,9.310,2.210,3.142,7.741,9.777,1.974,0.523,9.119,2.253,0.196,0.715,7.934,8.010,+0.268,97,0,0.500,-0.492,0.650,,,
+p3d_03,23:34:59,SUCCEEDED,4.1,0,no,9.043,2.257,2.615,0.359,6.200,2.000,3.142,2.854,6.658,2.253,0.523,5.976,2.147,0.268,0.690,3.069,3.188,+0.334,41,0,0.500,0.000,0.659,,,
+p3d_04,23:39:24,SUCCEEDED,16.2,0,no,5.868,1.099,0.160,0.405,22.100,0.640,0.000,16.238,21.491,0.959,0.688,22.054,0.730,0.101,0.608,16.189,16.572,+0.334,161,0,0.500,-0.607,0.596,,,
+p3d_05,23:41:50,SUCCEEDED,6.4,0,no,22.873,1.602,2.623,0.486,17.220,2.000,3.142,5.667,17.784,1.482,0.765,17.065,1.953,0.162,0.859,5.819,5.867,+0.200,64,0,0.500,-1.195,0.736,,,
