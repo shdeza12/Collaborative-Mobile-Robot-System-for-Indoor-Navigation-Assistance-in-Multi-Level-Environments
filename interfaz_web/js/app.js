@@ -252,17 +252,30 @@ function alTerminar(valores, exitoLlamada) {
 function claveYTitulo(e) {
   switch (e.etapa) {
     case ETAPA.COMPLETADA: return ["llegada", "Hemos llegado"];
-    case ETAPA.FALLIDA: return ["bloqueado", "Camino bloqueado"];
+    // No "Camino bloqueado": la mision tambien falla cuando el robot se detiene
+    // fuera de la tolerancia de llegada, y ese titulo hacia culpar al usuario.
+    // El motivo real va en la frase.
+    case ETAPA.FALLIDA: return ["bloqueado", "No se pudo completar"];
     case ETAPA.RECIBIDA: return ["preparando", "Preparando"];
     case ETAPA.TRANSFERENCIA: return ["transferencia", "Cambia de piso"];
     case ETAPA.TRAMO_1:
     case ETAPA.TRAMO_2:
       return e.destino_actual.id && e.destino_actual.id === e.origen_id
         ? ["espera", "Espera al robot"] : ["sigueme", "Sígueme"];
-    case ETAPA.ESPERANDO_CONFIRMACION: return ["confirmar", "¿Ya subió?"];
+    case ETAPA.ESPERANDO_CONFIRMACION: return ["confirmar", tituloConfirmacion(e)];
     case ETAPA.CANCELANDO: return ["cancelando", "Cancelando"];
     default: return ["inactiva", "Sin misión activa"];
   }
+}
+
+// En la etapa 7 'destino_actual' es la escalera del piso al que va el usuario,
+// y el origen es el punto donde empezo: comparar los dos niveles da el sentido.
+// "¿Ya subió?" era brusco, y en una bajada ademas era falso.
+function tituloConfirmacion(e) {
+  const origen = estado.puntos.find((p) => p.id === e.origen_id);
+  const nivel = e.destino_actual && e.destino_actual.nivel;
+  if (!origen || !nivel || origen.nivel === nivel) return "Confirme el cambio de piso";
+  return `${nivel > origen.nivel ? "Suba" : "Baje"} con calma al piso ${nivel}`;
 }
 
 const ORDEN_ETAPAS = [[6, "Preparando"], [1, "Tramo 1"], [2, "Relevo"], [3, "Tramo 2"], [4, "Fin"]];
@@ -279,6 +292,8 @@ function pintarPanel(e) {
   // Visible en cualquier otra etapa seria una forma de confirmar una mision que
   // no esta preguntando nada.
   $("acciones-confirmar").hidden = e.etapa !== ETAPA.ESPERANDO_CONFIRMACION;
+  const nivelEspera = e.etapa === ETAPA.ESPERANDO_CONFIRMACION && e.destino_actual && e.destino_actual.nivel;
+  $("btn-confirmar").textContent = nivelEspera ? `Ya estoy en el piso ${nivelEspera}` : "Ya estoy en el otro piso";
 
   const filas = [];
   if (e.robot_activo) filas.push(["Robot", e.robot_activo]);

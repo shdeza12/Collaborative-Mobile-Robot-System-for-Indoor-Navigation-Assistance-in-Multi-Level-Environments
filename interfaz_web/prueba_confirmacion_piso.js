@@ -128,7 +128,7 @@ async function hasta(cond, ms = 15000) {
   const et7 = await hasta(() => nodo("panel-etiqueta").textContent === "ESPERANDO_CONFIRMACION");
   comprueba("la etiqueta dice ESPERANDO_CONFIRMACION y no 'desconocida (7)'", et7,
             `etiqueta='${nodo("panel-etiqueta").textContent}'`);
-  comprueba("el titulo dice '¿Ya subió?'", nodo("panel-titulo").textContent === "¿Ya subió?",
+  comprueba("sin niveles conocidos, el titulo es neutro", nodo("panel-titulo").textContent === "Confirme el cambio de piso",
             `titulo='${nodo("panel-titulo").textContent}'`);
   comprueba("la clase del panel es 'panel confirmar'", nodo("panel").className === "panel confirmar",
             `className='${nodo("panel").className}'`);
