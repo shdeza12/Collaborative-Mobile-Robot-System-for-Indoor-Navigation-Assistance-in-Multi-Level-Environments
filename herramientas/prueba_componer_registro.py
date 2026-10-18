@@ -907,6 +907,20 @@ def pruebas_del_vehiculo(esquema):
               reg["verdad_de_terreno"]["fuente"] == "cinta_metrica"
               and reg["veredicto"]["c1_posicion"] is True,
               f"-> {reg['verdad_de_terreno']['fuente']}, {reg['veredicto']['c1_posicion']}")
+        # 2026-10-18: la campaña del 16-oct no tuvo cinta. La llegada que mide
+        # el coordinador entra con su propia fuente, nunca como cinta.
+        loc = componer(ruta, banco="fisico", campana="prueba", error_posicion_m=0.30,
+                       distro="jazzy", fuente_llegada="localizacion_agente",
+                       medido_por="coordinador")
+        v = loc["verdad_de_terreno"]
+        check("sin cinta, la llegada del coordinador valida y queda con fuente "
+              "localizacion_agente, sin incertidumbre",
+              valida(loc, esquema) and v["fuente"] == "localizacion_agente"
+              and v["incertidumbre_m"] is None and loc["veredicto"]["c1_posicion"] is True,
+              f"-> {v['fuente']}, {v['incertidumbre_m']}, {_por_que(loc, esquema)}")
+        loc["verdad_de_terreno"]["fuente"] = "gazebo_worldpose_via_odom"
+        check("el banco fisico sigue sin admitir la fuente de la simulacion",
+              not valida(loc, esquema))
         check("t_inicio_tramo2 sale del odom de robot2",
               reg["marcas"]["t_inicio_tramo2"] is not None
               and abs(reg["marcas"]["t_inicio_tramo2"] - 90.5) < 1e-6,

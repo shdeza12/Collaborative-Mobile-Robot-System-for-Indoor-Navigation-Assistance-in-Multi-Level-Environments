@@ -208,10 +208,10 @@ las calcula.
 
 | Campo | Tipo | Simulación | Físico |
 |---|---|---|---|
-| `fuente` | enum | `"gazebo_worldpose_via_odom"` | `"cinta_metrica"` |
+| `fuente` | enum | `"gazebo_worldpose_via_odom"` | `"cinta_metrica"` o, sin cinta, `"localizacion_agente"` |
 | `error_posicion_m` | float \| null | calculado de `/odom` contra la pose del catálogo | leído de la cinta |
 | `pose_final` | objeto \| null | `{x, y, yaw}` | `null` |
-| `incertidumbre_m` | float | `0.0` | `~0.01` |
+| `incertidumbre_m` | float \| null | `0.0` | `~0.01` con cinta; `null` con `localizacion_agente` |
 | `medido_por` | string | `"automatico"` | nombre de quien midió |
 | `nota` | string | | |
 
@@ -456,7 +456,7 @@ contaría como no ocurrida, y eso infla la tasa de éxito por omisión.**
 ### 4.3 Restricciones cruzadas que el JSON Schema hace cumplir
 
 - `banco = "simulacion"` ⟹ `marcas.reloj = "/clock"` **y** `verdad_de_terreno.fuente = "gazebo_worldpose_via_odom"` **y** `salud_del_banco.rtf` no es `null`.
-- `banco = "fisico"` ⟹ `verdad_de_terreno.fuente = "cinta_metrica"` **y** `pose_final = null` **y** `rtf = null` **y** `deriva_map_odom_m = null`.
+- `banco = "fisico"` ⟹ `verdad_de_terreno.fuente` es `"cinta_metrica"` o `"localizacion_agente"` **y** `pose_final = null` **y** `rtf = null` **y** `deriva_map_odom_m = null`.
 - `condicion = "A"` ⟹ `t_fin_tramo1 = null`, `t_inicio_tramo2 = null`, `c3_relevo = null`,
   `hueco_relevo_s = null`.
 - `condicion = "B"` ⟹ `c3_relevo` no es `null`. Las dos marcas de relevo **sí pueden ir `null`**: una
@@ -475,6 +475,14 @@ En el banco físico, el registro se compone al terminar con `verdad_de_terreno.e
 **`null` significa «pendiente de medir».** El registro es válido contra el esquema, pero **el
 analizador de campaña rechaza cualquier registro con `error_posicion_m` en `null`**: sin la medida
 no hay veredicto. Dos niveles distintos, a propósito: válido como captura, no listo para análisis.
+
+**Sin cinta (desde el 18 de octubre de 2026).** La campaña de los vehículos del 16 de octubre se
+corrió sin medir las llegadas con cinta. La única medida que existe es la del coordinador: la pose
+del agente en su mapa 1,5 s después de `SUCCEEDED`, comparada con el punto del catálogo. Esa cifra
+entra con `--fuente-llegada localizacion_agente`, que escribe `fuente = "localizacion_agente"` e
+`incertidumbre_m = null`, porque no se contrastó con nada externo. El analizador la cuenta aparte y
+avisa que la condición 1 quedó evaluada con la estimación del propio vehículo. Nunca se escribe como
+`cinta_metrica`.
 
 ### 4.5 Misión cancelada por el usuario
 

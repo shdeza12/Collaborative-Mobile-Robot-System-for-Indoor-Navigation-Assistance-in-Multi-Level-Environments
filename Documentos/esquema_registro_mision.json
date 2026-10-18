@@ -124,7 +124,7 @@
       "required": ["fuente", "error_posicion_m", "pose_final", "incertidumbre_m",
                    "medido_por", "nota"],
       "properties": {
-        "fuente": {"enum": ["gazebo_worldpose_via_odom", "cinta_metrica"]},
+        "fuente": {"enum": ["gazebo_worldpose_via_odom", "cinta_metrica", "localizacion_agente"]},
         "error_posicion_m": {
           "comentario": "El unico campo que decide el exito, y se llena igual en los dos bancos. null significa 'pendiente de medir' (§4.4): valido como captura, NO listo para analisis.",
           "type": ["number", "null"]
@@ -138,8 +138,8 @@
           }
         },
         "incertidumbre_m": {
-          "comentario": "0.0 en simulacion porque es un oraculo, ~0.01 en fisico porque es una cinta leida por una persona.",
-          "type": "number"
+          "comentario": "0.0 en simulacion porque es un oraculo, ~0.01 en fisico porque es una cinta leida por una persona, null con fuente localizacion_agente porque esa medida no se contrasto con nada externo.",
+          "type": ["number", "null"]
         },
         "medido_por": {
           "comentario": "Admite null porque la §4.4 compone el registro fisico con este campo pendiente y lo rellena en una segunda pasada.",
@@ -337,7 +337,7 @@
       "then": {
         "properties": {
           "verdad_de_terreno": {
-            "properties": {"fuente": {"const": "cinta_metrica"},
+            "properties": {"fuente": {"enum": ["cinta_metrica", "localizacion_agente"]},
                            "pose_final": {"type": "null"}}},
           "salud_del_banco": {"properties": {"rtf": {"type": "null"}}},
           "descriptivas": {"properties": {"deriva_map_odom_m": {"type": "null"}}}

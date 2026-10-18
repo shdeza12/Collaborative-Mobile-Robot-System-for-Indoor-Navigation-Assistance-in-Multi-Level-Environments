@@ -491,7 +491,7 @@ def _condicion(nivel_origen, nivel_destino, etapas):
 
 def componer(ruta_bag, banco, campana, error_posicion_m=None, rtf=None,
              semilla=None, es_piloto=False, medido_por="automatico",
-             distro=None, mundo=None, mapa=None):
+             distro=None, mundo=None, mapa=None, fuente_llegada="cinta_metrica"):
     """Construye el registro completo. Ver la §3 del esquema."""
     topicos = leer_bag(ruta_bag)
 
@@ -658,7 +658,7 @@ def componer(ruta_bag, banco, campana, error_posicion_m=None, rtf=None,
         "solicitud": solicitud,
         "marcas": marcas,
         "verdad_de_terreno": _verdad(banco, error_posicion_m, pose_llegada,
-                                     medido_por, nota),
+                                     medido_por, nota, fuente_llegada),
         "veredicto": veredicto,
         "descriptivas": _descriptivas(banco, topicos, poses, marcas,
                                       solicitud["entre_niveles"]),
@@ -990,7 +990,8 @@ def _solicitud(crudos, condicion, niveles, origen, destino):
     }
 
 
-def _verdad(banco, error_posicion_m, pose_llegada, medido_por, nota):
+def _verdad(banco, error_posicion_m, pose_llegada, medido_por, nota,
+            fuente_llegada="cinta_metrica"):
     """De donde sale la verdad de terreno, que NO es la misma en los dos bancos.
 
     En simulacion /odom es la pose exacta del motor de Gazebo -WorldPose(), ver
@@ -1003,6 +1004,18 @@ def _verdad(banco, error_posicion_m, pose_llegada, medido_por, nota):
     el registro en octubre no puede distinguir una llegada medida en
     t_completada de una medida al final del bag, y son cifras distintas.
     """
+    # 2026-10-18: la campaña de los vehiculos del 16-oct se corrio sin cinta.
+    # La unica medida de llegada que existe es la del coordinador -la pose del
+    # agente en su mapa 1,5 s despues de SUCCEEDED-, y escribirla como
+    # 'cinta_metrica' seria decir que se midio por fuera. Va con su propia
+    # fuente y sin incertidumbre, porque nadie la ha contrastado.
+    if banco == "fisico" and fuente_llegada == "localizacion_agente":
+        return {"fuente": "localizacion_agente",
+                "error_posicion_m": error_posicion_m, "pose_final": None,
+                "incertidumbre_m": None, "medido_por": medido_por,
+                "nota": "error de la pose del agente (AMCL) contra el punto del "
+                        "catalogo, el que verifico el coordinador; sin medida "
+                        "externa"}
     if banco == "fisico":
         return {"fuente": "cinta_metrica", "error_posicion_m": error_posicion_m,
                 "pose_final": None, "incertidumbre_m": 0.01,
@@ -1192,6 +1205,12 @@ def main():
     p.add_argument("--semilla", type=int, default=None)
     p.add_argument("--piloto", action="store_true")
     p.add_argument("--medido-por", default="automatico")
+    p.add_argument("--fuente-llegada", default="cinta_metrica",
+                   choices=["cinta_metrica", "localizacion_agente"],
+                   help="Solo en el banco fisico. 'localizacion_agente' cuando "
+                        "no hubo cinta y --error-posicion-m es el error que "
+                        "midio el coordinador con la pose del agente. Queda "
+                        "declarado en el registro con esa fuente.")
     p.add_argument("--distro", choices=["humble", "jazzy"], default=None,
                    help="Por omision, ROS_DISTRO. Hace falta al componer en el "
                         "PC un bag grabado en el carro.")
@@ -1240,9 +1259,16 @@ def main():
             f"--rtf, anotando en el informe que es posterior a la mision. "
             f"Si ya se cerro, el RTF de esa corrida se perdio.")
 
+    if a.fuente_llegada == "localizacion_agente":
+        if a.banco != "fisico":
+            raise SystemExit("--fuente-llegada localizacion_agente es solo del "
+                             "banco fisico: en simulacion el error sale de /odom.")
+        if a.error_posicion_m is None:
+            raise SystemExit("--fuente-llegada localizacion_agente necesita "
+                             "--error-posicion-m con el error del coordinador.")
     registro = componer(a.bag, a.banco, a.campana, a.error_posicion_m, rtf,
                         a.semilla, a.piloto, a.medido_por, a.distro,
-                        a.mundo, a.mapa)
+                        a.mundo, a.mapa, a.fuente_llegada)
 
     # El esquema acepta cadena vacia en estos dos -son 'string' a secas-, asi
     # que si no se avisa aqui el hueco no lo detecta nadie hasta S26, cuando ya

@@ -441,6 +441,20 @@ def analizar(registros, incluir_pilotos=False):
     # contra el umbral del banco del lote.
     llegada["por_encima_de_025"] = sum(1 for e in errs
                                        if e is not None and e > umbral)
+    # 2026-10-18: en el banco fisico la llegada puede venir de la cinta o, si
+    # no la hubo, de la localizacion del agente. Se cuenta para que el informe
+    # no presente la segunda como si fuera la primera.
+    fuentes = {}
+    for r in validas:
+        f = r.get("verdad_de_terreno", {}).get("fuente")
+        fuentes[f] = fuentes.get(f, 0) + 1
+    llegada["fuentes"] = fuentes
+    if fuentes.get("localizacion_agente"):
+        alertas.append(
+            f"{fuentes['localizacion_agente']} de {len(validas)} llegada(s) "
+            f"salen de la localizacion del agente, no de una medida externa: "
+            f"la condicion 1 del §3.3 queda evaluada con la estimacion del "
+            f"propio vehiculo.")
 
     # --- RNF-01: constancia de z, con umbral ------------------------------
     # Una pareja por ROBOT y por mision, no una por mision: la afirmacion del
@@ -612,6 +626,9 @@ def formatear(inf):
     L.append("\nDescriptiva · Error de llegada (no decide nada aqui; el "
              "veredicto ya viene resuelto)")
     L.append(_linea_continua("error_posicion_m", g, unidad="m"))
+    if g.get("fuentes"):
+        L.append("  fuente: " + ", ".join(f"{k} {v}" for k, v in
+                                          sorted(g["fuentes"].items(), key=str)))
     if g["n"]:
         L.append(f"  por encima de {g['umbral_m']} m: "
                  f"{g['por_encima_de_025']}/{g['n']}")

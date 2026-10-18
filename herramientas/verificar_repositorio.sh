@@ -44,8 +44,14 @@ titulo '1. El repositorio no depende de donde se clone'
 # Se perdonan las lineas que nombran la ruta fija para explicar por que se
 # quito: igual que en la comprobacion de 'cp -r', documentar el error pasado
 # es lo contrario de cometerlo.
+#
+# Tambien se dejan fuera las carpetas de datos de campo (Evidencia/campo_AAAAMMDD/):
+# son logs y registros copiados tal cual de los vehiculos, con sus rutas fijas.
+# No son instrucciones, y reescribirlos para pasar esta comprobacion seria
+# alterar el dato.
 paso 'ningun archivo lleva rutas de una maquina concreta'
 HITS=$(grep -n '/home/[a-z]\|HOME/Documents/Tesis\|~/Documents/Tesis' "${TEXTOS[@]}" 2>/dev/null \
+       | grep -v '^Documentos/Evidencia/campo_[0-9]\{8\}/' \
        | grep -vi 'ruta fija' | head -14)
 if [ -z "$HITS" ]; then bien
 else mal "$(printf '%s\n' "$HITS")
