@@ -1,0 +1,123 @@
+{
+  "veredicto": "VALIDA",
+  "banco": "fisico",
+  "campana": "RF27",
+  "leidos": 9,
+  "pilotos": 0,
+  "exito": {
+    "n": 9,
+    "exitos": 9,
+    "fallos": 0,
+    "tasa": 1.0,
+    "ic95": [
+      0.7008549514820552,
+      1.0
+    ],
+    "metodo": "Wilson 95 %",
+    "motivos": {}
+  },
+  "descartes": {
+    "n": 0,
+    "sobre": 9,
+    "fraccion": 0.0,
+    "techo": 0.2,
+    "por_causa": {},
+    "valida": true
+  },
+  "respuesta": {
+    "n": 9,
+    "mediana": 0.8696858882904053,
+    "media": 1.3340508937835693,
+    "sd": 1.2442401339826727,
+    "ee": 0.4147467113275576,
+    "min": 0.27091264724731445,
+    "max": 3.8955671787261963,
+    "p90": 3.8955671787261963,
+    "ic95": [
+      0.3776449774622215,
+      2.290456810104917
+    ],
+    "sin_marca": []
+  },
+  "asignacion": {
+    "cota_s": null,
+    "n": 9,
+    "media": 0.00027489662170410156,
+    "mediana": 0.00028824806213378906,
+    "maximo": 0.0003161430358886719,
+    "por_encima_del_tick": [],
+    "nota": "Banco fisico: reloj de pared del grabador, sin cuantizar. Incluye el transporte del mensaje de estado hasta el grabador."
+  },
+  "continuidad": {
+    "misiones_entre_niveles": 9,
+    "hueco": {
+      "n": 9,
+      "mediana": 1.2161669731140137,
+      "media": 10.265328380796644,
+      "sd": 11.919294578807357,
+      "ee": 3.9730981929357854,
+      "min": 0.679128885269165,
+      "max": 27.47888731956482,
+      "p90": 27.47888731956482,
+      "ic95": [
+        1.1033639478867237,
+        19.427292813706565
+      ],
+      "sin_marca": []
+    },
+    "binaria": {
+      "medible": true,
+      "n": 9,
+      "continuas": 9,
+      "tasa": 1.0,
+      "ic95": [
+        0.7008549514820552,
+        1.0
+      ],
+      "discontinuas": [],
+      "sin_campo": [],
+      "motivo": ""
+    }
+  },
+  "llegada": {
+    "n": 9,
+    "mediana": 0.2336,
+    "media": 0.27303333333333335,
+    "sd": 0.09869685911922425,
+    "ee": 0.03289895303974142,
+    "min": 0.1434,
+    "max": 0.4354,
+    "p90": 0.4354,
+    "ic95": [
+      0.19716834762368962,
+      0.3488983190429771
+    ],
+    "umbral_m": 0.5,
+    "por_encima_de_025": 0,
+    "fuentes": {
+      "localizacion_agente": 9
+    }
+  },
+  "rnf01": {
+    "n": 18,
+    "mediana": 0.0,
+    "media": 0.0,
+    "sd": 0.0,
+    "ee": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "p90": 0.0,
+    "ic95": [
+      0.0,
+      0.0
+    ],
+    "umbral_m": 0.05,
+    "fuera": [],
+    "sin_campo": [],
+    "nota": "La cifra es max|z| por robot y mision, una COTA y no una desviacion tipica. Acotarla acota la variacion: dos muestras cualesquiera distan menos del doble."
+  },
+  "errores": [],
+  "alertas": [
+    "9 de 9 llegada(s) salen de la localizacion del agente, no de una medida externa: la condicion 1 del §3.3 queda evaluada con la estimacion del propio vehiculo."
+  ]
+}

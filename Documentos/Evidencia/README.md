@@ -376,6 +376,9 @@ que el propio documento sostiene:
 **Semana 27**
 
 - [`CAPTURAS_POR_FASE.md`](CAPTURAS_POR_FASE.md) — Capturas del proyecto, por fase (recuperadas el 15 de octubre)
+- [`S27_campana_rf27.md`](S27_campana_rf27.md) — Campaña del sistema completo con los dos vehículos en los pisos 3 y 4: G-5 y G-6 (16 de octubre)
+- [`campo_20261016/`](campo_20261016/) — Datos de campo del 16 de octubre sin las grabaciones: registros del coordinador, carga, logs y notas
+- [`datos_20261008_deepy/`](datos_20261008_deepy/) — Hoja de las corridas del 8 de octubre en el piso 3 con deepy
 
 ---
 

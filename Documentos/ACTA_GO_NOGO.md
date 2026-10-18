@@ -126,8 +126,8 @@ escribieron antes de correr.
 | **G-2 · Odometría** | **ALCANZADO** | 2026-10-02 | [`S25_pisos34_campo.md`](Evidencia/S25_pisos34_campo.md), §6, conclusión 1 |
 | **G-3 · Navegación de uno** | **ALCANZADO** (no alcanzado en C-1, abierto por el §6.2) | 2026-10-07 | [`S26_piso4_cadena_media_vuelta.md`](Evidencia/S26_piso4_cadena_media_vuelta.md), §2 y §3.1 |
 | **G-4 · Dos en el mismo grafo** | **ALCANZADO** | 2026-09-22 | [`S24_compuerta_G4_dos_en_el_grafo.md`](Evidencia/S24_compuerta_G4_dos_en_el_grafo.md) |
-| **G-5 · Protocolo completo** | Pendiente | — | — |
-| **G-6 · RF-27** | Pendiente | — | — |
+| **G-5 · Protocolo completo** | **ALCANZADO** | 2026-10-16 | [`S27_campana_rf27.md`](Evidencia/S27_campana_rf27.md), resultado 5 |
+| **G-6 · RF-27** | **ALCANZADO**, n = 9 | 2026-10-16 | [`S27_campana_rf27.md`](Evidencia/S27_campana_rf27.md), resultados 1 a 4 |
 
 **G-1 se alcanzó por encima de su criterio.** El criterio pedía que `.102` moviera las ruedas y que
 `.101` «se recupere o se diagnostique»; lo que ocurrió es que **los dos** vehículos completaron la
@@ -137,6 +137,15 @@ sonda de actuación entera, con el operador delante y el carro en alto.
 `agente` publica su estado aunque la TF falle, y el coordinador crea sus clientes de navegación sin
 que exista servidor al otro lado. Adelantarlo saca de la ruta crítica la única compuerta que puede
 tumbar el GO pleno por una razón de arquitectura en vez de por un sensor.
+
+**Corte C-3, 16 de octubre.** G-5 se cumplió con la misión del Salón 302 al Salón 402 de la primera
+sesión del día, con relevo y completada en 132,5 s. Para G-6 corrieron y se completaron las misiones 1
+a 9 del sorteo, las nueve con relevo; la 10 no terminó porque el portátil se apagó por batería. El
+análisis da 9 de 9 éxitos (IC95 del 70,1 % al 100 %), con un error de llegada mediano de 0,234 m. Se
+declaran tres desviaciones, decididas por el equipo el 18 de octubre: el error de llegada es el de la
+localización del vehículo, porque no hubo medida con cinta; las misiones 1 y 2 se completaron en un
+segundo intento y los primeros no entran en la tasa; y la campaña se grabó en un solo archivo,
+partido después por misión. La toma de datos quedó cerrada.
 
 **Lo que esto no cambia.** Las dos compuertas alcanzadas son las que **no** dependen de la
 odometría. **G-2 sigue siendo la ruta crítica** y su corte, C-1 del viernes 2 de octubre, sigue
