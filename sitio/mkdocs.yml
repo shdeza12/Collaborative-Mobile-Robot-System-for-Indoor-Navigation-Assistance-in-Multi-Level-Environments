@@ -1,0 +1,83 @@
+site_name: Robots guía en edificios de varios pisos
+site_description: >-
+  Proyecto de grado de la Universidad Santo Tomás: dos robots móviles que guían
+  a una persona entre los pisos de un edificio, con relevo en la escalera.
+site_author: Santiago Hernández Ávila y Jonny Alejandro Mejía León
+repo_url: https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments
+repo_name: Repositorio del proyecto
+edit_uri: ""
+docs_dir: paginas
+site_dir: ../.sitio_construido
+copyright: Santiago Hernández Ávila y Jonny Alejandro Mejía León · Universidad Santo Tomás · 2026
+
+theme:
+  name: material
+  language: es
+  font:
+    text: Inter
+    code: JetBrains Mono
+  icon:
+    logo: material/robot-outline
+    repo: fontawesome/brands/github
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-night
+        name: Cambiar a modo oscuro
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-sunny
+        name: Cambiar a modo claro
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
+    - navigation.footer
+    - navigation.indexes
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.tabs.link
+
+extra_css:
+  - css/sitio.css
+extra_javascript:
+  - js/graficas.js
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      title: En esta página
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+nav:
+  - Inicio: index.md
+  - El proyecto: proyecto.md
+  - Cómo funciona: como-funciona.md
+  - Proceso:
+      - proceso/index.md
+      - Decisiones y cambios de rumbo: proceso/decisiones.md
+      - Pruebas de verificación: proceso/pruebas.md
+  - Resultados: resultados.md
+  - Replicarlo: replicar.md
+  - Documentos: documentos.md

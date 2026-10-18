@@ -47,3 +47,6 @@ mapas/bag_mapa_*/
 
 # Videos de campo y su edición (originales, proyecto de Shotcut y exportaciones): no se versionan.
 VIDEOS/
+
+# Sitio construido por MkDocs (se genera con mkdocs build; no se versiona)
+.sitio_construido/
