@@ -86,7 +86,6 @@ toca. Sólo hay dos sitios:
 | Comandos que empiezan por… | Se ejecutan desde |
 |---|---|
 | `herramientas/…`, `python3 herramientas/…` | la **raíz del repositorio** (tu clon) |
-| `python3 -m http.server … --directory interfaz_web` | la **raíz del repositorio** (§4.1) |
 | `ros2 …` a secas | `~/deepracer_sim_ws`, con `source install/setup.bash` hecho |
 
 Este runbook no escribe la ruta de tu clon en ningún sitio, porque no la sabe: puede colgar de
@@ -279,10 +278,11 @@ en curso —cancelar y pausar, de la lista del director—, así que el argument
 **Terminal 7 — servir los ficheros.** Desde la raíz del repositorio:
 
 ```bash
-python3 -m http.server 8000 --directory interfaz_web
+python3 herramientas/servir_interfaz.py 8000
 ```
 
-**Esperado:** `Serving HTTP on 0.0.0.0 port 8000`.
+**Esperado:** `interfaz_web en el puerto 8000, con Cache-Control: no-cache`. No usar
+`python3 -m http.server`: el teléfono se queda con la versión anterior de la página (16-oct).
 
 **La dirección que se teclea en el teléfono** sale de:
 

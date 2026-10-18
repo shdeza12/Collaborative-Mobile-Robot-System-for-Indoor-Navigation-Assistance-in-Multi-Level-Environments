@@ -54,7 +54,7 @@ Hay **dos** sitios y solo dos:
 
 | comandos que empiezan por… | se ejecutan desde |
 |---|---|
-| `herramientas/…`, `python3 herramientas/…`, `python3 -m http.server` | la **raíz del clon** |
+| `herramientas/…`, `python3 herramientas/…` | la **raíz del clon** |
 | `ros2 …` a secas | `~/deepracer_sim_ws`, con `source install/setup.bash` hecho |
 
 Para confirmar que una terminal está en la raíz del clon antes del primer comando:
@@ -229,10 +229,11 @@ cd ~/deepracer_sim_ws && source install/setup.bash && ros2 launch rosbridge_serv
 **Terminal 6 — servir los archivos.** Desde la raíz del clon:
 
 ```bash
-python3 -m http.server 8000 --directory interfaz_web
+python3 herramientas/servir_interfaz.py 8000
 ```
 
-**Esperado:** `Serving HTTP on 0.0.0.0 port 8000`.
+**Esperado:** `interfaz_web en el puerto 8000, con Cache-Control: no-cache`. No usar
+`python3 -m http.server`: el teléfono se queda con la versión anterior de la página (16-oct).
 
 La dirección que se teclea en el teléfono sale de:
 

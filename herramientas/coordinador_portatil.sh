@@ -132,7 +132,7 @@ PY
 interfaz() {
   parar_demonio
   info "rosbridge (puerto 9090) y la pagina (puerto 8000)"
-  pkill -f '[r]osbridge_websocket' ; pkill -f '[r]osapi_node' ; pkill -f '[h]ttp.server 8000'
+  pkill -f '[r]osbridge_websocket' ; pkill -f '[r]osapi_node' ; pkill -f '[h]ttp.server 8000' ; pkill -f '[s]ervir_interfaz.py'
   # Con 'ros2 run' y no con 'ros2 launch': el lanzador crea un nodo propio, que
   # seria un quinto participante (ver la cabecera). Los dos con coordinacion_msgs
   # cargado, para que la pagina pueda pedir la forma de esos mensajes.
@@ -140,7 +140,9 @@ interfaz() {
   lanzar /tmp/rosbridge.log "$humble && exec ros2 run rosbridge_server rosbridge_websocket --ros-args -p send_action_goals_in_new_thread:=true"
   sleep 2
   lanzar /tmp/rosapi.log "$humble && exec ros2 run rosapi rosapi_node"
-  lanzar /tmp/http_interfaz.log "cd '$REPO' && exec python3 -m http.server 8000 --directory interfaz_web"
+  # servir_interfaz.py y no 'python3 -m http.server': ese manda solo Last-Modified
+  # y el telefono se quedo el 16-oct con el app.js anterior (ver el guion).
+  lanzar /tmp/http_interfaz.log "cd '$REPO' && exec python3 herramientas/servir_interfaz.py 8000"
   sleep 6
   ss -ltn | grep -q ':9090' && verde "   rosbridge en el puerto 9090" || rojo "   rosbridge no arranco: /tmp/rosbridge.log"
   ss -ltn | grep -q ':8000' && verde "   la pagina en http://$(hostname -I | cut -d' ' -f1):8000/" || rojo "   la pagina no arranco"
@@ -181,7 +183,7 @@ parar() {
   docker exec coordinador pkill -INT -f '[b]ag record' 2>/dev/null
   sleep 3
   docker rm -f coordinador >/dev/null 2>&1 && echo "coordinador detenido"
-  pkill -f '[r]osbridge_websocket'; pkill -f '[r]osapi_node'; pkill -f '[h]ttp.server 8000'
+  pkill -f '[r]osbridge_websocket'; pkill -f '[r]osapi_node'; pkill -f '[h]ttp.server 8000'; pkill -f '[s]ervir_interfaz.py'
   echo "rosbridge y la pagina detenidos"
 }
 
