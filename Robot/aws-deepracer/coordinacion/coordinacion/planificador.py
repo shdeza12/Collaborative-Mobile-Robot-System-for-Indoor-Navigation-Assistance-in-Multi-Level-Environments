@@ -88,7 +88,7 @@ def _buscar(catalogo, id_punto, papel):
             return p
     conocidos = ", ".join(sorted(p["id"] for p in catalogo))
     raise ErrorPlanificacion(
-        f"El {papel} '{id_punto}' no esta en el catalogo. Conocidos: {conocidos}"
+        f"El {papel} '{id_punto}' no está en el catálogo. Conocidos: {conocidos}"
     )
 
 
@@ -106,15 +106,15 @@ def _transferencia_de(catalogo, nivel):
                   if p.get("es_transferencia") and p["nivel"] == nivel]
     if not candidatos:
         raise ErrorPlanificacion(
-            f"El nivel {nivel} no tiene punto de transferencia, asi que no se "
-            f"puede entrar ni salir de el. Falta un punto con "
+            f"El nivel {nivel} no tiene punto de transferencia, así que no se "
+            f"puede entrar ni salir de él. Falta un punto con "
             f"es_transferencia: true en puntos_interes.yaml"
         )
     if len(candidatos) > 1:
         ids = ", ".join(p["id"] for p in candidatos)
         raise ErrorPlanificacion(
             f"El nivel {nivel} tiene {len(candidatos)} puntos de transferencia "
-            f"({ids}) y el planificador no sabe cual elegir. Ver "
+            f"({ids}) y el planificador no sabe cuál elegir. Ver "
             f"_transferencia_de() en planificador.py"
         )
     return candidatos[0]
@@ -196,14 +196,14 @@ def planificar(catalogo, origen_id, destino_id, asignacion=None):
     if origen_id == destino_id:
         raise ErrorPlanificacion(
             f"El origen y el destino son el mismo punto ('{origen_id}'). "
-            f"No hay nada que guiar"
+            f"No hay nada que guiar."
         )
 
     for punto, papel in ((origen, "origen"), (destino, "destino")):
         if punto["nivel"] not in asignacion:
             raise ErrorPlanificacion(
-                f"El {papel} '{punto['id']}' esta en el nivel {punto['nivel']}, "
-                f"y no hay ningun robot asignado a ese nivel"
+                f"El {papel} '{punto['id']}' está en el nivel {punto['nivel']}, "
+                f"y no hay ningún robot asignado a ese nivel."
             )
 
     robot_origen = asignacion[origen["nivel"]]
@@ -216,7 +216,7 @@ def planificar(catalogo, origen_id, destino_id, asignacion=None):
     if origen["nivel"] == destino["nivel"]:
         return (_colapsar([
             Tramo(robot_origen, origen, TRAMO_1, False,
-                  f"El robot va hacia {origen['nombre']}. Espere alli."),
+                  f"El robot va hacia {origen['nombre']}. Espere allí."),
             Tramo(robot_origen, destino, TRAMO_1, True,
                   f"Siga al robot hasta {destino['nombre']}."),
         ]), 0)
@@ -227,14 +227,14 @@ def planificar(catalogo, origen_id, destino_id, asignacion=None):
 
     if robot_origen == robot_destino:
         raise ErrorPlanificacion(
-            f"Los niveles {origen['nivel']} y {destino['nivel']} estan "
-            f"asignados al mismo robot ('{robot_origen}'), y ningun robot "
-            f"cruza de nivel (decision D2). La asignacion es incoherente"
+            f"Los niveles {origen['nivel']} y {destino['nivel']} están "
+            f"asignados al mismo robot ('{robot_origen}'), y ningún robot "
+            f"cruza de nivel (decisión D2). La asignación es incoherente."
         )
 
     return (_colapsar([
         Tramo(robot_origen, origen, TRAMO_1, False,
-              f"El robot va hacia {origen['nombre']}. Espere alli."),
+              f"El robot va hacia {origen['nombre']}. Espere allí."),
         Tramo(robot_origen, transf_origen, TRAMO_1, True,
               f"Siga al robot hasta {transf_origen['nombre']}."),
         # El usuario cambia de nivel por su cuenta: ningun robot cruza (D2).

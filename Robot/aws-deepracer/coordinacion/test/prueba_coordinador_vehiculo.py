@@ -381,7 +381,7 @@ def con_simulacion(clase):
             print("6. Control: el mismo escenario con condicion:=simulacion, que lee /odom")
             estado, res = usuario.pedir("piso3_salon_302", "piso4_salon_402")
             comprueba("con /odom en otro marco, la llegada al Salon 302 se rechaza",
-                      res is not None and not res.exito and "/odom lo situa a" in res.motivo_fallo,
+                      res is not None and not res.exito and "/odom lo sitúa a" in res.motivo_fallo,
                       f"(motivo {res.motivo_fallo if res else None!r})")
         finally:
             desmontar(ejecutor)

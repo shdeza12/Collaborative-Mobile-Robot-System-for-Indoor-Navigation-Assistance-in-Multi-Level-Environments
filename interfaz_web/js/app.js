@@ -94,7 +94,7 @@ class CampoBuscable {
     this.lista.addEventListener("click", (ev) => {
       const b = ev.target.closest(".opcion");
       if (!b) return;
-      this._seleccionar(b.dataset.id, b.querySelector(".nombre").textContent);
+      this._seleccionar(b.dataset.id, nombreDe(b.dataset.id));
     });
     document.addEventListener("click", (ev) => {
       if (this.lista.hidden) return;
@@ -151,8 +151,17 @@ class CampoBuscable {
   }
 }
 
+// Los pisos 3 y 4 tienen cada uno su "Ascensor" y sus "Escaleras". En la lista
+// se distinguian por la etiqueta del piso, pero al elegir el campo solo decia
+// "Ascensor", y el 16-oct se pidio el del piso 4 en vez del 3. Un nombre que se
+// repite en otro piso lleva el piso en el propio nombre, en todos los sitios.
+function nombreVisible(p) {
+  const repetido = estado.puntos.some((o) => o.id !== p.id && o.nombre === p.nombre);
+  return repetido ? `${p.nombre} (piso ${p.nivel})` : p.nombre;
+}
+
 const opcionEstandar = (p) => `
-  <span class="nombre">${escapar(p.nombre)}${p.es_transferencia ? " (escaleras)" : ""}</span>
+  <span class="nombre">${escapar(nombreVisible(p))}${p.es_transferencia && !/escalera/i.test(p.nombre) ? " (escaleras)" : ""}</span>
   <span class="etiquetas"><span class="etq">piso ${p.nivel}</span></span>`;
 
 const campoOrigen = new CampoBuscable({
@@ -175,7 +184,7 @@ const campoDestino = new CampoBuscable({
     const origen = estado.puntos.find((o) => o.id === estado.origenSel);
     const conRelevo = origen && p.nivel !== origen.nivel;
     return `
-      <span class="nombre">${escapar(p.nombre)}</span>
+      <span class="nombre">${escapar(nombreVisible(p))}</span>
       <span class="etiquetas">
         <span class="etq">piso ${p.nivel}</span>
         ${conRelevo ? '<span class="etq relevo">con relevo</span>' : ""}
@@ -193,7 +202,7 @@ function pintarOrigen() {
   // catalogo (p. ej. al reconectar) no se lo pisa.
   if (!estado.origenSel && estado.puntos.length) {
     estado.origenSel = estado.puntos[0].id;
-    campoOrigen.seleccionar(estado.puntos[0].id, estado.puntos[0].nombre);
+    campoOrigen.seleccionar(estado.puntos[0].id, nombreVisible(estado.puntos[0]));
   }
   campoOrigen.refrescarCatalogo();
 }
@@ -297,7 +306,9 @@ function pintarPanel(e) {
 
   const filas = [];
   if (e.robot_activo) filas.push(["Robot", e.robot_activo]);
-  if (e.destino_actual && e.destino_actual.nombre) filas.push(["Va hacia", e.destino_actual.nombre]);
+  if (e.destino_actual && e.destino_actual.nombre) {
+    filas.push(["Va hacia", e.destino_actual.id ? nombreDe(e.destino_actual.id) : e.destino_actual.nombre]);
+  }
   if (e.destino_id) filas.push(["Destino final", nombreDe(e.destino_id)]);
   if (e.distancia_restante !== null && e.distancia_restante !== undefined) {
     filas.push(["Distancia", e.distancia_restante.toFixed(2) + " m"]);
@@ -328,7 +339,7 @@ function pintarPanelSinDatos(mensaje) {
 
 function nombreDe(id) {
   const p = estado.puntos.find((p) => p.id === id);
-  return p ? p.nombre : id;
+  return p ? nombreVisible(p) : id;
 }
 
 pintarPanelSinDatos("Conectando con el coordinador...");

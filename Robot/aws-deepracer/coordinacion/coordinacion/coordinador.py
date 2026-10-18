@@ -197,7 +197,7 @@ class Coordinador(Node):
             EstadoMision, "/coordinacion/estado_mision", 10)
         self.estado = EstadoMision()
         self.estado.etapa = INACTIVA
-        self.estado.mensaje_usuario = "Sin mision activa."
+        self.estado.mensaje_usuario = "Sin misión activa."
         self.create_timer(1.0, self._publicar_estado)   # 1 Hz, como pide el §4
 
         # Un cliente de navegacion y un lector de /odom por robot, y en el
@@ -405,7 +405,7 @@ class Coordinador(Node):
                         tramo, goal_handle, mision_id)
                     if not ok:
                         self._marcar(FALLIDA, tramo.robot, tramo.punto,
-                                     f"Mision detenida: {motivo}", mision_id)
+                                     f"Misión detenida: {motivo}", mision_id)
                         self._feedback(goal_handle)
                         goal_handle.abort()
                         res.exito, res.motivo_fallo = False, motivo
@@ -792,16 +792,16 @@ class Coordinador(Node):
         fut = cliente.send_goal_async(objetivo)
         gh = self._esperar(fut)
         if gh is None:
-            return False, "Nav2 no respondio al envio del goal"
+            return False, "Nav2 no respondió al envío del goal"
         if not gh.accepted:
-            return False, f"'{robot}' rechazo el goal"
+            return False, f"'{robot}' rechazó el goal"
 
         resultado = self._esperar_resultado_nav2(gh, goal_handle, robot)
         if resultado is None:
-            return False, "Nav2 no devolvio resultado"
+            return False, "Nav2 no devolvió resultado"
 
         if resultado.status != GoalStatus.STATUS_SUCCEEDED:
-            return False, f"Nav2 termino con estado {resultado.status}"
+            return False, f"Nav2 terminó con estado {resultado.status}"
 
         if self.condicion == "hardware":
             self._esperar_pose_asentada(robot)
@@ -810,13 +810,13 @@ class Coordinador(Node):
         d = self._distancia(robot, punto)
         if math.isnan(d):
             return False, (
-                f"'{robot}' dijo SUCCEEDED pero no hay {self.fuente_pose}, asi "
-                f"que la llegada no se puede verificar. No se acepta")
+                f"'{robot}' dijo SUCCEEDED pero no hay {self.fuente_pose}, así "
+                f"que la llegada no se puede verificar. No se acepta.")
         if d > self.tolerancia_llegada_m:
             return False, (
-                f"'{robot}' dijo SUCCEEDED pero {self.fuente_pose} lo situa a "
+                f"'{robot}' dijo SUCCEEDED pero {self.fuente_pose} lo sitúa a "
                 f"{d:.3f} m del punto, por encima de los "
-                f"{self.tolerancia_llegada_m} m de tolerancia")
+                f"{self.tolerancia_llegada_m} m de tolerancia.")
         self.get_logger().info(
             f"    llegada verificada contra {self.fuente_pose}: {d:.3f} m")
         return True, ""
@@ -912,7 +912,7 @@ class Coordinador(Node):
             return True, ""
 
         self._marcar(ESPERANDO_CONFIRMACION, tramo.robot, tramo.punto,
-                     f"¿Ya esta en el piso {nivel}? Confirmelo para continuar.",
+                     f"¿Ya está en el piso {nivel}? Confírmelo para continuar.",
                      mision_id)
         self._feedback(goal_handle)
         self.get_logger().info(
@@ -943,7 +943,7 @@ class Coordinador(Node):
             estado = fase(time.time() - t0)
             if estado == "agotada":
                 return False, (
-                    f"el usuario no confirmo la llegada al piso {nivel} en "
+                    f"el usuario no confirmó la llegada al piso {nivel} en "
                     f"{PLAZO_S:.0f} s")
             if estado == "alerta" and not avisado:
                 # UNA sola vez, no en cada vuelta del bucle: a 20 Hz serian
@@ -953,7 +953,7 @@ class Coordinador(Node):
                 restante = PLAZO_S - ALERTA_S
                 self._marcar(
                     ESPERANDO_CONFIRMACION, tramo.robot, tramo.punto,
-                    f"Seguimos esperando su confirmacion. Quedan "
+                    f"Seguimos esperando su confirmación. Quedan "
                     f"{restante:.0f} segundos.", mision_id)
                 self._feedback(goal_handle)
                 self.get_logger().warn(
