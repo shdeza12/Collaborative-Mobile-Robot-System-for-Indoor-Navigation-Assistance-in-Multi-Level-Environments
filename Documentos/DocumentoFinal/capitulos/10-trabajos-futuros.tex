@@ -3,15 +3,11 @@
 %  2026-10-15: al día con lo hecho (la unidad inercial y los dos vehículos
 %  en la misma red ya no son trabajo futuro), sin códigos del repositorio,
 %  y con dos líneas nuevas apoyadas en la literatura del marco teórico.
+%  2026-10-19: cerrada con lo que dejó la campaña de los dos vehículos
+%  (medida externa de la llegada y estabilidad en sesiones largas).
 % =====================================================================
 \chapter*{Trabajos futuros}
 \addcontentsline{toc}{chapter}{TRABAJOS FUTUROS}
-
-\begin{notaavance}[lista sujeta a lo que arroje la campaña con los vehículos]
-Esta lista se cierra cuando termine la toma de datos, el 16 de octubre de 2026.
-Las líneas que siguen salen de límites ya medidos y no van a desaparecer; la
-campaña con los dos vehículos puede añadir alguna más.
-\end{notaavance}
 
 Las líneas que siguen salen de límites concretos que el trabajo encontró y
 documentó, y de las suposiciones que el diseño hizo para mantenerse dentro del
@@ -35,6 +31,21 @@ con estructura, y esa solución limita dónde puede operar el sistema.
 Codificadores en las ruedas, u odometría visual con las cámaras que los vehículos
 ya llevan, darían información de avance que no depende de la geometría del sitio.
 
+\paragraph{Una medida externa de la llegada.} En la campaña con los dos
+vehículos la llegada se verificó con la localización del propio vehículo
+(sección~\ref{sec:lim-llegada}). Repetirla con una medida independiente daría la
+distancia real a cada destino. Puede ser el flexómetro sobre marcas en el piso,
+como pedía el protocolo, o un sistema de seguimiento externo, que además
+registraría la trayectoria completa sin depender del vehículo.
+
+\paragraph{Estabilidad de la navegación en sesiones largas.} Tras horas
+encendidos, la navegación de los dos vehículos dejó de responder y hubo que
+reiniciarla (sección~\ref{sec:res-completo}). La causa no se estableció. Antes de
+dejar el sistema en servicio hace falta reproducir la falla en una sesión larga
+controlada. Con ella se puede decidir si basta con supervisar la cadena de
+navegación y reiniciarla sola, o si hay que bajar la carga del procesador del
+vehículo.
+
 \paragraph{El ascensor como segunda vía de transición.} Hoy el cambio de piso se
 hace siempre por la escalera, y el ascensor es un destino más. Admitir los dos
 exige que el planificador elija entre dos puntos de transferencia por nivel,
@@ -57,11 +68,12 @@ MURDOCH \autocite{gerkey2002sold} o CBBA \autocite{choi2009consensus}, empiezan 
 decidir algo. Es la extensión natural del trabajo para edificios con más
 afluencia.
 
-\paragraph{Ampliar la muestra de la campaña.} Con treinta misiones el intervalo
-de confianza mide 24 puntos porcentuales. Ese ancho es de diseño y solo se reduce
-con más repeticiones. Una campaña mayor permitiría además comparar las misiones
-de un mismo piso con las de dos pisos, comparación que hoy no se sostiene porque
-sus intervalos se solapan.
+\paragraph{Ampliar la muestra de las campañas.} Con treinta misiones en
+simulación el intervalo de confianza mide 24 puntos porcentuales, y con nueve en
+los vehículos la cota inferior es del 70~\%. Ese ancho es de diseño y solo se
+reduce con más repeticiones. Una campaña mayor permitiría además comparar las
+misiones de un mismo piso con las de dos pisos, comparación que hoy no se sostiene
+porque sus intervalos se solapan.
 
 \paragraph{Evaluación con usuarios.} Las cuatro métricas del proyecto miden el
 sistema, y no la experiencia de quien lo usa. Un estudio con personas, como el

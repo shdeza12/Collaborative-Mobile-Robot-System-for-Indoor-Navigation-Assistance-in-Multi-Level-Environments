@@ -48,12 +48,13 @@ sudo apt install texlive-science
 
 Sin él el documento compila igual; solo avisa de que `\SI` y `\num` no están.
 
-## En Overleaf, si algún día hace falta
+## Overleaf ya no se usa
 
-Subir la carpeta `DocumentoFinal/` completa a un proyecto nuevo y compilar
-`main.tex` con pdfLaTeX. Overleaf ejecuta `biber` solo.
+Desde el 19 de octubre el documento se compila solo en el portátil. El `.zip`
+de `--zip` se conserva por si hiciera falta subirlo a otro sitio: Overleaf lo
+recibe con *New Project → Upload Project* y ejecuta `biber` solo.
 
 ## Estado de la última compilación verificada
 
-2026-09-28: **25 páginas, tamaño carta, sin errores ni avisos pendientes.**
-Margen izquierdo medido sobre el PDF: 3,0 cm, conforme a la NTC 1486.
+2026-10-19: **84 páginas, tamaño carta, sin errores, sin referencias sin
+resolver y sin cajas desbordadas** (`bash herramientas/armar_documento.sh --pdf`).

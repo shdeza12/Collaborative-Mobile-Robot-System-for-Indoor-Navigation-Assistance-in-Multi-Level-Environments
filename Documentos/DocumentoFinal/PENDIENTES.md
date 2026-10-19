@@ -1,9 +1,11 @@
 # Documento final — lo que falta por completar
 
-**Última revisión:** 2026-10-05
-**Estado del documento:** revisión parcial. El proyecto no ha cerrado: la toma de
-datos termina el **viernes 16 de octubre** (corte C-3 del
-[`ACTA_GO_NOGO.md`](../ACTA_GO_NOGO.md)).
+**Última revisión:** 2026-10-19
+**Estado del documento:** la toma de datos cerró el 16 de octubre (corte C-3 del
+[`ACTA_GO_NOGO.md`](../ACTA_GO_NOGO.md)) y los resultados del sistema completo,
+las conclusiones, los trabajos futuros y el resumen están redactados con esos
+datos. Ya no queda ningún bloque «Apartado en curso» en el PDF. Lo que falta son
+los datos institucionales y las decisiones de §1 a §4.
 
 Esta lista estaba dentro del PDF, en bloques «Nota para la revisión». Se sacaron
 de ahí —no son texto del documento— pero los pendientes son reales y siguen
@@ -58,45 +60,17 @@ no ponerla. Los agradecimientos sí están escritos.
 
 ---
 
-## 5. Apartados abiertos a la espera de datos
+## 5. Resultados del sistema completo · cerrado el 2026-10-19
 
-Estos no son pendientes de redacción sino de **medición**, y por eso van aparte.
-Se dejaron **sin escribir a propósito**: redactarlos con las cifras de hoy
-obligaría a corregirlos el 16 de octubre.
+Los apartados que esperaban datos (la navegación y la llegada, el sistema completo
+con los dos vehículos, las conclusiones del segundo y el cuarto objetivo y los
+trabajos futuros) están redactados con la evidencia de
+[`S27_campana_rf27.md`](../Evidencia/S27_campana_rf27.md). La figura de etapas
+de la campaña sale de `herramientas/figura_campana_vehiculos.py`.
 
-| Apartado | Qué falta para cerrarlo |
+Quedan dos datos que, si llegan, cambian una frase:
+
+| Dato | Dónde iría |
 |---|---|
-| **§4.2.2 La navegación y la precisión de llegada** | La compuerta **G-3**, que no se alcanzó en el corte C-1 y sigue abierta. La sección dice qué irá en ella y no adelanta ningún resultado |
-| **Conclusión de OE2, mitad de llegada** | Lo mismo: G-3. La mitad de odometría ya está escrita |
-| **Conclusión de OE4, mitad de llegada** | Lo mismo. La simulación y la odometría ya están cerradas y escritas |
-| **Trabajos futuros** | La lista puede crecer con lo que arrojen las sesiones que faltan |
-
-> **Cambió el 5 de octubre.** El acta de directores declaró **G-2 (odometría)
-> ALCANZADA** con las medidas del 2 de octubre en el piso 4, y dejó **G-3
-> (precisión de llegada) abierta**. Antes de esa resolución el §4.2 entero
-> estaba sin redactar; ahora la mitad de odometría se reporta como resultado
-> cerrado y solo queda abierta la de llegada.
-
-Cada uno lleva en el PDF un bloque **«Apartado en curso»** que dice qué puede
-cambiar y qué no. Esos bloques **sí son texto del documento** mientras el
-proyecto siga abierto, al contrario que las notas de revisión. Se apagan todos de
-golpe con `\ustanotasavancefalse` en `main.tex` cuando cierre.
-
-### Lo que sí está cerrado y no se va a mover
-
-Conviene tenerlo claro para no volver a tocarlo:
-
-- La **campaña de simulación** (§4.1): treinta misiones sorteadas, veredicto
-  válido, cero descartes, tasa de éxito superior al 70 % con 95 % de confianza.
-  Corrió el 5 de septiembre.
-- Las **limitaciones de la medición** (§4.3), que son de esa campaña.
-- Las **conclusiones de OE1 y OE3**.
-- La conclusión sobre el **objetivo general**, que descansa en la campaña de
-  simulación.
-- La **banda muerta de tracción** (§3.2.6): es una característica de la
-  plataforma medida al integrar, no un resultado de la campaña, y por eso está
-  en el capítulo de desarrollo y no en el de resultados.
-- La **odometría del vehículo** (§4.2.1, compuerta G-2): declarada alcanzada por
-  los directores el 5 de octubre, con error entre −4,6 % y +3,3 % sobre
-  recorridos de 6,68 y 14,57 m en el piso 4. Era la única ruta crítica que el
-  proyecto se reconocía desde septiembre.
+| Si hubo personas en el pasillo durante las misiones de la campaña | §4.3.1, condiciones de las pruebas |
+| La prueba de los ajustes de la página con un teléfono y los vehículos | §3.4.5; hoy dice que se verificaron con pruebas automáticas |

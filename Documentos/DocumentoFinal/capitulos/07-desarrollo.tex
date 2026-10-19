@@ -569,7 +569,8 @@ rumbo del vehículo y a más de 1,5~m. Si el agente no la completa en 120~s, sig
 Nav2 como antes. La maniobra giró 160$^\circ$ frente a un salón del piso 3 y
 167$^\circ$ junto a la escalera, en un solo tiempo cada vez. La cadena completa,
 del coordinador al agente y de ahí a Nav2, está verificada en las pruebas
-automáticas del coordinador.
+automáticas del coordinador, y en la campaña con los dos vehículos la maniobra se
+ejecutó 24 veces (sección~\ref{sec:res-completo}).
 
 % ---------------------------------------------------------------------
 \section{Interfaz de interacción con el usuario}
@@ -654,7 +655,8 @@ al llegar.
   \includegraphics[width=0.55\textwidth]{imagenes/hri_confirmacion_piso.png}
   \caption{Interfaz en la etapa de espera de confirmación, durante su prueba
     automática: el estado de la misión lo publica la prueba, con el texto
-    «Prueba de etapa 7», y la página muestra el botón «Ya estoy en el otro piso».}
+    «Prueba de etapa 7», y la página muestra el botón «Ya estoy en el otro piso»,
+    de la versión anterior a los ajustes de la sección~\ref{sec:ajustes-campo}.}
   \label{fig:confirmacion}
 \end{figure}
 
@@ -673,6 +675,28 @@ cancelar, la misión pasa por la etapa de cancelación y el vehículo activo reg
 al punto de transferencia de su piso; después la misión cierra como fallida, con
 un texto que lo dice. Se verificó con una corrida cancelada y una de control, y el
 vehículo quedó a 0,121~m de su punto de regreso.
+
+\subsection{Ajustes tras las pruebas con los vehículos}
+\label{sec:ajustes-campo}
+
+Las pruebas con los vehículos mostraron tres defectos de la página. El primero
+estaba en el título de la etapa de confirmación, que preguntaba siempre «¿Ya
+subió?». Al subir resultaba brusco, y al bajar del piso 4 al 3 era falso. Ahora el
+título sale de comparar el piso de origen con el del vehículo que espera, por
+ejemplo «Suba con calma al piso 4» o «Baje con calma al piso 3», y el botón dice
+«Ya estoy en el piso 4», o el piso que corresponda.
+
+Ese cambio se hizo el mismo día de la campaña, antes de correrla, y sin embargo
+los teléfonos siguieron mostrando la versión anterior. El servidor de la página no
+le indicaba al navegador cuándo volver a pedirla, y el navegador usaba la copia
+que tenía guardada. La página se sirve ahora con la indicación de comprobarla cada
+vez que se abre.
+
+El tercer defecto fue de nombres. Los dos ascensores se llamaban igual en la lista
+de destinos, y en una misión se eligió el del piso equivocado. Cuando un nombre se
+repite en los dos pisos, la página lo muestra ahora con su piso, como «Ascensor
+(piso 3)». Los tres ajustes se verificaron con pruebas automáticas de la página y
+del servidor.
 
 % ---------------------------------------------------------------------
 \section{Protocolo experimental e instrumentación}
@@ -713,8 +737,10 @@ vehículos, el reloj del computador que graba.
 \end{table}
 
 Una misión es exitosa si cumple tres condiciones. La pose final del vehículo, en
-su odometría, está a 0,25~m o menos del destino declarado en el catálogo; en los
-vehículos reales el umbral es de 0,5~m y la llegada se mide con flexómetro. La
+su odometría, está a 0,25~m o menos del destino declarado en el catálogo. En los
+vehículos reales el umbral es de 0,5~m y el protocolo mide la llegada con
+flexómetro; en la campaña con los dos vehículos esa medida no se tomó, y la
+llegada salió de la localización del vehículo (sección~\ref{sec:lim-llegada}). La
 misión llegó a la etapa completada sin pasar por fallida. Y, si era entre niveles,
 hubo un relevo.
 
@@ -775,8 +801,10 @@ el método declarado.
 Para los vehículos reales la cadena tiene dos diferencias. El grabador corre en
 el contenedor con Jazzy, así que un programa adapta la grabación al formato que
 leen las herramientas de Humble. Y el registro usa el reloj del computador, la
-tolerancia de 0,5~m, el mapa de cada piso y la distancia de llegada medida con
-flexómetro.
+tolerancia de 0,5~m y el mapa de cada piso. La distancia de llegada se guarda con
+su procedencia: medida con flexómetro o, si no la hay, tomada de la localización
+del vehículo, sin incertidumbre asignada. El analizador cuenta las llegadas de
+cada procedencia y advierte cuando no hay medida externa.
 
 \subsection{Pruebas de verificación de la demostración física}
 \label{sec:pruebas-verificacion}
@@ -790,8 +818,8 @@ toman más datos.
 
 \begin{table}[H]
   \centering\small
-  \caption{Pruebas de verificación de la demostración física y su estado antes
-    de la campaña con los vehículos.}
+  \caption{Pruebas de verificación de la demostración física y su estado al
+    cerrar la toma de datos.}
   \label{tab:pruebas-verificacion}
   \begin{tabular}{@{}p{0.24\textwidth}p{0.52\textwidth}p{0.16\textwidth}@{}}
     \toprule
@@ -800,12 +828,12 @@ toman más datos.
     Odometría & Error de 10~\% o menos sobre un recorrido conocido de 5~m o más & Superada \\ \addlinespace
     Navegación de un vehículo & Un vehículo llega de un punto a otro con Nav2, con la llegada verificada & Superada \\ \addlinespace
     Dos vehículos en la misma red & Los dos vehículos y el coordinador coexisten sin conflicto de nombres & Superada \\ \addlinespace
-    Misión con relevo & Una misión con relevo sobre los dos vehículos, con su registro & Pendiente \\ \addlinespace
-    Campaña con los vehículos & Entre 5 y 10 repeticiones del protocolo con su registro & Pendiente \\ \bottomrule
+    Misión con relevo & Una misión con relevo sobre los dos vehículos, con su registro & Superada \\ \addlinespace
+    Campaña con los vehículos & Entre 5 y 10 repeticiones del protocolo con su registro & Superada \\ \bottomrule
   \end{tabular}
 \end{table}
 
 Para la campaña con los vehículos se sortearon, antes de correr y con una semilla
 fija, diez misiones entre los pisos 3 y 4: cinco de subida y cinco de bajada. Se
-corren en ese orden y sin reubicar los vehículos entre misiones, como ocurriría en
-la operación real.
+corrieron en ese orden y sin reubicar los vehículos entre misiones, como ocurriría
+en la operación real. Sus resultados están en la sección~\ref{sec:res-completo}.

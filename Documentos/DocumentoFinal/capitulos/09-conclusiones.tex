@@ -2,20 +2,10 @@
 %  CONCLUSIONES  —  un párrafo por objetivo específico, que es una de las
 %  dos formas que admite la plantilla y la que menos margen deja a la
 %  vaguedad. 2026-10-15: sin códigos del repositorio ni fechas de bitácora.
+%  2026-10-19: cerradas con la campaña de los dos vehículos.
 % =====================================================================
 \chapter*{Conclusiones}
 \addcontentsline{toc}{chapter}{CONCLUSIONES}
-
-\begin{notaavance}[conclusiones parciales: uno de los cuatro objetivos sigue
-abierto]
-Estas conclusiones se escriben con el proyecto todavía en curso, y solo para lo
-que ya está cerrado. Los objetivos primero, segundo y tercero están verificados,
-así que sus conclusiones son definitivas. El cuarto depende de la campaña con los
-dos vehículos, que se corre el 16 de octubre de 2026; después de esa fecha no se
-toman más datos. La conclusión sobre el objetivo general se enuncia porque
-descansa en la campaña de simulación, ya cerrada, y en la navegación de cada
-vehículo, ya verificada; falta ejecutar el relevo con los dos vehículos reales.
-\end{notaavance}
 
 El primer objetivo específico, modelar la arquitectura funcional del sistema, se
 cumplió. El sistema tiene un contrato de interfaces escrito, treinta y seis
@@ -38,12 +28,17 @@ correspondiente. La navegación de un vehículo con la llegada verificada tambi�
 se superó. En una cadena de tres tramos sin intervención, las llegadas medidas con
 flexómetro quedaron entre 0,06 y 0,45~m de la meta, dentro de la tolerancia de
 0,5~m (sección~\ref{sec:res-g3}). Los dos vehículos operan juntos en la misma red,
-con un tiempo de ida y vuelta de los mensajes de 5,99~ms de mediana.
+con un tiempo de ida y vuelta de los mensajes de 5,99~ms de mediana. En la campaña
+completaron nueve misiones seguidas con relevo sin que se los reubicara, con 24
+medias vueltas en pasillos de 2,5 a 3,2~m de ancho.
 
-El límite que queda en la plataforma es la banda muerta de tracción
+Quedan dos límites en la plataforma. El primero es la banda muerta de tracción
 (sección~\ref{sec:banda-muerta}). El vehículo no avanza por debajo de 0,40~m/s y no
 tiene régimen de aproximación fina, y por eso la tolerancia de llegada con los
-vehículos es de 0,5~m y no de 0,25~m, como en simulación.
+vehículos es de 0,5~m y no de 0,25~m, como en simulación. El segundo es la
+estabilidad en sesiones largas: tras horas encendidos y con el procesador muy
+cargado, la navegación de los dos vehículos dejó de responder y hubo que
+reiniciarla, por una causa que no se estableció.
 
 El tercer objetivo, la interfaz de interacción con el usuario, se cumplió. La
 interfaz funciona desde el navegador de un teléfono, sin instalación y sin salida
@@ -52,23 +47,34 @@ dispositivo real. Dos funciones se añadieron después de ver el sistema en uso.
 Una es la confirmación de cambio de piso, que impide dar por completada una
 misión con el usuario en el nivel equivocado. La otra es la cancelación, que no
 funcionaba porque el servidor de acción rechazaba las solicitudes sin informar.
+Con la interfaz se pidieron y siguieron todas las misiones de la campaña con los
+vehículos, y la confirmación de cambio de piso se usó en cada relevo. Esas pruebas
+mostraron defectos de la página que ya están corregidos
+(sección~\ref{sec:ajustes-campo}). El título de la confirmación no indicaba si el
+usuario sube o baja, dos destinos de pisos distintos tenían el mismo nombre y el
+teléfono conservaba una versión anterior de la página.
 
-El cuarto objetivo, la evaluación experimental, está cumplido en simulación y
-parcialmente con los vehículos. La campaña de treinta misiones sorteadas fue
-válida, sin descartes, y permite afirmar con 95~\% de confianza que la tasa de
-éxito supera el 70~\%. Esa parte del objetivo está cerrada y sus cifras no van a
-cambiar. Con los vehículos ya se superaron las pruebas de odometría y de
-navegación de un vehículo. Falta la campaña con los dos vehículos, que se
-concluye al terminar la toma de datos (sección~\ref{sec:res-completo}).
+El cuarto objetivo, la evaluación experimental, se cumplió en simulación y con
+los vehículos. La campaña de treinta misiones sorteadas en simulación fue válida,
+sin descartes, y permite afirmar con 95~\% de confianza que la tasa de éxito
+supera el 70~\%. Con los dos vehículos, en los pisos 3 y 4, las nueve misiones
+sorteadas que llegaron a correr se completaron con relevo, lo que sostiene la
+misma cota (sección~\ref{sec:res-completo}). Su tiempo total tuvo una mediana de
+87,6~s, el tiempo de respuesta, de 0,87~s, y el de asignación fue de 0,3~ms. La
+llegada de esa campaña se verificó con la localización de cada vehículo y no con
+una medida externa (sección~\ref{sec:lim-llegada}). Lo demostrado es que cada
+vehículo, según su propia estimación, terminó a menos de 0,5~m del destino. Las misiones 1 y 2 se completaron al segundo
+intento, y esos primeros intentos se declaran fuera de la tasa.
 
 Sobre el objetivo general, el esquema de relevo es viable. Dos robots dedicados
 cada uno a un nivel pueden repartirse el guiado de una persona que cambia de piso,
 sin que ninguno atraviese la zona de transición vertical y sin modificar el
-edificio. Eso quedó demostrado en simulación, con una campaña medida y válida.
-Sobre los vehículos reales están verificadas la odometría y la navegación de cada
-uno, que durante meses hicieron dudar de que el esquema fuera ejecutable fuera de
-la simulación. Falta ejecutar el relevo con los dos vehículos, que es el objeto
-de la campaña con los vehículos.
+edificio. Eso quedó demostrado en simulación, con una campaña medida y válida, y
+sobre los dos vehículos reales, que ejecutaron el relevo entre los pisos 3 y 4 en
+cada una de las nueve misiones de su campaña. La odometría y la navegación de los
+vehículos, que durante meses hicieron dudar de que el esquema fuera ejecutable
+fuera de la simulación, dejaron de ser el límite. Lo que el trabajo no mide es la
+experiencia de la persona guiada, que queda para un estudio con usuarios.
 
 Queda una conclusión de método. En este proyecto costó más averiguar qué medía
 cada prueba que construir el sistema, como muestran tres casos. El tiempo de
@@ -78,4 +84,7 @@ criterio de continuidad entre niveles no podía dar un resultado negativo, así 
 sus treinta verificaciones no eran evidencia. Y la correspondencia entre el modelo
 del edificio y el edificio real se daba por supuesta, y resultó falsa en un 20~\%
 la primera vez que se midió. Los tres se encontraron preguntando si el criterio
-podía fallar, y ninguno habría aparecido corriendo más experimentos.
+podía fallar, y ninguno habría aparecido corriendo más experimentos. La campaña con
+los vehículos añadió un caso más. El intervalo del relevo, que en simulación medía
+la reacción del sistema, en los vehículos medía a veces cuánto tardaba la persona
+en confirmar, y solo se vio al descomponer cada misión en sus etapas.
