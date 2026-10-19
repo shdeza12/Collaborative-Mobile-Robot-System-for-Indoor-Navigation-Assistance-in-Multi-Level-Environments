@@ -68,9 +68,14 @@ trabajos futuros) están redactados con la evidencia de
 [`S27_campana_rf27.md`](../Evidencia/S27_campana_rf27.md). La figura de etapas
 de la campaña sale de `herramientas/figura_campana_vehiculos.py`.
 
+El 19 de octubre se añadió al desarrollo la sección «Recorrido del trabajo»
+(DonkeyCar, migración a Humble, primeros entornos, integración en simulación y
+vehículos físicos). Su fuente es [`CRONOLOGIA.md`](CRONOLOGIA.md), que reúne
+semana a semana los entregables 10 a 27 y los commits.
+
 Quedan dos datos que, si llegan, cambian una frase:
 
 | Dato | Dónde iría |
 |---|---|
-| Si hubo personas en el pasillo durante las misiones de la campaña | §4.3.1, condiciones de las pruebas |
-| La prueba de los ajustes de la página con un teléfono y los vehículos | §3.4.5; hoy dice que se verificaron con pruebas automáticas |
+| Si hubo personas en el pasillo durante las misiones de la campaña | Resultados, «Condiciones de las pruebas» del sistema completo |
+| La prueba de los ajustes de la página con un teléfono y los vehículos | Desarrollo, «Ajustes tras las pruebas con los vehículos»; hoy dice que se verificaron con pruebas automáticas |

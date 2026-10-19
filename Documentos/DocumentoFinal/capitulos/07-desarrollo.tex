@@ -9,16 +9,24 @@
 %  Fuentes: Entregables S10-S15, CONTRATO_INTERFACES.md, REQUISITOS.md,
 %  PROTOCOLO_EXPERIMENTAL.md, ENTORNO_DE_EVALUACION.md, ACTA_GO_NOGO.md,
 %  DISENO_CONFIRMACION_PISO.md y la evidencia de cada subsección.
+%
+%  2026-10-19: sección «Recorrido del trabajo» (DonkeyCar, migración a
+%  Humble, primeros entornos, integración en simulación y vehículos), a
+%  partir de CRONOLOGIA.md, que reúne los entregables S10-S27 y los commits.
 % =====================================================================
 \chapter{Desarrollo}
 \label{cap:desarrollo}
 
 El sistema se construyó en cuatro frentes, uno por objetivo específico. Antes de
 describirlos, la primera sección ubica el trabajo en las fases de la metodología
-del anteproyecto, porque varias decisiones solo se entienden en el orden en que
-se tomaron. Cada sección siguiente describe qué se hizo, qué se decidió y por qué.
-Las decisiones que hubo que revisar aparecen con su corrección, porque el camino
-que se descartó explica el que quedó.
+del anteproyecto. La segunda lo recorre en el orden en que se hizo, desde la
+plataforma DonkeyCar que proponía el anteproyecto hasta la campaña con los
+vehículos físicos, pasando por el modelo de AWS DeepRacer, su migración a ROS~2
+Humble y la integración en simulación. Varias decisiones solo se entienden en ese
+orden. Las secciones siguientes, una por
+objetivo, describen qué quedó, qué se decidió y por qué. Las decisiones que hubo
+que revisar aparecen con su corrección, porque el camino que se descartó explica
+el que quedó.
 
 % ---------------------------------------------------------------------
 \section{Etapas del trabajo}
@@ -40,11 +48,12 @@ cada período.
   \begin{tabular}{@{}p{0.15\textwidth}p{0.18\textwidth}p{0.59\textwidth}@{}}
     \toprule
     \textbf{Período} & \textbf{Fase} & \textbf{Lo que se hizo} \\ \midrule
-    Marzo y abril & Requisitos y diseño conceptual & Análisis de la plataforma DonkeyCar y de los simuladores; adopción del modelo de AWS DeepRacer y su migración a ROS~2 Humble; arquitectura con servidor central y escenario de relevo \\ \addlinespace
-    Mayo y junio & Desarrollo progresivo & Modelo del pasillo de la universidad en Gazebo; validación de los sensores simulados; mapa con SLAM en simulación; seguidor de paredes, descartado \\ \addlinespace
-    Agosto & Integración & Contrato de interfaces; requisitos numerados; dos vehículos en simulación; mundo de dos pisos; coordinador y relevo; protocolo experimental; primeras pruebas sobre los vehículos \\ \addlinespace
-    Septiembre & Integración y validación & Campaña de treinta misiones en simulación; interfaz web; comunicación entre los dos vehículos; congelación del código; primera navegación autónoma sobre un vehículo \\ \addlinespace
-    Octubre & Validación & Unidad inercial; navegación en los pisos 3 y 4; sistema completo con los dos vehículos; campaña con los vehículos \\ \bottomrule
+    Febrero y marzo & Planteamiento y requisitos & Anteproyecto, con el problema, la pregunta, la revisión de literatura y su sustentación; requisitos funcionales y restricciones técnicas \\ \addlinespace
+    Abril & Requisitos y diseño conceptual & Análisis de la plataforma DonkeyCar y de los simuladores; adopción del modelo de AWS DeepRacer y su migración a ROS~2 Humble; arquitectura con servidor central y escenario de relevo \\ \addlinespace
+    Mayo y junio & Desarrollo progresivo & Pasillo de la universidad en Gazebo; seguidor de paredes, descartado; sensores simulados en el primer piso; primer mapa con SLAM \\ \addlinespace
+    Agosto & Integración & Vehículo físico con el software abierto de la comunidad; Nav2 en Humble para dirección Ackermann; contrato de interfaces; dos agentes en simulación; mundo de dos pisos; coordinador y relevo; requisitos numerados y protocolo experimental \\ \addlinespace
+    Septiembre & Integración y validación & Campaña de treinta misiones en simulación; interfaz web en un teléfono; segundo vehículo; congelación del código; primera navegación autónoma sobre un vehículo \\ \addlinespace
+    Octubre & Validación & Pisos 3 y 4; unidad inercial; llegada verificada; coordinador en el portátil; campaña con los dos vehículos \\ \bottomrule
   \end{tabular}
 \end{table}
 
@@ -54,6 +63,237 @@ el avance de cada objetivo. Y los criterios de la demostración física, propues
 por los autores y decididos por los directores, fijan qué pruebas debían
 superarse sobre los vehículos reales y hasta cuándo se tomaban datos
 (sección~\ref{sec:pruebas-verificacion}).
+
+% ---------------------------------------------------------------------
+\section{Recorrido del trabajo}
+\label{sec:recorrido}
+
+Esta sección cuenta el trabajo en el orden en que se hizo, con las decisiones que
+cambiaron su rumbo. Lo que quedó de cada etapa se describe con detalle en las
+secciones de cada objetivo, a las que remite el texto.
+
+\subsection{La plataforma DonkeyCar y su simulador}
+\label{sec:donkeycar}
+
+El anteproyecto planteó dos vehículos tipo DonkeyCar con una Raspberry Pi~4 como
+computador, simulación en CoppeliaSim y visión con OpenCV. DonkeyCar es una
+plataforma abierta de vehículos a escala con dirección tipo automóvil, orientada
+a la conducción autónoma con una cámara \autocite{donkeycar}. La misma lista de
+herramientas del anteproyecto nombraba ya el AWS DeepRacer como hardware, y la
+ingeniería inversa sobre esos vehículos como técnica.
+
+Lo primero que se hizo, en abril, fue instalar el simulador de la plataforma y
+conducir con él. Es una aplicación con pistas exteriores, y el vehículo se maneja
+desde la interfaz web del propio DonkeyCar, que muestra la imagen de su cámara y
+permite grabar los recorridos (figura~\ref{fig:donkeycar}, izquierda). En
+paralelo se empezó un modelo propio del vehículo para ROS~2, con el chasis, las
+cuatro ruedas, la dirección y su árbol de transformaciones, que llegó a
+representarse en el visualizador de ROS~2 (figura~\ref{fig:donkeycar}, derecha).
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[height=5.2cm]{imagenes/etapa_donkeycar_simulador.jpg}\hfill
+  \includegraphics[height=5.2cm]{imagenes/etapa_donkeycar_modelo.png}
+  \caption{Exploración de la plataforma DonkeyCar. A la izquierda, su simulador
+    conducido desde la interfaz web de la plataforma, con la imagen de la cámara
+    del vehículo. A la derecha, el modelo propio del vehículo en el visualizador
+    de ROS~2, con el chasis, las ruedas y la dirección.}
+  \label{fig:donkeycar}
+\end{figure}
+
+Ese trabajo encontró tres limitaciones. El ecosistema DonkeyCar no se actualiza
+desde hace años y no es compatible con las versiones recientes de ROS~2. Su
+simulador no se comunica con ROS~2, de modo que no permite probar el mapeo, la
+localización, la planificación ni la comunicación entre robots, que son el
+núcleo del proyecto. Y no existía un modelo del DonkeyCar para Gazebo con
+dirección Ackermann que estuviera mantenido y funcionara en ROS~2 Humble.
+
+Para elegir el simulador se fijaron cuatro criterios: compatibilidad con ROS~2
+Humble, vehículos con dirección Ackermann, entornos interiores y soporte para
+mapeo y navegación. Se consideraron CoppeliaSim, que proponía el anteproyecto, el
+simulador del curso F1TENTH \autocite{okelly2019f1tenth} y Gazebo
+\autocite{koenig2004gazebo}. Quedó Gazebo, por su integración directa con ROS~2
+y con su sistema de control de articulaciones.
+
+La decisión sobre el vehículo se tomó en dos pasos. Primero se resolvió conservar
+un chasis con dirección tipo automóvil. Como cada robot atiende un piso y la
+persona cambia de nivel por la escalera, el vehículo no tiene que entrar a un
+ascensor ni subir escalones. La vuelta dentro del pasillo se podía dejar a un
+planificador para automóviles, capaz de maniobrar en varios tiempos.
+Una semana después, por la falta de un modelo de simulación, se cambió al
+modelo del AWS DeepRacer (sección~\ref{sec:seleccion}).
+
+\subsection{El modelo de AWS DeepRacer y su migración a ROS~2 Humble}
+\label{sec:migracion}
+
+AWS publicó en código abierto la descripción del DeepRacer para simulación, con
+su complemento de cinemática Ackermann para Gazebo, los archivos de
+configuración y los nodos que traducen las órdenes de velocidad a los servos del
+vehículo \autocite{awsdeepracer2021}. Ese software estaba escrito para ROS~2 Foxy
+sobre Ubuntu 20.04, y el proyecto trabaja con Humble sobre Ubuntu 22.04.
+
+La migración se hizo paquete por paquete. Hicieron falta tres cambios, todos por
+la evolución del sistema de control de articulaciones de ROS~2 entre las dos
+versiones. La orden que activa los controladores pasó de \texttt{start} a
+\texttt{active} en dos archivos de lanzamiento, y el componente que publica el
+estado de las articulaciones cambió de nombre y de tipo. Los seis paquetes
+compilaron sin errores. Más tarde se eliminaron los dos avisos de compilación
+del complemento Ackermann: una cabecera obsoleta y una opción del compilador que
+la nueva versión no admite.
+
+La validación se hizo en un mundo vacío (figura~\ref{fig:deepracer-sim},
+izquierda). El vehículo apareció con el láser y la cámara publicando, a 62
+cuadros por segundo y con un factor de tiempo real de 1,00. Los siete
+controladores quedaron activos: el publicador de estado, las cuatro ruedas y las
+dos articulaciones de dirección. El vehículo respondió a las órdenes de
+velocidad, y la odometría registró 0,40~m/s ante una orden de 0,5~m/s, coherente
+con la respuesta del controlador y la fricción del modelo.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[height=4.6cm]{imagenes/etapa_deepracer_gazebo.png}\hfill
+  \includegraphics[height=4.6cm]{imagenes/etapa_pasillo_usta.png}
+  \caption{El modelo del DeepRacer migrado a ROS~2 Humble. A la izquierda, en un
+    mundo vacío, con el barrido del láser en azul. A la derecha, dentro del primer
+    modelo del pasillo de la universidad, de 7 por 3~m; el sector sin barrido
+    detrás del vehículo es el que no cubría el láser del modelo simulado.}
+  \label{fig:deepracer-sim}
+\end{figure}
+
+En ese momento el plan era conservar el chasis del DeepRacer y reemplazar su
+tarjeta, con procesador Intel, por una Raspberry Pi~4 con Humble. Ese plan cambió
+al empezar el trabajo con los vehículos (sección~\ref{sec:recorrido-fisico}).
+
+La configuración de Nav2 que se preparó durante el primer semestre también
+estaba escrita para Foxy, y se migró al empezar el segundo. Cambiaron de nombre
+el servidor de las maniobras de recuperación, el planificador híbrido, el modelo
+de movimiento de la localización y los parámetros de los árboles de
+comportamiento por omisión. La adaptación de Nav2 a un vehículo que no gira
+sobre su eje está en la sección~\ref{sec:nav2-ackermann}.
+
+\subsection{Los primeros entornos simulados y el seguidor de paredes}
+\label{sec:primeros-entornos}
+
+En mayo se modeló un tramo del pasillo de la universidad con el editor de
+edificios de Gazebo, de 7 por 3~m, y se condujo dentro el vehículo de forma
+remota (figura~\ref{fig:deepracer-sim}, derecha). Sobre ese pasillo se programó un
+seguidor de paredes, que la dirección sugirió como ejercicio de integración entre
+el láser y la cinemática del vehículo. La primera versión aplicaba control
+proporcional-derivativo sobre un solo rayo lateral del láser, y saturaba el giro
+porque no tenía información de la orientación del vehículo respecto a la pared.
+La segunda aplicó la técnica de dos rayos del curso F1TENTH, que estima además
+ese ángulo y la distancia a la pared que tendrá el vehículo un metro más
+adelante.
+
+En el pasillo de 7 por 3~m ninguna sintonía estabilizó al vehículo. El giro se
+saturaba, y el vehículo trazaba círculos o chocaba con las paredes, porque su
+radio de giro deja muy poco margen en 3~m de ancho. En un pasillo ampliado de 15
+por 5~m el seguidor convergió por tramos, a unos 0,76~m de la pared frente al
+objetivo de 0,5~m, y se perdía en los extremos. De ahí se concluyó que un
+comportamiento reactivo no anticipa las restricciones de un vehículo tipo
+automóvil en un pasillo estrecho, y el proyecto pasó a la navegación con un mapa
+y un planificador que conoce esas restricciones.
+
+Después se modeló la primera planta del edificio de pruebas, un pasillo de unos
+44 por 5~m con las puertas de los salones abiertas. En ella se comprobaron, con el
+vehículo conducido a distancia, el láser, la cámara, la odometría y el árbol de
+transformaciones. La cámara quedó disponible y el sistema final no la usa.
+
+Con ese mundo se construyó el primer mapa por localización y mapeo simultáneos
+(SLAM). Se aceptó entonces sin medirlo. Medido en septiembre, resultó de 23,04
+por 15,72~m, la mitad del largo y el triple del ancho del pasillo, deformado por la
+deriva de la pose estimada. Fue la primera manifestación, sin
+diagnosticar entonces, de la falta de información de avance en un pasillo recto
+(sección~\ref{sec:teo-localizacion}), que acabó determinando cómo se hicieron los
+mapas del proyecto (sección~\ref{sec:mapas}).
+
+\subsection{La integración en simulación}
+\label{sec:recorrido-sim}
+
+El segundo semestre empezó con un cronograma replanificado, aprobado por el
+director, con un criterio de cierre para cada semana. Lo primero fue ordenar la
+base. El espacio de trabajo donde se compilaba el código resultó ser una copia
+del repositorio del fabricante y no un enlace al del proyecto, de modo que los
+ajustes del mapeo del primer semestre nunca se habían ejecutado. Se enlazó al
+repositorio del proyecto y se fijó el contrato de interfaces
+(sección~\ref{sec:contrato}). La tabla~\ref{tab:hitos-sim} resume los pasos
+siguientes.
+
+\begin{table}[H]
+  \centering\small
+  \caption{Pasos de la integración en simulación, en el orden en que se dieron.}
+  \label{tab:hitos-sim}
+  \begin{tabular}{@{}p{0.22\textwidth}p{0.72\textwidth}@{}}
+    \toprule
+    \textbf{Cuándo} & \textbf{Qué se logró} \\ \midrule
+    Inicio de agosto & Nav2 migrado a Humble y adaptado a la dirección Ackermann; contrato de interfaces \\ \addlinespace
+    Mediados de agosto & Dos agentes aislados, cada uno con su espacio de nombres, en un simulador por vehículo; entorno de dos niveles; mapa de navegación calculado a partir del modelo del edificio \\ \addlinespace
+    Segunda mitad de agosto & Orden de velocidad corregida en el modelo del vehículo; mundo definitivo de dos pisos, después partido en un mundo por piso; requisitos numerados y protocolo experimental \\ \addlinespace
+    Finales de agosto & Los dos agentes navegando a la vez; coordinador y planificador; primera misión completa y primera misión con relevo entre los dos pisos \\ \addlinespace
+    Septiembre & Campaña de treinta misiones; interfaz web operada desde un teléfono; confirmación de cambio de piso y cancelación; congelación del código \\ \bottomrule
+  \end{tabular}
+\end{table}
+
+Dos de esos pasos cambiaron el diseño. El primero fue la separación de los
+vehículos en dos simuladores. En un mismo proceso de Gazebo no fue posible tener
+dos robots, porque la integración de Gazebo con ROS~2 en Humble aplica a todos los
+complementos el espacio de nombres del primer modelo cargado. Por eso cada
+vehículo tiene su propio simulador, y más tarde cada piso, su propio mundo
+(sección~\ref{sec:simulacion}).
+
+El segundo fue el mapa de navegación. El mapa que se había construido con SLAM
+cubría el 35,5~\% del largo del pasillo, medía 15,0~m de ancho frente a 5,3~m
+reales, y 2688 de sus 3618 celdas ocupadas, el 74~\%, no tenían ninguna pared
+detrás. Se reemplazó por un mapa calculado a partir de la geometría del modelo
+del edificio, que es exacto en simulación. Como un mapa de ocupación es un corte
+horizontal, el del piso superior resultó idéntico y no hubo que levantarlo.
+
+En la misma etapa se corrigió un defecto del modelo del vehículo. La orden de
+velocidad estándar de ROS~2 expresa el giro como velocidad angular, y el
+complemento de simulación la tomaba como el ángulo del volante. Con la
+corrección, el ángulo de dirección se calcula con el modelo de bicicleta a partir
+de la velocidad angular, la velocidad lineal y la distancia entre ejes, y el
+error de seguimiento de las trayectorias bajó a la mitad. La misma corrección se
+aplicó al nodo que mueve el vehículo real.
+
+\subsection{Del vehículo físico a la campaña con los dos vehículos}
+\label{sec:recorrido-fisico}
+
+El trabajo con los vehículos físicos corrió en paralelo desde agosto. Al empezar
+el semestre se instaló el software abierto de la comunidad del DeepRacer
+\autocite{deepracercustomcar} en una Raspberry Pi~4 y en la tarjeta original del
+vehículo, y se probó la marcha desde la interfaz web del vehículo. Los vehículos
+quedaron operando con su tarjeta original, con Ubuntu 24.04 y ROS~2 Jazzy
+(sección~\ref{sec:componentes}). Como la simulación no puede pasar a Jazzy, el
+proyecto trabaja desde entonces con dos distribuciones de ROS~2
+(sección~\ref{sec:teo-ros2}). La tabla~\ref{tab:hitos-fisico} resume el resto del
+camino.
+
+\begin{table}[H]
+  \centering\small
+  \caption{Pasos del trabajo con los vehículos físicos, en el orden en que se
+    dieron.}
+  \label{tab:hitos-fisico}
+  \begin{tabular}{@{}p{0.22\textwidth}p{0.72\textwidth}@{}}
+    \toprule
+    \textbf{Cuándo} & \textbf{Qué se logró} \\ \midrule
+    Agosto & Software de la comunidad en los vehículos y marcha desde su interfaz web; diagnóstico del láser y del mando desde ROS~2; láser funcionando junto al software del fabricante; primer mapa del laboratorio \\ \addlinespace
+    Mediados de septiembre & Llegada del segundo vehículo y comunicación entre los dos; banda muerta de tracción medida \\ \addlinespace
+    Finales de septiembre & Decisión de intentar la demostración física, con seis pruebas de verificación; odometría con el láser; mapa construido a bordo y primera navegación autónoma de un vehículo; los dos vehículos aislados entre sí; primeras pruebas en el piso 2 \\ \addlinespace
+    Inicio de octubre & Paso a los pisos 3 y 4, levantados con flexómetro; odometría verificada; unidad inercial integrada; red de un punto de acceso por piso \\ \addlinespace
+    Octubre & Llegada verificada en el piso 4; media vuelta en varios tiempos; recorrido del piso 3; coordinador en el computador portátil; misión con relevo y campaña con los dos vehículos \\ \bottomrule
+  \end{tabular}
+\end{table}
+
+Tres hechos de ese camino cambiaron el plan. Durante tres semanas el segundo
+vehículo pareció averiado, y la causa eran los permisos con que corría el
+software del fabricante (sección~\ref{sec:dos-vehiculos}). En el hall del piso 2 se
+comprobó con flexómetro la primera medida del modelo, y el modelo daba el hall un
+25~\% más ancho que el real. Como las demás medidas nunca se habían comprobado,
+las pruebas pasaron a los pisos 3 y 4, levantados con flexómetro
+(sección~\ref{sec:mapas}). Y con las dos cadenas de navegación encendidas, la
+tarjeta de un vehículo se saturó y Nav2 no arrancaba, de modo que el coordinador
+y el grabador pasaron al computador portátil (sección~\ref{sec:dos-vehiculos}).
 
 % ---------------------------------------------------------------------
 \section{Arquitectura funcional del sistema}
@@ -212,24 +452,11 @@ medir.
 \label{sec:simulacion}
 
 Los escenarios con varios pisos se construyeron primero en simulación, en
-Gazebo~11 con ROS~2 Humble. El vehículo simulado es el modelo de código abierto
-del AWS DeepRacer, con su complemento de dirección Ackermann
-(sección~\ref{sec:seleccion}). El modelo estaba escrito para ROS~2 Foxy. Su
-migración a Humble exigió dos cambios en la configuración del control de las
-ruedas: cambió la palabra con que se activan los controladores y el nombre del
-componente que publica el estado de las articulaciones. Con esos cambios, los
-siete controladores del vehículo (cuatro ruedas, dos articulaciones de dirección
-y el publicador de estado) quedan activos y el vehículo responde a las órdenes de
-velocidad.
-
-El entorno evolucionó en varios pasos. Primero se modeló un tramo del pasillo de
-la universidad con el editor de edificios de Gazebo, de 7 por 3~m, y uno ampliado
-de 15 por 5~m. En ellos se probó un seguidor de paredes, con control
-proporcional-derivativo sobre un rayo del láser y con la técnica de dos rayos de
-F1TENTH. En el pasillo estrecho no se estabilizó, por el radio de giro del
-vehículo, y en el ancho solo convergió por tramos. Con ese resultado el proyecto
-pasó a la navegación con mapa. Se modeló después la primera planta del edificio y
-se duplicó para obtener dos niveles. Más tarde se adoptó un modelo más fiel del
+Gazebo~11 con ROS~2 Humble, con el modelo del AWS DeepRacer migrado a esa versión
+(sección~\ref{sec:migracion}). El entorno evolucionó en varios pasos. Tras los
+pasillos de prueba y la primera planta del edificio
+(sección~\ref{sec:primeros-entornos}), esa planta se duplicó para obtener dos
+niveles. Más tarde se adoptó un modelo más fiel del
 pasillo, cuyo catálogo llegó a 31 puntos de interés: quince en el piso 1 y
 dieciséis en el piso 2. Por último, ese mundo se partió en uno por piso.
 
@@ -267,12 +494,9 @@ procesamiento y comunicación que necesita la operación colaborativa.
 \label{sec:seleccion}
 
 El objetivo habla de «dos vehículos tipo DonkeyCar». Los vehículos empleados son
-dos AWS DeepRacer, y el cambio se decidió durante el diseño conceptual. El
-análisis de la plataforma DonkeyCar encontró tres limitaciones. Su ecosistema no
-se actualiza desde hace años y no es compatible con las versiones recientes de
-ROS~2. Su simulador propio, basado en Unity, no se integra con ROS~2, de modo que
-no permite probar mapeo, localización ni planificación. Y no se encontró un modelo
-del vehículo para Gazebo, con cinemática Ackermann, que estuviera mantenido.
+dos AWS DeepRacer, y el cambio se decidió durante el diseño conceptual, por las
+tres limitaciones que encontró el análisis de la plataforma DonkeyCar
+(sección~\ref{sec:donkeycar}).
 
 El DeepRacer resolvía las tres. Es la misma clase de plataforma: un chasis de
 radiocontrol a escala 1:18 con dirección Ackermann, un computador a bordo y
@@ -290,6 +514,7 @@ láser, se ejecutan con el usuario administrador y publican sin espacio de nombr
 (sección~\ref{sec:dos-vehiculos}).
 
 \subsection{Componentes del vehículo}
+\label{sec:componentes}
 
 Durante el diseño se planeó reemplazar la tarjeta de cómputo de los vehículos por
 una Raspberry Pi 4. Al empezar la integración se instaló en las dos tarjetas el
