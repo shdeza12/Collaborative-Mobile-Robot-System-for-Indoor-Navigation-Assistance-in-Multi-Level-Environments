@@ -25,32 +25,17 @@ equivocación se ve en la primera página.
 | Grupo de investigación | «GED — Grupo de Estudio y Desarrollo en Robótica» | Confirmarlo. Es el nombre que llevan el anteproyecto y los ocho entregables semanales; si el oficial fuera «Investigación y Desarrollo», hay que corregirlo **en todos ellos**, no solo aquí |
 | Línea de investigación | «Robótica y Sistemas Autónomos» | Confirmar la denominación exacta con el director |
 
-## 2. Antecedente interno sin referencia · `capitulos/06-marco-referencial.tex`
+## 2. Antecedente interno sin referencia · cerrado el 2026-10-20
 
-El anteproyecto menciona un trabajo de la Universidad Santo Tomás sobre asistencia
-a personas invidentes en la primera planta, atribuido a **Parra Buitrago (2021)**.
-Allí se cita por nombre y año, pero **no figura en la bibliografía**.
+El anteproyecto atribuía a **Parra Buitrago (2021)** un trabajo de la Universidad sobre asistencia a
+personas invidentes, sin referencia completa. Decisión de los autores: no se incluye. Se borró la nota
+que pedía la referencia.
 
-No está en el §2.1 porque no se ha podido localizar la referencia completa. Es el
-antecedente más próximo en contexto institucional y merece quedar bien citado.
-**Falta:** la referencia, o el dato que permita completarla.
+## 3. Marco legal y ambiental · cerrado el 2026-10-20
 
-## 3. Marco legal y ambiental · `capitulos/06-marco-referencial.tex` §2.4 y §2.5
-
-Están redactados **solo con lo que se pudo verificar**: las dos políticas CONPES
-que ya citaba el anteproyecto y la NTC 1486, que la plantilla institucional
-declara como su base.
-
-Quedan tres puntos sin redactar, a propósito, porque una cita normativa mal hecha
-es peor que un vacío señalado:
-
-- accesibilidad en edificaciones,
-- tratamiento de datos personales,
-- uso del espectro.
-
-**Falta decidir** cuáles de los tres aplican de verdad a un prototipo de este
-alcance, y si las dos secciones se desarrollan por completo o basta con el
-encuadre actual.
+Quedan como están: las dos políticas CONPES, la NTC 1486 y el alcance de la operación. Decisión de los
+autores: por ahora no se desarrollan accesibilidad en edificaciones, datos personales ni uso del
+espectro. Se borró la nota al revisor que lo preguntaba.
 
 ## 4. Dedicatoria · `capitulos/01-dedicatoria-agradecimientos.tex`
 
