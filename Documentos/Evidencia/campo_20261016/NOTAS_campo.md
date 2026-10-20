@@ -40,6 +40,10 @@ escalera hasta que el usuario confirma.
 | — | (repetida, mismo destino equivocado) | 19:33:37 | completada, sin relevo | 13,5 | 0,42 | — |
 | 10 | Salón 403 → Ascensor p3 | 19:35:10 | **interrumpida**: el portátil se apagó; la grabación acaba a las 19:35:28 con racey camino de su escalera, a 7,3 m | — | — | — |
 
+Nota del 20-oct: la grabación acaba antes de que se apagara el portátil (el grabador pierde el último
+bloque al cortarse). Según la pantalla del teléfono, racey llegó a su escalera a los 28,6 s y la página
+perdió el coordinador a los 30,2 s. Ver `S27_campana_rf27.md`, resultado 4.
+
 Nueve misiones del sorteo completadas (la 1 y la 2 en el segundo intento).
 Sobre esas nueve: tiempo mediano 87,6 s (52,3 a 105,4); error de llegada mediano
 0,23 m (0,14 a 0,44); espera en el relevo mediana 1,7 s (0,8 a 27,6); asignación

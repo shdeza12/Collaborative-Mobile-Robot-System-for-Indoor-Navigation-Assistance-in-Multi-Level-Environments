@@ -44,3 +44,6 @@ mapas/bag_mapa_*/
 *.mov
 *.webm
 *.mkv
+
+# Videos de campo y su edición (originales, proyecto de Shotcut y exportaciones): no se versionan.
+VIDEOS/

@@ -24,7 +24,12 @@ requisito RF-27 (demostración física del protocolo con N entre 5 y 10 repetici
    error de la pose del agente contra el punto del catálogo, el mismo que verificó el coordinador
    1,5 s después de que Nav2 diera la meta por alcanzada. No hubo medida con cinta (ver abajo).
 4. La misión 10 (Salón 403 → Ascensor del piso 3) empezó a las 19:35:10 y no terminó: el portátil se
-   apagó por batería a los 18 s, con racey camino de su escalera. Queda fuera del conteo.
+   apagó por batería unos 30 s después, cuando racey ya había llegado a su escalera. Queda fuera del
+   conteo. Corrección del 20 de octubre: la primera versión decía «a los 18 s», que es donde termina la
+   grabación de datos, y el grabador pierde su último bloque cuando se corta de golpe. La grabación de la
+   pantalla del teléfono, sincronizada con el coordinador (desfase de 616,6 s, comprobado con las diez
+   llegadas), muestra la página en «Cambia de piso» a los 28,6 s, con racey en su escalera, y
+   «Buscando el coordinador…» a los 30,2 s. El video no se versiona; está en `VIDEOS/` del equipo.
 5. G-5 se cumplió en la primera sesión: la misión del Salón 302 al Salón 402, con relevo, se
    completó en 132,5 s con un error de llegada de 0,444 m y 61,1 s de espera en el relevo
    ([`registros/G5_01.json`](registros/G5_01.json)).
