@@ -15,6 +15,11 @@ El estado de avance detallado se mantiene en [`ESTADO.md`](ESTADO.md). Qué docu
 para cada tarea —y cuáles de las guías de campo siguen vigentes— está en
 [`Documentos/INDICE_GUIAS.md`](Documentos/INDICE_GUIAS.md).
 
+La versión gráfica, con una página por semana desde la semana 10, está en el
+[sitio del proyecto](https://shdeza12.github.io/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/).
+Su fuente está en [`sitio/`](sitio/); las páginas de las semanas se regeneran con
+`python3 sitio/generar_semanas.py` a partir de la cronología, los entregables y la evidencia.
+
 ---
 
 ## Requisitos

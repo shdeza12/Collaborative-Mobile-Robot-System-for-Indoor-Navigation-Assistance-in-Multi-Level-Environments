@@ -1,0 +1,43 @@
+# Publica el sitio del proyecto (sitio/) en GitHub Pages cada vez que cambia en main.
+# Las páginas de cada semana se generan en local con `python3 sitio/generar_semanas.py` y se
+# versionan; aquí solo se construye el sitio con MkDocs Material y se publica.
+name: Sitio del proyecto
+
+on:
+  push:
+    branches: [main]
+    paths: ['sitio/**', '.github/workflows/sitio.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  construir:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install mkdocs-material==9.5.39
+      - run: mkdocs build --strict -f sitio/mkdocs.yml
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .sitio_construido
+
+  publicar:
+    needs: construir
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.despliegue.outputs.page_url }}
+    steps:
+      - id: despliegue
+        uses: actions/deploy-pages@v4

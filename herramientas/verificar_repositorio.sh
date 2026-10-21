@@ -137,8 +137,9 @@ for f in $(git ls-files '*.md' '*.rviz'); do
     # Vienen del repositorio original de AWS; no son documentos del proyecto.
     */CODE_OF_CONDUCT.md|*/CONTRIBUTING.md) continue ;;
   esac
+  # '*.yml' cuenta porque el menú del sitio (sitio/mkdocs.yml) es lo que publica sus páginas.
   if ! grep -rlF --include='*.md' --include='*.tex' --include='*.py' \
-                 --include='*.xml' --include='*.sh' \
+                 --include='*.xml' --include='*.sh' --include='*.yml' \
                  "$(basename "$f")" . 2>/dev/null \
        | grep -qv "^\./$f$"; then
     HUERFANOS="$HUERFANOS

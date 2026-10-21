@@ -3,6 +3,7 @@ site_description: >-
   Proyecto de grado de la Universidad Santo Tomás: dos robots móviles que guían
   a una persona entre los pisos de un edificio, con relevo en la escalera.
 site_author: Santiago Hernández Ávila y Jonny Alejandro Mejía León
+site_url: https://shdeza12.github.io/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/
 repo_url: https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments
 repo_name: Repositorio del proyecto
 edit_uri: ""
@@ -44,6 +45,7 @@ theme:
     - search.suggest
     - search.highlight
     - content.tabs.link
+    - content.tooltips
 
 extra_css:
   - css/sitio.css
@@ -52,6 +54,11 @@ extra_javascript:
 
 markdown_extensions:
   - admonition
+  - abbr
+  - pymdownx.snippets:
+      base_path: !relative $config_dir
+      auto_append:
+        - glosario.md
   - attr_list
   - md_in_html
   - tables
@@ -72,6 +79,29 @@ markdown_extensions:
 
 nav:
   - Inicio: index.md
+  # semanas:inicio
+  - Semana a semana:
+      - semanas/index.md
+      - Semana 10: semanas/s10.md
+      - Semana 11: semanas/s11.md
+      - Semana 12: semanas/s12.md
+      - Semana 13: semanas/s13.md
+      - Semana 14: semanas/s14.md
+      - Semana 15: semanas/s15.md
+      - Semana 16: semanas/s16.md
+      - Semana 17: semanas/s17.md
+      - Semana 18: semanas/s18.md
+      - Semana 19: semanas/s19.md
+      - Semana 20: semanas/s20.md
+      - Semana 21: semanas/s21.md
+      - Semana 22: semanas/s22.md
+      - Semana 23: semanas/s23.md
+      - Semana 24: semanas/s24.md
+      - Semana 25: semanas/s25.md
+      - Semana 26: semanas/s26.md
+      - Semana 27: semanas/s27.md
+      - Semana 28: semanas/s28.md
+  # semanas:fin
   - El proyecto: proyecto.md
   - Cómo funciona: como-funciona.md
   - Proceso:

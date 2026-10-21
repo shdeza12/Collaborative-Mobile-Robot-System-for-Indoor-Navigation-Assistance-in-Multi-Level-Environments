@@ -352,5 +352,15 @@ Fuente: Entregable S27; `Evidencia/S27_campana_rf27.md`.
 
 ### S28 (desde el 19 de octubre): documento final
 
-- Los dos vehículos nivelados con el código vigente. Resultados del sistema completo, conclusiones,
-  trabajos futuros y resumen redactados con la campaña.
+- 19 de octubre: los dos vehículos nivelados con el código vigente (textos con tildes y puntos de
+  interés repetidos con su piso); la prueba del coordinador con vehículos simulados pasó 19 de 19
+  escenarios dentro de cada uno.
+- Documento final: resultados del sistema completo, conclusiones, trabajos futuros y resumen
+  redactados con la campaña, y el recorrido del trabajo desde el DonkeyCar.
+- Video de la campaña: el POV del usuario y la pantalla de su teléfono en el mismo instante, con la
+  pantalla sincronizada con el coordinador a ±0,3 s; en los relevos de las misiones 4, 5 y 9, los dos
+  POV lado a lado.
+- Corrección: el portátil de la misión 10 se apagó unos 30 s después de la solicitud, no a los 18 s.
+- Prueba del sitio del proyecto, con una página por semana.
+
+Fuente: Entregable S28; `Evidencia/S28_video_campana.md`.
