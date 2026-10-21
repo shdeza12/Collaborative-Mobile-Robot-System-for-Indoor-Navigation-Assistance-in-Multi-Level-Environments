@@ -51,8 +51,11 @@
 
     \begin{figure}[H]
         \centering
-        % Logotipo de la Universidad y la Facultad; si no está, el de la Universidad del documento final.
-        \IfFileExists{Logos Uni.png}{\includegraphics[width=0.6\textwidth]{Logos Uni.png}}{\includegraphics[width=0.35\textwidth]{logo_usta.png}}
+        % Logotipo de la Universidad y la Facultad (en Documentos/, o junto al .tex); si no está, el de la
+        % Universidad del documento final.
+        \IfFileExists{../Logos Uni.png}{\includegraphics[width=0.6\textwidth]{../Logos Uni.png}}{%
+          \IfFileExists{Logos Uni.png}{\includegraphics[width=0.6\textwidth]{Logos Uni.png}}{%
+            \includegraphics[width=0.35\textwidth]{logo_usta.png}}}
         \label{Logo Universidad Santo Tomas y facultad de ingenieria electronica}
     \end{figure}
 
