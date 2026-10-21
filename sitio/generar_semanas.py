@@ -37,6 +37,17 @@ FASES = [
 OBJETIVOS = ['Arquitectura', 'Plataforma robótica', 'Interfaz', 'Evaluación']
 # Miniatura de la tarjeta cuando la primera figura no es la más representativa de la semana.
 PORTADA = {17: 'S17_dos_objetivos_succeeded', 19: 'S19_rviz_gazebo_maniobra', 22: 'S22_hri_mision_sigueme'}
+# Videos publicados en YouTube que citan los informes y la evidencia de cada semana.
+VIDEOS = {
+    14: [('ZPJ0Qw2L5-A', 'Teleoperación del vehículo en el modelo del primer piso, con la respuesta de los '
+                         'sensores en RViz')],
+    17: [('ZGfAMnC4lYY', 'Prueba de marcha del AWS DeepRacer desde su interfaz web')],
+    19: [('6SABSgCxVEw', 'Maniobra de volteo en simulación, con RViz y Gazebo')],
+    21: [('eH_Co4vZZdw', 'Campaña de treinta misiones de prueba en simulación')],
+    27: [('X3BINGgNxiA', 'Campaña con los dos vehículos, 16 de octubre: a la izquierda la vista del usuario, '
+                         'a la derecha la pantalla de su teléfono, sincronizada con el registro del coordinador')],
+    28: [('X3BINGgNxiA', 'Video de la campaña con los dos vehículos, editado esta semana')],
+}
 
 
 def fase(n):
@@ -327,6 +338,14 @@ def pagina(n, s, figs, concl, av, evid, inf, previa, siguiente):
         l += [f'- {v}' for v in s['hecho']] + ['', '</div>', '']
     if av:
         l += bloque_avance(av, n)
+    if VIDEOS.get(n):
+        l += ['## En video', '']
+        for codigo, pie in VIDEOS[n]:
+            l += ['<figure class="video">',
+                  f'<iframe src="https://www.youtube-nocookie.com/embed/{codigo}" title="{pie}" loading="lazy" '
+                  'allow="encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>',
+                  f'<figcaption>{pie}. <a href="https://youtu.be/{codigo}">Ver en YouTube</a></figcaption>',
+                  '</figure>', '']
     if figs:
         l += ['## En imágenes', '', '<div class="galeria" markdown>', '']
         for archivo, pie in figs:

@@ -13,6 +13,9 @@ el POV del carro del otro piso mientras iba a su escalera. Los videos no se vers
   solicitud. En los relevos de las misiones 4, 5 y 9 se ven los dos POV lado a lado. La misión 10
   termina con la desconexión del coordinador. No incluye los primeros intentos fallidos de las
   misiones 1 y 2 (decisión del equipo).
+- Publicado en YouTube el 20 de octubre: <https://youtu.be/X3BINGgNxiA>, con el título «Campaña
+  experimental con relevo entre pisos sobre dos vehículos AWS DeepRacer — Evidencia Semana 27». Es la
+  versión v2.
 - `VIDEOS/editado/proyecto_shotcut/campana_dos_vehiculos.mlt`: el mismo montaje como proyecto de
   Shotcut, en cinco pistas, para retocarlo a mano. Verificado renderizando cuadros con `melt` 7.4.
 - Herramientas, fuera del repositorio, en `~/tesis_evidencia/video_campana/`: `preparar.py` (videos
