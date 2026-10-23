@@ -303,27 +303,23 @@ Esta sección corresponde al primer objetivo específico: modelar la arquitectur
 funcional, con sus requisitos, sus escenarios de operación en varios pisos, la
 estrategia de asignación de tareas y el esquema de comunicación entre robots.
 
-La figura~\ref{fig:arquitectura} resume el sistema completo. Están la interfaz
-por la que entra la solicitud, el coordinador que la reparte, los dos agentes con
-su pila de navegación y la zona de transición donde ocurre el relevo. La
-secuencia de la parte inferior es la que implementa el planificador
-(sección~\ref{sec:planificador}).
+La figura~\ref{fig:arquitectura} muestra el sistema tal como se implementó en
+simulación, donde se desarrolló y se evaluó primero. Están la interfaz por la que
+entra la solicitud, el coordinador que la reparte, los dos agentes con su pila de
+navegación y la escalera donde ocurre el relevo.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=\textwidth]{imagenes/arquitectura_sistema.png}
-  \caption{Arquitectura funcional del sistema colaborativo. Ningún robot
-    atraviesa la zona de transición: lo que la cruza es el usuario, y lo que se
-    traspasa entre agentes es la responsabilidad de guiarlo.}
+  \includegraphics[width=\textwidth]{imagenes/arquitectura_simulacion.png}
+  \caption{Arquitectura del sistema en simulación, con un proceso de Gazebo por
+    piso. Ningún robot atraviesa la zona de transición: lo que la cruza es el
+    usuario, y lo que se traspasa entre agentes es la responsabilidad de guiarlo.}
   \label{fig:arquitectura}
 \end{figure}
 
-Dos casillas de la figura se concretaron más tarde. La de planificación nombra los
-candidatos que se consideraron en el diseño; el que quedó, y por qué, está en la
-sección~\ref{sec:nav2-ackermann}. Y los niveles aparecen como pisos 1 y 2 porque así
-se planteó el escenario de simulación. Las pruebas con los vehículos se hicieron en
-los pisos 3 y 4 (sección~\ref{sec:mapas}), y la arquitectura no cambió, que era lo
-que se esperaba de ella.
+Al llevar el sistema a los dos vehículos, la estructura se mantuvo y cambió la
+implementación de varios bloques. La sección~\ref{sec:sim-a-vehiculos} reúne esos
+cambios y sus causas.
 
 \subsection{Requisitos}
 
@@ -427,6 +423,7 @@ metros no falla en Nav2, que devuelve éxito al instante, así que la simulació
 lo habría mostrado.
 
 \subsection{La asignación de tareas}
+\label{sec:asignacion}
 
 Cada nivel tiene un agente asignado, y esa correspondencia es un dato de
 configuración, no una constante del código. El coordinador elige el agente al
@@ -481,6 +478,52 @@ misión con relevo entre los dos procesos.
 La simulación debe correr a tiempo real para que las métricas temporales valgan.
 En las treinta misiones de la campaña, el factor de tiempo real tuvo un mínimo de
 0,9917 y una media de 0,9973.
+
+\subsection{De la simulación a los vehículos}
+\label{sec:sim-a-vehiculos}
+
+Al llevar el sistema a los vehículos se mantuvo su estructura: un coordinador, un
+agente por piso, el relevo en la escalera y las reglas de comunicación del
+contrato (sección~\ref{sec:contrato}). También se mantuvo el código. El del
+coordinador, el del planificador, el de los mensajes y el de la página es el mismo
+en los dos destinos: compila sin cambios en las dos distribuciones de ROS~2 y
+completó una misión en cada uno. La configuración de Nav2 tiene una variante por
+distribución, derivada de una base común, y una prueba comprueba que las dos no se
+separen.
+
+Lo que cambió fue la implementación de los bloques. La
+tabla~\ref{tab:sim-vehiculos} reúne cada cambio con su causa y la sección donde se
+trata, y la figura~\ref{fig:arquitectura-vehiculos} muestra el sistema como
+funcionó en la campaña con los dos vehículos.
+
+\begin{table}[H]
+  \centering\footnotesize
+  \caption{Cambios en la implementación al pasar de la simulación a los vehículos.}
+  \label{tab:sim-vehiculos}
+  \begin{tabular}{@{}p{0.13\textwidth}p{0.21\textwidth}p{0.27\textwidth}p{0.31\textwidth}@{}}
+    \toprule
+    \textbf{Parte} & \textbf{En simulación} & \textbf{En los vehículos} & \textbf{Causa} \\ \midrule
+    Distribución de ROS~2 & Humble en todos los componentes & Jazzy en los vehículos y en el coordinador, que corre en un contenedor del portátil; Humble en la página y en rosbridge & El software de la tarjeta original solo existe para Ubuntu 24.04 con Jazzy, y la acción de navegación de Jazzy no es compatible con la de Humble (sección~\ref{sec:teo-ros2}) \\ \addlinespace
+    Coordinador & En el portátil, junto a los dos simuladores & En el portátil, después de un intento en uno de los vehículos & Con el coordinador y el grabador en una tarjeta y las dos navegaciones encendidas, la carga subió de 6 a entre 17 y 33 y Nav2 no arrancaba (sección~\ref{sec:dos-vehiculos}) \\ \addlinespace
+    Comunicación & Un solo computador y un dominio de comunicaciones; un espacio de nombres por agente & Red inalámbrica con un punto de acceso de 5~GHz por piso; una partición por vehículo y topología en estrella hacia el portátil & Los tópicos del fabricante no llevan espacio de nombres, y unos cuarenta procesos anunciándose por la red saturaban las tarjetas (sección~\ref{sec:dos-vehiculos}) \\ \addlinespace
+    Locomoción & Complemento Ackermann de Gazebo con \texttt{ros2\_control} & Puente de la orden de velocidad a los servos, con una escala por vehículo & La tracción real tiene banda muerta y funciona en lazo abierto (sección~\ref{sec:banda-muerta}) \\ \addlinespace
+    Sensado & Láser simulado de 10~m de alcance & RPLIDAR A1M8 y la unidad inercial de la tarjeta; cámaras apagadas & Las cámaras no se usan y cargaban la tarjeta (sección~\ref{sec:componentes}) \\ \addlinespace
+    Odometría & La del simulador & La del láser, combinada con la unidad inercial mediante un filtro & El vehículo no tiene codificadores en las ruedas, y con el láser solo el rumbo derivaba 5,9$^\circ$ por minuto (secciones~\ref{sec:odometria-laser} y~\ref{sec:imu}) \\ \addlinespace
+    Mapa & Calculado de la geometría del mundo simulado & Derivado de la planta medida con flexómetro & El mapeo con SLAM a bordo no dio un mapa utilizable en ningún pasillo (sección~\ref{sec:mapas}) \\ \addlinespace
+    Escenario & Pisos 1 y 2 del modelo del edificio & Pisos 3 y 4, levantados con flexómetro & El modelo del piso 2 no correspondía al edificio, y en sus pasillos uniformes la odometría del láser no veía el avance (sección~\ref{sec:mapas}) \\ \addlinespace
+    Llegada & Tolerancia de 0,25~m & Tolerancia de 0,5~m, verificada con la pose del agente 1,5~s después de que Nav2 da la meta por alcanzada & Por la banda muerta, el vehículo no alcanza la precisión de la simulación, y sigue rodando cuando Nav2 declara la llegada (secciones~\ref{sec:banda-muerta} y~\ref{sec:asignacion}) \\ \addlinespace
+    Media vuelta & La planifica Nav2, con marcha atrás & Maniobra propia del agente, vigilada con el láser y el mapa & En la salida del piso 4, de 2,5~m de ancho, la media vuelta de Nav2 abortó contra la pared (sección~\ref{sec:media-vuelta}) \\ \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{imagenes/arquitectura_vehiculos.png}
+  \caption{Arquitectura del sistema en la campaña con los dos vehículos, en los
+    pisos 3 y 4. La estructura es la de la figura~\ref{fig:arquitectura}; cambia
+    la implementación de los bloques.}
+  \label{fig:arquitectura-vehiculos}
+\end{figure}
 
 % ---------------------------------------------------------------------
 \section{Plataforma robótica}
@@ -590,6 +633,7 @@ laboratorio con los dos vehículos, la cadena completa quedó lista en 4~min 4~s
 uno y en 4~min 22~s en el otro.
 
 \subsection{La odometría del láser como limitación principal}
+\label{sec:odometria-laser}
 
 El vehículo no tiene codificadores en las ruedas. Su única fuente de odometría es
 la comparación entre barridos sucesivos del láser, y durante meses esa pieza no

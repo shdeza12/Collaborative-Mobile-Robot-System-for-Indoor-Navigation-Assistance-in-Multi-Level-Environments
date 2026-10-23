@@ -114,7 +114,4 @@ Varias decisiones del proyecto solo se entienden sabiendo qué se probó antes. 
 
 </div>
 
-??? note "El diseño inicial de la arquitectura"
-    Así se planteó la arquitectura al empezar: Raspberry Pi en cada vehículo y los pisos 1 y 2. La estructura (coordinador, dos agentes, zona de relevo) se mantuvo; cambiaron la plataforma de cómputo, el sitio y la topología de red.
-
-    ![Diagrama de la arquitectura inicial](../img/arquitectura_inicial.png)
+La comparación completa entre la arquitectura en simulación y la de los vehículos, bloque por bloque y con la causa de cada cambio, está en [Cómo funciona](../como-funciona.md#de-la-simulacion-a-los-vehiculos).
