@@ -175,6 +175,25 @@ comprueba("Con una meta vieja EXITOSA y una viva EJECUTANDO, gana NAVEGANDO",
 comprueba("Con una vieja ABORTADA y una viva EJECUTANDO, gana NAVEGANDO",
           MaquinaEstado().actualizar([ABORTADA, EJECUTANDO]) == NAVEGANDO)
 
+# La media vuelta solo espera a que Nav2 no tenga una meta VIVA. El 2026-10-23,
+# en los pisos 3 y 4, se rechazaba con «el robot no esta libre (estado 3)»
+# despues de cada cancelacion: Nav2 guarda varios minutos las metas terminadas,
+# la CANCELADA dejaba al robot en ERROR, y ERROR no es LIBRE. Sin media vuelta,
+# Nav2 intentaba girar solo en el pasillo de 2,5 m y oscilaba o abortaba.
+comprueba("Recien arrancado no hay meta activa",
+          MaquinaEstado().meta_activa is False)
+for vivas in ([ACEPTADA], [EJECUTANDO], [CANCELANDO], [EXITOSA, EJECUTANDO]):
+    m = MaquinaEstado()
+    m.actualizar(vivas)
+    comprueba(f"Con {vivas} hay meta activa: la media vuelta espera",
+              m.meta_activa is True)
+for muertas in ([CANCELADA, EXITOSA], [ABORTADA], [CANCELADA], [EXITOSA], []):
+    m = MaquinaEstado()
+    m.actualizar([EJECUTANDO])
+    m.actualizar(muertas)
+    comprueba(f"Con {muertas} no hay meta activa: la media vuelta puede hacerse",
+              m.meta_activa is False, f"(estado {m.estado})")
+
 # El criterio de aceptacion literal de RF-08.
 m = MaquinaEstado()
 antes = m.estado

@@ -164,10 +164,13 @@ class Agente(Node):
         la maniobra lee. Las suscripciones se abren y se cierran aqui, en el hilo
         del ejecutor.
         """
-        if self.maquina.estado != LIBRE:
+        # Solo se espera a que Nav2 no tenga una meta viva. Mirar el estado
+        # (!= LIBRE) dejaba sin media vuelta durante minutos al robot que
+        # acababa de cancelar o de fallar un tramo (2026-10-23).
+        if self.maquina.meta_activa:
             respuesta.success = False
-            respuesta.message = (f"no se hace: el robot no esta libre (estado "
-                                 f"{self.maquina.estado}); Nav2 tiene una meta activa")
+            respuesta.message = (f"no se hace: Nav2 tiene una meta activa "
+                                 f"(estado del robot {self.maquina.estado})")
             return respuesta
         self.maniobrando = True
         self.get_logger().info("media vuelta pedida")

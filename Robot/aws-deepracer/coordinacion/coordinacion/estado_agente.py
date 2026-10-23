@@ -83,11 +83,23 @@ class MaquinaEstado:
     def __init__(self):
         self._estado = LIBRE
         self._relevo = False
+        self._meta_activa = False
 
     @property
     def estado(self):
         """Ultimo estado calculado. LIBRE mientras no llegue ningun status."""
         return self._estado
+
+    @property
+    def meta_activa(self):
+        """True si Nav2 tiene una meta VIVA (aceptada, ejecutando o cancelando).
+
+        Es lo que la media vuelta necesita saber, y no es lo mismo que «el
+        estado no es LIBRE»: una meta CANCELADA o ABORTADA deja el estado en
+        ERROR durante los minutos que Nav2 la guarda en el array, aunque el
+        robot este quieto y sin nada en curso (2026-10-23).
+        """
+        return self._meta_activa
 
     def declarar_relevo(self, es_relevo):
         """El mando declara que el tramo en curso termina en un relevo."""
@@ -102,8 +114,9 @@ class MaquinaEstado:
         marcado en ERROR mientras navega perfectamente.
         """
         estados = list(estados_meta)
+        self._meta_activa = any(s in VIVAS for s in estados)
 
-        if any(s in VIVAS for s in estados):
+        if self._meta_activa:
             self._estado = EN_TRANSFERENCIA if self._relevo else NAVEGANDO
         elif any(s in FALLIDAS for s in estados):
             self._estado = ERROR
