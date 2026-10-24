@@ -1,0 +1,94 @@
+{
+  "esquema": "1.1",
+  "mision_id": "manual_20261023_223000",
+  "condicion": "hardware",
+  "solicitud": {
+    "origen_id": "piso3_salon_302",
+    "destino_id": "piso4_salon_402",
+    "t_solicitud": 1792794600.427589
+  },
+  "asignacion": {
+    "1": "robot1",
+    "2": "robot2",
+    "3": "robot1",
+    "4": "robot2"
+  },
+  "marcas": [
+    {
+      "t": 1792794600.42955,
+      "etapa": "RECIBIDA",
+      "etapa_num": 6,
+      "robot": "",
+      "punto_id": null,
+      "extraordinaria": true
+    },
+    {
+      "t": 1792794600.42983,
+      "etapa": "TRAMO_1",
+      "etapa_num": 1,
+      "robot": "robot1",
+      "punto_id": "piso3_salon_302",
+      "extraordinaria": true
+    },
+    {
+      "t": 1792794621.467776,
+      "etapa": "FALLIDA",
+      "etapa_num": 5,
+      "robot": "robot1",
+      "punto_id": "piso3_salon_302",
+      "extraordinaria": true
+    }
+  ],
+  "metricas": {
+    "t_respuesta_s": null,
+    "t_asignacion_s": 0.0022,
+    "hueco_relevo_s": null,
+    "continuidad": null,
+    "error_llegada_m": null,
+    "rumbo_llegada_rad": null,
+    "exito": false,
+    "criterios_exito": {
+      "llegada_dentro_de_tolerancia": false,
+      "completada_sin_fallida": false,
+      "relevo_si_entre_niveles": true
+    },
+    "tolerancia_llegada_m": 0.5
+  },
+  "cierre": {
+    "t": 1792794621.4687881,
+    "exito_declarado": false,
+    "motivo_fallo": "El robot 'robot1' no ofrece navigate_to_pose despues de 20 s. Si el robot esta vivo, sospechar del desajuste Humble/Jazzy descrito en la cabecera de este archivo",
+    "num_relevos": 1,
+    "destino_pose": {
+      "x": 9.31,
+      "y": 2.21,
+      "yaw": 0.0
+    }
+  },
+  "trazas": {
+    "formato": [
+      "t",
+      "x",
+      "y",
+      "z",
+      "v",
+      "yaw"
+    ],
+    "muestras": {}
+  },
+  "entorno": {
+    "verdad_terreno": "odom",
+    "mundo": null,
+    "mapa": null,
+    "rtf": null,
+    "controladores_activos": {},
+    "vehiculo_id": null,
+    "distro": null,
+    "medicion_externa_m": null
+  },
+  "descarte": {
+    "descartada": false,
+    "causa": null,
+    "evidencia": null
+  }
+}

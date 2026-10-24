@@ -58,9 +58,9 @@ El 19 de octubre se añadió al desarrollo la sección «Recorrido del trabajo»
 vehículos físicos). Su fuente es [`CRONOLOGIA.md`](CRONOLOGIA.md), que reúne
 semana a semana los entregables 10 a 27 y los commits.
 
-Quedan dos datos que, si llegan, cambian una frase:
+Queda un dato que, si llega, cambia una frase (el otro se cerró el 23 de octubre):
 
 | Dato | Dónde iría |
 |---|---|
 | Si hubo personas en el pasillo durante las misiones de la campaña | Resultados, «Condiciones de las pruebas» del sistema completo |
-| La prueba de los ajustes de la página con un teléfono y los vehículos | Desarrollo, «Ajustes tras las pruebas con los vehículos»; hoy dice que se verificaron con pruebas automáticas |
+| ~~La prueba de los ajustes de la página con un teléfono y los vehículos~~ | Hecha el 2026-10-23 ([`S28_campo_pagina_cancelacion.md`](../Evidencia/S28_campo_pagina_cancelacion.md)); escrita en «Ajustes tras las pruebas con los vehículos» y, con la cancelación en los vehículos, en «Cancelación» |

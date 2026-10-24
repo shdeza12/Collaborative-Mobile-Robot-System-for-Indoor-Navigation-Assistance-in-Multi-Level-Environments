@@ -945,6 +945,17 @@ al punto de transferencia de su piso; después la misión cierra como fallida, c
 un texto que lo dice. Se verificó con una corrida cancelada y una de control, y el
 vehículo quedó a 0,121~m de su punto de regreso.
 
+Con los vehículos se cancelaron seis misiones, al menos una en cada etapa: yendo a
+recoger al usuario, en la transferencia, esperando la confirmación y en el segundo
+tramo. En las seis el vehículo volvió a su escalera, a entre 0,07 y 0,34~m de su
+punto, dentro de la tolerancia de 0,5~m. Esas pruebas mostraron un defecto que la
+simulación no podía mostrar, porque la media vuelta propia se añadió después. Nav2
+conserva unos minutos las metas terminadas, y mientras tenía una cancelada en su
+lista el agente marcaba el vehículo como en error y rechazaba la media vuelta. Sin
+ella, Nav2 intentaba girar por su cuenta en el pasillo y oscilaba. Ahora la media
+vuelta solo espera a que no haya una meta en curso. Antes de la corrección se
+rechazaron ocho de quince medias vueltas, y después ninguna de diez.
+
 \subsection{Ajustes tras las pruebas con los vehículos}
 \label{sec:ajustes-campo}
 
@@ -965,7 +976,8 @@ El tercer defecto fue de nombres. Los dos ascensores se llamaban igual en la lis
 de destinos, y en una misión se eligió el del piso equivocado. Cuando un nombre se
 repite en los dos pisos, la página lo muestra ahora con su piso, como «Ascensor
 (piso 3)». Los tres ajustes se verificaron con pruebas automáticas de la página y
-del servidor.
+del servidor, y después con un teléfono y los vehículos: en una misión de subida y
+otra de bajada la página mostró el título que correspondía a cada sentido.
 
 % ---------------------------------------------------------------------
 \section{Protocolo experimental e instrumentación}

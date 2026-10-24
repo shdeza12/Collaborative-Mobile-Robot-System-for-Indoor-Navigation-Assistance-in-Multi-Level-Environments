@@ -1,0 +1,242 @@
+[INFO] [1792793480.219350535] [coordinador]: media vuelta del agente antes de navegar: si (media_vuelta=auto)
+[INFO] [1792793480.219900680] [coordinador]: condicion 'hardware': la llegada se acepta a 0.5 m o menos (§3.3 del protocolo)
+[INFO] [1792793480.323827412] [coordinador]: Coordinador listo. 10 puntos, asignacion {1: 'robot1', 2: 'robot2', 3: 'robot1', 4: 'robot2'}
+[INFO] [1792793888.513582774] [coordinador]: Mision: piso4_salon_403 -> piso3_salon_303
+[INFO] [1792793888.515200206] [coordinador]:   tramo 1/4: robot2 -> piso4_salon_403
+[INFO] [1792793888.516493552] [coordinador]:     rumbo de llegada invertido respecto al catalogo: 0 -> 180 grados (rumbo de aproximacion 173 grados). Evita la media vuelta de Hybrid-A*
+[INFO] [1792793904.515166647] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.238 m
+[INFO] [1792793904.516195078] [coordinador]:   tramo 2/4: robot2 -> piso4_escalera
+[INFO] [1792793904.517321282] [coordinador]:     la meta queda a 173 grados del rumbo de 'robot2': media vuelta del agente antes de navegar
+[INFO] [1792793911.097553908] [coordinador]:     media vuelta: 161 grados en 2 tiempos. reversa 120 grados (corta: mapa a 0.08 m); avance 20 grados (completa el giro)
+[INFO] [1792793922.652468164] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.184 m
+[INFO] [1792793922.653439769] [coordinador]:   tramo 3/4: robot1 -> piso3_escalera
+[INFO] [1792793927.272176380] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.467 m
+[INFO] [1792793927.396371680] [coordinador]:     esperando confirmacion del usuario (alerta a 60 s, plazo 120 s)
+[INFO] [1792793947.840071813] [coordinador]: confirmacion de piso recibida: 'manual_20261023_221808'
+[INFO] [1792793947.840965482] [coordinador]:     confirmado por el usuario tras 20.4 s
+[INFO] [1792793947.842599384] [coordinador]:   tramo 4/4: robot1 -> piso3_salon_303
+[INFO] [1792793947.843698117] [coordinador]:     rumbo de llegada invertido respecto al catalogo: 0 -> 180 grados (rumbo de aproximacion 168 grados). Evita la media vuelta de Hybrid-A*
+[INFO] [1792793956.979108429] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.483 m
+[INFO] [1792793957.948959415] [coordinador]: Mision completada en 68.5 s, 1 relevo(s)
+[INFO] [1792793957.969465502] [coordinador]: Registro de mision escrito: /evidencia/registros/mision_manual_20261023_221808.json
+[INFO] [1792794056.435725466] [coordinador]: Mision: piso3_salon_301 -> piso4_salon_401
+[INFO] [1792794056.436953580] [coordinador]:   tramo 1/4: robot1 -> piso3_salon_301
+[INFO] [1792794056.438074664] [coordinador]:     rumbo de llegada invertido respecto al catalogo: 0 -> 180 grados (rumbo de aproximacion -179 grados). Evita la media vuelta de Hybrid-A*
+[INFO] [1792794068.971410965] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.399 m
+[INFO] [1792794068.972302972] [coordinador]:   tramo 2/4: robot1 -> piso3_escalera
+[INFO] [1792794068.973332174] [coordinador]:     la meta queda a 178 grados del rumbo de 'robot1': media vuelta del agente antes de navegar
+[INFO] [1792794072.777911406] [coordinador]:     media vuelta: 165 grados en 1 tiempo. reversa 165 grados (completa el giro)
+[INFO] [1792794091.310638252] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.421 m
+[INFO] [1792794091.312054157] [coordinador]:   tramo 3/4: robot2 -> piso4_escalera
+[INFO] [1792794095.436398294] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.193 m
+[INFO] [1792794095.437554624] [coordinador]:     esperando confirmacion del usuario (alerta a 60 s, plazo 120 s)
+[INFO] [1792794121.568820542] [coordinador]: confirmacion de piso recibida: 'manual_20261023_222056'
+[INFO] [1792794122.399400318] [coordinador]:     confirmado por el usuario tras 27.0 s
+[INFO] [1792794122.402613731] [coordinador]:   tramo 4/4: robot2 -> piso4_salon_401
+[INFO] [1792794122.403545602] [coordinador]:     la meta queda a 177 grados del rumbo de 'robot2': media vuelta del agente antes de navegar
+[INFO] [1792794129.688383331] [coordinador]:     media vuelta: 162 grados en 2 tiempos. reversa 91 grados (corta: LiDAR a 0.08 m); avance 54 grados (completa el giro)
+[INFO] [1792794129.689569116] [coordinador]:     rumbo de llegada invertido respecto al catalogo: 0 -> 180 grados (rumbo de aproximacion 176 grados). Evita la media vuelta de Hybrid-A*
+[INFO] [1792794155.704810045] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.077 m
+[INFO] [1792794155.705861569] [coordinador]: Mision completada en 99.3 s, 1 relevo(s)
+[INFO] [1792794155.718108127] [coordinador]: Registro de mision escrito: /evidencia/registros/mision_manual_20261023_222056.json
+[INFO] [1792794600.429349374] [coordinador]: Mision: piso3_salon_302 -> piso4_salon_402
+[INFO] [1792794600.430417340] [coordinador]:   tramo 1/4: robot1 -> piso3_salon_302
+[ERROR] [1792794621.467115480] [coordinador]:   tramo 1 fallo: El robot 'robot1' no ofrece navigate_to_pose despues de 20 s. Si el robot esta vivo, sospechar del desajuste Humble/Jazzy descrito en la cabecera de este archivo
+[WARN] [1792794621.468762888] [coordinador]: Mision terminada SIN exito tras 21.0 s: El robot 'robot1' no ofrece navigate_to_pose despues de 20 s. Si el robot esta vivo, sospechar del desajuste Humble/Jazzy descrito en la cabecera de este archivo
+[INFO] [1792794621.469508060] [coordinador]: Registro de mision escrito: /evidencia/registros/mision_manual_20261023_223000.json
+[INFO] [1792794694.950368927] [coordinador]: Mision: piso3_salon_302 -> piso4_salon_402
+[INFO] [1792794694.951711021] [coordinador]:   tramo 1/4: robot1 -> piso3_salon_302
+[INFO] [1792794694.953059666] [coordinador]:     la meta queda a 161 grados del rumbo de 'robot1': media vuelta del agente antes de navegar
+[INFO] [1792794699.943912530] [coordinador]:     media vuelta: 161 grados en 2 tiempos. reversa 70 grados (corta: LiDAR a 0.09 m); avance 73 grados (completa el giro)
+[INFO] [1792794699.944764525] [coordinador]:     rumbo de llegada invertido respecto al catalogo: 0 -> 180 grados (rumbo de aproximacion 174 grados). Evita la media vuelta de Hybrid-A*
+[ERROR] [1792794711.269500901] [coordinador]:   tramo 1 fallo: 'robot1' dijo SUCCEEDED pero la pose del agente en el mapa (/<ns>/estado) lo sitúa a 0.521 m del punto, por encima de los 0.5 m de tolerancia.
+[WARN] [1792794711.271272899] [coordinador]: Mision terminada SIN exito tras 16.3 s: 'robot1' dijo SUCCEEDED pero la pose del agente en el mapa (/<ns>/estado) lo sitúa a 0.521 m del punto, por encima de los 0.5 m de tolerancia.
+[INFO] [1792794711.275240899] [coordinador]: Registro de mision escrito: /evidencia/registros/mision_manual_20261023_223134.json
+[INFO] [1792794725.101543801] [coordinador]: Mision: piso3_salon_302 -> piso4_salon_402
+[INFO] [1792794725.102814480] [coordinador]:   tramo 1/4: robot1 -> piso3_salon_302
+[INFO] [1792794727.602802122] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.311 m
+[INFO] [1792794727.603786505] [coordinador]:   tramo 2/4: robot1 -> piso3_escalera
+[INFO] [1792794727.604803029] [coordinador]:     la meta queda a 150 grados del rumbo de 'robot1': media vuelta del agente antes de navegar
+[INFO] [1792794730.616039118] [coordinador]:     media vuelta: 161 grados en 1 tiempo. reversa 161 grados (completa el giro)
+[INFO] [1792794745.945463217] [coordinador]:   cancelada: robot1 vuelve a 'piso3_escalera'
+[INFO] [1792794756.497317629] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.459 m
+[WARN] [1792794756.498630978] [coordinador]: Mision terminada SIN exito tras 31.4 s: Cancelada por el usuario
+[INFO] [1792794756.504068208] [coordinador]: Registro de mision escrito: /evidencia/registros/mision_manual_20261023_223205.json
+[INFO] [1792794797.309833368] [coordinador]: Mision: piso3_salon_302 -> piso4_salon_402
+[INFO] [1792794797.311015300] [coordinador]:   tramo 1/4: robot1 -> piso3_salon_302
+[INFO] [1792794797.312312579] [coordinador]:     la meta queda a 174 grados del rumbo de 'robot1': media vuelta del agente antes de navegar
+[WARN] [1792794797.365438158] [coordinador]:     media vuelta no completada (no se hace: el robot no esta libre (estado 3); Nav2 tiene una meta activa); sigue Nav2
+[INFO] [1792794797.366217126] [coordinador]:     rumbo de llegada invertido respecto al catalogo: 0 -> 180 grados (rumbo de aproximacion 173 grados). Evita la media vuelta de Hybrid-A*
+[INFO] [1792794844.801353808] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.496 m
+[INFO] [1792794844.802975013] [coordinador]:   tramo 2/4: robot1 -> piso3_escalera
+[INFO] [1792794844.803964905] [coordinador]:     la meta queda a 155 grados del rumbo de 'robot1': media vuelta del agente antes de navegar
+[WARN] [1792794844.882547737] [coordinador]:     media vuelta no completada (no se hace: el robot no esta libre (estado 3); Nav2 tiene una meta activa); sigue Nav2
+[INFO] [1792794895.905033649] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.327 m
+[INFO] [1792794895.905982545] [coordinador]:   tramo 3/4: robot2 -> piso4_escalera
+[INFO] [1792794895.906957700] [coordinador]:     la meta queda a 176 grados del rumbo de 'robot2': media vuelta del agente antes de navegar
+[INFO] [1792794906.744101913] [coordinador]:     media vuelta: 161 grados en 2 tiempos. reversa 93 grados (corta: LiDAR a 0.09 m); avance 51 grados (completa el giro)
+[INFO] [1792794933.234745615] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.089 m
+[INFO] [1792794933.235829022] [coordinador]:     esperando confirmacion del usuario (alerta a 60 s, plazo 120 s)
+[INFO] [1792794936.505206609] [coordinador]: confirmacion de piso recibida: 'manual_20261023_223317'
+[INFO] [1792794936.554184015] [coordinador]:     confirmado por el usuario tras 3.3 s
+[INFO] [1792794936.555719708] [coordinador]:   tramo 4/4: robot2 -> piso4_salon_402
+[INFO] [1792794936.556555492] [coordinador]:     la meta queda a 175 grados del rumbo de 'robot2': media vuelta del agente antes de navegar
+[INFO] [1792794943.827941902] [coordinador]:     media vuelta: 161 grados en 2 tiempos. reversa 105 grados (corta: LiDAR a 0.08 m); avance 42 grados (completa el giro)
+[INFO] [1792794943.828561502] [coordinador]:     rumbo de llegada invertido respecto al catalogo: 0 -> 180 grados (rumbo de aproximacion 176 grados). Evita la media vuelta de Hybrid-A*
+[INFO] [1792794946.544757453] [coordinador]:   cancelada: robot2 vuelve a 'piso4_escalera'
+[INFO] [1792794946.740703946] [coordinador]:     la meta queda a 178 grados del rumbo de 'robot2': media vuelta del agente antes de navegar
+[WARN] [1792794946.998092385] [coordinador]:     media vuelta no completada (no se hace: el robot no esta libre (estado 3); Nav2 tiene una meta activa); sigue Nav2
+[WARN] [1792794955.325423537] [coordinador]:     vuelta a casa, intento 1/3 fallo: 'robot2' dijo SUCCEEDED pero la pose del agente en el mapa (/<ns>/estado) lo sitúa a 1.453 m del punto, por encima de los 0.5 m de tolerancia.
+[INFO] [1792794962.650345006] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.179 m
+[WARN] [1792794962.651607859] [coordinador]: Mision terminada SIN exito tras 165.3 s: Cancelada por el usuario
+[INFO] [1792794962.670983882] [coordinador]: Registro de mision escrito: /evidencia/registros/mision_manual_20261023_223317.json
+[INFO] [1792795013.844907437] [coordinador]: Mision: piso4_salon_403 -> piso4_salon_401
+[INFO] [1792795013.846023265] [coordinador]:   tramo 1/2: robot2 -> piso4_salon_403
+[INFO] [1792795013.847372679] [coordinador]:     rumbo de llegada invertido respecto al catalogo: 0 -> 180 grados (rumbo de aproximacion 169 grados). Evita la media vuelta de Hybrid-A*
+[INFO] [1792795023.282443370] [coordinador]:   cancelada: robot2 vuelve a 'piso4_escalera'
+[INFO] [1792795025.466905454] [coordinador]:     la meta queda a 178 grados del rumbo de 'robot2': media vuelta del agente antes de navegar
+[WARN] [1792795025.787726511] [coordinador]:     media vuelta no completada (no se hace: el robot no esta libre (estado 3); Nav2 tiene una meta activa); sigue Nav2
+[INFO] [1792795069.539281413] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.352 m
+[WARN] [1792795069.540893799] [coordinador]: Mision terminada SIN exito tras 55.7 s: Cancelada por el usuario
+[INFO] [1792795069.547674793] [coordinador]: Registro de mision escrito: /evidencia/registros/mision_manual_20261023_223653.json
+[INFO] [1792795075.819848553] [coordinador]: Mision: piso4_salon_403 -> piso4_salon_401
+[INFO] [1792795075.820996540] [coordinador]:   tramo 1/2: robot2 -> piso4_salon_403
+[INFO] [1792795075.822075168] [coordinador]:     la meta queda a 142 grados del rumbo de 'robot2': media vuelta del agente antes de navegar
+[WARN] [1792795075.878767797] [coordinador]:     media vuelta no completada (no se hace: el robot no esta libre (estado 3); Nav2 tiene una meta activa); sigue Nav2
+[INFO] [1792795075.879568354] [coordinador]:     rumbo de llegada invertido respecto al catalogo: 0 -> 180 grados (rumbo de aproximacion 172 grados). Evita la media vuelta de Hybrid-A*
+[INFO] [1792795107.298459431] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.347 m
+[INFO] [1792795107.299515356] [coordinador]:   tramo 2/2: robot2 -> piso4_salon_401
+[INFO] [1792795107.300391275] [coordinador]:     rumbo de llegada invertido respecto al catalogo: 0 -> 180 grados (rumbo de aproximacion 179 grados). Evita la media vuelta de Hybrid-A*
+[INFO] [1792795130.151978397] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.066 m
+[INFO] [1792795130.153250867] [coordinador]: Mision completada en 54.3 s, 0 relevo(s)
+[INFO] [1792795130.161736909] [coordinador]: Registro de mision escrito: /evidencia/registros/mision_manual_20261023_223755.json
+[INFO] [1792795149.895471440] [coordinador]: Mision: piso4_salon_401 -> piso3_salon_303
+[INFO] [1792795149.896619036] [coordinador]:   tramo 1/4: robot2 -> piso4_salon_401
+[INFO] [1792795152.322850804] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.065 m
+[INFO] [1792795152.327457640] [coordinador]:   tramo 2/4: robot2 -> piso4_escalera
+[INFO] [1792795152.328447261] [coordinador]:     la meta queda a 162 grados del rumbo de 'robot2': media vuelta del agente antes de navegar
+[WARN] [1792795152.485202214] [coordinador]:     media vuelta no completada (no se hace: el robot no esta libre (estado 3); Nav2 tiene una meta activa); sigue Nav2
+[ERROR] [1792795243.697616871] [coordinador]:   tramo 2 fallo: Nav2 terminó con estado 6
+[WARN] [1792795243.698755199] [coordinador]: Mision terminada SIN exito tras 93.8 s: Nav2 terminó con estado 6
+[INFO] [1792795243.748872412] [coordinador]: Registro de mision escrito: /evidencia/registros/mision_manual_20261023_223909.json
+[INFO] [1792795455.117691442] [coordinador]: Mision: piso4_salon_401 -> piso3_salon_303
+[INFO] [1792795455.118965935] [coordinador]:   tramo 1/4: robot2 -> piso4_salon_401
+[INFO] [1792795455.119863613] [coordinador]:     la meta queda a 167 grados del rumbo de 'robot2': media vuelta del agente antes de navegar
+[WARN] [1792795455.346140309] [coordinador]:     media vuelta no completada (no se hace: el robot no esta libre (estado 3); Nav2 tiene una meta activa); sigue Nav2
+[INFO] [1792795455.346794693] [coordinador]:     rumbo de llegada invertido respecto al catalogo: 0 -> 180 grados (rumbo de aproximacion -178 grados). Evita la media vuelta de Hybrid-A*
+[INFO] [1792795478.669153432] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.365 m
+[INFO] [1792795478.670170443] [coordinador]:   tramo 2/4: robot2 -> piso4_escalera
+[INFO] [1792795478.671038035] [coordinador]:     la meta queda a 112 grados del rumbo de 'robot2': media vuelta del agente antes de navegar
+[WARN] [1792795478.913619225] [coordinador]:     media vuelta no completada (no se hace: el robot no esta libre (estado 3); Nav2 tiene una meta activa); sigue Nav2
+[INFO] [1792795506.516392791] [coordinador]:   cancelada: robot2 vuelve a 'piso4_escalera'
+[WARN] [1792795532.494147055] [coordinador]:     vuelta a casa, intento 1/3 fallo: Nav2 terminó con estado 6
+[WARN] [1792795568.408303864] [coordinador]:     vuelta a casa, intento 2/3 fallo: Nav2 terminó con estado 6
+[WARN] [1792795596.504081904] [coordinador]:     vuelta a casa, intento 3/3 fallo: Nav2 terminó con estado 6
+[ERROR] [1792795596.504619489] [coordinador]:   no volvio a casa tras 3 intentos: Nav2 terminó con estado 6
+[WARN] [1792795596.506433541] [coordinador]: Mision terminada SIN exito tras 141.4 s: Cancelada por el usuario
+[INFO] [1792795596.528635434] [coordinador]: Registro de mision escrito: /evidencia/registros/mision_manual_20261023_224415.json
+[INFO] [1792796061.401421826] [coordinador]: Mision: piso3_salon_302 -> piso4_salon_402
+[INFO] [1792796061.402406546] [coordinador]:   tramo 1/4: robot1 -> piso3_salon_302
+[INFO] [1792796061.403487887] [coordinador]:     rumbo de llegada invertido respecto al catalogo: 0 -> 180 grados (rumbo de aproximacion 175 grados). Evita la media vuelta de Hybrid-A*
+[INFO] [1792796064.895179345] [coordinador]:   cancelada: robot1 vuelve a 'piso3_escalera'
+[INFO] [1792796065.351056645] [coordinador]:     la meta queda a 168 grados del rumbo de 'robot1': media vuelta del agente antes de navegar
+[INFO] [1792796071.853209298] [coordinador]:     media vuelta: 163 grados en 4 tiempos. reversa 73 grados (corta: mapa a 0.08 m); avance 0 grados (sin espacio al empezar: LiDAR a 0.00 m); reversa 0 grados (corta: LiDAR a 0.07 m); avance 15 grados (corta: LiDAR a 0.09 m); reversa 47 grados (completa el giro)
+[WARN] [1792796077.624540040] [coordinador]:     vuelta a casa, intento 1/3 fallo: 'robot1' dijo SUCCEEDED pero la pose del agente en el mapa (/<ns>/estado) lo sitúa a 0.578 m del punto, por encima de los 0.5 m de tolerancia.
+[INFO] [1792796079.024514399] [coordinador]:     rumbo de llegada invertido respecto al catalogo: 0 -> 180 grados (rumbo de aproximacion 144 grados). Evita la media vuelta de Hybrid-A*
+[INFO] [1792796082.505228909] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.173 m
+[WARN] [1792796082.509372143] [coordinador]: Mision terminada SIN exito tras 21.1 s: Cancelada por el usuario
+[INFO] [1792796082.514238488] [coordinador]: Registro de mision escrito: /evidencia/registros/mision_manual_20261023_225421.json
+[INFO] [1792796148.875135887] [coordinador]: Mision: piso4_salon_401 -> piso3_salon_303
+[INFO] [1792796148.876336250] [coordinador]:   tramo 1/4: robot2 -> piso4_salon_401
+[INFO] [1792796148.877414175] [coordinador]:     rumbo de llegada invertido respecto al catalogo: 0 -> 180 grados (rumbo de aproximacion 177 grados). Evita la media vuelta de Hybrid-A*
+[INFO] [1792796175.244895016] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.258 m
+[INFO] [1792796175.254170531] [coordinador]:   tramo 2/4: robot2 -> piso4_escalera
+[INFO] [1792796175.255270006] [coordinador]:     la meta queda a 180 grados del rumbo de 'robot2': media vuelta del agente antes de navegar
+[INFO] [1792796179.585259889] [coordinador]:     media vuelta: 164 grados en 1 tiempo. reversa 164 grados (completa el giro)
+[INFO] [1792796207.010602192] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.256 m
+[INFO] [1792796207.011752151] [coordinador]:   tramo 3/4: robot1 -> piso3_escalera
+[INFO] [1792796209.265590635] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.148 m
+[INFO] [1792796209.266435884] [coordinador]:     esperando confirmacion del usuario (alerta a 60 s, plazo 120 s)
+[INFO] [1792796220.087142848] [coordinador]:     confirmado por el usuario tras 10.8 s
+[INFO] [1792796220.087831405] [coordinador]: confirmacion de piso recibida: 'manual_20261023_225548'
+[INFO] [1792796220.088741596] [coordinador]:   tramo 4/4: robot1 -> piso3_salon_303
+[INFO] [1792796220.089808650] [coordinador]:     la meta queda a 154 grados del rumbo de 'robot1': media vuelta del agente antes de navegar
+[INFO] [1792796225.990961120] [coordinador]:     media vuelta: 161 grados en 3 tiempos. reversa 30 grados (corta: mapa a 0.08 m); avance 63 grados (corta: mapa a 0.09 m); reversa 36 grados (completa el giro)
+[INFO] [1792796225.991908501] [coordinador]:     rumbo de llegada invertido respecto al catalogo: 0 -> 180 grados (rumbo de aproximacion 171 grados). Evita la media vuelta de Hybrid-A*
+[INFO] [1792796226.602658458] [coordinador]:   cancelada: robot1 vuelve a 'piso3_escalera'
+[INFO] [1792796229.850418257] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.337 m
+[WARN] [1792796229.852010423] [coordinador]: Mision terminada SIN exito tras 81.0 s: Cancelada por el usuario
+[INFO] [1792796229.865614307] [coordinador]: Registro de mision escrito: /evidencia/registros/mision_manual_20261023_225548.json
+[INFO] [1792796251.612182069] [coordinador]: Mision: piso3_escalera -> piso4_salon_401
+[INFO] [1792796251.613304577] [coordinador]:   tramo 1/3: robot1 -> piso3_escalera
+[INFO] [1792796253.604411467] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.353 m
+[INFO] [1792796253.605414211] [coordinador]:   tramo 2/3: robot2 -> piso4_escalera
+[INFO] [1792796255.401672791] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.301 m
+[INFO] [1792796255.402510897] [coordinador]:     esperando confirmacion del usuario (alerta a 60 s, plazo 120 s)
+[INFO] [1792796258.337804779] [coordinador]:   cancelada: robot2 vuelve a 'piso4_escalera'
+[INFO] [1792796261.857354673] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.302 m
+[WARN] [1792796261.858378106] [coordinador]: Mision terminada SIN exito tras 10.2 s: Cancelada por el usuario
+[INFO] [1792796261.861499089] [coordinador]: Registro de mision escrito: /evidencia/registros/mision_manual_20261023_225731.json
+[INFO] [1792796287.175694920] [coordinador]: Mision: piso3_ascensor -> piso4_salon_401
+[INFO] [1792796287.177080599] [coordinador]:   tramo 1/4: robot1 -> piso3_ascensor
+[INFO] [1792796287.178359059] [coordinador]:     rumbo de llegada invertido respecto al catalogo: 0 -> 180 grados (rumbo de aproximacion 176 grados). Evita la media vuelta de Hybrid-A*
+[INFO] [1792796295.486559265] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.387 m
+[INFO] [1792796295.487543594] [coordinador]:   tramo 2/4: robot1 -> piso3_escalera
+[INFO] [1792796295.488371582] [coordinador]:     la meta queda a 171 grados del rumbo de 'robot1': media vuelta del agente antes de navegar
+[INFO] [1792796300.116450454] [coordinador]:     media vuelta: 161 grados en 2 tiempos. reversa 55 grados (corta: mapa a 0.08 m); avance 90 grados (completa el giro)
+[INFO] [1792796305.522622693] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.307 m
+[INFO] [1792796305.523634223] [coordinador]:   tramo 3/4: robot2 -> piso4_escalera
+[INFO] [1792796307.411954741] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.297 m
+[INFO] [1792796307.413108448] [coordinador]:     esperando confirmacion del usuario (alerta a 60 s, plazo 120 s)
+[INFO] [1792796331.017278849] [coordinador]: confirmacion de piso recibida: 'manual_20261023_225807'
+[INFO] [1792796331.063805290] [coordinador]:     confirmado por el usuario tras 23.6 s
+[INFO] [1792796331.064771146] [coordinador]:   tramo 4/4: robot2 -> piso4_salon_401
+[INFO] [1792796331.065604282] [coordinador]:     la meta queda a 166 grados del rumbo de 'robot2': media vuelta del agente antes de navegar
+[INFO] [1792796337.599296758] [coordinador]:     media vuelta: 161 grados en 2 tiempos. reversa 107 grados (corta: LiDAR a 0.00 m); avance 32 grados (completa el giro)
+[INFO] [1792796337.600408436] [coordinador]:     rumbo de llegada invertido respecto al catalogo: 0 -> 180 grados (rumbo de aproximacion 178 grados). Evita la media vuelta de Hybrid-A*
+[INFO] [1792796346.708296483] [coordinador]:   cancelada: robot2 vuelve a 'piso4_escalera'
+[INFO] [1792796347.008827471] [coordinador]:     la meta queda a 165 grados del rumbo de 'robot2': media vuelta del agente antes de navegar
+[INFO] [1792796355.777548249] [coordinador]:     media vuelta: 160 grados en 3 tiempos. reversa 35 grados (corta: LiDAR a 0.10 m); avance 73 grados (corta: LiDAR a 0.00 m); reversa 29 grados (completa el giro)
+[INFO] [1792796368.377728229] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.328 m
+[WARN] [1792796368.389016024] [coordinador]: Mision terminada SIN exito tras 81.2 s: Cancelada por el usuario
+[INFO] [1792796368.402043721] [coordinador]: Registro de mision escrito: /evidencia/registros/mision_manual_20261023_225807.json
+[INFO] [1792796403.851001315] [coordinador]: Mision: piso4_salon_403 -> piso4_salon_401
+[INFO] [1792796403.852296806] [coordinador]:   tramo 1/2: robot2 -> piso4_salon_403
+[INFO] [1792796403.853376634] [coordinador]:     la meta queda a 167 grados del rumbo de 'robot2': media vuelta del agente antes de navegar
+[INFO] [1792796411.146214267] [coordinador]:     media vuelta: 161 grados en 2 tiempos. reversa 80 grados (corta: LiDAR a 0.08 m); avance 52 grados (completa el giro)
+[INFO] [1792796411.147039619] [coordinador]:     rumbo de llegada invertido respecto al catalogo: 0 -> 180 grados (rumbo de aproximacion 169 grados). Evita la media vuelta de Hybrid-A*
+[INFO] [1792796419.956736212] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.133 m
+[INFO] [1792796419.957912751] [coordinador]:   tramo 2/2: robot2 -> piso4_salon_401
+[INFO] [1792796419.959006164] [coordinador]:     rumbo de llegada invertido respecto al catalogo: 0 -> 180 grados (rumbo de aproximacion -179 grados). Evita la media vuelta de Hybrid-A*
+[INFO] [1792796438.456573695] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.146 m
+[INFO] [1792796438.457838529] [coordinador]: Mision completada en 34.6 s, 0 relevo(s)
+[INFO] [1792796438.464001356] [coordinador]: Registro de mision escrito: /evidencia/registros/mision_manual_20261023_230003.json
+[INFO] [1792796449.279993050] [coordinador]: Mision: piso3_salon_303 -> piso3_salon_301
+[INFO] [1792796449.283499573] [coordinador]:   tramo 1/2: robot1 -> piso3_salon_303
+[INFO] [1792796449.284446152] [coordinador]:     la meta queda a 171 grados del rumbo de 'robot1': media vuelta del agente antes de navegar
+[INFO] [1792796455.890994726] [coordinador]:     media vuelta: 164 grados en 3 tiempos. reversa 35 grados (corta: mapa a 0.08 m); avance 61 grados (corta: LiDAR a 0.08 m); reversa 35 grados (completa el giro)
+[INFO] [1792796455.891651764] [coordinador]:     rumbo de llegada invertido respecto al catalogo: 0 -> 180 grados (rumbo de aproximacion 171 grados). Evita la media vuelta de Hybrid-A*
+[INFO] [1792796483.989848606] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.379 m
+[INFO] [1792796483.990922773] [coordinador]:   tramo 2/2: robot1 -> piso3_salon_301
+[INFO] [1792796483.991987332] [coordinador]:     rumbo de llegada invertido respecto al catalogo: 0 -> 180 grados (rumbo de aproximacion -179 grados). Evita la media vuelta de Hybrid-A*
+[INFO] [1792796496.423967456] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.484 m
+[INFO] [1792796496.425513947] [coordinador]: Mision completada en 47.2 s, 0 relevo(s)
+[INFO] [1792796496.435956422] [coordinador]: Registro de mision escrito: /evidencia/registros/mision_manual_20261023_230049.json
+[INFO] [1792796806.263988711] [coordinador]: Mision: piso3_salon_303 -> piso3_ascensor
+[INFO] [1792796806.265401613] [coordinador]:   tramo 1/2: robot1 -> piso3_salon_303
+[INFO] [1792796806.266579060] [coordinador]:     la meta queda a 163 grados del rumbo de 'robot1': media vuelta del agente antes de navegar
+[INFO] [1792796809.568608907] [coordinador]:     media vuelta: 163 grados en 1 tiempo. reversa 163 grados (completa el giro)
+[INFO] [1792796844.612981096] [coordinador]:   cancelada: robot1 vuelve a 'piso3_escalera'
+[INFO] [1792796857.426779820] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.337 m
+[WARN] [1792796857.428087792] [coordinador]: Mision terminada SIN exito tras 51.2 s: Cancelada por el usuario
+[INFO] [1792796857.441914949] [coordinador]: Registro de mision escrito: /evidencia/registros/mision_manual_20261023_230646.json
+[INFO] [1792796884.073024654] [coordinador]: Mision: piso3_escalera -> piso4_salon_402
+[INFO] [1792796884.075055780] [coordinador]:   tramo 1/3: robot1 -> piso3_escalera
+[INFO] [1792796886.151057608] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.319 m
+[INFO] [1792796886.152969399] [coordinador]:   tramo 2/3: robot2 -> piso4_escalera
+[INFO] [1792796886.154566615] [coordinador]:     la meta queda a 165 grados del rumbo de 'robot2': media vuelta del agente antes de navegar
+[INFO] [1792796892.983899068] [coordinador]:     media vuelta: 160 grados en 2 tiempos. reversa 72 grados (corta: LiDAR a 0.00 m); avance 71 grados (completa el giro)
+[INFO] [1792796894.082127171] [coordinador]:   cancelada: robot2 vuelve a 'piso4_escalera'
+[INFO] [1792796918.583323677] [coordinador]:     llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.074 m
+[WARN] [1792796918.585658715] [coordinador]: Mision terminada SIN exito tras 34.5 s: Cancelada por el usuario
+[INFO] [1792796918.607101700] [coordinador]: Registro de mision escrito: /evidencia/registros/mision_manual_20261023_230804.json

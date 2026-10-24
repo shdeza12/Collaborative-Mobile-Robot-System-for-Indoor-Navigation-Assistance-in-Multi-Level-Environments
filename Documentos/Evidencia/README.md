@@ -380,6 +380,12 @@ que el propio documento sostiene:
 - [`campo_20261016/`](campo_20261016/) — Datos de campo del 16 de octubre sin las grabaciones: registros del coordinador, carga, logs y notas
 - [`datos_20261008_deepy/`](datos_20261008_deepy/) — Hoja de las corridas del 8 de octubre en el piso 3 con deepy
 
+**Semana 28**
+
+- [`S28_video_campana.md`](S28_video_campana.md) — Video de la campaña sincronizado con la pantalla del teléfono (19 y 20 de octubre)
+- [`S28_campo_pagina_cancelacion.md`](S28_campo_pagina_cancelacion.md) — Ajustes de la página y cancelación con los dos vehículos; arreglo de la media vuelta (23 de octubre)
+- [`campo_20261023/`](campo_20261023/) — Registros del coordinador y su log del 23 de octubre, sin las grabaciones
+
 ---
 
 ## Capturas recuperadas el 15 de octubre de 2026
