@@ -79,7 +79,7 @@ sin prefijos. Evidencia en
 ## Compilación
 
 El procedimiento completo —dependencias, variables de entorno y verificación— está en el
-[`README.md` de la raíz](../README.md). Deliberadamente **no se duplica aquí**: dos copias de
+[`guia_instalacion.md`](../Documentos/guia_instalacion.md). Deliberadamente **no se duplica aquí**: dos copias de
 unas instrucciones divergen, y quien instala acaba siguiendo la equivocada.
 
 > **Nunca copiar esta carpeta al workspace.** La versión anterior de este archivo decía
@@ -91,7 +91,7 @@ unas instrucciones divergen, y quien instala acaba siguiendo la equivocada.
 ## Lanzamiento de la simulación
 
 Los comandos de uso —mapeo, navegación y modo de dos robots— están en el
-[`README.md` de la raíz](../README.md#uso), por el mismo motivo que la instalación:
+[`guia_instalacion.md`](../Documentos/guia_instalacion.md#uso), por el mismo motivo que la instalación:
 una sola copia. Para comprobar solo que el vehículo aparece y se mueve, basta el
 mundo vacío que trae Gazebo:
 

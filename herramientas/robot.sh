@@ -152,7 +152,7 @@ if [[ "$MUNDO_REL" == "-" ]]; then
   echo "ERROR: '$robot' no tiene mundo declarado en POSE_INICIAL" >&2
   exit 1
 fi
-MUNDO="${MUNDO:-$REPO/$MUNDO_REL}"
+MUNDO="${MUNDO:-$REPO/simulacion/$MUNDO_REL}"
 
 # --- procesos de ESTE robot -------------------------------------------------
 # EL FILTRO ES UNA MARCA PROPIA, NO EL DOMINIO. Hasta el 2026-08-30 se leia
@@ -260,7 +260,7 @@ preparar_entorno() {
     exit 1
   fi
   source "$WS/install/setup.bash"
-  export GAZEBO_MODEL_PATH="$GAZEBO_MODEL_PATH:$REPO"
+  export GAZEBO_MODEL_PATH="$GAZEBO_MODEL_PATH:$REPO/simulacion"
   export ROS_DOMAIN_ID="$DOMINIO"
   # La marca que usa pids_del_robot(). Va aqui y no en cada rama porque tiene que
   # heredarla TODO lo que se lance, no solo Gazebo.

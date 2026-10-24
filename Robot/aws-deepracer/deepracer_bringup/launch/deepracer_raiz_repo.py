@@ -1,6 +1,6 @@
 """Deduce la raiz del repositorio a partir de la ubicacion real de este archivo.
 
-Para que existe: los mundos y los modelos SDF viven en la raiz del repositorio,
+Para que existe: los mundos y los modelos SDF viven en simulacion/, en la raiz del repositorio,
 FUERA del paquete ROS, asi que ningun launch puede encontrarlos con
 get_package_share_directory. Antes cada launch resolvia eso a su manera -o no lo
 resolvia y exigia escribir la ruta absoluta a mano-, y las dos formas del error
@@ -61,6 +61,10 @@ import sys
 # al piso 2, extraccion pura -- los rectangulos de pared salen IDENTICOS antes y
 # despues, y el .pgm del mapa del piso 1 es el mismo byte a byte.
 MUNDO_VIGENTE = 'mundo_definitivo_piso1.world'
+
+# Los mundos y sus modelos SDF viven en esta carpeta de la raiz del repositorio
+# (hasta el 2026-10-24, en la raiz misma).
+CARPETA_MUNDOS = 'simulacion'
 
 # Donde nace cada robot en el mundo vigente. ESTA ES LA UNICA TABLA DE POSES DEL
 # PROYECTO: la leen los launch y 'herramientas/robot.sh'.
@@ -213,8 +217,16 @@ def raiz_repositorio():
     candidatos = [os.environ['TESIS_WORLDS_DIR']] if os.environ.get('TESIS_WORLDS_DIR') \
         else [deducida]
     return next(
-        (d for d in candidatos if os.path.isfile(os.path.join(d, MUNDO_VIGENTE))),
+        (d for d in candidatos
+         if os.path.isfile(os.path.join(d, CARPETA_MUNDOS, MUNDO_VIGENTE))),
         None)
+
+
+def carpeta_mundos():
+    """Carpeta de los mundos y modelos del repositorio del que se lanza el codigo."""
+    raiz = raiz_repositorio() or os.path.abspath(os.path.join(
+        os.path.dirname(os.path.realpath(__file__)), '..', '..', '..', '..'))
+    return os.path.join(raiz, CARPETA_MUNDOS)
 
 
 def mundo_por_defecto(nombre=MUNDO_VIGENTE):
@@ -228,9 +240,9 @@ def mundo_por_defecto(nombre=MUNDO_VIGENTE):
     if raiz is None:
         if not any(a.startswith('world:=') for a in sys.argv):
             raise RuntimeError(
-                'No se encontro {} en la raiz deducida del repositorio. '
+                'No se encontro {}/{} en la raiz deducida del repositorio. '
                 'Exportar TESIS_WORLDS_DIR con la raiz del repositorio, '
-                'o pasar world:=<ruta absoluta al mundo>.'.format(nombre))
+                'o pasar world:=<ruta absoluta al mundo>.'.format(CARPETA_MUNDOS, nombre))
         raiz = os.path.abspath(os.path.join(
             os.path.dirname(os.path.realpath(__file__)), '..', '..', '..', '..'))
-    return os.path.join(raiz, nombre)
+    return os.path.join(raiz, CARPETA_MUNDOS, nombre)

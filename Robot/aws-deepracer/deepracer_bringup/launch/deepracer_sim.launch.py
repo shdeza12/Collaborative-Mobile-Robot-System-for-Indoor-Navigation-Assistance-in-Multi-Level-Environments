@@ -28,7 +28,7 @@ from launch.substitutions import LaunchConfiguration
 
 # El modulo vive junto a este archivo, dentro del propio paquete instalado.
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
-from deepracer_raiz_repo import mundo_por_defecto, pose_texto  # noqa: E402
+from deepracer_raiz_repo import carpeta_mundos, mundo_por_defecto, pose_texto  # noqa: E402
 
 # Plugins de sistema que 'gzserver.launch.py' carga por defecto. Se repiten aqui
 # porque este archivo ya no lo incluye; el porque esta en 'servidor_gazebo'.
@@ -130,6 +130,9 @@ def servidor_gazebo(context, *args, **kwargs):
     modelos, plugins, medios = GazeboRosPaths.get_paths()
     if 'GAZEBO_MODEL_PATH' in os.environ:
         modelos += os.pathsep + os.environ['GAZEBO_MODEL_PATH']
+    # Los model:// de los mundos del proyecto se resuelven aunque GAZEBO_MODEL_PATH
+    # no traiga la carpeta: sin ella Gazebo abre el mundo vacio y no da error.
+    modelos += os.pathsep + carpeta_mundos()
     if 'GAZEBO_PLUGIN_PATH' in os.environ:
         plugins += os.pathsep + os.environ['GAZEBO_PLUGIN_PATH']
     if 'GAZEBO_RESOURCE_PATH' in os.environ:

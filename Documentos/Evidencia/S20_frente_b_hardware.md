@@ -118,7 +118,7 @@ llegada de mensajes, y el sentido portátil→vehículo **solo** con las ruedas 
 
 ### 5.1 El artefacto
 
-`mapas/mapa_laboratorio.pgm` + `.yaml`, generado con `map_saver_cli` sobre el vehículo y copiado al
+`S20_mapa_laboratorio/mapa_laboratorio.pgm` + `.yaml`, generado con `map_saver_cli` sobre el vehículo y copiado al
 portátil. Medido sobre la imagen:
 
 | Magnitud | Valor |

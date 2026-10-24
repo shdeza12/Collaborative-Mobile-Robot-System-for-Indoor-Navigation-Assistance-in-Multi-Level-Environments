@@ -60,9 +60,11 @@ cmd()    { printf '         Ejecutar:\n           %s\n' "$1"; }
 #     descarta las mismas. Si las dos no miraran igual, una linea comentada
 #     dejaria a la guarda sin anadir nada y al consejo afirmando que ya esta:
 #     el verificador seguiria fallando sin que nada de lo que dice lo explique.
-CMD_GZP="grep -v '^[[:space:]]*#' ~/.bashrc 2>/dev/null | grep -F GAZEBO_MODEL_PATH | grep -qF '$REPO' || echo 'export GAZEBO_MODEL_PATH=\"\$GAZEBO_MODEL_PATH:$REPO\"' >> ~/.bashrc"
+# Los mundos y sus modelos viven en simulacion/ desde el 2026-10-24 (antes, en la raiz).
+MODELOS="$REPO/simulacion"
+CMD_GZP="grep -v '^[[:space:]]*#' ~/.bashrc 2>/dev/null | grep -F GAZEBO_MODEL_PATH | grep -qF '$MODELOS' || echo 'export GAZEBO_MODEL_PATH=\"\$GAZEBO_MODEL_PATH:$MODELOS\"' >> ~/.bashrc"
 
-# ¿Alguna ruta de esta lista (separada por ':') es la raiz del repositorio?
+# ¿Alguna ruta de esta lista (separada por ':') es la carpeta simulacion/ del repositorio?
 # Compara rutas RESUELTAS, no texto: '$HOME/<clon>', la misma ruta escrita entera y un
 # enlace que apunte ahi son la misma carpeta. Comparar texto dio el 2026-10-06 un
 # fallo falso con la variable bien puesta, y un consejo que habria anadido una
@@ -70,7 +72,7 @@ CMD_GZP="grep -v '^[[:space:]]*#' ~/.bashrc 2>/dev/null | grep -F GAZEBO_MODEL_P
 contiene_repo() {
   local IFS=':' p
   for p in $1; do
-    [[ -n "$p" && "$(readlink -f "$p" 2>/dev/null)" == "$REPO" ]] && return 0
+    [[ -n "$p" && "$(readlink -f "$p" 2>/dev/null)" == "$MODELOS" ]] && return 0
   done
   return 1
 }
@@ -273,7 +275,7 @@ done
 # ------------------------------------------------------------- 7. escenarios
 titulo '7. Mundos y modelos de Gazebo'
 
-paso 'GAZEBO_MODEL_PATH incluye la raiz del repositorio'
+paso 'GAZEBO_MODEL_PATH incluye la carpeta simulacion/ del repositorio'
 if contiene_repo "${GAZEBO_MODEL_PATH:-}"; then bien
 else
   mal "sin esto, todo mundo que use model:// carga vacio y sin dar error"
@@ -282,8 +284,8 @@ fi
 
 for w in mundo_definitivo_piso1.world mundo_definitivo_piso2.world mundo_definitivo.world primer_piso.world primer_piso_v2.world primer_piso_dos_niveles.world pasillo_grande.world; do
   paso "$w"
-  if [ -f "$REPO/$w" ]; then bien
-  else mal "no esta en la raiz del repositorio"; fi
+  if [ -f "$MODELOS/$w" ]; then bien
+  else mal "no esta en simulacion/"; fi
 done
 
 # Que la variable este exportada no prueba que sirva. Los mundos con 'model://'
@@ -308,9 +310,9 @@ done
 # segunda linea: si algun dia la variable deja de bastar, el script falla en 20 s
 # con un motivo, en vez de quedarse quieto sin decir nada.
 paso 'los model:// externos resuelven desde otra carpeta'
-MUNDOS_URI=$(grep -l 'model://' "$REPO"/*.world 2>/dev/null || true)
+MUNDOS_URI=$(grep -l 'model://' "$MODELOS"/*.world 2>/dev/null || true)
 if [ -z "$MUNDOS_URI" ]; then
-  mal 'ningun .world de la raiz usa model://, no se puede comprobar'
+  mal 'ningun .world de simulacion/ usa model://, no se puede comprobar'
 elif ! command -v gz >/dev/null; then
   aviso 'no esta la herramienta gz; se omite'
 else

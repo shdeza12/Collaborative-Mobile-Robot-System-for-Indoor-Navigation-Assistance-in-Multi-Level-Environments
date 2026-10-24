@@ -58,7 +58,7 @@ interfaz_web/          Página del teléfono (HTML y JavaScript, sin dependencia
 herramientas/          Arranque, verificación, medición y análisis de las misiones
 Documentos/            Documento final, entregables semanales, requisitos, guías y evidencia
 sitio/                 Fuente del sitio en GitHub Pages
-*.world y carpetas     Mundos y modelos de Gazebo (pisos 1 y 2 en simulación; pisos 3 y 4 medidos)
+simulacion/            Mundos y modelos de Gazebo (pisos 1 y 2 en simulación; pisos 3 y 4 medidos)
 ESTADO.md              Estado del proyecto y bitácora
 ```
 

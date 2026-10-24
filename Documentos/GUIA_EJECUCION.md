@@ -807,8 +807,8 @@ No se levantaron con SLAM: se dibujaron leyendo la geometría declarada del `.wo
 completa que lo generó, y esa orden basta para rehacerlo:
 
 ```bash
-python3 herramientas/generar_mapa_desde_mundo.py mundo_definitivo_piso1.world Robot/aws-deepracer/deepracer_bringup/maps/mundo_definitivo_piso1 --semilla -19.165 7.292
-python3 herramientas/generar_mapa_desde_mundo.py mundo_definitivo_piso2.world Robot/aws-deepracer/deepracer_bringup/maps/mundo_definitivo_piso2 --semilla -21.889 -8.379
+python3 herramientas/generar_mapa_desde_mundo.py simulacion/mundo_definitivo_piso1.world Robot/aws-deepracer/deepracer_bringup/maps/mundo_definitivo_piso1 --semilla -19.165 7.292
+python3 herramientas/generar_mapa_desde_mundo.py simulacion/mundo_definitivo_piso2.world Robot/aws-deepracer/deepracer_bringup/maps/mundo_definitivo_piso2 --semilla -21.889 -8.379
 ```
 
 **No llevan `--region`, y que no lo lleven es el punto.** Hasta el 24-ago sí lo llevaban —dos
@@ -827,7 +827,7 @@ los antiguos `--region`, que ya declaraban la red navegable: si los dos lados de
 dentro de la red, es paso y no se toca. Ése es el único uso que les queda:
 
 ```bash
-python3 herramientas/buscar_vanos.py mundo_definitivo_piso2.world \
+python3 herramientas/buscar_vanos.py simulacion/mundo_definitivo_piso2.world \
     --region -23.39 -11.30 -17.37 -6.76 --region -17.52 -11.30 -14.03 -0.83 \
     --region -14.20 -5.85 8.50 -3.12  --region 8.50 -5.85 23.39 -3.68 \
     --region 18.48 -9.56 21.71 -5.67  --xml Limite_p2_
@@ -840,8 +840,8 @@ ocupado igual que el 0 pero un humano distingue de una pared de verdad.
 ### El verificador los acepta, y ésa es la prueba
 
 ```bash
-python3 herramientas/verificar_mapa.py Robot/aws-deepracer/deepracer_bringup/maps/mundo_definitivo_piso1.yaml mundo_definitivo_piso1.world
-python3 herramientas/verificar_mapa.py Robot/aws-deepracer/deepracer_bringup/maps/mundo_definitivo_piso2.yaml mundo_definitivo_piso2.world
+python3 herramientas/verificar_mapa.py Robot/aws-deepracer/deepracer_bringup/maps/mundo_definitivo_piso1.yaml simulacion/mundo_definitivo_piso1.world
+python3 herramientas/verificar_mapa.py Robot/aws-deepracer/deepracer_bringup/maps/mundo_definitivo_piso2.yaml simulacion/mundo_definitivo_piso2.world
 ```
 
 Los dos salen `ACEPTADO`. **Hay que pasarle a cada mapa su propio mundo:** contra el

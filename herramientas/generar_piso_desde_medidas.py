@@ -253,7 +253,7 @@ def generar(clave, con_svg=False):
                           math.atan2(a2 - a1, b2 - b1)))
 
     d = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                     planta['nombre'])
+                     'simulacion', planta['nombre'])
     os.makedirs(d, exist_ok=True)
     with open(os.path.join(d, 'model.sdf'), 'w') as f:
         f.write("<?xml version='1.0'?>\n<sdf version='1.7'>\n"

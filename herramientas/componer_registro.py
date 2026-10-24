@@ -742,9 +742,9 @@ def _escenario_de(robots):
         mundo, mapa = p.get("mundo") or "", p.get("mapa") or ""
         if not mundo or not mapa:
             continue
-        # Las mismas rutas que arma robot.sh: el mundo cuelga de la raiz del
-        # repositorio y el mapa de deepracer_bringup/maps.
-        escenario[robot] = {"mundo": _relativa(mundo),
+        # Las mismas rutas que arma robot.sh: el mundo cuelga de simulacion/
+        # (de la raiz hasta el 2026-10-24) y el mapa de deepracer_bringup/maps.
+        escenario[robot] = {"mundo": _relativa(os.path.join(_raiz(), "simulacion", mundo)),
                             "mapa": _relativa(os.path.join(mapas, mapa))}
     return escenario
 
@@ -816,7 +816,8 @@ def _escenario_fisico(nivel_de_robot):
     mapas = os.path.join("Robot", "aws-deepracer", "deepracer_bringup", "maps")
     escenario = {}
     for robot, nivel in nivel_de_robot.items():
-        mundo, mapa = f"piso{nivel}.world", os.path.join(mapas, f"piso{nivel}.yaml")
+        mundo = os.path.join("simulacion", f"piso{nivel}.world")
+        mapa = os.path.join(mapas, f"piso{nivel}.yaml")
         if all(os.path.exists(os.path.join(_raiz(), r)) for r in (mundo, mapa)):
             escenario[robot] = {"mundo": mundo, "mapa": mapa}
     return escenario

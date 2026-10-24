@@ -53,7 +53,7 @@ cambia el número y:
 
 ```bash
 python3 herramientas/generar_piso_desde_medidas.py piso4
-python3 herramientas/generar_mapa_desde_mundo.py piso4.world \
+python3 herramientas/generar_mapa_desde_mundo.py simulacion/piso4.world \
         Robot/aws-deepracer/deepracer_bringup/maps/piso4.yaml --semilla 5.0 1.2
 ```
 

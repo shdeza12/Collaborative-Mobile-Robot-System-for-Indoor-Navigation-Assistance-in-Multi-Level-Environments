@@ -164,7 +164,7 @@ python3 herramientas/comprobar_workspace.py
 
 ### 5. Variables de entorno
 
-Los mundos y los modelos SDF viven en la raíz del repositorio, **fuera** del workspace, así
+Los mundos y los modelos SDF viven en `simulacion/`, en la raíz del repositorio y **fuera** del workspace, así
 que Gazebo no los encuentra solo. El paso 4 termina dentro de `~/deepracer_sim_ws`; antes
 de ejecutar el bloque de aquí hay que volver a la raíz del repositorio (la carpeta que se
 clonó o descomprimió en el paso 1):
@@ -177,11 +177,11 @@ cd ~/Tesis
 # correcta. Hay que parar y corregirla antes de seguir: las órdenes siguientes usan
 # $PWD, y desde otra carpeta escribirían una GAZEBO_MODEL_PATH que apunta a un sitio
 # sin mundos, con el fallo silencioso que se describe más abajo.
-ls pasillo_grande.world
+ls simulacion/pasillo_grande.world
 
 grep -v '^[[:space:]]*#' ~/.bashrc 2>/dev/null | grep -qF 'deepracer_sim_ws/install/setup.bash' || echo 'source ~/deepracer_sim_ws/install/setup.bash' >> ~/.bashrc
 
-R="$(pwd -P)"; grep -v '^[[:space:]]*#' ~/.bashrc 2>/dev/null | grep -F GAZEBO_MODEL_PATH | sed "s|\${HOME}|$HOME|g; s|\$HOME|$HOME|g; s|~|$HOME|g" | grep -qF "$R" || echo "export GAZEBO_MODEL_PATH=\"\$GAZEBO_MODEL_PATH:$R\"" >> ~/.bashrc
+R="$(pwd -P)/simulacion"; grep -v '^[[:space:]]*#' ~/.bashrc 2>/dev/null | grep -F GAZEBO_MODEL_PATH | sed "s|\${HOME}|$HOME|g; s|\$HOME|$HOME|g; s|~|$HOME|g" | grep -qF "$R" || echo "export GAZEBO_MODEL_PATH=\"\$GAZEBO_MODEL_PATH:$R\"" >> ~/.bashrc
 
 exec bash
 ```
@@ -215,11 +215,11 @@ exec bash
 > Sin recargar, todo lo que se lance desde aquí seguirá sin ver la variable.
 
 La primera línea evita tener que hacer `source` en cada terminal nueva. La segunda añade la
-raíz del repositorio a `GAZEBO_MODEL_PATH`, y la necesitan los mundos que incluyen modelos
+carpeta `simulacion/` a `GAZEBO_MODEL_PATH`, y la necesitan los mundos que incluyen modelos
 externos con `model://`: **`mundo_definitivo_piso1.world`** y **`mundo_definitivo_piso2.world`**,
 que son los mundos vigentes —el primero es el que los launch cargan por defecto—,
 `mundo_definitivo.world`, `pasillo_grande.world`, `pasillo_test.world`,
-`USTA_WORLD/usta_test.world` y `primer_piso_dos_niveles.world`. Solo `primer_piso.world` y
+`simulacion/USTA_WORLD/usta_test.world` y `primer_piso_dos_niveles.world`. Solo `primer_piso.world` y
 `primer_piso_v2.world` llevan la geometría embebida y funcionan sin ella.
 
 > Esta variable dejó de ser opcional el 2026-08-20. Mientras el mundo vigente fue
@@ -233,6 +233,10 @@ que son los mundos vigentes —el primero es el que los launch cargan por defect
 > Y encima **funciona igual sin la variable si se lanza desde la raíz del repositorio**,
 > porque Gazebo también busca en el directorio actual. Por eso este fallo no aparece nunca en
 > el equipo de quien escribe las instrucciones, y sí en el de quien lanza desde otra carpeta.
+>
+> Desde el 24 de octubre de 2026 el lanzador de la simulación agrega `simulacion/` a la ruta de
+> modelos por su cuenta, así que el lanzamiento normal ya no cae en esta trampa. La variable sigue
+> haciendo falta para abrir un mundo con `gazebo` a mano y para la comprobación del paso 6.
 
 Existe una tercera variable opcional, `TESIS_WORLDS_DIR`, para apuntar a otro checkout del
 repositorio. No hace falta declararla: por defecto cada launch deduce la raíz a partir de la
@@ -397,7 +401,7 @@ ros2 run nav2_map_server map_saver_cli -f /tmp/mapa_candidato \
 Antes de aceptar un mapa como definitivo, validarlo contra la geometría del mundo:
 
 ```bash
-python3 herramientas/verificar_mapa.py /tmp/mapa_candidato.yaml mundo_definitivo_piso1.world
+python3 herramientas/verificar_mapa.py /tmp/mapa_candidato.yaml simulacion/mundo_definitivo_piso1.world
 ```
 
 La herramienta compara la extensión mapeada con la del archivo `.world` y rechaza el mapa
@@ -409,7 +413,7 @@ argumento: la altura del corte horizontal, en metros sobre el suelo del mundo. P
 son 0,30 m, la altura del LiDAR sobre el nivel 1:
 
 ```bash
-python3 herramientas/verificar_mapa.py Robot/aws-deepracer/deepracer_bringup/maps/primer_piso_definitivo.yaml primer_piso_dos_niveles.world 3.30
+python3 herramientas/verificar_mapa.py Robot/aws-deepracer/deepracer_bringup/maps/primer_piso_definitivo.yaml simulacion/primer_piso_dos_niveles.world 3.30
 ```
 
 Un mapa 2D es un corte, no una sombra: proyectar todo al plano metería la losa del nivel 2
@@ -445,8 +449,8 @@ la misma geometría. `generar_mapa_desde_mundo.py` acepta la misma opción como 
 | `Documentos/` | Anteproyecto, entregables semanales y guías operativas |
 | `Documentos/Evidencia/` | Capturas, registros de terminal e informes de sesión. Cada archivo con su pie de foto en [`Documentos/Evidencia/README.md`](Evidencia/README.md): qué muestra, de cuándo es y qué afirmación sostiene |
 | `herramientas/` | Verificadores y utilidades (ver abajo) |
-| `*.world` | Mundos de Gazebo. El vigente es `mundo_definitivo_piso1.world` desde el 2026-08-23, y su par es `mundo_definitivo_piso2.world`: **un mundo por piso**, que juntos son el **entorno de evaluación de OE4**. Los dos pisos son pasillos distintos del mismo edificio —en la realidad, uno sobre el otro; dibujados en Gazebo uno al lado del otro en Y, piso 1 en y≈10,0 y piso 2 en y≈−4,5—, no una planta duplicada en altura. Sustituyen a `mundo_definitivo.world`, que los traía en la **misma escena** y se conserva solo como referencia histórica: ver el aviso sobre el cruce de LiDAR más abajo. `primer_piso_dos_niveles.world`, que sí los apila en altura, queda también como referencia. **`piso3.world` y `piso4.world` son otra cosa**: los pisos del edificio donde corren los vehículos reales desde el 5-oct, levantados con flexómetro, con su mapa y su catálogo de destinos propios ([`Documentos/GUIA_PISOS_3_Y_4.md`](GUIA_PISOS_3_Y_4.md)) |
-| `USTA_WORLD/`, `pasillo_grande/`, `pasillo_usta/` | Modelos SDF de entornos |
+| `simulacion/*.world` | Mundos de Gazebo, en `simulacion/` desde el 24 de octubre de 2026 (antes, en la raíz). El vigente es `mundo_definitivo_piso1.world` desde el 2026-08-23, y su par es `mundo_definitivo_piso2.world`: **un mundo por piso**, que juntos son el **entorno de evaluación de OE4**. Los dos pisos son pasillos distintos del mismo edificio —en la realidad, uno sobre el otro; dibujados en Gazebo uno al lado del otro en Y, piso 1 en y≈10,0 y piso 2 en y≈−4,5—, no una planta duplicada en altura. Sustituyen a `mundo_definitivo.world`, que los traía en la **misma escena** y se conserva solo como referencia histórica: ver el aviso sobre el cruce de LiDAR más abajo. `primer_piso_dos_niveles.world`, que sí los apila en altura, queda también como referencia. **`piso3.world` y `piso4.world` son otra cosa**: los pisos del edificio donde corren los vehículos reales desde el 5-oct, levantados con flexómetro, con su mapa y su catálogo de destinos propios ([`Documentos/GUIA_PISOS_3_Y_4.md`](GUIA_PISOS_3_Y_4.md)) |
+| `simulacion/` (carpetas) | Modelos SDF de los entornos: `pasillo_usta/`, `pasillo_grande/`, `USTA_WORLD/`, `primer_piso/`, `mundo_definitivo_piso1/`, `mundo_definitivo_piso2/`, `piso3/`, `piso4/` |
 | `ESTADO.md` | Tablero de avance, riesgos y decisiones |
 
 ### Las herramientas

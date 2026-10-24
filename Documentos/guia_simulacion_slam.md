@@ -171,7 +171,7 @@ Y desde la **raíz del repositorio** —las dos rutas van relativas a ella, así
 funciona clones donde clones:
 
 ```bash
-python3 herramientas/verificar_mapa.py /tmp/mapa_candidato.yaml primer_piso_v2.world
+python3 herramientas/verificar_mapa.py /tmp/mapa_candidato.yaml simulacion/primer_piso_v2.world
 ```
 
 El script compara la extensión realmente mapeada contra la geometría del `.world` y rechaza

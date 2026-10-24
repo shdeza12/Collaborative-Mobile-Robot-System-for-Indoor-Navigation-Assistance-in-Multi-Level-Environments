@@ -930,10 +930,10 @@ def pruebas_del_vehiculo(esquema):
         esc = reg["procedencia"].get("escenario_por_robot", {})
         check("cada robot lleva el mapa y el modelo de SU piso, no los de la simulacion",
               {r: (e["mundo"], os.path.basename(e["mapa"])) for r, e in esc.items()}
-              == {"robot1": ("piso3.world", "piso3.yaml"),
-                  "robot2": ("piso4.world", "piso4.yaml")}, f"-> {esc}")
+              == {"robot1": ("simulacion/piso3.world", "piso3.yaml"),
+                  "robot2": ("simulacion/piso4.world", "piso4.yaml")}, f"-> {esc}")
         check("mundo y mapa sueltos son los del robot que inicia",
-              reg["procedencia"]["mundo"] == "piso3.world"
+              reg["procedencia"]["mundo"] == "simulacion/piso3.world"
               and reg["procedencia"]["mapa"].endswith("piso3.yaml"),
               f"-> {reg['procedencia']['mundo']}, {reg['procedencia']['mapa']}")
         check("el catalogo se anota con su nombre",

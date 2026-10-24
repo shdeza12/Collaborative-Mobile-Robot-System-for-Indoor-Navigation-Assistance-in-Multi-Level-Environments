@@ -34,7 +34,7 @@ Todo el código es abierto. La forma más directa de ver el sistema funcionando 
     ```bash
     cd ~/Tesis
     echo 'source ~/deepracer_sim_ws/install/setup.bash' >> ~/.bashrc
-    echo "export GAZEBO_MODEL_PATH=\"\$GAZEBO_MODEL_PATH:$(pwd -P)\"" >> ~/.bashrc
+    echo "export GAZEBO_MODEL_PATH=\"\$GAZEBO_MODEL_PATH:$(pwd -P)/simulacion\"" >> ~/.bashrc
     exec bash
     ```
 
@@ -69,6 +69,6 @@ Todo el código es abierto. La forma más directa de ver el sistema funcionando 
     Los mapas de los pisos 3 y 4 salen de medidas con flexómetro, no de SLAM. La guía de esos pisos explica cómo se levantaron y dónde va cada vehículo al arrancar: [GUIA_PISOS_3_Y_4.md](https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/blob/main/Documentos/GUIA_PISOS_3_Y_4.md).
 
 ??? question "Si algo no funciona"
-    - **Gazebo abre un mundo vacío y no da error**: falta la variable `GAZEBO_MODEL_PATH` del paso 4.
+    - **Gazebo abre un mundo vacío y no da error** al abrir un mundo a mano: falta la variable `GAZEBO_MODEL_PATH` del paso 4, que apunta a la carpeta `simulacion/`. El lanzador del proyecto la agrega por su cuenta.
     - **Los controladores no quedan activos**: el código se migró de ROS 2 Foxy a Humble; en Humble los controladores se activan con el estado `active`.
     - **La página del teléfono se queda con una versión vieja**: sírvala con `herramientas/servir_interfaz.py`, que obliga al navegador a pedir los archivos nuevos.
