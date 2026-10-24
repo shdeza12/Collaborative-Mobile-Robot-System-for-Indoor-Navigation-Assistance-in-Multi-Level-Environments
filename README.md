@@ -8,11 +8,28 @@ desde el navegador del teléfono y el robot de su piso la lleva hasta la escaler
 confirma en el teléfono, y el robot del otro piso la recibe y termina el recorrido. Un coordinador central
 asigna los robots y organiza el relevo. El aporte del proyecto es esa coordinación entre agentes.
 
-[Video de la campaña](https://youtu.be/X3BINGgNxiA) ·
-[Sitio del proyecto, semana a semana](https://shdeza12.github.io/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/) ·
-[Documento final (PDF)](Documentos/DocumentoFinal/main.pdf)
+[![Sitio del proyecto: semana a semana](https://img.shields.io/badge/Sitio_del_proyecto-semana_a_semana-2a78d6?style=for-the-badge)](https://shdeza12.github.io/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/)
+[![Video de la campaña](https://img.shields.io/badge/Video-campa%C3%B1a_con_los_veh%C3%ADculos-c4302b?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/X3BINGgNxiA)
+[![Documento final](https://img.shields.io/badge/Documento_final-PDF-57606a?style=for-the-badge)](Documentos/DocumentoFinal/main.pdf)
+[![Objetivos](https://img.shields.io/badge/Objetivos-4_de_4_cumplidos-1a7f37?style=for-the-badge)](ESTADO.md)
 
-![Arquitectura del sistema con los dos vehículos](Documentos/DocumentoFinal/imagenes/arquitectura_vehiculos.png)
+<a href="https://shdeza12.github.io/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="sitio/paginas/img/readme_sitio_oscuro.png">
+    <img alt="Sitio del proyecto: una página por semana, de la 10 a la 28, con lo que se hizo, sus imágenes y lo que se concluyó" src="sitio/paginas/img/readme_sitio_claro.png">
+  </picture>
+</a>
+
+## Objetivos
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="sitio/paginas/img/readme_objetivos_oscuro.png">
+  <img alt="Los cuatro objetivos específicos cumplidos: arquitectura funcional (10 de 10 requisitos), plataforma robótica (6 de 6), interfaz para el usuario (6 de 6) y evaluación experimental (7 de 7)" src="sitio/paginas/img/readme_objetivos_claro.png">
+</picture>
+
+De los 36 requisitos del proyecto hay 35 verificados, cada uno con su prueba
+([`REQUISITOS.md`](Documentos/REQUISITOS.md)). Queda parcial una restricción del alcance, operar en
+condiciones controladas, a falta de anotar las personas que pasaron por el pasillo durante las pruebas.
 
 ## Resultados
 
@@ -26,6 +43,12 @@ asigna los robots y organiza el relevo. El aporte del proyecto es esa coordinaci
 
 El detalle está en el capítulo de resultados del documento final y en
 [`Documentos/Evidencia/`](Documentos/Evidencia/README.md).
+
+## Cómo funciona
+
+La página del teléfono habla con el coordinador, que corre en un portátil; cada vehículo lleva su propia navegación y solo se comunica con el portátil. El relevo ocurre en la escalera, que la persona sube o baja por su cuenta.
+
+![Arquitectura del sistema con los dos vehículos](Documentos/DocumentoFinal/imagenes/arquitectura_vehiculos.png)
 
 ## Estructura
 
