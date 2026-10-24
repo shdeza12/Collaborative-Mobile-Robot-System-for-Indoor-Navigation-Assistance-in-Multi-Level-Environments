@@ -18,7 +18,7 @@ vehículos, nivelados con el repositorio antes de empezar. Datos: [`campo_202610
    respondía «el robot no esta libre (estado 3)». Nav2 guarda varios minutos las metas terminadas; con una
    `CANCELADA` o `ABORTADA` en la lista el agente marcaba el robot en ERROR, y la media vuelta exigía LIBRE.
    Sin ella, Nav2 intentaba girar solo en el pasillo y oscilaba: una misión abortó y una vuelta a casa falló
-   tras tres intentos. Arreglo en el commit `843fd5a`: la media vuelta se rechaza solo con una meta viva.
+   tras tres intentos. Arreglo en el commit `d25e45e`: la media vuelta se rechaza solo con una meta viva.
    Pruebas: 50 de 50 del agente y 19 de 19 del coordinador con vehículos simulados. Copiado a los dos
    vehículos. Medias vueltas antes del arreglo: 7 hechas y 8 rechazadas; después: 10 hechas, 0 rechazadas.
 4. **Cancelación (RF-29) en los vehículos.** Después del arreglo se cancelaron seis misiones, una o más
