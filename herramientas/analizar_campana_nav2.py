@@ -143,7 +143,7 @@ def main():
           ' verificar la llegada, no creer a Nav2.' % (exitos, n))
     print()
     print('> Estas corridas **no cuentan para RF-27**, que pide el protocolo completo')
-    print('> sobre los dos vehiculos. Ver Documentos/PLAN_S25.md.')
+    print('> sobre los dos vehiculos. Ver Documentos/historial/PLAN_S25.md.')
     return 0
 
 

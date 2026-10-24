@@ -4,7 +4,7 @@
 >
 > **Cubre del inicio de Nav2 al 17 de julio de 2026** (sesiones 1 y 3; no hubo sesión 2
 > registrada). **No se actualiza más.** El estado vigente del proyecto está en
-> [`ESTADO.md`](../ESTADO.md), que es la fuente única de verdad, y la bitácora de
+> [`ESTADO.md`](../../ESTADO.md), que es la fuente única de verdad, y la bitácora de
 > decisiones vive ahí.
 >
 > Se conserva porque documenta cómo se levantó el stack Nav2 + AMCL y por qué cada
@@ -17,7 +17,7 @@
 > | §1.3: mundo por defecto `primer_piso.world` | El vigente es `primer_piso_v2.world` desde el 2026-08-11, y el entorno de evaluación de OE4 es `primer_piso_dos_niveles.world` desde el 14-ago | `README.md`, y la constante `MUNDO_VIGENTE` de `deepracer_raiz_repo.py` |
 > | §3.2: *«AMCL soporta `set_initial_pose` + `initial_pose` (x, y, yaw)»*, con `initial_pose: [0.0, 0.0, 0.0]` | **Falso.** Es una línea muerta: AMCL declara `initial_pose.x/.y/.z/.yaw` por separado y ROS descarta la lista en silencio. Un robot lanzado con `y:=2.0` arrancaba con 2 m de error | `ESTADO.md`, bitácora del 2026-08-12 |
 > | §1 y §3, *«navegación autónoma verificada: alcanza el goal (3,0)»* | Un `SUCCEEDED` de Nav2 **no** se acepta como evidencia desde el 2026-08-12: lo emite el controlador contra la pose que le da AMCL, no contra la real. Toda medida se contrasta con `/odom` | `ESTADO.md`, bitácora del 2026-08-12 |
-> | La fórmula del final publica en `/initialpose` | Correcto para un solo robot; bajo espacio de nombres hay que usar `/<ns>/initialpose` o no lo escucha nadie | [`CONTRATO_INTERFACES.md`](CONTRATO_INTERFACES.md) |
+> | La fórmula del final publica en `/initialpose` | Correcto para un solo robot; bajo espacio de nombres hay que usar `/<ns>/initialpose` o no lo escucha nadie | [`CONTRATO_INTERFACES.md`](../CONTRATO_INTERFACES.md) |
 >
 > Las «Notas para próxima sesión» de la sesión 1 quedaron sin cerrar aquí; si alguna sigue
 > viva, su sitio es el tablero de riesgos de `ESTADO.md`, no este archivo.
@@ -262,4 +262,4 @@ pub.publish(msg)
 ---
 
 *Cerrado el 2026-08-16. La última entrada es del 17 de julio de 2026. El registro de
-sesiones continúa en la bitácora de decisiones de [`ESTADO.md`](../ESTADO.md).*
+sesiones continúa en la bitácora de decisiones de [`ESTADO.md`](../../ESTADO.md).*

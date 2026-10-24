@@ -252,7 +252,7 @@ C-3), y la sustentación para la semana 28 o 29.
 | Documento | Qué respalda |
 |---|---|
 | `Documentos/ACTA_GO_NOGO.md` | Compuertas, cortes y sección 3 |
-| `Documentos/PLAN_S25.md` | Secciones 2 y 10 |
+| `Documentos/historial/PLAN_S25.md` | Secciones 2 y 10 |
 | `Documentos/Evidencia/S25_aislamiento_dos_carros.md` | Sección 4 |
 | `Documentos/Evidencia/S25_ensayo_laboratorio.md` | Secciones 4 y 5 |
 | `Documentos/Evidencia/S25_pasillo_piso2_amss-jgm9.md` | Secciones 5 y 6 |

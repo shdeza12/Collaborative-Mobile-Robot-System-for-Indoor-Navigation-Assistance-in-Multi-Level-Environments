@@ -19,7 +19,7 @@
 # se queda en blanco sin dar un error que se entienda.
 #
 # La via para ver en vivo esta descrita, sin validar, en el par. 6 de
-# Documentos/GUIA_CAMPANA_NAV2_HARDWARE.md.
+# Documentos/historial/GUIA_CAMPANA_NAV2_HARDWARE.md.
 #
 # LO QUE HACE
 #   1. Si el bag es de Jazzy (metadata version 9), lo adapta a Humble en /tmp

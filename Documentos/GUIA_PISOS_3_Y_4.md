@@ -120,7 +120,7 @@ empujarlo y deepy llega a 1,58 m/s (2-oct, conclusión 3 de
 
 Para una misión **coordinada** (con el coordinador y el relevo) hacen falta además `NS=robot1` o
 `NS=robot2`, `IMU=true` y `MARGEN=0.5`; las órdenes completas están en
-[`PLAN_S26.md`](PLAN_S26.md) §4.2.
+[`PLAN_S26.md`](historial/PLAN_S26.md) §4.2.
 
 `POSE_X`, `POSE_Y` y `POSE_YAW` son la salida del vehículo y hay que pasarlas siempre: sin ellas el
 guion pone (1,0, 0,0), que en los mapas de los pisos 3 y 4 cae sobre la pared oeste. La salida
@@ -187,7 +187,7 @@ cortas ([`S25_pisos34_campo.md`](Evidencia/S25_pisos34_campo.md)). G-3 se mide c
 Desde el 5-oct el margen ya no está fijo en el lanzador: es el argumento `margen_llegada`, que en el
 guion se pasa como `MARGEN=`, con 1,0 m por defecto. **Las misiones coordinadas necesitan
 `MARGEN=0.5`**: el coordinador acepta la llegada a 0,5 m o menos, así que con 1,0 m una llegada entre
-0,5 y 1,0 m se rechaza y la misión falla ([`PLAN_S26.md`](PLAN_S26.md) §4.1). Si la IMU permite bajar
+0,5 y 1,0 m se rechaza y la misión falla ([`PLAN_S26.md`](historial/PLAN_S26.md) §4.1). Si la IMU permite bajar
 el margen a 0,5 m se decide con las misiones encadenadas del miércoles 7 (§3.2 del plan).
 
 **Anotar el error de cada corrida, no intentar arreglarlo en campo.**
@@ -206,7 +206,7 @@ seguridad: sin ella el vehículo no ve obstáculos nuevos.
 > **Resuelto el 2026-10-05.** El equipo aprobó los dos cambios y están en el coordinador: los
 > parámetros `robot_nivel_3` y `robot_nivel_4`, vacíos por defecto para que la simulación no cambie,
 > y la opción B, con la que en el vehículo la llegada se juzga con la pose en el mapa que publica el
-> agente, porque `/odom` arranca en (0, 0). Detalle y pruebas en [`PLAN_S26.md`](PLAN_S26.md) §4.1;
+> agente, porque `/odom` arranca en (0, 0). Detalle y pruebas en [`PLAN_S26.md`](historial/PLAN_S26.md) §4.1;
 > las órdenes para lanzarlo en los vehículos, en el §4.2. Lo que sigue se deja como se escribió el
 > 2-oct, porque explica por qué hacía falta.
 

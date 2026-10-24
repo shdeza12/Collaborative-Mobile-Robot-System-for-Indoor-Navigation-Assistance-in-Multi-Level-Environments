@@ -2,7 +2,7 @@
 
 Sesión en los pisos 3 y 4 con `amss-ez9n` (deepy, `robot1`) y `amss-jgm9` (racey, `robot2`). Primero
 corrió deepy solo en el piso 3: cuatro tramos encadenados, un quinto después de dar media vuelta, y
-las primeras medias vueltas con `media_vuelta.py` (§3.3 y §3.4 de [`PLAN_S26.md`](../PLAN_S26.md)).
+las primeras medias vueltas con `media_vuelta.py` (§3.3 y §3.4 de [`PLAN_S26.md`](../historial/PLAN_S26.md)).
 Después se intentó G-5 con las dos cadenas a la vez y el coordinador en racey, y no se pudo correr.
 El equipo colocó los vehículos y acompañó las maniobras; Claude lanzó las cadenas y las corridas por
 SSH y analizó los registros. Este informe se escribió el 13-oct con lo que quedó en el portátil.
@@ -14,7 +14,7 @@ Datos:
   (`arranque_*.log`); el registro de carga de deepy de la tarde está copiado en
   `~/tesis_evidencia/lab_2026-10-09/carga_deepy_2026-10-08_piso3.csv`;
 - en deepy, sin copiar: el CSV de la campaña (`campana_s26_deepy.csv`) y las grabaciones
-  `campana_p3d_01` a `05` y `mv_p3d_04`, `04b` y `05` ([`PLAN_S27.md`](../PLAN_S27.md) §2.5).
+  `campana_p3d_01` a `05` y `mv_p3d_04`, `04b` y `05` ([`PLAN_S27.md`](../historial/PLAN_S27.md) §2.5).
 
 ## Resultado
 
@@ -110,7 +110,7 @@ al final racey se cayó de la red.
   quedaron al 54 % y al 59 % en reposo
   ([`S26_laboratorio_carga_dos_vehiculos.md`](S26_laboratorio_carga_dos_vehiculos.md)).
 - El 13-oct, a raíz del §1, se revisó cómo verifica el coordinador una llegada en el vehículo, y se
-  corrigió para medir con el vehículo ya asentado ([`PLAN_S27.md`](../PLAN_S27.md) §1.5).
+  corrigió para medir con el vehículo ya asentado ([`PLAN_S27.md`](../historial/PLAN_S27.md) §1.5).
 
 ## 5. Pendiente
 

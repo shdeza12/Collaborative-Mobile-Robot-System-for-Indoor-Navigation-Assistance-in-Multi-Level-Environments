@@ -79,7 +79,7 @@ por minuto.
 - La vibración con los motores en marcha: los vehículos se giraron siempre a mano.
 - La variación del sesgo con la temperatura en una sesión larga.
 
-Las dos se miden en las corridas con IMU y sin ella del piso 4 ([`PLAN_S26.md`](../PLAN_S26.md) §3.2).
+Las dos se miden en las corridas con IMU y sin ella del piso 4 ([`PLAN_S26.md`](../historial/PLAN_S26.md) §3.2).
 
 ## 5. El acelerómetro de `amss-jgm9`
 
@@ -96,5 +96,5 @@ criterio de la prueba no se cambia; el resultado queda como está.
    la misma lectura de `probar_imu.py`).
 2. El marco `imu_link` en `deepracer_hardware.urdf`, con la orientación del §2.
 3. La calibración del sesgo con el vehículo quieto al arrancar, en cada vehículo.
-4. El filtro EKF que combine la velocidad de giro con rf2o ([`PLAN_S26.md`](../PLAN_S26.md) §2.3), y
+4. El filtro EKF que combine la velocidad de giro con rf2o ([`PLAN_S26.md`](../historial/PLAN_S26.md) §2.3), y
    las corridas con IMU y sin ella en el piso 4 (§3.2).

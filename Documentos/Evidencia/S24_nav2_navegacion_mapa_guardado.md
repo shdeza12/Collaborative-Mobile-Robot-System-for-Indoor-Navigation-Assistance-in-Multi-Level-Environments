@@ -10,7 +10,7 @@ noche anterior en la corrida C de [`S24_mapeo_6m_hardware.md`](S24_mapeo_6m_hard
 
 **Qué cierra:** los peldaños **6 (mapas de costos)** y **7 (planificador y
 controlador)** de la escalera de Nav2, los dos últimos, sobre hardware. La tabla del
-§2.3 de [`MAPA_TRABAJO_RESTANTE.md`](../MAPA_TRABAJO_RESTANTE.md) los tenía en ❌.
+§2.3 de [`MAPA_TRABAJO_RESTANTE.md`](../historial/MAPA_TRABAJO_RESTANTE.md) los tenía en ❌.
 
 ---
 
@@ -170,4 +170,4 @@ de pedir una meta, conviene medir si está en zona libre del mapa.**
 - **Los «5 m» que se dijeron al día siguiente no son una medida**: son la distancia entre las cajas
   y la impresión de que el carro llegó cerca. La corrida sigue sin verdad de terreno.
 - Todo el procedimiento para repetir esto N veces y medirlo está en
-  [`GUIA_CAMPANA_NAV2_HARDWARE.md`](../GUIA_CAMPANA_NAV2_HARDWARE.md).
+  [`GUIA_CAMPANA_NAV2_HARDWARE.md`](../historial/GUIA_CAMPANA_NAV2_HARDWARE.md).

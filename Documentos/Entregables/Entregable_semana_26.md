@@ -259,7 +259,7 @@ la semana 28 o 29.
 | Documento | Qué respalda |
 |---|---|
 | `Documentos/ACTA_GO_NOGO.md` | Compuertas, cortes y sección 3 |
-| `Documentos/PLAN_S26.md` | Secciones 2 y 12 |
+| `Documentos/historial/PLAN_S26.md` | Secciones 2 y 12 |
 | `Documentos/Evidencia/S26_pruebas_imu.md` | Sección 4 |
 | `Documentos/Evidencia/S26_integracion_imu_vehiculos.md` | Sección 4 |
 | `Documentos/Evidencia/S26_red_5ghz_regulatorio.md` | Sección 5 |

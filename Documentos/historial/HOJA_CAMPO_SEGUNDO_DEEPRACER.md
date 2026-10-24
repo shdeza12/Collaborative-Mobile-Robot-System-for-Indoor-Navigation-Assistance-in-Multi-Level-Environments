@@ -1,6 +1,6 @@
 # Hoja de campo — la llegada del segundo DeepRacer
 
-> **Estado al 2026-10-06:** Histórica como hoja de la sesión del 11-sep. **Su §5, el procedimiento de RF-15, sigue vigente**: lo usa [`PLAN_S26.md`](PLAN_S26.md) §2.4 para medir la red entre los pisos 3 y 4. Qué seguir para cada tarea: [`INDICE_GUIAS.md`](INDICE_GUIAS.md).
+> **Estado al 2026-10-06:** Histórica como hoja de la sesión del 11-sep. **Su §5, el procedimiento de RF-15, sigue vigente**: lo usa [`PLAN_S26.md`](PLAN_S26.md) §2.4 para medir la red entre los pisos 3 y 4. Qué seguir para cada tarea: [`INDICE_GUIAS.md`](../INDICE_GUIAS.md).
 
 **Para la sesión con el segundo vehículo.** Escrita el **2026-09-11 por la mañana**, antes de que
 el codirector Néstor lo traiga, con todo lo que ya costó una sesión en las tres salidas anteriores
@@ -12,10 +12,10 @@ de OE2**. Esta hoja existe para que la sesión no se gaste improvisando comandos
 
 | Documento | Qué cubre |
 |---|---|
-| [`Evidencia/S19_spike_p1_p2_hardware.md`](Evidencia/S19_spike_p1_p2_hardware.md) | El cortafuegos, el cruce Humble↔Jazzy, y las tres trampas de la tarjeta |
-| [`Evidencia/S20_frente_b_hardware.md`](Evidencia/S20_frente_b_hardware.md) | La jornada con **un** vehículo: LiDAR, odometría láser, teleoperación |
+| [`Evidencia/S19_spike_p1_p2_hardware.md`](../Evidencia/S19_spike_p1_p2_hardware.md) | El cortafuegos, el cruce Humble↔Jazzy, y las tres trampas de la tarjeta |
+| [`Evidencia/S20_frente_b_hardware.md`](../Evidencia/S20_frente_b_hardware.md) | La jornada con **un** vehículo: LiDAR, odometría láser, teleoperación |
 | [`HOJA_CAMPO_G2.md`](HOJA_CAMPO_G2.md) | La regla de dueños, las baterías, y cómo se graba en la tarjeta |
-| [`REQUISITOS.md`](REQUISITOS.md) | Las celdas de OE2: RF-11 a RF-16 |
+| [`REQUISITOS.md`](../REQUISITOS.md) | Las celdas de OE2: RF-11 a RF-16 |
 
 Si hay contradicción entre esta hoja y una de esas, **manda la otra**, y se corrige esta.
 
@@ -62,7 +62,7 @@ portátil no es un vehículo.
 tienen, y porque en cuanto se vaya dejan de estar disponibles.
 
 El cronograma pide literalmente *«qué vehículo está intervenido, qué se le intervino y en qué
-fecha vuelve a estar operativo»* ([`CRONOGRAMA_S17_S32.md`](CRONOGRAMA_S17_S32.md), S19). La fecha
+fecha vuelve a estar operativo»* ([`CRONOGRAMA_S17_S32.md`](../CRONOGRAMA_S17_S32.md), S19). La fecha
 ya es hoy, así que la tercera línea se convierte en su gemela útil: **qué quedó sin arreglar**.
 
 Se copia el bloque del §8.1 en un fichero de evidencia y se rellena. **No vale «ya está

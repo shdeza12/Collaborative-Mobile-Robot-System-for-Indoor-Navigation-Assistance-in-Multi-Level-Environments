@@ -251,7 +251,7 @@ consolidará el conjunto de datos de la campaña y se emitirá este informe.
 | `Documentos/Evidencia/registros/S23_RF15_carroA_carroB.json` | Sección 4, RF-15 |
 | `Documentos/Evidencia/S23_informacion_avance_piso1.md` y `…_piso2.md` | Sección 5 |
 | `Documentos/Evidencia/S23_campo_traccion_RF14.md` | Sección 6 |
-| `Documentos/MAPA_TRABAJO_RESTANTE.md` | Sección 7 |
+| `Documentos/historial/MAPA_TRABAJO_RESTANTE.md` | Sección 7 |
 | `Documentos/Evidencia/S23_reproducibilidad_de_los_registros.md` | Sección 8, reproducibilidad de los 44 registros |
 | `Documentos/GUIA_ARRANQUE.md` | Sección 8, arranque del sistema |
 | `Documentos/RESULTADOS_OE4_SIMULACION.md` | Sección 8, capítulo de resultados |

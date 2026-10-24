@@ -3,7 +3,7 @@
 
 POR QUE EXISTE
 --------------
-El bloque C de Documentos/PLAN_S25.md pone la pila del vehiculo bajo `/robotN`,
+El bloque C de Documentos/historial/PLAN_S25.md pone la pila del vehiculo bajo `/robotN`,
 que es como la manda el coordinador. Su criterio de cierre en el escritorio es:
 con `namespace:=robot2`, todos los nodos bajo `/robot2` y todos los marcos con
 prefijo, y el modo sin espacio de nombres identico al de antes. Un marco sin

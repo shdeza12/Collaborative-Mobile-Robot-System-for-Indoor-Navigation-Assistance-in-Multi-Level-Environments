@@ -7,7 +7,7 @@
 # ACTIVO en ese instante, la capa estatica queda vacia y el planificador aborta
 # con "Start occupied" en CUALQUIER meta, apuntando al punto de partida en vez
 # de a la causa. Costo la noche del 2026-09-24 encontrarlo. Ver el §3.1 de
-# Documentos/GUION_NAVEGACION_USTA.md.
+# Documentos/historial/GUION_NAVEGACION_USTA.md.
 #
 # El orden que este guion impone, y que no es negociable:
 #   1. puente cmdvel_to_servo   (el launch NO lo arranca; sin el, Nav2
@@ -103,7 +103,7 @@ LOGS=/tmp/nav2_campo
 # Procesos de AWS que se paran al arrancar (ver el paso 0 de arrancar()).
 AWS_SOBRANTES="camera_node sensor_fusion_n web_video_serve inference_node model_optimizer model_loader_no software_update bag_log_node_cp device_info_nod device_status_n usb_monitor_nod deepracer_navig status_led_node"
 
-# Espacio de nombres (bloque C de Documentos/PLAN_S25.md). Vacio, que es el valor
+# Espacio de nombres (bloque C de Documentos/historial/PLAN_S25.md). Vacio, que es el valor
 # por defecto, deja cada orden exactamente como antes: los tres prefijos de abajo
 # se reducen a la cadena vacia. Con NS=robot2 todo cuelga de /robot2 y los marcos
 # propios llevan 'robot2/'; el lanzador hace lo mismo con 'namespace:=robot2'.

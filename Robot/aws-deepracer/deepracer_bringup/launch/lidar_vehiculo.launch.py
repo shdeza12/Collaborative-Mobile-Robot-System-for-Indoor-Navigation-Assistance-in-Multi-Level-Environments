@@ -65,7 +65,7 @@ segunda mitad pendiente de RF-12 y se trata aparte.
 
 USO: POR RUTA, PORQUE EN LA TARJETA NO HAY WORKSPACE
 ----------------------------------------------------
-Comprobado el 2026-09-07 (Documentos/PLAN_S22.md §5.2): la tarjeta NO tiene
+Comprobado el 2026-09-07 (Documentos/historial/PLAN_S22.md §5.2): la tarjeta NO tiene
 ningun workspace del proyecto. Solo existe '~/tesis_ws/', creado ese dia, y
 dentro unicamente 'coordinacion_msgs' y un YAML. 'deepracer_bringup' NUNCA ha
 estado alli, asi que invocarlo por paquete falla con

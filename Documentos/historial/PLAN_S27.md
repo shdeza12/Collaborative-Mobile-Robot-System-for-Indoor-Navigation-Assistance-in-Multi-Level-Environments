@@ -1,7 +1,7 @@
 # Plan de la semana 27 (12 al 16 de octubre)
 
 Última semana de toma de datos. El corte C-3 del viernes 16
-([`ACTA_GO_NOGO.md`](ACTA_GO_NOGO.md)) pide G-5, una misión con relevo entre los dos vehículos, y
+([`ACTA_GO_NOGO.md`](../ACTA_GO_NOGO.md)) pide G-5, una misión con relevo entre los dos vehículos, y
 G-6, las repeticiones de RF-27. Después del viernes no se toman más datos: se reporta lo corrido con
 su n real. El campo estaba previsto el jueves 15 y el viernes 16 (decisión del equipo, 13-oct). El
 15-oct el equipo aplazó el jueves: G-5, G-6 y el cierre de datos se hacen el viernes 16, en un solo
@@ -9,9 +9,9 @@ día. El resto de la semana es preparación y documentación.
 
 Desde la semana 26 la cadena completa con los dos vehículos funciona en el laboratorio, con el
 coordinador en el portátil
-([`S26_laboratorio_carga_dos_vehiculos.md`](Evidencia/S26_laboratorio_carga_dos_vehiculos.md)), y G-3
+([`S26_laboratorio_carga_dos_vehiculos.md`](../Evidencia/S26_laboratorio_carga_dos_vehiculos.md)), y G-3
 está alcanzada. Las misiones de G-6 están sorteadas
-([`campana_rf27_misiones.csv`](Evidencia/campana_rf27_misiones.csv), `7a41815`).
+([`campana_rf27_misiones.csv`](../Evidencia/campana_rf27_misiones.csv), `7a41815`).
 
 ## 0. La semana de un vistazo
 
@@ -137,7 +137,7 @@ vehículo hasta la escalera, sube o baja, y confirma en la página la llegada al
 ### 2.1 · Marcas de los destinos
 
 Una cruz de cinta en cada destino, con las coordenadas del catálogo
-([`GUIA_PISOS_3_Y_4.md`](GUIA_PISOS_3_Y_4.md) §3): x a lo largo del pasillo desde la pared norte, y
+([`GUIA_PISOS_3_Y_4.md`](../GUIA_PISOS_3_Y_4.md) §3): x a lo largo del pasillo desde la pared norte, y
 desde la pared oeste. La distancia a la pared sur sale de la salida de cada piso. En el piso 3 la salida
 (x = 22,10) está a 3,23 m de la pared sur; en el piso 4 (x = 24,45), a 1,00 m. Se mide desde la pared más cercana.
 
@@ -159,7 +159,7 @@ Cierre: ocho cruces, cada una fotografiada con la cinta en el cuadro.
 | Paso | Qué | Comando o acción | Esperado | Si falla |
 |---|---|---|---|---|
 | 1 | Confirmar el sitio | Deepy en la salida del piso 3, racey en la del piso 4, los dos mirando al norte | Los dos en su marca de salida | No se arranca con un mapa que no es del sitio |
-| 2 | Red | `ping -c 3 192.168.0.102` y `ping -c 3 192.168.0.104`; el portátil en `192.168.0.105` | Respuesta de los dos, sin duplicados | [`TOPOLOGIA_RED.md`](TOPOLOGIA_RED.md) |
+| 2 | Red | `ping -c 3 192.168.0.102` y `ping -c 3 192.168.0.104`; el portátil en `192.168.0.105` | Respuesta de los dos, sin duplicados | [`TOPOLOGIA_RED.md`](../TOPOLOGIA_RED.md) |
 | 3 | Vehículos iguales al repositorio | `bash herramientas/nivelar_carros.sh` | `Los vehiculos estan nivelados con el repositorio.` | `--copiar` |
 | 4 | Las dos cadenas, a la vez | deepy: `NS=robot1 IMU=true MARGEN=0.5 CARRO=192.168.0.102 MAPA=/home/deepracer/tesis/piso3.yaml POSE_X=22.10 POSE_Y=1.06 POSE_YAW=3.1416 bash herramientas/nav2_mapa_guardado.sh`; racey: `NS=robot2 IMU=true MARGEN=0.5 CARRO=192.168.0.104 MAPA=/home/deepracer/tesis/piso4.yaml POSE_X=24.45 POSE_Y=1.21 POSE_YAW=3.1416 bash herramientas/nav2_mapa_guardado.sh` (ruta fija del vehículo) | `CADENA LISTA` en los dos en unos 4 a 4,5 min, con los seis nodos `active` | El aviso en rojo dice la pieza. LiDAR sin barridos: `sudo systemctl restart deepracer-core` en el vehículo y repetir |
 | 5 | Un agente en cada vehículo | La orden de [`PLAN_S26.md`](PLAN_S26.md) §4.2, paso 3, en los dos | `/tmp/agente.log` con `publicando estado a 2.0 Hz` y el mapa de la media vuelta cargado | Revisar que `/tmp/nav2_campo/pares.sh` tenga la IP del portátil |
@@ -232,7 +232,7 @@ El n de G-6 es el número de misiones corridas del listado, con su resultado.
 |---|---|---|
 | 1 | Componer los registros que falten (§4.1) | Un JSON por misión en `Documentos/Evidencia/registros/` |
 | 2 | `python3 herramientas/analizar_campana.py Documentos/Evidencia/registros --campana RF27 --json Documentos/Evidencia/S27_metricas_rf27.json` | `VEREDICTO: VALIDA` y las cuatro métricas del banco físico |
-| 3 | Acta: estado de G-5 y G-6 con su n real ([`ACTA_GO_NOGO.md`](ACTA_GO_NOGO.md) §4.1, resultados declarados) | — |
+| 3 | Acta: estado de G-5 y G-6 con su n real ([`ACTA_GO_NOGO.md`](../ACTA_GO_NOGO.md) §4.1, resultados declarados) | — |
 
 ### 3.3 · Corte semanal
 
@@ -264,12 +264,12 @@ La misión se anota en la hoja y su registro queda pendiente.
 
 | Qué | Dónde | Estado |
 |---|---|---|
-| Evidencia del 8-oct: piso 3 con deepy (cinco corridas), primeras medias vueltas del agente (160° y 167°) e intento de G-5 con la saturación de las tarjetas | [`S26_piso3_deepy_y_saturacion.md`](Evidencia/S26_piso3_deepy_y_saturacion.md) | Hecha el 13-oct con los registros del portátil; las grabaciones de deepy se agregan el viernes |
+| Evidencia del 8-oct: piso 3 con deepy (cinco corridas), primeras medias vueltas del agente (160° y 167°) e intento de G-5 con la saturación de las tarjetas | [`S26_piso3_deepy_y_saturacion.md`](../Evidencia/S26_piso3_deepy_y_saturacion.md) | Hecha el 13-oct con los registros del portátil; las grabaciones de deepy se agregan el viernes |
 | Estado del 8-oct en `PLAN_S26.md` §3.4 | `PLAN_S26.md` | Hecho el 13-oct |
 | Videos del 7-oct | `S26_piso4_cadena_media_vuelta.md`, punto 4 | Los sube el equipo |
 | Documento final: capítulo 7 (IMU, media vuelta, coordinador en el portátil, aislamiento) y capítulo 8 (G-2 con el filtro, G-3, carga de las tarjetas) | `DocumentoFinal/capitulos/` | Hecho el 13-oct (`3edf3a3`), sin compilar; G-5 y G-6 después del viernes |
-| Matriz de requisitos: RF-11 a RF-14 y RF-16 con la evidencia de campo de G-2, G-3 y del laboratorio del 9-oct | [`REQUISITOS.md`](REQUISITOS.md), revisión del 15 de octubre en el §3 | Hecha el 15-oct: los cinco verificados y OE2 en 100 %, con dos decisiones del equipo (RF-12 y RF-14) |
-| Capturas de las semanas 10 a 25, con su uso en el documento final | [`CAPTURAS_POR_FASE.md`](Evidencia/CAPTURAS_POR_FASE.md) | Hecho el 15-oct (`766186d`) |
+| Matriz de requisitos: RF-11 a RF-14 y RF-16 con la evidencia de campo de G-2, G-3 y del laboratorio del 9-oct | [`REQUISITOS.md`](../REQUISITOS.md), revisión del 15 de octubre en el §3 | Hecha el 15-oct: los cinco verificados y OE2 en 100 %, con dos decisiones del equipo (RF-12 y RF-14) |
+| Capturas de las semanas 10 a 25, con su uso en el documento final | [`CAPTURAS_POR_FASE.md`](../Evidencia/CAPTURAS_POR_FASE.md) | Hecho el 15-oct (`766186d`) |
 | Conclusiones y presentación (cronograma de S27) | `DocumentoFinal/capitulos/09-conclusiones.tex` | Después del corte C-3 |
 
 ## 6. Riesgos y salidas

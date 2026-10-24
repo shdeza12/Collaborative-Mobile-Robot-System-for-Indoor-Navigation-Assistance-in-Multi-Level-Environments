@@ -1,7 +1,7 @@
 # S24 · Los tres mapas del cuarto sobre hardware, y la medida que se sale del cuarto
 
 **Fecha:** 2026-09-24 · **Vehículos:** `amss-jgm9` (`.101`) y `amss-ez9n` (`.102`)
-**Origen:** los peldaños 4 y 5 de [`GUION_NAV2_HARDWARE.md`](../GUION_NAV2_HARDWARE.md), la primera
+**Origen:** los peldaños 4 y 5 de [`GUION_NAV2_HARDWARE.md`](../historial/GUION_NAV2_HARDWARE.md), la primera
 vez que la cadena `slam_toolbox` publica `/map` sobre el vehículo real.
 
 ## 1. Por qué existe este documento

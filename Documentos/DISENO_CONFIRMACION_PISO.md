@@ -202,4 +202,4 @@ diseño, no una anomalía del banco: la condición D-C4 existe precisamente para
 ## 6. Plan de implementación
 
 Las siete tareas, con los archivos exactos y los comandos de verificación de cada paso, están
-en `Documentos/PLAN_RF28_CONFIRMACION.md`.
+en `Documentos/historial/PLAN_RF28_CONFIRMACION.md`.

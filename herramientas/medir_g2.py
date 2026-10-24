@@ -9,7 +9,7 @@ Las dos cifras con las que se decide el G2, definidas en la enmienda del
     M1  desplazamiento que registra /odom  /  desplazamiento real medido con cinta
     M2  error de /amcl_pose contra la marca de cinta al final de la recta
 
-El procedimiento entero esta en Documentos/GUIA_PASADA_LOCALIZACION.md. Esta
+El procedimiento entero esta en Documentos/historial/GUIA_PASADA_LOCALIZACION.md. Esta
 herramienta es su Paso 5.
 
 DE DONDE SALEN LAS DOS PARADAS

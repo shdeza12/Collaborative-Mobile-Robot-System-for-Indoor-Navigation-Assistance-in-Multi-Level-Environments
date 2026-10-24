@@ -1332,7 +1332,7 @@ lanzarla por la acción dejaría sin probar el único camino nuevo.
 > `S22_RF28_AV3`, `S22_RF28_BV3`, `S22_RF28_CV3`. Las dos primeras tandas destaparon los tres
 > defectos que corrigió `03c68c6` y no sirven como evidencia. **En todos los comandos de esta
 > sección y de la §7.4, `S22_RF28_$n` es en realidad `S22_RF28_${n}V3`.** El resultado está en
-> [`Evidencia/S22_RF28_confirmacion.md`](Evidencia/S22_RF28_confirmacion.md).
+> [`Evidencia/S22_RF28_confirmacion.md`](../Evidencia/S22_RF28_confirmacion.md).
 
 Cada corrida: bag nuevo, nombre nuevo, y `Ctrl-C` del grabador al terminar. Terminal 4, antes de
 lanzar cada misión:

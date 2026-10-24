@@ -80,7 +80,7 @@ los registros entregados y reescribirles el commit.
 
 **(a) Tres misiones se corrieron dos veces.** Los registros entregados de las misiones 13, 22 y 28
 son `S21_OE4_13_2`, `S21_OE4_22_2` y `S21_OE4_28_2`; la hoja de corridas
-([`HOJA_CORRIDAS_OE4.md`](HOJA_CORRIDAS_OE4.md)) las planificaba sin sufijo. Lo que los datos dicen
+([`HOJA_CORRIDAS_OE4.md`](historial/HOJA_CORRIDAS_OE4.md)) las planificaba sin sufijo. Lo que los datos dicen
 con certeza: las tres se ejecutaron **consecutivas al final de la jornada** —17:47, 17:51 y 17:55
 UTC— y con un commit **distinto** al del resto de la tanda, `22c5f07` frente a `0e2b46c`. El motivo
 de la repetición **no consta en el repositorio**, y ninguna de las tres quedó marcada como descarte.
@@ -454,16 +454,16 @@ sobre los vehículos reales. Tres cosas que esta campaña deja pedidas, en orden
    cota, y conviene fijarla **antes** de correr —como se hizo aquí— y no después.
 
 El resto de lo que bloquea RF-27 no es de medición sino de plataforma, y está acotado en
-[`MAPA_TRABAJO_RESTANTE.md`](MAPA_TRABAJO_RESTANTE.md): la ruta crítica es publicar `odom → base_link`
+[`MAPA_TRABAJO_RESTANTE.md`](historial/MAPA_TRABAJO_RESTANTE.md): la ruta crítica es publicar `odom → base_link`
 en el vehículo.
 
 **Actualización del 2026-09-25.** Esa ruta crítica ya no lo es: `rf2o` publica y mide sobre el
 vehículo desde el 24-sep, y esa misma noche Nav2 navegó el carro sobre un mapa guardado
 ([`S24_nav2_navegacion_mapa_guardado.md`](Evidencia/S24_nav2_navegacion_mapa_guardado.md)). El
 procedimiento de las compuertas previas, G-2 y G-3, está en
-[`GUIA_CAMPANA_NAV2_HARDWARE.md`](GUIA_CAMPANA_NAV2_HARDWARE.md). **No es la campaña de RF-27**, que
+[`GUIA_CAMPANA_NAV2_HARDWARE.md`](historial/GUIA_CAMPANA_NAV2_HARDWARE.md). **No es la campaña de RF-27**, que
 pide el protocolo completo sobre los dos carros y va en S27 según
-[`PLAN_S25.md`](PLAN_S25.md); pero deja probadas dos de las tres cosas de arriba, que la campaña
+[`PLAN_S25.md`](historial/PLAN_S25.md); pero deja probadas dos de las tres cosas de arriba, que la campaña
 heredará: la verdad de terreno la da el **flexómetro**, que resuelve al medio centímetro —cinco veces
 más fino que los 2,5 cm que pide el punto 2—, y cada corrida deja en su registro, como columnas
 numéricas, el error de llegada según AMCL, según `/odom` y según la cinta, que es el campo del
@@ -491,6 +491,6 @@ Es una misión de varias metas; la X marca la última.*
 | reproducibilidad bag → registro, 44/44 | [`S23_reproducibilidad_de_los_registros.md`](Evidencia/S23_reproducibilidad_de_los_registros.md) |
 | las 85 cúspides de `S21_OE4_09` | [`S22_R12_85_cuspides.md`](Evidencia/S22_R12_85_cuspides.md) |
 | tolerancias de Nav2 | `Robot/aws-deepracer/deepracer_bringup/config/nav2_params_nav_amcl_sim_demo.yaml` |
-| guion de las corridas | [`HOJA_CORRIDAS_OE4.md`](HOJA_CORRIDAS_OE4.md) |
+| guion de las corridas | [`HOJA_CORRIDAS_OE4.md`](historial/HOJA_CORRIDAS_OE4.md) |
 | escalones, huecos, correlaciones y desglose por estrato | recalculados sobre los 30 registros el 2026-09-19 |
 | cierre en `FALLIDA`, `SUCCEEDED` y distancias del coordinador | lectura del tópico `/coordinacion/estado_mision` en los bags de `~/tesis_evidencia/`, 2026-09-19 |

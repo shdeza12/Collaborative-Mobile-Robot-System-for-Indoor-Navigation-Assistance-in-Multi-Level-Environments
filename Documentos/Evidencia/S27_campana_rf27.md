@@ -4,7 +4,7 @@ Prueba del protocolo completo en los vehículos. Cada misión se pidió desde la
 coordinador del portátil; la guió el vehículo del piso de origen hasta la escalera, el usuario
 confirmó el cambio de piso y la terminó el vehículo del piso de destino. deepy (`amss-ez9n`) fue
 `robot1` en el piso 3 y racey (`amss-jgm9`) fue `robot2` en el piso 4. El plan del día es el
-[`PLAN_S27.md`](../PLAN_S27.md) §2; el sorteo de las diez misiones, [`campana_rf27_misiones.csv`](campana_rf27_misiones.csv).
+[`PLAN_S27.md`](../historial/PLAN_S27.md) §2; el sorteo de las diez misiones, [`campana_rf27_misiones.csv`](campana_rf27_misiones.csv).
 
 Hubo dos sesiones: la primera (17:38 a 17:56) corrió doce misiones elegidas a criterio por el
 equipo, sin seguir el sorteo, y queda como sesión exploratoria; de ella sale la prueba G-5. La

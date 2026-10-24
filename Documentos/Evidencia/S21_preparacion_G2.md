@@ -127,7 +127,7 @@ producir el mapa; después, una segunda pasada con AMCL contra ese mapa, graband
 jornada perdida.
 
 **La primera pasada ya está escrita paso a paso** en
-[`GUIA_PASADA_MAPEO.md`](../GUIA_PASADA_MAPEO.md), con las tres comprobaciones que habrían visto
+[`GUIA_PASADA_MAPEO.md`](../historial/GUIA_PASADA_MAPEO.md), con las tres comprobaciones que habrían visto
 los tres fallos del 28-ago antes de recoger. Se decidió **grabar solo `/scan` en el carro y
 levantar el mapa después en el portátil** con
 [`herramientas/mapear_desde_bag.sh`](../../herramientas/mapear_desde_bag.sh): esa cadena está
@@ -189,7 +189,7 @@ arrastre ya declarado *«verificación del mapa físico»*.
 4. Decidir los umbrales del §4 **antes** de salir al pasillo. Fijarlos después de ver el dato es lo
    que el §7 del protocolo prohíbe.
 5. Planificar la mañana como **dos pasadas**: primero el mapa, luego localización con AMCL. La
-   primera está escrita paso a paso en [`GUIA_PASADA_MAPEO.md`](../GUIA_PASADA_MAPEO.md).
+   primera está escrita paso a paso en [`GUIA_PASADA_MAPEO.md`](../historial/GUIA_PASADA_MAPEO.md).
 6. En la pasada de mapeo, **comprobar en el sitio que el sensor se movió**, con
    `python3 herramientas/comprobar_movimiento_bag.py <bag>`, antes de recoger. Es la comprobación
    que faltó el 28-ago y la que convierte una mañana perdida en una repetición de cinco minutos.

@@ -1,6 +1,6 @@
 # Guion de campo — navegación en el edificio de la USTA sobre mapa derivado del modelo
 
-> **Estado al 2026-10-06:** Histórica: escrita el 25-sep para el piso 1. El sitio de pruebas cambió a los pisos 3 y 4 el 5-oct: ver [`GUIA_PISOS_3_Y_4.md`](GUIA_PISOS_3_Y_4.md). Qué seguir para cada tarea: [`INDICE_GUIAS.md`](INDICE_GUIAS.md).
+> **Estado al 2026-10-06:** Histórica: escrita el 25-sep para el piso 1. El sitio de pruebas cambió a los pisos 3 y 4 el 5-oct: ver [`GUIA_PISOS_3_Y_4.md`](../GUIA_PISOS_3_Y_4.md). Qué seguir para cada tarea: [`INDICE_GUIAS.md`](../INDICE_GUIAS.md).
 
 **Fecha de redacción:** 2026-09-25
 **Para quién:** ejecutable por cualquiera de los dos, sin haber estado en la sesión
@@ -9,12 +9,12 @@ del 24-sep por la noche.
 `primer_piso_definitivo`, que se derivó de la geometría del mundo simulado.
 
 **Por qué este guion existe.** La noche del 24-sep quedó demostrado que **Nav2 navega
-sobre un mapa guardado en hardware** ([`S24_nav2_navegacion_mapa_guardado.md`](Evidencia/S24_nav2_navegacion_mapa_guardado.md)):
+sobre un mapa guardado en hardware** ([`S24_nav2_navegacion_mapa_guardado.md`](../Evidencia/S24_nav2_navegacion_mapa_guardado.md)):
 4,837 m recorridos con el plan consumiéndose y la dirección trabajando. Eso abre una
 vía que el proyecto llevaba un mes sin poder recorrer, porque **no necesita SLAM**: si
 hay un mapa válido del pasillo real, se carga y se navega.
 
-Y puede haberlo ya. El §4 de [`ENTORNO_DE_EVALUACION.md`](ENTORNO_DE_EVALUACION.md)
+Y puede haberlo ya. El §4 de [`ENTORNO_DE_EVALUACION.md`](../ENTORNO_DE_EVALUACION.md)
 afirma que `primer_piso_v2.world` *«corresponde a la primera planta del edificio de la
 USTA»* y que *«el segundo piso real del edificio es idéntico al primero»*.
 
@@ -225,7 +225,7 @@ la prueba de no divergencia pueda comparar los dos archivos enteros»*:
 | `yaml_filename` | `primer_piso_definitivo.yaml` | la **ruta absoluta** al mapa en la tarjeta |
 | `scan_topic` (amcl) | `scan` | **`/rplidar_ros/scan`** |
 
-La herramienta [`herramientas/nav2_mapa_guardado.sh`](../herramientas/nav2_mapa_guardado.sh)
+La herramienta [`herramientas/nav2_mapa_guardado.sh`](../../herramientas/nav2_mapa_guardado.sh)
 automatiza los cinco pasos en ese orden y deja el sistema listo sin mandar la meta.
 
 ### 3.2 · La pose inicial, y por qué aquí NO se adivina

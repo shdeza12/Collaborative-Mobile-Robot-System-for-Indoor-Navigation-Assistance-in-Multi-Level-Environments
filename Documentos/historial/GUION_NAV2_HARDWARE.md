@@ -1,6 +1,6 @@
 # Guion de campo — Nav2 sobre el vehículo real
 
-> **Estado al 2026-10-06:** Histórica: escrita el 24-sep para subir los peldaños 4 a 7 de Nav2 sobre hardware, que ya están superados. Qué seguir para cada tarea: [`INDICE_GUIAS.md`](INDICE_GUIAS.md).
+> **Estado al 2026-10-06:** Histórica: escrita el 24-sep para subir los peldaños 4 a 7 de Nav2 sobre hardware, que ya están superados. Qué seguir para cada tarea: [`INDICE_GUIAS.md`](../INDICE_GUIAS.md).
 
 **Fecha de redacción:** 2026-09-24
 **Qué aísla:** los peldaños 4 a 7 de la escalera de Nav2 sobre hardware —mapa,
@@ -303,12 +303,12 @@ sin configurar.
 > expira. El mapa está construido y el guardado falla igual.
 >
 > La vía que sí funciona es grabar `/map` en el bag y extraerlo después con
-> [`extraer_mapa.py`](../herramientas/extraer_mapa.py). Además lo hace repetible:
+> [`extraer_mapa.py`](../../herramientas/extraer_mapa.py). Además lo hace repetible:
 > si hay que cambiar un umbral se cambia en el escritorio, sin repetir la salida.
 > Así se recuperó el mapa de 6 m del 24-sep después de que el guardado fallara.
 >
 > Todo ello, junto con otros tres fallos silenciosos de la misma noche, en
-> [`S24_mapeo_6m_hardware.md`](Evidencia/S24_mapeo_6m_hardware.md). Y el
+> [`S24_mapeo_6m_hardware.md`](../Evidencia/S24_mapeo_6m_hardware.md). Y el
 > procedimiento de campo ya corregido, en
 > [`GUION_CAMPO_PISO2.md`](GUION_CAMPO_PISO2.md).
 

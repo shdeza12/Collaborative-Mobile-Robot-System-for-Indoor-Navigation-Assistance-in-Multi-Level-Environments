@@ -104,8 +104,8 @@ Estas ya estaban citadas desde sus informes; se listan para que el índice esté
 
 | Archivo | Qué muestra | Informe que la cita |
 |---|---|---|
-| `S17_dos_gazebo_lado_a_lado.png` | Dos simuladores independientes en paralelo | [`PLAN_S17_S18.md`](../PLAN_S17_S18.md) |
-| `S17_dos_objetivos_succeeded.png` | Los dos robots alcanzando objetivos distintos | [`PLAN_S17_S18.md`](../PLAN_S17_S18.md) |
+| `S17_dos_gazebo_lado_a_lado.png` | Dos simuladores independientes en paralelo | [`PLAN_S17_S18.md`](../historial/PLAN_S17_S18.md) |
+| `S17_dos_objetivos_succeeded.png` | Los dos robots alcanzando objetivos distintos | [`PLAN_S17_S18.md`](../historial/PLAN_S17_S18.md) |
 | `S17_gazebo_robot1_modelo.png` | `robot1` con geometría en Gazebo | [`S17_nav2_namespaces.md`](S17_nav2_namespaces.md) |
 | `S17_rviz_robot1_robotmodel.png` | El mismo modelo en RViz con `TF Prefix: robot1` | [`S17_nav2_namespaces.md`](S17_nav2_namespaces.md) |
 
@@ -135,7 +135,7 @@ Primera evidencia tomada sobre el **vehículo físico** y sobre el **LiDAR real*
 simulación. Sin capturas: los resultados son numéricos y salen de una herramienta versionada, así
 que se pueden volver a producir en vez de mirarse.
 
-Cubre la condición 1 de cierre de [`PLAN_S19.md`](../PLAN_S19.md), que es quien reparte el §S19
+Cubre la condición 1 de cierre de [`PLAN_S19.md`](../historial/PLAN_S19.md), que es quien reparte el §S19
 del cronograma entre los dos últimos días de la semana.
 
 | Archivo | Qué sostiene | Dónde se cita |
@@ -494,4 +494,4 @@ entre al repositorio igual que las capturas de pantalla:
   `SNN_descripcion_corta.png`.
 
 Qué capturar en cada prueba de la semana 26 está en
-[`HOJA_CAPTURA_S26.md`](../HOJA_CAPTURA_S26.md).
+[`HOJA_CAPTURA_S26.md`](../historial/HOJA_CAPTURA_S26.md).

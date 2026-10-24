@@ -2,7 +2,7 @@
 
 Primera sesión con la IMU dentro de la navegación de los vehículos: el nodo `imu_bmi160.py`, el
 filtro EKF de `robot_localization` y rf2o, arrancados con `nav2_hardware.launch.py imu:=true`, sin
-Nav2 y sin mover los vehículos salvo los giros a mano (§2.3 de [`PLAN_S26.md`](../PLAN_S26.md)).
+Nav2 y sin mover los vehículos salvo los giros a mano (§2.3 de [`PLAN_S26.md`](../historial/PLAN_S26.md)).
 Después, un ensayo sin movimiento de la cadena del jueves: agente, coordinador y `rosbridge`
 (§4.2 del plan). Las pruebas del sensor solo están en [`S26_pruebas_imu.md`](S26_pruebas_imu.md);
 aquí se prueba el software que va encima.

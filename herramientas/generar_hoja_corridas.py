@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Genera Documentos/HOJA_CORRIDAS_OE4.md desde el sorteo.
+"""Genera Documentos/historial/HOJA_CORRIDAS_OE4.md desde el sorteo.
 
 POR QUE SE GENERA Y NO SE ESCRIBE A MANO. La primera version llevaba
 marcadores tipo '<BAG>' y el 2026-09-04 costo la campana: '<BAG>' es una
@@ -27,7 +27,7 @@ RAIZ = pathlib.Path(__file__).resolve().parent.parent
 # mismas y ya estan corridas; el original se conserva como evidencia de con que
 # listado se corrieron.
 CSV = RAIZ / "Documentos/Evidencia/campana_oe4_misiones_v2.csv"
-SALIDA = RAIZ / "Documentos/HOJA_CORRIDAS_OE4.md"
+SALIDA = RAIZ / "Documentos/historial/HOJA_CORRIDAS_OE4.md"
 
 PREFIJO_MISION = "S21C"
 

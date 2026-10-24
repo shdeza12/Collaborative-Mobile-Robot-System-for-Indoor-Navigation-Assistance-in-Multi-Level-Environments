@@ -1,6 +1,6 @@
 # Hoja de campo del G2 — la mañana en el pasillo
 
-> **Estado al 2026-10-06:** Histórica: escrita el 3-sep para el G2 del pasillo, anterior al acta. No es la compuerta G-2 de [`ACTA_GO_NOGO.md`](ACTA_GO_NOGO.md). Qué seguir para cada tarea: [`INDICE_GUIAS.md`](INDICE_GUIAS.md).
+> **Estado al 2026-10-06:** Histórica: escrita el 3-sep para el G2 del pasillo, anterior al acta. No es la compuerta G-2 de [`ACTA_GO_NOGO.md`](../ACTA_GO_NOGO.md). Qué seguir para cada tarea: [`INDICE_GUIAS.md`](../INDICE_GUIAS.md).
 
 **Para quien va al pasillo.** Escrita el **2026-09-03 por la noche**, después de una salida de
 prueba que falló, y con lo que se aprendió en ella ya incorporado.
@@ -12,7 +12,7 @@ que siguen siendo la fuente de verdad, y que hay que abrir cuando algo no cuadre
 |---|---|
 | [`GUIA_PASADA_MAPEO.md`](GUIA_PASADA_MAPEO.md) | La primera pasada: levantar el mapa |
 | [`GUIA_PASADA_LOCALIZACION.md`](GUIA_PASADA_LOCALIZACION.md) | La segunda: medir M1 y M2 |
-| [`GUIA_TELEOP_MANDO.md`](GUIA_TELEOP_MANDO.md) | El mando, que hace falta en la segunda |
+| [`GUIA_TELEOP_MANDO.md`](../GUIA_TELEOP_MANDO.md) | El mando, que hace falta en la segunda |
 
 Esta hoja te dice **el orden, los tiempos y las tres trampas**. Los porqués, las variantes y el
 diagnóstico completo están allí. Si hay contradicción entre esta hoja y una guía, **manda la
@@ -481,7 +481,7 @@ contra qué localizarse.
 
 ## 8. Bloque 5 — Montar el mando (~20 min)
 
-Guía de localización **Paso 2.3**, que remite a [`GUIA_TELEOP_MANDO.md`](GUIA_TELEOP_MANDO.md),
+Guía de localización **Paso 2.3**, que remite a [`GUIA_TELEOP_MANDO.md`](../GUIA_TELEOP_MANDO.md),
 Partes 1 a 5. Lo que no se puede olvidar:
 
 - El mando va **por USB al carro**, no por Bluetooth al portátil.
@@ -562,10 +562,10 @@ Primero `get_mapped_throttle` categoriza `|v| / MAX_SPEED` con `MAX_SPEED = 4,0 
 > **Corregido el 2026-09-22.** Hasta esa fecha esta tabla daba los escalones **nominales** —0,5 ·
 > 0,8 · 1,0—, que son los que salen del primer paso y **no** los que recibe `servo_pkg`. El
 > reescalado estaba descrito desde el 17-sep en
-> [`S23_campo_traccion_RF14.md`](Evidencia/S23_campo_traccion_RF14.md) §3 y no había llegado aquí.
+> [`S23_campo_traccion_RF14.md`](../Evidencia/S23_campo_traccion_RF14.md) §3 y no había llegado aquí.
 > Los valores reales son un **15 % más bajos**, y esa diferencia es justo la que cruza el umbral de
 > arranque. Razonamiento completo en
-> [`S24_analisis_previo_RF11.md`](Evidencia/S24_analisis_previo_RF11.md) §2.
+> [`S24_analisis_previo_RF11.md`](../Evidencia/S24_analisis_previo_RF11.md) §2.
 
 | Velocidad pedida en `/cmd_vel` | Escalón nominal | **`throttle` que recibe `servo_pkg`** |
 |---|---|---|
@@ -580,7 +580,7 @@ Nav2 pide **0,25 m/s en curva y 0,05 en la aproximación**. Las dos caen en la p
 **Y la velocidad de crucero tampoco sirve, que es peor.** `desired_linear_vel = 0,50 m/s`
 (`nav2_params.yaml`:78) cae en el escalón bajo, **0,4247** — y el `0,50` publicado directo al servo
 **no arrancó ninguna de cinco veces** sobre el suelo
-([`S23_campo_traccion_RF14.md`](Evidencia/S23_campo_traccion_RF14.md) §4). La otra configuración,
+([`S23_campo_traccion_RF14.md`](../Evidencia/S23_campo_traccion_RF14.md) §4). La otra configuración,
 `max_vel_x = 0,26` (`nav2_slam_params.yaml`:70), da un **cero exacto**. Es decir: **con las
 constantes de hoy, las dos configuraciones de Nav2 del repositorio producen un vehículo inmóvil**,
 y ninguna emite error.
@@ -649,7 +649,7 @@ dueños otra vez, no un mando averiado.
 mano daba una nube y no una tabla. Esta hoja lo aceptaba a propósito y anotaba la razón: «la tabla
 fina de escalones sostenidos necesita un nodo que publique un valor fijo con hombre muerto, y eso
 es código que hoy no existe». **Ese código ya existe**:
-[`sostener_traccion.py`](../herramientas/sostener_traccion.py), con 33 comprobaciones en
+[`sostener_traccion.py`](../../herramientas/sostener_traccion.py), con 33 comprobaciones en
 `prueba_sostener_traccion.py`.
 
 Publica un `throttle` **fijo** durante un tiempo **fijo**, con ángulo cero —el mensurando es
@@ -718,9 +718,9 @@ De paso mide por primera vez si el pasillo real es observable: si el vídeo dice
 
 **Qué se busca, en una línea:** la curva `throttle → velocidad real sobre el suelo` entre 0,60 y
 1,00. Es el único dato que falta para decidir el par `(MAX_SPEED, MAX_SPEED_PCT)`
-([`S24_analisis_previo_RF11.md`](Evidencia/S24_analisis_previo_RF11.md) §4 y §5). Hoy el único punto
+([`S24_analisis_previo_RF11.md`](../Evidencia/S24_analisis_previo_RF11.md) §4 y §5). Hoy el único punto
 que existe es `0,60 → menos de 1 m en 4 s`, y `1,00` figura literalmente como **«sin medir»**
-([`S23_campo_traccion_RF14.md`](Evidencia/S23_campo_traccion_RF14.md) §4).
+([`S23_campo_traccion_RF14.md`](../Evidencia/S23_campo_traccion_RF14.md) §4).
 
 #### El error de método que hay que evitar: la inercia se mide sola
 
@@ -803,7 +803,7 @@ decide con los ojos si cabe la siguiente.
 > **Por qué se vuelve a medir el 0,50, que ya estaba medido.** Porque estaba medido **en el otro
 > carro**. El `0.50 → 0 arranques de 5` del §4 de S23 se tomó sobre el `amss-jgm9`, y es el número
 > sobre el que se apoya **todo** el argumento de
-> [`S24_analisis_previo_RF11.md`](Evidencia/S24_analisis_previo_RF11.md): que Nav2 pide 0,50 m/s, que
+> [`S24_analisis_previo_RF11.md`](../Evidencia/S24_analisis_previo_RF11.md): que Nav2 pide 0,50 m/s, que
 > la cadena emite 0,4247 y que por eso el carro no se mueve. Si la curva se levanta sobre el
 > `amss-ez9n`, ese apoyo pertenece a otro vehículo. La calibración de tracción es idéntica en los
 > dos, pero el umbral de arranque no lo fija sólo el PWM: lo fijan el motor, el variador, la batería
@@ -878,11 +878,11 @@ flexómetro.
   como cota inferior, que para decidir si un escalón supera el umbral de arranque sigue bastando.
 
 Estas cinco cifras entran en la tabla del §4 de
-[`S24_analisis_previo_RF11.md`](Evidencia/S24_analisis_previo_RF11.md), que ya tiene calculado qué
+[`S24_analisis_previo_RF11.md`](../Evidencia/S24_analisis_previo_RF11.md), que ya tiene calculado qué
 `throttle` produce cada par `(MAX_SPEED, MAX_SPEED_PCT)`. **La decisión no se toma en el pasillo.**
 
 > **Corrido el 2026-09-22. Resultados en
-> [`S24_campo_traccion_ez9n.md`](Evidencia/S24_campo_traccion_ez9n.md).** Las trece corridas se
+> [`S24_campo_traccion_ez9n.md`](../Evidencia/S24_campo_traccion_ez9n.md).** Las trece corridas se
 > hicieron enteras y sin incidentes, y **la corrida 13 refutó el supuesto del método**: a
 > `throttle 1,00` la ventana \[4 s, 6 s] da 4,250 m/s frente a los 2,900 m/s de la \[2 s, 4 s], así
 > que el vehículo seguía acelerando en el segundo 4 y **de este barrido no sale la curva de
@@ -925,7 +925,7 @@ mapeaste, así que no hace falta uno nuevo. Al bag de **servo** no se le pasa
 `adaptar_bag_jazzy.py`: se apunta directo a su `.mcap` y rosbag2 saca los tópicos del propio
 archivo, que es la salida que ya se usó con `bag_mapa_1456` el 2026-09-01.
 
-[`medir_escala_traccion.py`](../herramientas/medir_escala_traccion.py) empareja el `throttle` con
+[`medir_escala_traccion.py`](../../herramientas/medir_escala_traccion.py) empareja el `throttle` con
 la velocidad que salió de la odometría, saca el **umbral de arranque** y el **`MAX_SPEED`
 implícito**, y decide entre las tres filas del §10.4 sin que nadie tenga que interpretarlas.
 

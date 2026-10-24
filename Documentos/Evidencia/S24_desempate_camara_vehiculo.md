@@ -1,6 +1,6 @@
 # La tarjeta sí publica imagen, pero a 160 × 120 y sin calibrar
 
-**Fecha:** 2026-09-21 · **Cierre del Bloque 0 de [`MAPA_TRABAJO_RESTANTE.md`](../MAPA_TRABAJO_RESTANTE.md)**
+**Fecha:** 2026-09-21 · **Cierre del Bloque 0 de [`MAPA_TRABAJO_RESTANTE.md`](../historial/MAPA_TRABAJO_RESTANTE.md)**
 
 ## 0. La pregunta que decidía tres semanas
 
@@ -31,7 +31,7 @@ No se ha comprobado que la identidad compartida cause daño —Fast DDS deriva l
 participantes principalmente de la MAC, y esas sí difieren— pero queda anotada como primera
 hipótesis a revisar si el descubrimiento entre vehículos falla de forma inexplicable.
 
-**Batería medida, no supuesta** (§4.5 de [`HOJA_CAMPO_SEGUNDO_DEEPRACER.md`](../HOJA_CAMPO_SEGUNDO_DEEPRACER.md)):
+**Batería medida, no supuesta** (§4.5 de [`HOJA_CAMPO_SEGUNDO_DEEPRACER.md`](../historial/HOJA_CAMPO_SEGUNDO_DEEPRACER.md)):
 `level = 7` en los dos, frente al 10 que dio uno recién cargado el 2026-09-08. Suficiente para esta
 sesión, que no mueve motores ni exige LiDAR.
 
@@ -58,7 +58,7 @@ contra un grafo que no cambiaba. Preguntar por la cámara sin estabilizar el dem
 **falso negativo** que habría decidido tres semanas en falso.
 
 Con el demonio levantado, tres lecturas seguidas por carro: **21, 21, 21 en los dos.** Estable, que
-es el criterio; pero **21 y no los 22** documentados en [`GUIA_PASADA_MAPEO.md`](../GUIA_PASADA_MAPEO.md)
+es el criterio; pero **21 y no los 22** documentados en [`GUIA_PASADA_MAPEO.md`](../historial/GUIA_PASADA_MAPEO.md)
 §2.5. La lista de hoy no contiene `/camera_pkg/video_mjpeg`, que el Bloque 0 preveía encontrar; no
 se ha establecido si ese es el tópico que falta respecto a la medición anterior, y no se supone.
 
@@ -265,4 +265,4 @@ La pieza 3 del §2.2 no se resuelve con `push_ros_namespace`; exige tocar estos 
 | `camera_resize`, remapeos absolutos, bloque libcamera | `deepracer_launcher.py`, hallado con `find /opt -name 'deepracer_launcher.py'` |
 | Batería de cierre `level = 7` en ambos | mismo servicio aislado, al terminar la sesión |
 | Dominio 0 y separación por namespaces | [`GUIA_EJECUCION.md`](../GUIA_EJECUCION.md) §«RViz de cada uno», decisión del 2026-08-30 |
-| Indeterminismo de `topic list` sin demonio | [`GUIA_PASADA_MAPEO.md`](../GUIA_PASADA_MAPEO.md) §2.5, tabla de 2, 10 y 17 |
+| Indeterminismo de `topic list` sin demonio | [`GUIA_PASADA_MAPEO.md`](../historial/GUIA_PASADA_MAPEO.md) §2.5, tabla de 2, 10 y 17 |

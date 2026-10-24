@@ -1,6 +1,6 @@
 # Ensayo de B0 con `amss-jgm9` (29 de septiembre)
 
-Registro del ensayo B0 de [`PLAN_S25.md`](../PLAN_S25.md), hecho antes de la sesión de compuertas
+Registro del ensayo B0 de [`PLAN_S25.md`](../historial/PLAN_S25.md), hecho antes de la sesión de compuertas
 G-2 y G-3. Lo ejecutó Claude por SSH desde el portátil, a petición de Santiago; las observaciones del
 movimiento y las medidas con flexómetro las hicieron Santiago y Jonny junto al vehículo.
 

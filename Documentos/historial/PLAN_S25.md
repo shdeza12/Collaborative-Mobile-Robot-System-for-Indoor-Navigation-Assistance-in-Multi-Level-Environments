@@ -19,12 +19,12 @@ lleva más riesgo.
 | Día | Bloque | Qué | Quién (propuesta) | ¿Carros? |
 |---|---|---|---|---|
 | Lun 28 | F | Hecho: las tres decisiones, acordadas con el director Armando Mateus (acta §6.1) | Santiago | no |
-| Lun 28 | A | Hecho: los dos carros aislados, A1 a A5 en verde ([registro](Evidencia/S25_aislamiento_dos_carros.md)) | Santiago y Jonny | los dos |
+| Lun 28 | A | Hecho: los dos carros aislados, A1 a A5 en verde ([registro](../Evidencia/S25_aislamiento_dos_carros.md)) | Santiago y Jonny | los dos |
 | Lun 28 – mar 29 | **C** | Hecho (C1): la pila con espacio de nombres, en el escritorio, con su prueba | Santiago | no |
 | Lun 28 – mié 30 | **D** | Red entre pisos, con un carro en cada piso | Jonny | los dos |
-| Mar 29, mañana | **B0** | Ensayo en el laboratorio. Hecho a medias: L2 y L3 con `amss-jgm9`; L1 y el L2 de `amss-ez9n` pendientes, sin batería de tracción ([registro](Evidencia/S25_ensayo_laboratorio.md)) | Santiago y Jonny | los dos, uno cada vez |
-| **Mar 29, noche** | **B** | **Sesión de compuertas G-2 y G-3**: intentada con `amss-ez9n`, sin cerrar ([registro](Evidencia/S25_campana_c1_deepy.md)); se repite el miércoles | Santiago | uno |
-| Mié 30, noche | **B-bis** | G-2 y G-3 en el hall del extremo oeste del piso 2, con `amss-jgm9`: sin cerrar; dos llegadas medidas a 1,43 y 1,26 m ([registro](Evidencia/S25_pasillo_piso2_amss-jgm9.md)) | Santiago | uno |
+| Mar 29, mañana | **B0** | Ensayo en el laboratorio. Hecho a medias: L2 y L3 con `amss-jgm9`; L1 y el L2 de `amss-ez9n` pendientes, sin batería de tracción ([registro](../Evidencia/S25_ensayo_laboratorio.md)) | Santiago y Jonny | los dos, uno cada vez |
+| **Mar 29, noche** | **B** | **Sesión de compuertas G-2 y G-3**: intentada con `amss-ez9n`, sin cerrar ([registro](../Evidencia/S25_campana_c1_deepy.md)); se repite el miércoles | Santiago | uno |
+| Mié 30, noche | **B-bis** | G-2 y G-3 en el hall del extremo oeste del piso 2, con `amss-jgm9`: sin cerrar; dos llegadas medidas a 1,43 y 1,26 m ([registro](../Evidencia/S25_pasillo_piso2_amss-jgm9.md)) | Santiago | uno |
 | Mar 29 – mié 30 | **B2** | Pasillo liso con los dos carros: odometría contra cinta, como caracterización | Santiago y Jonny | **los dos** |
 | Mié 30 | **C** | Un carro navega con espacio de nombres | Santiago | uno |
 | Jue 1 | **C + E** | Los dos carros a la vez; coordinador e interfaz en un carro | los dos | **los dos** |
@@ -50,11 +50,11 @@ lleva más riesgo.
 ## 1. Bloque A — aislar los dos carros (lunes; cerrado el 28-sep)
 
 **Cerrado el lunes 28:** A1 a A5 en verde en los dos carros. Registro en
-[`S25_aislamiento_dos_carros.md`](Evidencia/S25_aislamiento_dos_carros.md).
+[`S25_aislamiento_dos_carros.md`](../Evidencia/S25_aislamiento_dos_carros.md).
 
 **Por qué primero:** con los dos carros encendidos, una orden mueve los dos y la odometría de cada uno
 recibe el láser del otro. Sin esto no hay sistema real. El diseño y su justificación están en
-[`DISENO_AISLAMIENTO_DOS_CARROS.md`](DISENO_AISLAMIENTO_DOS_CARROS.md); el mecanismo ya pasó **9 de 9**
+[`DISENO_AISLAMIENTO_DOS_CARROS.md`](../DISENO_AISLAMIENTO_DOS_CARROS.md); el mecanismo ya pasó **9 de 9**
 en el portátil. Falta confirmarlo en Jazzy y con el servicio de AWS.
 
 **Regla de seguridad del bloque: ruedas en el aire** —el carro sobre una caja— en todo lo que
@@ -128,7 +128,7 @@ corre en un carro cada vez; el otro puede quedar encendido.
 > **Estado, 29-sep.** L2 y L3 se hicieron con `amss-jgm9`; `amss-ez9n` no tenía batería de tracción.
 > L3 dejó tres arreglos (la banda muerta del puente, el controlador a 10 Hz y el latido del gestor a
 > 20 s) y un límite: con el mapa de una sola pasada, AMCL no se localizó. L1 queda para cuando los dos
-> carros tengan batería. Registro: [`S25_ensayo_laboratorio.md`](Evidencia/S25_ensayo_laboratorio.md).
+> carros tengan batería. Registro: [`S25_ensayo_laboratorio.md`](../Evidencia/S25_ensayo_laboratorio.md).
 
 **L1 · La interferencia de la pila, medida (10 min, ruedas en el aire)**
 
@@ -191,12 +191,12 @@ tramo encajonado del piso 2, con `amss-jgm9` (`amss-ez9n` sin batería de tracci
 > la computadora): una llegó pero se pasó 1,134 m según `/odom`, dos abortaron antes de moverse por
 > dos defectos corregidos esa noche (el plazo de `bt_navigator` y la pose inicial de
 > `corrida_nav2.py`), y la cuarta no se detuvo por un salto de la odometría. Ninguna tiene medida de
-> flexómetro. Se repite el miércoles 30. Registro: [`S25_campana_c1_deepy.md`](Evidencia/S25_campana_c1_deepy.md).
+> flexómetro. Se repite el miércoles 30. Registro: [`S25_campana_c1_deepy.md`](../Evidencia/S25_campana_c1_deepy.md).
 
 ### B-bis · G-2 y G-3 en el pasillo real del piso 2, con el mapa del modelo (miércoles 30)
 
 **Por qué cambia el sitio.** La sesión del 29-sep corrió sobre el mapa S24 en un pasillo que no era
-el de ese mapa y no vale ([`S25_campana_c1_deepy.md`](Evidencia/S25_campana_c1_deepy.md)). El 29-sep
+el de ese mapa y no vale ([`S25_campana_c1_deepy.md`](../Evidencia/S25_campana_c1_deepy.md)). El 29-sep
 se decidió hacer G-2 y G-3 en los pasillos reales del modelo, que es además el sitio que fijó el
 director (acta §6.1), navegando sobre `mundo_definitivo_piso2`, que tiene las medidas del edificio.
 Los vehículos no han estado todavía en esos pasillos: esta es la primera vez.
@@ -205,7 +205,7 @@ Los vehículos no han estado todavía en esos pasillos: esta es la primera vez.
 `x = −17,28` a `x = 23,16` en todo el ancho del carro (`zona_libre_mapa.py --y -4.5`). Salida en
 `x = −12,0`, meta en `x = −7,0`: 5 m de avance que empiezan 2 m al este de la apertura al hall
 (`x = −14,1`), donde el láser todavía ve el hall detrás. Figura:
-[`S25_mapa_piso2_salida_A.png`](Evidencia/S25_mapa_piso2_salida_A.png).
+[`S25_mapa_piso2_salida_A.png`](../Evidencia/S25_mapa_piso2_salida_A.png).
 
 | Paso | Qué | Comando o acción | Esperado | Si falla | Cierre |
 |---|---|---|---|---|---|
@@ -229,7 +229,7 @@ La escala es 0,9 en los dos: con menos, `amss-jgm9` no arranca (29-sep). Si una 
 > G-2 y G-3 siguen abiertas. Se corrigieron la odometría invertida de rf2o (parche), el margen de
 > llegada de Nav2 (1,0 m) y el ancho del hall en el modelo (3,40 m). No se navega hacia la escalera
 > hasta resolver el error longitudinal de AMCL en el hall (2,62 m en p2r_05). El sitio de la próxima
-> sesión está por decidir ([registro](Evidencia/S25_pasillo_piso2_amss-jgm9.md)).
+> sesión está por decidir ([registro](../Evidencia/S25_pasillo_piso2_amss-jgm9.md)).
 
 ### B2 · El pasillo liso, con los dos carros (martes después de B, o miércoles)
 
@@ -262,15 +262,15 @@ marco `robotN/map`. Toda la navegación de esta semana corrió **sin** espacio d
 
 > **Estado, 29-sep: hecho.** `nav2_hardware.launch.py` admite `namespace:=robotN`,
 > `nav2_mapa_guardado.sh` admite `NS=robotN` y `correr_corrida_nav2.sh` graba los tópicos del `--ns`
-> que recibe. [`prueba_nav2_hardware_ns.py`](../herramientas/prueba_nav2_hardware_ns.py) lanza el
+> que recibe. [`prueba_nav2_hardware_ns.py`](../../herramientas/prueba_nav2_hardware_ns.py) lanza el
 > lanzador en el portátil: con `robot2`, todos los nodos bajo `/robot2`, los YAML anidados y los
 > marcos prefijados; sin espacio de nombres, cada nodo y cada parámetro igual que en el commit
 > `6ef1642` (39 comprobaciones; con el lanzador de `6ef1642` fallan 10). El script de arranque, corrido
 > con un `ssh` simulado, manda sin `NS` las mismas 23 órdenes que antes. `amcl` bajo `/robot2` lee el
 > YAML anidado (comprobado en el portátil con un valor centinela). Falta C2 en el vehículo.
 
-Lo que hay que cambiar, en [`nav2_hardware.launch.py`](../Robot/aws-deepracer/deepracer_bringup/launch/nav2_hardware.launch.py)
-y en [`nav2_mapa_guardado.sh`](../herramientas/nav2_mapa_guardado.sh):
+Lo que hay que cambiar, en [`nav2_hardware.launch.py`](../../Robot/aws-deepracer/deepracer_bringup/launch/nav2_hardware.launch.py)
+y en [`nav2_mapa_guardado.sh`](../../herramientas/nav2_mapa_guardado.sh):
 
 - Un argumento `namespace`, que meta todos los nodos bajo `/robotN`.
 - **Prefijo `robotN/` en los marcos** que son nuestros —`map`, `odom`, `base_link`— y en los de la
@@ -279,7 +279,7 @@ y en [`nav2_mapa_guardado.sh`](../herramientas/nav2_mapa_guardado.sh):
   no se puede cambiar. En la TF privada de cada carro no choca con el otro.
 - El puente de servos, con espacio de nombres y `-r /cmd_vel:=/robotN/cmd_vel`: su suscripción es
   absoluta y, sin el remapeo, los dos puentes escucharían el mismo `/cmd_vel`.
-- [`correr_corrida_nav2.sh`](../herramientas/correr_corrida_nav2.sh) graba `/odom`, `/cmd_vel`, `/plan`,
+- [`correr_corrida_nav2.sh`](../../herramientas/correr_corrida_nav2.sh) graba `/odom`, `/cmd_vel`, `/plan`,
   `/amcl_pose`… **sin** espacio de nombres: con `/robot2` el bag saldría sin ellos y sin avisar. Tiene
   que grabar los del espacio de nombres que se le pase.
 
@@ -348,13 +348,13 @@ al lunes 5.
 ## 6. Bloque F — decisiones del director (resuelto el lunes 28)
 
 Los tres puntos se trataron directamente con el director, Armando Mateus, el 28-sep, en lugar de
-enviar el mensaje escrito. Lo acordado quedó en el §6.1 de [`ACTA_GO_NOGO.md`](ACTA_GO_NOGO.md):
+enviar el mensaje escrito. Lo acordado quedó en el §6.1 de [`ACTA_GO_NOGO.md`](../ACTA_GO_NOGO.md):
 
 | # | Decisión | Lo acordado |
 |---|---|---|
 | 1 | Sitio de la etapa 3 | Se mantienen los pasillos reales del edificio, los mismos de la simulación. Si aparecen novedades, por ejemplo en la red entre pisos, se ven cambios y adaptaciones con él |
 | 2 | N de RF-27 | Sin número fijo: se elige según cómo salgan las primeras corridas del sistema completo |
-| 3 | Tolerancia de llegada | 0,5 m en los vehículos reales; la simulación conserva 0,25 m. Enmienda en el §3.3 de [`PROTOCOLO_EXPERIMENTAL.md`](PROTOCOLO_EXPERIMENTAL.md) |
+| 3 | Tolerancia de llegada | 0,5 m en los vehículos reales; la simulación conserva 0,25 m. Enmienda en el §3.3 de [`PROTOCOLO_EXPERIMENTAL.md`](../PROTOCOLO_EXPERIMENTAL.md) |
 
 ---
 
@@ -362,7 +362,7 @@ enviar el mensaje escrito. Lo acordado quedó en el §6.1 de [`ACTA_GO_NOGO.md`]
 
 | | Qué | Dónde queda |
 |---|---|---|
-| 1 | **G-2 y G-3 declarados**, con cifras, en la tabla del §4.1 del acta | [`ACTA_GO_NOGO.md`](ACTA_GO_NOGO.md) |
+| 1 | **G-2 y G-3 declarados**, con cifras, en la tabla del §4.1 del acta | [`ACTA_GO_NOGO.md`](../ACTA_GO_NOGO.md) |
 | 2 | **Si alguna no se alcanzó**, se aplica lo escrito: NO-GO, RF-27 no alcanzable, la evidencia queda en la campaña de simulación. **No se reinterpreta el criterio** | ídem |
 | 3 | **Decidir si S26 va con dos carros** (bloque A y C3 en verde) **o con el repliegue de uno** | [`MAPA_TRABAJO_RESTANTE.md`](MAPA_TRABAJO_RESTANTE.md) §0 |
 | 4 | Corte semanal: `ESTADO.md`, entregable de S25 en `.tex` y `.md`, commit | `ESTADO.md`, `Documentos/Entregables/` |
@@ -371,7 +371,7 @@ enviar el mensaje escrito. Lo acordado quedó en el §6.1 de [`ACTA_GO_NOGO.md`]
 > equipo aprobaron los directores y los evaluadores. G-2 cumple en las dos corridas medidas del piso
 > 4 (+3,3 % y −4,6 %); G-3 no (0,57 y 0,62 m). La declaración en el acta, el registro del cambio de
 > sitio y el entregable de S25 quedan pendientes
-> ([registro](Evidencia/S25_pisos34_campo.md)).
+> ([registro](../Evidencia/S25_pisos34_campo.md)).
 
 ---
 

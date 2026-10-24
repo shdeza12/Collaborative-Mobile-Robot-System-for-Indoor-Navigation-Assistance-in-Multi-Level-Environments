@@ -4,7 +4,7 @@
 POR QUE EXISTE
 --------------
 Con `imu:=true`, `nav2_hardware.launch.py` pone un EKF de `robot_localization`
-entre rf2o y Nav2 (Documentos/PLAN_S26.md §2.3). Lo que el filtro toma de cada
+entre rf2o y Nav2 (Documentos/historial/PLAN_S26.md §2.3). Lo que el filtro toma de cada
 fuente lo deciden unas listas de quince booleanos en `parametros_ekf`, y un
 error en ellas no da ningun aviso: el filtro arranca, publica `odom` y el rumbo
 sale de donde no debe. El caso que importa es el rumbo de rf2o, que llega con

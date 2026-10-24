@@ -8,7 +8,7 @@ que [`PLAN_S20.md`](PLAN_S20.md) fijó y explicó en su primer párrafo.
 > corrido un día respecto al título. Se reetiquetan del 7 al 13. El contenido de cada jornada no
 > cambia; el colchón pasa de un día a dos (sábado 12 y domingo 13).
 
-Manda el [cronograma S17–S32](CRONOGRAMA_S17_S32.md) §S22. Este documento **no lo reinterpreta**:
+Manda el [cronograma S17–S32](../CRONOGRAMA_S17_S32.md) §S22. Este documento **no lo reinterpreta**:
 reordena la semana dentro de él, y el único cambio de fondo —adelantar el G2 del viernes al martes—
 tiene su motivo escrito en §2.1.
 
@@ -25,7 +25,7 @@ Y fija cuatro actividades: la interfaz web (OE3), la integración de extremo a e
 sobre los vehículos físicos según el resultado del GO/NO-GO, y emitir el entregable de S21.
 
 **De esas cuatro, una ya está hecha y otra no se puede hacer todavía.** El entregable de S21
-([PDF](Entregables/Entregable_semana_21.pdf), 22 páginas) se emitió el 2026-09-05, el mismo día de
+([PDF](../Entregables/Entregable_semana_21.pdf), 22 páginas) se emitió el 2026-09-05, el mismo día de
 la campaña. Y el despliegue sobre los vehículos «según el resultado del go/no-go» no tiene resultado
 que consultar, porque **el GO/NO-GO no está resuelto**.
 
@@ -45,7 +45,7 @@ que sea código nuevo entra ahora o no entra.
 
 ### 1.1 El G2 se cayó del calendario en silencio, y eso es lo primero que hay que arreglar
 
-El [`PLAN` de S21 dentro de `ESTADO.md`](../ESTADO.md) tenía para el viernes 4 por la mañana:
+El [`PLAN` de S21 dentro de `ESTADO.md`](../../ESTADO.md) tenía para el viernes 4 por la mañana:
 
 > *«G2 por la mañana (recta de ≥ 20 m sobre el vehículo) · Bag evaluable contra M1 y M2, y el
 > GO/NO-GO resuelto. **G2 es lo único que impide que el GO/NO-GO de S21 devuelva un GO falso.**»*
@@ -53,7 +53,7 @@ El [`PLAN` de S21 dentro de `ESTADO.md`](../ESTADO.md) tenía para el viernes 4 
 Comprobado el 2026-09-06 contra los archivos, no contra el tablero:
 
 - En `Evidencia/` el último `S21_*` es `S21_metricas_campana_oe4.json`. Existe
-  [`S21_preparacion_G2.md`](Evidencia/S21_preparacion_G2.md) —la preparación— y ningún resultado.
+  [`S21_preparacion_G2.md`](../Evidencia/S21_preparacion_G2.md) —la preparación— y ningún resultado.
 - **No hay ningún M1 ni ningún M2 calculado** en ningún documento del repositorio.
 - En `~/tesis_evidencia/` no hay un solo bag del pasillo posterior al 4-sep: todo lo del 4 y del 5
   son los `S21_OE4_NN` de la campaña, y el primero es del viernes a las 19:21.
@@ -119,8 +119,8 @@ medición o limpieza, y eso sí se puede hacer en S23.
 ## 3. La enmienda de M1 y M2, ya tomada
 
 **Decidida el 2026-09-06, antes de salir al pasillo**, como obliga el §7 del protocolo experimental.
-Queda escrita en el bloque G2 de [`CRONOGRAMA_S17_S32.md`](CRONOGRAMA_S17_S32.md) §S21; el fundamento
-completo está en el §4 de [`S21_preparacion_G2.md`](Evidencia/S21_preparacion_G2.md).
+Queda escrita en el bloque G2 de [`CRONOGRAMA_S17_S32.md`](../CRONOGRAMA_S17_S32.md) §S21; el fundamento
+completo está en el §4 de [`S21_preparacion_G2.md`](../Evidencia/S21_preparacion_G2.md).
 
 | | Antes | Ahora | Función |
 |---|---|---|---|
@@ -203,13 +203,13 @@ powerbank y todo es compilar y hablar por DDS. Sacarla hoy le devuelve media hor
 la jornada apretada.
 
 > **El criterio del martes decía «compila», y eso es una prueba que no puede fallar.** El §5 de
-> [`CONTRATO_INTERFACES.md`](CONTRATO_INTERFACES.md) ya lo había declarado el 2026-08-24, con estas
+> [`CONTRATO_INTERFACES.md`](../CONTRATO_INTERFACES.md) ya lo había declarado el 2026-08-24, con estas
 > palabras: *«generar los headers no prueba que `rmw` transporte igual en las dos distribuciones»*.
 > El criterio bueno es **el round-trip corriendo en la tarjeta**, no el `colcon build` en verde.
 
 > **HECHA el 2026-09-07. 19 de 19 en la tarjeta**, con los 31 puntos, tras compilar en 1 min 31 s
 > sin `stderr`. Evidencia y contexto en
-> [`S22_jazzy_round_trip.txt`](Evidencia/logs/S22_jazzy_round_trip.txt). Los pasos de abajo quedan
+> [`S22_jazzy_round_trip.txt`](../Evidencia/logs/S22_jazzy_round_trip.txt). Los pasos de abajo quedan
 > **reescritos con lo que se hizo de verdad**, no con lo que este plan suponía.
 >
 > **La suposición que falló fue el paso 5.2: `~/deepracer_ws` no existe.** La tarjeta no tenía
@@ -255,7 +255,7 @@ importa no es que el YAML exista en la tarjeta, sino que exista **dos niveles po
   y escucha **dentro de un solo proceso**. Correrla con `sudo` dejaría además ficheros de `root` en
   el workspace del carro.
 - **Criterio de cierre — CUMPLIDO:** la salida de 5.8 está en
-  [`Evidencia/logs/S22_jazzy_round_trip.txt`](Evidencia/logs/S22_jazzy_round_trip.txt) y la línea
+  [`Evidencia/logs/S22_jazzy_round_trip.txt`](../Evidencia/logs/S22_jazzy_round_trip.txt) y la línea
   «Última ejecución en Jazzy» de `prueba_round_trip.py` ya no dice `NUNCA`.
 - **Lo que esta corrida NO cierra, y conviene no afirmar de más:** la prueba publica y escucha en un
   solo proceso, así que **no** demuestra que dos procesos separados en la tarjeta se vean, ni que el
@@ -357,7 +357,7 @@ Tres tareas de tamaño conocido, en orden de valor:
 | # | Tarea | Criterio de cierre |
 |---|---|---|
 | 1 | **`controladores_activos` sale vacío en 30 de 30.** ~~El compositor lo escribe como `{}` mientras el registrador sí lo llena (`registrador.py:268,284`).~~ **Corregido el 2026-09-10 al ir a arreglarlo: esas líneas son `dict(controladores)` sobre un parámetro, y su único llamador (`coordinador.py:289-291`) pasa `controladores={}` con el comentario «los rellena quien lance la campaña». Nadie lo llenaba en ningún sitio.** La causa real es que `ros2 control list_controllers` es un **servicio**, no un tópico: su respuesta no está en el bag ni puede estarlo, así que el compositor no tenía de dónde leerla. Arreglado con el mismo patrón que `rtf.json` y `condicion_inicial.json`: lo mide `grabar_mision.sh` con la pila viva y lo deja en `<bag>/controladores.json`. **Es un campo, y es lo único que mantiene RF-25 en 🟡** | RF-25 pasa a 🟢, con un registro nuevo que traiga `"7/7"` |
-| 2 | ~~**R12 — la misión de 85 cúspides.**~~ **CERRADA el 2026-09-11** ([`S22_R12_85_cuspides.md`](Evidencia/S22_R12_85_cuspides.md)). Estrato B12, contra una mediana de 7 y un máximo de 13 en el resto; el bag estaba conservado y la campaña ya cerrada, así que investigarla no era tocar datos después de verlos. **No era el comprobador de meta:** 8 cúspides de robot1 y 77 de robot2, 59 de ellas en 16 s de la TRANSFERENCIA, con `angular.z` exactamente cero en 308 de 320 comandos. Con el plan reducido a 0,188 m el planificador SE(2) coloca una cúspide a 6,5 mm; `allow_reversing: true` encoge la persecución de 0,600 a 0,0165 m; y la guarda `carrot_dist2 > 0.001` —3,16 cm— de `RegulatedPurePursuitController` 1.1.20 deja la curvatura en cero y **apaga la dirección**. Caso de control en el mismo bag: robot1, cúspide a 91,4 mm, fuera de la guarda, resuelto en 3,5 s. **No se cambia la configuración** y la misión fue un éxito (0,0554 m) | ~~R12 pasa a 🟢 con la causa escrita, o se documenta por qué no se pudo~~ — **cumplido: 🟢 con mecanismo, aritmética y caso de control** |
+| 2 | ~~**R12 — la misión de 85 cúspides.**~~ **CERRADA el 2026-09-11** ([`S22_R12_85_cuspides.md`](../Evidencia/S22_R12_85_cuspides.md)). Estrato B12, contra una mediana de 7 y un máximo de 13 en el resto; el bag estaba conservado y la campaña ya cerrada, así que investigarla no era tocar datos después de verlos. **No era el comprobador de meta:** 8 cúspides de robot1 y 77 de robot2, 59 de ellas en 16 s de la TRANSFERENCIA, con `angular.z` exactamente cero en 308 de 320 comandos. Con el plan reducido a 0,188 m el planificador SE(2) coloca una cúspide a 6,5 mm; `allow_reversing: true` encoge la persecución de 0,600 a 0,0165 m; y la guarda `carrot_dist2 > 0.001` —3,16 cm— de `RegulatedPurePursuitController` 1.1.20 deja la curvatura en cero y **apaga la dirección**. Caso de control en el mismo bag: robot1, cúspide a 91,4 mm, fuera de la guarda, resuelto en 3,5 s. **No se cambia la configuración** y la misión fue un éxito (0,0554 m) | ~~R12 pasa a 🟢 con la causa escrita, o se documenta por qué no se pudo~~ — **cumplido: 🟢 con mecanismo, aritmética y caso de control** |
 | 3 | **Barrer `PROTOCOLO_EXPERIMENTAL.md` buscando más pruebas que no pueden fallar.** Pendiente declarado el 5-sep. Ya hay **dos** precedentes: RF-22 y la puerta M1 | Cada §3.x y §4 revisado con una frase que diga si su criterio puede fallar |
 
 **Corte semanal por la noche**, según la regla del 2026-08-18:

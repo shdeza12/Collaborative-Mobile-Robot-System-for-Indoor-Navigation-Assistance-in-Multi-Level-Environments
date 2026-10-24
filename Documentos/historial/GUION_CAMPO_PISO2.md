@@ -1,6 +1,6 @@
 # Guion de campo — piso 2, recorrido propio y mapa
 
-> **Estado al 2026-10-06:** Histórica: escrita el 24-sep para el piso 2, y sustituida para G-2 el 25-sep, como explica más abajo. Qué seguir para cada tarea: [`INDICE_GUIAS.md`](INDICE_GUIAS.md).
+> **Estado al 2026-10-06:** Histórica: escrita el 24-sep para el piso 2, y sustituida para G-2 el 25-sep, como explica más abajo. Qué seguir para cada tarea: [`INDICE_GUIAS.md`](../INDICE_GUIAS.md).
 
 **Fecha de redacción:** 2026-09-24, noche
 **Para quién:** ejecutable por cualquiera de los dos. Escrito pensando en que lo
@@ -27,7 +27,7 @@ corra **Jonny** sin haber estado en la sesión donde se armó.
 > *Corregido el 2026-09-25.* Aquí decía que Nav2 no podía navegar por «cuatro defectos de
 > configuración sin corregir». Era falso: esos defectos son de `nav2_slam_params.yaml`, que el
 > vehículo no usa, y esa misma noche Jonny navegó el carro con Nav2. Detalle en el §6 de
-> [`S24_mapeo_6m_hardware.md`](Evidencia/S24_mapeo_6m_hardware.md).
+> [`S24_mapeo_6m_hardware.md`](../Evidencia/S24_mapeo_6m_hardware.md).
 
 ---
 
@@ -65,7 +65,7 @@ los ficheros de `~/tesis/`**: copia los del §0.1 a los dos, que es lo que pide 
 `CLAUDE.md`, y comprueba con el §0.2 el que vayas a usar.
 
 > *Corregido el 2026-09-25.* Aquí decía que `amss-jgm9` no tenía esos paquetes. Era falso
-> cuando se escribió; ver el §6 de [`S24_mapeo_6m_hardware.md`](Evidencia/S24_mapeo_6m_hardware.md).
+> cuando se escribió; ver el §6 de [`S24_mapeo_6m_hardware.md`](../Evidencia/S24_mapeo_6m_hardware.md).
 
 ### 0.4 · Qué llevar
 
@@ -208,7 +208,7 @@ python3 -c "from PIL import Image; import numpy as np; a=np.array(Image.open('ma
 
 Así salió la corrida del 24-sep, dibujada en metros:
 
-![Mapa del pasillo de piso 2 construido conduciendo 6 m](Evidencia/S24_mapa_pasillo6m_HARDWARE.png)
+![Mapa del pasillo de piso 2 construido conduciendo 6 m](../Evidencia/S24_mapa_pasillo6m_HARDWARE.png)
 
 > **Ojo con la extensión del mapa.** La corrida del 24-sep recorrió 6 m y el mapa
 > salió de 21,75 m de largo. No es un error: es lo que el LiDAR alcanzó a ver
@@ -266,7 +266,7 @@ debería pasar —el guion corre como `root`— pero es barato mirarlo.
 | **Escala de tracción (RF-14)** | se conoce la velocidad real a `throttle 0,4247` con varianza explicada | hay 3 medidas, **no repetibles** |
 
 Al volver, el análisis se hace en el escritorio con
-[`medir_g2.py`](../herramientas/medir_g2.py) sobre los bags, siguiendo
+[`medir_g2.py`](../../herramientas/medir_g2.py) sobre los bags, siguiendo
 [`GUIA_PASADA_LOCALIZACION.md`](GUIA_PASADA_LOCALIZACION.md). Los bags vienen de
 Jazzy, así que hay que adaptarlos antes:
 

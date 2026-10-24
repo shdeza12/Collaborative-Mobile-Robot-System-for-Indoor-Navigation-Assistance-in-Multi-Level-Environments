@@ -1,6 +1,6 @@
 # Guía — sesión de compuertas G-2 y G-3: navegación con Nav2 sobre el vehículo real
 
-> **Estado al 2026-10-06:** Histórica: escrita para G-2 y G-3 del 29-sep al 2-oct. Para G-3 en los pisos 3 y 4 se sigue [`PLAN_S26.md`](PLAN_S26.md) §3.2. **Su escala de 0,9 no sirve para racey** (con 0,9 no arranca): hoy es 1,0 en racey y 0,85 en deepy. Qué seguir para cada tarea: [`INDICE_GUIAS.md`](INDICE_GUIAS.md).
+> **Estado al 2026-10-06:** Histórica: escrita para G-2 y G-3 del 29-sep al 2-oct. Para G-3 en los pisos 3 y 4 se sigue [`PLAN_S26.md`](PLAN_S26.md) §3.2. **Su escala de 0,9 no sirve para racey** (con 0,9 no arranca): hoy es 1,0 en racey y 0,85 en deepy. Qué seguir para cada tarea: [`INDICE_GUIAS.md`](../INDICE_GUIAS.md).
 
 **Redactada:** 2026-09-25 (S24).
 **Para quién:** cualquiera que clone el repositorio. No hace falta haber estado en ninguna sesión
@@ -15,8 +15,8 @@ direcciones están reservadas en el router desde ese día (`amss-ez9n` .102, `am
 
 | Pregunta | Criterio | Fuente |
 |---|---|---|
-| **G-2** · ¿cuánto se equivoca la odometría? | error ≤ 10 % sobre un recorrido **medido** de ≥ 5 m | [`ACTA_GO_NOGO.md`](ACTA_GO_NOGO.md):104 |
-| **G-3** · ¿llega el vehículo adonde se le manda? | llegada verificada contra `/odom`, **no** contra el `SUCCEEDED` de Nav2 | [`ACTA_GO_NOGO.md`](ACTA_GO_NOGO.md):105 |
+| **G-2** · ¿cuánto se equivoca la odometría? | error ≤ 10 % sobre un recorrido **medido** de ≥ 5 m | [`ACTA_GO_NOGO.md`](../ACTA_GO_NOGO.md):104 |
+| **G-3** · ¿llega el vehículo adonde se le manda? | llegada verificada contra `/odom`, **no** contra el `SUCCEEDED` de Nav2 | [`ACTA_GO_NOGO.md`](../ACTA_GO_NOGO.md):105 |
 Las dos son del corte **C-1 del viernes 2 de octubre**: si no se alcanzan, el acta revierte a NO-GO.
 
 > **Corregido el 2026-09-25.** Una versión anterior de esta guía decía que estas corridas contaban
@@ -29,7 +29,7 @@ Las dos son del corte **C-1 del viernes 2 de octubre**: si no se alcanzan, el ac
 navega sobre el mapa que el propio carro construyó, en un tramo encajonado, y mide G-2 y G-3. La de
 Jonny navega el edificio sobre el mapa **derivado del modelo de Gazebo**, y su primer bloque es
 validar con flexómetro que el modelo se parece al edificio (criterio ≤ 2 %). Comparten el arranque:
-[`nav2_mapa_guardado.sh`](../herramientas/nav2_mapa_guardado.sh).
+[`nav2_mapa_guardado.sh`](../../herramientas/nav2_mapa_guardado.sh).
 
 ---
 
@@ -39,14 +39,14 @@ Esta tabla va primero porque es lo que decide cuánto fiarse de cada paso.
 
 | Pieza | Estado | Dónde se probó |
 |---|---|---|
-| Nav2 + AMCL sobre mapa guardado, en el vehículo | **funciona, una vez**, arrancado a mano | Jonny, 2026-09-24: [`S24_nav2_navegacion_mapa_guardado.md`](Evidencia/S24_nav2_navegacion_mapa_guardado.md) |
-| [`nav2_mapa_guardado.sh`](../herramientas/nav2_mapa_guardado.sh), de Jonny: arranca toda la pila en el orden correcto | **ejecutado contra `amss-jgm9` el 29-sep**: arranca la pila completa y el planificador responde `SUCCEEDED`; Nav2 tarda de 3 a 5 min en quedar activo | [`S25_ensayo_laboratorio.md`](Evidencia/S25_ensayo_laboratorio.md) §3 |
-| [`corrida_nav2.py`](../herramientas/corrida_nav2.py): pose inicial, meta, espera, registro | probado contra Nav2 real en Gazebo (4 corridas y 3 guardas) y **ejecutado contra `amss-ez9n` el 29-sep**: cuatro corridas; esa noche se corrigió que publicaba la pose inicial sin esperar a AMCL | [`S25_campana_c1_deepy.md`](Evidencia/S25_campana_c1_deepy.md) §2 |
-| [`correr_corrida_nav2.sh`](../herramientas/correr_corrida_nav2.sh): la corrida con su bag | **ejecutado contra `amss-ez9n` el 29-sep**: cuatro corridas, cada una con su grabación | [`S25_campana_c1_deepy.md`](Evidencia/S25_campana_c1_deepy.md) §2 |
-| [`zona_libre_mapa.py`](../herramientas/zona_libre_mapa.py): dónde se puede pedir una meta | **probado** sobre el mapa real del pasillo | 2026-09-25 |
-| [`ver_bag_rviz.sh`](../herramientas/ver_bag_rviz.sh): ver la corrida en RViz después | **probado** con un bag real de Jazzy | 2026-09-25 |
-| [`dibujar_corrida_nav2.py`](../herramientas/dibujar_corrida_nav2.py): imagen de la corrida | **probado** con un bag de la campaña OE4; lectura de bags de Jazzy comprobada | 2026-09-25 |
-| [`analizar_campana_nav2.py`](../herramientas/analizar_campana_nav2.py): G-2 y G-3 del CSV | **probado** con valores conocidos, cuentas verificadas a mano | 2026-09-25 |
+| Nav2 + AMCL sobre mapa guardado, en el vehículo | **funciona, una vez**, arrancado a mano | Jonny, 2026-09-24: [`S24_nav2_navegacion_mapa_guardado.md`](../Evidencia/S24_nav2_navegacion_mapa_guardado.md) |
+| [`nav2_mapa_guardado.sh`](../../herramientas/nav2_mapa_guardado.sh), de Jonny: arranca toda la pila en el orden correcto | **ejecutado contra `amss-jgm9` el 29-sep**: arranca la pila completa y el planificador responde `SUCCEEDED`; Nav2 tarda de 3 a 5 min en quedar activo | [`S25_ensayo_laboratorio.md`](../Evidencia/S25_ensayo_laboratorio.md) §3 |
+| [`corrida_nav2.py`](../../herramientas/corrida_nav2.py): pose inicial, meta, espera, registro | probado contra Nav2 real en Gazebo (4 corridas y 3 guardas) y **ejecutado contra `amss-ez9n` el 29-sep**: cuatro corridas; esa noche se corrigió que publicaba la pose inicial sin esperar a AMCL | [`S25_campana_c1_deepy.md`](../Evidencia/S25_campana_c1_deepy.md) §2 |
+| [`correr_corrida_nav2.sh`](../../herramientas/correr_corrida_nav2.sh): la corrida con su bag | **ejecutado contra `amss-ez9n` el 29-sep**: cuatro corridas, cada una con su grabación | [`S25_campana_c1_deepy.md`](../Evidencia/S25_campana_c1_deepy.md) §2 |
+| [`zona_libre_mapa.py`](../../herramientas/zona_libre_mapa.py): dónde se puede pedir una meta | **probado** sobre el mapa real del pasillo | 2026-09-25 |
+| [`ver_bag_rviz.sh`](../../herramientas/ver_bag_rviz.sh): ver la corrida en RViz después | **probado** con un bag real de Jazzy | 2026-09-25 |
+| [`dibujar_corrida_nav2.py`](../../herramientas/dibujar_corrida_nav2.py): imagen de la corrida | **probado** con un bag de la campaña OE4; lectura de bags de Jazzy comprobada | 2026-09-25 |
+| [`analizar_campana_nav2.py`](../../herramientas/analizar_campana_nav2.py): G-2 y G-3 del CSV | **probado** con valores conocidos, cuentas verificadas a mano | 2026-09-25 |
 | **Ver el vehículo en vivo desde el portátil** | **no funciona, y está medido** | §6.2 |
 
 Lo que se deduce: **la primera corrida de la primera campaña es también la validación del script
@@ -56,10 +56,10 @@ es el ensayo que faltaba. Está previsto en el §4.1.
 ### 0.1 · El mapa sobre el que se navega
 
 La campaña corre sobre el mapa que el vehículo construyó conduciendo 6 m el 2026-09-24
-([`S24_mapeo_6m_hardware.md`](Evidencia/S24_mapeo_6m_hardware.md)), el mismo sobre el que navegó
+([`S24_mapeo_6m_hardware.md`](../Evidencia/S24_mapeo_6m_hardware.md)), el mismo sobre el que navegó
 Jonny:
 
-![Mapa del pasillo de piso 2 en metros, con los dos muros y las dos cajas probables](Evidencia/S24_mapa_pasillo6m_HARDWARE.png)
+![Mapa del pasillo de piso 2 en metros, con los dos muros y las dos cajas probables](../Evidencia/S24_mapa_pasillo6m_HARDWARE.png)
 
 Tres cosas del mapa que mandan en todo lo que sigue:
 
@@ -80,7 +80,7 @@ regla del proyecto desde el 24-sep: **todo cambio en un vehículo se aplica a lo
 sesión**, porque un procedimiento que depende de algo instalado en uno solo falla en el otro, y
 falla tarde, cuando ya se está midiendo. Desde el 28-sep los dos pueden estar **encendidos** a la
 vez: cada uno tiene su partición de comunicaciones para el LiDAR, los servos y las transformadas
-([`S25_aislamiento_dos_carros.md`](Evidencia/S25_aislamiento_dos_carros.md)). Pero **la pila de esta
+([`S25_aislamiento_dos_carros.md`](../Evidencia/S25_aislamiento_dos_carros.md)). Pero **la pila de esta
 guía corre en un solo carro cada vez**: `/cmd_vel`, `/odom`, `/map` y Nav2 no están en la partición,
 y el `/cmd_vel` de un carro movería al otro. Lo que se lance a mano en un carro y lea el LiDAR o las
 transformadas tiene que cargar el perfil, o no recibe nada.
@@ -92,10 +92,10 @@ transformadas tiene que cargar el perfil, o no recibe nada.
 
 ## 1. Cómo se dispone la campaña
 
-![Disposición propuesta: salida en x = 0,70, meta en x = 5,70, 5 m de avance dentro del tramo útil](Evidencia/S24_campana_disposicion_pasillo6m.png)
+![Disposición propuesta: salida en x = 0,70, meta en x = 5,70, 5 m de avance dentro del tramo útil](../Evidencia/S24_campana_disposicion_pasillo6m.png)
 
 **Por qué estas cifras y no otras.** Sale de medir el mapa con
-[`zona_libre_mapa.py`](../herramientas/zona_libre_mapa.py):
+[`zona_libre_mapa.py`](../../herramientas/zona_libre_mapa.py):
 
 ```bash
 python3 herramientas/zona_libre_mapa.py Documentos/Evidencia/S24_mapa_pasillo6m_HARDWARE.yaml
@@ -127,11 +127,11 @@ avance** —lo que pide G-2— con 0,09 m de holgura por la salida y 0,36 m por 
 
 | | |
 |---|---|
-| **Antes de nada** | **Confirma que el sitio es el mismo pasillo donde se hizo el mapa.** Colocar las cajas con las medidas del mapa en otro pasillo no lo convierte en el sitio del mapa: las paredes no coinciden y AMCL se ubica mal. Pasó el 29-sep ([`S25_campana_c1_deepy.md`](Evidencia/S25_campana_c1_deepy.md)). Si es otro sitio, ve a la fila «Si no se puede reproducir el sitio». |
+| **Antes de nada** | **Confirma que el sitio es el mismo pasillo donde se hizo el mapa.** Colocar las cajas con las medidas del mapa en otro pasillo no lo convierte en el sitio del mapa: las paredes no coinciden y AMCL se ubica mal. Pasó el 29-sep ([`S25_campana_c1_deepy.md`](../Evidencia/S25_campana_c1_deepy.md)). Si es otro sitio, ve a la fila «Si no se puede reproducir el sitio». |
 | **Objetivo** | Que el pasillo real se parezca al mapa: AMCL localiza emparejando el barrido con el mapa, y si el sitio cambió no empareja. |
 | **Qué hacer** | (1) Si hay cajas, ponlas donde indica el mapa: **caras interiores a unos 5,90 m** una de otra (de `x ≈ 0,26` a `x ≈ 6,16`). La de salida **atraviesa** el eje del recorrido (de `y = −0,50` a `0,25`); la del fondo queda **al norte** de él (de `y = 0,05` a `0,60`). (2) Marca con cinta el **eje del recorrido**: **1,10 m del muro sur**, que es `y = 0` en el mapa. (3) Marca con cinta dos líneas transversales **separadas 5,00 m exactos, medidos con flexómetro**: la de salida y la de meta. |
 | **Dónde van las líneas** | Donde quedará la **defensa delantera**: la salida a 0,84 m del origen del mapa y la meta a 5,84. En la práctica: con el carro en su sitio de salida (§5.1), la línea de salida va bajo la defensa delantera, y la de meta 5,00 m más allá. |
-| **Si no se puede reproducir el sitio** | Se vuelve a mapear con [`mapear_conduciendo.sh`](../herramientas/mapear_conduciendo.sh) siguiendo [`GUION_CAMPO_PISO2.md`](GUION_CAMPO_PISO2.md), y se recalculan salida y meta con `zona_libre_mapa.py` sobre el mapa nuevo. |
+| **Si no se puede reproducir el sitio** | Se vuelve a mapear con [`mapear_conduciendo.sh`](../../herramientas/mapear_conduciendo.sh) siguiendo [`GUION_CAMPO_PISO2.md`](GUION_CAMPO_PISO2.md), y se recalculan salida y meta con `zona_libre_mapa.py` sobre el mapa nuevo. |
 | **Cierre** | Líneas de salida y meta en el suelo, y su separación **anotada con la cifra que dio el flexómetro**, no con «5». |
 
 > **Por qué 5,00 m medidos y no «la distancia entre las cajas».** El 2026-09-25 se dio por hecho
@@ -173,7 +173,7 @@ ssh deepracer@192.168.0.102 "source /opt/ros/jazzy/setup.bash; source ~/nav_ws/i
 |---|---|
 | **Esperado** | Las cinco líneas. |
 | **Si falta rf2o** | `ssh deepracer@192.168.0.102 "source /opt/ros/jazzy/setup.bash && cd ~/nav_ws && colcon build --symlink-install --packages-select rf2o_laser_odometry"` — el fuente se copia antes desde `~/deepracer_sim_ws/src/rf2o_laser_odometry`, como se hizo el 2026-09-23. Tarda 3 min. |
-| **rf2o tiene que llevar el parche** | `ssh deepracer@192.168.0.102 "md5sum ~/nav_ws/src/rf2o_laser_odometry/src/CLaserOdometry2DNode.cpp"` debe empezar por `06cbdbe6c275`. Si empieza por `83ccf806ee13` es el fuente original: instalar el parche con los pasos de [`herramientas/parches/LEEME.md`](../herramientas/parches/LEEME.md). Sin él, rf2o puede arrancar sin la transformada del láser y dar la odometría invertida (30-sep). |
+| **rf2o tiene que llevar el parche** | `ssh deepracer@192.168.0.102 "md5sum ~/nav_ws/src/rf2o_laser_odometry/src/CLaserOdometry2DNode.cpp"` debe empezar por `06cbdbe6c275`. Si empieza por `83ccf806ee13` es el fuente original: instalar el parche con los pasos de [`herramientas/parches/LEEME.md`](../../herramientas/parches/LEEME.md). Sin él, rf2o puede arrancar sin la transformada del láser y dar la odometría invertida (30-sep). |
 | **Si falta Nav2** | `ssh deepracer@192.168.0.102 "sudo -n apt-get update && sudo -n DEBIAN_FRONTEND=noninteractive apt-get install -y ros-jazzy-navigation2 ros-jazzy-nav2-bringup"`. **El `update` primero no es opcional**: sin él el índice del carro pide versiones que ya no existen y todo acaba en `404 Not Found`. Pasó el 2026-09-23. |
 
 ---
@@ -187,7 +187,7 @@ que ha tenido este proyecto sobre hardware.
 
 ### 4.1 · Una orden, desde el portátil
 
-El arranque lo hace [`nav2_mapa_guardado.sh`](../herramientas/nav2_mapa_guardado.sh), de Jonny.
+El arranque lo hace [`nav2_mapa_guardado.sh`](../../herramientas/nav2_mapa_guardado.sh), de Jonny.
 Codifica **la secuencia que le funcionó a mano la noche del 24-sep**, con el orden que resolvió el
 defecto que más costó: si los costmaps se configuran antes de que el mapa esté publicado, la capa
 estática queda vacía y el planificador aborta con `"Start occupied"` en **cualquier** meta.
@@ -236,12 +236,12 @@ velocidad real es `max_speed_pct`, que se cambia en caliente. Para toda orden de
 
 | `max_speed_pct` | `throttle` | Lo que se sabe de él |
 |---|---|---|
-| **0,68** (de fábrica) | **0,4247** | **movió `amss-ez9n` 6 m el 2026-09-24**, tres corridas y 3227 órdenes, a 0,14–0,26 m/s reales ([`S24_mapeo_6m_hardware.md`](Evidencia/S24_mapeo_6m_hardware.md) §3). **`amss-jgm9` no arrancó** el 2026-09-29 |
+| **0,68** (de fábrica) | **0,4247** | **movió `amss-ez9n` 6 m el 2026-09-24**, tres corridas y 3227 órdenes, a 0,14–0,26 m/s reales ([`S24_mapeo_6m_hardware.md`](../Evidencia/S24_mapeo_6m_hardware.md) §3). **`amss-jgm9` no arrancó** el 2026-09-29 |
 | 0,70 | — | `amss-jgm9` no arrancó (29-sep) |
 | 0,75 | 0,4750 | sin medir |
 | 0,80 | 0,5185 | `amss-jgm9` solo sonó (29-sep) |
 | 0,85 | — | `amss-jgm9` avanzó muy lento (29-sep) |
-| **0,90** (el del script) | **0,6327** | el de la navegación del 24-sep, probablemente; es la que se percibió rápida. **`amss-jgm9` avanzó 3,39 m a 0,62 m/s de media** el 29-sep ([`S25_ensayo_laboratorio.md`](Evidencia/S25_ensayo_laboratorio.md) §2) |
+| **0,90** (el del script) | **0,6327** | el de la navegación del 24-sep, probablemente; es la que se percibió rápida. **`amss-jgm9` avanzó 3,39 m a 0,62 m/s de media** el 29-sep ([`S25_ensayo_laboratorio.md`](../Evidencia/S25_ensayo_laboratorio.md) §2) |
 
 Calculado ejecutando la función real del nodo, que reproduce exactamente el 0,4247 medido en el
 servo.
@@ -398,12 +398,12 @@ herramientas/ver_bag_rviz.sh ~/tesis_evidencia/campana_c1/campana_c1_01
 ```
 
 Adapta el bag de Jazzy a Humble sin tocar el original, abre RViz con
-[`campana_nav2_hardware.rviz`](../Robot/aws-deepracer/deepracer_description/rviz/campana_nav2_hardware.rviz)
+[`campana_nav2_hardware.rviz`](../../Robot/aws-deepracer/deepracer_description/rviz/campana_nav2_hardware.rviz)
 y reproduce con el reloj del bag. Se ve el mapa, el barrido del LiDAR en rojo, el plan de Nav2 en
 verde, la pose de AMCL con su incertidumbre en azul y el rastro de `/odom` en amarillo. Un tercer
 argumento acelera: `… campana_c1_01 map 2.0`.
 
-![RViz con la vista de campaña, reproduciendo el bag del cuarto del 23-sep](Evidencia/S24_visor_rviz_campana.png)
+![RViz con la vista de campaña, reproduciendo el bag del cuarto del 23-sep](../Evidencia/S24_visor_rviz_campana.png)
 
 *La captura es de la prueba del visor con el bag del cuarto de 1,60 m del 23-sep, que solo trae
 barridos: por eso no hay mapa, plan ni AMCL, y el marco fijo es `laser`. Con el bag de una corrida
@@ -442,7 +442,7 @@ source /opt/ros/humble/setup.bash && python3 herramientas/dibujar_corrida_nav2.p
 Dibuja el mapa, el primer plan, la pose de AMCL, el rastro de `/odom` alineado en la salida, y
 salida, meta y parada. Así se ve con un bag de la campaña OE4 en simulación:
 
-![Una misión de la campaña OE4 en simulación dibujada con la herramienta](Evidencia/S24_dibujo_corrida_oe4_simulacion.png)
+![Una misión de la campaña OE4 en simulación dibujada con la herramienta](../Evidencia/S24_dibujo_corrida_oe4_simulacion.png)
 
 *La traza naranja es `/odom` alineado con AMCL en la salida: la separación que crece a lo largo del
 recorrido es la deriva de la odometría simulada, que AMCL corrige. Es una misión de varias metas; la
@@ -480,13 +480,13 @@ Sale una tabla por corrida y el resumen de G-2 y G-3, en Markdown, listo para pe
 registro de evidencia. Las corridas **sin cinta no cuentan**, y la herramienta las nombra.
 
 > **La tolerancia de llegada es 0,5 m** desde el 28-sep, por decisión del director Armando Mateus
-> ([`ACTA_GO_NOGO.md`](ACTA_GO_NOGO.md) §6.1), tomada antes de estas corridas. El análisis la usa por
+> ([`ACTA_GO_NOGO.md`](../ACTA_GO_NOGO.md) §6.1), tomada antes de estas corridas. El análisis la usa por
 > defecto. `--tolerancia` sirve solo para mostrar la sensibilidad, y cuando se usa lo dice en la
 > primera línea.
 
 **5. Escribir el registro** en `Documentos/Evidencia/S25_campana_c1.md`: la tabla del análisis,
 una imagen por corrida del §6.3, las notas de papel y lo que **no** establece. Enlazarlo desde la
-bitácora de [`ESTADO.md`](../ESTADO.md); si no, el verificador lo marca como documento sin citar.
+bitácora de [`ESTADO.md`](../../ESTADO.md); si no, el verificador lo marca como documento sin citar.
 
 ---
 
@@ -574,13 +574,13 @@ nombre equivocado.
   vehículo, y es lo que falta para que la navegación demostrada sea la del guiado real.
 - **El pasillo abierto.** Este tramo tiene cajas en los dos extremos, que es la geometría que da
   información de avance a rf2o. Los pasillos abiertos del edificio miden 5,1 % y 5,9 % de esa
-  información ([`S23_informacion_avance_piso2.md`](Evidencia/S23_informacion_avance_piso2.md)). El
+  información ([`S23_informacion_avance_piso2.md`](../Evidencia/S23_informacion_avance_piso2.md)). El
   30-sep, en el hall del extremo oeste del piso 2, rf2o registró el 73 % del desplazamiento medido
   con flexómetro en las dos corridas en que se midió
-  ([`S25_pasillo_piso2_amss-jgm9.md`](Evidencia/S25_pasillo_piso2_amss-jgm9.md)).
+  ([`S25_pasillo_piso2_amss-jgm9.md`](../Evidencia/S25_pasillo_piso2_amss-jgm9.md)).
 - **Los dos vehículos a la vez.** Eso es G-5: el protocolo con relevo y el coordinador, no solo
   dos carros navegando.
 - **La escala de `/cmd_vel`.** Desde el 29-sep el puente sube a su escalón más bajo todo lo que
   queda entre 0,01 y 0,40 m/s, así que la banda muerta ya no para el carro; la escala sigue sin
   calibrar. Calibrarla es ajustar `MAX_SPEED` en el puente, que es RF-14
-  ([`S24_analisis_previo_RF11.md`](Evidencia/S24_analisis_previo_RF11.md) §4).
+  ([`S24_analisis_previo_RF11.md`](../Evidencia/S24_analisis_previo_RF11.md) §4).

@@ -109,7 +109,7 @@ conectado.** Si hubiera hecho falta recuperar el vehículo, habría requerido ac
 ## 3. La medida: RF-15 sobre 5 GHz
 
 Con los dos vehículos asociados al mismo punto de acceso en el canal 36, y el protocolo tal como lo
-fija [`HOJA_CAMPO_SEGUNDO_DEEPRACER.md`](../HOJA_CAMPO_SEGUNDO_DEEPRACER.md) —600 mensajes, cotas
+fija [`HOJA_CAMPO_SEGUNDO_DEEPRACER.md`](../historial/HOJA_CAMPO_SEGUNDO_DEEPRACER.md) —600 mensajes, cotas
 inscritas antes de medir—:
 
 | | Septiembre, 2,4 GHz | **5 de octubre, 5 GHz** | |

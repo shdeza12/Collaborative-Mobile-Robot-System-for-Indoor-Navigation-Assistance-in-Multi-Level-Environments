@@ -292,5 +292,5 @@ La misión completa con los dos vehículos (G-5) está prevista para la semana
 | `Documentos/Evidencia/S24_mapeo_6m_hardware.md` | Sección 6.3, mapa del pasillo |
 | `Documentos/Evidencia/S24_nav2_navegacion_mapa_guardado.md` | Sección 6.4, Nav2 |
 | `Documentos/Evidencia/S24_consolidacion_datos_oe4.md` | Sección 2 |
-| `Documentos/GUIA_CAMPANA_NAV2_HARDWARE.md` y `GUION_NAVEGACION_USTA.md` | Sección 7 |
+| `Documentos/historial/GUIA_CAMPANA_NAV2_HARDWARE.md` y `GUION_NAVEGACION_USTA.md` | Sección 7 |
 | `Documentos/DISENO_AISLAMIENTO_DOS_CARROS.md` y `PLAN_S25.md` | Secciones 7 y 9 |

@@ -1,7 +1,7 @@
 # Diseño — los dos vehículos encendidos a la vez sin pisarse
 
 **Redactado:** 2026-09-25 (S24). **Estado:** instalado y comprobado en los dos vehículos el
-2026-09-28, pruebas A1 a A5 del bloque A de [`PLAN_S25.md`](PLAN_S25.md), registradas en
+2026-09-28, pruebas A1 a A5 del bloque A de [`PLAN_S25.md`](historial/PLAN_S25.md), registradas en
 [`S25_aislamiento_dos_carros.md`](Evidencia/S25_aislamiento_dos_carros.md). El 29-sep se añadieron los dos tópicos de la
 cámara ([`S25_ensayo_laboratorio.md`](Evidencia/S25_ensayo_laboratorio.md) §1).
 
@@ -117,12 +117,12 @@ Environment=FASTRTPS_DEFAULT_PROFILES_FILE=/etc/deepracer-tesis/particion.xml
 ```
 
 y después `sudo systemctl daemon-reload && sudo systemctl restart deepracer-core`. Las órdenes
-exactas, con su comprobación, están en el §1 de [`PLAN_S25.md`](PLAN_S25.md).
+exactas, con su comprobación, están en el §1 de [`PLAN_S25.md`](historial/PLAN_S25.md).
 
 **3. A todo lo nuestro**, exportando la misma variable antes de lanzar:
 `export FASTRTPS_DEFAULT_PROFILES_FILE=/etc/deepracer-tesis/particion.xml`. El script de arranque
 [`nav2_mapa_guardado.sh`](../herramientas/nav2_mapa_guardado.sh) y los de campaña la tienen que
-llevar; es parte del §3 de [`PLAN_S25.md`](PLAN_S25.md).
+llevar; es parte del §3 de [`PLAN_S25.md`](historial/PLAN_S25.md).
 
 **Para deshacerlo:** borrar el `particion.conf`, `daemon-reload` y reiniciar el servicio. El
 vehículo vuelve a su estado de fábrica; el fichero de `/etc/deepracer-tesis/` sin el *drop-in* no

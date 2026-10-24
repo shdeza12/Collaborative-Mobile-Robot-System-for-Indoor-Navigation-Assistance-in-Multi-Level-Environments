@@ -1,6 +1,6 @@
 # Barrido del protocolo: qué criterios no pueden fallar
 
-**Fecha:** 2026-09-11 · **Tarea 3 de [`PLAN_S22.md`](../PLAN_S22.md)** · pendiente declarado el 2026-09-05
+**Fecha:** 2026-09-11 · **Tarea 3 de [`PLAN_S22.md`](../historial/PLAN_S22.md)** · pendiente declarado el 2026-09-05
 
 ## 0. Por qué se hace este barrido
 

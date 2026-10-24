@@ -1,6 +1,6 @@
 # Guion de la salida del 2026-09-23 — cuatro pruebas en una sesión
 
-> **Estado al 2026-10-06:** Histórica: escrita para la salida del 23-sep. Qué seguir para cada tarea: [`INDICE_GUIAS.md`](INDICE_GUIAS.md).
+> **Estado al 2026-10-06:** Histórica: escrita para la salida del 23-sep. Qué seguir para cada tarea: [`INDICE_GUIAS.md`](../INDICE_GUIAS.md).
 
 **Este es el documento que se lleva al campo.** El razonamiento de por qué la
 recta se mide en dos sitios, qué umbrales usa el comprobador y de dónde salen,
@@ -405,7 +405,7 @@ contaminación, y con el tiempo de movimiento suficiente.
 
 ## 8. Nota de alcance sobre el Bloque B
 
-El [acta GO/NO-GO](ACTA_GO_NOGO.md) §6 dice que **no se corre nada de la etapa 3
+El [acta GO/NO-GO](../ACTA_GO_NOGO.md) §6 dice que **no se corre nada de la etapa 3
 hasta que el sitio esté decidido por escrito**, y la etapa 3 es el pasillo real.
 
 **B no es etapa 3.** La etapa 3 es *«la que produce la evidencia»*: la campaña de

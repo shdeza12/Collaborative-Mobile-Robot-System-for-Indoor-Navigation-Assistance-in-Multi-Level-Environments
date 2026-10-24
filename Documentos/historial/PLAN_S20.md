@@ -5,7 +5,7 @@ Se escribe el 2026-08-22, el sábado anterior, y no el lunes por la mañana. La 
 plan, y su propia §1 tuvo que dedicar un párrafo a explicar por qué el miércoles se desvió. Con el
 plan escrito antes, esa conversación no hace falta.
 
-Manda el [cronograma S17–S32](CRONOGRAMA_S17_S32.md) §S20. Este documento **no lo reinterpreta**:
+Manda el [cronograma S17–S32](../CRONOGRAMA_S17_S32.md) §S20. Este documento **no lo reinterpreta**:
 reordena la semana dentro de él y añade dos tareas que el cronograma no nombra, porque son
 prerrequisito de lo que sí nombra. El motivo de cada una está escrito en §2.
 
@@ -24,8 +24,8 @@ en su nivel (**H3**).
 
 | Lo que ya está | Lo que no |
 |---|---|
-| [`PROTOCOLO_EXPERIMENTAL.md`](PROTOCOLO_EXPERIMENTAL.md): las cuatro métricas definidas antes de instrumentar | `coordinacion_msgs` **no existe**; `Robot/aws-deepracer/` no tiene el paquete |
-| [`REQUISITOS.md`](REQUISITOS.md): 34 requisitos con OE y prueba | El nodo de coordinación no existe |
+| [`PROTOCOLO_EXPERIMENTAL.md`](../PROTOCOLO_EXPERIMENTAL.md): las cuatro métricas definidas antes de instrumentar | `coordinacion_msgs` **no existe**; `Robot/aws-deepracer/` no tiene el paquete |
+| [`REQUISITOS.md`](../REQUISITOS.md): 34 requisitos con OE y prueba | El nodo de coordinación no existe |
 | 15 destinos del piso 1, con holgura verificada | El piso 2 no tiene mapa **ni un solo destino** |
 | Navegación punto a punto validada en los dos niveles | H3: los dos a la vez, sin hacer |
 | El LiDAR del kit mide y publica (RPLIDAR A1M8-R5) | El lanzador pide `rplidar_node` y el ejecutable se llama `rplidar_composition` |
@@ -58,7 +58,7 @@ de la condición B de la campaña, en S24. Lo que la ruta crítica necesita ahor
 
 | Cosa | ¿Necesita los nombres? | ¿Cuándo se necesita? |
 |---|---|---|
-| El **mapa** del piso 2 | No. Depende del corte oeste (A/B/C, final de [`mapa_destinos.txt`](mapa_destinos.txt)) | Ya: sin él `robot2` no localiza |
+| El **mapa** del piso 2 | No. Depende del corte oeste (A/B/C, final de [`mapa_destinos.txt`](../mapa_destinos.txt)) | Ya: sin él `robot2` no localiza |
 | El **punto de transferencia** | No. Es una pose | Ya: sin él no hay relevo |
 | Los otros 17 destinos | Sí | S24 |
 
@@ -139,7 +139,7 @@ defecto no se había nombrado todavía. El punto 2 se apoyaba en `--region`, y `
 nada: recorta el mapa ya calculado. El 24-ago se cerraron los dos mundos con paneles sintéticos
 —**7 en el piso 1, 23 en el piso 2**— y los dos mapas se regeneraron sin una sola región.
 
-Dónde va cada panel se decidió con [`herramientas/buscar_vanos.py`](../herramientas/buscar_vanos.py),
+Dónde va cada panel se decidió con [`herramientas/buscar_vanos.py`](../../herramientas/buscar_vanos.py),
 escrito ese mismo día. Empareja cada punta suelta de pared con la pared de enfrente y se queda con
 los huecos **colineales** —los que prolongan el eje de la pared que los abre—, que es lo que
 distingue una puerta de la sección transversal de un pasillo. En el piso 2 la separación fue
@@ -168,7 +168,7 @@ declarado no reproducible con el número de intentos escrito.
 ### Miércoles 26 — las dos decisiones que condicionan todo lo que se mida · *frente A*
 
 1. **`coordinacion_msgs`** con las cuatro definiciones del
-   [contrato §5](CONTRATO_INTERFACES.md). Compilarlo en Humble **y en la tarjeta Jazzy del carro el
+   [contrato §5](../CONTRATO_INTERFACES.md). Compilarlo en Humble **y en la tarjeta Jazzy del carro el
    mismo día** (§2.2). Nada más: solo los mensajes.
 2. **Congelar el esquema del registro de misión** (RF-25), con los campos de hardware previstos
    (§2.3). Un archivo por misión, procesable sin intervención manual.
@@ -207,7 +207,7 @@ lanzador bajo `/opt/aws/deepracer/`—, que es el único defecto vivo de los tre
 
 **Corte semanal, por la noche** (regla del 18-ago):
 
-- Actualizar [`ESTADO.md`](../ESTADO.md): OE1 y OE4, H3, R12, R8 y la bitácora.
+- Actualizar [`ESTADO.md`](../../ESTADO.md): OE1 y OE4, H3, R12, R8 y la bitácora.
 - **Emitir el entregable de S19** — lo pide la columna T del cronograma y el último emitido es el
   de S18.
 - `herramientas/verificar_repositorio.sh` en verde antes del commit.
@@ -227,8 +227,8 @@ distintas sobre dónde corre la campaña física:
 
 | Documento | Qué dice |
 |---|---|
-| [`ESTADO.md`](../ESTADO.md) §4.3 | las corridas físicas ocurren en **un único piso**, *«porque no hay forma de subir un DeepRacer por una escalera»* |
-| [`CRONOGRAMA_S17_S32.md`](CRONOGRAMA_S17_S32.md) D3 y §S25 | la etapa que produce la evidencia es *«el pasillo real de la USTA **en dos plantas**, cuyo acceso está confirmado»* |
+| [`ESTADO.md`](../../ESTADO.md) §4.3 | las corridas físicas ocurren en **un único piso**, *«porque no hay forma de subir un DeepRacer por una escalera»* |
+| [`CRONOGRAMA_S17_S32.md`](../CRONOGRAMA_S17_S32.md) D3 y §S25 | la etapa que produce la evidencia es *«el pasillo real de la USTA **en dos plantas**, cuyo acceso está confirmado»* |
 
 Si la campaña física es de un piso, **RF-24 no tiene ni una medida física** y el aporte del
 proyecto descansa entero en simulación. Eso es defendible declarándolo desde ahora e indefendible

@@ -6,11 +6,11 @@ tag `v0.4-implementacion-congelada`.** Cinco semanas hasta la ventana 1 de suste
 
 **Para qué sirve.** Acotar —cerrar, no enumerar— todo lo que queda por hacer, y decir en qué orden,
 porque el orden es la parte que este proyecto ha pagado caro dos veces. Sustituye a la lista mental
-y a los «pendientes» dispersos en la bitácora de [`ESTADO.md`](../ESTADO.md).
+y a los «pendientes» dispersos en la bitácora de [`ESTADO.md`](../../ESTADO.md).
 
 **Qué NO es.** No es un cronograma nuevo: el vigente es
-[`CRONOGRAMA_S17_S32.md`](CRONOGRAMA_S17_S32.md) y manda sobre este documento en fechas. No es un
-protocolo: el vigente es [`PROTOCOLO_EXPERIMENTAL.md`](PROTOCOLO_EXPERIMENTAL.md) y manda en
+[`CRONOGRAMA_S17_S32.md`](../CRONOGRAMA_S17_S32.md) y manda sobre este documento en fechas. No es un
+protocolo: el vigente es [`PROTOCOLO_EXPERIMENTAL.md`](../PROTOCOLO_EXPERIMENTAL.md) y manda en
 criterios y métricas. Este documento solo ordena el trabajo entre ambos.
 
 **Cómo se mantiene.** Se edita en sitio. Cada bloque del §8 se marca cerrado con la fecha y el
@@ -23,7 +23,7 @@ un bloque tachado con razón vale más que un bloque borrado.
 
 > **Al 2026-10-15.** De los seis requisitos abiertos del §2.1, cinco quedaron verificados con la
 > evidencia de campo: RF-11 a RF-14 y RF-16 (revisión del 15 de octubre en el §3 de
-> [`REQUISITOS.md`](REQUISITOS.md)). Queda RF-27, la compuerta G-6, que se corre el viernes 16 con
+> [`REQUISITOS.md`](../REQUISITOS.md)). Queda RF-27, la compuerta G-6, que se corre el viernes 16 con
 > [`PLAN_S27.md`](PLAN_S27.md). Lo que sigue se conserva como estaba el 25-sep.
 
 Esta sección va encima de todo porque **el §1 dejó de ser cierto el 24-sep**: la ruta crítica que
@@ -38,8 +38,8 @@ haya avanzado.
 |---|---|---|---|---|
 | **G-1** actuación | ✅ 2026-09-22 | — | — | — |
 | **G-4** dos en el grafo | ✅ 2026-09-22 | — | — | — |
-| **G-2** odometría | ⏳ **C-1, vie 2-oct** | rf2o publica y mide: 3 de 3 dentro del ±10 % sobre **3 m**, empujando a mano ([`S24_peldano2_odometria_hardware.md`](Evidencia/S24_peldano2_odometria_hardware.md)). Corridas de 6 m bajo motor, **sin cinta** | **Corridas de 5 m con flexómetro.** Cada corrida de la campaña es una medida de G-2 | nada: hay mapa, sitio, herramientas y guía |
-| **G-3** navegación de uno | ⏳ **C-1, vie 2-oct** | **Nav2 navegó el carro una vez** (Jonny, 24-sep) y paró a **0,412 m** de la meta contra 0,25 ([`S24_nav2_navegacion_mapa_guardado.md`](Evidencia/S24_nav2_navegacion_mapa_guardado.md)) | la campaña, con la llegada verificada contra `/odom` y cinta | **la tolerancia de llegada, por escrito y antes de correr** (directores) |
+| **G-2** odometría | ⏳ **C-1, vie 2-oct** | rf2o publica y mide: 3 de 3 dentro del ±10 % sobre **3 m**, empujando a mano ([`S24_peldano2_odometria_hardware.md`](../Evidencia/S24_peldano2_odometria_hardware.md)). Corridas de 6 m bajo motor, **sin cinta** | **Corridas de 5 m con flexómetro.** Cada corrida de la campaña es una medida de G-2 | nada: hay mapa, sitio, herramientas y guía |
+| **G-3** navegación de uno | ⏳ **C-1, vie 2-oct** | **Nav2 navegó el carro una vez** (Jonny, 24-sep) y paró a **0,412 m** de la meta contra 0,25 ([`S24_nav2_navegacion_mapa_guardado.md`](../Evidencia/S24_nav2_navegacion_mapa_guardado.md)) | la campaña, con la llegada verificada contra `/odom` y cinta | **la tolerancia de llegada, por escrito y antes de correr** (directores) |
 | **G-5** protocolo completo | ⏳ | — | una misión con relevo sobre los dos vehículos | G-3 |
 | **G-6** RF-27 | ⏳ | — | N entre 5 y 10 misiones **con el protocolo completo** | G-5, y la decisión de N de los directores |
 
@@ -51,7 +51,7 @@ admite **5,45 m** de avance para el ancho del carro, así que no hace falta volv
 dos carros encendidos **una orden mueve los dos y cada odometría recibe el láser del otro**, y toda la
 navegación sobre hardware se ha hecho **sin espacio de nombres**, cuando el coordinador los necesita.
 La primera tiene diseño, probado en el portátil:
-[`DISENO_AISLAMIENTO_DOS_CARROS.md`](DISENO_AISLAMIENTO_DOS_CARROS.md). **El plan de la semana, día a
+[`DISENO_AISLAMIENTO_DOS_CARROS.md`](../DISENO_AISLAMIENTO_DOS_CARROS.md). **El plan de la semana, día a
 día, está en [`PLAN_S25.md`](PLAN_S25.md).**
 
 La vía hermana para los mapas, la del edificio sobre el modelo de Gazebo, es la de
@@ -65,7 +65,7 @@ contra el edificio con flexómetro, y si pasa, **se navega el edificio sin SLAM*
 del edificio y de ese levantamiento salen **el mundo de Gazebo y el mapa a la vez**, de modo que
 simulación y edificio coinciden por construcción. Cierran al **0,32 %** (piso 4) y **0,62 %** (piso 3),
 contra el 20 % de error que el modelo del piso 2 tenía en el hall. Hay mapa, catálogo de diez destinos
-comprobados contra el mapa, y guion de campo en [`GUIA_PISOS_3_Y_4.md`](GUIA_PISOS_3_Y_4.md).
+comprobados contra el mapa, y guion de campo en [`GUIA_PISOS_3_Y_4.md`](../GUIA_PISOS_3_Y_4.md).
 **Lo que falta para el relevo:** `coordinador.py` declara `robot_nivel_1` y `robot_nivel_2` y nada más,
 así que una misión entre los pisos 3 y 4 no planifica. Con la asignación pasada a mano, las 90
 combinaciones funcionan, o sea que el planificador está bien y faltan dos parámetros. Son cuatro
@@ -95,7 +95,7 @@ llegada, y es de lo que se mide. Se fija una y no se cambia a mitad.
 
 | Pieza | Probada en | Riesgo si falla |
 |---|---|---|
-| [`nav2_mapa_guardado.sh`](../herramientas/nav2_mapa_guardado.sh), el arranque | codifica la secuencia manual que funcionó el 24-sep; como script, sin ejecución registrada | la corrida no arranca; la secuencia manual de Jonny sigue valiendo |
+| [`nav2_mapa_guardado.sh`](../../herramientas/nav2_mapa_guardado.sh), el arranque | codifica la secuencia manual que funcionó el 24-sep; como script, sin ejecución registrada | la corrida no arranca; la secuencia manual de Jonny sigue valiendo |
 | `corrida_nav2.py` | Nav2 real en Gazebo: 4 corridas y 3 guardas | se pierde la corrida; los datos del bag se conservan |
 | La capa de obstáculos escuchando `/rplidar_ros/scan` | portátil, ejecutando la reescritura del launch: los dos costmaps quedan en `/rplidar_ros/scan`. La línea de log que hizo pensar lo contrario imprime el nombre de la fuente, no el tópico | **seguridad**: sin ella el carro no ve obstáculos nuevos. Se comprueba en el carro con `ros2 topic info --verbose` (guía §4.3) y pasillo despejado hasta verlo |
 
@@ -105,9 +105,9 @@ llegada, y es de lo que se mide. Se fija una y no se cambia a mitad.
 |---|---|---|
 | 0 | **Aislar los dos carros y montar la pila con espacio de nombres** | sin ello el sistema real no puede correr: es lo primero de [`PLAN_S25.md`](PLAN_S25.md), bloques A y C |
 | 1 | **Copiar los ficheros nuevos a `~/tesis/` de los dos carros** | la regla de `CLAUDE.md`; los paquetes ya están nivelados desde el 24-sep, los ficheros de esta guía no |
-| 2 | ~~**Entregables de S23 y S24**~~ **emitidos el 2026-09-25**, en `.tex` y en `.md` ([`Entregable_semana_24.md`](Entregables/Entregable_semana_24.md)) | — |
+| 2 | ~~**Entregables de S23 y S24**~~ **emitidos el 2026-09-25**, en `.tex` y en `.md` ([`Entregable_semana_24.md`](../Entregables/Entregable_semana_24.md)) | — |
 | 3 | **La velocidad no es repetible**: 0,261 y 0,149 m/s con el mismo mando | hasta explicarlo, la cifra de RF-14 es un rango; primer sospechoso, la batería |
-| 4 | **RF-14, la escala de `/cmd_vel`**: el launch esquiva la banda muerta, no la corrige | calibrar `MAX_SPEED` en el puente ([`S24_analisis_previo_RF11.md`](Evidencia/S24_analisis_previo_RF11.md) §4) |
+| 4 | **RF-14, la escala de `/cmd_vel`**: el launch esquiva la banda muerta, no la corrige | calibrar `MAX_SPEED` en el puente ([`S24_analisis_previo_RF11.md`](../Evidencia/S24_analisis_previo_RF11.md) §4) |
 | 5 | **Una esquina** | nadie ha mapeado ni navegado una en el vehículo; el guiado real las tiene |
 | 6 | **El pasillo abierto** | el tramo de las compuertas está encajonado; los pasillos abiertos miden 5,1 % y 5,9 % de información de avance |
 | 7 | **Ver en vivo** | no funciona desde el portátil (Humble ↔ Jazzy); la vía por WebSocket está descrita y **sin validar**. Nada de lo planificado la necesita |
@@ -129,14 +129,14 @@ puede adelantar sin decidir nada.
 
 ### 2.1 Los seis requisitos abiertos, y de qué cuelgan
 
-De los 29 requisitos funcionales de [`REQUISITOS.md`](REQUISITOS.md), 23 están verificados. Los 6
+De los 29 requisitos funcionales de [`REQUISITOS.md`](../REQUISITOS.md), 23 están verificados. Los 6
 restantes son de vehículo físico:
 
 | Requisito | Qué le falta | Bloqueado por |
 |---|---|---|
 | **RF-11** locomoción por `/<ns>/cmd_vel` | recorrido medido sobre el carro | nada |
 | **RF-12** `/<ns>/scan` utilizable | segunda mitad: mapa de costos local | RF-13 |
-| **RF-13** odometría en `/<ns>/odom` | ~~no hay fuente en el vehículo~~ **hay fuente desde el 2026-09-24**: `rf2o` publica y mide, 3/3 dentro del ±10 % sobre 3,00 m ([`S24_peldano2_odometria_hardware.md`](Evidencia/S24_peldano2_odometria_hardware.md)). Falta la medida sobre **≥ 5 m** que pide G-2, y el espacio de nombres `/<ns>/` | el sitio de ≥ 5 m (segmento encajonado) |
+| **RF-13** odometría en `/<ns>/odom` | ~~no hay fuente en el vehículo~~ **hay fuente desde el 2026-09-24**: `rf2o` publica y mide, 3/3 dentro del ±10 % sobre 3,00 m ([`S24_peldano2_odometria_hardware.md`](../Evidencia/S24_peldano2_odometria_hardware.md)). Falta la medida sobre **≥ 5 m** que pide G-2, y el espacio de nombres `/<ns>/` | el sitio de ≥ 5 m (segmento encajonado) |
 | **RF-14** comando desde ROS 2 | campo: rampa, escalones, vídeo | batería medida |
 | **RF-16** mismo código en los dos destinos | ~~compilar en Jazzy, nunca intentado~~ **hecho el 2026-09-22 en los dos carros**: 22 ficheros de fuente con el mismo md5, `stderr` de 0 bytes, cinco baterías en los tres destinos. Falta la **segunda mitad** del criterio, una misión en cada mundo | **G-3** |
 | **RF-27** demostración física N = 5–10 | todo lo anterior | los cinco de arriba |
@@ -152,13 +152,13 @@ sobre hardware.
 
 **Segunda actualización del 2026-09-22, la misma tarde.** Al preparar el guion de ese puente
 apareció que **la prueba, tal como estaba redactada, no puede pasar**. Análisis completo en
-[`S24_analisis_previo_RF11.md`](Evidencia/S24_analisis_previo_RF11.md). En corto:
+[`S24_analisis_previo_RF11.md`](../Evidencia/S24_analisis_previo_RF11.md). En corto:
 
 1. `cmdvel_to_servo_pkg` **no está en ningún carro** — sólo los 17 paquetes de fábrica de AWS. La
    tarea es desplegar y compilar, no correr.
 2. Con las constantes actuales, `desired_linear_vel = 0,50 m/s` de Nav2 produce un `throttle` de
    **0,4247**, y el `0,50` publicado directo **no arrancó ninguna de cinco veces** sobre el suelo
-   ([`S23_campo_traccion_RF14.md`](Evidencia/S23_campo_traccion_RF14.md) §4). La otra configuración,
+   ([`S23_campo_traccion_RF14.md`](../Evidencia/S23_campo_traccion_RF14.md) §4). La otra configuración,
    `max_vel_x = 0,26`, produce un **cero exacto**.
 3. Lo que desbloquea es **una sola medida**: la curva `throttle → velocidad real` de 0,60 a 1,00.
    Su procedimiento ya existe —Bloque 7 de [`HOJA_CAMPO_G2.md`](HOJA_CAMPO_G2.md) §10— y **no
@@ -187,7 +187,7 @@ dos de esas trece corridas vuelven a medir el `0.50`: el umbral de arranque en q
 2 de arriba se midió sobre el otro vehículo.
 
 **Corrido el 2026-09-22, y la curva no salió**
-([`S24_campo_traccion_ez9n.md`](Evidencia/S24_campo_traccion_ez9n.md)). Las trece corridas se
+([`S24_campo_traccion_ez9n.md`](../Evidencia/S24_campo_traccion_ez9n.md)). Las trece corridas se
 hicieron enteras, y **la corrida de control refutó el supuesto del método**: a `throttle 1,00` el
 vehículo seguía acelerando en el segundo 4, así que las restas no dan velocidades. Queda medido el
 umbral en este carro —el `0.50` lo mueve, apenas— y queda **refutado** el `0,60 → menos de 0,25 m/s`
@@ -195,7 +195,7 @@ sobre el que se apoyaba el punto 2 de arriba: son 4,20 m en 4 s, factor tres. Tr
 `--marcha 6` a 0,60 · 0,70 · 0,80 validarían la mitad baja de la curva; el escalón de 1,00 **no cabe
 en la recta de 20 m** y necesita otro instrumento.
 
-*Actualización 2026-09-25 — la vía que abre la navegación en el edificio.* Con los peldaños 6 y 7 ya cruzados sobre un mapa guardado, **navegar el pasillo real no exige resolver el SLAM**: basta un mapa válido. Y puede haberlo ya, porque el §4 de [`ENTORNO_DE_EVALUACION.md`](ENTORNO_DE_EVALUACION.md) afirma que `primer_piso_v2.world` corresponde a la primera planta del edificio. **Pero el §10 del mismo documento declara esa correspondencia «un supuesto no verificado»**, y la validación que preveía —un mapa SLAM del pasillo real— está bloqueada por la inobservabilidad de avance. La vía barata que nadie intentó es **contrastar el modelo con flexómetro**: diez medidas, media hora, criterio ≤ 2 %. Si pasa, se navega el edificio sin SLAM; si no pasa, el §4 pierde su «argumento más fuerte» y la etapa 3 necesita otra vía. Guion completo con las diez cifras del modelo en [`GUION_NAVEGACION_USTA.md`](GUION_NAVEGACION_USTA.md).
+*Actualización 2026-09-25 — la vía que abre la navegación en el edificio.* Con los peldaños 6 y 7 ya cruzados sobre un mapa guardado, **navegar el pasillo real no exige resolver el SLAM**: basta un mapa válido. Y puede haberlo ya, porque el §4 de [`ENTORNO_DE_EVALUACION.md`](../ENTORNO_DE_EVALUACION.md) afirma que `primer_piso_v2.world` corresponde a la primera planta del edificio. **Pero el §10 del mismo documento declara esa correspondencia «un supuesto no verificado»**, y la validación que preveía —un mapa SLAM del pasillo real— está bloqueada por la inobservabilidad de avance. La vía barata que nadie intentó es **contrastar el modelo con flexómetro**: diez medidas, media hora, criterio ≤ 2 %. Si pasa, se navega el edificio sin SLAM; si no pasa, el §4 pierde su «argumento más fuerte» y la etapa 3 necesita otra vía. Guion completo con las diez cifras del modelo en [`GUION_NAVEGACION_USTA.md`](GUION_NAVEGACION_USTA.md).
 
 ---
 
@@ -257,12 +257,12 @@ Estado por peldaño:
 | # | Peldaño | Simulación | Vehículo real |
 |---|---|---|---|
 | 1 | TF `map → odom → base_link → laser` | ✅ | ⚠️ `base_link → laser` de pie en **los dos carros** — `[0.029, 0.000, 0.185]`, RPY −180°, del mismo URDF (md5 `ccd781f4…`): `.101` el 21-sep, `.102` el 23-sep. Falta `map → odom → base_link`, que cuelga del peldaño 2 |
-| 2 | odometría publicada y validada sola | ✅ verdad del motor de física | ✅ **2026-09-24: `rf2o` publica y MIDE.** Tres pasadas de 3,00 m contra flexómetro en el cuarto del extintor: razones **0,963 · 1,019 · 0,966**, media 0,982, σ 0,032 — **las tres dentro del ±10 %** del criterio M1. Sin deriva en parado (6–19 mm en 20–24 s). Detalle y salvedades en [`S24_peldano2_odometria_hardware.md`](Evidencia/S24_peldano2_odometria_hardware.md) |
+| 2 | odometría publicada y validada sola | ✅ verdad del motor de física | ✅ **2026-09-24: `rf2o` publica y MIDE.** Tres pasadas de 3,00 m contra flexómetro en el cuarto del extintor: razones **0,963 · 1,019 · 0,966**, media 0,982, σ 0,032 — **las tres dentro del ±10 %** del criterio M1. Sin deriva en parado (6–19 mm en 20–24 s). Detalle y salvedades en [`S24_peldano2_odometria_hardware.md`](../Evidencia/S24_peldano2_odometria_hardware.md) |
 | 3 | `/scan` con marco y estampas correctas | ✅ | ✅ 1,0228 m contra 1,000 m de flexómetro, 10/10 barridos, σ 2,8 mm |
 | 4 | mapa | ✅ | ⚠️ el mapa existe; nunca se ha cargado en el carro |
 | 5 | localización (AMCL) | ✅ | ❌ nunca ejecutado |
-| 6 | mapas de costos | ✅ | ✅ **2026-09-24 noche:** la capa estática carga el mapa guardado en el vehículo (`Resizing costmap to 447 X 108`). Hizo falta activar `map_server` **antes** de lanzar Nav2; al revés la capa queda vacía y el planificador aborta con `"Start occupied"` en cualquier meta. Ver [`S24_nav2_navegacion_mapa_guardado.md`](Evidencia/S24_nav2_navegacion_mapa_guardado.md) |
-| 7 | planificador y controlador | ✅ | 🟡 **2026-09-24 noche: navega, pero no llega con precisión.** Meta a 5,50 m sobre mapa guardado + AMCL: avanzó **4,837 m** con el plan consumiéndose (59→7 poses) y `angular.z` entre ±1,3 —o sea dirección viva—, pero paró a **0,412 m** de la meta contra una tolerancia de 0,25. La causa está medida: la banda muerta obliga a aproximarse a 0,40 m/s y **no hay régimen de aproximación fina**. Detalle en [`S24_nav2_navegacion_mapa_guardado.md`](Evidencia/S24_nav2_navegacion_mapa_guardado.md) |
+| 6 | mapas de costos | ✅ | ✅ **2026-09-24 noche:** la capa estática carga el mapa guardado en el vehículo (`Resizing costmap to 447 X 108`). Hizo falta activar `map_server` **antes** de lanzar Nav2; al revés la capa queda vacía y el planificador aborta con `"Start occupied"` en cualquier meta. Ver [`S24_nav2_navegacion_mapa_guardado.md`](../Evidencia/S24_nav2_navegacion_mapa_guardado.md) |
+| 7 | planificador y controlador | ✅ | 🟡 **2026-09-24 noche: navega, pero no llega con precisión.** Meta a 5,50 m sobre mapa guardado + AMCL: avanzó **4,837 m** con el plan consumiéndose (59→7 poses) y `angular.z` entre ±1,3 —o sea dirección viva—, pero paró a **0,412 m** de la meta contra una tolerancia de 0,25. La causa está medida: la banda muerta obliga a aproximarse a 0,40 m/s y **no hay régimen de aproximación fina**. Detalle en [`S24_nav2_navegacion_mapa_guardado.md`](../Evidencia/S24_nav2_navegacion_mapa_guardado.md) |
 
 El proyecto midió el peldaño 3 con rigor de laboratorio y caracterizó el 4 con herramientas propias,
 y **nunca construyó el 1 ni el 2**. No fue desorden: el 2 resultó ser un problema de física y se
@@ -279,7 +279,7 @@ pasadas de 3,00 m con razones 0,963 · 1,019 · 0,966 (media 0,982, σ 0,032), l
 *por esta causa*. **Lo que esto no mueve, y hay que leerlo junto:** la medida es de 3 m —G-2 exige
 ≥ 5— y se tomó en un cuarto de 3,50 × 1,20 m con estructura encarada por los cuatro lados, o sea la
 geometría buena. **No dice nada sobre el pasillo**, que sigue en 5,1 % y 5,9 % de información de
-avance. El §5 de [`S24_peldano2_odometria_hardware.md`](Evidencia/S24_peldano2_odometria_hardware.md)
+avance. El §5 de [`S24_peldano2_odometria_hardware.md`](../Evidencia/S24_peldano2_odometria_hardware.md)
 enumera las cuatro cosas que el resultado NO demuestra.
 
 *Lección de método que se cobró la misma tarde, y que afecta a cómo se mide de aquí en adelante:*
@@ -293,23 +293,23 @@ cadena.
 
 ## 3. Las cinco decisiones que van por escrito ANTES de correr
 
-El §3 de [`PROTOCOLO_EXPERIMENTAL.md`](PROTOCOLO_EXPERIMENTAL.md) prohíbe mover criterios después
+El §3 de [`PROTOCOLO_EXPERIMENTAL.md`](../PROTOCOLO_EXPERIMENTAL.md) prohíbe mover criterios después
 de ver resultados. Estas cinco están pendientes, y cada corrida que se ejecute sin resolverlas
 queda contaminada.
 
-> **Resuelto el 2026-09-21 en [`ACTA_GO_NOGO.md`](ACTA_GO_NOGO.md):** el punto de decisión GO/NO-GO
+> **Resuelto el 2026-09-21 en [`ACTA_GO_NOGO.md`](../ACTA_GO_NOGO.md):** el punto de decisión GO/NO-GO
 > se cerró con **GO pleno** —la demostración se intenta con los dos vehículos reales—, con seis
 > criterios de fallo escritos de antemano y cuatro puntos de corte con fecha, el último el
 > **16 de octubre**, después del cual no se toman más datos. El acta **no** resuelve las decisiones
 > 1 y 3 de esta lista: el sitio de la etapa 3 y el N de RF-27 son de directores, y el acta los
 > traslada con la medición de por medio. Hasta que eso esté por escrito no se corre la etapa 3.
 
-1. **El sitio de la etapa 3.** RF-27 y [`ENTORNO_DE_EVALUACION.md`](ENTORNO_DE_EVALUACION.md) §6
+1. **El sitio de la etapa 3.** RF-27 y [`ENTORNO_DE_EVALUACION.md`](../ENTORNO_DE_EVALUACION.md) §6
    dicen «el pasillo real de la USTA, en dos plantas». Está medido que **ninguno de los dos pisos
    contiene la información de avance**: 5,1 % en piso 1 y 5,9 % en piso 2, los dos por debajo del
    6,8 % del pasillo simulado cuyo mapa se rechazó
-   ([`S23_informacion_avance_piso1.md`](Evidencia/S23_informacion_avance_piso1.md),
-   [`S23_informacion_avance_piso2.md`](Evidencia/S23_informacion_avance_piso2.md)).
+   ([`S23_informacion_avance_piso1.md`](../Evidencia/S23_informacion_avance_piso1.md),
+   [`S23_informacion_avance_piso2.md`](../Evidencia/S23_informacion_avance_piso2.md)).
    **Decisión de directores, por escrito.**
 2. **El criterio de llegada de 0,25 m.** Está por debajo de 1σ en misiones largas: σx crece de 0,08
    a 0,40 m en 40 m de recorrido. Parte de las corridas fallará por construcción y chocará con el
@@ -386,7 +386,7 @@ inventar formato.
 
 El protocolo del proyecto ya tenía bien elegida la mitad de esto: *«la verdad de terreno de la
 campaña física se toma con medición externa —cinta métrica sobre marcas fijas en el piso,
-fotografiadas»* ([`PROTOCOLO_EXPERIMENTAL.md`](PROTOCOLO_EXPERIMENTAL.md), §1). Lo que no cubre es
+fotografiadas»* ([`PROTOCOLO_EXPERIMENTAL.md`](../PROTOCOLO_EXPERIMENTAL.md), §1). Lo que no cubre es
 la trayectoria en movimiento.
 
 ---
@@ -415,7 +415,7 @@ Ordenado por dependencia:
    que nombra nodo y espacio de nombres de cada extremo. **La declaración escrita de R11 sigue
    pendiente**, pero ya tiene con qué escribirse.
 7. ~~**Espacios de nombres `/robot1` y `/robot2` sobre hardware**~~ **ejercitados el 2026-09-22**:
-   es lo que mide la compuerta G-4 ([`Evidencia/S24_compuerta_G4_dos_en_el_grafo.md`](Evidencia/S24_compuerta_G4_dos_en_el_grafo.md)),
+   es lo que mide la compuerta G-4 ([`Evidencia/S24_compuerta_G4_dos_en_el_grafo.md`](../Evidencia/S24_compuerta_G4_dos_en_el_grafo.md)),
    con dos nodos llamados igual conviviendo por espacio de nombres.
 
 ---
@@ -488,7 +488,7 @@ resolución y frecuencia.
 escrita con su razón.
 
 **🟢 Resuelto el 2026-09-21 — y no salió binario.**
-Registro: [`S24_desempate_camara_vehiculo.md`](Evidencia/S24_desempate_camara_vehiculo.md).
+Registro: [`S24_desempate_camara_vehiculo.md`](../Evidencia/S24_desempate_camara_vehiculo.md).
 **Hay imagen**, `/camera_pkg/display_mjpeg` en los dos vehículos, así que **A no se cae y C no pasa
 a ser el plan**. Pero la pila de fábrica la expone a **160 × 120** —insuficiente para marcadores— y
 `camera_info` viene **entero en ceros**, sin intrínsecos. El sensor sí admite 640 × 480 a 30 fps y
@@ -643,7 +643,7 @@ demostración.
 ### Bloque 5 — Análisis y escritura
 
 **5.1 — Capítulo de resultados de la campaña en simulación. 🟢 Hecho el 2026-09-19:**
-[`RESULTADOS_OE4_SIMULACION.md`](RESULTADOS_OE4_SIMULACION.md). No dependía de los vehículos, así
+[`RESULTADOS_OE4_SIMULACION.md`](../RESULTADOS_OE4_SIMULACION.md). No dependía de los vehículos, así
 que se adelantó a su semana (S24). Deja dos encargos para el resto del bloque: el modo de fallo
 único queda atribuido al término de estimación de pose del presupuesto de error, y el campo que
 cerraría la atribución —la distancia entre pose estimada y verdad de terreno en el instante de
@@ -664,7 +664,7 @@ final.
   objetivo— es probar el sistema navegando.
 - **No dice que el pasillo sea inservible**, solo que no aporta información de avance al LiDAR. Es
   un resultado sobre un sensor y una geometría, no sobre el edificio.
-- **No fija fechas.** Las fija [`CRONOGRAMA_S17_S32.md`](CRONOGRAMA_S17_S32.md).
+- **No fija fechas.** Las fija [`CRONOGRAMA_S17_S32.md`](../CRONOGRAMA_S17_S32.md).
 
 ---
 

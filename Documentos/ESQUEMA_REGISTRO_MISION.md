@@ -3,13 +3,13 @@
 > **Congelado el 2026-08-26**, versión `1.0.0`. Este documento define qué se guarda de cada misión
 > y por qué. Es el artefacto que el §9.4 de
 > [`PROTOCOLO_EXPERIMENTAL.md`](PROTOCOLO_EXPERIMENTAL.md) llama *«registrador de misión»* y que la
-> §2.3 de [`PLAN_S20.md`](PLAN_S20.md) exigía congelar **antes** de tomar la primera métrica.
+> §2.3 de [`PLAN_S20.md`](historial/PLAN_S20.md) exigía congelar **antes** de tomar la primera métrica.
 >
 > Cambiar un campo después de la campaña de S24 invalida la comparación de S26. Cómo se cambia sin
 > romperla está en la §7.
 >
 > El orden en que se construye, con sus plazos y su criterio de aborto, está en
-> [`PLAN_RF25.md`](PLAN_RF25.md).
+> [`PLAN_RF25.md`](historial/PLAN_RF25.md).
 
 ---
 
@@ -647,7 +647,7 @@ comprobación de `prueba_componer_registro.py` valida ese caso explícitamente, 
 | §1, §3.6, §3.8 | [`ESTADO.md`](../ESTADO.md) §7 bitácora del 2026-08-26, y **R3** |
 | §3.8 | **R12** (cúspides) y **RNF-01** (desviación de `z`) |
 | §2.1, §3.4 | [`CONTRATO_INTERFACES.md`](CONTRATO_INTERFACES.md) §5 — `EstadoMision`, `GuiarUsuario` |
-| §1, §6 | [`PLAN_S20.md`](PLAN_S20.md) §2.3 |
+| §1, §6 | [`PLAN_S20.md`](historial/PLAN_S20.md) §2.3 |
 
 Requisito que satisface: **RF-25**. Sin él no hay **RF-21** a **RF-24**, que son las cuatro métricas
 de **OE4**.

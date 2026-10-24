@@ -1,6 +1,6 @@
 # Levantar el mapa del pasillo: la pasada de mapeo, paso a paso
 
-> **Estado al 2026-10-06:** Histórica: escrita el 1-sep para el mapa del pasillo de aquel G2. Qué seguir para cada tarea: [`INDICE_GUIAS.md`](INDICE_GUIAS.md).
+> **Estado al 2026-10-06:** Histórica: escrita el 1-sep para el mapa del pasillo de aquel G2. Qué seguir para cada tarea: [`INDICE_GUIAS.md`](../INDICE_GUIAS.md).
 
 Guía de principio a fin para producir el **mapa del pasillo físico de ≥ 20 m** que el G2 necesita.
 Cada comando dice **en qué máquina** va. No te saltes pasos: están en este orden porque cada uno
@@ -196,7 +196,7 @@ pkill -9 -f "ros2 bag play"; pkill -9 -f rf2o_laser; pkill -9 -f slam_toolbox
 
 No es de esta pasada, pero es del viernes y **hay que dejarlo escrito antes**, no después de ver
 el dato. El §7 del protocolo experimental lo prohíbe expresamente. Está discutido en
-[`Evidencia/S21_preparacion_G2.md`](Evidencia/S21_preparacion_G2.md) §4, y las tres preguntas que
+[`Evidencia/S21_preparacion_G2.md`](../Evidencia/S21_preparacion_G2.md) §4, y las tres preguntas que
 hay que llevar contestadas —y firmadas por el director— están en el **Paso 1.3** de
 [`GUIA_PASADA_LOCALIZACION.md`](GUIA_PASADA_LOCALIZACION.md).
 

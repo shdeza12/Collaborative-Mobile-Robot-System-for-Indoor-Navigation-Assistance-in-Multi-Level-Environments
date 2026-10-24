@@ -138,9 +138,9 @@ La lista de arriba se deja como se escribió el 2-oct. Cada punto, con dónde qu
 
 | # | Estado | Dónde consta |
 |---|---|---|
-| 1 | **A medias.** Las grabaciones de racey (p2r_01 a p2r_08 y p4r_01 a p4r_03), sus 2 CSV y sus registros se copiaron el 5-oct a `~/tesis_evidencia/copia_carros_2026-10-05/`. **De `p4d_02` de deepy no consta la copia** | Bitácora de `ESTADO.md`, 5-oct (noche); [`PLAN_S26.md`](../PLAN_S26.md) §1.5 |
-| 2 | **Hecho** el 5-oct: cambio de sitio aceptado, G-2 alcanzada y G-3 abierta | [`ACTA_GO_NOGO.md`](../ACTA_GO_NOGO.md) §4.1 y §6.2; [`PLAN_S26.md`](../PLAN_S26.md) §1.1 |
-| 3 | **En curso.** El margen de 1,0 m sigue por defecto y el de 0,5 m se prueba con la IMU en las misiones encadenadas del miércoles 7, con punto de decisión a las 12:00 | [`PLAN_S26.md`](../PLAN_S26.md) §3.2 y §4.1 |
-| 4 | **Hecho, salvo el radio de giro.** Escala por vehículo (`ESCALA`, 1,0 en racey y 0,85 en deepy) y cámara y fusión apagadas en el arranque desde el 5-oct; las cámaras, además, desactivadas por `udev` en los dos. El radio de giro se mide el miércoles 7 | [`PLAN_S26.md`](../PLAN_S26.md) §1.2 (f), §1.3 y §3.1 |
-| 5 | **Hecho** el 5-oct: siete correcciones a `corrida_nav2.py` y al grabador, con prueba de 21 de 21 sin Gazebo | [`PLAN_S26.md`](../PLAN_S26.md) §1.2 |
-| 6 | **Pendiente**: primera corrida en el piso 3, el miércoles 7 | [`PLAN_S26.md`](../PLAN_S26.md) §3.4 |
+| 1 | **A medias.** Las grabaciones de racey (p2r_01 a p2r_08 y p4r_01 a p4r_03), sus 2 CSV y sus registros se copiaron el 5-oct a `~/tesis_evidencia/copia_carros_2026-10-05/`. **De `p4d_02` de deepy no consta la copia** | Bitácora de `ESTADO.md`, 5-oct (noche); [`PLAN_S26.md`](../historial/PLAN_S26.md) §1.5 |
+| 2 | **Hecho** el 5-oct: cambio de sitio aceptado, G-2 alcanzada y G-3 abierta | [`ACTA_GO_NOGO.md`](../ACTA_GO_NOGO.md) §4.1 y §6.2; [`PLAN_S26.md`](../historial/PLAN_S26.md) §1.1 |
+| 3 | **En curso.** El margen de 1,0 m sigue por defecto y el de 0,5 m se prueba con la IMU en las misiones encadenadas del miércoles 7, con punto de decisión a las 12:00 | [`PLAN_S26.md`](../historial/PLAN_S26.md) §3.2 y §4.1 |
+| 4 | **Hecho, salvo el radio de giro.** Escala por vehículo (`ESCALA`, 1,0 en racey y 0,85 en deepy) y cámara y fusión apagadas en el arranque desde el 5-oct; las cámaras, además, desactivadas por `udev` en los dos. El radio de giro se mide el miércoles 7 | [`PLAN_S26.md`](../historial/PLAN_S26.md) §1.2 (f), §1.3 y §3.1 |
+| 5 | **Hecho** el 5-oct: siete correcciones a `corrida_nav2.py` y al grabador, con prueba de 21 de 21 sin Gazebo | [`PLAN_S26.md`](../historial/PLAN_S26.md) §1.2 |
+| 6 | **Pendiente**: primera corrida en el piso 3, el miércoles 7 | [`PLAN_S26.md`](../historial/PLAN_S26.md) §3.4 |

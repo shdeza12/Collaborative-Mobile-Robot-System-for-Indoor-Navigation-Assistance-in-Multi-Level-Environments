@@ -2,12 +2,12 @@
 
 La meta de la semana es llegar al viernes con la misión con relevo entre los pisos 3 y 4 sobre los
 dos vehículos (compuerta G-5). La toma de datos se cierra el viernes 16, en el corte C-3 del
-[acta](ACTA_GO_NOGO.md). Para llegar hay que dejar los vehículos estables (carga, escala, cámaras),
+[acta](../ACTA_GO_NOGO.md). Para llegar hay que dejar los vehículos estables (carga, escala, cámaras),
 cerrar G-3 e integrar la IMU de la tarjeta. Las pruebas de esta semana son más estrictas que las
 anteriores. El vehículo encadena misiones sin que nadie lo reubique ni le vuelva a dar la pose
 inicial. Entre una misión y la siguiente no vuelve a su escalera: el coordinador lo envía a recoger
-al usuario desde donde quedó (§6.2 del [acta](ACTA_GO_NOGO.md)). Lo que se hizo la semana anterior
-está en [`Entregable_semana_25.md`](Entregables/Entregable_semana_25.md).
+al usuario desde donde quedó (§6.2 del [acta](../ACTA_GO_NOGO.md)). Lo que se hizo la semana anterior
+está en [`Entregable_semana_25.md`](../Entregables/Entregable_semana_25.md).
 
 Vehículos: `amss-ez9n` (deepy, 192.168.0.102) va en el piso 3 como `robot1`; `amss-jgm9` (racey,
 192.168.0.104) va en el piso 4 como `robot2` y lleva el coordinador. Todas las órdenes se lanzan
@@ -38,7 +38,7 @@ Reglas de toda la semana:
   con la cinta en el cuadro, el id de la corrida en el primer cuadro de cada video.
 - No se actualizan los paquetes de ROS del portátil de campo antes del corte C-3. El 6-oct una
   actualización de 452 paquetes coincidió con que la simulación dejara de completar el relevo, y la
-  causa no está aislada ([`S26_simulacion_tras_actualizacion_ros.md`](Evidencia/S26_simulacion_tras_actualizacion_ros.md)).
+  causa no está aislada ([`S26_simulacion_tras_actualizacion_ros.md`](../Evidencia/S26_simulacion_tras_actualizacion_ros.md)).
 
 ---
 
@@ -47,7 +47,7 @@ Reglas de toda la semana:
 ### 1.1 · Acta: cambio de sitio y corte C-1 (hecho)
 
 Santiago habló con los directores el 5-oct. Sus respuestas están en el §6.2 del
-[acta](ACTA_GO_NOGO.md), y G-2 (alcanzada) y G-3 (abierta) en su §4.1.
+[acta](../ACTA_GO_NOGO.md), y G-2 (alcanzada) y G-3 (abierta) en su §4.1.
 
 | Pregunta | Respuesta |
 |---|---|
@@ -81,7 +81,7 @@ normal, la encadenada, la interrupción con `SIGINT` y con `SIGTERM` y el límit
 Las cámaras se quedan conectadas, porque sin ellas el vehículo pierde su aspecto, y se desactivan por
 software con una regla de `udev`: el sistema no autoriza los dispositivos `29fe:4d53` (GEO Semi
 Condor), así que no crea los `/dev/video*` y la pila de AWS no las abre. La regla está en
-[`config/90-tesis-camaras-desactivadas.rules`](../Robot/aws-deepracer/deepracer_bringup/config/90-tesis-camaras-desactivadas.rules),
+[`config/90-tesis-camaras-desactivadas.rules`](../../Robot/aws-deepracer/deepracer_bringup/config/90-tesis-camaras-desactivadas.rules),
 sobrevive a los reinicios y se deshace borrando el archivo y reiniciando.
 
 | Paso | Comando | Esperado |
@@ -113,12 +113,12 @@ sensor, que en el BMI160 vale `0xd1`, sin instalar nada en el vehículo.
 | Cierre | `0xd1` en los dos vehículos, con el bus y la dirección anotados |
 
 > Estado, 5-oct: hecho. Los dos vehículos tienen la BMI160 (`0xd1` en I2C 1, 0x68) y pasaron las
-> pruebas de [`PRUEBAS_IMU.md`](PRUEBAS_IMU.md); solo el módulo de la aceleración de `amss-jgm9` queda
+> pruebas de [`PRUEBAS_IMU.md`](../PRUEBAS_IMU.md); solo el módulo de la aceleración de `amss-jgm9` queda
 > fuera de su criterio, sin efecto en el giroscopio
-> ([`S26_pruebas_imu.md`](Evidencia/S26_pruebas_imu.md)).
+> ([`S26_pruebas_imu.md`](../Evidencia/S26_pruebas_imu.md)).
 
 Si responde `0xd1`, se comprueba que el sensor mide bien con las siete pruebas de
-[`PRUEBAS_IMU.md`](PRUEBAS_IMU.md) (identidad, gravedad, ruido, orientación de los ejes, giros de
+[`PRUEBAS_IMU.md`](../PRUEBAS_IMU.md) (identidad, gravedad, ruido, orientación de los ejes, giros de
 90° y 360° y deriva), antes de integrarlo en la navegación.
 
 ### 1.5 · Copiar las grabaciones pendientes (tarde)
@@ -142,7 +142,7 @@ Si responde `0xd1`, se comprueba que el sensor mide bien con las siete pruebas d
 |---|---|
 | Qué | Copiar a `~/tesis/` de los dos lo corregido en la §1.2 (`corrida_nav2.py`, `correr_corrida_nav2.sh`, `lanzar_bag.inc`), los mapas y el catálogo de los pisos 3 y 4, y el mapa corregido del piso 2 |
 | Comando | `bash herramientas/nivelar_carros.sh --copiar`. Compara 21 archivos de `~/tesis/` con el md5 del repositorio, copia los que falten o difieran y vuelve a comparar. Informa además del parche de rf2o y de la partición instalada en `/etc` |
-| Comprobación | `Los vehiculos estan nivelados con el repositorio.` Si avisa de la partición en `/etc`, se reinstala con el procedimiento del bloque A ([`DISENO_AISLAMIENTO_DOS_CARROS.md`](DISENO_AISLAMIENTO_DOS_CARROS.md)), no copiándola a mano |
+| Comprobación | `Los vehiculos estan nivelados con el repositorio.` Si avisa de la partición en `/etc`, se reinstala con el procedimiento del bloque A ([`DISENO_AISLAMIENTO_DOS_CARROS.md`](../DISENO_AISLAMIENTO_DOS_CARROS.md)), no copiándola a mano |
 | Si falla | Si un vehículo no responde, queda anotado y se cierra en cuanto vuelva a la red |
 | Cierre | Ningún archivo distinto del repositorio en ninguno de los dos |
 
@@ -163,10 +163,10 @@ habría que instalar sin internet. El filtro es el EKF de `robot_localization` 3
 
 | Pieza | Archivo | Prueba en el portátil |
 |---|---|---|
-| Nodo de la IMU: publica `imu/data` a 25 Hz con el sesgo medido al arrancar (a 50 Hz cargaba demasiado la tarjeta, §2.3) | `deepracer_bringup/scripts/imu_bmi160.py` | [`prueba_imu_bmi160.py`](../herramientas/prueba_imu_bmi160.py), 18 de 18 |
+| Nodo de la IMU: publica `imu/data` a 25 Hz con el sesgo medido al arrancar (a 50 Hz cargaba demasiado la tarjeta, §2.3) | `deepracer_bringup/scripts/imu_bmi160.py` | [`prueba_imu_bmi160.py`](../../herramientas/prueba_imu_bmi160.py), 18 de 18 |
 | Marco `imu_link` con la orientación medida | `deepracer_hardware.urdf` | `prueba_nav2_hardware_ns.py`, parte 3 |
 | `imu:=true` en el lanzador: IMU, EKF, y rf2o en `odom_rf2o` sin TF | `nav2_hardware.launch.py` | `prueba_nav2_hardware_ns.py`, 102 de 102; sin IMU, igual que antes |
-| El EKF toma el avance de rf2o y el rumbo de la IMU | `parametros_ekf` en el lanzador | [`prueba_ekf_imu.py`](../herramientas/prueba_ekf_imu.py), 9 de 9: con rf2o diciendo «recta» y la IMU un giro de 90°, el filtro da 89,4° a 90,0° |
+| El EKF toma el avance de rf2o y el rumbo de la IMU | `parametros_ekf` en el lanzador | [`prueba_ekf_imu.py`](../../herramientas/prueba_ekf_imu.py), 9 de 9: con rf2o diciendo «recta» y la IMU un giro de 90°, el filtro da 89,4° a 90,0° |
 | `IMU=true` en el arranque, con comprobación de `imu/data` y `odom` | `nav2_mapa_guardado.sh` | — |
 | Cada corrida graba `imu/data` y `odom_rf2o` | `correr_corrida_nav2.sh` | — |
 | Copia del nodo y de `probar_imu.py` | `nivelar_carros.sh` | — |
@@ -176,13 +176,13 @@ covarianza cero, y con su rumbo dentro el mismo giro de 90° queda en 71°.
 
 ### 2.2 · Orientación de los ejes y calibración (hecho el 5-oct)
 
-Está en [`S26_pruebas_imu.md`](Evidencia/S26_pruebas_imu.md). Los ejes del sensor son x a la
+Está en [`S26_pruebas_imu.md`](../Evidencia/S26_pruebas_imu.md). Los ejes del sensor son x a la
 izquierda, y hacia adelante y z hacia abajo, igual en los dos vehículos. El sesgo en z es de
 0,65 °/s en `amss-ez9n` y 0,47 °/s en `amss-jgm9`, estable en la sesión. El nodo lo mide en cada arranque.
 
 ### 2.3 · La IMU y el EKF en los vehículos (hecho el 5-oct en la noche)
 
-Resultado, en [`S26_integracion_imu_vehiculos.md`](Evidencia/S26_integracion_imu_vehiculos.md): la
+Resultado, en [`S26_integracion_imu_vehiculos.md`](../Evidencia/S26_integracion_imu_vehiculos.md): la
 IMU queda aprobada para el rumbo en los dos. En el giro de 90° contra una línea del piso, el filtro
 midió +90,17° en racey y +88,38° en deepy; quieto, el rumbo se mueve 0,3° o menos por minuto,
 mientras rf2o solo deriva hasta 5,9°. Por la carga de la tarjeta, la IMU quedó a 25 Hz y el filtro
@@ -222,7 +222,7 @@ futuro.
 
 | | |
 |---|---|
-| Montaje | El de [`TOPOLOGIA_RED.md`](TOPOLOGIA_RED.md), pasos 1 a 8: un punto de acceso de 5 GHz por piso (canal 44 en el 3 y 36 en el 4, ancho de 40 MHz), los dos en puente, con DHCP apagado y unidos por cable al router, que sigue de respaldo en 2,4 GHz. *Este renglón decía «repetidores… canales 1, 6 y 11», el diseño en 2,4 GHz que se descartó el 5-oct al encontrar que los vehículos no podían transmitir en 5 GHz ([`S26_red_5ghz_regulatorio.md`](Evidencia/S26_red_5ghz_regulatorio.md))* |
+| Montaje | El de [`TOPOLOGIA_RED.md`](../TOPOLOGIA_RED.md), pasos 1 a 8: un punto de acceso de 5 GHz por piso (canal 44 en el 3 y 36 en el 4, ancho de 40 MHz), los dos en puente, con DHCP apagado y unidos por cable al router, que sigue de respaldo en 2,4 GHz. *Este renglón decía «repetidores… canales 1, 6 y 11», el diseño en 2,4 GHz que se descartó el 5-oct al encontrar que los vehículos no podían transmitir en 5 GHz ([`S26_red_5ghz_regulatorio.md`](../Evidencia/S26_red_5ghz_regulatorio.md))* |
 | Prueba | El procedimiento de RF-15 de [`HOJA_CAMPO_SEGUNDO_DEEPRACER.md`](HOJA_CAMPO_SEGUNDO_DEEPRACER.md), con un vehículo en cada piso, en los puntos de salida |
 | Esperado | `CUMPLE` del medidor, y los dos vehículos responden al ping desde cualquier punto de su pasillo |
 | Si falla | Acercar o mover los repetidores; si no hay cobertura en todo el pasillo, se eligen rutas dentro de la cobertura |
@@ -236,8 +236,8 @@ futuro.
 > vehículos. **Falta**: separar los canales (los dos están en el 36), sacar los FiberHome de modo
 > malla, los SSID por piso, las reservas de DHCP, el cable entre plantas, y **repetir RF-15 con un
 > vehículo en cada piso**, que es lo único que cierra esta tarea. Lista completa en el §3.bis de
-> [`TOPOLOGIA_RED.md`](TOPOLOGIA_RED.md); lo medido, en
-> [`S26_bucle_capa2_y_red_dos_AP.md`](Evidencia/S26_bucle_capa2_y_red_dos_AP.md).
+> [`TOPOLOGIA_RED.md`](../TOPOLOGIA_RED.md); lo medido, en
+> [`S26_bucle_capa2_y_red_dos_AP.md`](../Evidencia/S26_bucle_capa2_y_red_dos_AP.md).
 >
 > Estado, 6-oct: **prerrequisito resuelto, cierre pendiente.** El 5-oct se encontró y arregló que a
 > los dos vehículos les faltaba `regulatory.db` y no podían transmitir en 5 GHz; con eso, RF-15
@@ -277,7 +277,7 @@ siguiente.
 | 1 | Colocar el vehículo | Centro a 1,00 m de la pared sur y a 1,25 m de la pared este, mirando al norte | — | Vehículo en la salida |
 | 2 | Arrancar Nav2 en racey, con IMU y margen de 0,5 m. No tocar el vehículo durante el arranque: la IMU mide su sesgo | `IMU=true MARGEN=0.5 CARRO=192.168.0.104 MAPA=/home/deepracer/tesis/piso4.yaml POSE_X=24.45 POSE_Y=1.21 POSE_YAW=3.1416 ESCALA=1.0 bash herramientas/nav2_mapa_guardado.sh   # ruta fija del vehiculo` | `CADENA LISTA`, con `imu/data` y `odom` publicando, y `registrando la carga de la tarjeta en /home/deepracer/carga_...csv` | Nav2 activo |
 | 2b | Carga en vivo, en otra terminal, mientras dura la cadena | `ssh -t deepracer@192.168.0.104 htop` | La tarjeta, con todo cargado | Ver el porcentaje de cada núcleo y qué procesos lo ocupan |
-| 3 | Comprobar las rutas sin mover el vehículo | `compute_path_to_pose` a los tres salones (§4.3 de [`GUIA_PISOS_3_Y_4.md`](GUIA_PISOS_3_Y_4.md)) | `SUCCEEDED` | Tres rutas |
+| 3 | Comprobar las rutas sin mover el vehículo | `compute_path_to_pose` a los tres salones (§4.3 de [`GUIA_PISOS_3_Y_4.md`](../GUIA_PISOS_3_Y_4.md)) | `SUCCEEDED` | Tres rutas |
 | 4 | Tramo 1, con la pose inicial | `ssh deepracer@192.168.0.104 "sudo -n bash ~deepracer/tesis/correr_corrida_nav2.sh p4r_04 --salida 24.45 1.21 3.1416 --meta 17.22 2.06 3.1416 --mapa /home/deepracer/tesis/piso4.yaml --csv ~deepracer/campana_s26_racey.csv"` (ruta fija del vehículo) | Fila en el CSV | Marca en el piso junto al centro del vehículo; avance desde la salida y distancia a la pared oeste |
 | 5 | Tramo 2, sin pose inicial | La misma orden con `p4r_05`, `--sin-pose-inicial` en lugar de `--salida` y `--meta 9.31 2.15 3.1416` | Fila en el CSV; AMCL no se reinicia | Marca nueva; avance medido de marca a marca y distancia a la pared oeste |
 | 6 | Tramo 3, sin pose inicial | Igual, `p4r_06` y `--meta 6.20 2.03 3.1416` | Igual | Igual |
@@ -287,7 +287,7 @@ siguiente.
 Decisión del 7-oct: la cadena se corre directamente con IMU y margen de 0,5 m, una sola vez por
 vehículo, que es como funcionará el sistema. La referencia sin IMU son las corridas del piso 4 del
 2-oct (+3,3 % y −4,6 % de error de avance, llegadas a 0,57 m y 0,62 m con margen de 1,0 m;
-[`S25_pisos34_campo.md`](Evidencia/S25_pisos34_campo.md)). Durante la cadena se mide cuánto se llena
+[`S25_pisos34_campo.md`](../Evidencia/S25_pisos34_campo.md)). Durante la cadena se mide cuánto se llena
 la tarjeta con todo cargado: Nav2, AMCL, rf2o, IMU, filtro, puente y grabador. Se mira en vivo con
 `htop` (paso 2b), y queda el registro que deja `nav2_mapa_guardado.sh` en
 `/home/deepracer/carga_<fecha>_<hora>.csv` (ruta fija del vehículo): una fila cada 5 s con el procesador por proceso, la carga,
@@ -305,7 +305,7 @@ IMU y margen de 0,5 m las llegadas no mejoran respecto al 2-oct, o si la tarjeta
 carga (Nav2 desactivado por el gestor, o el controlador fuera de su frecuencia). G-3 se reporta con su cifra.
 
 Estado del 7-oct, con racey: hecho
-([`S26_piso4_cadena_media_vuelta.md`](Evidencia/S26_piso4_cadena_media_vuelta.md)).
+([`S26_piso4_cadena_media_vuelta.md`](../Evidencia/S26_piso4_cadena_media_vuelta.md)).
 
 - Los tres tramos terminaron en SUCCEEDED, con llegadas a 0,26 m (estimada, sin cinta), 0,45 m y
   0,06 m.
@@ -338,13 +338,13 @@ Estado del 7-oct, con racey y sin el radio real en el planificador.
   salida, medido con cinta.
 - En la salida, con 2,5 m de ancho, la media vuelta de Nav2 abortó dos veces (`p4r_11` y `p4r_11b`).
 - Salió con la media vuelta en dos tiempos de
-  [`herramientas/media_vuelta.py`](../herramientas/media_vuelta.py): 182° y luego SUCCEEDED al 403
+  [`herramientas/media_vuelta.py`](../../herramientas/media_vuelta.py): 182° y luego SUCCEEDED al 403
   (`p4r_11c`).
 - La reversa de racey quedó en 0,75 (`escala_reversa`).
-- Detalle en [`S26_piso4_cadena_media_vuelta.md`](Evidencia/S26_piso4_cadena_media_vuelta.md).
+- Detalle en [`S26_piso4_cadena_media_vuelta.md`](../Evidencia/S26_piso4_cadena_media_vuelta.md).
 
 Estado del 8-oct: la media vuelta pasa al agente, protegida
-([`media_vuelta.py`](../Robot/aws-deepracer/coordinacion/coordinacion/media_vuelta.py)).
+([`media_vuelta.py`](../../Robot/aws-deepracer/coordinacion/coordinacion/media_vuelta.py)).
 
 - Alterna reversa y avance con la dirección a tope hasta girar 180°. Corta cada tiempo cuando el
   LiDAR o el mapa (con la lámina de la escalera) dejan menos de 0,10 m en el sentido de la marcha.
@@ -353,9 +353,9 @@ Estado del 8-oct: la media vuelta pasa al agente, protegida
 - El coordinador la pide antes de una meta que queda detrás del vehículo. Si no se completa, sigue
   Nav2 como antes.
 - En el vehículo el agente necesita `-p topico_scan:=/rplidar_ros/scan` (§4.2, paso 3).
-- Pruebas: [`prueba_media_vuelta.py`](../herramientas/prueba_media_vuelta.py), con un vehículo
+- Pruebas: [`prueba_media_vuelta.py`](../../herramientas/prueba_media_vuelta.py), con un vehículo
   simulado de radios distintos por lado en la salida del piso 4, 18 de 18; y
-  [`prueba_media_vuelta_ros.py`](../herramientas/prueba_media_vuelta_ros.py), con el agente real y
+  [`prueba_media_vuelta_ros.py`](../../herramientas/prueba_media_vuelta_ros.py), con el agente real y
   un mundo mínimo, 9 de 9.
 - En el campo se comprueba dentro de las misiones de G-5, sin una prueba aparte.
 
@@ -366,7 +366,7 @@ y a 1,26 m de la pared este. En el mapa es (22,10, 1,06). Meta: Salón 302 (9,31
 vez que un vehículo navega en el piso 3; sirve para comprobar el mapa antes de G-5.
 
 Estado del 8-oct, con deepy
-([`S26_piso3_deepy_y_saturacion.md`](Evidencia/S26_piso3_deepy_y_saturacion.md)):
+([`S26_piso3_deepy_y_saturacion.md`](../Evidencia/S26_piso3_deepy_y_saturacion.md)):
 
 - Cinco corridas encadenadas (salida → 303 → 302 → 301 → escalera → 303), todas en SUCCEEDED y
   sin recuperaciones. No se midieron con flexómetro.
@@ -390,7 +390,7 @@ El equipo aprobó el 5-oct dos cambios en `coordinador.py`:
 Se descartó la opción A (arrancar la odometría en la salida del mapa): su deriva se acumula entre
 misiones encadenadas, y con +3,3 % en 14,57 m ya son 0,48 m.
 
-[`prueba_coordinador_vehiculo.py`](../Robot/aws-deepracer/coordinacion/test/prueba_coordinador_vehiculo.py)
+[`prueba_coordinador_vehiculo.py`](../../Robot/aws-deepracer/coordinacion/test/prueba_coordinador_vehiculo.py)
 corre el coordinador real con dos robots falsos cuya `/odom` empieza en su salida, como rf2o: 15 de
 15. Prueba una misión del Salón 302 al 402 con relevo, otra encadenada sin reubicar, la cancelación
 y el agente callado. Como control, el mismo escenario leyendo `/odom` rechaza la llegada. Con el
@@ -407,7 +407,7 @@ la IMU (§3.2).
 ### 4.2 · Coordinador, agentes e interfaz en los vehículos
 
 Ensayado el 5-oct en la noche con deepy, sin Nav2
-([`S26_integracion_imu_vehiculos.md`](Evidencia/S26_integracion_imu_vehiculos.md) §5): el portátil
+([`S26_integracion_imu_vehiculos.md`](../Evidencia/S26_integracion_imu_vehiculos.md) §5): el portátil
 recibe el estado de los agentes y pide misiones al coordinador por acción, y la interfaz conecta con
 `rosbridge` en el portátil. Falta verlo desde el teléfono. Para el paso 3, `ros2 topic echo` necesita
 el tipo: `ros2 topic echo --once /robot2/estado coordinacion_msgs/msg/EstadoRobot`; sin él abandona si
@@ -415,7 +415,7 @@ aún no descubrió el tópico. Cada mensaje de Jazzy imprime en el portátil `se
 remaining buffer`, sin perderse ninguno.
 
 Desde el 9-oct el coordinador y el grabador corren en el portátil, en un contenedor con Jazzy
-([`coordinador_portatil.sh`](../herramientas/coordinador_portatil.sh)), y no en racey. El 8-oct, con
+([`coordinador_portatil.sh`](../../herramientas/coordinador_portatil.sh)), y no en racey. El 8-oct, con
 los dos en racey y las dos cadenas en la red, las tarjetas llegaron a carga 22–33 y G-5 no se pudo
 correr. Con Jazzy en el contenedor, el coordinador habla la misma acción de Nav2 que los vehículos
 (la razón de D6 desaparece). Cada vehículo tiene al portátil como único par conocido y los vehículos
@@ -507,5 +507,5 @@ push.
 | El miércoles la IMU no permite bajar el margen de Nav2 a 0,5 m | El coordinador rechazaría las llegadas entre 0,5 y 1,0 m (§4.1): decidirlo con los resultados del miércoles, antes de la §4.3 |
 | La red no cubre los dos pisos | Rutas dentro de la cobertura; el coordinador sigue en racey |
 | La media vuelta no sale ni con la meta intermedia | G-5 en la variante B; el regreso automático queda como limitación declarada |
-| G-5 no sale el viernes | Se repite el lunes 12. Si tampoco sale, el cronograma prevé bajar a un vehículo real y uno simulado (sección 9 de [`CRONOGRAMA_S17_S32.md`](CRONOGRAMA_S17_S32.md)) |
+| G-5 no sale el viernes | Se repite el lunes 12. Si tampoco sale, el cronograma prevé bajar a un vehículo real y uno simulado (sección 9 de [`CRONOGRAMA_S17_S32.md`](../CRONOGRAMA_S17_S32.md)) |
 | Un vehículo se queda sin batería | Cargar las dos baterías (cómputo y tracción) cada noche; llevar el cargador a la sesión |

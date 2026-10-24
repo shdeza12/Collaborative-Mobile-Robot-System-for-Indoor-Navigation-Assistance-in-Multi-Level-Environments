@@ -1,6 +1,6 @@
 # Sesión de G-2 y G-3 con `amss-jgm9` en el piso 2 (30 de septiembre, noche)
 
-Registro del bloque B-bis de [`PLAN_S25.md`](../PLAN_S25.md), en el extremo oeste del piso 2 del
+Registro del bloque B-bis de [`PLAN_S25.md`](../historial/PLAN_S25.md), en el extremo oeste del piso 2 del
 edificio, sobre el mapa `mundo_definitivo_piso2`. Es la primera vez que un vehículo navega en los
 pasillos que modela la simulación. El sitio lo confirmó el equipo antes de arrancar Nav2: el hall
 del extremo oeste, con la puerta del IEEE en la pared sur, el pasillo hacia el Lab. Sistemas 313 al

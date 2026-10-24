@@ -1,7 +1,7 @@
 # La escala de tracción, medida sobre el carro: dos defectos en vez de uno
 
 **Fecha de la salida:** jueves 2026-09-17, tarde y noche, con el `amss-jgm9` (192.168.0.100).
-**Qué se buscaba:** el §10 de [`HOJA_CAMPO_G2.md`](../HOJA_CAMPO_G2.md) — la tabla `throttle` →
+**Qué se buscaba:** el §10 de [`HOJA_CAMPO_G2.md`](../historial/HOJA_CAMPO_G2.md) — la tabla `throttle` →
 velocidad de RF-14, con al menos un punto por debajo de 0,25 m/s, usando
 [`sostener_traccion.py`](../../herramientas/sostener_traccion.py), escrito y empujado esa misma
 mañana en `e7139d4`.
@@ -57,8 +57,8 @@ nueve GPIO exportados, los mismos que el `.102`.
 ## 2. La regla de dueños vale también para publicar, y en esa dirección no avisa
 
 El repositorio ya enuncia la regla, y con precisión: **«el mismo dueño a los dos lados», no «todo
-con `sudo`»** ([`GUIA_PASADA_MAPEO.md`](../GUIA_PASADA_MAPEO.md):463,
-[`GUIA_PASADA_LOCALIZACION.md`](../GUIA_PASADA_LOCALIZACION.md):324–334). Pero está escrita para el
+con `sudo`»** ([`GUIA_PASADA_MAPEO.md`](../historial/GUIA_PASADA_MAPEO.md):463,
+[`GUIA_PASADA_LOCALIZACION.md`](../historial/GUIA_PASADA_LOCALIZACION.md):324–334). Pero está escrita para el
 lado de **leer**: `ros2 bag record`, `topic hz`, `topic echo`. El aviso dice que un tópico mudo
 puede ser un falso negativo de permisos.
 

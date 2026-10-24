@@ -1,6 +1,6 @@
 # Plan de implementación del registro de misión (RF-25)
 
-> Implementa [`ESQUEMA_REGISTRO_MISION.md`](ESQUEMA_REGISTRO_MISION.md), congelado el 2026-08-26 en
+> Implementa [`ESQUEMA_REGISTRO_MISION.md`](../ESQUEMA_REGISTRO_MISION.md), congelado el 2026-08-26 en
 > la versión `1.0.0`. Ese documento dice **qué** se guarda y por qué; éste dice **en qué orden se
 > construye y qué se sacrifica si el tiempo no alcanza**.
 

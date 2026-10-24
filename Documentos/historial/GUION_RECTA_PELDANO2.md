@@ -1,6 +1,6 @@
 # Guion de campo — la recta del peldaño 2
 
-> **Estado al 2026-10-06:** Histórica: escrita el 23-sep para la recta del peldaño 2. G-2 quedó alcanzada el 2-oct. Qué seguir para cada tarea: [`INDICE_GUIAS.md`](INDICE_GUIAS.md).
+> **Estado al 2026-10-06:** Histórica: escrita el 23-sep para la recta del peldaño 2. G-2 quedó alcanzada el 2-oct. Qué seguir para cada tarea: [`INDICE_GUIAS.md`](../INDICE_GUIAS.md).
 
 **Fecha de redacción:** 2026-09-23
 **Qué aísla:** el peldaño 2 de la escalera Nav2 — *odometría publicada y validada sola*.

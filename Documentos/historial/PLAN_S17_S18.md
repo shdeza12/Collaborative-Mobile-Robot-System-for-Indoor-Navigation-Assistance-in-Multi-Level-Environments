@@ -212,7 +212,7 @@ Todo este día lo hago yo. Tú revisas el resultado.
 - [ ] **Paso 6.** Commit:
 
   ```bash
-  git add Documentos/ENTORNO_DE_EVALUACION.md Documentos/PLAN_S17_S18.md Documentos/Entregables/Cronograma_S17_S32.tex Documentos/Entregables/Entregable_semana_17.tex
+  git add Documentos/ENTORNO_DE_EVALUACION.md Documentos/historial/PLAN_S17_S18.md Documentos/Entregables/Cronograma_S17_S32.tex Documentos/Entregables/Entregable_semana_17.tex
   git commit -m "Add: especificacion del entorno de evaluacion y ajuste de los documentos de S17"
   ```
 
@@ -604,7 +604,7 @@ nuevo**; es dejar constancia de que la corrección de meshes no alteró el compo
   hay a dónde volver.
 
   ```bash
-  git add Robot/aws-deepracer/deepracer_bringup/launch/ Robot/aws-deepracer/deepracer_description/ Documentos/Evidencia/ Documentos/PLAN_S17_S18.md
+  git add Robot/aws-deepracer/deepracer_bringup/launch/ Robot/aws-deepracer/deepracer_description/ Documentos/Evidencia/ Documentos/historial/PLAN_S17_S18.md
   git commit -m "Add: Nav2 y AMCL bajo espacio de nombres, y correccion de las URIs de los meshes"
   ```
 

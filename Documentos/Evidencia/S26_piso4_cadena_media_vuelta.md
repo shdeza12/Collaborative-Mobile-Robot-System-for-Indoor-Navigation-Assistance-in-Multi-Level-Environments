@@ -1,7 +1,7 @@
 # Cadena del piso 4 con racey y media vuelta en la salida (7 de octubre, tarde)
 
 Primera campaña en el pasillo del piso 4 con toda la cadena del vehículo: Nav2, AMCL, rf2o, la IMU y
-el filtro, con `IMU=true` y margen de llegada de 0,5 m (§3.2 y §3.3 de [`PLAN_S26.md`](../PLAN_S26.md)).
+el filtro, con `IMU=true` y margen de llegada de 0,5 m (§3.2 y §3.3 de [`PLAN_S26.md`](../historial/PLAN_S26.md)).
 Solo corrió `amss-jgm9` (racey), entre las 17:38 y las 18:44. `amss-ez9n` (deepy) quedó en red después
 de corregir su dirección (§6), pero se apagó para que un solo vehículo corriera la cadena. El equipo colocó el vehículo, marcó las llegadas en el piso y
 midió con flexómetro las que pudo. Claude lanzó las corridas por SSH desde el portátil y analizó las

@@ -10,7 +10,7 @@ vehículo y no se modificó ninguna constante del mapeo.**
 
 ## 0. Por qué se escribe esto antes de salir a campo
 
-[`MAPA_TRABAJO_RESTANTE.md`](../MAPA_TRABAJO_RESTANTE.md):51 dejó a **RF-11 como el único de los
+[`MAPA_TRABAJO_RESTANTE.md`](../historial/MAPA_TRABAJO_RESTANTE.md):51 dejó a **RF-11 como el único de los
 seis requisitos abiertos sin bloqueo**, con el pendiente acotado: el recorrido del 28-ago se mandó
 por `/ctrl_pkg/servo_msg` y el requisito pide `/<ns>/cmd_vel`, *un puente que nunca se ha ejercitado
 sobre hardware*.
@@ -135,7 +135,7 @@ Lo que **no** estaba escrito es sobre qué escalón cae la velocidad de crucero 
 al cruzarlo con el umbral medido sobre el suelo.
 
 > **Dos documentos del repositorio dan aquí la escalera equivocada.**
-> [`HOJA_CAMPO_G2.md`](../HOJA_CAMPO_G2.md) §10.1 y el encabezado de
+> [`HOJA_CAMPO_G2.md`](../historial/HOJA_CAMPO_G2.md) §10.1 y el encabezado de
 > [`medir_escala_traccion.py`](../../herramientas/medir_escala_traccion.py) tabulan **0,5 · 0,8 ·
 > 1,0**, que son los escalones *nominales*: los dos omiten el reescalado por `MAX_SPEED_PCT`. Los
 > valores que el servo recibe de verdad son **0,4247 · 0,6242 · 0,7341**, un 15 % más bajos.
@@ -266,7 +266,7 @@ arbitraria de elegir las constantes.
 ### 5.1 El procedimiento ya está escrito, y no hace falta reescribirlo
 
 No se redacta un guion nuevo. La rampa es el **Bloque 7** de
-[`HOJA_CAMPO_G2.md`](../HOJA_CAMPO_G2.md) §10, con su herramienta de campo
+[`HOJA_CAMPO_G2.md`](../historial/HOJA_CAMPO_G2.md) §10, con su herramienta de campo
 (`herramientas/sostener_traccion.py --rampa DESDE:HASTA:PASO`, con hombre muerto, tope duro de
 `--tope` y cuenta atrás) y su herramienta de análisis
 ([`medir_escala_traccion.py`](../../herramientas/medir_escala_traccion.py)). Su criterio de cierre
@@ -310,7 +310,7 @@ exactamente 2 s de velocidad de crucero. Cuesta cinco corridas más —de once s
 convierte una cifra contaminada en una medida.
 
 El guion completo, con las trece corridas, el plan de parada y qué hacer si algo falla, queda
-en el **§10.3-ter** de [`HOJA_CAMPO_G2.md`](../HOJA_CAMPO_G2.md), junto a los procedimientos que
+en el **§10.3-ter** de [`HOJA_CAMPO_G2.md`](../historial/HOJA_CAMPO_G2.md), junto a los procedimientos que
 sustituye. Los comandos se ensayaron en el portátil el 2026-09-22: la validación rechaza 0,60 sin
 `--tope` con el mensaje que el guion cita, y lo acepta con `--tope 1.0`.
 
@@ -404,7 +404,7 @@ Escritos **antes** de correr. No se ajustan después.
 ### 7.1 Una discrepancia que se deja anotada, no corregida
 
 [`REQUISITOS.md`](../REQUISITOS.md):114 escribe el criterio de RF-11 como «recorrido medido contra
-`/odom`». [`MAPA_TRABAJO_RESTANTE.md`](../MAPA_TRABAJO_RESTANTE.md):40 lo escribe como «recorrido
+`/odom`». [`MAPA_TRABAJO_RESTANTE.md`](../historial/MAPA_TRABAJO_RESTANTE.md):40 lo escribe como «recorrido
 medido sobre el carro», y §1.3 como «medir con flexómetro», dejando `/odom` para **RF-13**, que la
 propia celda de `REQUISITOS.md`:114 ya señala como requisito distinto.
 
@@ -431,5 +431,5 @@ documentos.
 | El mapeo era binario antes de la corrección | [`S19_spike_p1_p2_hardware.md`](S19_spike_p1_p2_hardware.md) §2.2 |
 | `ServoCtrlMsg` difiere entre repositorio y vehículo | [`S19_spike_p1_p2_hardware.md`](S19_spike_p1_p2_hardware.md) §2.4 |
 | Las velocidades de Nav2 | `nav2_params.yaml`:78, `nav2_params_nav_amcl_dr_demo.yaml`:63, `nav2_slam_params.yaml`:70 |
-| El procedimiento de rampa ya existe | [`HOJA_CAMPO_G2.md`](../HOJA_CAMPO_G2.md) §10, `herramientas/sostener_traccion.py`, `herramientas/medir_escala_traccion.py` |
+| El procedimiento de rampa ya existe | [`HOJA_CAMPO_G2.md`](../historial/HOJA_CAMPO_G2.md) §10, `herramientas/sostener_traccion.py`, `herramientas/medir_escala_traccion.py` |
 | Los dos documentos que tabulan los escalones nominales | `HOJA_CAMPO_G2.md`:548–553 y el encabezado de `medir_escala_traccion.py` |

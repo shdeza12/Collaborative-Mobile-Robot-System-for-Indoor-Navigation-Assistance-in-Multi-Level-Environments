@@ -38,7 +38,7 @@ Ninguna de estas filas es una expectativa; todas tienen fecha y artefacto.
 | Dos vehículos operativos, Ubuntu 24.04 + ROS 2 Jazzy, misma red | [`S24_desempate_camara_vehiculo.md`](Evidencia/S24_desempate_camara_vehiculo.md) §1 |
 | LiDAR real publicando `/scan` usable, +23 mm de cota superior de error | [`S19_spike_p1_p2_hardware.md`](Evidencia/S19_spike_p1_p2_hardware.md) §1 |
 | Mapa real del laboratorio, 8,45 × 6,90 m de contenido | [`S20_frente_b_hardware.md`](Evidencia/S20_frente_b_hardware.md) §5 |
-| `odom → base_link` con TF correcta en hardware, dentro de 1 mm | Tarea 1.1 del [`MAPA_TRABAJO_RESTANTE.md`](MAPA_TRABAJO_RESTANTE.md), 2026-09-21 |
+| `odom → base_link` con TF correcta en hardware, dentro de 1 mm | Tarea 1.1 del [`MAPA_TRABAJO_RESTANTE.md`](historial/MAPA_TRABAJO_RESTANTE.md), 2026-09-21 |
 | Latencia acotada entre los dos vehículos (RF-15) | [`REQUISITOS.md`](REQUISITOS.md), RF-15 ✅ |
 | Un coordinador que alcanza a los dos robots | [`PROTOCOLO_EXPERIMENTAL.md`](PROTOCOLO_EXPERIMENTAL.md), cerrado el 2026-08-30 |
 | Control del vehículo desde ROS 2, sin la interfaz web del fabricante | [`S20_frente_b_hardware.md`](Evidencia/S20_frente_b_hardware.md) §6 |

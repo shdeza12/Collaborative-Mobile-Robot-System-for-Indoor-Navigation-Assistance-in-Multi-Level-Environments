@@ -219,7 +219,7 @@ El corte C-3 cerró la toma de datos el 16 de octubre. Para las semanas siguient
 | Documento | Qué respalda |
 |---|---|
 | `Documentos/ACTA_GO_NOGO.md` | Compuertas, corte C-3 y desviaciones declaradas |
-| `Documentos/PLAN_S27.md` | Secciones 2 y 3 |
+| `Documentos/historial/PLAN_S27.md` | Secciones 2 y 3 |
 | `Documentos/Evidencia/campana_rf27_misiones.csv` | Sorteo de la sección 3 |
 | `Documentos/REQUISITOS.md` | Secciones 4 y 10 |
 | `Documentos/Evidencia/S27_campana_rf27.md` | Secciones 5, 6 y 7 |

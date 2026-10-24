@@ -2,7 +2,7 @@
 
 Para tener abierta en el teléfono durante las pruebas. Dice qué fotografiar, grabar o capturar en
 cada prueba de [`PLAN_S26.md`](PLAN_S26.md), y con qué nombre. La convención completa está en
-[`Evidencia/README.md`](Evidencia/README.md), «Fotos de campo y videos».
+[`Evidencia/README.md`](../Evidencia/README.md), «Fotos de campo y videos».
 
 **La regla:** lo que no se captura el día de la prueba no se recupera. Un informe sin imagen de la
 prueba física pide al jurado que crea lo que no vio.
@@ -34,5 +34,5 @@ prueba física pide al jurado que crea lo que no vio.
 - [ ] Videos a la carpeta compartida del equipo, con el id de la corrida en el nombre.
 - [ ] Fotos reducidas a unos 400 KB, renombradas y copiadas a `Documentos/Evidencia/`.
 - [ ] Cada foto citada en el informe de la prueba, con una línea que diga qué sostiene.
-- [ ] Una fila en el índice de [`Evidencia/README.md`](Evidencia/README.md) por cada informe nuevo,
+- [ ] Una fila en el índice de [`Evidencia/README.md`](../Evidencia/README.md) por cada informe nuevo,
       en el mismo commit.

@@ -4,7 +4,7 @@
 **Qué se buscaba:** el Bloque 3 del G2 —la primera pasada, la que produce el mapa contra el que se
 miden M1 y M2—. **Resultado: cuatro bags, cuatro mapas rechazados.** El Bloque 5 y las seis pasadas
 de localización **no se ejecutaron**, por la regla preinscrita del §7 de
-[`HOJA_CAMPO_G2.md`](../HOJA_CAMPO_G2.md): sin mapa aceptado no hay contra qué localizarse.
+[`HOJA_CAMPO_G2.md`](../historial/HOJA_CAMPO_G2.md): sin mapa aceptado no hay contra qué localizarse.
 
 Este documento existe porque el fallo **no es el que se esperaba**, y la hipótesis que traíamos
 —«se movió demasiado rápido»— quedó refutada por la propia medida.

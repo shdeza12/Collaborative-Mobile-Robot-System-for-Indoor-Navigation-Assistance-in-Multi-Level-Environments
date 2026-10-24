@@ -1,6 +1,6 @@
 # Medir M1 y M2: la pasada de localización, paso a paso
 
-> **Estado al 2026-10-06:** Histórica: escrita el 2-sep para M1 y M2 de aquel G2. Qué seguir para cada tarea: [`INDICE_GUIAS.md`](INDICE_GUIAS.md).
+> **Estado al 2026-10-06:** Histórica: escrita el 2-sep para M1 y M2 de aquel G2. Qué seguir para cada tarea: [`INDICE_GUIAS.md`](../INDICE_GUIAS.md).
 
 Guía de principio a fin para producir las **dos cifras que deciden el G2**: M1 —cuánto
 desplazamiento registra la odometría frente al que mide la cinta— y M2 —cuánto se equivoca AMCL
@@ -62,7 +62,7 @@ a 6,6 Hz, empujando a 0,5 m/s hay ~7 cm entre barridos consecutivos, y conducien
 ~21 cm. **Más solape es más fácil para el algoritmo.** Si esta pasada se empujara, M1 y M2 no
 dirían nada del vehículo: dirían lo que rinde el algoritmo con un sensor movido a mano.
 
-Se conduce con el mando por USB, siguiendo [`GUIA_TELEOP_MANDO.md`](GUIA_TELEOP_MANDO.md). **El
+Se conduce con el mando por USB, siguiendo [`GUIA_TELEOP_MANDO.md`](../GUIA_TELEOP_MANDO.md). **El
 teleop entero como `root`**, por lo del `/dev/shm` que esa guía explica en su §0.2 ter: tiene que
 hablar con `deepracer-core`, que es de `root`.
 
@@ -173,7 +173,7 @@ comprobar que la cadena no aborta**, que es de lo que trata este paso.
 
 **Este paso no es opcional y no es de código.** El §7 del protocolo prohíbe fijar umbrales
 después de ver el dato, y en este caso el dato ya se puede predecir, lo que agrava la cosa. El §4
-de [`Evidencia/S21_preparacion_G2.md`](Evidencia/S21_preparacion_G2.md) demuestra dos cosas:
+de [`Evidencia/S21_preparacion_G2.md`](../Evidencia/S21_preparacion_G2.md) demuestra dos cosas:
 
 1. **M1, tal como está escrito, no puede fallar.** Es un umbral de un solo lado —`≥ 0,90`— que
    tolera un 10 % cuando el peor error jamás medido es 5,7 %. Y el sesgo del carro es **+2,9 %
@@ -254,7 +254,7 @@ Es un desplazamiento constante, se resta y ya está. Lo que no se puede es **no 
 
 ### Paso 2.3 — Montar el mando y comprobar que el carro obedece
 
-Sigue [`GUIA_TELEOP_MANDO.md`](GUIA_TELEOP_MANDO.md), Partes 1 a 5. Resumen de lo que no se puede
+Sigue [`GUIA_TELEOP_MANDO.md`](../GUIA_TELEOP_MANDO.md), Partes 1 a 5. Resumen de lo que no se puede
 olvidar:
 
 - El mando va **por USB al carro**, no por Bluetooth al portátil.

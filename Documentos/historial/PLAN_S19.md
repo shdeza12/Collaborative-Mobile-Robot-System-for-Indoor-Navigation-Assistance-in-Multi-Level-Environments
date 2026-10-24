@@ -4,7 +4,7 @@ Se escribe el 2026-08-19 por la noche. Existe porque los dos primeros días de l
 trabajaron sin plan escrito, y sin plan no hay forma de saber si un día se desvió: solo queda la
 sensación de haber estado ocupado.
 
-Manda el [cronograma S17–S32](CRONOGRAMA_S17_S32.md) §S19. Este documento no lo reinterpreta: lo
+Manda el [cronograma S17–S32](../CRONOGRAMA_S17_S32.md) §S19. Este documento no lo reinterpreta: lo
 reparte entre los dos días que quedan.
 
 ---
@@ -15,7 +15,7 @@ El cronograma fija cuatro condiciones. Al terminar el miércoles:
 
 | # | Condición de cierre | Estado |
 |---|---|---|
-| 1 | Informe del spike con las **preguntas 1, 2 y 4** respondidas y su impacto en el plan | ✅ [`Evidencia/S19_spike_p4_humble_jazzy.md`](Evidencia/S19_spike_p4_humble_jazzy.md) + [`Evidencia/S19_spike_p1_p2_hardware.md`](Evidencia/S19_spike_p1_p2_hardware.md) |
+| 1 | Informe del spike con las **preguntas 1, 2 y 4** respondidas y su impacto en el plan | ✅ [`Evidencia/S19_spike_p4_humble_jazzy.md`](../Evidencia/S19_spike_p4_humble_jazzy.md) + [`Evidencia/S19_spike_p1_p2_hardware.md`](../Evidencia/S19_spike_p1_p2_hardware.md) |
 | 2 | **Matriz de requisitos** publicada | 🔴 Sin empezar |
 | 3 | **Protocolo experimental de OE4**, escrito antes de instrumentar nada | 🔴 Sin empezar |
 | 4 | Los **dos agentes navegando simultáneamente**, cada uno en su nivel | 🔴 Sin empezar |
@@ -38,7 +38,7 @@ Ninguno necesita hardware ni simulación. Van primero por eso: no dependen de qu
 ### 2.1 Matriz de requisitos RF ↔ OE ↔ prueba *(bloque principal)*
 
 Cierra el riesgo **R5** y desbloquea **OE1**, que está en 55 % y no sube porque falta este artefacto.
-La materia prima ya existe: [`REQUISITOS.md`](REQUISITOS.md) tiene los 34 requisitos con su fuente y
+La materia prima ya existe: [`REQUISITOS.md`](../REQUISITOS.md) tiene los 34 requisitos con su fuente y
 su prueba. Lo que falta es la **traza**: qué objetivo específico sostiene cada requisito y con qué
 evidencia concreta se da por verificado.
 
@@ -91,7 +91,7 @@ tarde: si aparece un defecto, hay margen.
 
 ### 3.2 Corte semanal *(viernes por la noche)*
 
-- Actualizar [`ESTADO.md`](../ESTADO.md): avance de **OE2** —por primera vez con sensado y control
+- Actualizar [`ESTADO.md`](../../ESTADO.md): avance de **OE2** —por primera vez con sensado y control
   físicos medidos, no declarados—, R8 con su comprobación en hardware, y la bitácora.
 - Emitir el entregable de S19.
 - Commit. Está pendiente de versionar: `herramientas/verificar_lidar.py`,

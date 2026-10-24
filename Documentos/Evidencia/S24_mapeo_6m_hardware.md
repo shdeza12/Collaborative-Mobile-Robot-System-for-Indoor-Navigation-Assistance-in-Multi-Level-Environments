@@ -72,7 +72,7 @@ en el tramo central— no se ha comparado con el pasillo.
 
 ## 3. La cifra que cierra media pregunta de RF-14
 
-[`HOJA_CAMPO_G2.md`](../HOJA_CAMPO_G2.md) §10.4 fija, **antes de medir**, qué
+[`HOJA_CAMPO_G2.md`](../historial/HOJA_CAMPO_G2.md) §10.4 fija, **antes de medir**, qué
 significaría cada resultado de la escala de tracción, y dice que falta un solo
 dato: qué velocidad real produce un `throttle` dado. Estas tres corridas lo dan.
 
@@ -121,7 +121,7 @@ corrida B recorrió sus 6 m enteros y no había mapa que guardar.
 En Humble **no** es lifecycle, y por eso `mapear_desde_bag.sh` funciona en el
 portátil sin hacer nada de esto. Es una diferencia Humble↔Jazzy, no un fallo.
 
-Ya estaba escrito en [`GUION_NAV2_HARDWARE.md`](../GUION_NAV2_HARDWARE.md) §3, del
+Ya estaba escrito en [`GUION_NAV2_HARDWARE.md`](../historial/GUION_NAV2_HARDWARE.md) §3, del
 mismo día. **Se volvió a descubrir por no haberlo leído**, y eso costó una corrida
 de campo entera. Queda anotado como lo que es: un fallo de método, no de software.
 
@@ -202,7 +202,7 @@ efectivamente enviadas. Un cero ahí es inequívoco.
 > **El 5.** `amss-jgm9` sí tenía Nav2, `slam_toolbox` y rf2o. La nivelación de los dos carros se
 > había hecho ese mismo día —mismo Nav2 1.3.13, mismo `slam_toolbox` 2.8.5, rf2o compilado en los
 > dos, `~/tesis/` con los mismos md5, según el §0 de
-> [`GUION_NAV2_HARDWARE.md`](../GUION_NAV2_HARDWARE.md)— y rf2o **ya había medido sobre
+> [`GUION_NAV2_HARDWARE.md`](../historial/GUION_NAV2_HARDWARE.md)— y rf2o **ya había medido sobre
 > `amss-jgm9`** esa tarde ([`S24_peldano2_odometria_hardware.md`](S24_peldano2_odometria_hardware.md)).
 > Se afirmó sin comprobarlo en el vehículo, que estaba ocupado, deduciéndolo de que en esta sesión
 > solo se había instalado en el otro. Esas instalaciones del `.102` quedaron redundantes con la

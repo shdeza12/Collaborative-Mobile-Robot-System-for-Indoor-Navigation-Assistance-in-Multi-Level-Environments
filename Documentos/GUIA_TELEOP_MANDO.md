@@ -341,7 +341,7 @@ scp herramientas/teleop_mando.py deepracer@<IP>:~/
 > **Si vas a una salida de campo, copia los dos ficheros de una vez.** El LiDAR tiene el mismo
 > problema —en la tarjeta **no hay ningún workspace del proyecto**, comprobado el 2026-09-07—, así
 > que su lanzador también viaja suelto. Es el Paso 1.5 de
-> [`GUIA_PASADA_MAPEO.md`](GUIA_PASADA_MAPEO.md):
+> [`GUIA_PASADA_MAPEO.md`](historial/GUIA_PASADA_MAPEO.md):
 >
 >     scp Robot/aws-deepracer/deepracer_bringup/launch/lidar_vehiculo.launch.py herramientas/teleop_mando.py deepracer@<IP>:~/
 

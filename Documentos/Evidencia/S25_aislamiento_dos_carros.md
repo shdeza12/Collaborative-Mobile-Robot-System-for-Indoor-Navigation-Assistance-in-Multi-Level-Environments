@@ -1,6 +1,6 @@
 # Aislamiento de los dos vehículos (bloque A, 28 de septiembre)
 
-Registro del bloque A de [`PLAN_S25.md`](../PLAN_S25.md). El diseño y su justificación están en
+Registro del bloque A de [`PLAN_S25.md`](../historial/PLAN_S25.md). El diseño y su justificación están en
 [`DISENO_AISLAMIENTO_DOS_CARROS.md`](../DISENO_AISLAMIENTO_DOS_CARROS.md).
 
 ## Resultado
@@ -58,7 +58,7 @@ encendidos, cada uno recibía 14,68 Hz, que eran los dos láseres mezclados
    desviación entre barridos subió en algunas: 0,111 s en `amss-jgm9` en A3 (8 muestras) y 0,075 s
    en `amss-ez9n` en A5 (117 muestras). Como alterna entre vehículos, parece carga momentánea del
    procesador. Queda por vigilar en las grabaciones de G-2, con el criterio de 0,020 s de
-   [`HOJA_CAMPO_G2.md`](../HOJA_CAMPO_G2.md).
+   [`HOJA_CAMPO_G2.md`](../historial/HOJA_CAMPO_G2.md).
 
 ## Qué cambia desde hoy
 
@@ -73,7 +73,7 @@ llegan al otro (A5). Lo que todavía no puede correr en los dos a la vez es la p
 (el puente de velocidad, rf2o, el SLAM, Nav2 y las grabaciones), porque la partición solo cubre los
 cinco tópicos del fabricante. `/cmd_vel`, `/odom` y `/map` son comunes: el `/cmd_vel` que publica la
 pila de un vehículo llega también al puente del otro y lo mueve, y cada odometría recibe la del
-otro. Eso lo resuelven los espacios de nombres del bloque C de [`PLAN_S25.md`](../PLAN_S25.md).
+otro. Eso lo resuelven los espacios de nombres del bloque C de [`PLAN_S25.md`](../historial/PLAN_S25.md).
 Hasta entonces, la pila corre en un vehículo cada vez.
 
 ## Cómo deshacerlo

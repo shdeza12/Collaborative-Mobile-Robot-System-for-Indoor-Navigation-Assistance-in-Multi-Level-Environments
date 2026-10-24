@@ -1,7 +1,7 @@
 # S24 · la rampa de tracción sobre el `amss-ez9n`: trece corridas, y el control que las invalida como velocidad
 
 **Fecha:** 2026-09-22 · **Vehículo:** `amss-ez9n` (192.168.0.102) · **Recta:** la marcada de 20,000 m
-(marcas a 0 · 5 · 10 · 15 · 20 m) · **Guion:** [`HOJA_CAMPO_G2.md`](../HOJA_CAMPO_G2.md) §10.3-ter ·
+(marcas a 0 · 5 · 10 · 15 · 20 m) · **Guion:** [`HOJA_CAMPO_G2.md`](../historial/HOJA_CAMPO_G2.md) §10.3-ter ·
 **Herramienta:** `sostener_traccion.py`, publicando a `/ctrl_pkg/servo_msg` con `--tope 1.0`.
 
 ---
@@ -288,12 +288,12 @@ arranque, y eso ya está contestado.
 | Afirmación | Dónde comprobarla |
 |---|---|
 | Las trece distancias | §1 de este documento; anotadas en campo por el operador, 2026-09-22 |
-| El método diferencial y su único supuesto | [`HOJA_CAMPO_G2.md`](../HOJA_CAMPO_G2.md) §10.3-ter, «Al volver: la cuenta» |
+| El método diferencial y su único supuesto | [`HOJA_CAMPO_G2.md`](../historial/HOJA_CAMPO_G2.md) §10.3-ter, «Al volver: la cuenta» |
 | El control no pasa: 2,900 frente a 4,250 m/s | §3, aritmética sobre las corridas 11, 12 y 13 |
 | La herramienta no frena | [`sostener_traccion.py`](../../herramientas/sostener_traccion.py):`parar()`, publica diez ceros |
 | Las dos sesiones publican por el mismo camino | `TOPICO_SERVO = "/ctrl_pkg/servo_msg"` en [`sostener_traccion.py`](../../herramientas/sostener_traccion.py):90, y [`S23_campo_traccion_RF14.md`](S23_campo_traccion_RF14.md) §4 |
 | S23 avisó de que sus distancias subestiman | [`S23_campo_traccion_RF14.md`](S23_campo_traccion_RF14.md) §8, escrito el 17-sep |
 | La dirección del `amss-jgm9` no estaba centrada | [`S23_campo_traccion_RF14.md`](S23_campo_traccion_RF14.md) §5 |
-| El `amss-ez9n` es el que va recto | [`HOJA_CAMPO_G2.md`](../HOJA_CAMPO_G2.md) §10.3-ter; calibración leída del vehículo el 2026-09-22 |
+| El `amss-ez9n` es el que va recto | [`HOJA_CAMPO_G2.md`](../historial/HOJA_CAMPO_G2.md) §10.3-ter; calibración leída del vehículo el 2026-09-22 |
 | Los veredictos eran previos | [`S24_analisis_previo_RF11.md`](S24_analisis_previo_RF11.md) §6 |
-| La recta mide 20,000 m | [`HOJA_CAMPO_G2.md`](../HOJA_CAMPO_G2.md); medida el 2026-09-07 con flexómetro de instrumentación |
+| La recta mide 20,000 m | [`HOJA_CAMPO_G2.md`](../historial/HOJA_CAMPO_G2.md); medida el 2026-09-07 con flexómetro de instrumentación |

@@ -13,7 +13,7 @@ sola*—, sin SLAM, sin localización, sin Nav2 y **sin motor**. El carro se emp
 
 ## 0. Por qué esta medición era la que mandaba
 
-El §1 de [`MAPA_TRABAJO_RESTANTE.md`](../MAPA_TRABAJO_RESTANTE.md) lo dice en una frase:
+El §1 de [`MAPA_TRABAJO_RESTANTE.md`](../historial/MAPA_TRABAJO_RESTANTE.md) lo dice en una frase:
 
 > *Hay una sola ruta crítica, y no es la campaña experimental: es publicar el TF
 > `odom → base_link` en el vehículo real.*
@@ -176,7 +176,7 @@ sobre-leer:
    [`S23_informacion_avance_piso2.md`](S23_informacion_avance_piso2.md)), por debajo
    del 6,8 % del pasillo simulado cuyo mapa se rechazó. **Nada de lo medido hoy
    contradice eso**, y la vía sigue siendo el segmento encajonado del §0 de
-   [`GUION_NAV2_HARDWARE.md`](../GUION_NAV2_HARDWARE.md).
+   [`GUION_NAV2_HARDWARE.md`](../historial/GUION_NAV2_HARDWARE.md).
 3. **No hay peldaños 6–7.** No se intentó mover el carro con motor, porque en este
    vehículo `servo_pkg` está bloqueado desde la pérdida de potencia documentada en
    [`S24_actuacion_bloqueada_servo.md`](S24_actuacion_bloqueada_servo.md) y recogida en
