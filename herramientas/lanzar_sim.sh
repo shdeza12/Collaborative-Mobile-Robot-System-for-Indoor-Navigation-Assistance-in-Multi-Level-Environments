@@ -25,7 +25,7 @@ set -eo pipefail
 # y si por casualidad habia otra copia del repositorio en la ruta adivinada,
 # cargaba en silencio los mundos de la copia equivocada.
 MUNDOS="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-# El workspace si es una convencion del proyecto (README, paso 2). Se puede
+# El workspace si es una convencion del proyecto (Documentos/guia_instalacion.md, paso 2). Se puede
 # apuntar a otro sin editar el script:  DEEPRACER_WS=/otro/ws lanzar_sim.sh
 WS="${DEEPRACER_WS:-$HOME/deepracer_sim_ws}"
 PUERTO_GAZEBO=11345

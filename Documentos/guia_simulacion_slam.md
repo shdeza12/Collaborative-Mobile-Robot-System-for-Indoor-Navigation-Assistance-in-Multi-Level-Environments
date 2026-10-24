@@ -3,7 +3,7 @@
 Procedimiento para mapear un mundo Gazebo con `slam_toolbox` sobre la sim del DeepRacer y prepararlo para AMCL/Nav2. Cuatro terminales independientes. **Cada terminal nueva** necesita sourcear `~/deepracer_sim_ws/install/setup.bash`.
 
 Requiere el proyecto instalado y verificado según los seis pasos del
-[`README`](../README.md#instalación). Los comandos que empiezan por `herramientas/…` se ejecutan
+[`guia_instalacion.md`](guia_instalacion.md#instalación). Los comandos que empiezan por `herramientas/…` se ejecutan
 **desde la raíz del repositorio**, esté donde esté tu clon; los que empiezan por `ros2 …`, desde
 `~/deepracer_sim_ws` con el `source install/setup.bash` hecho.
 

@@ -79,7 +79,7 @@ Los dos robots viven en el **dominio 0** desde el 2026-08-30, y exportar algo es
 que separa a las dos pilas no es el dominio sino los nombres: namespace por robot, prefijo en cada
 marco TF —incluido `map`— y puerto de `gzserver` propio. Hay bitácoras anteriores a esa fecha que
 dan por vigente el reparto en dominios 0 y 2; ya no lo es, y el motivo está en el
-[`README.md`](../README.md#dos-robots): un nodo de ROS 2 vive en **un** dominio, así que el
+[`guia_instalacion.md`](guia_instalacion.md#dos-robots): un nodo de ROS 2 vive en **un** dominio, así que el
 coordinador nunca alcanzaba a los dos a la vez y el relevo entre pisos no se podía ejecutar.
 
 ---

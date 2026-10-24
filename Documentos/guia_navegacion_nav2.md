@@ -3,7 +3,7 @@
 ## Requisitos previos
 
 El proyecto ya instalado y verificado segun los seis pasos del
-[`README`](../README.md#instalación). Esta guia da por hecho que
+[`guia_instalacion.md`](guia_instalacion.md#instalación). Esta guia da por hecho que
 `herramientas/verificar_instalacion.sh` termina en `0 fallan`.
 
 Los comandos que empiezan por `herramientas/…` se ejecutan **desde la raíz del repositorio**, esté
@@ -314,7 +314,7 @@ colcon build --packages-select deepracer_bringup
 ```
 
 No hay nada que sincronizar: `src/aws-deepracer` es un **enlace** al repositorio
-(paso 2 del README), asi que el workspace ya ve el archivo editado. Copiar el
+(paso 2 de la guía de instalación), asi que el workspace ya ve el archivo editado. Copiar el
 codigo al workspace es justamente el incidente R7 —se compila una copia mientras
 se edita el repositorio y los arreglos nunca llegan a ejecutarse—.
 
