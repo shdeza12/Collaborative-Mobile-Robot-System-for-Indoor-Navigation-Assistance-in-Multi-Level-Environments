@@ -13,7 +13,7 @@ El documento final: contexto, marco referencial, desarrollo, resultados, conclus
 
 <div class="decision-tarjeta" markdown>
 ### :material-calendar-week: Informes semanales
-Un informe por semana para los directores, de la semana 10 a la 27: qué se hizo, con qué cifras y qué quedó pendiente.
+Un informe por semana para el director, de la semana 10 a la 27: qué se hizo, con qué cifras y qué quedó pendiente.
 
 [Ver los informes :material-arrow-right:](https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/tree/main/Documentos/Entregables){ .md-button }
 </div>
@@ -40,4 +40,4 @@ El registro de trabajo del equipo, día por día, y la evidencia de cada prueba 
 
 **Santiago Hernández Ávila** y **Jonny Alejandro Mejía León**, Facultad de Ingeniería Electrónica, Universidad Santo Tomás, Bogotá.
 
-Dirigido por el Ing. Armando Mateus Rojas, el Ing. Nestor Ivan Ospina y el Ing. Oscar Mauricio Gélvez Lizarazo. Grupo de Estudio y Desarrollo en Robótica (GED).
+Dirigido por el Ing. Armando Mateus Rojas. Grupo de Estudio y Desarrollo en Robótica (GED), línea de Robótica e Inteligencia Computacional.

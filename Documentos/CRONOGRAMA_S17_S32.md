@@ -2,7 +2,7 @@
 
 **Proyecto:** Sistema colaborativo de robots móviles para asistencia de orientación en entornos interiores con múltiples pisos
 **Autores:** Santiago Hernández Ávila · Jonny Alejandro Mejía León
-**Directores:** Ing. Armando Mateus Rojas, Msc. · Ing. Nestor Ivan Ospina, Msc. · Ing. Oscar Mauricio Gélvez Lizarazo, Msc.
+**Director:** Ing. Armando Mateus Rojas, MSc.
 **Documento de referencia:** `Anteproyecto_Jonny_Santi.pdf`, Cap. 8 (cronograma a 32 semanas)
 **Fecha de corte:** 2026-08-15 (S18) · *S18 y S19 revisadas; el resto conserva el corte del 2026-08-05*
 

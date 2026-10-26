@@ -22,8 +22,8 @@ equivocación se ve en la primera página.
 | Qué | Qué dice hoy el documento | Qué hace falta |
 |---|---|---|
 | Autoridades académicas | `NOMBRES COMPLETOS` | Verificarlos en la fuente oficial de la Universidad |
-| Grupo de investigación | «GED — Grupo de Estudio y Desarrollo en Robótica» | Confirmarlo. Es el nombre que llevan el anteproyecto y los ocho entregables semanales; si el oficial fuera «Investigación y Desarrollo», hay que corregirlo **en todos ellos**, no solo aquí |
-| Línea de investigación | «Robótica y Sistemas Autónomos» | Confirmar la denominación exacta con el director |
+| Grupo de investigación | «GED — Grupo de Estudio y Desarrollo en Robótica» | Confirmado por los autores el 2026-10-25 |
+| Línea de investigación | «Robótica e Inteligencia Computacional» | Corregida el 2026-10-25 (decía «Robótica y Sistemas Autónomos») |
 
 ## 2. Antecedente interno sin referencia · cerrado el 2026-10-20
 

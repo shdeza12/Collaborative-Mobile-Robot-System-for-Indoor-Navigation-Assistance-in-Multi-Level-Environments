@@ -117,5 +117,4 @@ Jazzy. El código de terceros conserva su licencia Apache 2.0, con sus archivos 
 
 Santiago Hernández Ávila y Jonny Alejandro Mejía León.
 
-Directores: Ing. Armando Mateus Rojas, MSc.; Ing. Nestor Ivan Ospina, MSc.; Ing. Oscar Mauricio Gélvez
-Lizarazo, MSc.
+Director: Ing. Armando Mateus Rojas, MSc. Grupo de Estudio y Desarrollo en Robótica (GED), línea de Robótica e Inteligencia Computacional.

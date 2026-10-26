@@ -102,7 +102,7 @@ Fuente: Entregable S12; commit `484e1e5`.
 - Conclusión: un comportamiento reactivo no anticipa las restricciones de un vehículo Ackermann en
   espacios estrechos. El trabajo pasa a la navegación con mapa (SLAM, AMCL, puntos de interés y un
   planificador para automóvil).
-- Se evaluó `deepracer-custom-car`, de la comunidad del DeepRacer, sugerido por la codirección: lleva
+- Se evaluó `deepracer-custom-car`, de la comunidad del DeepRacer: lleva
   el software del vehículo a Raspberry Pi 4 (Humble) o Pi 5 (Jazzy), con soporte del LiDAR, y no trae
   nada de simulación. Quedó para la fase física.
 
