@@ -23,3 +23,6 @@ DocumentoFinal_overleaf.zip
 # El PDF SI se versiona, al contrario que los artefactos de arriba: es como se
 # ve el estado del documento sin compilar, y es la convencion que el repositorio
 # ya sigue con los entregables semanales.
+
+# PDF de cambios del recorte: lo arma cambios_recorte.py cuando se necesita revisar.
+cambios_recorte.pdf

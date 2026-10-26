@@ -1,0 +1,118 @@
+% Versión recortada del documento, para comparar con main.tex. Usa los capítulos
+% de capitulos_recorte/ donde existen y los de capitulos/ en el resto.
+% =====================================================================
+%  Documento final de proyecto de grado
+%  Sistema colaborativo de robots móviles para asistencia de orientación
+%  en entornos interiores con múltiples pisos
+%
+%  Santiago Hernández Ávila · Jonny Alejandro Mejía León
+%  Universidad Santo Tomás — Facultad de Ingeniería Electrónica
+%
+%  CÓMO SE COMPILA
+%  ---------------
+%  En Overleaf: subir la carpeta entera y compilar con pdfLaTeX. La bibliografía
+%  usa biblatex+biber, que Overleaf ejecuta solo.
+%  En local:  pdflatex main  →  biber main  →  pdflatex main  →  pdflatex main
+%             (es 'biber', NO 'bibtex')
+%
+%  CÓMO SE TRABAJA
+%  ---------------
+%  Cada capítulo es un archivo aparte en capitulos/. Así dos personas pueden
+%  escribir a la vez sin pisarse y cada cambio se ve en el diff de git, que es
+%  justamente lo que el .docx no permitía.
+%
+%  El formato vive en usta-proyecto-grado.sty, con la decisión de norma
+%  explicada en su cabecera. No meter ajustes de formato aquí.
+% =====================================================================
+\documentclass[12pt,letterpaper,oneside]{report}
+\usepackage{usta-proyecto-grado}
+
+% ---------------------------------------------------------- bibliografía ---
+\addbibresource{referencias.bib}
+
+% ------------------------------------------------------ datos del trabajo ---
+\ustatitulo{Sistema colaborativo de robots móviles para asistencia de
+            orientación en entornos interiores con múltiples pisos}
+\ustasubtitulo{}                    % la plantilla pide aquí la relación con el objetivo general
+\ustaautores{Santiago Hernández Ávila\\[0.3cm] Jonny Alejandro Mejía León}
+\ustamodalidad{Proyecto de Investigación}
+% Grupo y línea confirmados por los autores el 2026-10-25.
+\ustagrupo{GED — Grupo de Estudio y Desarrollo en Robótica}
+\ustalinea{Robótica e Inteligencia Computacional}
+\ustadirector{Ing. Armando Mateus Rojas, MSc.}
+% Sin codirectores: el proyecto tiene un solo director. El bloque no se imprime
+% si queda vacio (ver \ustacontraportada en el .sty).
+\ustacodirector{}
+\ustaasesor{}                        % vacío = no se imprime el bloque
+\ustaanio{2026}
+\ustames{octubre}
+
+% ---------------------------------------------------- notas en el PDF ---
+% Los bloques «Nota para la revisión» quedan APAGADOS: el texto sigue en los
+% capítulos, pero no se imprime. Los pendientes que señalaban están recogidos
+% en PENDIENTES.md, que es donde se les hace seguimiento.
+% Para volver a verlos en el PDF: borrar la línea de abajo.
+\ustanotasrevisorfalse
+
+\begin{document}
+
+% =====================================================================
+%  PRELIMINARES
+% =====================================================================
+\pagenumbering{roman}
+
+\ustaportada
+\ustacontraportada
+\input{capitulos/00-autoridades}
+\ustanotaaceptacion
+\ustaadvertencia
+\input{capitulos/01-dedicatoria-agradecimientos}
+\input{capitulos/02-resumen-abstract}
+\input{capitulos/03-glosario-abreviaturas}
+
+% ------------------------------------------------------------- índices ---
+\ustaseccion{Contenido}
+\tableofcontents
+
+\ustaseccion{Lista de figuras}
+\listoffigures
+
+% La plantilla declara OPCIONALES las listas de graficas y de codigos, y pide
+% ademas distinguir GRAFICA de FIGURA («una grafica contiene ejes coordenados
+% para expresar comportamiento de datos»). No se imprimen porque saldrian
+% vacias: las cinco ilustraciones del documento van todas como figura, incluidas
+% las que llevan ejes, porque cada una se apoya sobre el plano del edificio y se
+% lee como tal. Para devolver cualquiera de las dos listas basta descomentar su
+% par de lineas.
+%
+% \ustaseccion{Lista de gráficas}
+% \listofgraficas
+%
+% \ustaseccion{Lista de códigos}
+% \lstlistoflistings
+
+\ustaseccion{Lista de tablas}
+\listoftables
+
+% =====================================================================
+%  CUERPO
+% =====================================================================
+\clearpage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\input{capitulos/04-introduccion}
+\input{capitulos/05-contextualizacion}
+\input{capitulos_recorte/06-marco-referencial}
+\input{capitulos_recorte/07-desarrollo}
+\input{capitulos_recorte/08-resultados}
+\input{capitulos_recorte/09-conclusiones}
+\input{capitulos_recorte/10-trabajos-futuros}
+
+% =====================================================================
+%  REFERENCIAS
+% =====================================================================
+\ustaseccion{Referencias bibliográficas}
+\printbibliography[heading=none]
+
+\end{document}
