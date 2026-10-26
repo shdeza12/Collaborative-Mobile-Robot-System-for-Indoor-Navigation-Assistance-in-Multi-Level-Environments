@@ -1,5 +1,10 @@
 # La simulación de dos robots después de la actualización de ROS del 6 de octubre
 
+> **Seguimiento, 26 de octubre.** En el portátil, con sus paquetes de ROS actualizados el 16 de
+> septiembre y el 15 de octubre, la misión con relevo se completó en 3 de 3 corridas:
+> [`S29_simulacion_relevo_portatil.md`](S29_simulacion_relevo_portatil.md). La causa de lo que se
+> describe aquí sigue sin aislarse.
+
 Sesión del 6 de octubre en el PC de escritorio del equipo. Se siguió
 [`GUIA_ARRANQUE.md`](../GUIA_ARRANQUE.md) al pie de la letra, como lo haría alguien que no estuvo en
 el desarrollo, para comprobar que la simulación sigue funcionando con los cambios de la semana 26

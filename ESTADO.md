@@ -34,9 +34,7 @@ pasaron por el pasillo durante las misiones.
 
 1. RNF-03: revisar en los videos de la campaña las personas en el pasillo, misión por misión.
 2. Documento final: bajarlo de 94 a entre 60 y 80 páginas; corregir el «20 %» del hall del piso 2 (es 25 %).
-3. Simulación de dos robots: desde la actualización de ROS del 6 de octubre no completa el relevo; causa no
-   aislada (riesgo R16 de la bitácora).
-4. Registro de misión: la etapa de cancelación sale como `8` y no como `CANCELANDO`.
-5. Imagen `coordinador_jazzy` del portátil: reconstruirla con el agente nuevo.
-6. Siete archivos de código copiados en los vehículos citan en comentarios la ruta vieja de planes ya
+3. Registro de misión: la etapa de cancelación sale como `8` y no como `CANCELANDO`.
+4. Imagen `coordinador_jazzy` del portátil: reconstruirla con el agente nuevo.
+5. Siete archivos de código copiados en los vehículos citan en comentarios la ruta vieja de planes ya
    movidos a `historial/`; se actualizan en los dos vehículos la próxima vez que estén encendidos.

@@ -1,0 +1,39 @@
+# Misiones con relevo en simulación, 26 de octubre de 2026 (portátil)
+
+    0.2 s  etapa 0  Sin misión activa.
+    0.6 s  etapa 6  Recibida la solicitud; asignando el robot.
+    0.6 s  etapa 1  El robot va hacia Representación. Espere allí.
+   19.2 s  etapa 2  Suba al piso 2. Otro robot le espera en Escaleras.
+   23.7 s  etapa 7  ¿Ya está en el piso 2? Confírmelo para continuar.
+   23.7 s  confirmación publicada para S29_B_20261026_184507
+   23.7 s  etapa 3  Siga al robot hasta IEEE.
+   38.3 s  etapa 4  Ha llegado a IEEE.
+RESULTADO {'exito': True, 'tiempo_total_s': 37.599998474121094, 'num_relevos': 1, 'motivo_fallo': ''}
+
+=== corrida 2 (18:46:17)
+  error de localizacion    : 0.039 m, 4.2 grados   <- el criterio
+OK: AMCL sabe donde esta el robot dentro de 0.15 m y 10.0 grados.
+  error de localizacion    : 0.038 m, 3.6 grados   <- el criterio
+   23.1 s  confirmación publicada para S29_B_20261026_184848
+   23.2 s  etapa 3  Siga al robot hasta IEEE.
+   37.7 s  etapa 4  Ha llegado a IEEE.
+RESULTADO {'exito': True, 'tiempo_total_s': 37.599998474121094, 'num_relevos': 1, 'motivo_fallo': ''}
+  llegada verificada contra /odom: 0.187 m
+  llegada verificada contra /odom: 0.137 m
+  llegada verificada contra /odom: 0.174 m
+  llegada verificada contra /odom: 0.113 m
+  avisos de transformadas: r1=1 r2=0
+=== corrida 3 (18:49:26)
+  error de localizacion    : 0.033 m, 3.6 grados   <- el criterio
+OK: AMCL sabe donde esta el robot dentro de 0.15 m y 10.0 grados.
+  error de localizacion    : 0.030 m, 2.4 grados   <- el criterio
+   30.6 s  confirmación publicada para S29_B_20261026_185127
+   30.6 s  etapa 3  Siga al robot hasta IEEE.
+   45.0 s  etapa 4  Ha llegado a IEEE.
+RESULTADO {'exito': True, 'tiempo_total_s': 43.900001525878906, 'num_relevos': 1, 'motivo_fallo': ''}
+  llegada verificada contra /odom: 0.210 m
+  llegada verificada contra /odom: 0.144 m
+  llegada verificada contra /odom: 0.185 m
+  llegada verificada contra /odom: 0.126 m
+  avisos de transformadas: r1=0 r2=1
+=== fin (18:52:17)

@@ -34,8 +34,10 @@ se niega a lanzar y dice qué paquete y por qué. Antes del 2026-10-06 no lo hac
 un `executable 'agente' not found` dentro del launch, que acusaba al ejecutable y no a la
 compilación.
 
-> **Estado conocido al 2026-10-06 (riesgo R16).** En el equipo de escritorio, después de una
-> actualización de paquetes de ROS ese mismo día, la misión con relevo **no se completa**: en 3 de 4
+> **Estado al 2026-10-26.** En el portátil, la misión con relevo de esta guía se completó en 3 de 3
+> corridas ([`S29_simulacion_relevo_portatil.md`](Evidencia/S29_simulacion_relevo_portatil.md)).
+> **Antecedente (riesgo R16).** El 2026-10-06, en el equipo de escritorio y después de una
+> actualización de paquetes de ROS ese mismo día, la misión con relevo **no se completó**: en 3 de 4
 > corridas con las dos pilas, Nav2 de `robot1` dejó de aceptar `map → odom` aunque AMCL lo seguía
 > publicando. Con `robot1` solo pasó lo mismo en 1 de 2 corridas, así que no depende de que haya
 > dos pilas. La causa no está aislada. Se reconoce en la
@@ -148,7 +150,7 @@ source ~/deepracer_sim_ws/install/setup.bash && python3 herramientas/verificar_c
 
 **Lo que esta compuerta no ve.** Compara `/amcl_pose` con `/odom`, y `/amcl_pose` no se republica
 mientras el robot está quieto. Por eso da `LISTA` aunque Nav2 haya dejado de aceptar `map → odom`,
-que es la forma en que falla la simulación desde el 6-oct (recuadro del principio). Antes de lanzar,
+que es como falló la simulación el 6 de octubre en el equipo de escritorio (recuadro del principio). Antes de lanzar,
 mirar en la terminal de cada robot que no se repitan `Transform data too old` ni
 `extrapolation into the past`.
 
