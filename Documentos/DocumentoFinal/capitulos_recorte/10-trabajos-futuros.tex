@@ -2,36 +2,67 @@
 %  TRABAJOS FUTUROS (versión recortada, para comparar con
 %  capitulos/10-trabajos-futuros.tex)
 %
-%  Recorte del 2026-10-25: las nueve líneas quedan en siete. Se juntan las
-%  dos sobre el avance del vehículo (régimen lento y medida de avance
-%  propia) y las dos sobre las campañas (más muestra y medida externa), y
-%  cada línea se acorta a lo que hay que hacer.
+%  Revisión del 27 de octubre: primero las cinco líneas que pidieron los
+%  autores (navegación, cómputo, evasión de obstáculos, otro controlador e
+%  interacción por voz) y después las que ya estaban, más cortas y sin
+%  remisiones a otras secciones.
 % =====================================================================
 \chapter*{Trabajos futuros}
 \addcontentsline{toc}{chapter}{TRABAJOS FUTUROS}
 
-\paragraph{Un régimen lento y una medida de avance propia.} El agente no se
-mueve por debajo de 0,40~m/s (sección~\ref{sec:banda-muerta}), y su posición sale
-de comparar barridos del láser, que falla por construcción en pasillos uniformes
-(sección~\ref{sec:teo-localizacion}). Calibrar el variador o cambiar la relación
-de transmisión le daría un régimen lento. Codificadores en las ruedas, u
-odometría visual con las cámaras que el agente ya lleva, le darían una medida
-de avance que no depende del sitio. Con esa medida se podría cerrar el lazo de
-velocidad cerca de la meta, y el sistema dejaría de necesitar un entorno con
-estructura para operar.
+\paragraph{Una navegación más precisa.} La navegación de los agentes se puede
+mejorar en dos frentes. El primero es la tracción: el agente no se mueve por
+debajo de 0,40~m/s, y calibrar el variador o cambiar la relación de transmisión
+le daría el régimen lento que hoy le falta para la aproximación final. El
+segundo es la medida del avance: codificadores en las ruedas, u odometría visual
+con las cámaras que el agente ya lleva, darían una medida que no depende de que
+el pasillo tenga estructura. Con las dos, la tolerancia de llegada podría volver
+a 0,25~m y el sistema dejaría de depender del entorno para localizarse.
+
+\paragraph{Más capacidad de cómputo.} La tarjeta original, de dos núcleos,
+queda entre el 54 y el 59~\% de uso en reposo con la navegación completa, y su
+carga se dispara cuando los procesos de los dos agentes se anuncian en la red.
+Adaptar la plataforma a una Raspberry Pi~4 o~5, de cuatro núcleos, daría margen
+para la navegación, para un controlador más exigente y para la evasión de
+obstáculos. Para la Raspberry Pi~4, la comunidad del DeepRacer ya publica el
+software del vehículo.
+
+\paragraph{Evasión de obstáculos.} Las pruebas se hicieron con los pasillos
+despejados. En un edificio en uso, el agente tiene que esquivar a las personas
+que se cruzan y los objetos que cambian de sitio, y no solo detenerse ante
+ellos. Integrar la evasión de obstáculos en movimiento, y probarla con
+personas que caminan por el pasillo, es el paso previo a operar en horario de
+clases.
+
+\paragraph{Un controlador predictivo.} El seguimiento de trayectorias usa
+Regulated Pure Pursuit, que sigue la ruta punto a punto y cuya guarda de
+seguridad anula la curvatura cuando una inversión de marcha queda cerca de la
+meta. Un controlador predictivo, como el MPPI que incluye Nav2 y que admite
+cinemática tipo automóvil, optimiza el movimiento varios pasos hacia adelante y
+tiene en cuenta los obstáculos. Con él, la media vuelta podría volver a Nav2 y
+la aproximación final sería más precisa. Exige más cómputo, y por eso va de la
+mano de la línea anterior.
+
+\paragraph{Interacción por voz.} La interfaz pide elegir el origen y el destino
+en listas. Con reconocimiento de voz a texto y un modelo de lenguaje, el usuario
+podría pedir el servicio hablando, por ejemplo «lléveme al Salón 402», y el
+sistema le explicaría cada etapa en voz alta. Como la red del edificio puede no
+tener salida a internet, los dos modelos tendrían que correr en el computador del coordinador. El de lenguaje solo traduciría la petición a un origen y un
+destino del catálogo, sin decidir el recorrido, que sigue a cargo del
+planificador.
 
 \paragraph{Campañas más grandes y con medida externa.} Con treinta misiones en
-simulación el intervalo de confianza mide 24 puntos porcentuales, y con las nueve de los agentes físicos la cota inferior es del 70~\%. Ese ancho solo se reduce con más
-repeticiones, que permitirían además comparar las misiones de un mismo piso con
-las de dos pisos, una comparación que hoy no se sostiene porque sus intervalos se solapan. La
-campaña física debería repetirse con la llegada medida con flexómetro o con un
-sistema de seguimiento externo (sección~\ref{sec:lim-llegada}).
+simulación el intervalo de confianza mide 24 puntos porcentuales, y con las
+nueve de los agentes físicos la cota inferior es del 70~\%. Ese ancho solo se
+reduce con más repeticiones, que permitirían además comparar las misiones de un
+mismo piso con las de dos pisos. La campaña física debería repetirse con la
+llegada medida con flexómetro o con un sistema de seguimiento externo.
 
-\paragraph{Estabilidad de la navegación en sesiones largas.} Tras horas
-encendidos, la navegación de los dos agentes dejó de responder y hubo que
-reiniciarla, por una causa que no se estableció (sección~\ref{sec:res-completo}).
-Antes de dejar el sistema en servicio hace falta reproducir la falla en una sesión larga controlada. Con ella se puede decidir si basta con supervisar la cadena de
-navegación y reiniciarla sola, o si hay que bajar la carga del procesador.
+\paragraph{Estabilidad en sesiones largas.} Tras horas encendidos, la
+navegación de los dos agentes dejó de responder y hubo que reiniciarla, por una
+causa que no se estableció. Antes de dejar el sistema en servicio hace falta
+reproducir la falla en una sesión larga controlada y decidir si basta con
+supervisar la cadena de navegación y reiniciarla sola.
 
 \paragraph{El ascensor como segunda vía de transición.} Hoy el cambio de piso se
 hace siempre por la escalera. Admitir el ascensor exige que el planificador elija
@@ -46,16 +77,15 @@ pasillo por piso.
 
 \paragraph{Más de un agente por nivel y misiones simultáneas.} El sistema
 atiende una misión a la vez, con un solo agente por nivel, y con esas
-condiciones la asignación es trivial (sección~\ref{sec:teo-asignacion}). Con dos o
-más agentes elegibles por tarea, o varias solicitudes a la vez, los métodos de
-subasta como MURDOCH \autocite{gerkey2002sold} o CBBA \autocite{choi2009consensus}
-empiezan a decidir algo. Es la extensión natural del trabajo para edificios con
-más afluencia.
+condiciones la asignación es trivial. Con dos o más agentes elegibles por tarea,
+o varias solicitudes a la vez, los métodos de subasta como MURDOCH
+\autocite{gerkey2002sold} o CBBA \autocite{choi2009consensus} empiezan a decidir
+algo. Es la extensión natural del trabajo para edificios con más afluencia.
 
 \paragraph{Evaluación con usuarios.} Las cuatro métricas del proyecto miden el
 sistema, y la experiencia de quien lo usa queda sin medir. Un estudio con
 personas, como el que hicieron \textcite{guerreiro2019cabot} con su robot guía, permitiría medirla. Diría si la interfaz se entiende sin explicación, si la velocidad del agente es
 cómoda para caminar a su lado y cuánto tolera el usuario la espera en la
 escalera. Es también el paso previo a ofrecer el sistema a personas con
-discapacidad visual, que es la aplicación de más impacto que sugiere la
-literatura revisada.
+discapacidad visual, la aplicación de más impacto que sugiere la literatura
+revisada.

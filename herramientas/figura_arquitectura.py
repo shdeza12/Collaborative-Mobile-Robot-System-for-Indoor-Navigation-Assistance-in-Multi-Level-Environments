@@ -38,7 +38,7 @@ SIMULACION = {
     'modulos': [('Sensado', ['Láser simulado', 'de 10 m de alcance']),
                 ('Odometría', ['La que entrega', 'el simulador']),
                 ('Localización', ['AMCL sobre un mapa', 'calculado del mundo']),
-                ('Navegación', ['Nav2: Smac híbrido y', 'persecución pura']),
+                ('Navegación', ['Nav2: Smac híbrido y', 'Regulated Pure Pursuit']),
                 ('Locomoción', ['Complemento Ackermann', 'de Gazebo y ros2_control']),
                 ('Comunicación', ['Un computador, un dominio;', 'espacio de nombres propio'])],
     'escalera': 'La cruza el usuario · llegada a 0,25 m',

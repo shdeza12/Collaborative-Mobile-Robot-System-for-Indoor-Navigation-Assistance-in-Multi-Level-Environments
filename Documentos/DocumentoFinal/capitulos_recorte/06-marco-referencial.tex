@@ -73,8 +73,7 @@ navegación de la primera generación de ROS: organiza la tarea con un árbol de
 comportamiento y arranca cada servidor como un nodo de ciclo de vida. Lo
 validaron en un campus universitario, navegando entre estudiantes.
 \textcite{macenski2023survey} comparan los algoritmos de planificación, control y
-localización que hoy ofrece el ecosistema. Las dos referencias sirvieron para
-elegir los componentes de la sección~\ref{sec:teo-planificacion}.
+localización que hoy ofrece el ecosistema. Las dos referencias sirvieron para elegir los componentes de navegación.
 \textcite{varghese2023multirobot} llevan el problema a varios agentes que
 construyen un mapa compartido y mantienen consistente su localización, con la
 misma técnica bidimensional sobre ROS.
@@ -103,9 +102,7 @@ resiliencia del sistema cuando un nodo falla.
 
 El marco teórico de la asignación lo fijan \textcite{gerkey2004taxonomy}, cuya
 taxonomía clasifica cualquier esquema de reparto según cuántas tareas acepta un
-robot, cuántos robots requiere una tarea y con cuánta anticipación se decide. La
-sección~\ref{sec:teo-asignacion} usa esa taxonomía, y su extensión por
-\textcite{korsah2013comprehensive}, para situar el esquema de este trabajo.
+robot, cuántos robots requiere una tarea y con cuánta anticipación se decide. Esa taxonomía, con su extensión por \textcite{korsah2013comprehensive}, es la que sitúa el esquema de asignación de este trabajo.
 
 El antecedente más cercano es \textcite{srivastava2025deliver}, que coordinan
 recogida y entrega entre varios robots mediante planificación con relevos. Allí
@@ -144,7 +141,7 @@ A esas líneas se suma la de dónde ejecutar el procesamiento.
 remotos, \textcite{tahir2025edge} las que lo acercan al borde de la red, y
 \textcite{malavolta2023offloading} miden el costo de esa delegación sobre WiFi en
 robots terrestres. Sus resultados llevaron a que la navegación corra completa en cada agente y solo la coordinación, que intercambia mensajes pequeños,
-se centralice en un computador portátil, sin depender de salida a internet (sección~\ref{sec:teo-ros2}).
+se centralice en un computador portátil, sin depender de salida a internet.
 
 La literatura cubre bien cada componente por separado. La
 tabla~\ref{tab:antecedentes} resume lo que cada línea aporta a este proyecto y el
@@ -263,11 +260,11 @@ anteproyecto: el \textbf{tiempo de respuesta}, el \textbf{tiempo de asignación}
 \textbf{continuidad de servicio}. El tiempo de asignación es el intervalo entre
 aceptar la solicitud y designar el agente que la atiende. Para medirlas se usan
 además el \textbf{intervalo de confianza de Wilson} y la \textbf{falsabilidad}
-de un criterio, que se exponen en la sección~\ref{sec:teo-evaluacion}. Un \textbf{invariante estructural} es una
+de un criterio. Un \textbf{invariante estructural} es una
 propiedad que se cumple siempre por el diseño del sistema y que, por eso, no es
 un resultado experimental. La \textbf{cota superior por misión} es lo que se
 informa cuando el instrumento no tiene resolución para dar el valor exacto. Con los agentes físicos, la demostración se organizó en \textbf{pruebas de
-verificación}, condiciones acordadas con el director antes de correrlas, como
+verificación}, condiciones fijadas antes de correrlas, como
 que la odometría registre el avance con un error del 10~\% o menos. Decidirlas
 exige una \textbf{verdad de terreno}, la medida independiente con que se
 contrasta el sistema, que en este trabajo es la distancia tomada con flexómetro.
@@ -338,8 +335,7 @@ participantes y las políticas de calidad de servicio de cada canal.
 El descubrimiento tiene un costo que crece con el tamaño del sistema. Por
 omisión, cada proceso se anuncia en la red y empareja sus publicadores y
 suscriptores con los de todos los demás, y sobre una red inalámbrica ese tráfico
-compite con la navegación por el procesador de cada agente
-(sección~\ref{sec:dos-vehiculos}). ROS~2 Jazzy permite restringir el
+compite con la navegación por el procesador de cada agente. ROS~2 Jazzy permite restringir el
 descubrimiento a los procesos del mismo computador y declarar una lista fija de
 equipos con los que sí se comunica. Con esas dos opciones la red adopta la
 topología en estrella del diseño. Dentro de cada agente los procesos se
@@ -348,7 +344,7 @@ el coordinador necesita, de modo que los agentes no se ven entre sí.
 
 Dos mecanismos más separan a los agentes. La partición de comunicaciones deja
 dentro de cada agente los tópicos del software del fabricante, que no llevan
-espacio de nombres. Un espacio de nombres distinto para cada agente distingue la navegación, el estado y la media vuelta de cada uno cuando llegan al portátil. El sistema usa además dos distribuciones de ROS~2, Humble en simulación y Jazzy en los agentes físicos (sección~\ref{sec:sim-a-vehiculos}).
+espacio de nombres. Un espacio de nombres distinto para cada agente distingue la navegación, el estado y la media vuelta de cada uno cuando llegan al portátil. El sistema usa además dos distribuciones de ROS~2, Humble en simulación y Jazzy en los agentes físicos.
 
 \subsection{Cinemática tipo automóvil, planificación y seguimiento de trayectorias}
 \label{sec:teo-planificacion}
@@ -380,8 +376,7 @@ el costo alrededor de cada obstáculo según el tamaño del agente. El mapa de
 costos global sirve al planificador y el local, que cubre los alrededores del
 agente, al controlador.
 
-El controlador convierte la trayectoria en órdenes de velocidad. La persecución
-pura \autocite{coulter1992implementation} elige sobre la trayectoria un punto
+El controlador convierte la trayectoria en órdenes de velocidad. El algoritmo Pure Pursuit, o de persecución pura \autocite{coulter1992implementation}, elige sobre la trayectoria un punto
 situado a una distancia de anticipación $\ell$ del agente y calcula el arco de
 circunferencia que lleva hasta él. Llamando $y$ a la distancia lateral del punto
 al eje del agente, la curvatura ordenada es
@@ -390,16 +385,14 @@ al eje del agente, la curvatura ordenada es
 \end{equation}
 No requiere un modelo dinámico y siempre ordena arcos que la dirección puede
 seguir. \textcite{macenski2023rpp} le añadieron una regulación de velocidad en
-las curvas cerradas y cerca de los obstáculos, y la marcha atrás, de modo que
-sigue las cúspides que propone el planificador.
+las curvas cerradas y cerca de los obstáculos, y la marcha atrás, de modo que sigue las cúspides que propone el planificador; esa versión, Regulated Pure Pursuit, es la que usa este trabajo.
 
 Esa configuración tiene un límite cerca de la meta. En este trabajo la distancia
 de anticipación va de 0,3 a 0,9~m. Cuando una cúspide queda muy cerca de la
 meta, esa distancia se acorta por debajo de un umbral en el que una guarda de seguridad del
 propio controlador anula la curvatura. El agente sigue invirtiendo la marcha
 sin dirigir y maniobra decenas de veces en el mismo punto. Por eso la media
-vuelta se resolvió con una maniobra propia del agente
-(sección~\ref{sec:media-vuelta}).
+vuelta se resolvió con una maniobra propia del agente.
 
 \subsection{Localización, odometría y observabilidad}
 \label{sec:teo-localizacion}
@@ -432,14 +425,13 @@ longitudinal es inobservable.
 
 De ahí sale la diferencia entre dos tipos de error que se parecen. Un error de
 calibración se corrige ajustando parámetros; una inobservabilidad estructural no,
-porque la información no está en la señal. La información de avance, definida en
-la sección~\ref{sec:conceptual}, mide cuánta hay en cada sitio. El criterio que
+porque la información no está en la señal. La información de avance mide cuánta hay en cada sitio. El criterio que
 el proyecto adoptó para elegir dónde operar es que el entorno ofrezca estructura
 no uniforme dentro del alcance del sensor durante todo el recorrido. La
 construcción de mapas comparte el límite: la herramienta de SLAM de ROS~2
 \autocite{macenski2021slam} usa la misma odometría del láser, y en un pasillo
 uniforme no tiene con qué cerrar el mapa. Por eso los mapas de este proyecto se
-derivaron de un levantamiento con flexómetro (sección~\ref{sec:mapas}).
+derivaron de un levantamiento con flexómetro.
 
 El rumbo tiene una solución distinta, porque el giroscopio de la IMU lo mide de
 forma directa, sin depender del entorno. Un filtro de Kalman extendido combina
@@ -460,8 +452,7 @@ La cinemática Ackermann del agente se simula con un complemento propio del
 paquete de simulación del DeepRacer, en lugar del genérico de Gazebo. Los dos agentes simulados comparten un dominio de comunicaciones y se separan por espacio de
 nombres, incluido el marco de referencia de su mapa. Con la configuración por
 omisión, dar a cada agente un dominio distinto corta también su descubrimiento con el coordinador. El tiempo que ven los nodos avanza en saltos
-de 100~ms, y eso fija la resolución con que se miden los tiempos de la campaña
-(sección~\ref{sec:limitaciones}).
+de 100~ms, y eso fija la resolución con que se miden los tiempos de la campaña.
 
 \subsection{La interfaz web como cliente del sistema}
 \label{sec:teo-interfaz}
@@ -498,15 +489,12 @@ de la confianza deseada ($z = 1{,}96$ para el 95~\%). El intervalo de Wilson es
 \begin{equation}
   \frac{\hat{p} + \dfrac{z^{2}}{2n} \pm z\sqrt{\dfrac{\hat{p}(1-\hat{p})}{n} + \dfrac{z^{2}}{4n^{2}}}}{1 + \dfrac{z^{2}}{n}} .
 \end{equation}
-Su ancho decide qué se puede afirmar con una muestra dada
-(sección~\ref{sec:res-sim}).
+Su ancho decide qué se puede afirmar con una muestra dada.
 
 El segundo principio es de método. Para \textcite{popper1959logic}, una
 afirmación aporta conocimiento empírico solo si alguna observación posible podría
 refutarla. Trasladado a un experimento, un criterio de aceptación solo es
-evidencia si alguna ejecución del sistema puede incumplirlo. La
-sección~\ref{sec:limitaciones} muestra un criterio del proyecto que no cumplía
-esa condición y cómo se reformuló.
+evidencia si alguna ejecución del sistema puede incumplirlo.
 
 La demostración con los agentes físicos sigue otra lógica. La norma ASTM
 F3244-21 \autocite{astm2021f3244} establece un método de prueba para la
@@ -519,9 +507,7 @@ confianza $C$ es
 \end{equation}
 que con $n = 10$ y $C = 0{,}85$ da $R \approx 0{,}83$. Con las cinco a diez
 repeticiones que caben en el calendario, la campaña física demuestra que el
-sistema opera con los agentes físicos, pero no estima su tasa de éxito con la
-precisión de la simulación. Por eso las dos campañas se reportan por separado: la
-de simulación produce la evidencia estadística y la física, la demostración.
+sistema opera con los agentes físicos, pero no estima su tasa de éxito con la precisión de la simulación.
 
 % =====================================================================
 \section{Marco legal}
@@ -541,9 +527,7 @@ Este trabajo encaja en esa línea. Es un prototipo de asistencia robótica
 construido sobre plataformas de bajo costo y software abierto, dentro de las
 limitaciones presupuestales de un entorno universitario.
 
-La presentación del propio documento sigue la norma NTC 1486 del ICONTEC
-\autocite{ntc1486}, que regula cómo se presentan las tesis y los trabajos de grado y
-que la plantilla institucional declara como su base.
+
 
 \subsection{Alcance de la operación y responsabilidad}
 
@@ -553,31 +537,16 @@ se adoptó por razones técnicas y de costo, y tiene además una consecuencia
 normativa favorable: evita intervenir sistemas sujetos a regulación específica de
 seguridad en edificaciones.
 
-Las pruebas se hicieron en pasillos de uso común, en franjas de baja circulación,
-con una persona junto a cada agente durante las maniobras y la posibilidad de
-cancelar la misión desde la interfaz en cualquier momento.
+
 
 % =====================================================================
 \section{Marco ambiental}
 \label{sec:ambiental}
 % =====================================================================
 
-El impacto ambiental del prototipo está en el hardware que emplea, la energía que
-consume y el destino de sus baterías. Los dos agentes son equipo institucional que ya existía: el proyecto no los compró, y el presupuesto del anteproyecto los contabiliza como uso y desgaste. La decisión fue económica, pero
-también alarga la vida útil de equipos que estaban subutilizados. El entorno de
-evaluación es el propio edificio de la universidad, sin infraestructura dedicada
-ni modificaciones.
+El impacto ambiental del proyecto es mínimo. Los dos agentes son equipo institucional que ya existía: el proyecto no los compró, y el presupuesto del anteproyecto los contabiliza como uso y desgaste. Funcionan con baterías pequeñas y de bajo consumo, y una sesión de campo completa gasta una fracción de su carga. El entorno de evaluación es el propio edificio de la universidad, sin infraestructura dedicada ni modificaciones. El único cuidado que exige el prototipo es el de las baterías de polímero de litio de la tracción, que al final de su vida útil deben ir a los canales de disposición de residuos electrónicos de la institución y no a la basura doméstica.
 
-Cada agente lleva una fuente de alimentación para el cómputo y otra para la
-tracción, y una sesión de campo completa gasta una fracción de su carga. El mayor
-consumo del proyecto está en la estación de trabajo que ejecuta la simulación,
-con dos instancias del simulador a la vez y de forma sostenida. Eso respalda que
-la lógica de coordinación se verificara como función pura, sin simulador. Las
-baterías de polímero de litio de la tracción son el componente más sensible, porque contienen litio y se degradan con los
-ciclos de carga. Al final de su vida útil deben ir a los canales de disposición de residuos electrónicos de la institución,
-nunca a la basura doméstica. Como la tracción funciona en lazo abierto, una misma
-orden produjo velocidades distintas en corridas consecutivas, con la batería como
-causa más probable, y eso obliga a revisar su nivel de carga entre mediciones.
+
 
 % VERIFICAR: si la universidad tiene un programa institucional de gestión de RAEE
 % (residuos de aparatos eléctricos y electrónicos), nombrarlo aquí en concreto.

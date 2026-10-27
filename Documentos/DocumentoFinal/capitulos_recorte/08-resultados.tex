@@ -7,22 +7,24 @@
 %     dicho con la tabla de la campaña en simulación.
 %   - La llegada sin flexómetro se explica una sola vez, en la última
 %     limitación; las condiciones de las pruebas solo remiten a ella.
-%   - Voz de los autores donde se interpreta un resultado; registro
-%     impersonal en lo que se reporta.
+%   - Registro impersonal (corrección del 27 de octubre).
+%   - Revisión del 27 de octubre: los fallos de las dos campañas son de
+%     navegación y no de coordinación; gráfico del error de llegada; fechas
+%     de las sesiones; por qué la campaña física no midió con flexómetro; el
+%     umbral del mapa explicado paso a paso.
 %   - Figuras y tablas con [htbp].
 %  Ninguna cifra de resultado sale del capítulo.
 % =====================================================================
 \chapter{Resultados}
 \label{cap:resultados}
 
-Las dos campañas, en simulación y con los agentes físicos, se reportan por separado. La de simulación produce la evidencia estadística, y la de los agentes físicos demuestra que el sistema opera fuera del simulador.
+Las dos campañas se reportan por separado porque responden preguntas distintas. La de simulación, con treinta misiones, da la evidencia estadística sobre la tasa de éxito. La de los agentes físicos, con diez misiones sorteadas en los pisos 3 y 4 del edificio Calatayud, muestra que el sistema completo se puede llevar a un edificio real. Allí intervienen los sensores, la red inalámbrica y la tracción de los agentes, y los usuarios piden, siguen y confirman las misiones desde un teléfono. En las dos campañas, todos los fallos ocurrieron en la navegación de un agente, sobre todo en la precisión de su llegada, y ninguno en la asignación ni en el relevo, que son el núcleo del proyecto.
 
 % ---------------------------------------------------------------------
 \section{Evaluación en simulación}
 \label{sec:res-sim}
 
-La campaña corrió treinta misiones sorteadas: quince de control, con origen y
-destino en el mismo piso, y quince entre pisos, con un relevo. El analizador la
+La campaña corrió treinta misiones sorteadas: quince con origen y destino en el mismo piso, sin relevo, que sirven de comparación, y quince entre pisos, con un relevo. El analizador la
 dictaminó válida, sin ningún descarte, frente a un máximo admitido del 20~\%.
 
 \subsection{Tasa de éxito}
@@ -40,27 +42,28 @@ con su intervalo de confianza de Wilson al 95~\% \autocite{wilson1927probable}.
     \toprule
     \textbf{Misiones} & \textbf{n} & \textbf{éxitos} & \textbf{tasa} & \textbf{intervalo al 95~\%} \\ \midrule
     Campaña completa & 30 & 26 & 86,7 \% & 70,3 -- 94,7 \% \\
-    Mismo piso (control) & 15 & 12 & 80,0 \% & 54,8 -- 93,0 \% \\
+    Mismo piso, sin relevo & 15 & 12 & 80,0 \% & 54,8 -- 93,0 \% \\
     Entre pisos, con relevo & 15 & 14 & 93,3 \% & 70,2 -- 98,8 \% \\ \bottomrule
   \end{tabular}
 \end{table}
 
-Lo que podemos afirmar es que la tasa de éxito supera el 70~\%, no que sea del
-86,7~\%. Con treinta misiones el intervalo mide 24 puntos porcentuales de ancho, y
+Lo que se puede afirmar es que la tasa de éxito supera el 70~\%, no que sea del 86,7~\%. Con treinta misiones el intervalo mide 24 puntos porcentuales de ancho, y
 ese límite es de diseño: solo se reduce con más muestra. El 86,7~\% es el
 estimador puntual y se reporta siempre junto a su intervalo. Los intervalos de
-los dos grupos se solapan, así que la comparación entre ellos no sostiene ninguna
-conclusión, aunque el estimador puntual apunte en contra de la intuición: las
-misiones con relevo salieron mejor que las de control.
+los dos grupos se solapan, así que la comparación entre ellos no sostiene ninguna conclusión, aunque el estimador puntual de las misiones con relevo haya salido mayor que el de las de un solo piso.
 
 \subsection{Causa común de los cuatro fallos}
 
 Las cuatro misiones fallidas quedaron a 0,295, 0,284, 0,311 y 0,347~m del
 destino, frente a una tolerancia de 0,25~m. Las cuatro se quedaron cortas:
-ninguna se pasó del destino ni terminó en otro sitio. Los cuatro fallos se deben
-al límite de precisión de la aproximación final, y ninguno a la coordinación. El
-error de llegada del conjunto tiene una mediana de 0,106~m y va de 0,019 a
-0,347~m.
+ninguna se pasó del destino ni terminó en otro sitio. Los cuatro fallos son de la navegación, en la precisión de la aproximación final, y ninguno de la coordinación: en las treinta misiones el coordinador asignó el agente, ejecutó el relevo cuando correspondía y llevó la misión hasta su cierre. La figura~\ref{fig:llegada-sim} muestra el error de llegada de cada misión. El del conjunto tiene una mediana de 0,106~m y va de 0,019 a 0,347~m.
+
+\begin{figure}[!htbp]
+  \centering
+  \includegraphics[width=\textwidth]{imagenes/llegada_simulacion.png}
+  \caption{Error de llegada de las treinta misiones de la campaña en simulación, por grupo. La línea discontinua es la tolerancia de 0,25~m; en naranja, las cuatro misiones que quedaron fuera de ella. La marca vertical de cada fila es su mediana.}
+  \label{fig:llegada-sim}
+\end{figure}
 
 \subsection{Tiempo de respuesta y tiempo de asignación}
 
@@ -107,8 +110,7 @@ figura~\ref{fig:simulacion} muestra una misión de la campaña.
 
 \subsection{La odometría del agente}
 
-La odometría del agente sale de comparar barridos sucesivos del láser, y
-durante meses no produjo una medida utilizable. La tabla~\ref{tab:odometria}
+La odometría del agente sale de comparar barridos sucesivos del láser, y entre el 26 de agosto y el 2 de octubre no produjo una medida utilizable. La tabla~\ref{tab:odometria}
 reúne lo que se midió en cada entorno, como fracción del avance real medido con
 flexómetro.
 
@@ -117,36 +119,32 @@ flexómetro.
   \caption{Fracción del avance real que registra la odometría, por entorno. El
     criterio de la prueba es un error de 10~\% o menos.}
   \label{tab:odometria}
-  \begin{tabular}{@{}lccl@{}}
+  \begin{tabular}{@{}p{0.44\textwidth}ccl@{}}
     \toprule
     \textbf{Entorno} & \textbf{Recorrido} & \textbf{Registrado} & \textbf{Criterio} \\ \midrule
-    Pasillo simulado, 46,9 m & largo & 37,9 \% & no cumple \\
-    Pasillos de los pisos 1 y 2 & largo & 5,7 \% y 1,3 \% & no cumple \\
-    Hall del piso 2 & 6 m & 73 \% & no cumple \\
+    Gregorio, pasillo simulado de 46,9 m & largo & 37,9 \% & no cumple \\
+    Gregorio, pasillos simulados de los pisos 2 y 3 & largo & 5,7 \% y 1,3 \% & no cumple \\
+    Gregorio, hall del piso 3 & 6 m & 73 \% & no cumple \\
     Cuarto cerrado, desplazado a mano & 3 m & 96,3 -- 101,9 \% & cumple \\
-    Pasillo del piso 4 & 6,68 m & 95,4 \% & cumple \\
-    Pasillo del piso 4 & 14,57 m & 103,3 \% & cumple \\
-    Pasillo del piso 4, con la unidad inercial & 8,08 m & 101,9 \% & cumple \\
-    Pasillo del piso 4, con la unidad inercial & 2,82 m & 104,9 \% & cumple \\ \bottomrule
+    Calatayud, pasillo del piso 4 & 6,68 m & 95,4 \% & cumple \\
+    Calatayud, pasillo del piso 4 & 14,57 m & 103,3 \% & cumple \\
+    Calatayud, piso 4, con la unidad inercial & 8,08 m & 101,9 \% & cumple \\
+    Calatayud, piso 4, con la unidad inercial & 2,82 m & 104,9 \% & cumple \\ \bottomrule
   \end{tabular}
 \end{table}
 
 El estimador es el mismo en todas las filas; lo que cambió fue el entorno. En un
-pasillo recto y uniforme la información de avance no está en la señal del
-sensor, y ningún ajuste la recupera (sección~\ref{sec:teo-localizacion}). En un
+pasillo recto y uniforme la información de avance no está en la señal del sensor, y ningún ajuste la recupera. En un
 pasillo con hornacinas, casilleros y quiebres, con ocho cambios de perfil en
 25~m, la misma odometría queda dentro del $\pm$5~\% sin cambiar un parámetro. Con
-las dos mediciones del pasillo del piso 4, de 6,68 y 14,57~m, el director dio por superada la prueba de odometría, de la que dependía todo lo demás con los agentes físicos. Las dos últimas filas ya incluyen la unidad inercial
-(sección~\ref{sec:imu}); el segundo de esos tramos mide 2,82~m, por debajo de los
+las dos mediciones del pasillo del piso 4, de 6,68 y 14,57~m, la odometría cumplió el criterio de la prueba, del que dependía todo lo demás con los agentes físicos. Las dos últimas filas ya incluyen la unidad inercial; el segundo de esos tramos mide 2,82~m, por debajo de los
 5~m que pide el criterio, y se incluye como dato de la misma cadena.
 
 \subsection{La navegación y la precisión de llegada}
 \label{sec:res-g3}
 
-La prueba de navegación de un agente pide un recorrido de punto a punto con Nav2 y la llegada verificada con flexómetro, a 0,5~m o menos del destino. Es la tolerancia que fijó el director para los agentes físicos. En la primera
-sesión en el piso 4 las dos llegadas medidas quedaron a 0,57 y 0,62~m, cortas,
-porque Nav2 daba entonces la meta por alcanzada a 1,0~m. Con la unidad inercial
-integrada (sección~\ref{sec:imu}) ese margen bajó a 0,5~m. En la sesión siguiente, uno de los agentes recorrió en el piso 4 tres tramos encadenados, sin
+La prueba de navegación de un agente pide un recorrido de punto a punto con Nav2 y la llegada verificada con flexómetro, a 0,5~m o menos del destino. En la primera sesión en el piso 4, el 2 de octubre, las dos llegadas medidas quedaron a 0,57 y 0,62~m, cortas,
+porque Nav2 daba entonces la meta por alcanzada a 1,0~m. Con la unidad inercial integrada, ese margen bajó a 0,5~m. El 7 de octubre, uno de los agentes recorrió en el piso 4 tres tramos encadenados, sin
 que nadie lo tocara entre uno y otro, y después regresó a la salida
 (tabla~\ref{tab:g3} y figura~\ref{fig:cadena}).
 
@@ -165,7 +163,7 @@ que nadie lo tocara entre uno y otro, y después regresó a la salida
   \end{tabular}
 \end{table}
 
-Las llegadas medidas quedaron dentro de la tolerancia de 0,5~m, y el director dio por superada la prueba. La llegada al Salón 403 no se midió porque en ese
+Las llegadas medidas quedaron dentro de la tolerancia de 0,5~m, y la prueba se superó. La llegada al Salón 403 no se midió porque en ese
 momento no había flexómetro, y se estimó con el error de los otros dos tramos. El
 regreso a la salida incluyó una media vuelta en el tramo ancho frente a los
 salones, que Nav2 resolvió con seis recuperaciones.
@@ -179,18 +177,17 @@ salones, que Nav2 resolvió con seis recuperaciones.
   \label{fig:cadena}
 \end{figure}
 
-Al día siguiente, el otro agente recorrió el piso 3 en cinco tramos
+El 8 de octubre, el otro agente recorrió el piso 3 en cinco tramos
 encadenados, con dos medias vueltas entre ellos, y los cinco terminaron con éxito
 y sin recuperaciones. Esas llegadas no se midieron con flexómetro, y al forzar a la
-localización a recalcular su pose al final de cada tramo, esta se desplazó entre 0,61 y 0,86~m. La pose que publica la localización al detenerse el agente va atrasada, y por eso la llegada que vale es la medida con flexómetro. Lo que condiciona la precisión de llegada sigue siendo la banda
-muerta de tracción (sección~\ref{sec:banda-muerta}): el agente se aproxima a la
+localización a recalcular su pose al final de cada tramo, esta se desplazó entre 0,61 y 0,86~m. La pose que publica la localización al detenerse el agente va atrasada, y por eso la llegada que vale es la medida con flexómetro. Lo que condiciona la precisión de llegada sigue siendo la banda muerta de tracción: el agente se aproxima a la
 meta a 0,40~m/s y no tiene régimen de aproximación fina.
 
 % ---------------------------------------------------------------------
 \section{Evaluación del sistema completo con los agentes físicos}
 \label{sec:res-completo}
 
-El sistema completo funcionó con los dos agentes físicos. La misión con relevo del
+El 16 de octubre, el sistema completo funcionó con los dos agentes físicos. La misión con relevo del
 Salón 302 al Salón 402 se completó, y de las diez misiones sorteadas para la
 campaña, las nueve que llegaron a correr se completaron, todas con relevo. La
 décima quedó interrumpida porque el computador portátil se apagó por falta de
@@ -198,13 +195,12 @@ batería.
 
 \subsection{Condiciones de las pruebas}
 
-Las pruebas se hicieron en los pisos 3 y 4, con un agente en cada piso. El
+Las pruebas se hicieron en los pisos 3 y 4 del edificio Calatayud, con un agente en cada piso. El
 coordinador y el grabador corrieron en el portátil, y cada misión se pidió desde
 la página web en un teléfono conectado a la red de los agentes. Los autores
 hicieron de usuario: pidieron cada misión, acompañaron a los agentes y
 confirmaron el cambio de piso en la página. Los agentes no se reubicaron entre
-misiones, y cuando el destino quedaba detrás del agente, el coordinador pidió la
-media vuelta en varios tiempos (sección~\ref{sec:media-vuelta}). La llegada se verificó con la localización de cada agente y no con flexómetro (sección~\ref{sec:lim-llegada}).
+misiones, y cuando el destino quedaba detrás del agente, el coordinador pidió la media vuelta en varios tiempos. La llegada se verificó con la localización de cada agente y no con flexómetro.
 
 \subsection{La misión con relevo}
 
@@ -215,17 +211,13 @@ arranque del segundo pasaron 61,1~s. Fue el segundo intento: en el primero, el
 coordinador rechazó la llegada del agente del piso 3 al Salón 302, adonde iba a
 recoger al usuario, porque su localización lo situaba a 0,59~m del punto.
 
-Esa sesión sirvió de ensayo del montaje, y en ella los autores eligieron las
-misiones sin seguir el sorteo. De las doce misiones grabadas, siete se completaron
+Esa sesión sirvió de ensayo del montaje, y en ella las misiones se eligieron sin seguir el sorteo. De las doce misiones grabadas, siete se completaron
 y cinco terminaron fallidas: en cuatro, el coordinador rechazó una llegada con el
-agente a entre 0,51 y 0,78~m del punto, y en la otra Nav2 abortó la navegación.
-Estas misiones no forman parte de la campaña.
+agente a entre 0,51 y 0,78~m del punto, y en la otra Nav2 abortó la navegación. Los cinco fueron fallos de navegación, no de coordinación, y estas misiones no forman parte de la campaña.
 
 \subsection{La campaña con las misiones sorteadas}
 
-Las diez misiones de la campaña se sortearon antes de correr, con una semilla
-fija, entre los puntos de interés de los dos pisos: cinco de subida y cinco de
-bajada (sección~\ref{sec:pruebas-verificacion}). Corrieron en el orden del
+Las diez misiones de la campaña se sortearon antes de correr, con una semilla fija, entre los puntos de interés de los dos pisos: cinco de subida y cinco de bajada. Corrieron en el orden del
 sorteo, y la tabla~\ref{tab:campana-vehiculos} da el resultado de las nueve que
 llegaron a correr.
 
@@ -252,9 +244,7 @@ llegaron a correr.
 \end{table}
 
 Con nueve éxitos en nueve misiones, el intervalo de Wilson al 95~\% va del 70,1 al
-100~\%. Lo que podemos afirmar es que la tasa de éxito con los agentes físicos supera
-el 70~\%, la misma cota que sostiene la campaña en simulación. Expresado como en
-la sección~\ref{sec:teo-evaluacion}, nueve repeticiones sin fallo demuestran una
+100~\%. Lo que se puede afirmar es que la tasa de éxito con los agentes físicos supera el 70~\%, la misma cota que sostiene la campaña en simulación. Con la expresión de la norma ASTM F3244-21, nueve repeticiones sin fallo demuestran una
 fiabilidad mínima de 0,81 con un 85~\% de confianza.
 
 El error de llegada tuvo una mediana de 0,234~m y fue de 0,143 a 0,435~m. El
@@ -265,8 +255,7 @@ mediana de 0,87~s y quedó por debajo de 1,3~s en siete de las nueve misiones. L
 dos valores más altos, 3,90 y 2,97~s, son de misiones en que el agente ya estaba
 en el punto de origen. El coordinador verificó esa llegada, que no exigía moverse,
 con la espera de 1,5~s, y el primer movimiento fue la media vuelta hacia la
-escalera. El tiempo de asignación fue de 0,3~ms en las nueve misiones, medido con el reloj del portátil e incluyendo el paso del mensaje hasta el grabador, del mismo orden que el del banco de pruebas
-(sección~\ref{sec:res-sim}). En las nueve misiones los agentes hicieron 24 medias
+escalera. El tiempo de asignación fue de 0,3~ms en las nueve misiones, medido con el reloj del portátil e incluyendo el paso del mensaje hasta el grabador, del mismo orden que el del banco de pruebas. En las nueve misiones los agentes hicieron 24 medias
 vueltas, de entre 160 y 171$^\circ$, en uno a cuatro tiempos cada una.
 
 La figura~\ref{fig:campana-vehiculos} descompone el tiempo de cada misión en sus
@@ -286,14 +275,12 @@ terminado la misión anterior. El guiado en el piso de origen tuvo una mediana d
 \subsection{El relevo entre los dos agentes}
 
 En las nueve misiones el relevo se produjo y el coordinador no pasó por el estado
-inactivo ni quedó sin agente asignado. Como en simulación, ese criterio no puede
-fallar por la forma en que está construido (sección~\ref{sec:limitaciones}). La medida que informa es el intervalo del relevo: el tiempo desde que el primer
+inactivo ni quedó sin agente asignado. Como en simulación, ese criterio no puede fallar por la forma en que está construido. La medida que informa es el intervalo del relevo: el tiempo desde que el primer
 agente llega a su escalera hasta el primer movimiento del segundo.
 
 Ese intervalo tuvo una mediana de 1,22~s, pero la cifra junta dos situaciones. En
 cinco misiones el segundo agente tuvo que desplazarse hasta su escalera, en
-cuatro desde el destino de la misión anterior y en una para corregir su posición
-unos centímetros, y arrancó en menos de 1,3~s. En las otras cuatro ya estaba en la
+cuatro desde el destino de la misión anterior y en una para corregir su posición, y arrancó en menos de 1,3~s. En las otras cuatro ya estaba en la
 escalera, su primer movimiento fue el del guiado final, después de la
 confirmación, y el intervalo, de 12,9 a 27,5~s, mide sobre todo cuánto tardó la
 persona en confirmar.
@@ -307,13 +294,10 @@ entre 2,3 y 24,7~s, y el aviso de los 60~s no llegó a mostrarse en ninguna misi
 
 \subsection{Criterio de conteo e incidencias}
 
-La campaña cuenta, por decisión de los autores, una corrida por misión: la que se
-completó. El protocolo, en cambio, cuenta como fallo toda corrida fallida, y por
-eso los intentos que no entran en la tasa se declaran aquí. Las misiones 1 y 2 se
+La campaña cuenta una corrida por misión, la que se completó, mientras que el protocolo cuenta como fallo toda corrida fallida; por eso los intentos que no entran en la tasa se declaran aquí. Las misiones 1 y 2 se
 completaron en el segundo intento. Los dos primeros intentos fallaron en el tramo
 en que el agente del piso 3 iba a recoger al usuario. En el de la misión 1, el
-coordinador rechazó la llegada al ascensor, con el agente a 0,526~m del punto, y
-en el de la misión 2 no tenía la pose del agente para verificar la llegada.
+coordinador rechazó la llegada al ascensor, con el agente a 0,526~m del punto, y en el de la misión 2 no tenía la pose del agente para verificar la llegada. Ninguno de los dos fue un fallo de la coordinación: el coordinador asignó el agente y verificó la llegada como estaba previsto, y lo que faltó fue la precisión o la pose del agente.
 
 Antes de esos intentos, la navegación de los dos agentes dejó de responder.
 Ocho intentos de la misión 1 terminaron rechazados o abortados, con las
@@ -323,12 +307,10 @@ reiniciaron las cadenas de navegación con la pose de salida, y después las nue
 misiones corrieron sin tocar los agentes. La causa de la detención no se
 estableció.
 
-La misión 10 empezó y no terminó: el portátil se apagó por falta de batería unos
-30~s después de pedirla, cuando el agente del piso 4 ya había llegado a su
-escalera. Unos minutos antes se había pedido por error el ascensor del piso 4 como
+La misión 10 empezó y no terminó: el portátil se apagó por falta de batería poco después de pedirla, cuando el agente del piso 4 ya había llegado a su
+escalera. Antes se había pedido por error el ascensor del piso 4 como
 destino, porque los ascensores de los dos pisos aparecían en la página con el mismo nombre. Ese intento no es una misión del sorteo y no se cuenta. Después de
-la campaña, la página muestra el piso junto a los nombres que se repiten
-(sección~\ref{sec:ajustes-campo}).
+la campaña, la página muestra el piso junto a los nombres que se repiten.
 
 % ---------------------------------------------------------------------
 \section{Limitaciones de la medición}
@@ -344,7 +326,7 @@ ventana se abra. No existe ejecución posible que lo incumpla, y un criterio que
 puede dar resultado negativo no aporta evidencia, por muchas veces que se
 verifique \autocite{popper1959logic}.
 
-No quisimos corregirlo inventando una ruta de fallo, porque eso habría sido
+No se corrigió inventando una ruta de fallo, porque eso habría sido
 instrumentar el experimento para que pareciera más informativo. La continuidad
 se declaró como un invariante estructural del diseño, y la afirmación se apoyó en
 una magnitud que sí varía: el intervalo del relevo, entre el final del tramo de un
@@ -354,32 +336,24 @@ la simulación.
 
 \subsection{Espacio desconocido marcado como libre en el mapa}
 
-El mapa con que corrió la campaña en simulación declaraba un umbral que hacía que
-10\,908 celdas desconocidas, el 14,5~\% del mapa, se cargaran como espacio libre.
-Con ello quedaban desactivadas en la práctica las dos salvaguardas que debían
-impedir planificar sobre lo no explorado. Esto no invalida el veredicto de la
-campaña: los cuatro fallos fueron de precisión de llegada, no de trazado, y el
-pasillo por el que se navegó está libre en el mundo real. Lo que no se sabe es si
-alguna trayectoria cruzó una de esas celdas, algo comprobable sobre los registros
-conservados. El defecto se corrigió después de la campaña.
+El mapa de ocupación es una imagen en la que cada celda es libre, ocupada o desconocida, y su archivo de configuración fija el umbral por debajo del cual una celda se carga como libre. En el mapa de la campaña en simulación ese umbral era 0,25, y las celdas desconocidas, que el formato guarda con una ocupación de 0,196, quedaban por debajo de él. Al cargar el mapa, 10\,908 celdas que el modelo no describía, el 14,5~\% del mapa, se leyeron como espacio libre. Con eso, las dos protecciones que impiden planificar por espacio desconocido, la del planificador y la del mapa de costos, no tenían nada que rechazar.
+
+El defecto no cambia el veredicto de la campaña: los cuatro fallos fueron de precisión de llegada y no de trazado, y el pasillo por el que se navegó es libre en el mundo simulado. Lo que no se verificó es que ninguna trayectoria cruzara una de esas celdas, algo que se puede comprobar con los registros conservados. El umbral se corrigió a 0,10 el 25 de septiembre, después de la campaña.
 
 \subsection{La llegada en los agentes físicos, sin medida externa}
 \label{sec:lim-llegada}
 
 En la campaña con los agentes físicos la llegada no tuvo una medida independiente del
-sistema. El protocolo la toma con flexómetro sobre marcas en el piso, y en esa
-sesión no se midió. El error que se reporta es el de la localización del propio
+sistema. El protocolo la toma con flexómetro sobre marcas en el piso, y en esa sesión no se midió. La odometría y la llegada ya se habían verificado con flexómetro en los mismos pisos, en las pruebas de odometría y de navegación. El error que se reporta es el de la localización del propio
 agente contra el punto del catálogo, leído 1,5~s después de que Nav2 diera la
 meta por alcanzada, con el agente ya detenido. Es la medida con que el coordinador acepta la llegada, así que el sistema verificó su llegada con su
-propia estimación, que es lo que la regla principal del protocolo procura evitar
-(sección~\ref{sec:protocolo}). Los registros lo declaran con la procedencia de la
+propia estimación, que es lo que la regla principal del protocolo procura evitar. Los registros lo declaran con la procedencia de la
 medida, y el analizador lo advierte al calcular las métricas.
 
-La única comparación entre la localización y el flexómetro en los agentes físicos es la
-de la cadena de tres tramos en el piso 4 (sección~\ref{sec:res-g3}). Leída de
+La única comparación entre la localización y el flexómetro en los agentes físicos es la de la cadena de tres tramos en el piso 4. Leída de
 nuevo al terminar cada tramo, la localización quedó a 0,10~m o menos de la medida
 en el sentido del avance y a 5~cm o menos de lado. En el piso 3, en cambio, forzar
 a la localización a recalcular su pose al final de cada tramo la desplazó entre
-0,61 y 0,86~m. Por eso leemos el resultado de la campaña así: cada agente,
+0,61 y 0,86~m. Por eso el resultado de la campaña se lee así: cada agente,
 según su propia localización, llegó a menos de 0,5~m del destino. Que la
 distancia real cumpliera la misma tolerancia no está medido.

@@ -7,10 +7,10 @@ recorrido semana a semana en [`CRONOLOGIA.md`](Documentos/DocumentoFinal/CRONOLO
 
 | | |
 |---|---|
-| **Semana en curso** | S28 (19 al 25 de octubre de 2026), fase 6: análisis y escritura |
-| **Fecha de corte** | 2026-10-24 (viernes). Ajustes de la página y cancelación verificados con el teléfono y los dos vehículos el 23-oct ([`S28_campo_pagina_cancelacion.md`](Documentos/Evidencia/S28_campo_pagina_cancelacion.md)); arreglo de la media vuelta después de cancelar (`d25e45e`); README corto, documentos de sesiones pasadas en [`historial/`](Documentos/historial/) y mundos de Gazebo en [`simulacion/`](simulacion/) |
+| **Semana en curso** | S29 (26 de octubre al 1 de noviembre de 2026), fase 6: análisis y escritura |
+| **Fecha de corte** | 2026-10-27 (lunes). Revisión del documento recortado con las anotaciones de los autores: los robots se llaman «agente»; edificio Gregorio (pisos 2 y 3) y cambio al Calatayud (pisos 3 y 4); impersonal en todo el texto; menos remisiones y menciones al director; fechas exactas; figuras de los nodos, del planificador, de la instrumentación y del error de llegada; contrato de interfaces en tabla; conclusiones y trabajos futuros reescritos |
 | **Último entregable formal** | Semana 28 ([`Entregable_semana_28.tex`](Documentos/Entregables/Entregable_semana_28.tex) y su versión [`.md`](Documentos/Entregables/Entregable_semana_28.md)) |
-| **Documento final** | Compila en el portátil: 94 páginas, sin errores ([`DocumentoFinal/`](Documentos/DocumentoFinal/)). El director pide entre 60 y 80 |
+| **Documento final** | Compila en el portátil, sin errores ([`DocumentoFinal/`](Documentos/DocumentoFinal/)): la versión vigente tiene 94 páginas y la recortada (`main_recorte.tex`), 79. El director pide entre 60 y 80 |
 
 ## Objetivos específicos
 
@@ -33,8 +33,7 @@ pasaron por el pasillo durante las misiones.
 ## Pendiente
 
 1. RNF-03: revisar en los videos de la campaña las personas en el pasillo, misión por misión.
-2. Documento final: la versión recortada (78 páginas, `main_recorte.tex`) espera la revisión de los autores;
-   faltan los preliminares. El «20 %» del hall ya está corregido a 25 % en las dos versiones.
+2. Documento final: la versión recortada (79 páginas) ya tiene la revisión del 27-oct. Faltan los preliminares, confirmar la grafía del edificio Calatayud y decidir si se recorta la bibliografía (62 entradas); después, fundir el recorte en `capitulos/`.
 3. Registro de misión: la etapa de cancelación sale como `8` y no como `CANCELANDO`.
 4. Imagen `coordinador_jazzy` del portátil: reconstruirla con el agente nuevo.
 5. Siete archivos de código copiados en los vehículos citan en comentarios la ruta vieja de planes ya

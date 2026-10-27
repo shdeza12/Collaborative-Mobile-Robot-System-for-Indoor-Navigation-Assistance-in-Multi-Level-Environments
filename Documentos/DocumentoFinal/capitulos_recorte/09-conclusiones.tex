@@ -2,60 +2,56 @@
 %  CONCLUSIONES (versión recortada, para comparar con
 %  capitulos/09-conclusiones.tex)
 %
-%  Recorte del 2026-10-25: un párrafo por objetivo específico y uno por el
-%  objetivo general, como sugiere la plantilla. Cada párrafo dice si el
-%  objetivo se cumplió y con qué cifras principales; el resto queda en los
-%  resultados. La conclusión de método pasa al párrafo del cuarto objetivo,
-%  y el error del modelo del piso 2 queda en 25 % (antes decía 20 %).
+%  Un párrafo por objetivo específico y uno por la pregunta problema, como
+%  sugiere la plantilla. Revisión del 27 de octubre: cada párrafo dice qué se
+%  concluye del objetivo, no repite los resultados; las cifras quedan en el
+%  capítulo de resultados, salvo la cota de la tasa de éxito. Sin primera
+%  persona y sin remisiones a otras secciones.
 % =====================================================================
 \chapter*{Conclusiones}
 \addcontentsline{toc}{chapter}{CONCLUSIONES}
 
 El primer objetivo específico, modelar la arquitectura funcional del sistema, se
-cumplió. El sistema tiene un contrato de interfaces, treinta y seis requisitos
-con su prueba y una capa de coordinación que ejecuta el relevo entre niveles. La decisión que más valoramos fue escribir el planificador como función pura. Permitió verificar las 930 combinaciones de origen y destino sin
-simulador y encontrar defectos que una corrida no habría delatado, como planes
-que mandaban al mismo agente dos veces a la misma pose. La asignación de tareas es
-óptima por la estructura del problema, con un solo agente admisible por nivel, y
-el aporte del trabajo está en coordinar dos agendas que dependen una de otra
-durante el relevo.
+cumplió. Un coordinador central con un agente por nivel convierte el cambio de piso en un problema de coordinación y no de locomoción. Ningún agente necesita
+subir escaleras ni usar el ascensor, y lo que se traspasa en la escalera es la
+responsabilidad de guiar al usuario. Separar la planificación del relevo de
+ROS~2 permitió verificarla de forma exhaustiva y sin simulador, y esa
+verificación encontró defectos que las corridas no habrían mostrado. La
+asignación de tareas resulta trivial por la estructura del problema, con un solo
+agente admisible por nivel; la dificultad está en coordinar dos agendas que
+dependen una de otra durante el relevo, y ahí está el aporte del trabajo.
 
-El segundo objetivo, la plataforma robótica con los dos agentes, se cumplió. Nav2
-quedó configurado para cinemática tipo automóvil
-(sección~\ref{sec:nav2-ackermann}). La odometría cumplió su criterio con un error
-entre $-4{,}6$~\% y $+3{,}3$~\%, y una cadena de tres tramos sin intervención
-llegó a entre 0,06 y 0,45~m de sus metas (sección~\ref{sec:res-g3}). Los dos
-agentes operan juntos en la misma red, con un tiempo de ida y vuelta de 5,99~ms
-de mediana, y en la campaña hicieron 24 medias vueltas en pasillos de 2,5 a 3,2~m. Quedan dos límites en la plataforma. La banda muerta de tracción impide una aproximación fina y obliga a una tolerancia de llegada de 0,5~m en lugar de 0,25~m (sección~\ref{sec:banda-muerta}). Y la estabilidad en sesiones largas no está resuelta: tras horas encendidos, la navegación de los dos agentes dejó de responder por una causa que no se estableció.
+El segundo objetivo, la plataforma robótica con los dos agentes, se cumplió. El
+AWS DeepRacer sirve como agente de un sistema de guiado en interiores, con tres
+condiciones que este trabajo hizo explícitas. Su odometría depende del entorno:
+sin codificadores en las ruedas, el avance solo se mide si el pasillo tiene
+estructura, y por eso la elección del sitio de operación es parte del diseño y
+no un detalle de la prueba. Su tracción no responde por debajo de 0,40~m/s, lo
+que fija la precisión de llegada en 0,5~m. Y su tarjeta de dos núcleos obliga a
+repartir el cómputo, con la navegación a bordo y la coordinación en un
+computador aparte. Queda abierta la estabilidad en sesiones de varias horas.
 
-El tercer objetivo, la interfaz de interacción con el usuario, se cumplió. Es una
-página web que funciona en el navegador de un teléfono, sin instalación y sin
-salida a internet, y con ella se pidieron y siguieron todas las misiones de la
-campaña con los agentes físicos. A nuestro juicio, las dos funciones que se añadieron
-al ver el sistema en uso son las que más lo acercan a una operación real. La
-confirmación de cambio de piso impide dar por completada una misión con el
-usuario en el nivel equivocado, y la cancelación devuelve al agente a su
-escalera en cualquier etapa. Las pruebas con los agentes físicos dejaron además tres
-ajustes de la página, ya corregidos (sección~\ref{sec:ajustes-campo}).
+El tercer objetivo, la interfaz de interacción con el usuario, se cumplió. Una
+página web servida en la red local basta para pedir, seguir, confirmar y
+cancelar una misión desde cualquier teléfono, sin instalación y sin salida a
+internet. La confirmación de cambio de piso y la cancelación, añadidas al ver el
+sistema en uso, son las funciones que más lo acercan a una operación real. La primera impide dar por terminada una misión con el usuario en el piso
+equivocado, y la segunda devuelve al agente a su escalera en cualquier etapa.
 
-El cuarto objetivo, la evaluación experimental, se cumplió en simulación y con los agentes físicos. La campaña de treinta misiones en simulación fue válida y permite
-afirmar, con 95~\% de confianza, que la tasa de éxito supera el 70~\%. Con los dos agentes físicos, las nueve misiones sorteadas que corrieron se completaron con
-relevo, lo que sostiene la misma cota (sección~\ref{sec:res-completo}), con una
-mediana de 87,6~s de tiempo total y de 0,87~s de respuesta. Su llegada se
-verificó con la localización de cada agente y no con una medida externa
-(sección~\ref{sec:lim-llegada}). La evaluación nos dejó también una conclusión de
-método: costó más averiguar qué medía cada prueba que construir el sistema. El
-reloj de la simulación no tenía resolución para el tiempo de asignación, el
-criterio de continuidad no podía fallar, y el modelo del edificio, que se daba
-por correcto, daba un hall un 25~\% más ancho que el real. Los tres casos se
-encontraron preguntando si el criterio podía fallar, y ninguno habría aparecido
-corriendo más experimentos.
+El cuarto objetivo, la evaluación experimental, se cumplió en simulación y con
+los agentes físicos. La campaña en simulación permite afirmar, con 95~\% de
+confianza, que la tasa de éxito del sistema supera el 70~\%, y la campaña física
+muestra que el sistema completo funciona en un edificio real con la misma cota.
+Los fallos de las dos campañas estuvieron en la precisión de llegada de los
+agentes y no en la coordinación. La evaluación dejó además una conclusión de
+método: decidir qué mide cada criterio fue más difícil que construir el sistema.
+Un criterio que no puede fallar, un reloj sin resolución para la magnitud que
+mide o un modelo del edificio sin verificar producen resultados que parecen evidencia y no lo son. Ninguno de esos casos habría aparecido corriendo más experimentos.
 
-Sobre la pregunta problema, cómo asistir la orientación de usuarios en entornos
-interiores con múltiples pisos utilizando sistemas robóticos, nuestra respuesta
-es un esquema de relevo, y concluimos que es viable. Dos agentes dedicados cada uno a un nivel pueden repartirse el guiado de una persona
-que cambia de piso, sin que ninguno atraviese la zona de transición y sin
-modificar el edificio. Quedó demostrado en simulación, con una campaña medida y
-válida, y con los dos agentes físicos, que ejecutaron el relevo entre los
-pisos 3 y 4 en todas las misiones de su campaña. Lo que el trabajo no mide es la
-experiencia de la persona guiada, que queda para un estudio con usuarios.
+Sobre la pregunta problema, cómo asistir la orientación de usuarios dentro de
+entornos interiores con múltiples pisos utilizando sistemas robóticos, se
+concluye que un esquema de relevo entre dos agentes, uno por nivel, es una
+respuesta viable. Los agentes se reparten el guiado de una persona que cambia
+de piso sin que ninguno atraviese la zona de transición y sin modificar el
+edificio. Queda sin medir la experiencia de la persona guiada, que corresponde a
+un estudio con usuarios.

@@ -58,8 +58,7 @@
   \item[Observabilidad] Propiedad de una magnitud física que permite estimarla a
     partir de las mediciones disponibles. Si en cierta combinación de entorno y
     sensor una magnitud es inobservable, ningún ajuste de parámetros la
-    recupera, porque la información no está en la señal. La
-    sección~\ref{sec:teo-localizacion} muestra un caso concreto en un pasillo recto.
+    recupera, porque la información no está en la señal. El caso típico es la posición a lo largo de un pasillo recto y uniforme, medida con un láser.
 
   \item[Odometría] Estimación del desplazamiento propio del agente a partir de sus propias mediciones. Los agentes de este trabajo no tienen encoders, así que la obtienen comparando barridos sucesivos del láser.
 
@@ -70,9 +69,7 @@
     agente al otro, en un punto acordado de antemano. Es el aporte que el
     proyecto declara, y lo que sustituye al hardware de transición vertical.
 
-  \item[Tasa de éxito] Proporción de misiones que terminan como el protocolo
-    experimental declara que deben terminar. Su definición operativa está en la
-    sección~\ref{sec:protocolo}.
+  \item[Tasa de éxito] Proporción de misiones exitosas sobre las corridas válidas. Una misión es exitosa si llega dentro de la tolerancia, se completa sin pasar por fallida y, si es entre pisos, tiene un relevo.
 
   \item[Tiempo de respuesta] Intervalo entre la solicitud del usuario y el
     instante en que el agente asignado arranca la tarea.
