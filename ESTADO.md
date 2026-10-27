@@ -26,15 +26,12 @@ recorrido semana a semana en [`CRONOLOGIA.md`](Documentos/DocumentoFinal/CRONOLO
 | OE3 · Interfaz web | Confirmación de cambio de piso y cancelación, probadas en teléfono con los vehículos |
 | OE4 · Evaluación | 30 misiones en simulación y 9 de 9 con los vehículos ([`S27_campana_rf27.md`](Documentos/Evidencia/S27_campana_rf27.md)) |
 
-Matriz completa en [`REQUISITOS.md`](Documentos/REQUISITOS.md): 36 requisitos, 35 verificados y uno
-parcial, la restricción RNF-03 (operación en condiciones controladas), a falta de anotar las personas que
-pasaron por el pasillo durante las misiones.
+Matriz completa en [`REQUISITOS.md`](Documentos/REQUISITOS.md): los 36 requisitos verificados. RNF-03 (operación en condiciones controladas) se cerró el 27 de octubre: en la campaña solo estuvieron en el pasillo los dos autores y quien hizo de usuario.
 
 ## Pendiente
 
-1. RNF-03: revisar en los videos de la campaña las personas en el pasillo, misión por misión.
-2. Documento final: la versión recortada (79 páginas) ya tiene la revisión del 27-oct. Faltan los preliminares, confirmar la grafía del edificio Calatayud y decidir si se recorta la bibliografía (62 entradas); después, fundir el recorte en `capitulos/`.
-3. Registro de misión: la etapa de cancelación sale como `8` y no como `CANCELANDO`.
-4. Imagen `coordinador_jazzy` del portátil: reconstruirla con el agente nuevo.
-5. Siete archivos de código copiados en los vehículos citan en comentarios la ruta vieja de planes ya
+1. Documento final: la versión recortada (79 páginas) ya tiene la revisión del 27-oct, los trabajos futuros reducidos a cinco líneas y el anexo A con los siete videos del proyecto. Faltan los preliminares, confirmar la grafía del edificio Calatayud y decidir si se recorta la bibliografía (62 entradas); después, fundir el recorte en `capitulos/`.
+2. Registro de misión: la etapa de cancelación sale como `8` y no como `CANCELANDO`.
+3. Imagen `coordinador_jazzy` del portátil: reconstruirla con el agente nuevo.
+4. Siete archivos de código copiados en los vehículos citan en comentarios la ruta vieja de planes ya
    movidos a `historial/`; se actualizan en los dos vehículos la próxima vez que estén encendidos.

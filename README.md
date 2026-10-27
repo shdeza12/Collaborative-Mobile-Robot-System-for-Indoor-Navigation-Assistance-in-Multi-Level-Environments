@@ -27,9 +27,7 @@ asigna los robots y organiza el relevo. El aporte del proyecto es esa coordinaci
   <img alt="Los cuatro objetivos específicos cumplidos: arquitectura funcional (10 de 10 requisitos), plataforma robótica (6 de 6), interfaz para el usuario (6 de 6) y evaluación experimental (7 de 7)" src="sitio/paginas/img/readme_objetivos_claro.png">
 </picture>
 
-De los 36 requisitos del proyecto hay 35 verificados, cada uno con su prueba
-([`REQUISITOS.md`](Documentos/REQUISITOS.md)). Queda parcial una restricción del alcance, operar en
-condiciones controladas, a falta de anotar las personas que pasaron por el pasillo durante las pruebas.
+Los 36 requisitos del proyecto están verificados, cada uno con su prueba ([`REQUISITOS.md`](Documentos/REQUISITOS.md)).
 
 ## Resultados
 

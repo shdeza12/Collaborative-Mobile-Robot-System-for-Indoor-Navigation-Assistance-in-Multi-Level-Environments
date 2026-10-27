@@ -2,10 +2,10 @@
 %  TRABAJOS FUTUROS (versión recortada, para comparar con
 %  capitulos/10-trabajos-futuros.tex)
 %
-%  Revisión del 27 de octubre: primero las cinco líneas que pidieron los
-%  autores (navegación, cómputo, evasión de obstáculos, otro controlador e
-%  interacción por voz) y después las que ya estaban, más cortas y sin
-%  remisiones a otras secciones.
+%  Revisión del 27 de octubre: las cinco líneas que pidieron los autores
+%  (navegación, cómputo, evasión de obstáculos, otro controlador e interacción
+%  por voz). Las seis anteriores, de campañas más grandes a evaluación con
+%  usuarios, se quitaron por indicación de los autores.
 % =====================================================================
 \chapter*{Trabajos futuros}
 \addcontentsline{toc}{chapter}{TRABAJOS FUTUROS}
@@ -50,42 +50,3 @@ sistema le explicaría cada etapa en voz alta. Como la red del edificio puede no
 tener salida a internet, los dos modelos tendrían que correr en el computador del coordinador. El de lenguaje solo traduciría la petición a un origen y un
 destino del catálogo, sin decidir el recorrido, que sigue a cargo del
 planificador.
-
-\paragraph{Campañas más grandes y con medida externa.} Con treinta misiones en
-simulación el intervalo de confianza mide 24 puntos porcentuales, y con las
-nueve de los agentes físicos la cota inferior es del 70~\%. Ese ancho solo se
-reduce con más repeticiones, que permitirían además comparar las misiones de un
-mismo piso con las de dos pisos. La campaña física debería repetirse con la
-llegada medida con flexómetro o con un sistema de seguimiento externo.
-
-\paragraph{Estabilidad en sesiones largas.} Tras horas encendidos, la
-navegación de los dos agentes dejó de responder y hubo que reiniciarla, por una
-causa que no se estableció. Antes de dejar el sistema en servicio hace falta
-reproducir la falla en una sesión larga controlada y decidir si basta con
-supervisar la cadena de navegación y reiniciarla sola.
-
-\paragraph{El ascensor como segunda vía de transición.} Hoy el cambio de piso se
-hace siempre por la escalera. Admitir el ascensor exige que el planificador elija
-entre dos puntos de transferencia por nivel, por cercanía o por preferencia del
-usuario. El planificador ya detecta ese caso y falla con un mensaje explícito, de
-modo que el punto de extensión está identificado.
-
-\paragraph{Esquinas en pasillos estrechos.} Todos los recorridos medidos fueron
-sobre tramos rectos. Falta probar que el agente resuelva un giro de 90$^\circ$
-en una esquina estrecha, que es lo que exige el guiado en edificios con más de un
-pasillo por piso.
-
-\paragraph{Más de un agente por nivel y misiones simultáneas.} El sistema
-atiende una misión a la vez, con un solo agente por nivel, y con esas
-condiciones la asignación es trivial. Con dos o más agentes elegibles por tarea,
-o varias solicitudes a la vez, los métodos de subasta como MURDOCH
-\autocite{gerkey2002sold} o CBBA \autocite{choi2009consensus} empiezan a decidir
-algo. Es la extensión natural del trabajo para edificios con más afluencia.
-
-\paragraph{Evaluación con usuarios.} Las cuatro métricas del proyecto miden el
-sistema, y la experiencia de quien lo usa queda sin medir. Un estudio con
-personas, como el que hicieron \textcite{guerreiro2019cabot} con su robot guía, permitiría medirla. Diría si la interfaz se entiende sin explicación, si la velocidad del agente es
-cómoda para caminar a su lado y cuánto tolera el usuario la espera en la
-escalera. Es también el paso previo a ofrecer el sistema a personas con
-discapacidad visual, la aplicación de más impacto que sugiere la literatura
-revisada.

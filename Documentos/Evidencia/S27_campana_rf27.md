@@ -95,8 +95,7 @@ La causa de las transformadas detenidas no se estableció. Coincide con cadenas 
 encendidas, que pasaron por el apagado del portátil, y con cargas de 10 a 14 en tarjetas de dos
 núcleos. Después de los reinicios, las nueve misiones corrieron sin tocar los vehículos.
 
-La hoja no registra personas en el pasillo durante las misiones (RNF-03). Queda por confirmar con el
-equipo.
+La hoja no registra personas en el pasillo durante las misiones (RNF-03). Confirmado por los autores el 27 de octubre: en el pasillo solo estuvieron ellos dos y quien hizo de usuario, sin personas ajenas.
 
 ## Datos y reproducción
 
@@ -130,5 +129,5 @@ de `mision_20261016_223826` con `--campana G5`.
 
 ## Pendientes
 
-- Confirmar si hubo personas en el pasillo durante las misiones, para RNF-03.
+- ~~Confirmar si hubo personas en el pasillo durante las misiones, para RNF-03.~~ Confirmado el 27 de octubre: no las hubo.
 - La causa de las transformadas detenidas en Nav2 queda abierta; no afecta a las nueve misiones.
