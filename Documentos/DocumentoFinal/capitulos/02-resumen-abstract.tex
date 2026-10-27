@@ -15,9 +15,8 @@ existentes resuelven ese salto de dos maneras: dotando al robot de mecanismos
 para subir escaleras, o conectándolo al ascensor. Las dos son caras y obligan a
 intervenir el edificio.
 
-Este trabajo propone y evalúa una alternativa. Dos robots móviles terrestres, uno
-por planta, se reparten el guiado de una persona mediante un protocolo de relevo
-en la zona de escaleras. Ningún vehículo cruza de nivel. Un coordinador central
+Este trabajo propone y evalúa una alternativa. Dos agentes, robots móviles terrestres, uno por planta, se reparten el guiado de una persona mediante un protocolo de relevo
+en la zona de escaleras. Ningún agente cruza de nivel. Un coordinador central
 asigna el agente según el nivel del origen y del destino. El usuario pide el
 servicio desde una interfaz web que funciona en cualquier teléfono, sin instalar
 nada y sin salida a internet.
@@ -27,12 +26,11 @@ cuatro métricas de definición operativa. En simulación, treinta misiones
 sorteadas dieron una campaña válida sin descartes, que permite afirmar con 95~\%
 de confianza que la tasa de éxito supera el 70~\%.
 
-De diez misiones sorteadas sobre dos vehículos reales, uno por piso, nueve se
+De diez misiones sorteadas con los agentes físicos, uno por piso, nueve se
 completaron con relevo, con un tiempo total mediano de 87,6~s y la
-llegada a menos de 0,5~m del destino según la localización de cada vehículo. La
+llegada a menos de 0,5~m del destino según la localización de cada agente. La
 décima se interrumpió porque el computador del coordinador se quedó sin batería.
-La precisión de llegada está limitada por la plataforma, que no se mueve por
-debajo de 0,40~m/s.
+La tracción no responde por debajo de 0,40~m/s, y eso limita la precisión de llegada.
 
 \vspace{1em}
 \textbf{Palabras clave:} robótica móvil colaborativa; sistemas multi-robot;
@@ -46,9 +44,8 @@ robotic solutions address that gap in two ways: by equipping the robot to climb
 stairs, or by interfacing it with the building lift. Both are expensive and
 require modifying the infrastructure.
 
-This work proposes and evaluates an alternative. Two ground mobile robots, one
-per floor, share the task of guiding a person through a handover protocol at the
-stairwell. Neither vehicle crosses between levels. A central coordinator assigns
+This work proposes and evaluates an alternative. Two agents, ground mobile robots, one per floor, share the task of guiding a person through a handover protocol at the
+stairwell. Neither agent crosses between levels. A central coordinator assigns
 the agent according to the floor of the origin and the destination. The user
 requests the service from a web interface that runs on any phone, with no
 installation and no internet access.
@@ -58,12 +55,10 @@ four operationally defined metrics. In simulation, thirty randomised missions
 gave a valid campaign with no discards, which supports, with 95~\% confidence,
 the claim that the success rate exceeds 70~\%.
 
-Of ten randomised missions on two real vehicles, one per floor, nine were
+Of ten randomised missions with the physical agents, one per floor, nine were
 completed with a handover, with a median total time
-of 87.6~s and arrival within 0.5~m of the goal according to each vehicle's own
-localisation. The tenth was interrupted when the coordinator's computer ran out
-of battery. Arrival accuracy is limited by the platform, which does not move
-below 0.40~m/s.
+of 87.6~s and arrival within 0.5~m of the goal according to each agent's own localisation. The tenth was interrupted when the coordinator's computer ran out
+of battery. Traction does not respond below 0.40~m/s, which limits arrival accuracy.
 
 \vspace{1em}
 \textbf{Keywords:} collaborative mobile robotics; multi-robot systems; indoor

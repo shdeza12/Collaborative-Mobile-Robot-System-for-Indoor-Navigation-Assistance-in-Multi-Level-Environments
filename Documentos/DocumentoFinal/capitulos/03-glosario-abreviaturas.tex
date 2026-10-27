@@ -19,18 +19,14 @@
 \ustaseccion{Glosario}
 
 \begin{description}[style=nextline,leftmargin=1.5em,itemsep=0.2em]
-  \item[Agente] Cada uno de los dos robots del sistema. Se usa «agente» y no
-    «robot» cuando importa su papel dentro de la coordinación y no su hardware.
+  \item[Agente] Cada uno de los dos robots móviles del sistema, construidos sobre la plataforma AWS DeepRacer y dedicados cada uno a un nivel del edificio. Tiene su propia navegación y ejecuta los tramos de la misión que le asigna el coordinador.
 
   \item[AMCL] Algoritmo de localización por filtro de partículas. Combina la
-    odometría con las lecturas del láser para situar al robot dentro de un mapa
+    odometría con las lecturas del láser para situar al agente dentro de un mapa
     que ya conoce. No construye el mapa: lo supone dado.
 
-  \item[Banda muerta de tracción] Rango de velocidades ordenadas en el que el
-    vehículo no llega a moverse, porque la señal resultante no vence el
-    rozamiento estático. En la plataforma de este trabajo abarca todo lo que
-    está por debajo de 0,40~m/s, y condiciona la aproximación final del vehículo
-    al destino.
+  \item[Banda muerta de tracción] Rango de velocidades ordenadas en el que el agente no llega a moverse, porque la señal resultante no vence el
+    rozamiento estático. En los agentes de este trabajo abarca todo lo que está por debajo de 0,40~m/s, y condiciona su aproximación final al destino.
 
   \item[Cinemática tipo automóvil (dirección Ackermann)] Modelo de un vehículo
     que dirige con el eje delantero. Tiene radio de giro mínimo y no puede girar
@@ -41,8 +37,7 @@
     mientras el usuario cambia de nivel. Es la propiedad que el esquema de relevo
     debe garantizar para responder la pregunta problema.
 
-  \item[Localización] Estimación de la posición y la orientación del robot
-    respecto a un marco de referencia fijo.
+  \item[Localización] Estimación de la posición y la orientación del agente respecto a un marco de referencia fijo.
 
   \item[Mapa de ocupación] Cuadrícula en la que cada celda se declara libre,
     ocupada o desconocida. Es la representación del edificio con la que
@@ -66,9 +61,7 @@
     recupera, porque la información no está en la señal. La
     sección~\ref{sec:teo-localizacion} muestra un caso concreto en un pasillo recto.
 
-  \item[Odometría] Estimación del desplazamiento propio del robot a partir de
-    sus propias mediciones. La plataforma de este trabajo no tiene encoders, así
-    que la obtiene comparando barridos sucesivos del láser.
+  \item[Odometría] Estimación del desplazamiento propio del agente a partir de sus propias mediciones. Los agentes de este trabajo no tienen encoders, así que la obtienen comparando barridos sucesivos del láser.
 
   \item[Punto de transferencia] Lugar físico, en este trabajo la escalera, donde
     un agente entrega el guiado y el otro lo recibe.
@@ -82,10 +75,10 @@
     sección~\ref{sec:protocolo}.
 
   \item[Tiempo de respuesta] Intervalo entre la solicitud del usuario y el
-    instante en que el robot asignado arranca la tarea.
+    instante en que el agente asignado arranca la tarea.
 
   \item[Zona de transición] Punto del edificio donde se cambia de nivel:
-    escalera o ascensor. En este sistema ningún robot la atraviesa.
+    escalera o ascensor. En este sistema ningún agente la atraviesa.
 \end{description}
 
 \ustaseccion{Abreviaturas}
@@ -93,8 +86,7 @@
 \begin{description}[style=nextline,leftmargin=1.5em,itemsep=0.2em]
   \item[AMCL] \textit{Adaptive Monte Carlo Localization} — localización adaptativa
     por método de Monte Carlo.
-  \item[AWS] \textit{Amazon Web Services}, fabricante de la plataforma DeepRacer
-    empleada como vehículo.
+  \item[AWS] \textit{Amazon Web Services}, fabricante de la plataforma DeepRacer sobre la que se construyeron los agentes.
   \item[CONPES] Consejo Nacional de Política Económica y Social (Colombia).
   \item[DDS] \textit{Data Distribution Service} — protocolo de transporte sobre
     el que ROS~2 implementa sus comunicaciones.

@@ -15,36 +15,34 @@ El primer objetivo específico, modelar la arquitectura funcional del sistema, s
 cumplió. El sistema tiene un contrato de interfaces, treinta y seis requisitos
 con su prueba y una capa de coordinación que ejecuta el relevo entre niveles. La decisión que más valoramos fue escribir el planificador como función pura. Permitió verificar las 930 combinaciones de origen y destino sin
 simulador y encontrar defectos que una corrida no habría delatado, como planes
-que mandaban al mismo robot dos veces a la misma pose. La asignación de tareas es
+que mandaban al mismo agente dos veces a la misma pose. La asignación de tareas es
 óptima por la estructura del problema, con un solo agente admisible por nivel, y
 el aporte del trabajo está en coordinar dos agendas que dependen una de otra
 durante el relevo.
 
-El segundo objetivo, la plataforma robótica de dos vehículos, se cumplió. Nav2
+El segundo objetivo, la plataforma robótica con los dos agentes, se cumplió. Nav2
 quedó configurado para cinemática tipo automóvil
 (sección~\ref{sec:nav2-ackermann}). La odometría cumplió su criterio con un error
 entre $-4{,}6$~\% y $+3{,}3$~\%, y una cadena de tres tramos sin intervención
 llegó a entre 0,06 y 0,45~m de sus metas (sección~\ref{sec:res-g3}). Los dos
-vehículos operan juntos en la misma red, con un tiempo de ida y vuelta de 5,99~ms
-de mediana, y en la campaña hicieron 24 medias vueltas en pasillos de 2,5 a 3,2~m. Quedan dos límites en la plataforma. La banda muerta de tracción impide una aproximación fina y obliga a una tolerancia de llegada de 0,5~m en lugar de 0,25~m (sección~\ref{sec:banda-muerta}). Y la estabilidad en sesiones largas no está resuelta: tras horas encendidos, la navegación de los dos vehículos dejó de responder por una causa que no se estableció.
+agentes operan juntos en la misma red, con un tiempo de ida y vuelta de 5,99~ms
+de mediana, y en la campaña hicieron 24 medias vueltas en pasillos de 2,5 a 3,2~m. Quedan dos límites en la plataforma. La banda muerta de tracción impide una aproximación fina y obliga a una tolerancia de llegada de 0,5~m en lugar de 0,25~m (sección~\ref{sec:banda-muerta}). Y la estabilidad en sesiones largas no está resuelta: tras horas encendidos, la navegación de los dos agentes dejó de responder por una causa que no se estableció.
 
 El tercer objetivo, la interfaz de interacción con el usuario, se cumplió. Es una
 página web que funciona en el navegador de un teléfono, sin instalación y sin
 salida a internet, y con ella se pidieron y siguieron todas las misiones de la
-campaña con los vehículos. A nuestro juicio, las dos funciones que se añadieron
+campaña con los agentes físicos. A nuestro juicio, las dos funciones que se añadieron
 al ver el sistema en uso son las que más lo acercan a una operación real. La
 confirmación de cambio de piso impide dar por completada una misión con el
-usuario en el nivel equivocado, y la cancelación devuelve el vehículo a su
-escalera en cualquier etapa. Las pruebas con los vehículos dejaron además tres
+usuario en el nivel equivocado, y la cancelación devuelve al agente a su
+escalera en cualquier etapa. Las pruebas con los agentes físicos dejaron además tres
 ajustes de la página, ya corregidos (sección~\ref{sec:ajustes-campo}).
 
-El cuarto objetivo, la evaluación experimental, se cumplió en simulación y con
-los vehículos. La campaña de treinta misiones en simulación fue válida y permite
-afirmar, con 95~\% de confianza, que la tasa de éxito supera el 70~\%. Con los
-dos vehículos, las nueve misiones sorteadas que corrieron se completaron con
+El cuarto objetivo, la evaluación experimental, se cumplió en simulación y con los agentes físicos. La campaña de treinta misiones en simulación fue válida y permite
+afirmar, con 95~\% de confianza, que la tasa de éxito supera el 70~\%. Con los dos agentes físicos, las nueve misiones sorteadas que corrieron se completaron con
 relevo, lo que sostiene la misma cota (sección~\ref{sec:res-completo}), con una
 mediana de 87,6~s de tiempo total y de 0,87~s de respuesta. Su llegada se
-verificó con la localización de cada vehículo y no con una medida externa
+verificó con la localización de cada agente y no con una medida externa
 (sección~\ref{sec:lim-llegada}). La evaluación nos dejó también una conclusión de
 método: costó más averiguar qué medía cada prueba que construir el sistema. El
 reloj de la simulación no tenía resolución para el tiempo de asignación, el
@@ -55,10 +53,9 @@ corriendo más experimentos.
 
 Sobre la pregunta problema, cómo asistir la orientación de usuarios en entornos
 interiores con múltiples pisos utilizando sistemas robóticos, nuestra respuesta
-es un esquema de relevo, y concluimos que es viable. Dos
-robots dedicados cada uno a un nivel pueden repartirse el guiado de una persona
+es un esquema de relevo, y concluimos que es viable. Dos agentes dedicados cada uno a un nivel pueden repartirse el guiado de una persona
 que cambia de piso, sin que ninguno atraviese la zona de transición y sin
 modificar el edificio. Quedó demostrado en simulación, con una campaña medida y
-válida, y sobre los dos vehículos reales, que ejecutaron el relevo entre los
+válida, y con los dos agentes físicos, que ejecutaron el relevo entre los
 pisos 3 y 4 en todas las misiones de su campaña. Lo que el trabajo no mide es la
 experiencia de la persona guiada, que queda para un estudio con usuarios.

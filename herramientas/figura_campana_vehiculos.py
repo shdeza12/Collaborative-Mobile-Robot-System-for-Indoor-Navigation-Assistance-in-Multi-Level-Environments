@@ -39,11 +39,11 @@ NOMBRE = {
 
 TINTA, TINTA2, GRIS = '#0b0b0b', '#52514e', '#8a8984'
 ETAPAS = [
-    ('Primer vehículo: va a recoger al usuario', '#a9c9ef', None),
-    ('Primer vehículo: guía hasta la escalera', '#2a78d6', None),
-    ('Segundo vehículo: va a su escalera', '#f6b89d', None),
+    ('Primer agente: va a recoger al usuario', '#a9c9ef', None),
+    ('Primer agente: guía hasta la escalera', '#2a78d6', None),
+    ('Segundo agente: va a su escalera', '#f6b89d', None),
     ('Espera de la confirmación del usuario', '#d9d8d3', '////'),
-    ('Segundo vehículo: guía hasta el destino', '#eb6834', None),
+    ('Segundo agente: guía hasta el destino', '#eb6834', None),
 ]
 
 

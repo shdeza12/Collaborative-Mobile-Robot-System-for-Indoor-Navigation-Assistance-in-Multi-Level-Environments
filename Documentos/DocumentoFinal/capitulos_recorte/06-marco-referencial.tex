@@ -38,7 +38,7 @@ visitantes y una interfaz web para seguirlo a distancia. De ese trabajo se toma
 una idea vigente: guiar personas es un problema de integración tanto como de
 navegación, porque ninguna pieza sirve si las demás fallan. Del mismo grupo salió
 la localización de Monte Carlo \autocite{fox1999monte}, base del algoritmo de
-localización de los vehículos de este proyecto.
+localización de los agentes de este proyecto.
 
 \textcite{guerreiro2019cabot} llevan la idea a la asistencia de personas ciegas.
 Su robot, CaBot, tiene forma de maleta y transmite la dirección por un mango que
@@ -50,7 +50,7 @@ exigir atención constante.
 \textcite{li2023bug} abordan la seguridad de compartir el espacio con personas,
 modificando el algoritmo Bug con sensores de proximidad para reducir las
 colisiones con los trabajadores cercanos. En este proyecto la respuesta está en
-la operación: una persona acompaña a cada vehículo durante las maniobras, y el
+la operación: una persona acompaña a cada agente durante las maniobras, y el
 usuario puede cancelar la misión en cualquier momento.
 \textcite{jimenez2024arquitectura} integra al usuario en el propio sistema de
 mapas, con representaciones semánticas y reconocimiento de personas, en una
@@ -65,7 +65,7 @@ Ese supuesto es el que este trabajo cambia.
 \textcite{sojan2025autonomous} integran percepción, localización y planificación
 sobre ROS~2 para desplazarse en interiores dinámicos, con un mapa plano y
 localización por filtro de partículas. Es la arquitectura que este proyecto toma
-como punto de partida en cada vehículo.
+como punto de partida en cada agente.
 
 El sistema que implementa ese flujo en ROS~2 es Nav2.
 \textcite{macenski2020marathon} lo presentan como sucesor de la pila de
@@ -85,7 +85,7 @@ explícita: redes neuronales que aprenden a conducir solo con imágenes
 \autocite{zain2025obstacle} o a reaccionar combinando aprendizaje profundo y lógica
 difusa \autocite{lopez2024enhancing}. Este proyecto no sigue esa vía, porque
 exige datos etiquetados del edificio, que no existen, y porque con planificación
-clásica cada decisión del vehículo se puede inspeccionar cuando hay que explicar
+clásica cada decisión del agente se puede inspeccionar cuando hay que explicar
 un fallo.
 
 \subsection{Coordinación entre varios robots}
@@ -143,8 +143,7 @@ A esas líneas se suma la de dónde ejecutar el procesamiento.
 \textcite{kehoe2015cloud} revisan las arquitecturas que lo delegan a servidores
 remotos, \textcite{tahir2025edge} las que lo acercan al borde de la red, y
 \textcite{malavolta2023offloading} miden el costo de esa delegación sobre WiFi en
-robots terrestres. Sus resultados llevaron a que la navegación corra completa a
-bordo de cada vehículo y solo la coordinación, que intercambia mensajes pequeños,
+robots terrestres. Sus resultados llevaron a que la navegación corra completa en cada agente y solo la coordinación, que intercambia mensajes pequeños,
 se centralice en un computador portátil, sin depender de salida a internet (sección~\ref{sec:teo-ros2}).
 
 La literatura cubre bien cada componente por separado. La
@@ -160,7 +159,7 @@ supuesto que este proyecto no comparte.
     \toprule
     \textbf{Línea} & \textbf{Lo que se toma de ella} & \textbf{Supuesto que no se comparte} \\ \midrule
     Robots guía & La integración de navegación e interacción; la localización de Monte Carlo & Un solo robot acompaña todo el recorrido \\ \addlinespace
-    Navegación en interiores & El flujo mapa, localización y planificación sobre ROS~2 (Nav2) & Ninguno: se adopta, adaptado a la cinemática del vehículo \\ \addlinespace
+    Navegación en interiores & El flujo mapa, localización y planificación sobre ROS~2 (Nav2) & Ninguno: se adopta, adaptado a la cinemática del agente \\ \addlinespace
     Coordinación multirrobot & La taxonomía de asignación; la planificación con relevos & Lo que se traspasa puede esperar sin límite \\ \addlinespace
     Movilidad entre pisos & El mapa por piso unido por un punto de transición & El robot cruza de nivel \\ \addlinespace
     Distribución del cómputo & La navegación a bordo y la coordinación en un nodo central & --- \\ \bottomrule
@@ -168,7 +167,7 @@ supuesto que este proyecto no comparte.
 \end{table}
 
 Lo que no aparece en ninguna línea es la combinación que aquí se propone:
-resolver la discontinuidad entre pisos sin que ningún robot la atraviese. El
+resolver la discontinuidad entre pisos sin que ningún agente la atraviese. El
 recorrido se reparte entre dos agentes dedicados, cada uno a un nivel, y la
 persona pasa de uno a otro en la zona de transición. La diferencia con los
 trabajos de movilidad vertical es económica antes que algorítmica. Esos trabajos
@@ -188,7 +187,7 @@ problema donde no se había usado.
 
 En navegación y percepción, la \textbf{navegación autónoma} es el desplazamiento
 de un robot sin intervención humana, y reúne tres capacidades: percibir el
-entorno, estimar dónde está y decidir hacia dónde moverse. Cada vehículo percibe
+entorno, estimar dónde está y decidir hacia dónde moverse. Cada agente percibe
 con un \textbf{LiDAR}, un sensor láser que mide distancias en un plano, en
 360$^\circ$ a su alrededor, y con una \textbf{unidad de medición inercial} o
 IMU, que mide la velocidad de giro y la aceleración. Como no tiene codificadores
@@ -197,24 +196,24 @@ láser, y \textbf{AMCL} la corrige contra un mapa conocido. Que la odometría
 tenga con qué estimar el avance depende del sitio. Para medirlo, el proyecto definió la \textbf{información de avance} de un
 barrido: la fracción de los rayos del LiDAR que inciden sobre superficies
 orientadas hacia la dirección de marcha. Solo esos rayos cambian de longitud
-cuando el vehículo avanza. El entorno
+cuando el agente avanza. El entorno
 se representa con un \textbf{mapa de ocupación}, que dice qué celdas están libres,
 y con \textbf{mapas de costos}, que dan a cada celda un costo de tránsito. La
 \textbf{zona de transición} es el lugar del edificio donde se cambia de nivel; en
 este sistema, la escalera.
 
-En control y locomoción, el vehículo sigue un \textbf{modelo cinemático tipo
+En control y locomoción, el agente sigue un \textbf{modelo cinemático tipo
 automóvil}, o de \textbf{dirección Ackermann}: dirige con el eje delantero y
 tiene un \textbf{radio de giro mínimo}. No puede girar en el sitio, como sí lo
 hace un robot de tracción diferencial. Para invertir el rumbo en un
 pasillo angosto hace una \textbf{media vuelta en varios tiempos}, alternando
 marcha atrás y avance con la dirección a tope. Cada punto de una trayectoria en
-el que el vehículo invierte la marcha es una \textbf{cúspide}. Las órdenes llegan
+el que el agente invierte la marcha es una \textbf{cúspide}. Las órdenes llegan
 al motor y al servomotor de dirección como señales de \textbf{modulación por
 ancho de pulso} (PWM). La tracción funciona en lazo abierto, sin un
 \textbf{control PID} que regule la velocidad, y tiene una \textbf{banda muerta}:
-por debajo de 0,40~m/s el motor no mueve el vehículo. Al final de cada tramo, el
-\textbf{verificador de meta} decide si el vehículo llegó, comparando su posición
+por debajo de 0,40~m/s el motor no mueve al agente. Al final de cada tramo, el
+\textbf{verificador de meta} decide si el agente llegó, comparando su posición
 con una tolerancia.
 
 En comunicación y sistemas distribuidos, el \textbf{middleware robótico} del
@@ -230,14 +229,14 @@ que los participantes de la red se encuentran solos por \textbf{descubrimiento}.
 Quién habla con quién lo deciden el \textbf{dominio}, un número que separa el
 descubrimiento; la \textbf{partición}, un filtro dentro de un dominio, y el
 \textbf{espacio de nombres}, un prefijo como \texttt{/robot1} que indica a qué
-vehículo pertenece cada tópico. Las políticas de entrega de cada canal se llaman
+agente pertenece cada tópico. Las políticas de entrega de cada canal se llaman
 \textbf{calidad de servicio}. El \textbf{puente \textit{rosbridge}} traduce entre
 ROS~2 y mensajes JSON sobre WebSocket, y un \textbf{contenedor} es un entorno de
 ejecución aislado, con sus propias bibliotecas, que permite tener dos versiones
 de ROS~2 en un mismo computador.
 
 En arquitectura del sistema, la \textbf{asignación de tareas} es el reparto de
-actividades entre los robots según su disponibilidad y su ubicación. Cuando una
+actividades entre los agentes según su disponibilidad y su ubicación. Cuando una
 tarea cruza de un nivel a otro, el reparto toma la forma de un
 \textbf{relevo}: un agente entrega la responsabilidad de guiar al usuario y el
 otro la recibe en el \textbf{punto de transferencia}. La \textbf{máquina de
@@ -267,8 +266,7 @@ además el \textbf{intervalo de confianza de Wilson} y la \textbf{falsabilidad}
 de un criterio, que se exponen en la sección~\ref{sec:teo-evaluacion}. Un \textbf{invariante estructural} es una
 propiedad que se cumple siempre por el diseño del sistema y que, por eso, no es
 un resultado experimental. La \textbf{cota superior por misión} es lo que se
-informa cuando el instrumento no tiene resolución para dar el valor exacto. Con
-los vehículos reales, la demostración se organizó en \textbf{pruebas de
+informa cuando el instrumento no tiene resolución para dar el valor exacto. Con los agentes físicos, la demostración se organizó en \textbf{pruebas de
 verificación}, condiciones acordadas con el director antes de correrlas, como
 que la odometría registre el avance con un error del 10~\% o menos. Decidirlas
 exige una \textbf{verdad de terreno}, la medida independiente con que se
@@ -290,15 +288,13 @@ de tareas que requieren varios (MR). El tercero distingue la asignación
 instantánea (IA), que se decide al llegar cada tarea, de la extendida en el
 tiempo (TA), que planifica asignaciones futuras.
 
-La asignación de este sistema es ST--SR--IA. Cada vehículo ejecuta un tramo a la
-vez, cada tramo lo ejecuta un solo vehículo, y el agente se elige al llegar la
-solicitud. Los mismos autores demuestran que esa clase es una instancia del
+La asignación de este sistema es ST--SR--IA. Cada agente ejecuta un tramo a la vez, cada tramo lo ejecuta uno solo, y la elección se hace al llegar la solicitud. Los mismos autores demuestran que esa clase es una instancia del
 problema de asignación óptima, que el método húngaro resuelve en tiempo
 polinómico \autocite{kuhn1955hungarian}. En este problema, sin embargo, la matriz
-de costos tiene un solo candidato admisible por tarea, porque cada vehículo está
+de costos tiene un solo candidato admisible por tarea, porque cada agente está
 confinado a su nivel y hay uno solo por nivel. El método húngaro devuelve siempre
 la correspondencia que el sistema guarda como tabla de configuración, en la que
-cada nivel tiene asignado su vehículo. La ausencia de un optimizador es, por
+cada nivel tiene asignado su agente. La ausencia de un optimizador es, por
 tanto, una consecuencia de la estructura del problema y no una carencia de la
 implementación.
 
@@ -313,7 +309,7 @@ añade mensajes y latencia sin cambiar la decisión. CBBA, además, elimina el
 coordinador central, que la arquitectura mantiene por diseño.
 
 La misión completa sí se sale de esa clase. El relevo impone una restricción de
-precedencia: el tramo del segundo vehículo no puede empezar hasta que el primero
+precedencia: el tramo del segundo agente no puede empezar hasta que el primero
 termine el suyo y el usuario cambie de piso. Las agendas de los dos agentes
 quedan acopladas, y la taxonomía de 2004 está construida para tareas
 independientes. \textcite{korsah2013comprehensive} la extienden según el grado
@@ -324,7 +320,7 @@ por construcción, y la coordinación del relevo pertenece a una clase de proble
 que la taxonomía clásica del área no contempla.
 
 El análisis también delimita el alcance. El sistema atiende una misión a la vez y
-no tiene noción de agente ocupado ni cola de solicitudes. Con dos o más vehículos
+no tiene noción de agente ocupado ni cola de solicitudes. Con dos o más agentes
 elegibles por tarea, o con misiones simultáneas, la matriz de costos deja de
 tener un único candidato, y la elección del agente pasa a depender del método de
 asignación. Esa
@@ -342,19 +338,17 @@ participantes y las políticas de calidad de servicio de cada canal.
 El descubrimiento tiene un costo que crece con el tamaño del sistema. Por
 omisión, cada proceso se anuncia en la red y empareja sus publicadores y
 suscriptores con los de todos los demás, y sobre una red inalámbrica ese tráfico
-compite con la navegación por el procesador de cada vehículo
+compite con la navegación por el procesador de cada agente
 (sección~\ref{sec:dos-vehiculos}). ROS~2 Jazzy permite restringir el
 descubrimiento a los procesos del mismo computador y declarar una lista fija de
 equipos con los que sí se comunica. Con esas dos opciones la red adopta la
-topología en estrella del diseño. Dentro de cada vehículo los procesos se
+topología en estrella del diseño. Dentro de cada agente los procesos se
 descubren entre sí, y hacia afuera solo se anuncia al computador portátil lo que
-el coordinador necesita, de modo que los vehículos no se ven entre sí.
+el coordinador necesita, de modo que los agentes no se ven entre sí.
 
-Dos mecanismos más separan a los vehículos. La partición de comunicaciones deja
-dentro de cada vehículo los tópicos del software del fabricante, que no llevan
-espacio de nombres. Un espacio de nombres distinto para cada vehículo distingue
-la navegación, el estado y la media vuelta de cada agente cuando llegan al
-portátil. El sistema usa además dos distribuciones de ROS~2, Humble en simulación y Jazzy en los vehículos (sección~\ref{sec:sim-a-vehiculos}).
+Dos mecanismos más separan a los agentes. La partición de comunicaciones deja
+dentro de cada agente los tópicos del software del fabricante, que no llevan
+espacio de nombres. Un espacio de nombres distinto para cada agente distingue la navegación, el estado y la media vuelta de cada uno cuando llegan al portátil. El sistema usa además dos distribuciones de ROS~2, Humble en simulación y Jazzy en los agentes físicos (sección~\ref{sec:sim-a-vehiculos}).
 
 \subsection{Cinemática tipo automóvil, planificación y seguimiento de trayectorias}
 \label{sec:teo-planificacion}
@@ -370,8 +364,7 @@ camino más corto entre dos poses para un automóvil que puede avanzar y
 retroceder, con radio de giro mínimo. Basta considerar caminos formados por arcos
 de radio mínimo y segmentos rectos, con a lo sumo dos inversiones de marcha, y el
 óptimo está siempre en un conjunto finito de candidatos con fórmulas explícitas.
-Como el vehículo de este trabajo puede retroceder, ese es su modelo de
-movimiento.
+Como los agentes de este trabajo pueden retroceder, ese es su modelo de movimiento.
 
 Sobre un mapa con obstáculos hace falta además una búsqueda.
 \textcite{dolgov2010path} propusieron el A* híbrido: una búsqueda A* sobre la
@@ -380,18 +373,18 @@ cinemática y el camino resultante se suaviza después. Lo validaron en los
 estacionamientos del DARPA Urban Challenge de 2007, un escenario de maniobras con
 inversión de marcha parecido al de un pasillo angosto. Nav2 lo implementa en el
 planificador Smac, que admite el modelo Reeds-Shepp \autocite{macenski2024smac},
-y es el que usan los vehículos de este proyecto. El planificador trabaja sobre
+y es el que usan los agentes de este proyecto. El planificador trabaja sobre
 mapas de costos organizados por capas \autocite{lu2014layered}: la estática viene
 del mapa, la de obstáculos, de las lecturas del sensor, y la de inflado extiende
-el costo alrededor de cada obstáculo según el tamaño del vehículo. El mapa de
+el costo alrededor de cada obstáculo según el tamaño del agente. El mapa de
 costos global sirve al planificador y el local, que cubre los alrededores del
-vehículo, al controlador.
+agente, al controlador.
 
 El controlador convierte la trayectoria en órdenes de velocidad. La persecución
 pura \autocite{coulter1992implementation} elige sobre la trayectoria un punto
-situado a una distancia de anticipación $\ell$ del vehículo y calcula el arco de
+situado a una distancia de anticipación $\ell$ del agente y calcula el arco de
 circunferencia que lleva hasta él. Llamando $y$ a la distancia lateral del punto
-al eje del vehículo, la curvatura ordenada es
+al eje del agente, la curvatura ordenada es
 \begin{equation}
   \kappa = \frac{2\,y}{\ell^{2}} .
 \end{equation}
@@ -403,7 +396,7 @@ sigue las cúspides que propone el planificador.
 Esa configuración tiene un límite cerca de la meta. En este trabajo la distancia
 de anticipación va de 0,3 a 0,9~m. Cuando una cúspide queda muy cerca de la
 meta, esa distancia se acorta por debajo de un umbral en el que una guarda de seguridad del
-propio controlador anula la curvatura. El vehículo sigue invirtiendo la marcha
+propio controlador anula la curvatura. El agente sigue invirtiendo la marcha
 sin dirigir y maniobra decenas de veces en el mismo punto. Por eso la media
 vuelta se resolvió con una maniobra propia del agente
 (sección~\ref{sec:media-vuelta}).
@@ -411,7 +404,7 @@ vuelta se resolvió con una maniobra propia del agente
 \subsection{Localización, odometría y observabilidad}
 \label{sec:teo-localizacion}
 
-La localización de Monte Carlo representa la creencia sobre la pose del vehículo
+La localización de Monte Carlo representa la creencia sobre la pose del agente
 con un conjunto de partículas, cada una con un peso
 \autocite{fox1999monte,thrun2005probabilistic}. En cada paso, el modelo de
 movimiento desplaza las partículas según la odometría. Después, el modelo de
@@ -421,13 +414,13 @@ es la variante que ajusta el número de partículas a la incertidumbre; en este
 trabajo, entre 500 y 2000. Su precisión depende de la calidad de la odometría
 entre una actualización y la siguiente.
 
-Como los vehículos no tienen codificadores en las ruedas, la odometría sale del
+Como los agentes no tienen codificadores en las ruedas, la odometría sale del
 láser. \textcite{jaimez2016planar} estiman el movimiento plano de un láser a
 partir de barridos consecutivos con un enfoque de flujo de distancias
 (\textit{range flow}). Alinean los barridos de forma densa, usando sus
 gradientes y sin buscar correspondencias entre puntos, en alrededor de un
 milisegundo por barrido. Es el método que implementa el paquete rf2o, que usan
-los vehículos.
+los agentes.
 
 Todo estimador que se apoya en la geometría del entorno hereda una limitación.
 \textcite{zhang2016degeneracy} la formalizan como degeneración: hay direcciones
@@ -463,12 +456,10 @@ rumbo mejora; la posición no, porque sigue saliendo del láser.
 La campaña de evaluación corrió en Gazebo~11 con ROS~2 Humble. Gazebo es un
 simulador de código abierto pensado desde su origen para varios robots, con motor
 de física, modelos de sensores e integración con ROS \autocite{koenig2004gazebo}.
-La cinemática Ackermann del vehículo se simula con un complemento propio del
-paquete de simulación del DeepRacer, en lugar del genérico de Gazebo. Los dos
-vehículos comparten un dominio de comunicaciones y se separan por espacio de
+La cinemática Ackermann del agente se simula con un complemento propio del
+paquete de simulación del DeepRacer, en lugar del genérico de Gazebo. Los dos agentes simulados comparten un dominio de comunicaciones y se separan por espacio de
 nombres, incluido el marco de referencia de su mapa. Con la configuración por
-omisión, dar a cada vehículo un dominio distinto corta también el descubrimiento
-entre el coordinador y los agentes. El tiempo que ven los nodos avanza en saltos
+omisión, dar a cada agente un dominio distinto corta también su descubrimiento con el coordinador. El tiempo que ven los nodos avanza en saltos
 de 100~ms, y eso fija la resolución con que se miden los tiempos de la campaña
 (sección~\ref{sec:limitaciones}).
 
@@ -517,7 +508,7 @@ evidencia si alguna ejecución del sistema puede incumplirlo. La
 sección~\ref{sec:limitaciones} muestra un criterio del proyecto que no cumplía
 esa condición y cómo se reformuló.
 
-La demostración sobre los vehículos reales sigue otra lógica. La norma ASTM
+La demostración con los agentes físicos sigue otra lógica. La norma ASTM
 F3244-21 \autocite{astm2021f3244} establece un método de prueba para la
 navegación de robots en un área definida, con repeticiones del recorrido entre
 marcas fijas en el piso. El número de repeticiones fija cuánto se puede afirmar:
@@ -528,7 +519,7 @@ confianza $C$ es
 \end{equation}
 que con $n = 10$ y $C = 0{,}85$ da $R \approx 0{,}83$. Con las cinco a diez
 repeticiones que caben en el calendario, la campaña física demuestra que el
-sistema opera sobre los vehículos, pero no estima su tasa de éxito con la
+sistema opera con los agentes físicos, pero no estima su tasa de éxito con la
 precisión de la simulación. Por eso las dos campañas se reportan por separado: la
 de simulación produce la evidencia estadística y la física, la demostración.
 
@@ -556,15 +547,14 @@ que la plantilla institucional declara como su base.
 
 \subsection{Alcance de la operación y responsabilidad}
 
-El alcance del proyecto excluye de forma explícita que los robots interactúen
-mecánicamente con el edificio. No accionan puertas ni botones de ascensor, no
+El alcance del proyecto excluye de forma explícita que los agentes interactúen mecánicamente con el edificio. No accionan puertas ni botones de ascensor, no
 transportan carga y no cruzan las zonas de transición vertical. Esa delimitación
 se adoptó por razones técnicas y de costo, y tiene además una consecuencia
 normativa favorable: evita intervenir sistemas sujetos a regulación específica de
 seguridad en edificaciones.
 
 Las pruebas se hicieron en pasillos de uso común, en franjas de baja circulación,
-con una persona junto a cada vehículo durante las maniobras y la posibilidad de
+con una persona junto a cada agente durante las maniobras y la posibilidad de
 cancelar la misión desde la interfaz en cualquier momento.
 
 % =====================================================================
@@ -573,14 +563,12 @@ cancelar la misión desde la interfaz en cualquier momento.
 % =====================================================================
 
 El impacto ambiental del prototipo está en el hardware que emplea, la energía que
-consume y el destino de sus baterías. Las dos plataformas robóticas son equipo
-institucional que ya existía: el proyecto no las compró, y el presupuesto del
-anteproyecto las contabiliza como uso y desgaste. La decisión fue económica, pero
+consume y el destino de sus baterías. Los dos agentes son equipo institucional que ya existía: el proyecto no los compró, y el presupuesto del anteproyecto los contabiliza como uso y desgaste. La decisión fue económica, pero
 también alarga la vida útil de equipos que estaban subutilizados. El entorno de
 evaluación es el propio edificio de la universidad, sin infraestructura dedicada
 ni modificaciones.
 
-Cada vehículo lleva una fuente de alimentación para el cómputo y otra para la
+Cada agente lleva una fuente de alimentación para el cómputo y otra para la
 tracción, y una sesión de campo completa gasta una fracción de su carga. El mayor
 consumo del proyecto está en la estación de trabajo que ejecuta la simulación,
 con dos instancias del simulador a la vez y de forma sostenida. Eso respalda que

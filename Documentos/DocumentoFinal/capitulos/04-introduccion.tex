@@ -35,27 +35,24 @@ más lejos: automatizan ese uso instalando dispositivos conectados en el
 edificio. La otra opción es dotar al robot de mecanismos para subir escaleras.
 Ambas encarecen la plataforma y exigen intervenir la infraestructura.
 
-Este trabajo propone otra. En vez de un robot que cruza de piso, se usan
-\textbf{dos robots, cada uno dedicado a un nivel}. El usuario sube por su cuenta
-y un segundo agente lo recibe arriba. El cambio de piso deja de ser un problema
+Este trabajo propone otra. En vez de un robot que cruza de piso, se usan \textbf{dos agentes}, robots móviles dedicados cada uno a un nivel. El usuario sube por su cuenta y el segundo agente lo recibe arriba. El cambio de piso deja de ser un problema
 de locomoción y pasa a ser uno de coordinación. Dos agentes se reparten una tarea
 y se la pasan en un punto acordado. A ese traspaso lo llamamos \emph{relevo}, y
 es el aporte que el proyecto declara.
 
 La pregunta que organiza el trabajo es cómo asistir la orientación de usuarios
 dentro de entornos interiores con múltiples pisos utilizando sistemas robóticos,
-y el relevo es la respuesta que se propone y se pone a prueba. No basta con que
-los robots se muevan. Hay que demostrar que la asistencia no se interrumpe cuando
+y el relevo es la respuesta que se propone y se pone a prueba. No basta con que los agentes se muevan. Hay que demostrar que la asistencia no se interrumpe cuando
 el usuario cambia de nivel, y medirlo con criterios fijados antes de correr los
 experimentos.
 
-El sistema se construyó sobre dos vehículos AWS DeepRacer y software libre. La
+Los agentes se construyeron sobre la plataforma AWS DeepRacer, con software libre. La
 coordinación corre en un nodo central que habla con cada agente a través de
 ROS~2. \textcite{macenski2022ros2} lo describen como un rediseño sobre DDS, no
 como una actualización de su antecesor. El usuario pide el
 servicio desde una página web que funciona en cualquier teléfono, sin instalar
 nada y sin salida a internet.
 La evaluación se hizo primero en simulación, con una campaña de treinta misiones
-sorteadas, y después sobre los vehículos reales en los pasillos del edificio,
+sorteadas, y después con los agentes físicos en los pasillos del edificio,
 con una campaña de diez misiones sorteadas entre los pisos 3 y 4.
 

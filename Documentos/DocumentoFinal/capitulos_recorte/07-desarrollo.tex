@@ -31,7 +31,7 @@ empezó el desarrollo. El segundo, de agosto a octubre, hizo la integración y l
 evaluación, con un cronograma replanificado que aprobó el director
 (tabla~\ref{tab:etapas}). En esa segunda mitad, la matriz de requisitos asignó a
 cada requisito la prueba que lo declara cumplido, y los criterios de la
-demostración física fijaron qué debían superar los vehículos reales y hasta
+demostración física fijaron qué debían superar los agentes físicos y hasta
 cuándo se tomaban datos (sección~\ref{sec:pruebas-verificacion}).
 
 \begin{table}[htbp]
@@ -44,9 +44,9 @@ cuándo se tomaban datos (sección~\ref{sec:pruebas-verificacion}).
     Febrero y marzo & Planteamiento y requisitos & Anteproyecto, con el problema, la pregunta, la revisión de literatura y su sustentación; requisitos funcionales y restricciones técnicas \\ \addlinespace
     Abril & Requisitos y diseño conceptual & Análisis del DonkeyCar y de los simuladores; adopción del modelo del AWS DeepRacer y migración a ROS~2 Humble; arquitectura con servidor central y escenario de relevo \\ \addlinespace
     Mayo y junio & Desarrollo progresivo & Pasillo de la universidad en Gazebo; seguidor de paredes, descartado; sensores en el primer piso; primer mapa con SLAM \\ \addlinespace
-    Agosto & Integración & En simulación: Nav2 para dirección Ackermann, contrato de interfaces, dos agentes aislados, entorno de dos pisos, requisitos, protocolo y primera misión con relevo. Con los vehículos: software de la comunidad, láser y mando desde ROS~2 \\ \addlinespace
-    Septiembre & Integración y validación & En simulación: campaña de treinta misiones, interfaz en un teléfono, confirmación de cambio de piso, cancelación y código congelado. Con los vehículos: segundo vehículo, banda muerta, decisión de la demostración física y primera navegación autónoma \\ \addlinespace
-    Octubre & Validación & Pisos 3 y 4 levantados con flexómetro; odometría verificada; unidad inercial; llegada verificada; media vuelta; coordinador en el portátil; campaña con los dos vehículos \\ \bottomrule
+    Agosto & Integración & En simulación: Nav2 para dirección Ackermann, contrato de interfaces, dos agentes aislados, entorno de dos pisos, requisitos, protocolo y primera misión con relevo. Con los agentes físicos: software de la comunidad, láser y mando desde ROS~2 \\ \addlinespace
+    Septiembre & Integración y validación & En simulación: campaña de treinta misiones, interfaz en un teléfono, confirmación de cambio de piso, cancelación y código congelado. Con los agentes físicos: segundo agente, banda muerta, decisión de la demostración física y primera navegación autónoma \\ \addlinespace
+    Octubre & Validación & Pisos 3 y 4 levantados con flexómetro; odometría verificada; unidad inercial; llegada verificada; media vuelta; coordinador en el portátil; campaña con los agentes físicos \\ \bottomrule
   \end{tabular}
 \end{table}
 
@@ -56,11 +56,11 @@ cuándo se tomaban datos (sección~\ref{sec:pruebas-verificacion}).
 \subsection{La plataforma DonkeyCar y su simulador}
 \label{sec:donkeycar}
 
-El anteproyecto planteó dos vehículos tipo DonkeyCar con una Raspberry Pi~4,
+El anteproyecto planteó construir los agentes sobre DonkeyCar, con una Raspberry Pi~4,
 simulación en CoppeliaSim y visión con OpenCV. DonkeyCar es una plataforma
 abierta de vehículos a escala con dirección tipo automóvil, orientada a la
 conducción autónoma con una cámara \autocite{donkeycar}. En abril se instaló su
-simulador y se condujo desde la interfaz web de la plataforma. En paralelo se empezó un modelo propio del vehículo para ROS~2, con el chasis, las ruedas, la
+simulador y se condujo desde la interfaz web de la plataforma. En paralelo se empezó un modelo propio del agente para ROS~2, con el chasis, las ruedas, la
 dirección y su árbol de transformaciones (figura~\ref{fig:donkeycar}).
 
 \begin{figure}[htbp]
@@ -68,8 +68,7 @@ dirección y su árbol de transformaciones (figura~\ref{fig:donkeycar}).
   \includegraphics[height=5.2cm]{imagenes/etapa_donkeycar_simulador.jpg}\hfill
   \includegraphics[height=5.2cm]{imagenes/etapa_donkeycar_modelo.png}
   \caption{Exploración de la plataforma DonkeyCar. A la izquierda, su simulador
-    conducido desde la interfaz web de la plataforma, con la imagen de la cámara
-    del vehículo. A la derecha, el modelo propio del vehículo en el visualizador
+    conducido desde la interfaz web de la plataforma, con la imagen de la cámara a bordo. A la derecha, el modelo propio del agente en el visualizador
     de ROS~2, con el chasis, las ruedas y la dirección.}
   \label{fig:donkeycar}
 \end{figure}
@@ -77,7 +76,7 @@ dirección y su árbol de transformaciones (figura~\ref{fig:donkeycar}).
 Ese trabajo mostró tres limitaciones. El ecosistema DonkeyCar no se actualiza
 desde hace años y no es compatible con las versiones recientes de ROS~2. Su
 simulador no se comunica con ROS~2, así que no permite probar el mapeo, la
-localización, la planificación ni la comunicación entre robots, que son el núcleo
+localización, la planificación ni la comunicación entre agentes, que son el núcleo
 del proyecto. Y no existía un modelo del DonkeyCar para Gazebo con dirección
 Ackermann que funcionara en ROS~2 Humble.
 
@@ -87,7 +86,7 @@ navegación. Entre CoppeliaSim, que proponía el anteproyecto, el simulador del
 curso F1TENTH \autocite{okelly2019f1tenth} y Gazebo \autocite{koenig2004gazebo},
 elegimos Gazebo por su integración directa con ROS~2 y con su sistema de control
 de articulaciones. También decidimos conservar un chasis con dirección tipo
-automóvil. Cada robot atiende un piso y la persona cambia de nivel por la escalera, así que el vehículo no tiene que entrar a un ascensor ni subir escalones. La vuelta dentro del pasillo puede quedar a cargo de un planificador para
+automóvil. Cada agente atiende un piso y la persona cambia de nivel por la escalera, así que ningún agente tiene que entrar a un ascensor ni subir escalones. La vuelta dentro del pasillo puede quedar a cargo de un planificador para
 automóviles.
 
 \subsection{El modelo de AWS DeepRacer y su migración a ROS~2 Humble}
@@ -99,7 +98,7 @@ clase de plataforma que el DonkeyCar, con chasis a escala 1:18, dirección
 Ackermann, computador a bordo y software abierto. AWS publicó en código abierto su
 modelo de simulación, con un complemento de cinemática Ackermann para Gazebo y
 los nodos que traducen las órdenes de velocidad a los servos
-\autocite{awsdeepracer2021}, y la universidad ya tenía dos unidades. Lo que pide
+\autocite{awsdeepracer2021}, y la universidad ya tenía dos. Lo que pide
 el segundo objetivo, que es cinemática tipo automóvil, bajo costo y código
 modificable, se cumple igual con las dos plataformas, y usar las que existían dejó
 el tiempo para la coordinación. El costo fue convivir con el software del
@@ -111,8 +110,7 @@ proyecto trabaja con Humble sobre Ubuntu 22.04. La migración necesitó tres
 cambios, todos en el sistema de control de articulaciones: la orden que activa
 los controladores pasó de \texttt{start} a \texttt{active}, y el componente que
 publica el estado de las articulaciones cambió de nombre y de tipo. En un mundo
-vacío (figura~\ref{fig:deepracer-sim}, izquierda), el vehículo apareció con el
-láser y la cámara publicando a 62 cuadros por segundo, con un factor de tiempo
+vacío (figura~\ref{fig:deepracer-sim}, izquierda), el modelo apareció con el láser y la cámara publicando a 62 cuadros por segundo, con un factor de tiempo
 real de 1,00 y los siete controladores activos. La odometría registró 0,40~m/s
 ante una orden de 0,5~m/s.
 
@@ -123,7 +121,7 @@ ante una orden de 0,5~m/s.
   \caption{El modelo del DeepRacer migrado a ROS~2 Humble. A la izquierda, en un
     mundo vacío, con el barrido del láser en azul. A la derecha, dentro del primer
     modelo del pasillo de la universidad, de 7 por 3~m; el sector sin barrido
-    detrás del vehículo es el que no cubría el láser del modelo simulado.}
+    detrás del agente es el que no cubría el láser del modelo simulado.}
   \label{fig:deepracer-sim}
 \end{figure}
 
@@ -133,14 +131,14 @@ ante una orden de 0,5~m/s.
 En mayo se modeló un tramo del pasillo de la universidad, de 7 por 3~m
 (figura~\ref{fig:deepracer-sim}, derecha). Sobre él se programó un seguidor de
 paredes, que el director sugirió como ejercicio de integración entre el láser y
-la cinemática del vehículo. La primera versión aplicaba control
+la cinemática del agente. La primera versión aplicaba control
 proporcional-derivativo sobre un rayo lateral del láser, y saturaba el giro
-porque no conocía la orientación del vehículo respecto a la pared. La segunda usó
+porque no conocía la orientación del agente respecto a la pared. La segunda usó
 la técnica de dos rayos del curso F1TENTH, que estima ese ángulo y la distancia a
 la pared un metro más adelante.
 
-En el pasillo de 7 por 3~m ninguna sintonía estabilizó al vehículo: el giro se
-saturaba y el vehículo trazaba círculos o chocaba, porque su radio de giro deja
+En el pasillo de 7 por 3~m ninguna sintonía estabilizó al agente: el giro se
+saturaba y el agente trazaba círculos o chocaba, porque su radio de giro deja
 muy poco margen en 3~m de ancho. En un pasillo ampliado de 15 por 5~m convergió
 por tramos, a unos 0,76~m de la pared frente a un objetivo de 0,5~m, y se perdía
 en los extremos. La conclusión nos pareció clara: un comportamiento reactivo no
@@ -171,28 +169,27 @@ En agosto se aislaron los dos agentes, se construyó el entorno de dos pisos y s
 escribieron los requisitos y el protocolo. A finales de mes se completó la
 primera misión con relevo, y la campaña de treinta misiones corrió a comienzos
 de septiembre. Las dos decisiones de diseño de esa etapa, un simulador por
-vehículo y un mapa calculado en lugar del de SLAM, están en la
+agente y un mapa calculado en lugar del de SLAM, están en la
 sección~\ref{sec:simulacion}.
 
-También se corrigió el modelo del vehículo, que tomaba la velocidad angular de la
+También se corrigió el modelo del agente, que tomaba la velocidad angular de la
 orden estándar de ROS~2 como el ángulo del volante. Ahora el ángulo se calcula con
 el modelo de bicicleta, a partir de las velocidades angular y lineal y de la
 distancia entre ejes, y el error de seguimiento de las trayectorias bajó a la
-mitad. La misma corrección se aplicó al nodo que mueve el vehículo real.
+mitad. La misma corrección se aplicó al nodo que mueve al agente físico.
 
-\subsection{Del vehículo físico a la campaña con los dos vehículos}
+\subsection{Del primer agente físico a la campaña con los dos}
 \label{sec:recorrido-fisico}
 
-Con los vehículos se trabajó en paralelo desde agosto. Se instaló el software de
+Con los agentes físicos se trabajó en paralelo desde agosto. Se instaló el software de
 la comunidad del DeepRacer \autocite{deepracercustomcar} en una Raspberry Pi~4 y
-en la tarjeta original, y los vehículos quedaron con su tarjeta original, con
+en la tarjeta original, y los agentes quedaron con su tarjeta original, con
 Ubuntu 24.04 y ROS~2 Jazzy (sección~\ref{sec:componentes}). Como la integración de
 Gazebo~11 con ROS~2 no está publicada para Jazzy, desde entonces el proyecto
 trabaja con dos distribuciones (sección~\ref{sec:sim-a-vehiculos}).
 
 El camino hasta la campaña tuvo tres giros. Una supuesta avería resultó ser un problema de permisos, y la tarjeta se saturó con dos cadenas de navegación (sección~\ref{sec:dos-vehiculos}). Además, el modelo del piso 2 no correspondía al edificio (sección~\ref{sec:mapas}). El 21 de septiembre decidimos intentar la demostración física con seis pruebas de
-verificación (sección~\ref{sec:pruebas-verificacion}), y la campaña con los dos
-vehículos corrió el 16 de octubre.
+verificación (sección~\ref{sec:pruebas-verificacion}), y la campaña con los agentes físicos corrió el 16 de octubre.
 
 % =====================================================================
 \section{Arquitectura funcional del sistema}
@@ -207,7 +204,7 @@ relevo.
   \centering
   \includegraphics[width=\textwidth]{imagenes/arquitectura_simulacion.png}
   \caption{Arquitectura del sistema en simulación, con un proceso de Gazebo por
-    piso. Ningún robot atraviesa la zona de transición: lo que la cruza es el
+    piso. Ningún agente atraviesa la zona de transición: lo que la cruza es el
     usuario, y lo que se traspasa entre agentes es la responsabilidad de guiarlo.}
   \label{fig:arquitectura}
 \end{figure}
@@ -290,11 +287,11 @@ negocia: es el punto de transferencia declarado de cada nivel en el catálogo.
 
 A nuestro juicio fue una de las decisiones más rentables del proyecto. Con el
 relevo dentro del nodo, mezclado con los clientes de acción, la única forma de
-comprobarlo habría sido levantar dos simuladores y observar si el vehículo llega.
+comprobarlo habría sido levantar dos simuladores y observar si el agente llega.
 Como función pura, una prueba recorre las 930 combinaciones de origen y destino
 del catálogo en milisegundos, sin simulador. Esa prueba encontró un defecto que
 una corrida no habría delatado: cuando el origen o el destino era el propio punto
-de transferencia de su nivel, el plan mandaba al mismo robot dos veces a la misma
+de transferencia de su nivel, el plan mandaba al mismo agente dos veces a la misma
 pose. Nav2 devuelve éxito al instante ante un desplazamiento de cero metros, así
 que en simulación no se habría visto.
 
@@ -310,7 +307,7 @@ devolvería la misma tabla (sección~\ref{sec:teo-asignacion}).
 El planificador exige un único punto de transferencia por nivel y falla con un
 mensaje explícito si encuentra dos. Hoy cada planta tiene una escalera y eso se
 cumple; la verificación está para que, el día que haya dos, la decisión se tome a
-la vista. En los vehículos, además, el coordinador no da por buena la llegada que
+la vista. En los agentes físicos, además, el coordinador no da por buena la llegada que
 informa Nav2, sino que la comprueba con la pose que publica el agente
 (sección~\ref{sec:instrumentacion}).
 
@@ -319,14 +316,14 @@ informa Nav2, sino que la comprueba con la pose que publica el agente
 
 Los escenarios de varios pisos se construyeron primero en Gazebo~11 con ROS~2
 Humble. La integración de Gazebo con ROS~2 en Humble aplica a todos los
-complementos el espacio de nombres del primer modelo cargado. Por eso no fue posible tener dos robots en un mismo proceso, y cada vehículo tiene su propio
+complementos el espacio de nombres del primer modelo cargado. Por eso no fue posible tener dos agentes en un mismo proceso, y cada uno tiene su propio
 simulador. El catálogo llegó a 31 puntos de interés: quince en el piso 1 y
 dieciséis en el piso 2.
 
 Al principio los dos pisos estaban en un mismo mundo, y el láser simulado, de
-10~m de alcance, veía paredes del otro piso en 61 de 1701 posiciones muestreadas. Esas posiciones estaban justo donde arranca el primer vehículo y donde está su punto de transferencia. Por
+10~m de alcance, veía paredes del otro piso en 61 de 1701 posiciones muestreadas. Esas posiciones estaban justo donde arranca el primer agente y donde está su punto de transferencia. Por
 eso cada piso es ahora un mundo distinto, con su propio proceso de simulación. Los
-dos vehículos comparten un dominio de comunicaciones, separados por espacio de
+dos agentes comparten un dominio de comunicaciones, separados por espacio de
 nombres (sección~\ref{sec:teo-simulacion}), y la figura~\ref{fig:sim-relevo}
 muestra una misión con relevo entre los dos procesos.
 
@@ -334,7 +331,7 @@ muestra una misión con relevo entre los dos procesos.
   \centering
   \includegraphics[width=\textwidth]{imagenes/simulacion_relevo_dos_procesos.png}
   \caption{Misión con relevo en simulación. Cada ventana es un proceso de Gazebo
-    con un piso y su vehículo; el láser de cada uno se ve en azul. La terminal
+    con un piso y su agente; el láser de cada uno se ve en azul. La terminal
     muestra el resultado de la acción: éxito, un relevo y 100,1~s de duración.}
   \label{fig:sim-relevo}
 \end{figure}
@@ -348,35 +345,34 @@ superior resultó idéntico. Por último, la simulación debe correr a tiempo re
 para que las métricas temporales valgan, y en las treinta misiones de la campaña
 el factor de tiempo real tuvo un mínimo de 0,9917 y una media de 0,9973.
 
-\subsection{De la simulación a los vehículos}
+\subsection{De la simulación a los agentes físicos}
 \label{sec:sim-a-vehiculos}
 
-Al llevar el sistema a los vehículos se mantuvo su estructura: un coordinador, un
+Al llevar el sistema a los agentes físicos se mantuvo su estructura: un coordinador, un
 agente por piso, el relevo en la escalera y las reglas del contrato
 (sección~\ref{sec:contrato}). También se mantuvo el código. El del coordinador,
 el del planificador, el de los mensajes y el de la página es el mismo en los dos
 destinos: compila sin cambios en las dos distribuciones de ROS~2 y completó una
 misión en cada uno. Lo que cambió fue la implementación de los bloques. La
 tabla~\ref{tab:sim-vehiculos} reúne cada cambio con su causa, y la
-figura~\ref{fig:arquitectura-vehiculos} muestra el sistema como funcionó en la
-campaña con los dos vehículos.
+figura~\ref{fig:arquitectura-vehiculos} muestra el sistema como funcionó en la campaña con los agentes físicos.
 
 \begin{table}[htbp]
   \centering\footnotesize
-  \caption{Cambios en la implementación al pasar de la simulación a los vehículos.}
+  \caption{Cambios en la implementación al pasar de la simulación a los agentes físicos.}
   \label{tab:sim-vehiculos}
   \begin{tabular}{@{}p{0.13\textwidth}p{0.21\textwidth}p{0.27\textwidth}p{0.31\textwidth}@{}}
     \toprule
-    \textbf{Parte} & \textbf{En simulación} & \textbf{En los vehículos} & \textbf{Causa} \\ \midrule
-    Distribución de ROS~2 & Humble en todos los componentes & Jazzy en los vehículos y en el coordinador, que corre en un contenedor del portátil; Humble en la página y en rosbridge & El software de la tarjeta original solo existe para Ubuntu 24.04 con Jazzy, la simulación no existe en Jazzy, y la acción de navegación de Jazzy no es compatible con la de Humble (sección~\ref{sec:teo-ros2}) \\ \addlinespace
-    Coordinador & En el portátil, junto a los dos simuladores & En el portátil, después de un intento en uno de los vehículos & Con el coordinador y el grabador en una tarjeta y las dos navegaciones encendidas, la carga subió de 6 a entre 17 y 33 y Nav2 no arrancaba (sección~\ref{sec:dos-vehiculos}) \\ \addlinespace
-    Comunicación & Un solo computador y un dominio de comunicaciones; un espacio de nombres por agente & Red inalámbrica con un punto de acceso de 5~GHz por piso; una partición por vehículo y topología en estrella hacia el portátil & Los tópicos del fabricante no llevan espacio de nombres, y unos cuarenta procesos anunciándose por la red saturaban las tarjetas (sección~\ref{sec:dos-vehiculos}) \\ \addlinespace
-    Locomoción & Complemento Ackermann de Gazebo con \texttt{ros2\_control} & Puente de la orden de velocidad a los servos, con una escala por vehículo & La tracción real tiene banda muerta y funciona en lazo abierto (sección~\ref{sec:banda-muerta}) \\ \addlinespace
+    \textbf{Parte} & \textbf{En simulación} & \textbf{En los agentes físicos} & \textbf{Causa} \\ \midrule
+    Distribución de ROS~2 & Humble en todos los componentes & Jazzy en los agentes y en el coordinador, que corre en un contenedor del portátil; Humble en la página y en rosbridge & El software de la tarjeta original solo existe para Ubuntu 24.04 con Jazzy, la simulación no existe en Jazzy, y la acción de navegación de Jazzy no es compatible con la de Humble (sección~\ref{sec:teo-ros2}) \\ \addlinespace
+    Coordinador & En el portátil, junto a los dos simuladores & En el portátil, después de un intento en uno de los agentes & Con el coordinador y el grabador en una tarjeta y las dos navegaciones encendidas, la carga subió de 6 a entre 17 y 33 y Nav2 no arrancaba (sección~\ref{sec:dos-vehiculos}) \\ \addlinespace
+    Comunicación & Un solo computador y un dominio de comunicaciones; un espacio de nombres por agente & Red inalámbrica con un punto de acceso de 5~GHz por piso; una partición por agente y topología en estrella hacia el portátil & Los tópicos del fabricante no llevan espacio de nombres, y unos cuarenta procesos anunciándose por la red saturaban las tarjetas (sección~\ref{sec:dos-vehiculos}) \\ \addlinespace
+    Locomoción & Complemento Ackermann de Gazebo con \texttt{ros2\_control} & Puente de la orden de velocidad a los servos, con una escala por agente & La tracción real tiene banda muerta y funciona en lazo abierto (sección~\ref{sec:banda-muerta}) \\ \addlinespace
     Sensado & Láser simulado de 10~m de alcance & RPLIDAR A1M8 y la unidad inercial de la tarjeta; cámaras apagadas & Las cámaras no se usan y cargaban la tarjeta (sección~\ref{sec:componentes}) \\ \addlinespace
-    Odometría & La del simulador & La del láser, combinada con la unidad inercial mediante un filtro & El vehículo no tiene codificadores en las ruedas, y con el láser solo el rumbo derivaba 5,9$^\circ$ por minuto (secciones~\ref{sec:odometria-laser} y~\ref{sec:imu}) \\ \addlinespace
+    Odometría & La del simulador & La del láser, combinada con la unidad inercial mediante un filtro & El agente no tiene codificadores en las ruedas, y con el láser solo el rumbo derivaba 5,9$^\circ$ por minuto (secciones~\ref{sec:odometria-laser} y~\ref{sec:imu}) \\ \addlinespace
     Mapa & Calculado de la geometría del mundo simulado & Derivado de la planta medida con flexómetro & El mapeo con SLAM a bordo no dio un mapa utilizable en ningún pasillo (sección~\ref{sec:mapas}) \\ \addlinespace
     Escenario & Pisos 1 y 2 del modelo del edificio & Pisos 3 y 4, levantados con flexómetro & El modelo del piso 2 no correspondía al edificio, y en sus pasillos uniformes la odometría del láser no veía el avance (sección~\ref{sec:mapas}) \\ \addlinespace
-    Llegada & Tolerancia de 0,25~m & Tolerancia de 0,5~m, verificada con la pose del agente 1,5~s después de que Nav2 da la meta por alcanzada & Por la banda muerta, el vehículo no alcanza la precisión de la simulación, y sigue rodando cuando Nav2 declara la llegada (secciones~\ref{sec:banda-muerta} y~\ref{sec:instrumentacion}) \\ \addlinespace
+    Llegada & Tolerancia de 0,25~m & Tolerancia de 0,5~m, verificada con la pose del agente 1,5~s después de que Nav2 da la meta por alcanzada & Por la banda muerta, el agente no alcanza la precisión de la simulación, y sigue rodando cuando Nav2 declara la llegada (secciones~\ref{sec:banda-muerta} y~\ref{sec:instrumentacion}) \\ \addlinespace
     Media vuelta & La planifica Nav2, con marcha atrás & Maniobra propia del agente, vigilada con el láser y el mapa & En la salida del piso 4, de 2,5~m de ancho, la media vuelta de Nav2 abortó contra la pared (sección~\ref{sec:media-vuelta}) \\ \bottomrule
   \end{tabular}
 \end{table}
@@ -384,7 +380,7 @@ campaña con los dos vehículos.
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\textwidth]{imagenes/arquitectura_vehiculos.png}
-  \caption{Arquitectura del sistema en la campaña con los dos vehículos, en los
+  \caption{Arquitectura del sistema en la campaña con los agentes físicos, en los
     pisos 3 y 4. La estructura es la de la figura~\ref{fig:arquitectura}; cambia
     la implementación de los bloques.}
   \label{fig:arquitectura-vehiculos}
@@ -394,19 +390,19 @@ campaña con los dos vehículos.
 \section{Plataforma robótica}
 \label{sec:plataforma}
 
-\subsection{Componentes del vehículo}
+\subsection{Componentes del agente}
 \label{sec:componentes}
 
-Los dos vehículos operan con su tarjeta original, para la que el software de la
+Los dos agentes operan con su tarjeta original, para la que el software de la
 comunidad solo se publica sobre Ubuntu 24.04 con ROS~2 Jazzy. La
-tabla~\ref{tab:vehiculo} reúne los componentes. Cada vehículo atiende un piso, uno
+tabla~\ref{tab:vehiculo} reúne los componentes. Cada agente atiende un piso, uno
 el 3 y otro el 4. El láser que traía el kit no era el que describía el primer
 informe de hardware; se identificó leyendo el modelo que reporta el propio
 sensor.
 
 \begin{table}[htbp]
   \centering\small
-  \caption{Componentes de cada vehículo y del computador central.}
+  \caption{Componentes de cada agente y del computador central.}
   \label{tab:vehiculo}
   \begin{tabular}{@{}p{0.25\textwidth}p{0.68\textwidth}@{}}
     \toprule
@@ -421,7 +417,7 @@ sensor.
   \end{tabular}
 \end{table}
 
-\subsection{Nav2 sobre un vehículo que no gira sobre su eje}
+\subsection{Nav2 sobre un agente que no gira sobre su eje}
 \label{sec:nav2-ackermann}
 
 La configuración por omisión de Nav2 asume tracción diferencial y propone
@@ -431,7 +427,7 @@ planificación global pasó al planificador híbrido A* de Smac con modelo
 Reeds-Shepp, y el seguimiento, al controlador de persecución pura regulada, los
 dos con marcha atrás, y con una velocidad deseada de 0,5~m/s. Del árbol de
 comportamiento se quitó la recuperación que gira sobre el propio eje, con la que
-el vehículo, ante un bloqueo, movía las ruedas sin avanzar hasta agotar los
+el agente, ante un bloqueo, movía las ruedas sin avanzar hasta agotar los
 reintentos. Los parámetros tienen una variante por distribución, y una prueba
 automática falla si se separan en algo distinto de las diferencias documentadas.
 
@@ -439,16 +435,16 @@ La cadena se puso en marcha con la escalera de siete pasos de la guía oficial d
 Nav2 \autocite{nav2setup}. El orden va de las transformaciones entre marcos de referencia al
 planificador y el controlador, pasando por la odometría, el láser, el mapa, la
 localización y los mapas de costos. Seguir ese orden permitió aislar el problema de la odometría, porque una odometría que no mide y un planificador que no
-planifica se manifiestan igual: el vehículo no llega. El orden importa también al
+planifica se manifiestan igual: el agente no llega. El orden importa también al
 arrancar, porque los mapas de costos leen el mapa al configurarse. Por eso el
-programa de arranque de los vehículos activa primero el servidor de mapas y
+programa de arranque de los agentes activa primero el servidor de mapas y
 espera a que los seis nodos de la cadena estén activos. En el laboratorio, la
-cadena quedó lista en 4~min 4~s en un vehículo y en 4~min 22~s en el otro.
+cadena quedó lista en 4~min 4~s en un agente y en 4~min 22~s en el otro.
 
 \subsection{La odometría del láser como limitación principal}
 \label{sec:odometria-laser}
 
-El vehículo no tiene codificadores en las ruedas, y su única odometría sale de
+El agente no tiene codificadores en las ruedas, y su única odometría sale de
 comparar barridos sucesivos del láser. Durante meses no dio una medida
 utilizable, por falta de información en la señal
 (sección~\ref{sec:teo-localizacion}): en un pasillo recto y uniforme, cada barrido
@@ -475,12 +471,12 @@ casilleros, la papelera, el ascensor y la escalera suman ocho cambios de perfil 
 25~m, uno cada tres metros. Con la misma odometría y sin cambiar un parámetro, el
 error cayó por debajo del 5~\% (tabla~\ref{tab:odometria}), y el director aceptó el cambio de sitio. Consideramos que fue la decisión que hizo posible
 la demostración física, porque en los pasillos de los pisos 1 y 2 ningún ajuste
-habría dado al vehículo la información que le faltaba.
+habría dado al agente la información que le faltaba.
 
 \subsection{Los mapas, derivados de medidas y no de SLAM}
 \label{sec:mapas}
 
-Durante semanas intentamos construir el mapa con SLAM a bordo de los vehículos, y
+Durante semanas intentamos construir el mapa con SLAM en los propios agentes, y
 no se consiguió en ningún pasillo, por la razón del apartado anterior. La vía que
 funcionó fue levantar la planta con flexómetro y derivar de ese levantamiento
 tanto el mundo simulado como el mapa de navegación. Así, simulación y edificio
@@ -507,30 +503,30 @@ tres salones, el ascensor y la escalera, que es su punto de transferencia.
 \label{sec:banda-muerta}
 
 Al integrar la cadena de tracción apareció una característica de la plataforma
-que condiciona la llegada: el vehículo no se mueve con velocidades pedidas por
+que condiciona la llegada: el agente no se mueve con velocidades pedidas por
 debajo de 0,40~m/s. El puente que traduce la orden al variador las convertía en
-tracción nula, sin ningún aviso, y el vehículo se detenía al entrar en la fase
+tracción nula, sin ningún aviso, y el agente se detenía al entrar en la fase
 final del recorrido, intentando moverse a una velocidad que su propia cadena
 anulaba. Se subió a 0,40~m/s la velocidad mínima de aproximación del controlador,
 y después se modificó el puente para que envíe las órdenes menores con el escalón
 de tracción más bajo.
 
-El resultado es que el vehículo se aproxima a la meta a 0,40~m/s y no tiene
+El resultado es que el agente se aproxima a la meta a 0,40~m/s y no tiene
 régimen de aproximación fina. Es un límite de la plataforma, que no se corrige
 afinando el controlador. Como la tracción funciona en lazo abierto, la relación
-entre la orden y la velocidad real tampoco es igual en los dos vehículos. Por eso el puente tiene una escala por vehículo, ajustada en campo: 0,85 en el del piso 3 y
+entre la orden y la velocidad real tampoco es igual en los dos agentes. Por eso el puente tiene una escala por agente, ajustada en campo: 0,85 en el del piso 3 y
 0,9 en el del piso 4. Con la escala 1,0, el del piso 4 iba a 1,36~m/s y se pasaba
 de la meta; con 0,9 va a unos 0,7~m/s.
 
-Ante ese límite, la tolerancia de llegada con los vehículos se fijó en 0,5~m, por
+Ante ese límite, la tolerancia de llegada con los agentes físicos se fijó en 0,5~m, por
 decisión del director, mientras la simulación conserva 0,25~m. Bajar el umbral de
-arranque del vehículo queda para los trabajos futuros.
+arranque del agente queda para los trabajos futuros.
 
 \subsection{La unidad de medición inercial de la tarjeta}
 \label{sec:imu}
 
 Al principio el rumbo también salía de la odometría del láser, que en un pasillo
-recto pierde los giros igual que el avance. Con el vehículo quieto, ese rumbo
+recto pierde los giros igual que el avance. Con el agente quieto, ese rumbo
 derivó hasta 5,9$^\circ$ por minuto, y un giro de 90$^\circ$ hecho a mano se
 registró como 19,1$^\circ$. La tarjeta incluye una unidad de medición inercial,
 una Bosch BMI160 que el software del fabricante no usa. Leída directamente, midió
@@ -541,43 +537,43 @@ Escribimos un nodo que la lee y calibra el sesgo del giroscopio al arrancar. Un
 filtro de Kalman extendido (sección~\ref{sec:teo-localizacion}) toma de la
 odometría del láser el avance y de la unidad inercial el giro; la unidad publica
 a 25~Hz y el filtro corre a 15~Hz, para no cargar la tarjeta. En un giro de
-90$^\circ$ contra una línea del piso, el filtro midió 90,17$^\circ$ en un vehículo
-y 88,38$^\circ$ en el otro, y con el vehículo quieto su rumbo se movió
+90$^\circ$ contra una línea del piso, el filtro midió 90,17$^\circ$ en un agente
+y 88,38$^\circ$ en el otro, y con el agente quieto su rumbo se movió
 0,3$^\circ$ o menos por minuto. La posición no mejora, porque sigue saliendo del
 láser. Con el rumbo estable se redujo de 1,0 a 0,5~m el margen en el que Nav2 da
 la meta por alcanzada, y con ese margen se superó la prueba de navegación de un
-vehículo (sección~\ref{sec:res-g3}).
+agente (sección~\ref{sec:res-g3}).
 
-\subsection{Los dos vehículos en la misma red}
+\subsection{Los dos agentes en la misma red}
 \label{sec:dos-vehiculos}
 
-Con los dos vehículos encendidos aparecieron tres problemas que con uno solo no
+Con los dos agentes encendidos aparecieron tres problemas que con uno solo no
 existían. El primero fue de permisos. El software del fabricante se ejecuta con
 el usuario administrador, y ROS~2 intercambia los datos entre procesos del mismo
 equipo por memoria compartida, a la que solo ese usuario puede escribir. Los
 programas lanzados con otro usuario veían los nodos del fabricante pero no podían
 intercambiar mensajes con ellos, sin ningún error, y durante tres semanas eso
-pareció una avería de uno de los vehículos.
+pareció una avería de uno de los agentes.
 
 El segundo fue de nombres. Los tópicos del fabricante no llevan espacio de
-nombres, así que una orden de movimiento llegaba a los dos vehículos y la
-odometría de cada uno recibía el láser del otro. Cada vehículo tiene ahora una
+nombres, así que una orden de movimiento llegaba a los dos agentes y la
+odometría de cada uno recibía el láser del otro. Cada agente tiene ahora una
 partición de comunicaciones propia, y la cadena del proyecto corre con un espacio
 de nombres distinto en cada uno.
 
 El tercero apareció en el primer intento de misión con relevo. Con las dos
 cadenas completas, unos cuarenta procesos se anunciaban unos a otros por la red
-inalámbrica. La carga de la tarjeta de un vehículo pasó de 6 a entre 17 y 33, con
+inalámbrica. La carga de la tarjeta de un agente pasó de 6 a entre 17 y 33, con
 el procesador al 84--95~\%, y Nav2 no llegaba a arrancar. La respuesta fue la
 topología en estrella del diseño (sección~\ref{sec:teo-ros2}): los procesos de
-cada vehículo solo se buscan dentro de él, lo que el coordinador necesita solo se
-anuncia al portátil, y los vehículos no se ven entre sí. El coordinador y el
+cada agente solo se buscan dentro de él, lo que el coordinador necesita solo se
+anuncia al portátil, y los agentes no se ven entre sí. El coordinador y el
 grabador pasaron al portátil, en un contenedor con Jazzy, y verifican las
-llegadas con la pose que cada vehículo publica dos veces por segundo.
+llegadas con la pose que cada agente publica dos veces por segundo.
 
 Con todo el sistema en el laboratorio, las tarjetas quedaron al 54~\% y al 59~\%
 de uso en reposo, y al 68~\% y al 74~\% navegando con las ruedas en el aire. El controlador de Nav2, que corre a 10~Hz, no bajó de 5,5~Hz. La red tiene un punto
-de acceso de 5~GHz por piso, en la misma subred. Entre los dos vehículos, el
+de acceso de 5~GHz por piso, en la misma subred. Entre los dos agentes, el
 tiempo de ida y vuelta de los mensajes tuvo una mediana de 5,99~ms y un percentil
 95 de 11,12~ms, sin pérdidas, frente al límite de 100~ms que fija el requisito.
 
@@ -585,7 +581,7 @@ tiempo de ida y vuelta de los mensajes tuvo una mediana de 5,99~ms y un percenti
 \label{sec:media-vuelta}
 
 Por acuerdo con el director, cada misión empieza donde terminó la anterior, y
-el siguiente usuario queda a menudo detrás del vehículo, que en pasillos de 2,5 a
+el siguiente usuario queda a menudo detrás del agente, que en pasillos de 2,5 a
 3,2~m de ancho tiene que dar la vuelta en varios tiempos. En el piso 4, a la
 salida del pasillo de 2,5~m, la media vuelta de Nav2 abortó dos veces contra la
 pared, porque el planificador proponía cada segundo una maniobra distinta.
@@ -596,14 +592,14 @@ Preferimos escribir la media vuelta como una maniobra propia del agente antes qu
 seguir ajustando Nav2, que en ese caso trabajaba en el borde de lo que su
 controlador resuelve (sección~\ref{sec:teo-planificacion}). La maniobra alterna
 marcha atrás y avance con la dirección a tope y empieza hacia el costado con más
-espacio. Cada tiempo se corta cuando la huella prevista del vehículo queda a
+espacio. Cada tiempo se corta cuando la huella prevista del agente queda a
 menos de 0,10~m de un obstáculo, visto por el láser o marcado en el mapa, donde la
 escalera está cerrada porque el láser no ve su borde.
 
 El coordinador la pide antes de una meta que queda a más de 110$^\circ$ del rumbo
-del vehículo y a más de 1,5~m, y si no se completa en 120~s, sigue Nav2. En sus
+del agente y a más de 1,5~m, y si no se completa en 120~s, sigue Nav2. En sus
 primeras pruebas giró 160$^\circ$ y 167$^\circ$, en un solo tiempo cada vez, y en
-la campaña con los dos vehículos se ejecutó 24 veces
+la campaña con los agentes físicos se ejecutó 24 veces
 (sección~\ref{sec:res-completo}).
 
 % =====================================================================
@@ -620,7 +616,7 @@ a internet, porque la red del edificio puede no tenerla, y no usa bibliotecas ni
 recursos externos. Son un archivo HTML, una hoja de estilo y dos programas en
 JavaScript, 658 líneas en total, que sirve el propio portátil. Se comunica con
 ROS~2 por el puente \textit{rosbridge}, que no tiene autenticación, así que el
-cortafuegos del portátil solo admite conexiones desde la red de los vehículos.
+cortafuegos del portátil solo admite conexiones desde la red de los agentes.
 
 El primer programa es un cliente propio del protocolo del puente, porque la
 biblioteca de cliente más difundida implementa las acciones de la primera
@@ -633,7 +629,7 @@ confirmación de cambio de piso.
 El usuario elige el origen en una lista y el destino en un catálogo con búsqueda
 por nombre, donde cada destino muestra su piso y, si queda en el otro nivel, la
 marca «con relevo». Durante la misión, la página muestra un título calculado a
-partir de la etapa, el texto que redacta el coordinador, el vehículo que está
+partir de la etapa, el texto que redacta el coordinador, el agente que está
 guiando, hacia dónde va, el destino final y la distancia restante. Una franja de
 cinco pasos (preparando, tramo 1, relevo, tramo 2 y fin) marca el paso actual
 (figura~\ref{fig:hri}).
@@ -643,29 +639,29 @@ cinco pasos (preparando, tramo 1, relevo, tramo 2 y fin) marca el paso actual
   \includegraphics[width=0.62\textwidth]{imagenes/hri_seguimiento.png}
   \caption{Interfaz durante una misión en simulación: el destino elegido, el
     botón de cancelar y el panel de estado del primer tramo, con el texto del
-    coordinador, el vehículo activo y la distancia restante.}
+    coordinador, el agente activo y la distancia restante.}
   \label{fig:hri}
 \end{figure}
 
 La interfaz se verificó contra el coordinador real: el catálogo, una misión con
 sus etapas, el texto del coordinador mostrado literal y el botón que se reactiva
 al terminar. También se operó una misión completa con relevo desde un teléfono
-real conectado a la red de los vehículos, sin tocar el computador. Las dos
+real conectado a la red de los agentes, sin tocar el computador. Las dos
 funciones que siguen se añadieron después de ver el sistema en uso, a pedido del
 director.
 
 \subsection{Confirmación de cambio de piso}
 
-En una misión entre niveles, el segundo vehículo llega a su escalera y espera al
+En una misión entre niveles, el segundo agente llega a su escalera y espera al
 usuario, pero no puede saber si la persona ya subió. Sin una pausa explícita, la
 misión podía darse por completada con el usuario todavía en el piso equivocado, y
 la instrumentación lo habría registrado como éxito. Por eso, cuando el segundo
-vehículo llega a su punto de transferencia, el coordinador pasa a la etapa de espera de confirmación. La página muestra entonces un botón para confirmar el cambio de
+agente llega a su punto de transferencia, el coordinador pasa a la etapa de espera de confirmación. La página muestra entonces un botón para confirmar el cambio de
 piso, que solo existe en esa etapa (figura~\ref{fig:confirmacion}). A los 60~s sin
 confirmación aparece un aviso, y a los 120~s la misión termina como fallida. Los
-plazos se cuentan desde que llega el vehículo, para que un vehículo lento no le
+plazos se cuentan desde que llega el agente, para que un agente lento no le
 consuma tiempo al usuario, y se miden con el reloj del sistema y no con el de la
-simulación. Si el usuario confirma antes de que el vehículo llegue, la
+simulación. Si el usuario confirma antes de que el agente llegue, la
 confirmación se retiene y se aplica al llegar.
 
 \begin{figure}[htbp]
@@ -687,28 +683,27 @@ El botón de cancelar existía pero no hacía nada, y no se había detectado. El
 servidor de acción del coordinador no registraba la función que responde a la
 cancelación, y ROS~2 rechaza por omisión, sin informar, toda cancelación que no
 tenga esa función. Al corregirlo se añadió el comportamiento que faltaba: la
-misión pasa por la etapa de cancelación, el vehículo activo regresa al punto de
+misión pasa por la etapa de cancelación, el agente activo regresa al punto de
 transferencia de su piso, y la misión cierra como fallida con un texto que lo
-dice. En simulación, con una corrida cancelada y una de control, el vehículo
+dice. En simulación, con una corrida cancelada y una de control, el agente
 quedó a 0,121~m de su punto de regreso.
 
-Con los vehículos se cancelaron seis misiones, al menos una en cada etapa, y en
-las seis el vehículo volvió a su escalera, a entre 0,07 y 0,34~m de su punto. Esas
+Con los agentes físicos se cancelaron seis misiones, al menos una en cada etapa, y en
+las seis el agente volvió a su escalera, a entre 0,07 y 0,34~m de su punto. Esas
 pruebas mostraron un defecto que la simulación no podía mostrar, porque la media
 vuelta propia se añadió después. Nav2 conserva unos minutos las metas
-terminadas, y mientras tenía una cancelada en su lista, el agente marcaba el
-vehículo como en error y rechazaba la media vuelta. Sin ella, Nav2 intentaba girar
+terminadas, y mientras tenía una cancelada en su lista, el agente se declaraba en error y rechazaba la media vuelta. Sin ella, Nav2 intentaba girar
 por su cuenta en el pasillo y oscilaba. Ahora la media vuelta solo espera a que no
 haya una meta en curso: antes de la corrección se rechazaron ocho de quince
 medias vueltas, y después ninguna de diez.
 
-\subsection{Ajustes tras las pruebas con los vehículos}
+\subsection{Ajustes tras las pruebas con los agentes físicos}
 \label{sec:ajustes-campo}
 
-Las pruebas con los vehículos mostraron tres defectos de la página. El título de
+Las pruebas con los agentes físicos mostraron tres defectos de la página. El título de
 la etapa de confirmación preguntaba siempre «¿Ya subió?», lo que al subir
 resultaba brusco y al bajar del piso 4 al 3 era falso. Ahora sale de comparar el
-piso de origen con el del vehículo que espera, como «Suba con calma al piso 4» o «Baje con calma al piso 3». El botón dice «Ya estoy en el piso 4», o el piso que
+piso de origen con el del agente que espera, como «Suba con calma al piso 4» o «Baje con calma al piso 3». El botón dice «Ya estoy en el piso 4», o el piso que
 corresponda.
 
 Ese cambio se hizo el día de la campaña, antes de correrla, y aun así los
@@ -718,7 +713,7 @@ indicación de comprobarla cada vez que se abre. El tercer defecto fue de nombre
 los dos ascensores se llamaban igual en la lista y en una misión se eligió el del
 piso equivocado, así que los nombres repetidos se muestran ahora con su piso, como
 «Ascensor (piso 3)». Los tres ajustes se verificaron con pruebas automáticas y
-después con un teléfono y los vehículos, en una misión de subida y otra de
+después con un teléfono y los agentes físicos, en una misión de subida y otra de
 bajada.
 
 % =====================================================================
@@ -737,8 +732,7 @@ repositorio.
 
 Una métrica sin un evento de inicio y uno de fin medibles por una máquina no se
 puede reportar. La tabla~\ref{tab:metricas} da los dos eventos de cada una. Todas
-las marcas salen de un mismo reloj: en simulación, el de la simulación; en los
-vehículos, el del computador que graba.
+las marcas salen de un mismo reloj: en simulación, el de la simulación; en los agentes físicos, el del computador que graba.
 
 \begin{table}[htbp]
   \centering\small
@@ -747,23 +741,22 @@ vehículos, el del computador que graba.
   \begin{tabular}{@{}p{0.2\textwidth}p{0.36\textwidth}p{0.36\textwidth}@{}}
     \toprule
     \textbf{Métrica} & \textbf{Inicio} & \textbf{Fin} \\ \midrule
-    Tiempo de respuesta & El coordinador acepta la solicitud & Primera de tres muestras seguidas de la odometría del vehículo asignado con velocidad de al menos 0,02~m/s \\ \addlinespace
+    Tiempo de respuesta & El coordinador acepta la solicitud & Primera de tres muestras seguidas de la odometría del agente asignado con velocidad de al menos 0,02~m/s \\ \addlinespace
     Tiempo de asignación & Primera publicación de la etapa recibida & Primera publicación del primer tramo, con el agente asignado \\ \addlinespace
     Tasa de éxito & \multicolumn{2}{p{0.72\textwidth}}{Proporción de misiones exitosas sobre las corridas válidas} \\ \addlinespace
-    Continuidad entre niveles & El primer vehículo alcanza su punto de transferencia & Primer movimiento del segundo vehículo \\ \bottomrule
+    Continuidad entre niveles & El primer agente alcanza su punto de transferencia & Primer movimiento del segundo agente \\ \bottomrule
   \end{tabular}
 \end{table}
 
-Una misión es exitosa si cumple tres condiciones. La pose final del vehículo, en
-su odometría, está a 0,25~m o menos del destino declarado en el catálogo; en los
-vehículos el umbral es de 0,5~m. La misión llegó a la etapa completada sin pasar
+Una misión es exitosa si cumple tres condiciones. La pose final del agente, en
+su odometría, está a 0,25~m o menos del destino declarado en el catálogo; en los agentes físicos el umbral es de 0,5~m. La misión llegó a la etapa completada sin pasar
 por fallida. Y, si era entre niveles, hubo un relevo.
 
 La regla que consideramos central en el protocolo es que el éxito se mide contra
-la odometría del vehículo, nunca contra el resultado que devuelve Nav2. Una
-navegación puede terminar en éxito y haber dejado al vehículo lejos del destino:
+la odometría del agente, nunca contra el resultado que devuelve Nav2. Una
+navegación puede terminar en éxito y haber dejado al agente lejos del destino:
 en las primeras pruebas en simulación, una de tres metas devolvió éxito con el
-vehículo a 0,296~m. Aceptar ese resultado sería dejar que el sistema se evalúe a
+agente a 0,296~m. Aceptar ese resultado sería dejar que el sistema se evalúe a
 sí mismo.
 
 El tiempo de asignación resultó menor que el paso de 100~ms del reloj de la
@@ -785,7 +778,7 @@ protocolo.
 
 Los pares de origen y destino se sortean con una semilla fija, publicada antes de
 correr, porque con pares elegidos a mano se corre el riesgo de probar justo los
-recorridos que funcionan. Una corrida fallida cuenta como fallo. Solo se descarta si la causa es ajena al sistema y está en una lista cerrada, escrita antes de la campaña, que admite la caída del simulador, un controlador del vehículo que no
+recorridos que funcionan. Una corrida fallida cuenta como fallo. Solo se descarta si la causa es ajena al sistema y está en una lista cerrada, escrita antes de la campaña, que admite la caída del simulador, un controlador del agente que no
 se activa, el factor de tiempo real por debajo de 0,99, un fallo de la máquina
 anfitriona o una cancelación por una causa externa anotada antes de conocer el
 resultado. Si los descartes superan el 20~\% de las corridas, la campaña no es
@@ -795,28 +788,28 @@ válida.
 \label{sec:instrumentacion}
 
 Cada misión deja una grabación de datos de ROS (\textit{rosbag}) con los tópicos
-del coordinador y de los dos vehículos. Un programa compone a partir de ella el
-registro de la misión, en un formato estructurado que se valida contra un esquema versionado. El registro contiene las marcas de cada etapa, la trayectoria de cada vehículo, la pose
+del coordinador y de los dos agentes. Un programa compone a partir de ella el
+registro de la misión, en un formato estructurado que se valida contra un esquema versionado. El registro contiene las marcas de cada etapa, la trayectoria de cada agente, la pose
 final, el error de llegada y su procedencia. Un segundo programa comprueba la
 integridad de los registros y calcula las cuatro métricas con sus intervalos de
 confianza. Se escribió antes de la campaña, y encontró dos defectos que después
 habrían sido irreparables: la continuidad no tenía campo en el esquema, y el
 intervalo que citaba el protocolo no se reproducía con el método declarado.
 
-Con los vehículos, el grabador corre en el contenedor con Jazzy, y un programa adapta la grabación al formato que leen las
+Con los agentes físicos, el grabador corre en el contenedor con Jazzy, y un programa adapta la grabación al formato que leen las
 herramientas de Humble. El registro usa el reloj del computador, la tolerancia de
-0,5~m y el mapa de cada piso. La llegada la verifica el coordinador con la pose que publica el agente, 1,5~s después de que Nav2 la da por alcanzada. Nav2 la declara en cuanto el vehículo entra en su margen, y el vehículo sigue rodando.
-En las llegadas medidas en el piso 4, el vehículo estaba a entre 0,53 y 0,62~m de
+0,5~m y el mapa de cada piso. La llegada la verifica el coordinador con la pose que publica el agente, 1,5~s después de que Nav2 la da por alcanzada. Nav2 la declara en cuanto el agente entra en su margen, y el agente sigue rodando.
+En las llegadas medidas en el piso 4, el agente estaba a entre 0,53 y 0,62~m de
 la meta en la última orden de avance, y un segundo después, ya quieto, a entre
 0,09 y 0,53~m. La distancia de llegada se guarda con su procedencia, medida con
-flexómetro o tomada de la localización del vehículo, y el analizador advierte
-cuando no hay medida externa, como ocurrió en la campaña con los dos vehículos
+flexómetro o tomada de la localización del agente, y el analizador advierte
+cuando no hay medida externa, como ocurrió en la campaña con los agentes físicos
 (sección~\ref{sec:lim-llegada}).
 
 \subsection{Pruebas de verificación de la demostración física}
 \label{sec:pruebas-verificacion}
 
-La demostración sobre los vehículos se organizó en seis pruebas de verificación
+La demostración con los agentes físicos se organizó en seis pruebas de verificación
 sucesivas, con criterios propuestos por los autores y decididos por el director. Cada prueba tiene un criterio escrito antes de correrla y lo que
 significa no superarla (tabla~\ref{tab:pruebas-verificacion}). Se fijaron tres
 fechas de revisión en octubre, y después de la última, el 16 de octubre, no se
@@ -830,16 +823,16 @@ toman más datos.
   \begin{tabular}{@{}p{0.24\textwidth}p{0.52\textwidth}p{0.16\textwidth}@{}}
     \toprule
     \textbf{Prueba} & \textbf{Criterio} & \textbf{Estado} \\ \midrule
-    Actuación & El vehículo responde a las órdenes de dirección y tracción & Superada \\ \addlinespace
+    Actuación & El agente responde a las órdenes de dirección y tracción & Superada \\ \addlinespace
     Odometría & Error de 10~\% o menos sobre un recorrido conocido de 5~m o más & Superada \\ \addlinespace
-    Navegación de un vehículo & Un vehículo llega de un punto a otro con Nav2, con la llegada verificada & Superada \\ \addlinespace
-    Dos vehículos en la misma red & Los dos vehículos y el coordinador coexisten sin conflicto de nombres & Superada \\ \addlinespace
-    Misión con relevo & Una misión con relevo sobre los dos vehículos, con su registro & Superada \\ \addlinespace
-    Campaña con los vehículos & Entre 5 y 10 repeticiones del protocolo con su registro & Superada \\ \bottomrule
+    Navegación de un agente & Un agente llega de un punto a otro con Nav2, con la llegada verificada & Superada \\ \addlinespace
+    Dos agentes en la misma red & Los dos agentes y el coordinador coexisten sin conflicto de nombres & Superada \\ \addlinespace
+    Misión con relevo & Una misión con relevo sobre los dos agentes, con su registro & Superada \\ \addlinespace
+    Campaña con los agentes físicos & Entre 5 y 10 repeticiones del protocolo con su registro & Superada \\ \bottomrule
   \end{tabular}
 \end{table}
 
-Para la campaña con los vehículos se sortearon, antes de correr y con una semilla
+Para la campaña con los agentes físicos se sortearon, antes de correr y con una semilla
 fija, diez misiones entre los pisos 3 y 4: cinco de subida y cinco de bajada. Se
-corrieron en ese orden y sin reubicar los vehículos entre misiones, como ocurriría
+corrieron en ese orden y sin reubicar los agentes entre misiones, como ocurriría
 en la operación real. Sus resultados están en la sección~\ref{sec:res-completo}.
