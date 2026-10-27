@@ -47,11 +47,6 @@ exigencias que también aparecen aquí: el robot tiene que adaptarse a una perso
 que camina a su lado, y la interfaz tiene que comunicar el estado del guiado sin
 exigir atención constante.
 
-\textcite{li2023bug} abordan la seguridad de compartir el espacio con personas,
-modificando el algoritmo Bug con sensores de proximidad para reducir las
-colisiones con los trabajadores cercanos. En este proyecto la respuesta está en
-la operación: una persona acompaña a cada agente durante las maniobras, y el
-usuario puede cancelar la misión en cualquier momento.
 \textcite{jimenez2024arquitectura} integra al usuario en el propio sistema de
 mapas, con representaciones semánticas y reconocimiento de personas, en una
 plataforma asistencial de varios niveles. Es el antecedente más próximo en
@@ -62,43 +57,19 @@ Ese supuesto es el que este trabajo cambia.
 
 \subsection{Navegación autónoma en interiores}
 
-\textcite{sojan2025autonomous} integran percepción, localización y planificación
-sobre ROS~2 para desplazarse en interiores dinámicos, con un mapa plano y
-localización por filtro de partículas. Es la arquitectura que este proyecto toma
-como punto de partida en cada agente.
-
-El sistema que implementa ese flujo en ROS~2 es Nav2.
+El flujo de percepción, localización y planificación que usa cada agente es el de Nav2, sobre ROS~2.
 \textcite{macenski2020marathon} lo presentan como sucesor de la pila de
 navegación de la primera generación de ROS: organiza la tarea con un árbol de
-comportamiento y arranca cada servidor como un nodo de ciclo de vida. Lo
-validaron en un campus universitario, navegando entre estudiantes.
-\textcite{macenski2023survey} comparan los algoritmos de planificación, control y
-localización que hoy ofrece el ecosistema. Las dos referencias sirvieron para elegir los componentes de navegación.
-\textcite{varghese2023multirobot} llevan el problema a varios agentes que
-construyen un mapa compartido y mantienen consistente su localización, con la
-misma técnica bidimensional sobre ROS.
+comportamiento y arranca cada servidor como un nodo de ciclo de vida. Lo validaron en un campus universitario, navegando entre estudiantes.
 
-Otra línea resuelve la navegación con aprendizaje en lugar de planificación
-explícita: redes neuronales que aprenden a conducir solo con imágenes
-\autocite{bojarski2016end}, a evadir obstáculos fusionando sensores
-\autocite{zain2025obstacle} o a reaccionar combinando aprendizaje profundo y lógica
-difusa \autocite{lopez2024enhancing}. Este proyecto no sigue esa vía, porque
+Otra línea resuelve la navegación con aprendizaje en lugar de planificación explícita, con redes neuronales que aprenden a conducir a partir de imágenes \autocite{bojarski2016end}. Este proyecto no sigue esa vía, porque
 exige datos etiquetados del edificio, que no existen, y porque con planificación
 clásica cada decisión del agente se puede inspeccionar cuando hay que explicar
 un fallo.
 
 \subsection{Coordinación entre varios robots}
 
-Las estrategias de coordinación revisadas se diferencian por el nivel en el que
-cooperan. \textcite{nair2024collaborative} comparten la información sensorial
-entre los robots para mejorar el desempeño del conjunto.
-\textcite{roszkowska2023multilevel} proponen una estructura jerárquica que
-supervisa el desplazamiento simultáneo de varios agentes para prevenir
-conflictos. \textcite{rudrusamy2022broadcast} resuelven el problema desde el
-canal de comunicación, con control por difusión y seguimiento visual.
-\textcite{xu2025modular} aportan una arquitectura modular sobre ROS para
-asignación cooperativa de tareas, y \textcite{zhan2025kubernetes} estudian la
-resiliencia del sistema cuando un nodo falla.
+Entre las estrategias de coordinación revisadas, \textcite{nair2024collaborative} comparten la información sensorial entre los robots para mejorar el desempeño del conjunto.
 
 El marco teórico de la asignación lo fijan \textcite{gerkey2004taxonomy}, cuya
 taxonomía clasifica cualquier esquema de reparto según cuántas tareas acepta un
@@ -109,10 +80,7 @@ recogida y entrega entre varios robots mediante planificación con relevos. All�
 lo que pasa de un agente a otro es un paquete; aquí es una persona. Un paquete
 puede esperar indefinidamente en el punto de transferencia, y una persona no. Por
 eso el relevo de este trabajo incluye una confirmación explícita del usuario al
-llegar al otro piso, con un aviso a los 60~s y un plazo máximo de 120~s. De
-alcance comparable, por ser también un proyecto de grado de ingeniería, es
-\textcite{piguave2023multirobot}, un sistema multirrobot de código abierto sobre
-ROS~2. Según la revisión del anteproyecto, todos estos trabajos operan en un solo
+llegar al otro piso, con un aviso a los 60~s y un plazo máximo de 120~s. Según la revisión del anteproyecto, todos estos trabajos operan en un solo
 nivel físico.
 
 \subsection{Movilidad entre pisos}
@@ -121,26 +89,13 @@ El cambio de nivel se ha abordado sobre todo desde la logística y la
 exploración. \textcite{kim2024indoor} combinan un mapa por piso con un grafo
 topológico que los conecta, e integran la interacción con el ascensor.
 \textcite{song2024elevator} automatizan el uso del elevador con dispositivos
-conectados instalados en el edificio. \textcite{luo2025elevator} deciden entre
-ascensor y escalera con aprendizaje por refuerzo jerárquico, según el tránsito
-que encuentra el robot. \textcite{chen2025lite} descomponen el entorno en pisos y
-escaleras para extender las técnicas bidimensionales a varios niveles, y
-\textcite{gong2026stairway} incorporan conciencia de piso a la navegación hacia
-objetos sin entrenamiento previo del escenario.
-
-Estas propuestas atacan la movilidad entre pisos desde la infraestructura, el
-modelado topológico y la decisión adaptativa, y comparten un supuesto: el robot
-cruza de nivel, subiendo o accionando el ascensor. Todas se orientan a entrega o
-exploración antes que a la asistencia de personas.
+conectados instalados en el edificio. Las dos propuestas atacan la movilidad entre pisos desde la infraestructura y el modelado topológico, y comparten un supuesto: el robot
+cruza de nivel, subiendo o accionando el ascensor. Las dos se orientan a la logística antes que a la asistencia de personas.
 
 \subsection{Aporte de este trabajo frente a los antecedentes}
 \label{sec:aporte}
 
-A esas líneas se suma la de dónde ejecutar el procesamiento.
-\textcite{kehoe2015cloud} revisan las arquitecturas que lo delegan a servidores
-remotos, \textcite{tahir2025edge} las que lo acercan al borde de la red, y
-\textcite{malavolta2023offloading} miden el costo de esa delegación sobre WiFi en
-robots terrestres. Sus resultados llevaron a que la navegación corra completa en cada agente y solo la coordinación, que intercambia mensajes pequeños,
+A esas líneas se suma la de dónde ejecutar el procesamiento. \textcite{malavolta2023offloading} miden el costo de delegar el cómputo de robots terrestres a otros equipos por WiFi. Sus resultados llevaron a que la navegación corra completa en cada agente y solo la coordinación, que intercambia mensajes pequeños,
 se centralice en un computador portátil, sin depender de salida a internet.
 
 La literatura cubre bien cada componente por separado. La
@@ -295,15 +250,7 @@ cada nivel tiene asignado su agente. La ausencia de un optimizador es, por
 tanto, una consecuencia de la estructura del problema y no una carencia de la
 implementación.
 
-Por la misma razón se descartaron los mecanismos de mercado. En el protocolo de
-red de contratos \autocite{smith1980contract}, un gestor anuncia la tarea, los
-agentes ofertan su costo y la tarea se adjudica a la mejor oferta. MURDOCH
-\autocite{gerkey2002sold} aplica ese esquema a robots sobre publicación y
-suscripción, y CBBA \autocite{choi2009consensus} lo lleva a una subasta
-descentralizada en la que los agentes llegan a consenso sin coordinador central.
-Con un solo agente elegible por tramo, cualquier subasta tiene un único postor:
-añade mensajes y latencia sin cambiar la decisión. CBBA, además, elimina el
-coordinador central, que la arquitectura mantiene por diseño.
+Por la misma razón se descartaron los mecanismos de mercado, como el protocolo de red de contratos \autocite{smith1980contract}, en el que un gestor anuncia la tarea, los agentes ofertan su costo y la tarea se adjudica a la mejor oferta. Con un solo agente elegible por tramo, cualquier subasta tiene un único postor: añade mensajes y latencia sin cambiar la decisión.
 
 La misión completa sí se sale de esa clase. El relevo impone una restricción de
 precedencia: el tramo del segundo agente no puede empezar hasta que el primero
@@ -479,11 +426,7 @@ protocolo se escribió antes de instrumentar el sistema, y las misiones se sorte
 con una semilla fijada antes de correrlas, para que ni el instrumento ni los
 recorridos se elijan después de ver los resultados.
 
-La tasa de éxito es una proporción estimada sobre una muestra pequeña, y para
-ella falla el intervalo de confianza de la aproximación normal.
-\textcite{brown2001interval} mostraron que su cobertura real oscila de forma
-irregular, incluso con muestras grandes, y empeora con proporciones cercanas a 0
-o a 1, y recomiendan el intervalo de \textcite{wilson1927probable}. Sea $n$ el
+La tasa de éxito es una proporción estimada sobre una muestra pequeña, y para ella el intervalo de confianza de la aproximación normal no es fiable: su cobertura real oscila y empeora con proporciones cercanas a 0 o a 1. Por eso se usa el intervalo de \textcite{wilson1927probable}. Sea $n$ el
 número de misiones, $\hat{p}$ la proporción observada de éxitos y $z$ el cuantil
 de la confianza deseada ($z = 1{,}96$ para el 95~\%). El intervalo de Wilson es
 \begin{equation}
@@ -534,8 +477,9 @@ limitaciones presupuestales de un entorno universitario.
 El alcance del proyecto excluye de forma explícita que los agentes interactúen mecánicamente con el edificio. No accionan puertas ni botones de ascensor, no
 transportan carga y no cruzan las zonas de transición vertical. Esa delimitación
 se adoptó por razones técnicas y de costo, y tiene además una consecuencia
-normativa favorable: evita intervenir sistemas sujetos a regulación específica de
-seguridad en edificaciones.
+normativa favorable: evita intervenir sistemas sujetos a regulación específica de seguridad en edificaciones.
+
+Durante las pruebas, una persona acompañó a cada agente en las maniobras, y el usuario podía cancelar la misión desde la interfaz en cualquier momento.
 
 
 

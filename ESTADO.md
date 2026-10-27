@@ -8,7 +8,7 @@ recorrido semana a semana en [`CRONOLOGIA.md`](Documentos/DocumentoFinal/CRONOLO
 | | |
 |---|---|
 | **Semana en curso** | S29 (26 de octubre al 1 de noviembre de 2026), fase 6: análisis y escritura |
-| **Fecha de corte** | 2026-10-27 (lunes). Revisión del documento recortado con las anotaciones de los autores: los robots se llaman «agente»; edificio Gregorio (pisos 2 y 3) y cambio al Calatayud (pisos 3 y 4); impersonal en todo el texto; menos remisiones y menciones al director; fechas exactas; figuras de los nodos, del planificador, de la instrumentación y del error de llegada; contrato de interfaces en tabla; conclusiones y trabajos futuros reescritos |
+| **Fecha de corte** | 2026-10-27 (lunes). Revisión del documento recortado con las anotaciones de los autores: los robots se llaman «agente»; edificio Gregorio (pisos 2 y 3) y cambio al Catalayud (pisos 3 y 4); impersonal en todo el texto; menos remisiones y menciones al director; fechas exactas; figuras de los nodos, del planificador, de la instrumentación y del error de llegada; contrato de interfaces en tabla; conclusiones y trabajos futuros reescritos |
 | **Último entregable formal** | Semana 28 ([`Entregable_semana_28.tex`](Documentos/Entregables/Entregable_semana_28.tex) y su versión [`.md`](Documentos/Entregables/Entregable_semana_28.md)) |
 | **Documento final** | Compila en el portátil, sin errores ([`DocumentoFinal/`](Documentos/DocumentoFinal/)): la versión vigente tiene 94 páginas y la recortada (`main_recorte.tex`), 79. El director pide entre 60 y 80 |
 
@@ -30,7 +30,7 @@ Matriz completa en [`REQUISITOS.md`](Documentos/REQUISITOS.md): los 36 requisito
 
 ## Pendiente
 
-1. Documento final: la versión recortada (79 páginas) ya tiene la revisión del 27-oct, los trabajos futuros reducidos a cinco líneas y el anexo A con los siete videos del proyecto. Faltan los preliminares, confirmar la grafía del edificio Calatayud y decidir si se recorta la bibliografía (62 entradas); después, fundir el recorte en `capitulos/`.
+1. Documento final: la versión recortada (79 páginas) ya tiene la revisión del 27-oct, los trabajos futuros reducidos a cinco líneas y el anexo A con los siete videos del proyecto. La bibliografía quedó en las referencias necesarias y el edificio es el Catalayud (grafía confirmada por los autores). Faltan los preliminares; después, fundir el recorte en `capitulos/`.
 2. Registro de misión: la etapa de cancelación sale como `8` y no como `CANCELANDO`.
 3. Imagen `coordinador_jazzy` del portátil: reconstruirla con el agente nuevo.
 4. Siete archivos de código copiados en los vehículos citan en comentarios la ruta vieja de planes ya

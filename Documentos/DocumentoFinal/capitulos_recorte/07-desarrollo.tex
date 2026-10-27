@@ -17,7 +17,7 @@
 %   - Registro impersonal en todo el capítulo (corrección del 27 de octubre:
 %     la primera persona estaba mal); la postura se dice sin «nosotros».
 %   - Revisión del 27 de octubre: cambio del edificio Gregorio (pisos 2 y 3)
-%     al Calatayud (pisos 3 y 4); contrato de interfaces en tabla; figuras de
+%     al Catalayud (pisos 3 y 4); contrato de interfaces en tabla; figuras de
 %     los nodos, del planificador y de la instrumentación; cómo salen las 930
 %     combinaciones y cómo se sortearon las semillas; fechas en lugar de
 %     «durante meses»; menos remisiones a otras secciones y al director.
@@ -48,7 +48,7 @@ demostración física fijaron qué debían superar los agentes físicos y hasta 
     Mayo y junio & Desarrollo progresivo & Pasillo de la universidad en Gazebo; seguidor de paredes, descartado; sensores en el modelo del edificio Gregorio; primer mapa con SLAM \\ \addlinespace
     Agosto & Integración & En simulación: Nav2 para dirección Ackermann, contrato de interfaces, dos agentes aislados, entorno de dos pisos del edificio Gregorio, requisitos, protocolo y primera misión con relevo. Con los agentes físicos: software de la comunidad, láser y mando desde ROS~2 \\ \addlinespace
     Septiembre & Integración y validación & En simulación: campaña de treinta misiones, interfaz en un teléfono, confirmación de cambio de piso, cancelación y código congelado. Con los agentes físicos: segundo agente, banda muerta, decisión de la demostración física y primera navegación autónoma \\ \addlinespace
-    Octubre & Validación & Pisos 3 y 4 del edificio Calatayud levantados con flexómetro; odometría verificada; unidad inercial; llegada verificada; media vuelta; coordinador en el portátil; campaña con los agentes físicos \\ \bottomrule
+    Octubre & Validación & Pisos 3 y 4 del edificio Catalayud levantados con flexómetro; odometría verificada; unidad inercial; llegada verificada; media vuelta; coordinador en el portátil; campaña con los agentes físicos \\ \bottomrule
   \end{tabular}
 \end{table}
 
@@ -175,7 +175,7 @@ Ubuntu 24.04 y ROS~2 Jazzy. Como la integración de
 Gazebo~11 con ROS~2 no está publicada para Jazzy, desde entonces el proyecto
 trabaja con dos distribuciones.
 
-Las pruebas con los agentes físicos empezaron en los pasillos del edificio Gregorio, los mismos que se habían modelado para la simulación. Llevar allí los agentes resultó difícil por el tránsito de personas durante las pruebas, y en esos pasillos uniformes la odometría del láser no registraba el avance. Además, el modelo del piso 3 de Gregorio no correspondía a la planta real. El 2 de octubre el trabajo pasó a los pisos 3 y 4 del edificio Calatayud, que el equipo levantó con flexómetro ese mismo día. De esas medidas salieron los mapas, los mundos simulados y el catálogo de destinos de la campaña física.
+Las pruebas con los agentes físicos empezaron en los pasillos del edificio Gregorio, los mismos que se habían modelado para la simulación. Llevar allí los agentes resultó difícil por el tránsito de personas durante las pruebas, y en esos pasillos uniformes la odometría del láser no registraba el avance. Además, el modelo del piso 3 de Gregorio no correspondía a la planta real. El 2 de octubre el trabajo pasó a los pisos 3 y 4 del edificio Catalayud, que el equipo levantó con flexómetro ese mismo día. De esas medidas salieron los mapas, los mundos simulados y el catálogo de destinos de la campaña física.
 
 En el camino hubo otros dos tropiezos: una supuesta avería que resultó ser un problema de permisos, y la saturación de la tarjeta con dos cadenas de navegación. El 21 de septiembre se decidió intentar la demostración física con seis pruebas de verificación, y la campaña con los agentes físicos corrió el 16 de octubre.
 
@@ -376,7 +376,7 @@ figura~\ref{fig:arquitectura-vehiculos} muestra el sistema como funcionó en la 
     Sensado & Láser simulado de 10~m de alcance & RPLIDAR A1M8 y la unidad inercial de la tarjeta; cámaras apagadas & Las cámaras no se usan y cargaban la tarjeta \\ \addlinespace
     Odometría & La del simulador & La del láser, combinada con la unidad inercial mediante un filtro & El agente no tiene codificadores en las ruedas, y con el láser solo el rumbo derivaba 5,9$^\circ$ por minuto \\ \addlinespace
     Mapa & Calculado de la geometría del mundo simulado & Derivado de la planta medida con flexómetro & El mapeo con SLAM a bordo no dio un mapa utilizable en ningún pasillo \\ \addlinespace
-    Escenario & Pisos 2 y 3 del edificio Gregorio & Pisos 3 y 4 del edificio Calatayud, levantados con flexómetro & En Gregorio el tránsito de personas dificultaba las pruebas, el modelo no correspondía a la planta real y en sus pasillos uniformes la odometría del láser no veía el avance \\ \addlinespace
+    Escenario & Pisos 2 y 3 del edificio Gregorio & Pisos 3 y 4 del edificio Catalayud, levantados con flexómetro & En Gregorio el tránsito de personas dificultaba las pruebas, el modelo no correspondía a la planta real y en sus pasillos uniformes la odometría del láser no veía el avance \\ \addlinespace
     Llegada & Tolerancia de 0,25~m & Tolerancia de 0,5~m, verificada con la pose del agente 1,5~s después de que Nav2 da la meta por alcanzada & Por la banda muerta, el agente no alcanza la precisión de la simulación, y sigue rodando cuando Nav2 declara la llegada \\ \addlinespace
     Media vuelta & La planifica Nav2, con marcha atrás & Maniobra propia del agente, vigilada con el láser y el mapa & En la salida del piso 4, de 2,5~m de ancho, la media vuelta de Nav2 abortó contra la pared \\ \bottomrule
   \end{tabular}
@@ -400,7 +400,7 @@ figura~\ref{fig:arquitectura-vehiculos} muestra el sistema como funcionó en la 
 
 Los dos agentes operan con su tarjeta original, para la que el software de la
 comunidad solo se publica sobre Ubuntu 24.04 con ROS~2 Jazzy. La
-tabla~\ref{tab:vehiculo} reúne los componentes. Cada agente atiende un piso del edificio Calatayud, uno el 3 y otro el 4. El láser que traía el kit no era el que describía el primer
+tabla~\ref{tab:vehiculo} reúne los componentes. Cada agente atiende un piso del edificio Catalayud, uno el 3 y otro el 4. El láser que traía el kit no era el que describía el primer
 informe de hardware; se identificó leyendo el modelo que reporta el propio
 sensor.
 
@@ -464,7 +464,7 @@ posición medida con flexómetro (figura~\ref{fig:hall}).
 Ningún ajuste del algoritmo recupera información que la señal no contiene, y por
 eso la solución fue cambiar de entorno. El criterio salió de la misma medida:
 hace falta estructura no uniforme dentro del alcance del sensor durante todo el
-recorrido. Los pisos 3 y 4 del edificio Calatayud la tienen. Entre las hornacinas de los salones, los
+recorrido. Los pisos 3 y 4 del edificio Catalayud la tienen. Entre las hornacinas de los salones, los
 casilleros, la papelera, el ascensor y la escalera suman ocho cambios de perfil en
 25~m, uno cada tres metros. Con la misma odometría y sin cambiar un parámetro, el error cayó por debajo del 5~\% (tabla~\ref{tab:odometria}). El cambio de edificio fue la decisión que hizo posible la demostración física, porque en los pasillos de Gregorio ningún ajuste habría dado al agente la información que le faltaba.
 
@@ -475,7 +475,7 @@ Los intentos de construir el mapa con SLAM en los propios agentes, en septiembre
 funcionó fue levantar la planta con flexómetro y derivar de ese levantamiento
 tanto el mundo simulado como el mapa de navegación. Así, simulación y edificio
 coinciden porque salen de la misma fuente. Esa correspondencia se había dado por
-supuesta, y al verificarla por primera vez resultó falsa. El modelo del edificio Gregorio daba el hall del piso 3 0,84~m más ancho de lo que es, 4,24~m frente a 3,40~m, un 25~\% de error. En los pisos 3 y 4 de Calatayud se invirtió el orden: primero se midió y después se modeló.
+supuesta, y al verificarla por primera vez resultó falsa. El modelo del edificio Gregorio daba el hall del piso 3 0,84~m más ancho de lo que es, 4,24~m frente a 3,40~m, un 25~\% de error. En los pisos 3 y 4 de Catalayud se invirtió el orden: primero se midió y después se modeló.
 
 La herramienta que genera las plantas suma las dos paredes de cada pasillo y
 avisa si no cierran dentro del 2~\%. Esa comprobación encontró cinco errores antes
@@ -794,4 +794,4 @@ toman más datos.
   \end{tabular}
 \end{table}
 
-Para la campaña con los agentes físicos se sortearon el 13 de octubre, con la semilla 20261013, diez misiones entre los pisos 3 y 4 del edificio Calatayud: cinco de subida y cinco de bajada. Se corrieron en ese orden y sin reubicar los agentes entre misiones, como ocurriría en la operación real.
+Para la campaña con los agentes físicos se sortearon el 13 de octubre, con la semilla 20261013, diez misiones entre los pisos 3 y 4 del edificio Catalayud: cinco de subida y cinco de bajada. Se corrieron en ese orden y sin reubicar los agentes entre misiones, como ocurriría en la operación real.
