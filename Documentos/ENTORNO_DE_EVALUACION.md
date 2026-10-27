@@ -14,6 +14,11 @@ se había documentado.
 
 ## 1. Pregunta de investigación
 
+> **Corrección del 2026-10-26.** La pregunta problema del proyecto es: *¿Cómo asistir la orientación
+> de usuarios dentro de entornos interiores con múltiples pisos utilizando sistemas robóticos?* Es la
+> que lleva el documento final. La formulación de abajo fue una propuesta de los autores en agosto y
+> queda como registro; describe la respuesta que el proyecto pone a prueba, no la pregunta.
+
 El anteproyecto no la formula de manera explícita: el capítulo 2 tiene una sola sección
 («2.1 Planteamiento») y no existe un apartado de pregunta de investigación, pese a que el
 cronograma del anteproyecto sí incluye la actividad «Formulación de pregunta de

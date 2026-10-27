@@ -2,10 +2,10 @@
 
 ## El problema
 
-En un edificio de varios pisos, una persona que no lo conoce tiene que encontrar un salón que puede estar en otro piso. Un robot guía resuelve el recorrido dentro de un piso, pero un robot de ruedas no sube escaleras. La pregunta del proyecto es si dos robots, uno por piso, pueden **repartirse el recorrido** y entregar a la persona de uno al otro en la escalera, sin que el servicio se corte.
+En un edificio de varios pisos, una persona que no lo conoce tiene que encontrar un salón que puede estar en otro piso. Un robot guía resuelve el recorrido dentro de un piso, pero un robot de ruedas no sube escaleras. La respuesta que propone el proyecto es que dos robots, uno por piso, se **repartan el recorrido** y se entreguen a la persona en la escalera, sin que el servicio se corte.
 
 !!! question "Pregunta del proyecto"
-    ¿Cómo puede un sistema de dos robots móviles guiar a una persona entre los pisos de un edificio, coordinando el traspaso en la escalera, con tiempos de respuesta y una tasa de éxito medibles?
+    ¿Cómo asistir la orientación de usuarios dentro de entornos interiores con múltiples pisos utilizando sistemas robóticos?
 
 ## Objetivo general
 
