@@ -552,5 +552,5 @@ ninguna herramienta trae de serie.
   sustituye** a la medida del pasillo.
 - ~~Corregir `HOJA_CAMPO_G2.md:185` y `:190`~~ — hecho el 2026-09-23.
 - ~~Corregir `MAPA_TRABAJO_RESTANTE.md` §2.3~~ — hecho el 2026-09-23.
-- **Decisión de los directores** sobre sitio de la etapa 3 y N de RF-27. Hasta
+- **Decisión del director** sobre sitio de la etapa 3 y N de RF-27. Hasta
   que no esté por escrito no se corre la etapa 3, según §6 del acta.

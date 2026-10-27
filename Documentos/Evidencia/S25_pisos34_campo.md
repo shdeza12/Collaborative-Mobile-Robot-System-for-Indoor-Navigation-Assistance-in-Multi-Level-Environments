@@ -2,7 +2,7 @@
 
 Primera sesión de navegación en el sitio nuevo: los pasillos de los pisos 3 y 4 del edificio,
 levantados con flexómetro por Jonny ([`GUIA_PISOS_3_Y_4.md`](../GUIA_PISOS_3_Y_4.md), commits
-`81d41f1` a `bd5d133`). Según el equipo, los directores y los evaluadores dieron el visto bueno al
+`81d41f1` a `bd5d133`). Según el equipo, el director y los evaluadores dieron el visto bueno al
 cambio de sitio ese mismo día; falta registrarlo en el §6.1 de
 [`ACTA_GO_NOGO.md`](../ACTA_GO_NOGO.md). Claude ejecutó las corridas por SSH desde el portátil; el
 equipo colocó los vehículos y midió con flexómetro. Las horas son las del vehículo, en UTC; la hora

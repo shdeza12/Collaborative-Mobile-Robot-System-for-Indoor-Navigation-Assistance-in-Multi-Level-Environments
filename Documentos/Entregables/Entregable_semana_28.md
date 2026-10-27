@@ -6,7 +6,7 @@ Sistema colaborativo de robots móviles para asistencia de orientación en entor
 
 Realizado por: Santiago Hernández Ávila y Jonny Alejandro Mejía León
 
-Dirigido por: Ing. Armando Mateus Rojas, Msc.; Ing. Nestor Ivan Ospina, Msc.; Ing. Oscar Mauricio Gélvez Lizarazo, Msc.
+Dirigido por: Ing. Armando Mateus Rojas, Msc.
 
 Semana 28: 19 al 25 de octubre de 2026, con corte adelantado al martes 20. Fase 6: análisis y escritura.
 

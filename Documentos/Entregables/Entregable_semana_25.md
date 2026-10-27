@@ -6,7 +6,7 @@ Sistema colaborativo de robots móviles para asistencia de orientación en entor
 
 Realizado por: Santiago Hernández Ávila y Jonny Alejandro Mejía León
 
-Dirigido por: Ing. Armando Mateus Rojas, Msc.; Ing. Nestor Ivan Ospina, Msc.; Ing. Oscar Mauricio Gélvez Lizarazo, Msc.
+Dirigido por: Ing. Armando Mateus Rojas, Msc.
 
 Semana 25: 28 de septiembre al 4 de octubre de 2026, con corte el viernes 2. Fase 5: integración del sistema y realización de pruebas.
 
@@ -29,7 +29,7 @@ demostración física; los cortes son las fechas en que se revisan.
 
 Los dos vehículos quedaron aislados entre sí y se probaron en tres sitios. En el hall del piso 2 el
 modelo del edificio no correspondía a las medidas reales. El equipo levantó entonces con flexómetro
-los pisos 3 y 4, que los directores y los evaluadores aprobaron como sitio nuevo el 2 de octubre. En el piso 4, la odometría cumplió el criterio de G-2 en las dos corridas medidas; la
+los pisos 3 y 4, que el director y los evaluadores aprobaron como sitio nuevo el 2 de octubre. En el piso 4, la odometría cumplió el criterio de G-2 en las dos corridas medidas; la
 llegada no cumplió el de G-3.
 
 | Compuerta | Qué exige | Estado al 4 de octubre |
@@ -139,7 +139,7 @@ cada piso por sus dos paredes, el levantamiento cierra con un error de 0,32 % en
 0,62 % en el piso 3, dentro del 2 % que se fijó como criterio. Cada piso tiene cinco destinos: tres
 salones, el ascensor y las escaleras.
 
-El 2 de octubre los directores y los evaluadores aprobaron el cambio de sitio. Falta registrarlo en la
+El 2 de octubre el director y los evaluadores aprobaron el cambio de sitio. Falta registrarlo en la
 sección 6.1 del acta.
 
 ## 8. Pruebas en el piso 4

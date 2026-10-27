@@ -1,6 +1,6 @@
 # Pruebas de verificación
 
-La demostración con los vehículos se organizó como una escalera de seis pruebas. Cada una tiene un criterio escrito antes de correrla, y la siguiente solo tiene sentido si la anterior se superó. Los criterios los propusieron los autores y los decidieron los directores; después de la última fecha de revisión, el 16 de octubre, no se tomaron más datos.
+La demostración con los vehículos se organizó como una escalera de seis pruebas. Cada una tiene un criterio escrito antes de correrla, y la siguiente solo tiene sentido si la anterior se superó. Los criterios los propusieron los autores y los decidió el director; después de la última fecha de revisión, el 16 de octubre, no se tomaron más datos.
 
 <div class="escalera">
   <div class="escalon"><div class="num">Prueba 1 · 22 de septiembre</div><h3>Actuación</h3><div class="criterio">El vehículo responde a las órdenes de dirección y tracción.</div><div class="resultado"><span class="estado-ok">Superada</span><br>Los dos vehículos completaron la prueba de actuación entera.</div></div>

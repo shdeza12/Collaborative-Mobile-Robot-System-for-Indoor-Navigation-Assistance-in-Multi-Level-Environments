@@ -5,7 +5,7 @@
 **Fecha de redacción:** 2026-09-23
 **Qué aísla:** el peldaño 2 de la escalera Nav2 — *odometría publicada y validada sola*.
 **Por qué ahora:** es el único peldaño que nunca se ha construido sobre hardware, y
-es el que bloquea G-2. No necesita la decisión de los directores, porque esto **no
+es el que bloquea G-2. No necesita la decisión del director, porque esto **no
 es la medida oficial de G-2** sino el ensayo que dice si la cadena produce algo
 usable. Ellos deciden *dónde* se toma la oficial, no si el método funciona.
 
@@ -176,8 +176,8 @@ un resultado interpretable; un pasillo sin control, no.
 
 ## 3. Bloque C — grabar
 
-Tres pasadas por sitio. No es el N de RF-27 (eso sigue pendiente de los
-directores); tres basta para ver si la dispersión es pequeña o enorme.
+Tres pasadas por sitio. No es el N de RF-27 (eso sigue pendiente del
+director); tres basta para ver si la dispersión es pequeña o enorme.
 
 **Por cada pasada:**
 

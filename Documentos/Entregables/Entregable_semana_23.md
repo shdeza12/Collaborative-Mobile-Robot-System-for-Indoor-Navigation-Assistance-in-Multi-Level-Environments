@@ -6,7 +6,7 @@ Sistema colaborativo de robots móviles para asistencia de orientación en entor
 
 Realizado por: Santiago Hernández Ávila y Jonny Alejandro Mejía León
 
-Dirigido por: Ing. Armando Mateus Rojas, Msc.; Ing. Nestor Ivan Ospina, Msc.; Ing. Oscar Mauricio Gélvez Lizarazo, Msc.
+Dirigido por: Ing. Armando Mateus Rojas, Msc.
 
 Semana 23: 14 al 20 de septiembre de 2026. Fase 5: integración del sistema y realización de pruebas.
 
@@ -78,7 +78,7 @@ se corrigió antes de dar el requisito por verificado.
 
 ## 4. Llegada del segundo vehículo y verificación de RF-15
 
-El 14 de septiembre el codirector entregó el segundo vehículo (`amss-jgm9`), que estaba en
+El 14 de septiembre llegó el segundo vehículo (`amss-jgm9`), que estaba en
 intervención técnica desde agosto (riesgo R11). Ese mismo día se midió la comunicación entre los
 dos vehículos para el requisito RF-15, con los límites fijados antes de la medición:
 

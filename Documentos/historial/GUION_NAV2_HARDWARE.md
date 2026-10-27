@@ -48,7 +48,7 @@ las dos.
 > aceptar correr donde está medido que el estimador falla», y nada de la etapa 3
 > corre hasta que eso esté por escrito. Encajonar es una tercera vía que el acta
 > no contempló: **el mismo pasillo real que exige D3**, con el defecto medido
-> corregido por construcción. Eso es lo que se lleva a los directores.
+> corregido por construcción. Eso es lo que se lleva al director.
 >
 > **Y el sitio no se decide discutiendo, se decide con el número.** Sobre el bag
 > ya grabado:

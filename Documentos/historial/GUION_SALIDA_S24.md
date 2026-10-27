@@ -412,6 +412,6 @@ hasta que el sitio esté decidido por escrito**, y la etapa 3 es el pasillo real
 RF-27, con los dos vehículos y N repeticiones. B es una pasada diagnóstica con el
 carro empujado a mano, sin autonomía y sin protocolo. **Se corre como insumo del
 propio §6**, porque el acta pide decidir *«con la medición como justificación»* y
-sin medir el pasillo los directores no tienen con qué decidir.
+sin medir el pasillo el director no tiene con qué decidir.
 
 Queda escrito aquí para que la distinción sea deliberada y no un descuido.

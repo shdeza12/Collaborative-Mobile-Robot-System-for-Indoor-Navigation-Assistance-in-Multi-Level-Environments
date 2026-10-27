@@ -39,9 +39,9 @@ haya avanzado.
 | **G-1** actuación | ✅ 2026-09-22 | — | — | — |
 | **G-4** dos en el grafo | ✅ 2026-09-22 | — | — | — |
 | **G-2** odometría | ⏳ **C-1, vie 2-oct** | rf2o publica y mide: 3 de 3 dentro del ±10 % sobre **3 m**, empujando a mano ([`S24_peldano2_odometria_hardware.md`](../Evidencia/S24_peldano2_odometria_hardware.md)). Corridas de 6 m bajo motor, **sin cinta** | **Corridas de 5 m con flexómetro.** Cada corrida de la campaña es una medida de G-2 | nada: hay mapa, sitio, herramientas y guía |
-| **G-3** navegación de uno | ⏳ **C-1, vie 2-oct** | **Nav2 navegó el carro una vez** (Jonny, 24-sep) y paró a **0,412 m** de la meta contra 0,25 ([`S24_nav2_navegacion_mapa_guardado.md`](../Evidencia/S24_nav2_navegacion_mapa_guardado.md)) | la campaña, con la llegada verificada contra `/odom` y cinta | **la tolerancia de llegada, por escrito y antes de correr** (directores) |
+| **G-3** navegación de uno | ⏳ **C-1, vie 2-oct** | **Nav2 navegó el carro una vez** (Jonny, 24-sep) y paró a **0,412 m** de la meta contra 0,25 ([`S24_nav2_navegacion_mapa_guardado.md`](../Evidencia/S24_nav2_navegacion_mapa_guardado.md)) | la campaña, con la llegada verificada contra `/odom` y cinta | **la tolerancia de llegada, por escrito y antes de correr** (director) |
 | **G-5** protocolo completo | ⏳ | — | una misión con relevo sobre los dos vehículos | G-3 |
-| **G-6** RF-27 | ⏳ | — | N entre 5 y 10 misiones **con el protocolo completo** | G-5, y la decisión de N de los directores |
+| **G-6** RF-27 | ⏳ | — | N entre 5 y 10 misiones **con el protocolo completo** | G-5, y la decisión de N del director |
 
 **G-2 y G-3 los cierra una sesión corta**, de tres corridas de 5 m con cinta, montada en
 [`GUIA_CAMPANA_NAV2_HARDWARE.md`](GUIA_CAMPANA_NAV2_HARDWARE.md). El mapa del pasillo de piso 2
@@ -75,8 +75,8 @@ líneas con el código congelado: **se acuerda entre los dos antes de tocarlo**.
 
 ### 0.2 · Lo que decide otro, y va por escrito ANTES de correr
 
-Tres decisiones son **de los directores** —dos las fija el §6 del acta y la tercera la trae la
-navegación del 24-sep— y **la casilla «comunicada a los directores» del acta está vacía**: el acta
+Tres decisiones son **del director** —dos las fija el §6 del acta y la tercera la trae la
+navegación del 24-sep— y **la casilla «comunicada al director» del acta está vacía**: el acta
 nunca se les ha enviado. Todo se pide el lunes 28, con un borrador ya escrito en el §6 de
 [`PLAN_S25.md`](PLAN_S25.md).
 
@@ -301,7 +301,7 @@ queda contaminada.
 > se cerró con **GO pleno** —la demostración se intenta con los dos vehículos reales—, con seis
 > criterios de fallo escritos de antemano y cuatro puntos de corte con fecha, el último el
 > **16 de octubre**, después del cual no se toman más datos. El acta **no** resuelve las decisiones
-> 1 y 3 de esta lista: el sitio de la etapa 3 y el N de RF-27 son de directores, y el acta los
+> 1 y 3 de esta lista: el sitio de la etapa 3 y el N de RF-27 son del director, y el acta los
 > traslada con la medición de por medio. Hasta que eso esté por escrito no se corre la etapa 3.
 
 1. **El sitio de la etapa 3.** RF-27 y [`ENTORNO_DE_EVALUACION.md`](../ENTORNO_DE_EVALUACION.md) §6
@@ -310,14 +310,14 @@ queda contaminada.
    6,8 % del pasillo simulado cuyo mapa se rechazó
    ([`S23_informacion_avance_piso1.md`](../Evidencia/S23_informacion_avance_piso1.md),
    [`S23_informacion_avance_piso2.md`](../Evidencia/S23_informacion_avance_piso2.md)).
-   **Decisión de directores, por escrito.**
+   **Decisión del director, por escrito.**
 2. **El criterio de llegada de 0,25 m.** Está por debajo de 1σ en misiones largas: σx crece de 0,08
    a 0,40 m en 40 m de recorrido. Parte de las corridas fallará por construcción y chocará con el
    techo de descarte del 20 %. O se cambia el criterio con justificación previa, o se acepta el
    fallo como resultado.
 3. **N = 5 o N = 10.** ASTM F3244-21 da respaldo numérico al 10 —cero fallos en 10 repeticiones
-   ⇒ 80 % de fiabilidad con 85 % de confianza— y ninguno al 5. Cambiar la decisión D1 es de
-   directores.
+   ⇒ 80 % de fiabilidad con 85 % de confianza— y ninguno al 5. Cambiar la decisión D1 es del
+   director.
 4. **Verdad de terreno en movimiento: se mide, o se declara no medible.** Marca en el suelo con el
    robot detenido da 5–10 mm y cumple el factor 10× de sobra, pero solo en puntos discretos. ATE y
    RPE continuos exigen marcadores fiduciales. Si no se montan, se declara por escrito que las

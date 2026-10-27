@@ -42,7 +42,7 @@ El proyecto se hizo en dos semestres de 2026. Esta línea de tiempo reúne los m
 
 <div class="fase">Octubre · validación con los vehículos</div>
 
-<div class="hito cambio"><div class="cuando">2 de octubre</div><div class="titulo">Pisos 3 y 4: un pasillo con estructura <span class="tipo cambio">cambio</span></div><div class="texto">Con salones, casilleros, ascensor y escalera a la vista, la misma odometría midió +3,3 % y −4,6 %. Prueba de odometría superada; los directores aceptaron el cambio de sitio el 5 de octubre.</div></div>
+<div class="hito cambio"><div class="cuando">2 de octubre</div><div class="titulo">Pisos 3 y 4: un pasillo con estructura <span class="tipo cambio">cambio</span></div><div class="texto">Con salones, casilleros, ascensor y escalera a la vista, la misma odometría midió +3,3 % y −4,6 %. Prueba de odometría superada; el director aceptó el cambio de sitio el 5 de octubre.</div></div>
 
 <div class="hito cambio"><div class="cuando">5 de octubre</div><div class="titulo">La unidad inercial de la tarjeta <span class="tipo cambio">cambio</span></div><div class="texto">La tarjeta traía un giroscopio que nadie usaba. Integrado con un filtro, el rumbo dejó de derivar, y el margen de llegada bajó de 1,0 a 0,5 m.</div></div>
 

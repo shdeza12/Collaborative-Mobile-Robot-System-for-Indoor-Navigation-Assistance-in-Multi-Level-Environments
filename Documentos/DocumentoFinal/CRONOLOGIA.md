@@ -321,7 +321,7 @@ Fuente: Entregable S25; commits de Jonny del 2 de octubre.
 
 ### S26 (5 al 11 de octubre): unidad inercial, red, llegada verificada y coordinador al portátil
 
-- 5 de octubre: los directores aceptan los pisos 3 y 4; entre misiones el vehículo sale desde donde
+- 5 de octubre: el director acepta los pisos 3 y 4; entre misiones el vehículo sale desde donde
   terminó la anterior, y vuelve a su escalera solo al cancelar.
 - Unidad inercial Bosch BMI160 de la tarjeta integrada en los dos vehículos: giros de 90° medidos
   como +90,17° y +88,38°; filtro que toma el avance de rf2o y el giro de la unidad inercial.

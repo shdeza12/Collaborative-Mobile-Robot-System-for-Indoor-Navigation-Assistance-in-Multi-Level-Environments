@@ -11,7 +11,7 @@
 >
 > | Artefacto | Qué es | Corte | Autoridad |
 > |---|---|---|---|
-> | [`Actividad_1_Corte_1_Cronograma_2026-2_firmado.pdf`](Entregables/Actividad_1_Corte_1_Cronograma_2026-2_firmado.pdf) | 57 actividades, matriz objetivo–evidencia, hitos y desviaciones. Generado del `.xlsx` | 13-ago | **Es el único firmado.** Ante los directores, manda este |
+> | [`Actividad_1_Corte_1_Cronograma_2026-2_firmado.pdf`](Entregables/Actividad_1_Corte_1_Cronograma_2026-2_firmado.pdf) | 57 actividades, matriz objetivo–evidencia, hitos y desviaciones. Generado del `.xlsx` | 13-ago | **Es el único firmado.** Ante el director, manda este |
 > | [`Entregables/Cronograma_S17_S32.tex`](Entregables/Cronograma_S17_S32.tex) | Versión LaTeX del entregable | 11-ago | Absorbió las correcciones de [`ENTORNO_DE_EVALUACION.md`](ENTORNO_DE_EVALUACION.md) §11 |
 > | **Este `.md`** | Documento de trabajo: más detalle operativo y estado real por actividad | 15-ago | **Es el más actual.** Para saber qué está hecho de verdad, este |
 >
@@ -83,7 +83,7 @@ sobre hardware real. Quedan pendientes el sensado con el LiDAR físico y el cont
 
 ## 4. Decisiones de alcance que rigen esta planificación
 
-Adoptadas el 2026-08-05. Deben presentarse a los directores y quedar en acta.
+Adoptadas el 2026-08-05. Deben presentarse al director y quedar en acta.
 
 **D1 — La simulación produce la evidencia estadística; el hardware produce la demostración.**
 Las cuatro métricas de OE4 se miden en simulación con N = 30 repeticiones. Los vehículos físicos
@@ -533,13 +533,13 @@ por requisito.
 | Redacción completa del documento, incorporando las observaciones del jurado |
 | Justificar por escrito las desviaciones registradas en §5 y en `ESTADO.md` §6 |
 
-**Criterio de cierre (S31):** borrador completo entregado a los directores.
+**Criterio de cierre (S31):** borrador completo entregado al director.
 
 ### S32 · 16 – 22 nov — Entrega
 
 | Actividad |
 |---|
-| Incorporar las correcciones de los directores |
+| Incorporar las correcciones del director |
 | Entrega final |
 
 ---

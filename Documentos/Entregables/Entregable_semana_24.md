@@ -6,7 +6,7 @@ Sistema colaborativo de robots móviles para asistencia de orientación en entor
 
 Realizado por: Santiago Hernández Ávila y Jonny Alejandro Mejía León
 
-Dirigido por: Ing. Armando Mateus Rojas, Msc.; Ing. Nestor Ivan Ospina, Msc.; Ing. Oscar Mauricio Gélvez Lizarazo, Msc.
+Dirigido por: Ing. Armando Mateus Rojas, Msc.
 
 Semana 24: 21 al 27 de septiembre de 2026, con corte el viernes 25. Fase 5: integración del sistema y realización de pruebas.
 
@@ -255,7 +255,7 @@ El plan detallado de la semana 25 está en `PLAN_S25.md` y comprende:
 - la instalación del aislamiento entre los dos vehículos y de la configuración con espacios de
   nombres;
 - la validación del modelo del edificio con flexómetro y la medición de la red entre pisos;
-- la solicitud por escrito a los directores para que definan el sitio de la etapa 3 del protocolo (la
+- la solicitud por escrito al director para que defina el sitio de la etapa 3 del protocolo (la
   demostración física con relevo), el número de repeticiones de RF-27 y la tolerancia de llegada.
 
 La misión completa con los dos vehículos (G-5) está prevista para la semana
@@ -271,7 +271,7 @@ La misión completa con los dos vehículos (G-5) está prevista para la semana
 3. La odometría del vehículo quedó dentro del ±10 % en las tres pasadas de 3 m (razón media 0,982).
    Falta la medición sobre 5 m con flexómetro que exige la compuerta G-2.
 4. Nav2 guía al vehículo, pero la parada queda a 0,412 m de la meta, por encima de la tolerancia de
-   0,25 m, a causa de la banda muerta de la tracción. Los directores deben decidir la tolerancia de
+   0,25 m, a causa de la banda muerta de la tracción. El director debe decidir la tolerancia de
    llegada antes de la campaña.
 5. La sesión de pruebas de G-2 y G-3 está documentada y ensayada en simulación. La interferencia entre
    los dos vehículos, que impide operar el sistema completo, tiene una solución diseñada y probada en

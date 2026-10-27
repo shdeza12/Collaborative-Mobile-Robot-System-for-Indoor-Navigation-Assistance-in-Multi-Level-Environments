@@ -293,7 +293,7 @@ tolerancia: **misma métrica cuestionada desde los dos lados**.
 
 **Anotar el error de cada corrida, no intentar arreglarlo en campo.** Las dos vías son
 decisiones y no ajustes: bajar el umbral de arranque del vehículo, o subir la tolerancia
-con justificación previa. La segunda es **decisión de directores**, como el criterio de
+con justificación previa. La segunda es **decisión del director**, como el criterio de
 0,25 m, y va por escrito antes de la campaña de RF-27.
 
 ---

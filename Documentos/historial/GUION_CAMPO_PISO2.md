@@ -275,5 +275,5 @@ python3 herramientas/adaptar_bag_jazzy.py ~/tesis_evidencia/mapeo_HHMMSS/bag -o 
 ```
 
 **Y la regla que no se negocia:** si el error de G-2 sale peor que el 10 %, se
-anota tal cual y se decide con los directores. No se ajusta el criterio para que
+anota tal cual y se decide con el director. No se ajusta el criterio para que
 salga bien; ese reproche este proyecto ya se lo hizo el 26 de agosto.

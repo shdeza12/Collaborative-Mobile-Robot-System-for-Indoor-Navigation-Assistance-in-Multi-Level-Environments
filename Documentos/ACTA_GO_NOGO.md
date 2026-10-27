@@ -2,7 +2,7 @@
 
 **Actividad 28 del cronograma · Responsables: ambos autores · Fecha: 2026-09-21 (S24)**
 
-*Propuesta de los autores, para comunicar a los directores. Las decisiones del §6 no son nuestras.*
+*Propuesta de los autores, para comunicar al director. Las decisiones del §6 no son nuestras.*
 
 ## 0. Por qué se resuelve hoy y no cuando se despeje
 
@@ -155,7 +155,7 @@ siendo el que decide entre GO pleno y NO-GO. Cerrar dos de seis no adelanta esa 
 calculada con el LiDAR (rf2o) registró el avance con un error de +3,3 % sobre 14,57 m y de −4,6 %
 sobre 6,68 m, dentro del 10 % del criterio. Las dos llegadas quedaron a 0,57 m y 0,62 m de la meta,
 medidas con flexómetro, fuera de los 0,5 m de G-3 (§6.1, punto 3). Nav2 da la meta por alcanzada a
-1,0 m, y los dos vehículos se detuvieron al cruzar ese margen. Lo que resolvieron los directores
+1,0 m, y los dos vehículos se detuvieron al cruzar ese margen. Lo que resolvió el director
 sobre el corte está en el §6.2.
 
 **Alcance de G-3, 7 de octubre.** En el piso 4, con la IMU integrada en la odometría y el margen de
@@ -201,7 +201,7 @@ bloqueadores reales, G-1 y G-2, que son indiferentes a la distro. El camino inve
 
 ## 6. Lo que no deciden los autores
 
-Dos puntos que exceden esta acta y se llevan a los directores:
+Dos puntos que exceden esta acta y se llevan al director:
 
 1. **El sitio de la etapa 3.** D3 lo fija en el pasillo real, y el §3.1 muestra medido que el
    pasillo no da la información de avance que la odometría necesita. O se cambia el sitio con la
@@ -234,15 +234,15 @@ posterior de estos valores se registrará en esta sección, con su fecha.
 
 ### 6.2 Resolución del 5 de octubre de 2026
 
-Los autores consultaron a los directores sobre el cambio de sitio, el corte C-1 y el regreso
-automático del vehículo después de una misión. Los directores trataron también el cambio de sitio
+Los autores consultaron al director sobre el cambio de sitio, el corte C-1 y el regreso
+automático del vehículo después de una misión. El director trató también el cambio de sitio
 con los evaluadores. Los acuerdos fueron verbales y esta sección es su registro:
 
 1. Sitio de la etapa 3. Se acepta el cambio a los pasillos de los pisos 3 y 4 del edificio, medidos
    con flexómetro por el equipo el 2 de octubre ([`GUIA_PISOS_3_Y_4.md`](GUIA_PISOS_3_Y_4.md)).
    Reemplaza el punto 1 del §6.1. El levantamiento del sitio nuevo, con sus mapas y destinos, tomó
    poco tiempo al equipo.
-2. Corte C-1. La indicación de los directores fue organizar el trabajo para presentar a tiempo, sin
+2. Corte C-1. La indicación del director fue organizar el trabajo para presentar a tiempo, sin
    fijar una fecha nueva para C-1. Los autores la aplican así: la demostración con los vehículos
    continúa, G-3 sigue abierto con su tolerancia de 0,5 m, y los cortes C-2 (9 de octubre) y C-3
    (16 de octubre) se mantienen.
@@ -261,8 +261,8 @@ Esta resolución no modifica los criterios del §4 ni la tolerancia del §6.1.
 |---|---|---|
 | Autor | Santiago Hernández Ávila | |
 | Autor | Jonny Mejía | |
-| Comunicada a los directores el | Ing. Armando Mateus Rojas, en conversación directa (§6.1) | 2026-09-28 |
-| Resolución del §6.2 | Los directores, en conversación con los autores; consultada con los evaluadores | 2026-10-05 |
+| Comunicada al director el | Ing. Armando Mateus Rojas, en conversación directa (§6.1) | 2026-09-28 |
+| Resolución del §6.2 | El director, en conversación con los autores; consultada con los evaluadores | 2026-10-05 |
 
 ## 8. Trazabilidad
 

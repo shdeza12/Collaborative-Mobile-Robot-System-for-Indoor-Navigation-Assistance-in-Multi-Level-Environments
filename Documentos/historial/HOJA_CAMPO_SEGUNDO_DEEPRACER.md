@@ -2,8 +2,7 @@
 
 > **Estado al 2026-10-06:** Histórica como hoja de la sesión del 11-sep. **Su §5, el procedimiento de RF-15, sigue vigente**: lo usa [`PLAN_S26.md`](PLAN_S26.md) §2.4 para medir la red entre los pisos 3 y 4. Qué seguir para cada tarea: [`INDICE_GUIAS.md`](../INDICE_GUIAS.md).
 
-**Para la sesión con el segundo vehículo.** Escrita el **2026-09-11 por la mañana**, antes de que
-el codirector Néstor lo traiga, con todo lo que ya costó una sesión en las tres salidas anteriores
+**Para la sesión con el segundo vehículo.** Escrita el **2026-09-11 por la mañana**, antes de que llegue, con todo lo que ya costó una sesión en las tres salidas anteriores
 de hardware ya incorporado.
 
 **La ventana con los dos carros es el recurso escaso de este proyecto.** Lleva abierto desde el
@@ -58,8 +57,7 @@ portátil no es un vehículo.
 
 ## 3. Lo primero de todo: la declaración de R11. Cinco líneas, cinco minutos
 
-**Esto se hace mientras Néstor todavía está delante**, porque son datos que solo él y Jonny
-tienen, y porque en cuanto se vaya dejan de estar disponibles.
+**Esto se hace al recibir el vehículo**, porque son datos que solo tienen quien lo entrega y Jonny, y en cuanto se vaya dejan de estar disponibles.
 
 El cronograma pide literalmente *«qué vehículo está intervenido, qué se le intervino y en qué
 fecha vuelve a estar operativo»* ([`CRONOGRAMA_S17_S32.md`](../CRONOGRAMA_S17_S32.md), S19). La fecha

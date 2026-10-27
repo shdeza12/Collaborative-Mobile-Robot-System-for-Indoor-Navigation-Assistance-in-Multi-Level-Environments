@@ -319,7 +319,7 @@ Procedimiento: el de RF-15 —[`HOJA_CAMPO_SEGUNDO_DEEPRACER.md`](HOJA_CAMPO_SEG
 carro en cada piso, en los puntos donde van a estar durante una misión.
 
 **Cierre:** `CUMPLE` del medidor con los carros en pisos distintos. **Si no cumple**, el relevo entre
-pisos no se puede hacer así, y es lo primero que hay que llevar a los directores.
+pisos no se puede hacer así, y es lo primero que hay que llevar al director.
 
 ---
 
@@ -368,7 +368,7 @@ enviar el mensaje escrito. Lo acordado quedó en el §6.1 de [`ACTA_GO_NOGO.md`]
 | 4 | Corte semanal: `ESTADO.md`, entregable de S25 en `.tex` y `.md`, commit | `ESTADO.md`, `Documentos/Entregables/` |
 
 > **Estado, 2-oct.** Las pruebas se hicieron ese día en el sitio nuevo, los pisos 3 y 4, que según el
-> equipo aprobaron los directores y los evaluadores. G-2 cumple en las dos corridas medidas del piso
+> equipo aprobaron el director y los evaluadores. G-2 cumple en las dos corridas medidas del piso
 > 4 (+3,3 % y −4,6 %); G-3 no (0,57 y 0,62 m). La declaración en el acta, el registro del cambio de
 > sitio y el entregable de S25 quedan pendientes
 > ([registro](../Evidencia/S25_pisos34_campo.md)).
@@ -391,6 +391,6 @@ enviar el mensaje escrito. Lo acordado quedó en el §6.1 de [`ACTA_GO_NOGO.md`]
 |---|---|---|
 | **La partición no funciona en Jazzy** | A1 no da `PASA` | Plan B del diseño (§7): LiDAR y servos fuera de `deepracer-core`. Retrasa C3 y E; G-2 y G-3 no se ven afectadas, que son de un carro |
 | **G-3 no entra en 0,5 m** | el error por cinta pasa de 0,5 m | Es un resultado, con mecanismo medido; va al director. Si el acta obliga a revertir, se revierte |
-| **La red no llega de un piso a otro** | D1 no da `CUMPLE` | Es lo más grave para S26: sin red entre pisos no hay relevo. Llevarlo a los directores con el sitio (F1) |
+| **La red no llega de un piso a otro** | D1 no da `CUMPLE` | Es lo más grave para S26: sin red entre pisos no hay relevo. Llevarlo al director con el sitio (F1) |
 | **Batería o disponibilidad de los carros** | un carro no enciende o cae | Los dos cargados el domingo por la noche; el jueves tiene holgura |
 | **Algo se lanza sin el perfil** | un proceso no ve el láser y no avisa | Los scripts lo cargan solos; a mano, el `export` del recuadro de A2 |

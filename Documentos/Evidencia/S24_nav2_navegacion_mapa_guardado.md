@@ -147,7 +147,7 @@ de pedir una meta, conviene medir si está en zona libre del mapa.**
 - **Arreglar el tópico de la capa de obstáculos** (punto 4 de arriba). Es una línea y
   es condición para navegar con personas en el entorno.
 - **Decidir la tolerancia de llegada**, con el §2 delante y **antes** de correr la
-  campaña de RF-27. Es decisión de directores, como la del criterio de 0,25 m.
+  campaña de RF-27. Es decisión del director, como la del criterio de 0,25 m.
 - **Medir el umbral de arranque real** con `sostener_traccion.py --rampa`. Es el dato
   que cuantifica la banda muerta y hoy no existe en ningún documento.
 - **Una esquina.** Nadie ha mapeado ninguna, y es lo que falta para que la navegación

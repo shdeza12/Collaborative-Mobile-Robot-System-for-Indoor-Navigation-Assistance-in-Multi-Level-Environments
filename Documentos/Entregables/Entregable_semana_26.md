@@ -6,7 +6,7 @@ Sistema colaborativo de robots móviles para asistencia de orientación en entor
 
 Realizado por: Santiago Hernández Ávila y Jonny Alejandro Mejía León
 
-Dirigido por: Ing. Armando Mateus Rojas, Msc.; Ing. Nestor Ivan Ospina, Msc.; Ing. Oscar Mauricio Gélvez Lizarazo, Msc.
+Dirigido por: Ing. Armando Mateus Rojas, Msc.
 
 Semana 26: 5 al 9 de octubre de 2026, con corte el viernes 9. Fase 5: integración del sistema y realización de pruebas.
 
@@ -52,14 +52,13 @@ con relevo (G-5) pasó a esta semana y la campaña de RF-27 a la semana 27; sin 
 físicas que graficar. La semana se organizó en `PLAN_S26.md`: la IMU, la red entre los dos pisos, G-3,
 la media vuelta del vehículo y G-5. Se cumplió todo salvo G-5.
 
-## 3. Resolución de los directores del 5 de octubre
+## 3. Resolución del director del 5 de octubre
 
-Los autores consultaron a los directores sobre el cambio de sitio, el corte C-1 y el regreso
+Los autores consultaron al director sobre el cambio de sitio, el corte C-1 y el regreso
 automático del vehículo después de una misión. Los acuerdos, verbales, quedaron en la sección 6.2 del
 acta:
 
-1. Se acepta el cambio de sitio a los pasillos de los pisos 3 y 4 del edificio, que los directores
-   trataron también con los evaluadores.
+1. Se acepta el cambio de sitio a los pasillos de los pisos 3 y 4 del edificio, que el director trató también con los evaluadores.
 2. Sobre el corte C-1, la indicación fue organizar el trabajo para presentar a tiempo, sin una fecha
    nueva. Los autores la aplican así: la demostración con los vehículos continúa, G-3 sigue abierta
    con su tolerancia de 0,5 m y los cortes C-2 (9 de octubre) y C-3 (16 de octubre) se mantienen.

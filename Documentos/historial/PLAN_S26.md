@@ -46,12 +46,12 @@ Reglas de toda la semana:
 
 ### 1.1 · Acta: cambio de sitio y corte C-1 (hecho)
 
-Santiago habló con los directores el 5-oct. Sus respuestas están en el §6.2 del
+Santiago habló con el director el 5-oct. Sus respuestas están en el §6.2 del
 [acta](../ACTA_GO_NOGO.md), y G-2 (alcanzada) y G-3 (abierta) en su §4.1.
 
 | Pregunta | Respuesta |
 |---|---|
-| Sitio | Se acepta el cambio a los pisos 3 y 4; los directores lo trataron también con los evaluadores |
+| Sitio | Se acepta el cambio a los pisos 3 y 4; el director lo trató también con los evaluadores |
 | (1) a (3) Corte C-1 | Sin fecha nueva y sin NO-GO: organizar el trabajo para presentar a tiempo. La demostración con los vehículos sigue, G-3 queda abierta con 0,5 m y C-2 y C-3 no cambian |
 | (4) Regreso automático | Solo al cancelar (RF-29), como hoy. Entre misiones el vehículo no vuelve: el coordinador lo envía a recoger al usuario desde donde quedó. El regreso tras una misión completada es opcional y sin prioridad |
 
