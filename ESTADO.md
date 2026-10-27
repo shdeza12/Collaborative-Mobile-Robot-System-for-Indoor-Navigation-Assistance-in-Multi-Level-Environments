@@ -33,7 +33,8 @@ pasaron por el pasillo durante las misiones.
 ## Pendiente
 
 1. RNF-03: revisar en los videos de la campaña las personas en el pasillo, misión por misión.
-2. Documento final: bajarlo de 94 a entre 60 y 80 páginas; corregir el «20 %» del hall del piso 2 (es 25 %).
+2. Documento final: la versión recortada (78 páginas, `main_recorte.tex`) espera la revisión de los autores;
+   faltan los preliminares. El «20 %» del hall ya está corregido a 25 % en las dos versiones.
 3. Registro de misión: la etapa de cancelación sale como `8` y no como `CANCELANDO`.
 4. Imagen `coordinador_jazzy` del portátil: reconstruirla con el agente nuevo.
 5. Siete archivos de código copiados en los vehículos citan en comentarios la ruta vieja de planes ya
