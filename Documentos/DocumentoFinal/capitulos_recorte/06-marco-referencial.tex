@@ -24,21 +24,10 @@
 \chapter{Marco referencial}
 \label{cap:marco}
 
-Este capítulo sitúa el trabajo frente a lo que ya existe y fija el vocabulario y
-la teoría con que se lee el resto del documento. Los antecedentes terminan con lo
-que este proyecto aporta frente a ellos. Siguen los términos técnicos, el
-fundamento de cada decisión de diseño y el marco legal y ambiental del prototipo.
-
 % =====================================================================
 \section{Antecedentes}
 \label{sec:antecedentes}
 % =====================================================================
-
-La revisión se ordena en cuatro líneas: robots que guían a personas, navegación
-autónoma en interiores, coordinación entre varios robots y movilidad entre pisos.
-Cada una resuelve bien una parte del problema. La última subsección añade la
-distribución del cómputo y reúne lo que ninguna resuelve, que es lo que este
-trabajo aborda.
 
 \subsection{Robots que guían a personas}
 
@@ -156,8 +145,7 @@ remotos, \textcite{tahir2025edge} las que lo acercan al borde de la red, y
 \textcite{malavolta2023offloading} miden el costo de esa delegación sobre WiFi en
 robots terrestres. Sus resultados llevaron a que la navegación corra completa a
 bordo de cada vehículo y solo la coordinación, que intercambia mensajes pequeños,
-se centralice en un computador portátil, sin depender de salida a internet. La
-sección~\ref{sec:teo-ros2} explica cómo se refleja esa distribución en la red.
+se centralice en un computador portátil, sin depender de salida a internet (sección~\ref{sec:teo-ros2}).
 
 La literatura cubre bien cada componente por separado. La
 tabla~\ref{tab:antecedentes} resume lo que cada línea aporta a este proyecto y el
@@ -197,10 +185,6 @@ problema donde no se había usado.
 % 2026-10-05). Un parrafo por cada categoria del anteproyecto. Los terminos
 % siguen en negrita para poder barrer la seccion con la vista.
 % =====================================================================
-
-Esta sección define los términos con que se lee el resto del documento, en las
-seis categorías del anteproyecto. Los que tienen un fundamento propio se
-desarrollan en el marco teórico (sección~\ref{sec:teorico}).
 
 En navegación y percepción, la \textbf{navegación autónoma} es el desplazamiento
 de un robot sin intervención humana, y reúne tres capacidades: percibir el
@@ -295,10 +279,6 @@ contrasta el sistema, que en este trabajo es la distancia tomada con flexómetro
 \label{sec:teorico}
 % =====================================================================
 
-Cada subsección expone el fundamento de una parte del sistema y la literatura que
-lo respalda. El orden va de la coordinación, que es el aporte del trabajo, a la
-navegación de cada vehículo, y termina en los criterios con que se evaluó.
-
 \subsection{Asignación de tareas en sistemas multirrobot}
 \label{sec:teo-asignacion}
 
@@ -374,9 +354,7 @@ Dos mecanismos más separan a los vehículos. La partición de comunicaciones de
 dentro de cada vehículo los tópicos del software del fabricante, que no llevan
 espacio de nombres. Un espacio de nombres distinto para cada vehículo distingue
 la navegación, el estado y la media vuelta de cada agente cuando llegan al
-portátil. El sistema usa además dos distribuciones de ROS~2, Humble en
-simulación y Jazzy en los vehículos; la sección~\ref{sec:sim-a-vehiculos}
-explica por qué y qué cambia entre una y otra.
+portátil. El sistema usa además dos distribuciones de ROS~2, Humble en simulación y Jazzy en los vehículos (sección~\ref{sec:sim-a-vehiculos}).
 
 \subsection{Cinemática tipo automóvil, planificación y seguimiento de trayectorias}
 \label{sec:teo-planificacion}

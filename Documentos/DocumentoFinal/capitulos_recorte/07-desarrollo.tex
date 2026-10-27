@@ -50,15 +50,8 @@ cuándo se tomaban datos (sección~\ref{sec:pruebas-verificacion}).
   \end{tabular}
 \end{table}
 
-El capítulo empieza por el recorrido, porque varias decisiones solo se entienden
-en el orden en que se tomaron. Las secciones siguientes, una por objetivo
-específico, describen lo que quedó y por qué.
-
 \section{Recorrido del trabajo}
 \label{sec:recorrido}
-
-Esta sección cuenta el trabajo en el orden en que se hizo. Lo que quedó de cada
-etapa se describe en las secciones de cada objetivo, a las que remite el texto.
 
 \subsection{La plataforma DonkeyCar y su simulador}
 \label{sec:donkeycar}
@@ -197,7 +190,7 @@ Ubuntu 24.04 y ROS~2 Jazzy (sección~\ref{sec:componentes}). Como la integració
 Gazebo~11 con ROS~2 no está publicada para Jazzy, desde entonces el proyecto
 trabaja con dos distribuciones (sección~\ref{sec:sim-a-vehiculos}).
 
-El camino hasta la campaña tuvo tres giros, que se tratan con la plataforma. Una supuesta avería resultó ser un problema de permisos, y la tarjeta se saturó con dos cadenas de navegación (sección~\ref{sec:dos-vehiculos}). Además, el modelo del piso 2 no correspondía al edificio (sección~\ref{sec:mapas}). El 21 de septiembre decidimos intentar la demostración física con seis pruebas de
+El camino hasta la campaña tuvo tres giros. Una supuesta avería resultó ser un problema de permisos, y la tarjeta se saturó con dos cadenas de navegación (sección~\ref{sec:dos-vehiculos}). Además, el modelo del piso 2 no correspondía al edificio (sección~\ref{sec:mapas}). El 21 de septiembre decidimos intentar la demostración física con seis pruebas de
 verificación (sección~\ref{sec:pruebas-verificacion}), y la campaña con los dos
 vehículos corrió el 16 de octubre.
 
@@ -205,10 +198,7 @@ vehículos corrió el 16 de octubre.
 \section{Arquitectura funcional del sistema}
 \label{sec:oe1}
 
-Esta sección corresponde al primer objetivo específico: modelar la arquitectura
-funcional, con sus requisitos, sus escenarios de operación en varios pisos, la
-estrategia de asignación de tareas y el esquema de comunicación entre robots. La
-figura~\ref{fig:arquitectura} muestra el sistema tal como se implementó en
+La figura~\ref{fig:arquitectura} muestra el sistema tal como se implementó en
 simulación: la interfaz por la que entra la solicitud, el coordinador que la
 reparte, los dos agentes con su pila de navegación y la escalera donde ocurre el
 relevo.
@@ -404,11 +394,6 @@ campaña con los dos vehículos.
 \section{Plataforma robótica}
 \label{sec:plataforma}
 
-Esta sección corresponde al segundo objetivo específico: desarrollar una
-plataforma de dos vehículos con los módulos de locomoción, sensado, procesamiento
-y comunicación que necesita la operación colaborativa. La elección del AWS
-DeepRacer en lugar del DonkeyCar se justifica en la sección~\ref{sec:migracion}.
-
 \subsection{Componentes del vehículo}
 \label{sec:componentes}
 
@@ -453,8 +438,7 @@ automática falla si se separan en algo distinto de las diferencias documentadas
 La cadena se puso en marcha con la escalera de siete pasos de la guía oficial de
 Nav2 \autocite{nav2setup}. El orden va de las transformaciones entre marcos de referencia al
 planificador y el controlador, pasando por la odometría, el láser, el mapa, la
-localización y los mapas de costos. Seguir ese orden permitió aislar el problema
-del apartado siguiente, porque una odometría que no mide y un planificador que no
+localización y los mapas de costos. Seguir ese orden permitió aislar el problema de la odometría, porque una odometría que no mide y un planificador que no
 planifica se manifiestan igual: el vehículo no llega. El orden importa también al
 arrancar, porque los mapas de costos leen el mapa al configurarse. Por eso el
 programa de arranque de los vehículos activa primero el servidor de mapas y
@@ -626,9 +610,6 @@ la campaña con los dos vehículos se ejecutó 24 veces
 \section{Interfaz de interacción con el usuario}
 \label{sec:oe3}
 
-Esta sección corresponde al tercer objetivo específico: programar una interfaz
-móvil de interacción humano-robot basada en la selección del origen y el destino.
-
 \subsection{Una página web, no una aplicación}
 
 El objetivo pide «una interfaz móvil», y construimos una página web que se abre
@@ -744,9 +725,7 @@ bajada.
 \section{Protocolo experimental e instrumentación}
 \label{sec:protocolo}
 
-Esta sección corresponde al cuarto objetivo específico: evaluar el sistema con
-el tiempo de respuesta, el tiempo de asignación, la tasa de éxito y la
-continuidad del servicio entre niveles. Escribimos el protocolo antes de
+Escribimos el protocolo antes de
 instrumentar el sistema, y lo hicimos a propósito: un protocolo redactado después
 de ver los datos tiende a acomodarse a lo que salió, por ejemplo eligiendo el
 umbral que deja fuera las corridas malas. El protocolo fija las métricas con su

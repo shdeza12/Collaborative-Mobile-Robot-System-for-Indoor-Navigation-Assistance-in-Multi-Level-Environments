@@ -15,9 +15,7 @@
 \chapter{Resultados}
 \label{cap:resultados}
 
-Los resultados llegan de tres fuentes. La primera es la campaña en simulación, con treinta misiones sorteadas (sección~\ref{sec:res-sim}). La segunda son las pruebas de verificación de la plataforma física, que miden la odometría y la navegación de un vehículo (sección~\ref{sec:res-hw}). La tercera es el sistema completo sobre los dos vehículos, con una
-misión con relevo y una campaña de misiones sorteadas entre los pisos 3 y 4
-(sección~\ref{sec:res-completo}). Las dos campañas se reportan por separado. La de
+Las dos campañas, en simulación y con los vehículos, se reportan por separado. La de
 simulación produce la evidencia estadística, y la de los vehículos demuestra que
 el sistema opera sobre la plataforma real.
 
@@ -109,10 +107,6 @@ figura~\ref{fig:simulacion} muestra una misión de la campaña.
 \section{Evaluación con los vehículos}
 \label{sec:res-hw}
 
-La demostración física se organizó en pruebas de verificación sucesivas
-(sección~\ref{sec:pruebas-verificacion}). Esta sección reporta las dos que
-producen cifras: la de odometría y la de navegación de un vehículo.
-
 \subsection{La odometría del vehículo}
 
 La odometría del vehículo sale de comparar barridos sucesivos del láser, y
@@ -120,7 +114,7 @@ durante meses no produjo una medida utilizable. La tabla~\ref{tab:odometria}
 reúne lo que se midió en cada entorno, como fracción del avance real medido con
 flexómetro.
 
-\begin{table}[htbp]
+\begin{table}[H]
   \centering\small
   \caption{Fracción del avance real que registra la odometría, por entorno. El
     criterio de la prueba es un error de 10~\% o menos.}
@@ -213,9 +207,7 @@ la página web en un teléfono conectado a la red de los vehículos. Los autores
 hicieron de usuario: pidieron cada misión, acompañaron a los vehículos y
 confirmaron el cambio de piso en la página. Los vehículos no se reubicaron entre
 misiones, y cuando el destino quedaba detrás del vehículo, el coordinador pidió la
-media vuelta en varios tiempos (sección~\ref{sec:media-vuelta}). La llegada se
-verificó con la localización de cada vehículo y no con flexómetro, y la
-sección~\ref{sec:lim-llegada} explica cómo se lee eso.
+media vuelta en varios tiempos (sección~\ref{sec:media-vuelta}). La llegada se verificó con la localización de cada vehículo y no con flexómetro (sección~\ref{sec:lim-llegada}).
 
 \subsection{La misión con relevo}
 
@@ -345,10 +337,6 @@ la campaña, la página muestra el piso junto a los nombres que se repiten
 % ---------------------------------------------------------------------
 \section{Limitaciones de la medición}
 \label{sec:limitaciones}
-
-Tres límites afectan a cómo deben leerse los resultados anteriores: dos de la
-campaña en simulación y uno de la campaña con los vehículos. Los declaramos aquí
-porque callarlos sería presentar como medida lo que no lo es.
 
 \subsection{Naturaleza del criterio de continuidad entre niveles}
 
