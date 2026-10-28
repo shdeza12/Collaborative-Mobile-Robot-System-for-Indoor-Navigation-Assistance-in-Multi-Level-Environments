@@ -30,8 +30,9 @@ Matriz completa en [`REQUISITOS.md`](Documentos/REQUISITOS.md): los 36 requisito
 
 ## Pendiente
 
-1. Documento final: la versión recortada (79 páginas) ya tiene la revisión del 27-oct, los trabajos futuros reducidos a cinco líneas y el anexo A con los siete videos del proyecto. La bibliografía quedó en las referencias necesarias y el edificio es el Catalayud (grafía confirmada por los autores). Faltan los preliminares; después, fundir el recorte en `capitulos/`.
-2. Registro de misión: la etapa de cancelación sale como `8` y no como `CANCELANDO`.
-3. Imagen `coordinador_jazzy` del portátil: reconstruirla con el agente nuevo.
-4. Siete archivos de código copiados en los vehículos citan en comentarios la ruta vieja de planes ya
+1. Documento final: la versión recortada (79 páginas) ya tiene la revisión del 27-oct, los trabajos futuros reducidos a cinco líneas, el anexo A con los siete videos del proyecto y el anexo B con el repositorio y el sitio, donde está toda la trazabilidad. La bibliografía quedó en las referencias necesarias y el edificio es el Catalayud (grafía confirmada por los autores). Faltan los preliminares; después, fundir el recorte en `capitulos/`.
+2. Presustentación (2 a 6 de noviembre): la tarjeta de acceso del jurado, con los códigos QR de la red y de la página, se genera ese día con `python3 herramientas/tarjeta_jurado.py`, con el portátil ya en la red `DEEPRACER` (pide la clave al ejecutarse).
+3. Registro de misión: la etapa de cancelación sale como `8` y no como `CANCELANDO`.
+4. Imagen `coordinador_jazzy` del portátil: reconstruirla con el agente nuevo.
+5. Siete archivos de código copiados en los vehículos citan en comentarios la ruta vieja de planes ya
    movidos a `historial/`; se actualizan en los dos vehículos la próxima vez que estén encendidos.

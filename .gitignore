@@ -50,3 +50,6 @@ VIDEOS/
 
 # Sitio construido por MkDocs (se genera con mkdocs build; no se versiona)
 .sitio_construido/
+
+# Tarjeta de acceso del jurado (herramientas/tarjeta_jurado.py): lleva la clave de la red de los agentes.
+Documentos/acceso_jurado.pdf
