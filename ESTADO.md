@@ -8,7 +8,7 @@ recorrido semana a semana en [`CRONOLOGIA.md`](Documentos/DocumentoFinal/CRONOLO
 | | |
 |---|---|
 | **Semana en curso** | S29 (26 de octubre al 1 de noviembre de 2026), fase 6: análisis y escritura |
-| **Fecha de corte** | 2026-10-27 (lunes). Revisión del documento recortado con las anotaciones de los autores: los robots se llaman «agente»; edificio Gregorio (pisos 2 y 3) y cambio al Catalayud (pisos 3 y 4); impersonal en todo el texto; menos remisiones y menciones al director; fechas exactas; figuras de los nodos, del planificador, de la instrumentación y del error de llegada; contrato de interfaces en tabla; conclusiones y trabajos futuros reescritos |
+| **Fecha de corte** | 2026-10-27 (lunes). Revisión del documento recortado con las anotaciones de los autores: los robots se llaman «agente»; edificio Gregorio (pisos 2 y 3) y cambio al Catalayud (pisos 3 y 4); impersonal en todo el texto; menos remisiones y menciones al director; fechas exactas; figuras de los nodos, del planificador, de la instrumentación y del error de llegada; contrato de interfaces en tabla; conclusiones y trabajos futuros reescritos. Propuesta de presentación para la presustentación |
 | **Último entregable formal** | Semana 28 ([`Entregable_semana_28.tex`](Documentos/Entregables/Entregable_semana_28.tex) y su versión [`.md`](Documentos/Entregables/Entregable_semana_28.md)) |
 | **Documento final** | Compila en el portátil, sin errores ([`DocumentoFinal/`](Documentos/DocumentoFinal/)): la versión vigente tiene 94 páginas y la recortada (`main_recorte.tex`), 79. El director pide entre 60 y 80 |
 
@@ -31,7 +31,7 @@ Matriz completa en [`REQUISITOS.md`](Documentos/REQUISITOS.md): los 36 requisito
 ## Pendiente
 
 1. Documento final: la versión recortada (79 páginas) ya tiene la revisión del 27-oct, los trabajos futuros reducidos a cinco líneas, el anexo A con los siete videos del proyecto y el anexo B con el repositorio y el sitio, donde está toda la trazabilidad. La bibliografía quedó en las referencias necesarias y el edificio es el Catalayud (grafía confirmada por los autores). Faltan los preliminares; después, fundir el recorte en `capitulos/`.
-2. Presustentación (2 a 6 de noviembre): la tarjeta de acceso del jurado, con los códigos QR de la red y de la página, se genera ese día con `python3 herramientas/tarjeta_jurado.py`, con el portátil ya en la red `DEEPRACER` (pide la clave al ejecutarse).
+2. Presustentación (2 a 6 de noviembre): la propuesta de presentación está en [`Presustentacion.pptx`](Documentos/Presentacion/Presustentacion.pptx), con la plantilla de la presentación del anteproyecto: 39 diapositivas y notas del orador que suman 17 min 20 s. Se arma con `python3 herramientas/presentacion_sustentacion.py` y falta la revisión de los autores. La tarjeta de acceso del jurado, con los códigos QR de la red y de la página, se genera ese día con `python3 herramientas/tarjeta_jurado.py`, con el portátil ya en la red `DEEPRACER` (pide la clave al ejecutarse).
 3. Registro de misión: la etapa de cancelación sale como `8` y no como `CANCELANDO`.
 4. Imagen `coordinador_jazzy` del portátil: reconstruirla con el agente nuevo.
 5. Siete archivos de código copiados en los vehículos citan en comentarios la ruta vieja de planes ya
