@@ -362,5 +362,28 @@ Fuente: Entregable S27; `Evidencia/S27_campana_rf27.md`.
   POV lado a lado.
 - Corrección: el portátil de la misión 10 se apagó unos 30 s después de la solicitud, no a los 18 s.
 - Prueba del sitio del proyecto, con una página por semana.
+- 23 de octubre: ajustes de la página y cancelación probados con el teléfono y los dos vehículos. Dos
+  misiones con relevo completadas, en 69,4 s y 99,3 s. Se corrigió el rechazo de la media vuelta después
+  de cancelar (de 8 de 15 rechazadas a 0 de 10), y en seis cancelaciones el vehículo volvió a su escalera,
+  a entre 0,074 y 0,337 m.
+- 24 de octubre: repositorio ordenado: `ESTADO.md` en una pantalla, la bitácora y 25 documentos de
+  sesiones pasadas en `historial/`, y los mundos de Gazebo en `simulacion/`.
 
-Fuente: Entregable S28; `Evidencia/S28_video_campana.md`.
+Fuente: Entregables S28 y S29; `Evidencia/S28_video_campana.md`; `Evidencia/S28_campo_pagina_cancelacion.md`.
+
+### S29 (26 de octubre al 1 de noviembre): documento recortado y video de las pruebas
+
+- 26 de octubre: la simulación de dos robots, en el portátil: 3 de 3 misiones con relevo. La versión
+  recortada del documento, en paralela a la vigente. Un solo director en todo el repositorio y la pregunta
+  problema con su texto oficial.
+- 27 de octubre: revisión del documento con las anotaciones de los autores: «agente» para los robots,
+  edificios Gregorio y Catalayud, texto impersonal, bibliografía de 61 a 41 referencias, anexos con los
+  videos y con el repositorio. La restricción de condiciones controladas quedó verificada, y con ella los 36
+  requisitos. Propuesta de presentación para la presustentación.
+- 29 de octubre: video de las pruebas del 23 de octubre, con la pantalla del teléfono sincronizada. Al
+  sincronizarlo se midió que la página mostró la llegada hasta 46,0 s después que el coordinador, en tres
+  misiones anteriores a las 17:54; la causa no se estableció.
+- 1 de noviembre: preliminares del documento y corrección de la evidencia del 23 de octubre. El documento
+  recortado queda en 77 páginas.
+
+Fuente: Entregable S29; `Evidencia/S29_video_pagina_cancelacion.md`; `Evidencia/S29_simulacion_relevo_portatil.md`.

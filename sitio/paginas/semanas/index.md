@@ -45,4 +45,5 @@ Cada semana tiene su página con lo que se hizo, las imágenes y lo que se concl
 <div class="semanas-grid">
 <a class="semana-tarjeta" href="s27/"><img src="img/s27_1.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 27 · 12 al 18 de octubre</span><span class="titulo">Campaña con los dos vehículos</span></span></a>
 <a class="semana-tarjeta" href="s28/"><img src="img/s28_1.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 28 · desde el 19 de octubre</span><span class="titulo">Documento final</span></span></a>
+<a class="semana-tarjeta" href="s29/"><img src="img/s29_1.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 29 · 26 de octubre al 1 de noviembre</span><span class="titulo">Documento recortado y video de las pruebas</span></span></a>
 </div>
