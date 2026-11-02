@@ -65,6 +65,7 @@ VIDEOS = [  # anexo A del documento final
     ('iKYSiM9cs-Y', 'Primeras asignaciones del coordinador', '24 ago.'),
     ('eH_Co4vZZdw', 'Campaña de 30 misiones en simulación', '5 sep.'),
     ('X3BINGgNxiA', 'Campaña con los agentes físicos', '20 oct.'),
+    ('31oNn04qLoU', 'Ajustes de la página y cancelación', '1 nov.'),
 ]
 
 
@@ -1068,7 +1069,7 @@ REFERENCIAS = [
 def referencias(m):
     m.separador(['REFERENCIAS', 'BIBLIOGRÁFICAS'], 'Tiempo: 3 s.')
     s = m.contenido('Referencias bibliográficas', 'Tiempo: 5 s. Las referencias citadas en la '
-                    'presentación; la lista completa, de 41 referencias, está en el documento.')
+                    'presentación; la lista completa, de 42 referencias, está en el documento.')
     mitad = (len(REFERENCIAS) + 1) // 2
     for col, refs in enumerate([REFERENCIAS[:mitad], REFERENCIAS[mitad:]]):
         pars = [{'runs': [(a, {}), (b, {'cursiva': True}), (c, {})], 'vineta': True, 'despues': 4}
@@ -1079,8 +1080,8 @@ def referencias(m):
 def anexos(m):
     m.separador(['ANEXOS'], 'Tiempo: 3 s.')
     s = m.contenido('Anexos', (
-        'Tiempo: 15 s. Cada código abre un video del proyecto; los dos últimos son las campañas en '
-        'simulación y con los agentes físicos. El repositorio guarda toda la trazabilidad: código, '
+        'Tiempo: 15 s. Cada código abre un video del proyecto; el 6 y el 7 son las campañas en '
+        'simulación y con los agentes físicos, y el 8, las pruebas de la página y de la cancelación. El repositorio guarda toda la trazabilidad: código, '
         'matriz de requisitos con la prueba de cada uno, protocolo, registro de cada misión, '
         'evidencia de cada sesión y entregables semanales.'))
     texto(s, 66, 104, 500, 22, 'Anexo A. Videos del proyecto', tam=15, negrita=True,
