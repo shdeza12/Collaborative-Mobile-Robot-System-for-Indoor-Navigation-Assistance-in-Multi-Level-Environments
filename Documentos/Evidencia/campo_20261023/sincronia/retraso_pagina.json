@@ -1,0 +1,232 @@
+[
+ {
+  "archivo": "mision_manual_20261023_221808.json",
+  "origen": "piso4_salon_403",
+  "destino": "piso3_salon_303",
+  "t_sol": 1792793888.5116642,
+  "etapa": "COMPLETADA",
+  "t": 1792793956.9793491,
+  "motivo": "",
+  "relevos": 1,
+  "etapas": [
+   "RECIBIDA",
+   "TRAMO_1",
+   "TRAMO_1",
+   "TRANSFERENCIA",
+   "ESPERANDO_CONFIRMACION",
+   "TRAMO_2",
+   "COMPLETADA"
+  ],
+  "wa": "WA0010",
+  "t_pagina": 1792794002.981628,
+  "retraso": 46.00227880477905
+ },
+ {
+  "archivo": "mision_manual_20261023_222056.json",
+  "origen": "piso3_salon_301",
+  "destino": "piso4_salon_401",
+  "t_sol": 1792794056.4342935,
+  "etapa": "COMPLETADA",
+  "t": 1792794155.7050092,
+  "motivo": "",
+  "relevos": 1,
+  "etapas": [
+   "RECIBIDA",
+   "TRAMO_1",
+   "TRAMO_1",
+   "TRANSFERENCIA",
+   "ESPERANDO_CONFIRMACION",
+   "TRAMO_2",
+   "COMPLETADA"
+  ],
+  "wa": "WA0009",
+  "t_pagina": 1792794191.3659668,
+  "retraso": 35.66095757484436
+ },
+ {
+  "archivo": "mision_manual_20261023_223317.json",
+  "origen": "piso3_salon_302",
+  "destino": "piso4_salon_402",
+  "t_sol": 1792794797.3081286,
+  "etapa": "FALLIDA",
+  "t": 1792794962.6506233,
+  "motivo": "Cancelada por el usuario",
+  "relevos": 1,
+  "etapas": [
+   "RECIBIDA",
+   "TRAMO_1",
+   "TRAMO_1",
+   "TRANSFERENCIA",
+   "ESPERANDO_CONFIRMACION",
+   "TRAMO_2",
+   "8",
+   "FALLIDA"
+  ],
+  "wa": "WA0008",
+  "t_pagina": 1792794973.1180556,
+  "retraso": 10.467432260513306
+ },
+ {
+  "archivo": "mision_manual_20261023_225421.json",
+  "origen": "piso3_salon_302",
+  "destino": "piso4_salon_402",
+  "t_sol": 1792796061.397758,
+  "etapa": "FALLIDA",
+  "t": 1792796082.5054142,
+  "motivo": "Cancelada por el usuario",
+  "relevos": 1,
+  "etapas": [
+   "RECIBIDA",
+   "TRAMO_1",
+   "8",
+   "FALLIDA"
+  ],
+  "wa": "WA0011",
+  "t_pagina": 1792796082.7650223,
+  "retraso": 0.25960803031921387
+ },
+ {
+  "archivo": "mision_manual_20261023_225548.json",
+  "origen": "piso4_salon_401",
+  "destino": "piso3_salon_303",
+  "t_sol": 1792796148.8737109,
+  "etapa": "FALLIDA",
+  "t": 1792796229.8508606,
+  "motivo": "Cancelada por el usuario",
+  "relevos": 1,
+  "etapas": [
+   "RECIBIDA",
+   "TRAMO_1",
+   "TRAMO_1",
+   "TRANSFERENCIA",
+   "ESPERANDO_CONFIRMACION",
+   "TRAMO_2",
+   "8",
+   "FALLIDA"
+  ],
+  "wa": "WA0011",
+  "t_pagina": 1792796229.9560778,
+  "retraso": 0.10521721839904785
+ },
+ {
+  "archivo": "mision_manual_20261023_225731.json",
+  "origen": "piso3_escalera",
+  "destino": "piso4_salon_401",
+  "t_sol": 1792796251.608011,
+  "etapa": "FALLIDA",
+  "t": 1792796261.8575962,
+  "motivo": "Cancelada por el usuario",
+  "relevos": 1,
+  "etapas": [
+   "RECIBIDA",
+   "TRAMO_1",
+   "TRANSFERENCIA",
+   "ESPERANDO_CONFIRMACION",
+   "8",
+   "FALLIDA"
+  ],
+  "wa": "WA0011",
+  "t_pagina": 1792796261.9122,
+  "retraso": 0.05460381507873535
+ },
+ {
+  "archivo": "mision_manual_20261023_225807.json",
+  "origen": "piso3_ascensor",
+  "destino": "piso4_salon_401",
+  "t_sol": 1792796287.1739478,
+  "etapa": "FALLIDA",
+  "t": 1792796368.3779612,
+  "motivo": "Cancelada por el usuario",
+  "relevos": 1,
+  "etapas": [
+   "RECIBIDA",
+   "TRAMO_1",
+   "TRAMO_1",
+   "TRANSFERENCIA",
+   "ESPERANDO_CONFIRMACION",
+   "TRAMO_2",
+   "8",
+   "FALLIDA"
+  ],
+  "wa": "WA0011",
+  "t_pagina": 1792796370.3756778,
+  "retraso": 1.9977166652679443
+ },
+ {
+  "archivo": "mision_manual_20261023_230003.json",
+  "origen": "piso4_salon_403",
+  "destino": "piso4_salon_401",
+  "t_sol": 1792796403.8498282,
+  "etapa": "COMPLETADA",
+  "t": 1792796438.4568462,
+  "motivo": "",
+  "relevos": 0,
+  "etapas": [
+   "RECIBIDA",
+   "TRAMO_1",
+   "TRAMO_1",
+   "COMPLETADA"
+  ],
+  "wa": "WA0011",
+  "t_pagina": 1792796438.4596112,
+  "retraso": 0.0027649402618408203
+ },
+ {
+  "archivo": "mision_manual_20261023_230049.json",
+  "origen": "piso3_salon_303",
+  "destino": "piso3_salon_301",
+  "t_sol": 1792796449.2728045,
+  "etapa": "COMPLETADA",
+  "t": 1792796496.4242606,
+  "motivo": "",
+  "relevos": 0,
+  "etapas": [
+   "RECIBIDA",
+   "TRAMO_1",
+   "TRAMO_1",
+   "COMPLETADA"
+  ],
+  "wa": "WA0011",
+  "t_pagina": 1792796496.404389,
+  "retraso": -0.01987171173095703
+ },
+ {
+  "archivo": "mision_manual_20261023_230646.json",
+  "origen": "piso3_salon_303",
+  "destino": "piso3_ascensor",
+  "t_sol": 1792796806.2618546,
+  "etapa": "FALLIDA",
+  "t": 1792796857.4270594,
+  "motivo": "Cancelada por el usuario",
+  "relevos": 0,
+  "etapas": [
+   "RECIBIDA",
+   "TRAMO_1",
+   "8",
+   "FALLIDA"
+  ],
+  "wa": "WA0011",
+  "t_pagina": 1792796857.4654667,
+  "retraso": 0.038407325744628906
+ },
+ {
+  "archivo": "mision_manual_20261023_230804.json",
+  "origen": "piso3_escalera",
+  "destino": "piso4_salon_402",
+  "t_sol": 1792796884.0709794,
+  "etapa": "FALLIDA",
+  "t": 1792796918.5838704,
+  "motivo": "Cancelada por el usuario",
+  "relevos": 1,
+  "etapas": [
+   "RECIBIDA",
+   "TRAMO_1",
+   "TRANSFERENCIA",
+   "8",
+   "FALLIDA"
+  ],
+  "wa": "WA0011",
+  "t_pagina": 1792796918.5444224,
+  "retraso": -0.03944802284240723
+ }
+]

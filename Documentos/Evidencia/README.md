@@ -384,7 +384,13 @@ que el propio documento sostiene:
 
 - [`S28_video_campana.md`](S28_video_campana.md) — Video de la campaña sincronizado con la pantalla del teléfono (19 y 20 de octubre)
 - [`S28_campo_pagina_cancelacion.md`](S28_campo_pagina_cancelacion.md) — Ajustes de la página y cancelación con los dos vehículos; arreglo de la media vuelta (23 de octubre)
-- [`campo_20261023/`](campo_20261023/) — Registros del coordinador y su log del 23 de octubre, sin las grabaciones
+- [`campo_20261023/`](campo_20261023/) — Registros del coordinador y su log del 23 de octubre, sin las grabaciones; en `sincronia/`, la hora de cada grabación y el retraso de la página
+
+**Semana 29**
+
+- [`S29_simulacion_relevo_portatil.md`](S29_simulacion_relevo_portatil.md) — La simulación de dos robots en el portátil: 3 de 3 misiones con relevo (26 de octubre)
+- [`S29_video_pagina_cancelacion.md`](S29_video_pagina_cancelacion.md) — Video de las pruebas del 23 de octubre, sincronizado con la pantalla del teléfono (29 de octubre)
+- [`S29_video_cancelacion_mision6.jpg`](S29_video_cancelacion_mision6.jpg) — Cuadro del video: el agente del piso 4 vuelve a su escalera tras cancelar, con el teléfono en «Cancelando»
 
 ---
 
