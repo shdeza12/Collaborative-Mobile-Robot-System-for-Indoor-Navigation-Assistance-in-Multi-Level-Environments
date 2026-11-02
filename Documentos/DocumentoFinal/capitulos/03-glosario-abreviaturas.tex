@@ -21,10 +21,6 @@
 \begin{description}[style=nextline,leftmargin=1.5em,itemsep=0.2em]
   \item[Agente] Cada uno de los dos robots móviles del sistema, construidos sobre la plataforma AWS DeepRacer y dedicados cada uno a un nivel del edificio. Tiene su propia navegación y ejecuta los tramos de la misión que le asigna el coordinador.
 
-  \item[AMCL] Algoritmo de localización por filtro de partículas. Combina la
-    odometría con las lecturas del láser para situar al agente dentro de un mapa
-    que ya conoce. No construye el mapa: lo supone dado.
-
   \item[Banda muerta de tracción] Rango de velocidades ordenadas en el que el agente no llega a moverse, porque la señal resultante no vence el
     rozamiento estático. En los agentes de este trabajo abarca todo lo que está por debajo de 0,40~m/s, y condiciona su aproximación final al destino.
 
@@ -89,19 +85,13 @@
     el que ROS~2 implementa sus comunicaciones.
   \item[GED] Grupo de Estudio y Desarrollo en Robótica, grupo de investigación en
     el que se inscribe el proyecto.
-  \item[GUI] \textit{Graphical User Interface} — interfaz gráfica de usuario.
   \item[HRI] \textit{Human-Robot Interaction} — interacción humano-robot.
-  \item[ICONTEC] Instituto Colombiano de Normas Técnicas y Certificación.
   \item[IMU] \textit{Inertial Measurement Unit} — unidad de medición inercial.
   \item[JSON] \textit{JavaScript Object Notation}, formato de intercambio de
     datos en texto.
-  \item[MRS] \textit{Multi-Robot System} — sistema multi-robot.
   \item[Nav2] \textit{Navigation2}, marco de navegación autónoma de ROS~2.
-  \item[NTC] Norma Técnica Colombiana.
   \item[PID] Control proporcional-integral-derivativo.
   \item[PWM] \textit{Pulse Width Modulation} — modulación por ancho de pulso.
-  \item[QoS] \textit{Quality of Service} — políticas de entrega de un canal de
-    comunicación.
   \item[ROS] \textit{Robot Operating System}. La versión empleada es ROS~2, que
     no es una actualización de ROS~1 sino un rediseño sobre DDS.
   \item[SLAM] \textit{Simultaneous Localization and Mapping} — localización y
