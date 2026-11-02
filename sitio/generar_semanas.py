@@ -46,7 +46,10 @@ VIDEOS = {
     21: [('eH_Co4vZZdw', 'Campaña de treinta misiones de prueba en simulación')],
     27: [('X3BINGgNxiA', 'Campaña con los dos vehículos, 16 de octubre: a la izquierda la vista del usuario, '
                          'a la derecha la pantalla de su teléfono, sincronizada con el registro del coordinador')],
-    28: [('X3BINGgNxiA', 'Video de la campaña con los dos vehículos, editado esta semana')],
+    28: [('X3BINGgNxiA', 'Video de la campaña con los dos vehículos, editado esta semana'),
+         ('31oNn04qLoU', 'Pruebas del 23 de octubre: ajustes de la página y cancelación de misiones, con la pantalla '
+                         'del teléfono sincronizada')],
+    29: [('31oNn04qLoU', 'Video de las pruebas del 23 de octubre, editado esta semana')],
 }
 
 

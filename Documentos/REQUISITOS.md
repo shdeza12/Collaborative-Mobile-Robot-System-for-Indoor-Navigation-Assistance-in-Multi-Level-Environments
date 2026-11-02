@@ -269,7 +269,7 @@ del anteproyecto §4.3.
 |---|---|---|---|
 | **RNF-01** | **Ningún agente cruza entre niveles.** La transición es un evento lógico del protocolo, no un desplazamiento | La coordenada vertical de cada agente es constante durante toda la misión | ✅ **medido en S18 y confirmado sobre la campaña (2026-09-05).** El registro guarda `descriptivas.desviacion_z_m` por robot: **60 medidas** —dos agentes por cada una de las 30 misiones— con un máximo de **0,0070 m**. Ningún agente subió ni bajó: la transición sigue siendo un evento del protocolo |
 | **RNF-02** | Los agentes **no manipulan objetos, no transportan carga y no interactúan mecánicamente con la infraestructura** (puertas, botones de ascensor) | Por diseño: el vehículo no tiene actuadores más allá de tracción y dirección | ✅ |
-| **RNF-03** | Operación **en interiores, en un espacio previamente delimitado y en condiciones controladas** | En la campaña del 16 de octubre solo estuvieron en el pasillo los dos autores y quien hizo de usuario, sin personas ajenas (confirmado por los autores el 27 de octubre) | ✅ verificado |
+| **RNF-03** | Operación **en interiores, en un espacio previamente delimitado y en condiciones controladas** | En la campaña del 16 de octubre solo estuvieron en el pasillo los dos autores, que hicieron de usuario, sin personas ajenas (confirmado por los autores el 27 de octubre y el 1 de noviembre) | ✅ verificado |
 | **RNF-04** | Plataforma **de bajo costo** | AWS DeepRacer en lugar de DonkeyCar; desviación registrada en `ESTADO.md` §6 | ✅ con desviación |
 | **RNF-05** | Las trayectorias deben ser **ejecutables por cinemática Ackermann**: sin giro sobre el propio eje | Planificador con radio mínimo, árboles de comportamiento sin la primitiva de giro | ✅ **S17, y verificado sobre las trazas el 2026-09-05.** De **42 278** pares consecutivos de traza de la campaña, solo **3 (0,007 %)** muestran cambio de rumbo apreciable con menos de 1 cm de avance, y a 5 Hz de decimación eso es compatible con el temblor de la pose estimada estando quieto, no con un giro sobre el eje |
 | **RNF-06** | La simulación debe correr **a tiempo real** para que las métricas temporales sean válidas | Factor de tiempo real ≥ 0,99 con las dos pilas activas | ✅ **0,996 en S18 y sostenido en las 30 misiones (2026-09-05): 30 de 30 por encima de 0,99**, mínimo **0,9917**, media **0,9973**. No es un adorno: si el RTF se hubiera caído, las cifras temporales de RF-21 y RF-24 no valdrían, así que esta restricción es lo que hace legibles las métricas de OE4 |
@@ -363,7 +363,7 @@ del proyecto: sin ellos no hay resultado que sustentar.
 | **Total** | **36** | **36** | **0** | |
 
 > **Actualizado el 2026-10-27.** RNF-03 pasa a verificado: los autores confirmaron que durante la
-> campaña con los vehículos solo estuvieron en el pasillo ellos dos y quien hizo de usuario, así que
+> campaña con los vehículos solo estuvieron en el pasillo ellos dos, que hicieron de usuario, así que
 > la operación fue en condiciones controladas y no había personas ajenas que anotar. Los 36
 > requisitos quedan verificados.
 

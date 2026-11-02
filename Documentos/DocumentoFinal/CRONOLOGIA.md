@@ -377,13 +377,13 @@ Fuente: Entregables S28 y S29; `Evidencia/S28_video_campana.md`; `Evidencia/S28_
   recortada del documento, en paralela a la vigente. Un solo director en todo el repositorio y la pregunta
   problema con su texto oficial.
 - 27 de octubre: revisión del documento con las anotaciones de los autores: «agente» para los robots,
-  edificios Gregorio y Catalayud, texto impersonal, bibliografía de 61 a 41 referencias, anexos con los
+  edificios Gregorio y Catalayud, texto impersonal, bibliografía de 61 a 42 referencias, anexos con los
   videos y con el repositorio. La restricción de condiciones controladas quedó verificada, y con ella los 36
   requisitos. Propuesta de presentación para la presustentación.
 - 29 de octubre: video de las pruebas del 23 de octubre, con la pantalla del teléfono sincronizada. Al
   sincronizarlo se midió que la página mostró la llegada hasta 46,0 s después que el coordinador, en tres
   misiones anteriores a las 17:54; la causa no se estableció.
-- 1 de noviembre: preliminares del documento y corrección de la evidencia del 23 de octubre. El documento
-  recortado queda en 77 páginas.
+- 1 de noviembre: preliminares del documento y corrección de la evidencia del 23 de octubre. El video se
+  publicó y es el octavo del anexo A. El documento recortado queda en 77 páginas.
 
 Fuente: Entregable S29; `Evidencia/S29_video_pagina_cancelacion.md`; `Evidencia/S29_simulacion_relevo_portatil.md`.

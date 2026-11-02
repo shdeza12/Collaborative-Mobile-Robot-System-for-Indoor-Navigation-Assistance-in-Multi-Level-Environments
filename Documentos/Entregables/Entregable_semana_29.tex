@@ -84,7 +84,7 @@ Este informe presenta el avance de la semana 29 del cronograma (26 de octubre al
 
 En esas pruebas se verificaron, con un teléfono y los dos vehículos, los ajustes de la página y la cancelación de misiones. Las dos misiones de los ajustes se completaron con relevo, y en las seis cancelaciones hechas después de corregir la media vuelta el vehículo volvió a su escalera dentro de la tolerancia. Al sincronizar el video de esas pruebas se midió que la página mostró la llegada hasta 46,0~s después que el coordinador, lo que corrige la explicación que daba la evidencia de esa sesión (sección~\ref{sec:retraso}). El documento final se recortó de 94 a 77 páginas, dentro del rango de 60 a 80 que pide el director, y se revisó con las anotaciones de los autores. Los 36 requisitos de la matriz quedaron verificados.
 
-Quedan pendientes las autoridades académicas del documento, dejar la versión recortada como la vigente y publicar el video.
+Quedan pendientes las autoridades académicas del documento y dejar la versión recortada como la vigente.
 
 \section{Objetivos de la semana}
 
@@ -145,7 +145,7 @@ Desde las 17:54 & Ocho misiones grabadas & & & De $-$0,04 a 2,00~s \\ \bottomrul
 \end{tabular}
 \end{table}
 
-La causa no se estableció y no se intentó reproducir. Durante el retraso la página indicaba ``conectado'', y las etapas anteriores de esas misiones habían llegado a tiempo. El requisito RF-18 (la interfaz muestra el estado de la misión) no fija un límite de tiempo, así que su estado no cambia, y el retraso queda como observación. La evidencia quedó corregida, con la tabla completa de las once misiones grabadas.
+La causa no se estableció y no se intentó reproducir. Durante el retraso la página indicaba ``conectado'', y las etapas anteriores de esas misiones habían llegado a tiempo. El requisito RF-18 (la interfaz muestra el estado de la misión) no fija un límite de tiempo, así que su estado no cambia. El retraso queda como observación en la evidencia, corregida con la tabla de las once misiones grabadas, y por decisión de los autores no se declara como limitación en el documento final.
 
 \section{Documento final}
 \label{sec:documento}
@@ -160,7 +160,7 @@ El director pide entre 60 y 80 páginas. La versión recortada se armó en paral
 
 La revisión del 27 de octubre dejó una sola palabra para los robots del proyecto, ``agente'', y los edificios con su nombre: Gregorio (pisos 2 y 3) y Catalayud (pisos 3 y 4), con el cambio de edificio explicado. El texto quedó impersonal, con menos remisiones a otras secciones y con fechas y medidas exactas. Se añadieron figuras de los nodos, del planificador, de la instrumentación y del error de llegada en simulación, y el contrato de interfaces pasó a una tabla. Las conclusiones se reescribieron y los trabajos futuros quedaron en cinco líneas.
 
-La bibliografía pasó de 61 a 41 referencias. El anexo A reúne los siete videos del proyecto, con enlace y código QR, y el anexo B, el repositorio y el sitio. La pregunta problema quedó con su texto oficial, y el documento nombra a un solo director y la línea de Robótica e Inteligencia Computacional.
+La bibliografía pasó de 61 a 42 referencias. El anexo A reúne los ocho videos del proyecto, con enlace y código QR, y el anexo B, el repositorio y el sitio. La pregunta problema quedó con su texto oficial, y el documento nombra a un solo director y la línea de Robótica e Inteligencia Computacional.
 
 \subsection{Preliminares}
 
@@ -168,7 +168,7 @@ De la lista de abreviaturas salieron cinco siglas que el documento no usa (GUI, 
 
 \section{Video de las pruebas}
 
-Con 14 clips de cámara y 4 grabaciones de la pantalla del teléfono se editó un video de 8~min 21~s, a tiempo real y sin audio. A la izquierda va la cámara del usuario y a la derecha la pantalla, en el mismo instante (figura~\ref{fig:video}). Muestra las dos misiones de los ajustes de la página y cinco de las seis cancelaciones; la sexta no quedó en cámara. El video no incluye las cancelaciones anteriores a la corrección de la media vuelta.
+Con 14 clips de cámara y 4 grabaciones de la pantalla del teléfono se editó un video de 8~min 21~s, a tiempo real y sin audio. A la izquierda va la cámara del usuario y a la derecha la pantalla, en el mismo instante (figura~\ref{fig:video}). Muestra las dos misiones de los ajustes de la página y cinco de las seis cancelaciones; la sexta no quedó en cámara. El video no incluye las cancelaciones anteriores a la corrección de la media vuelta. Se publicó en YouTube el 1 de noviembre (\url{https://youtu.be/31oNn04qLoU}) y es el video 8 del anexo A.
 
 \begin{figure}[H]
     \centering
@@ -199,7 +199,7 @@ La propuesta de presentación está en \texttt{Documentos/Presentacion/Presusten
 \begin{tabular}{@{}p{2.2cm}p{4.9cm}p{5.6cm}p{2.5cm}@{}}
 \toprule
 \textbf{Informe} & \textbf{Dato publicado} & \textbf{Dato correcto} & \textbf{Evidencia} \\ \midrule
-Semana 28, sección 7 & ``Los videos muestran personas en el pasillo en algunas misiones, y la observación se está registrando misión por misión'' & Los autores confirmaron que en la campaña solo estuvieron en el pasillo ellos dos y quien hizo de usuario, sin personas ajenas que anotar. RNF-03 quedó verificado el 27 de octubre & \texttt{REQUISITOS.md} \\ \bottomrule
+Semana 28, sección 7 & ``Los videos muestran personas en el pasillo en algunas misiones, y la observación se está registrando misión por misión'' & Los autores confirmaron que en la campaña solo estuvieron en el pasillo ellos dos, que hicieron de usuario, sin personas ajenas que anotar. RNF-03 quedó verificado el 27 de octubre & \texttt{REQUISITOS.md} \\ \bottomrule
 \end{tabular}
 \end{table}
 
@@ -253,8 +253,6 @@ Para las semanas 30 y 31, cuyo criterio de cierre es el borrador completo entreg
 
 \begin{enumerate}
     \item Completar las autoridades académicas y dejar la versión recortada como la vigente.
-    \item Publicar el video de las pruebas y agregarlo al anexo A.
-    \item Decidir si el retraso de la página se declara como limitación en el documento final.
     \item Corregir el nombre de la etapa de cancelación en el registro de misión, actualizar los comentarios con rutas viejas en los dos vehículos y reconstruir la imagen del coordinador.
     \item Incorporar las observaciones de la presustentación.
 \end{enumerate}

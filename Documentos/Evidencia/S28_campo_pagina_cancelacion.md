@@ -4,6 +4,7 @@ Pisos 3 y 4: deepy en el 3 y racey en el 4, arrancados en su salida frente a la 
 vehículos, nivelados con el repositorio antes de empezar. Datos: [`campo_20261023/registros/`](campo_20261023/registros/)
 (18 misiones) y [`campo_20261023/coordinador.log`](campo_20261023/coordinador.log). Las grabaciones
 (`mision_prueba_20261023_01` a `_04`, 56 min en total) quedan fuera del repositorio, en `~/tesis_evidencia/`.
+Video de las pruebas: <https://youtu.be/31oNn04qLoU> ([`S29_video_pagina_cancelacion.md`](S29_video_pagina_cancelacion.md)).
 
 ## Resultado
 
@@ -69,7 +70,8 @@ cuatro grabaciones, el minuto de la barra de estado cambia entre 0,03 y 0,18 s d
 - Las etapas anteriores de esas mismas misiones sí llegaron a tiempo: el segundo tramo apareció entre 0,10 y
   0,31 s después de su marca, y la cancelación de las 17:35:45, a los 0,08 s.
 - La causa no se estableció y no se intentó reproducir. El requisito RF-18 (la interfaz muestra el estado de la
-  misión) no fija un límite de tiempo, así que su estado no cambia. El documento final no menciona este retraso.
+  misión) no fija un límite de tiempo, así que su estado no cambia. Por decisión de los autores (1 de noviembre), el documento final no lo declara como
+  limitación.
 
 ## Incidencias
 

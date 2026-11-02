@@ -10,7 +10,9 @@ quedan en la carpeta `VIDEOS/` del equipo. Las pruebas están en
 - `VIDEOS/editado/pagina_y_cancelacion_23oct.mp4`: 8 min 21 s (500,9 s), 1920×1080, 30 fps, sin audio, a tiempo real.
   A la izquierda la cámara del usuario y a la derecha la pantalla del teléfono en el mismo instante; abajo, la etapa
   de la misión según las marcas del coordinador, el tiempo desde la solicitud y la hora.
-- Publicación en YouTube: pendiente.
+- Publicado en YouTube el 1 de noviembre, no listado: <https://youtu.be/31oNn04qLoU>, con el título «Ajustes de la
+  página y cancelación de misiones con dos agentes AWS DeepRacer — Evidencia Semana 28». Es el video 8 del anexo A del
+  documento final.
 - No incluye las cancelaciones anteriores al arreglo de la media vuelta, de las 17:33 y las 17:36 (decisión del
   equipo), ni la cancelación de las 18:06, que no quedó en cámara.
 - Herramientas, fuera del repositorio, en `~/tesis_evidencia/video_23oct/`: `sincronizar_pantallas.py`,

@@ -29,8 +29,7 @@ corrige la explicación que daba la evidencia de esa sesión (sección 3.3). El 
 77 páginas, dentro del rango de 60 a 80 que pide el director, y se revisó con las anotaciones de los autores.
 Los 36 requisitos de la matriz quedaron verificados.
 
-Quedan pendientes las autoridades académicas del documento, dejar la versión recortada como la vigente y publicar
-el video.
+Quedan pendientes las autoridades académicas del documento y dejar la versión recortada como la vigente.
 
 ## 2. Objetivos de la semana
 
@@ -93,8 +92,9 @@ página:
 
 La causa no se estableció y no se intentó reproducir. Durante el retraso la página indicaba «conectado», y las
 etapas anteriores de esas misiones habían llegado a tiempo. El requisito RF-18 (la interfaz muestra el estado de la
-misión) no fija un límite de tiempo, así que su estado no cambia, y el retraso queda como observación. La evidencia
-quedó corregida, con la tabla completa de las once misiones grabadas.
+misión) no fija un límite de tiempo, así que su estado no cambia. El retraso queda como observación en la evidencia, corregida
+con la tabla de las once misiones grabadas, y por decisión de los autores no se declara como limitación en el documento
+final.
 
 ## 4. Documento final
 
@@ -114,7 +114,7 @@ impersonal, con menos remisiones a otras secciones y con fechas y medidas exacta
 del planificador, de la instrumentación y del error de llegada en simulación, y el contrato de interfaces pasó a una
 tabla. Las conclusiones se reescribieron y los trabajos futuros quedaron en cinco líneas.
 
-La bibliografía pasó de 61 a 41 referencias. El anexo A reúne los siete videos del proyecto, con enlace y código QR, y
+La bibliografía pasó de 61 a 42 referencias. El anexo A reúne los ocho videos del proyecto, con enlace y código QR, y
 el anexo B, el repositorio y el sitio. La pregunta problema quedó con su texto oficial, y el documento nombra a un
 solo director y la línea de Robótica e Inteligencia Computacional.
 
@@ -130,7 +130,8 @@ Universidad.
 Con 14 clips de cámara y 4 grabaciones de la pantalla del teléfono se editó un video de 8 min 21 s, a tiempo real y
 sin audio. A la izquierda va la cámara del usuario y a la derecha la pantalla, en el mismo instante (figura 1). Muestra
 las dos misiones de los ajustes de la página y cinco de las seis cancelaciones; la sexta no quedó en cámara. El video
-no incluye las cancelaciones anteriores a la corrección de la media vuelta.
+no incluye las cancelaciones anteriores a la corrección de la media vuelta. Se publicó en YouTube el 1 de noviembre
+(<https://youtu.be/31oNn04qLoU>) y es el video 8 del anexo A.
 
 ![Figura 1. Misión 6 en el video](../Evidencia/S29_video_cancelacion_mision6.jpg)
 
@@ -163,7 +164,7 @@ del anteproyecto: 39 diapositivas y notas del orador que suman 17 min 20 s. Falt
 
 | Informe | Dato publicado | Dato correcto | Evidencia |
 |---|---|---|---|
-| Semana 28, sección 7 | «Los videos muestran personas en el pasillo en algunas misiones, y la observación se está registrando misión por misión» | Los autores confirmaron que en la campaña solo estuvieron en el pasillo ellos dos y quien hizo de usuario, sin personas ajenas que anotar. RNF-03 quedó verificado el 27 de octubre | `REQUISITOS.md` |
+| Semana 28, sección 7 | «Los videos muestran personas en el pasillo en algunas misiones, y la observación se está registrando misión por misión» | Los autores confirmaron que en la campaña solo estuvieron en el pasillo ellos dos, que hicieron de usuario, sin personas ajenas que anotar. RNF-03 quedó verificado el 27 de octubre | `REQUISITOS.md` |
 
 ## 9. Aporte a los objetivos específicos
 
@@ -194,11 +195,9 @@ de la matriz están verificados.
 Para las semanas 30 y 31, cuyo criterio de cierre es el borrador completo entregado al director, el equipo prevé:
 
 1. Completar las autoridades académicas y dejar la versión recortada como la vigente.
-2. Publicar el video de las pruebas y agregarlo al anexo A.
-3. Decidir si el retraso de la página se declara como limitación en el documento final.
-4. Corregir el nombre de la etapa de cancelación en el registro de misión, actualizar los comentarios con rutas viejas
+2. Corregir el nombre de la etapa de cancelación en el registro de misión, actualizar los comentarios con rutas viejas
    en los dos vehículos y reconstruir la imagen del coordinador.
-5. Incorporar las observaciones de la presustentación.
+3. Incorporar las observaciones de la presustentación.
 
 ## 11. Conclusiones
 
