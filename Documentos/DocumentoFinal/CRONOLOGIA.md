@@ -408,5 +408,11 @@ Fuente: Entregable S29; `Evidencia/S29_video_pagina_cancelacion.md`; `Evidencia/
 - 3 de noviembre: las figuras de la interfaz en el documento, la presentación y el sitio pasaron a ser cuadros de las pruebas
   del 23 de octubre, con el catálogo de destinos y el mensaje de confirmación según el sentido: «Baje con calma al piso 3» y «Suba con calma al piso 4».
 - 3 de noviembre: la presentación ganó una diapositiva sobre la red y queda en 42 diapositivas y 19 min 20 s.
+- 3 de noviembre: la sección de la red se reescribió en las dos versiones del documento, con las mismas cifras, y la medida de
+  3,75 ms entre los dos agentes en la misma planta entró al texto. Los autores deciden no repetir el requisito de latencia con un
+  agente en cada piso: con uno en cada piso quedan las medidas de ida y vuelta contra el enrutador. El documento queda en 99
+  páginas y el recortado, en 80.
+- 3 de noviembre: el ensayo y la sesión con los jurados incluyen ver en RViz la misión 3 grabada en racey. El visor se probó con
+  una grabación de deepy del 8 de octubre; grabar con la cadena completa queda para el ensayo.
 
-Fuente: `Evidencia/S30_simulacion_catalayud.md`; `Evidencia/S30_segunda_mision_y_cancelacion.md`; `Evidencia/S26_red_campo_topologia_final.md`; `GUION_SESION_JURADOS.md`.
+Fuente: `Evidencia/S30_simulacion_catalayud.md`; `Evidencia/S30_segunda_mision_y_cancelacion.md`; `Evidencia/S26_red_campo_topologia_final.md`; `Evidencia/S30_grabacion_en_rviz.md`; `GUION_SESION_JURADOS.md`.

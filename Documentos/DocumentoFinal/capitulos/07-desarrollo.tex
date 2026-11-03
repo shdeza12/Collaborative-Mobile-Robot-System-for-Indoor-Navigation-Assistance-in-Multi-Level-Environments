@@ -814,10 +814,8 @@ ejecutó 24 veces (sección~\ref{sec:res-completo}).
 % cuatro remisiones del documento apuntan a ella.
 \label{sec:dos-vehiculos}
 
-El aporte de este trabajo es que dos agentes se repartan un recorrido, y eso
-descansa por completo en que puedan comunicarse. La red no es, por tanto, un
-detalle de montaje: es la condición que hace posible el relevo. Esta sección
-cuenta cómo se construyó, por qué se eligió así y qué costó.
+Que dos agentes se repartan un recorrido depende de que puedan comunicarse, así que
+la red es una condición del relevo.
 
 \subsection{Por qué una red inalámbrica local}
 \label{sec:red-por-que}
@@ -825,149 +823,128 @@ cuenta cómo se construyó, por qué se eligió así y qué costó.
 Los agentes se mueven, de modo que el enlace tiene que ser inalámbrico. Dentro de
 esa restricción se consideraron tres opciones.
 
-\textbf{La red de la universidad} quedó descartada por tres razones, y cualquiera
-de ellas bastaba. Aísla a sus clientes entre sí, de modo que los dos agentes no
-podrían verse; no admite reservas de dirección, y el middleware necesita
-direcciones estables; y no se puede diagnosticar ni modificar, lo que convierte
-cualquier anomalía en algo que el equipo no puede resolver. A eso se añade que su
-disponibilidad depende de terceros, lo que es inaceptable para una demostración
-con fecha fija.
+La red de la universidad quedó descartada por tres razones, y cualquiera de ellas
+bastaba. Aísla a sus clientes entre sí, de modo que los dos agentes no podrían
+verse; no admite reservas de dirección, y el middleware necesita direcciones
+estables; y no se puede diagnosticar ni modificar, de modo que el equipo no podría
+resolver una anomalía. Además, su disponibilidad depende de terceros, lo que no sirve
+para una demostración con fecha fija.
 
-\textbf{Una red móvil} se descartó por una razón de diseño, no de costo: el
-sistema está pensado para funcionar sin salida a internet, porque el edificio no
-siempre la tiene y porque la interfaz debe cargar en el teléfono de un visitante
-sin depender de su plan de datos. Introducir un enlace celular reintroduciría la
-dependencia que el diseño evita.
+Una red móvil se descartó por diseño. El sistema está pensado para funcionar sin
+salida a internet, porque el edificio no siempre la tiene y porque la interfaz debe
+cargar en el teléfono de un visitante sin depender de su plan de datos. Un enlace
+celular reintroduciría esa dependencia.
 
-\textbf{Una red propia sobre Wi-Fi} es la que se adoptó. Reúne las condiciones que
-el sistema necesita: el equipo la controla por completo, permite fijar direcciones
-por dirección física, admite medir y diagnosticar, y no depende de ningún servicio
-externo. El hardware ya estaba disponible, lo que además evitó gasto.
+Se adoptó una red propia sobre Wi-Fi, que reúne las condiciones que el sistema
+necesita: el equipo la controla por completo, permite fijar direcciones por dirección
+física, admite medir y diagnosticar, y no depende de ningún servicio externo. El
+hardware ya estaba disponible, lo que además evitó gasto.
 
-La decisión tiene un límite conocido y conviene declararlo: un enlace inalámbrico
-compartido no garantiza tiempos de entrega. Por eso el proyecto fijó un requisito
-de red con cotas numéricas y lo verificó con medición, en lugar de suponer que el
-enlace sería suficiente (sección~\ref{sec:red-medida}).
+Esta decisión tiene un límite conocido: un enlace inalámbrico compartido no garantiza
+tiempos de entrega. Por eso el proyecto fijó un requisito de red con cotas numéricas
+y lo verificó midiendo (tabla~\ref{tab:red-medida}).
 
 \subsection{Cómo quedó construida}
 \label{sec:red-topologia}
 
 La figura~\ref{fig:red-topologia} muestra el montaje. Un enrutador reparte las
-direcciones de toda la red. De él cuelgan, \textbf{por cable}, dos puntos de
-acceso, uno en cada planta, y cada agente se conecta al de su piso.
+direcciones de toda la red. De él cuelgan por cable dos puntos de acceso, uno en cada
+planta, y cada agente se conecta al de su piso.
 
-Conviene precisar los dos papeles, porque la diferencia no es de vocabulario sino
-de comportamiento. El \textbf{enrutador} une dos redes, reparte las direcciones y
-encamina el tráfico entre ellas; en esta instalación hay uno solo. Un
-\textbf{punto de acceso} da acceso inalámbrico a una red que ya existe: ni reparte
-direcciones ni encamina, de modo que sus clientes pertenecen a la red del
-enrutador. Los dos equipos de las plantas trabajan en ese segundo papel.
+Los dos papeles se comportan distinto. El enrutador une dos redes, reparte las
+direcciones y encamina el tráfico entre ellas; en esta instalación hay uno solo. Un
+punto de acceso da acceso inalámbrico a una red que ya existe: ni reparte direcciones
+ni encamina, de modo que sus clientes pertenecen a la red del enrutador. Los dos
+equipos de las plantas trabajan en ese segundo papel.
 
-\textbf{No son repetidores}, y la distinción importa. Un repetidor enlaza por
-radio con el resto de la red y usa la misma antena para hablar con sus clientes y
-con ese enlace, lo que reduce el caudal a la mitad y añade un salto inalámbrico a
-cada mensaje. Durante la construcción uno de los equipos quedó por error en ese
-modo estando además conectado por cable, con lo que ofrecía dos caminos a los
-mismos mensajes; el efecto se describe en la sección~\ref{sec:red-defectos}.
+Tampoco son repetidores. Un repetidor enlaza por radio con el resto de la red y usa
+la misma antena para hablar con sus clientes y con ese enlace, lo que reduce el
+caudal a la mitad y añade un salto inalámbrico a cada mensaje. Durante la
+construcción uno de los equipos quedó por error en ese modo estando además conectado
+por cable, con lo que ofrecía dos caminos a los mismos mensajes.
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=\textwidth]{imagenes/red_topologia.png}
   \caption{Montaje físico de la red. Los dos puntos de acceso trabajan en modo
-    puente: no reparten direcciones ni encaminan, de manera que toda la
-    instalación forma una sola subred. Es la condición para que los agentes se
-    descubran entre sí.}
+    puente: no reparten direcciones ni encaminan, de manera que toda la instalación
+    forma una sola subred, la condición para que cada agente y el portátil se
+    descubran.}
   \label{fig:red-topologia}
 \end{figure}
 
-Cuatro decisiones de ese montaje merecen explicación, porque las tres primeras se
-tomaron tras medir y la cuarta corrige un error.
+Se trabaja en la banda de 5~GHz porque un barrido del sitio encontró 33 redes ajenas
+en la de 2,4~GHz y la parte baja de la de 5~GHz prácticamente vacía, y las tarjetas de
+los agentes admiten las dos bandas. Medido entre los dos agentes, el cambio de banda
+redujo el percentil 95 del tiempo de ida y vuelta de 20,76 a 11,12~ms, prácticamente a
+la mitad: mejora la cola de la distribución, que es lo que la interferencia degrada.
 
-\textbf{Banda de 5~GHz.} Un barrido del sitio encontró 33 redes ajenas en la banda
-de 2,4~GHz y la parte baja de la de 5~GHz prácticamente vacía. Las tarjetas de los
-vehículos admiten las dos bandas, así que se eligió la despejada. Medido entre los
-dos agentes, el cambio de banda redujo el percentil 95 del tiempo de ida y vuelta
-de 20,76 a 11,12~ms, prácticamente a la mitad: lo que mejora es la cola de la
-distribución, que es justo lo que la interferencia degrada.
+Hay un punto de acceso por planta porque la losa entre pisos atenúa la señal, y uno
+solo no cubre las dos plantas con holgura. Los dos trabajan en canales que no se
+solapan, 36 y 44 con 40~MHz de ancho; con 80~MHz un canal centrado en el 36 ocuparía
+hasta el 48 y los dos equipos se estorbarían.
 
-\textbf{Un punto de acceso por planta, en canales separados.} La losa entre pisos
-atenúa la señal, de modo que un solo punto de acceso no cubre las dos plantas con
-holgura. Los dos trabajan en canales que no se solapan, 36 y 44 con 40~MHz de
-ancho; con 80~MHz un canal centrado en el 36 ocuparía hasta el 48 y los dos
-equipos se estorbarían.
+El enlace entre plantas va por cable para no perder la mitad del caudal ni añadir un
+salto inalámbrico a cada mensaje, lo que ocurriría con un repetidor.
 
-\textbf{Enlace entre plantas por cable.} Es la decisión que más problemas evitó.
-Un punto de acceso que repite por aire usa la misma radio para hablar con sus
-clientes y con el resto de la red, lo que reduce a la mitad el caudal disponible y
-añade un salto inalámbrico a cada mensaje. El cable elimina las dos cosas.
+Toda la instalación es una sola subred, con un solo servidor de direcciones, y los
+dos puntos de acceso trabajan en modo puente. El middleware lo exige: dos subredes
+separadas impiden el descubrimiento y el sistema deja de funcionar aunque cada agente,
+por separado, esté conectado.
 
-\textbf{Una sola subred y un solo servidor de direcciones.} Los dos puntos de
-acceso trabajan en modo puente. Es un requisito del middleware, no una
-preferencia: dos subredes separadas impiden el descubrimiento y el sistema deja de
-funcionar aunque cada agente, por separado, esté perfectamente conectado.
-
-\subsection{Tres defectos que ningún mensaje de error delató}
+\subsection{Defectos encontrados al construir la red}
 \label{sec:red-defectos}
 
-La construcción de la red consumió más tiempo del previsto, y la razón tiene un
-patrón común: los tres defectos que aparecieron se manifestaban como
-funcionamiento normal.
+La construcción de la red tomó más tiempo del previsto, porque los tres defectos que
+aparecieron se manifestaban como funcionamiento normal.
 
-\textbf{La radio no podía transmitir en 5~GHz.} A los dos vehículos les faltaba el
-fichero con las reglas de uso del espectro, de modo que el núcleo del sistema
-operativo dejaba las 31 frecuencias de esa banda en modo de solo escucha. El
-efecto era desconcertante: el vehículo \emph{veía} las redes de 5~GHz en el
-barrido, con buena señal, y al intentar conectarse fallaba sin mensaje. Instalado
-el fichero, quedaron disponibles 13 canales.
+A los dos agentes les faltaba el fichero con las reglas de uso del espectro, de modo
+que el núcleo del sistema operativo dejaba las 31 frecuencias de la banda de 5~GHz en
+modo de solo escucha. El agente veía las redes de 5~GHz en el barrido, con buena
+señal, y al intentar conectarse fallaba sin mensaje. Instalado el fichero, quedaron
+disponibles 13 canales.
 
-\textbf{Un lazo en la red duplicaba el tráfico.} Durante una sesión, los mensajes
-llegaban repetidos. La herramienta habitual de diagnóstico informaba
-\emph{cero por ciento de pérdida} y la red parecía sana. Contando los paquetes que
-el núcleo del sistema operativo recibía en el vehículo se vio lo que pasaba: de
-100 peticiones enviadas, el vehículo recibía 147. La causa era un punto de acceso
-conectado a la vez por cable y por radio, que ofrecía dos caminos a los mismos
-mensajes.
+Durante una sesión, un lazo en la red duplicaba el tráfico. La herramienta habitual
+de diagnóstico informaba cero por ciento de pérdida, y al contar los paquetes que el
+núcleo del sistema operativo recibía en el agente se encontró que, de 100 peticiones
+enviadas, recibía 147. La causa era un punto de acceso conectado a la vez por cable y
+por radio, que ofrecía dos caminos a los mismos mensajes.
 
-\textbf{Dos servidores de direcciones a la vez.} Un punto de acceso quedó
+También hubo dos servidores de direcciones a la vez. Un punto de acceso quedó
 repartiendo direcciones de una subred propia mientras el enrutador repartía las
-suyas. Cada equipo recibía dirección de quien respondiera primero, de manera que
-unos quedaban en una subred y otros en otra, al azar. Los agentes dejaban de
-verse sin que nada informara del motivo.
+suyas. Cada equipo recibía dirección de quien respondiera primero, de manera que unos
+quedaban en una subred y otros en otra, al azar, y los agentes dejaban de verse sin
+que nada informara el motivo.
 
-Los tres se encontraron midiendo, no leyendo registros de error, porque ninguno
-produjo uno. Es la misma lección que el trabajo encontró en la odometría: una
-magnitud que no se mide no se puede dar por buena.
+Los tres se encontraron al medir, porque ninguno produjo un registro de error.
 
 \subsection{El descubrimiento y la carga de las tarjetas}
 \label{sec:red-descubrimiento}
 
-El problema de red con mayor efecto sobre el sistema no estuvo en el enlace sino
-en \emph{cuántos} procesos se anunciaban por él.
+El problema de red con mayor efecto sobre el sistema estuvo en cuántos procesos se
+anunciaban por el enlace.
 
 En ROS~2 cada proceso es un participante de la red, y el middleware los pone de
-acuerdo sin que nadie lleve un directorio central: \textbf{cada participante se
-anuncia periódicamente a todos los demás y mantiene el estado de cada uno} ---qué
-publica, qué consume, si sigue vivo---. Ese trabajo no crece con el número de
-participantes sino aproximadamente con su cuadrado, porque cada uno trata con
-cada uno.
+acuerdo sin un directorio central. Cada participante se anuncia periódicamente a todos
+los demás y mantiene el estado de cada uno, es decir, qué publica, qué consume y si
+sigue vivo. Ese trabajo crece aproximadamente con el cuadrado del número de
+participantes, porque cada uno trata con cada uno.
 
-Con un solo agente en marcha había unos veinte participantes y su tarjeta
-trabajaba entre el 52 y el 63~\% de capacidad. Al encender el segundo pasaron a
-ser unos cuarenta, todos anunciándose por la red inalámbrica, y la tarjeta subió
-al 95~\%: Nav2 ya no alcanzaba a arrancar.
+Con un solo agente en marcha había unos veinte participantes y su tarjeta trabajaba
+entre el 52 y el 63~\% de capacidad. Al encender el segundo pasaron a ser unos
+cuarenta, todos anunciándose por la red inalámbrica, y la tarjeta subió al 95~\%, con
+Nav2 sin alcanzar a arrancar.
 
-Lo revelador está en dónde se fue esa capacidad. \textbf{La navegación gastaba
-menos que antes}, no más: hacía exactamente el mismo trabajo. Lo que se disparó
-fueron los procesos que atienden la red, del 7--13~\% al 42~\% de un núcleo, y el
-resto de procesos del sistema, del 3--6~\% al 63~\%. Ninguno hacía más trabajo
-útil con dos agentes que con uno; lo que creció fue el número de interlocutores
-con los que cada uno negociaba.
+La navegación gastaba menos que antes, con el mismo trabajo. Lo que subió fueron los
+procesos que atienden la red, del 7--13~\% al 42~\% de un núcleo, y el resto de
+procesos del sistema, del 3--6~\% al 63~\%. Ningún proceso hacía más trabajo útil con
+dos agentes que con uno; creció el número de interlocutores con los que cada uno
+negociaba.
 
-Y conviene subrayar qué \emph{no} se saturó. El tráfico inalámbrico de las dos
-cadenas rondaba los 2000 paquetes por segundo, que para un enlace de varios
-cientos de megabits por segundo es una fracción despreciable. \textbf{El enlace iba
-sobrado; lo que no daba abasto era el procesador que atendía esos paquetes.} El
-costo estaba en el número de mensajes y no en su tamaño.
+El enlace no se saturó. El tráfico inalámbrico de las dos cadenas rondaba los 2000
+paquetes por segundo, una fracción despreciable para un enlace de varios cientos de
+megabits por segundo. El costo estaba en el número de mensajes y en el procesador que
+los atendía.
 
 \begin{figure}[H]
   \centering
@@ -979,88 +956,72 @@ costo estaba en el número de mensajes y no en su tamaño.
   \label{fig:red-carga}
 \end{figure}
 
-La solución llegó en tres intentos, y los dos primeros explican la forma del
-tercero.
+La solución llegó en tres intentos. El primero fue restringirlo todo: que cada proceso
+se descubriera solo dentro de su propia tarjeta y que lo necesario desde fuera viajara
+a una lista de pares conocidos, sin difusión. El tráfico inalámbrico de un agente bajó
+de alrededor de 2000 paquetes por segundo a alrededor de 600, pero el coordinador dejó de ver la
+navegación de uno de los agentes. La causa está en el middleware, que con pares
+conocidos solo anuncia los cuatro primeros participantes de cada máquina, y cada agente
+tiene unos quince. El segundo intento devolvió al descubrimiento por red lo que se usa
+desde fuera y dejó local lo interno. No llegó a probarse, porque en esa misma sesión el
+láser de un agente dejó de publicar y el agente perdió la conexión con la red.
 
-El primero fue restringirlo todo: que cada proceso se descubriera solo dentro de
-su propia tarjeta y que lo necesario desde fuera viajara a una lista de pares
-conocidos, sin difusión. Funcionó en lo que buscaba ---el tráfico inalámbrico de
-un agente bajó de unos 2000 paquetes por segundo a unos 600--- pero rompió el
-sistema: el coordinador dejó de ver la navegación de uno de los agentes. La causa
-es una particularidad de la implementación del middleware, que con pares
-conocidos solo anuncia los cuatro primeros participantes de cada máquina mientras
-cada agente tiene unos quince; el resto quedaba invisible. El segundo intento
-devolvió al descubrimiento por red lo que se usa desde fuera y dejó local lo
-interno, pero no llegó a probarse, porque en esa misma sesión el láser de un
-agente dejó de publicar y el vehículo se cayó de la red.
+El tercero es el que quedó, y cambia dónde vive el coordinador en lugar de cómo se
+anuncian los procesos. El coordinador y el grabador pasaron del agente al computador
+portátil, y cada agente tiene a ese portátil como único interlocutor conocido. Los
+procesos internos de cada agente se descubren solo dentro de él, y lo que el
+coordinador necesita, que es la navegación, el estado y la media vuelta, se anuncia
+únicamente al portátil. Los agentes no se descubren entre sí, y eso no cuesta nada,
+porque nunca se comunican directamente sino a través del coordinador.
 
-El tercero es el que quedó, y resuelve el problema cambiando dónde vive el
-coordinador en lugar de cómo se anuncian los procesos. El coordinador y el
-grabador pasaron del vehículo al computador portátil, y cada agente tiene a ese
-portátil como \textbf{único interlocutor conocido}. Los procesos internos de cada
-agente se descubren solo dentro de él, y lo que el coordinador necesita ---la
-navegación, el estado y la media vuelta--- se anuncia únicamente al portátil. Los agentes, en consecuencia, no se descubren entre sí, y esa
-restricción no cuesta nada: refleja en la red algo que la arquitectura ya tenía,
-porque los agentes nunca se comunican directamente sino siempre a través del
-coordinador.
-
-Con ese esquema el sistema completo con los dos agentes volvió a trabajar entre
-el 68 y el 74~\% de la tarjeta, del mismo orden que un agente solo.
-
-Conviene subrayar la conclusión, porque no era previsible: \textbf{el límite del
-sistema no fue el ancho de banda del enlace sino el costo de procesamiento del
-descubrimiento}. El enlace nunca estuvo cerca de saturarse; las tarjetas sí.
+Con ese esquema, el sistema completo con los dos agentes volvió a trabajar entre el 68
+y el 74~\% de la tarjeta, del mismo orden que un agente solo. El límite del sistema
+fue el costo de procesamiento del descubrimiento: el enlace nunca estuvo cerca de
+saturarse, y las tarjetas sí.
 
 \subsection{La red medida}
 \label{sec:red-medida}
 
 El requisito de red exige que los agentes y el coordinador se alcancen con latencia
-acotada. Las cotas ---mediana de 100~ms y percentil 95 de 250~ms para el tiempo de
-ida y vuelta, sin pérdidas--- se fijaron \textbf{antes} de medir, y se derivan de
-la frecuencia a la que cada agente publica su estado: a 2~Hz, el período es de
-500~ms, de modo que una latencia de ida de ese orden desfasaría la información del
-sistema en una muestra entera.
+acotada. Las cotas, una mediana de 100~ms y un percentil 95 de 250~ms para el tiempo de
+ida y vuelta, sin pérdidas, se fijaron antes de medir. Se derivan de la frecuencia a la
+que cada agente publica su estado: a 2~Hz, el período es de 500~ms, de modo que una
+latencia de ida de ese orden desfasaría la información del sistema en una muestra
+entera.
 
-La medida se toma entre los dos agentes, y no contra un tercer equipo, por una
-razón que la propia campaña hizo evidente. Los tiempos medidos desde el computador
-portátil daban promedios de 20 a 24~ms con picos de 140~ms, mientras los agentes
-medían por debajo de 2,2~ms contra el mismo destino: la diferencia era el enlace
-del portátil, que seguía en la banda de 2,4~GHz. Medir desde un equipo que no
-participa en la tarea mide el peor enlace de la cadena.
+La medida se toma entre los dos agentes, y no contra un tercer equipo. Los tiempos
+medidos desde el computador portátil daban promedios de 20 a 24~ms con picos de
+140~ms, mientras los agentes medían por debajo de 2,2~ms contra el mismo destino. La
+diferencia era el enlace del portátil, que seguía en la banda de 2,4~GHz.
 
 \begin{table}[H]
   \centering\small
-  \caption{Comunicación entre los dos agentes. Las dos primeras filas son el
-    instrumento del proyecto, con las cotas inscritas antes de medir, sobre 600
-    mensajes. La tercera corresponde al montaje definitivo y se midió con
-    paquetes de red, no con mensajes del middleware.}
+  \caption{Comunicación entre los dos agentes. Las dos primeras filas son mensajes de
+    ROS~2, 600 por medida, con los dos agentes en la misma sala y las cotas fijadas
+    antes de medir. Las dos últimas son paquetes de red: 8 entre los agentes y 20 por
+    agente contra el enrutador.}
   \label{tab:red-medida}
   \begin{tabular}{@{}llccc@{}}
     \toprule
     \textbf{Configuración} & \textbf{Medida} & \textbf{Mediana} & \textbf{p95} & \textbf{Pérdida} \\ \midrule
     2,4 GHz, un punto de acceso & mensajes de ROS 2 & 7,61 ms & 20,76 ms & 0 \% \\
-    5 GHz, un punto de acceso & mensajes de ROS 2 & \textbf{5,99 ms} & \textbf{11,12 ms} & 0 \% \\
-    5 GHz, uno por planta & paquetes de red & 2,13 y 1,99 ms & --- & 0 \% \\ \bottomrule
+    5 GHz, un punto de acceso & mensajes de ROS 2 & 5,99 ms & 11,12 ms & 0 \% \\
+    5 GHz, dos puntos de acceso & paquetes, entre agentes & 3,75 ms (promedio) & --- & 0 \% \\
+    5 GHz, uno por planta & paquetes, al enrutador & 2,13 y 1,99 ms (promedio) & --- & 0 \% \\ \bottomrule
   \end{tabular}
 \end{table}
 
-La tabla~\ref{tab:red-medida} reúne lo medido. La segunda fila es la que verifica
-el requisito: con el instrumento del proyecto, entre los dos agentes y contra las
-cotas inscritas, la mediana quedó en 5,99~ms y el percentil 95 en 11,12~ms, sin
-pérdidas, lo que deja un margen de más de un orden de magnitud frente al límite
-exigido.
+La tabla~\ref{tab:red-medida} reúne lo medido. La segunda fila verifica el requisito: la
+mediana quedó en 5,99~ms y el percentil 95 en 11,12~ms, sin pérdidas, más de un orden de
+magnitud por debajo del límite.
 
-La tercera fila corresponde al montaje definitivo, con cada agente en el punto de
-acceso de su planta, y se incluye porque es la configuración que el sistema usa de
-verdad. Debe leerse por lo que es: tiempos de ida y vuelta de paquetes de red
-contra el enrutador, sin pérdidas ni duplicados, no una repetición de la medida
-del requisito. \textbf{Esa repetición queda pendiente}, y se señala en las
-limitaciones de la medición.
+La tercera fila es la ida y vuelta entre los dos agentes en el primer montaje con dos
+puntos de acceso, con los dos en la misma planta. La cuarta corresponde al montaje definitivo, con cada
+agente en el punto de acceso de su planta: la ida y vuelta contra el enrutador, sin
+pérdidas ni duplicados.
 
-Con ese margen, la conclusión que importa para el resto del trabajo es que
-\textbf{la red no es el factor que limita el desempeño del sistema}. Los límites
-encontrados están en la plataforma ---la banda muerta de tracción, la odometría
-del láser--- y no en la comunicación entre los agentes.
+Con ese margen, la red no limita el desempeño del sistema. Los límites encontrados
+están en la plataforma: la banda muerta de tracción y la odometría del láser.
 
 \section{Interfaz de interacción con el usuario}
 \label{sec:oe3}

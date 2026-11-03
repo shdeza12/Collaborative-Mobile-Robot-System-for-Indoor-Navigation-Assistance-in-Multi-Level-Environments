@@ -18,9 +18,8 @@ una hora con los jurados.
 | Vie 6 | Sesión, si esa es la fecha. Pendientes de los vehículos, solo después de la sesión (§6). Corte de la semana en la noche (§8) | los dos, si hay sesión o pendientes | Entregable 30, tablero y sitio |
 | Sáb 7 y dom 8 | Fundir la versión recortada y dejar listo el borrador (§3). Sin vehículos | no | Borrador listo para entregarlo el lunes 9 |
 
-El ensayo va un día hábil antes de la sesión. Si la sesión cae el miércoles 4, el ensayo pasa al martes 3, después de la
-reunión. Si un jurado solo puede la semana siguiente, el ensayo se mantiene esta semana y el día de la sesión se repite el
-calentamiento.
+A 3 de noviembre los jurados no han respondido, así que el ensayo no espera: sigue el miércoles 4, y el día de la sesión se
+repite el calentamiento.
 
 ## 1. Reunión con el director (martes 3)
 
@@ -38,12 +37,12 @@ Cierre: respuestas anotadas, y este plan corregido si cambia alguna fecha.
 
 ## 2. Fecha de la sesión con los jurados
 
-1. Pedirle la disponibilidad al jurado que falta.
+1. Insistirles a los dos jurados, que a 3 de noviembre no han respondido.
 2. Cruzarla con la del otro jurado y con las horas sin clases en los pisos 3 y 4. Las pruebas del 16 y el 23 de octubre
    empezaron después de las 17:00.
 3. Confirmarles el día, la hora y el punto de encuentro: piso 4, frente al Salón 403.
 
-Cierre: los dos jurados confirmaron, y el ensayo queda fijado un día hábil antes.
+Cierre: los dos jurados confirmaron.
 
 ## 3. Documento final
 
@@ -61,11 +60,11 @@ Todo está en la sección 3 de [`GUION_SESION_JURADOS.md`](GUION_SESION_JURADOS.
 las cuatro misiones y hacer las pruebas de la tabla. Lleva unas dos horas, con los dos autores y las baterías cargadas la
 noche anterior.
 
-Prueba opcional, si el equipo quiere mostrar lo que ve un vehículo. RViz en vivo no funciona desde el portátil. Humble no
+Desde el 3 de noviembre el ensayo y la sesión incluyen ver en RViz lo que vio un vehículo: se graba en racey la misión 3, se
+trae la grabación al portátil y se reproduce con `herramientas/ver_bag_rviz.sh`, que muestra el mapa, el láser, el plan y la
+pose ([`S30_grabacion_en_rviz.md`](Evidencia/S30_grabacion_en_rviz.md)). En vivo no funciona desde el portátil: Humble no
 decodifica el láser de Jazzy ([`S25_ensayo_laboratorio.md`](Evidencia/S25_ensayo_laboratorio.md)), y desde el 8 de octubre lo
-interno de cada vehículo no sale de él. Lo probado es grabar en el vehículo, traer la grabación y verla en RViz con `herramientas/ver_bag_rviz.sh`, que muestra
-el mapa, el láser, el plan y la pose ([`GUIA_CAMPANA_NAV2_HARDWARE.md`](historial/GUIA_CAMPANA_NAV2_HARDWARE.md), §6.1). En
-simulación sí se ve en vivo, con `herramientas/robot.sh robot1 rviz`.
+interno de cada vehículo no sale de él. En simulación sí se ve en vivo, con `herramientas/robot.sh robot1 rviz`.
 
 Cierre: el de la sección 3.3 del guion.
 

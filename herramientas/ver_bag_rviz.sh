@@ -9,6 +9,21 @@
 #                       solo barridos-, pon el marco del sensor: 'laser'
 #     velocidad         factor de reproduccion, por defecto 1.0
 #
+#     ROBOT=robot2 herramientas/ver_bag_rviz.sh <carpeta_del_bag>
+#                       para un bag con espacio de nombres: la vista lee
+#                       /robot2/map, /robot2/plan, /robot2/amcl_pose y
+#                       /robot2/odom, el marco fijo pasa a ser robot2/map, el
+#                       encuadre muestra el pasillo de los pisos 3 y 4 completo y
+#                       se ocultan las flechas de las transformadas, que cruzan
+#                       la vista por fuera del mapa y parecen un recorrido
+#
+# SE REPRODUCE EN OTRO DOMINIO DE ROS, A PROPOSITO
+# ------------------------------------------------
+# El bag trae /robotN/cmd_vel y /robotN/initialpose. Reproducido en el dominio 0
+# con los vehiculos encendidos, esos mensajes salen a la misma red que el
+# coordinador y los agentes. En el dominio 77 RViz solo ve el bag, y se puede
+# mirar una mision con el sistema en marcha.
+#
 # POR QUE SE MIRA EL BAG Y NO EL VEHICULO EN VIVO
 # -----------------------------------------------
 # Porque en vivo NO funciona, y esta medido. El portatil corre Humble y el
@@ -41,7 +56,7 @@ if [ $# -lt 1 ]; then
 fi
 
 BAG="$(cd "$1" && pwd)"
-MARCO="${2:-map}"
+MARCO="${2:-${ROBOT:+$ROBOT/}map}"
 RITMO="${3:-1.0}"
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 VISTA="$REPO/Robot/aws-deepracer/deepracer_description/rviz/campana_nav2_hardware.rviz"
@@ -63,6 +78,17 @@ if grep -q '^ *version: 9' "$BAG/metadata.yaml"; then
     echo "== el bag es de Jazzy: adaptandolo a Humble en $ADAPTADO =="
     python3 "$REPO/herramientas/adaptar_bag_jazzy.py" "$BAG" -o "$ADAPTADO"
     BAG="$ADAPTADO"
+fi
+
+export ROS_DOMAIN_ID=77
+
+if [ -n "${ROBOT:-}" ]; then
+    VISTA_ROBOT="/tmp/vista_campana_$ROBOT.rviz"
+    sed -e "s#Value: /\(map\|plan\|amcl_pose\|odom\)\$#Value: /$ROBOT/\1#" \
+        -e "s#Fixed Frame: map#Fixed Frame: $ROBOT/map#" \
+        -e "/rviz_default_plugins\/TF/,/Enabled:/ s#Enabled: true#Enabled: false#" \
+        -e "/Current:/,/Angle:/ { s#Scale: 110#Scale: 24#; s#X: 3\$#X: 12.8#; s#Y: 0\$#Y: 1.6# }" "$VISTA" > "$VISTA_ROBOT"
+    VISTA="$VISTA_ROBOT"
 fi
 
 echo "== limpiando reproducciones anteriores =="

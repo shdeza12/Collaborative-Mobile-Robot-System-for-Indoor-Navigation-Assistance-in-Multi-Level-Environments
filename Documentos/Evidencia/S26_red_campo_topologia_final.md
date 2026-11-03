@@ -69,7 +69,11 @@ Conviene dejarlo escrito porque es un error fácil de cometer y conduce a conclu
 red: medir desde el portátil mide el peor enlace de la cadena, no el de los vehículos. Es la misma
 razón por la que RF-15 está definido entre los dos vehículos y no contra un tercero.
 
-## 4. Lo que falta, y cómo se obtiene
+## 4. Lo que no se midió, y cómo se obtendría
+
+**Decisión de los autores, 3 de noviembre: esta medida no se repite.** RF-15 queda verificado con los dos registros en la
+misma sala, y con un vehículo en cada piso quedan las medidas de este informe. Las órdenes de abajo se dejan por si hicieran
+falta.
 
 **RF-15 nunca se repitió en esta topología.** Los dos registros que existen
 —[`S23_RF15_carroA_carroB.json`](registros/S23_RF15_carroA_carroB.json) en 2,4 GHz y

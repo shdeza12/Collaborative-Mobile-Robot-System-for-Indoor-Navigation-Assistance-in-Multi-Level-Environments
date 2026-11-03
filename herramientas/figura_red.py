@@ -95,7 +95,7 @@ def topologia():
     # Lo que la figura tiene que dejar claro de una sola vez.
     caja(ax, 10, 1.5, 80, 7.5, NARANJA_FONDO, NARANJA)
     texto(ax, 50, 6.6, 'Una sola subred y un solo servidor de direcciones', 7, 'bold', TINTA)
-    texto(ax, 50, 3.6, 'Es la condición para que los agentes se descubran entre sí', 6.4)
+    texto(ax, 50, 3.6, 'Es la condición para que cada agente y el portátil se descubran', 6.4)
 
     destino = IMAGENES / 'red_topologia.png'
     fig.savefig(destino, dpi=300)

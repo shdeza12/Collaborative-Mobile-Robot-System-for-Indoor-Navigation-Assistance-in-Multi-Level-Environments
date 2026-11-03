@@ -65,7 +65,7 @@ Lo que más pesó en las tarjetas fue cuántos procesos se anunciaban por la red
 <figcaption>Uso del procesador de la tarjeta según cómo se descubren los procesos.</figcaption>
 </figure>
 
-El requisito de latencia se midió con los dos vehículos en la misma sala. Con uno en cada piso se midió solo la ida y vuelta contra el enrutador, de 2,13 y 1,99 ms, sin pérdidas. [Ver la evidencia](https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/blob/main/Documentos/Evidencia/S26_red_campo_topologia_final.md).
+El requisito de latencia se midió con los dos vehículos en la misma sala, con una mediana de 5,99 ms. Con paquetes de red, entre los dos vehículos en la misma planta, la ida y vuelta fue de 3,75 ms. Con uno en cada piso, contra el enrutador, fue de 2,13 y 1,99 ms, sin pérdidas ni duplicados. [Ver la evidencia](https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/blob/main/Documentos/Evidencia/S26_red_campo_topologia_final.md).
 
 ## Una misión con relevo
 

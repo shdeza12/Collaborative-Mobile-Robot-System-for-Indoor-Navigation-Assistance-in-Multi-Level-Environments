@@ -4,8 +4,8 @@ Objetivo: que los jurados vean funcionar el sistema con los dos vehículos, en u
 
 | | |
 |---|---|
-| Fecha | Semana del 2 al 6 de noviembre de 2026, por acordar con los jurados |
-| Ensayo | Un día hábil antes de la sesión (sección 3) |
+| Fecha | Por acordar. A 3 de noviembre los jurados no han respondido |
+| Ensayo | Miércoles 4 de noviembre, sin esperar la fecha de la sesión (sección 3). Si la sesión cae después, ese día se repite el calentamiento |
 | Sitio | Edificio Catalayud, pisos 3 y 4: deepy en el 3 y racey en el 4 |
 | Horario | Sin clases en esos pisos. Las pruebas de campo del 16 y el 23 de octubre empezaron después de las 17:00 |
 | Equipo | Los dos autores, uno por piso. Se reparten antes del ensayo |
@@ -21,7 +21,7 @@ en la sesión los vehículos no salen de su escalera.
 |---|---|---|---|---|---|
 | 1 | Salón 403 → Salón 303, con relevo | racey guía hasta la escalera. Mientras el usuario baja, deepy va a la escalera del piso 3. El usuario confirma en el teléfono y deepy lo lleva al salón | Un autor | RF-07, RF-28 | Completada en 69,4 s, llegada a 0,483 m |
 | 2 | Salón 301 → Salón 401, con relevo | El mismo relevo de subida | Un jurado | RF-07, RF-28 | Completada en 99,3 s, llegada a 0,079 m |
-| 3 | Salón 403 → Salón 401 | Origen y destino en el mismo piso: un solo vehículo, sin relevo | Un jurado | RF-06 | Completada en 34,6 y 54,3 s, saliendo de la escalera |
+| 3 | Salón 403 → Salón 401 | Origen y destino en el mismo piso: un solo vehículo, sin relevo. Se graba en racey para verla después en RViz | Un jurado | RF-06 | Completada en 34,6 y 54,3 s, saliendo de la escalera |
 | 4 | Salón 401 → Salón 303, cancelada en el segundo tramo | Se pulsa «Cancelar» con deepy en camino al salón. deepy vuelve a su escalera y la misión cierra como cancelada | Un jurado | RF-29 | Cierre a los 81,0 s, deepy a 0,337 m de su escalera |
 
 Si sobra tiempo al final, se corre la misión que pida un jurado, entre los diez destinos del catálogo.
@@ -44,7 +44,8 @@ Si sobra tiempo al final, se corre la misión que pida un jurado, entre los diez
    ([`S27_campana_rf27.md`](Evidencia/S27_campana_rf27.md)).
 6. Durante una misión no se corre nada de ROS en el portátil, ni `ros2 topic` ni `comprobar`: el límite es de cuatro
    procesos (cabecera de `herramientas/coordinador_portatil.sh`). No se usa `grabar`: el registro de cada misión es
-   automático.
+   automático. La grabación de la misión 3 corre en racey, no en el portátil, y RViz se abre entre misiones, en otro
+   dominio de ROS (sección 5).
 7. Entre misiones los vehículos no se tocan, no se reubican y no se les da pose. Si hubo que levantar uno, se
    reinicia su cadena (sección 6).
 8. Entre misiones se revisa la batería de los dos vehículos. Con menos de un tercio, se pasa al plan alternativo.
@@ -92,6 +93,7 @@ Primero el arranque de la sección 4, con su calentamiento, y después:
 | Arranque completo con cronómetro | No se ha cronometrado entero, y la sesión necesita una hora de llegada | La hora de llegada: lo medido más 30 min | [`PLAN_S27.md`](historial/PLAN_S27.md) §2.2 |
 | Las cuatro misiones en orden, con cronómetro | Cada una corrió el 23 de octubre, pero no en esta secuencia. Ese día fallaron 3 de las 8 misiones no canceladas a propósito: una por la red, una por llegar a 0,52 m con tolerancia de 0,50 m y una por la media vuelta, ya corregida | Si una falla dos veces, se cambia por otra que complete y se corrige la sección 1 | [`S28_campo_pagina_cancelacion.md`](Evidencia/S28_campo_pagina_cancelacion.md) |
 | En cada misión, cronómetro desde que el vehículo para hasta que la página muestra el final | El 23 de octubre la página tardó 46,00, 35,66 y 10,47 s en tres misiones, sin causa establecida. Del último movimiento a `COMPLETADA` pasan de 0,01 a 4,66 s | Con más de 5 s, se siguen corriendo misiones hasta que desaparezca, y eso fija cuántas misiones de calentamiento se hacen antes de la sesión | [`S28_campo_pagina_cancelacion.md`](Evidencia/S28_campo_pagina_cancelacion.md), «Retraso de la página frente al coordinador» |
+| Grabar en racey la misión 3 con el nombre `vista_ensayo` y verla en RViz (órdenes de la sección 5) | Se probó con una grabación del 8 de octubre, no grabando con la cadena completa y el coordinador en el portátil, con la tarjeta entre el 68 y el 74 % | Si la misión se completa y la grabación se ve, en la sesión se graba otra. Si estorba a la misión o no se ve, en la sesión no se graba y se muestra `vista_ensayo`, o se quita RViz si tampoco se ve | [`S30_grabacion_en_rviz.md`](Evidencia/S30_grabacion_en_rviz.md) |
 | Salón 403 → Salón 401 con los dos autores caminando detrás de racey, y otra con uno de pie a un lado del pasillo | En la campaña solo estuvieron en el pasillo los dos autores, y la sesión suma a los jurados | Si racey se detiene o la misión falla, los jurados ven las misiones desde un punto fijo, sin caminar detrás | [`REQUISITOS.md`](REQUISITOS.md), RNF-03 |
 | Recargar la página a mitad de una misión con relevo y confirmar el piso desde ella | Por el código, el estado vuelve en 1 s y la confirmación sigue funcionando, pero no se ha visto en campo | Si la confirmación no funciona, la regla 2 pasa a «no recargar; si se pierde la conexión, cancelar desde el portátil» | [`app.js`](../interfaz_web/js/app.js) |
 | Cancelar desde el portátil una misión en curso (orden de la sección 6) | Es la salida con la página recargada. Se probó con robots falsos y en el contenedor, no con los vehículos | Si el vehículo no vuelve a su escalera, se quita de la sección 6 y la salida es parar su cadena | [`S30_segunda_mision_y_cancelacion.md`](Evidencia/S30_segunda_mision_y_cancelacion.md) |
@@ -109,6 +111,7 @@ python3 herramientas/tarjeta_jurado.py --ip 192.168.0.105
 ### 3.3 Cierre del ensayo
 
 - Las cuatro misiones corrieron seguidas, con sus tiempos anotados, y cada fila de la tabla tiene resultado.
+- `vista_ensayo` queda en `~/tesis_evidencia/`, como respaldo de la grabación de la sesión.
 - Lo que cambie se corrige en esta guía el mismo día, y los registros se guardan como en la sección 7.
 - Si el recorrido no se completa, se repite el ensayo antes de la sesión. Si la fecha no da, se mueve la sesión.
 
@@ -231,12 +234,40 @@ Lo que se les dice va entre comillas y usa «agente», la palabra del documento.
 | 0–5 | Recibirlos en el piso 4, frente al Salón 403 | «Son dos agentes, uno por piso, y un servidor central en el portátil que les reparte los tramos. El usuario solo usa la página del teléfono. Por favor caminen detrás del usuario y no se paren delante del agente: las pruebas se hicieron con el pasillo despejado.» |
 | 5–15 | Misión 1, con un autor de usuario. Todos bajan con él | «Mientras el usuario baja, el agente del piso 3 ya va hacia la escalera. Su tramo no arranca hasta que el usuario confirma en el teléfono.» |
 | 15–25 | Misión 2, con un jurado de usuario y el teléfono del equipo. Todos suben con él | «El mismo relevo de subida. La página pregunta según el sentido.» |
-| 25–32 | Misión 3 | «Origen y destino en el mismo piso: un solo agente y ningún relevo, con la misma página.» |
+| 25–32 | Misión 3, grabándola en racey (orden abajo) | «Origen y destino en el mismo piso: un solo agente y ningún relevo, con la misma página.» |
 | 32–42 | Misión 4. El autor del piso 3 dice cuándo pulsar «Cancelar», con deepy a unos metros de su escalera | «El agente vuelve a su escalera antes de que la misión cierre, y queda listo para la siguiente.» |
-| 42–50 | En el portátil, el registro de la última misión (orden abajo) y los clips, si los piden | «Cada misión deja un registro automático con sus tiempos, la llegada y el relevo.» |
+| 42–50 | En el portátil, la misión 3 en RViz, el registro de la última misión y los clips, si los piden (órdenes abajo) | «Esto es lo que vio el agente en la misión 3: el láser en rojo sobre el mapa, el plan en verde y su pose estimada en azul. Se grabó en el agente y se trajo al portátil.» «Cada misión deja además un registro automático con sus tiempos, la llegada y el relevo.» |
 | 50–60 | Preguntas. Si sobra tiempo, la misión que pida un jurado | |
 
 Si un jurado quiere usar su propio teléfono, escanea la tarjeta y se cierra la página en el teléfono del equipo.
+
+La misión 3 en RViz. En el ensayo la carpeta se llama `vista_ensayo`, como en estas órdenes; en la sesión se cambia por
+`vista_sesion` en las tres, porque el grabador no sobrescribe una carpeta que ya existe.
+
+Antes de pedir la misión, desde el portátil. Graba 120 s y termina sola:
+
+```bash
+ssh -t deepracer@192.168.0.104 "sudo -n bash -c 'export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST; [ -f /etc/deepracer-tesis/particion.xml ] && export FASTRTPS_DEFAULT_PROFILES_FILE=/etc/deepracer-tesis/particion.xml; source /opt/ros/jazzy/setup.bash && source /home/deepracer/nav_ws/install/setup.bash && cd ~deepracer && timeout -s INT 120 ros2 bag record -s mcap -o vista_ensayo /rplidar_ros/scan /robot2/odom /tf /tf_static /robot2/plan /robot2/map /robot2/amcl_pose; chown -R deepracer:deepracer ~deepracer/vista_ensayo'"  # ruta fija del vehículo
+```
+
+- Esperado: una línea `Subscribed to topic` por cada tópico. Se pide la misión al verlas.
+- Si falla: la misión se corre igual, sin grabar, y después se muestra `vista_ensayo`.
+
+Después de la misión 4, sin ninguna misión en curso:
+
+```bash
+scp -r deepracer@192.168.0.104:vista_ensayo ~/tesis_evidencia/
+```
+
+```bash
+ROBOT=robot2 herramientas/ver_bag_rviz.sh ~/tesis_evidencia/vista_ensayo
+```
+
+- Esperado: `Global Status: Ok`, el pasillo del piso 4 completo y el láser sobre sus paredes. La grabación corre a
+  velocidad real, así que la misión se ve después de la espera inicial. RViz se cierra con su ventana.
+- Se reproduce en el dominio 77, de modo que no se cruza con los vehículos aunque sigan encendidos: la grabación no lleva
+  `cmd_vel`, y el dominio aísla el resto.
+- Si falla: se sigue con el registro de la misión, sin diagnosticar delante de los jurados.
 
 El registro de la última misión, que solo lee un archivo y no ocupa un proceso ROS:
 
@@ -252,6 +283,7 @@ Preguntas que pueden salir de lo que ven:
 | ¿Y si hay gente en el pasillo? | Las pruebas se hicieron con los pasillos despejados. Esquivar personas en movimiento es trabajo futuro y el paso previo a operar en horario de clases |
 | ¿Por qué hay que confirmar el cambio de piso? | El sistema no observa al usuario en la escalera. Avisa a los 60 s, y sin confirmación la misión falla a los 120 s |
 | ¿La simulación está al nivel de los agentes físicos? | En funciones, sí: el mismo coordinador corre en Gazebo en los pisos 3 y 4, con los mismos mapas y destinos, la misma página, y la media vuelta y la llegada de los agentes. Lo físico no: la odometría real, la banda muerta, el radio de giro y la red. La campaña de 30 misiones se hizo en el edificio Gregorio |
+| ¿Se puede ver en vivo lo que ve el agente? | Con los agentes físicos, no. El láser y las transformadas se quedan dentro de cada agente para no saturar la red, y el portátil corre otra versión de ROS 2, que no decodifica el láser del agente. Por eso se graba en el agente y se reproduce después. En simulación sí se ve en vivo |
 | ¿Por qué tardó la página? (solo si pasa) | Se dice lo medido: el 23 de octubre la página mostró el final entre 10 y 46 s tarde en tres misiones, mientras el agente y el coordinador terminaban a tiempo. La causa no se estableció |
 | ¿Por qué falló esa misión? (solo si pasa) | Se lee el motivo que muestra la página y se repite la misión |
 
@@ -344,15 +376,21 @@ no repetirla.
    ssh deepracer@192.168.0.104 "sudo -n pkill -f '[c]oordinacion/agente'"
    ```
 
-3. Comparar los dos vehículos, solo en el ensayo, que es cuando se copió algo:
+3. Borrar de racey la grabación ya copiada, para que los dos vehículos queden iguales:
+
+   ```bash
+   ssh deepracer@192.168.0.104 "rm -rf vista_ensayo vista_sesion"
+   ```
+
+4. Comparar los dos vehículos, solo en el ensayo, que es cuando se copió algo:
 
    ```bash
    bash herramientas/nivelar_carros.sh
    ```
 
-4. Copiar los registros de ese día de `~/tesis_evidencia/registros/` a `Documentos/Evidencia/campo_AAAAMMDD/registros/`,
+5. Copiar los registros de ese día de `~/tesis_evidencia/registros/` a `Documentos/Evidencia/campo_AAAAMMDD/registros/`,
    junto con el registro del coordinador.
-5. Escribir la evidencia con su fila en [`Evidencia/README.md`](Evidencia/README.md): misiones, tiempos, retraso de la
+6. Escribir la evidencia con su fila en [`Evidencia/README.md`](Evidencia/README.md): misiones, tiempos, retraso de la
    página e incidencias.
 
 Cierre: los dos vehículos apagados y con las baterías a cargar, y la evidencia escrita el mismo día.

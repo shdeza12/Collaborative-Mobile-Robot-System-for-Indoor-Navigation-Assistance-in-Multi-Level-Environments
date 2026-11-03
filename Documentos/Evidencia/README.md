@@ -402,6 +402,8 @@ que el propio documento sostiene:
 - [`S30_gazebo_piso3.png`](S30_gazebo_piso3.png) — El mundo del piso 3 en Gazebo, con robot1 en su salida
 - [`S30_gazebo_piso4.png`](S30_gazebo_piso4.png) — El mundo del piso 4 en Gazebo, con robot2 en su salida
 - [`logs/S30_simulacion_catalayud.txt`](logs/S30_simulacion_catalayud.txt) — Extractos del registro del coordinador de esa sesión
+- [`S30_grabacion_en_rviz.md`](S30_grabacion_en_rviz.md) — Una grabación real de deepy vista en RViz en el portátil, en un dominio de ROS aparte, para mostrar lo que ve un vehículo en la sesión con los jurados (3 de noviembre)
+- [`S30_grabacion_en_rviz.png`](S30_grabacion_en_rviz.png) — La ventana de RViz en esa reproducción
 
 ---
 

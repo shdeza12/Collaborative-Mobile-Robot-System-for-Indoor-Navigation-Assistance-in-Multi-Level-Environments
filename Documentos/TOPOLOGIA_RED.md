@@ -165,9 +165,10 @@ funcionando, está enlazando por aire y hay que forzar el cableado.
 
 ### Paso 8 · Medir en el sitio real
 
-Con cada vehículo en su piso, `medir_latencia_red.py` entre los dos. **Esa medida es la que vale**
-para RF-15 en el documento; la del 5 de octubre se tomó con los dos en el mismo punto de acceso y en
-la misma sala, y solo sirve de línea base.
+Con cada vehículo en su piso, `medir_latencia_red.py` entre los dos. No se hizo, y por decisión de
+los autores del 3 de noviembre no se repite: RF-15 queda con la medida del 5 de octubre, con los dos
+en el mismo punto de acceso y en la misma sala, y con uno en cada piso quedan las medidas de
+[`S26_red_campo_topologia_final.md`](Evidencia/S26_red_campo_topologia_final.md).
 
 ## 3.bis · Lo hecho el 2026-10-07, y lo que queda para el laboratorio
 
@@ -209,7 +210,9 @@ dos, y la ambigüedad de `deepracer.local` está resuelta porque los nombres de 
 **Lo que cierra la tarea §2.4 del plan:**
 
 9. **RF-15 con un vehículo en cada piso**, con el cable puesto. La medida de hoy —3,75 ms de
-   promedio— se tomó con los dos en la misma planta.
+   promedio— se tomó con los dos en la misma planta. **No se repite, por decisión de los autores del
+   3 de noviembre:** con uno en cada piso quedan las medidas de
+   [`S26_red_campo_topologia_final.md`](Evidencia/S26_red_campo_topologia_final.md).
 
 ### Y una comprobación de seguridad que sigue pendiente
 
