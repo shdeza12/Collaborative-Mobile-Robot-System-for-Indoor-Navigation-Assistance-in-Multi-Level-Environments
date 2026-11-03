@@ -3,7 +3,7 @@
 Una sola palabra para cada cosa en todo lo que leen o escuchan personas ajenas al equipo: el documento final, la
 presentación y su guion, el sitio, el README y lo que se les dice a los jurados.
 
-Decisiones de los autores: «agente», el 27 de octubre de 2026; «el usuario» y «piso», el 3 de noviembre. Las definiciones
+Decisiones de los autores: «agente», el 27 de octubre de 2026; «el usuario» y «piso», el 3 de noviembre. Se dice «piso» porque así lo nombra el título del proyecto. Las definiciones
 están en el [glosario del documento](DocumentoFinal/capitulos/03-glosario-abreviaturas.tex).
 
 ## Los términos
