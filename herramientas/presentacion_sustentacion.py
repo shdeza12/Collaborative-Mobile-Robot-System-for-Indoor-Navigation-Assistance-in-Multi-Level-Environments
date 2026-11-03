@@ -15,6 +15,7 @@ Uso, desde la raíz del repositorio:
     python3 herramientas/presentacion_sustentacion.py
 """
 import math
+import sys
 from pathlib import Path
 
 from lxml import etree
@@ -33,6 +34,10 @@ RAIZ = Path(__file__).resolve().parent.parent
 REC = RAIZ / 'Documentos/Presentacion/plantilla'
 FIG = RAIZ / 'Documentos/DocumentoFinal/imagenes'
 SALIDA = RAIZ / 'Documentos/Presentacion/Presustentacion.pptx'
+
+# --sin-clips arma la presentacion sin los videos, para revisarla cuando no se tienen a mano.
+# El .pptx que resulta NO sirve para presentar: le faltan los clips.
+SIN_CLIPS = '--sin-clips' in sys.argv
 CLIPS = RAIZ / 'VIDEOS/editado/clips'  # no se versiona: los clips van dentro del .pptx
 
 # Colores medidos sobre el PDF de la plantilla
@@ -639,7 +644,7 @@ def desarrollo(m):
         '0,40 m/s, lo que fija la tolerancia de llegada en 0,5 m. El rumbo del láser derivaba hasta '
         '5,9° por minuto, y con la unidad inercial bajó a 0,3° por minuto o menos. Y en pasillos de '
         '2,5 a 3,2 m la media vuelta de Nav2 abortó contra la pared, por lo que se escribió una '
-        'maniobra propia. La red usa un punto de acceso de 5 GHz por piso.'))
+        'maniobra propia.'))
     bx, by, bw, bh = imagen(s, REC / 'foto_agente.jpg', 66, 106, w=285)
     fuente(s, bx, by + bh + 2, bw, 'Agente del piso 4, 16 de octubre. Fuente: Elaboración propia')
     texto(s, 66, 337, 290, 22, 'Componentes de cada agente', tam=14, negrita=True,
@@ -666,9 +671,42 @@ def desarrollo(m):
               radio=0.1, parrafos=[{'t': cab, 'negrita': True, 'tam': 13.5, 'color': AZUL_TITULO,
                                     'despues': 4}, {'t': cuerpo}], tam=12, anclaje='t',
               margen=(9, 7, 7, 5))
-    texto(s, 372, 384, 380, 60, 'Red: un punto de acceso de 5 GHz por piso; tiempo de ida y vuelta '
-          'entre los agentes de 5,99 ms de mediana, frente al límite de 100 ms', tam=12.5,
-          color=GRIS)
+
+    s = m.contenido('La red que comunica a los agentes', (
+        'Tiempo: 50 s. Que dos agentes se repartan un recorrido descansa en que puedan comunicarse, '
+        'así que la red es la condición del relevo y no un detalle de montaje. Se montó una red '
+        'propia porque la de la universidad aísla a sus clientes entre sí: los agentes no podrían '
+        'verse. Hay un punto de acceso por planta, en 5 GHz y en canales que no se solapan, unidos '
+        'al enrutador por cable; no son repetidores, que perderían la mitad del caudal. El problema '
+        'de mayor efecto no fue el enlace sino el descubrimiento: en ROS 2 cada proceso se anuncia a '
+        'todos los demás, y al encender el segundo agente los participantes pasaron de veinte a '
+        'cuarenta y la tarjeta se fue al 95 %, sin alcanzar a arrancar Nav2. El tráfico eran 2000 '
+        'paquetes por segundo, despreciable para el enlace: lo que no daba abasto era el procesador. '
+        'La solución fue mover el coordinador al portátil y que cada agente lo tenga como único '
+        'interlocutor. Medida entre los dos agentes, la mediana fue de 5,99 ms contra un límite de '
+        '100 ms.'))
+    bx, by, bw, bh = imagen(s, FIG / 'red_topologia.png', 58, 104, w=392)
+    fuente(s, bx, by + bh + 3, bw)
+    tarjetas = [
+        ('Por qué una red propia', 'La red de la universidad aísla a sus clientes entre sí: los '
+         'agentes no podrían verse. Y el sistema funciona sin salida a internet'),
+        ('Un punto de acceso por planta', 'En 5 GHz, en canales que no se solapan y unidos al '
+         'enrutador por cable. No son repetidores: estos perderían la mitad del caudal'),
+        ('El límite no fue el enlace', 'Con las dos cadenas anunciándose, la tarjeta pasó del '
+         '52–63 % al 95 % y Nav2 no arrancaba. El enlace iba sobrado'),
+        ('Coordinador en el portátil', 'Cada agente lo tiene como único interlocutor. Con eso el '
+         'sistema completo volvió al 68–74 % de la tarjeta'),
+    ]
+    for i, (cab, cuerpo) in enumerate(tarjetas):
+        x, y = 470 + (i % 2) * 222, 104 + (i // 2) * 132
+        forma(s, MSO_SHAPE.ROUNDED_RECTANGLE, x, y, 212, 122, relleno=BLANCO, borde=AZUL_CLARO,
+              radio=0.1, parrafos=[{'t': cab, 'negrita': True, 'tam': 13, 'color': AZUL_TITULO,
+                                    'despues': 4}, {'t': cuerpo}], tam=11.5, anclaje='t',
+              margen=(9, 7, 7, 5))
+    # Ancho acotado a 368: mas alla, la ultima linea se mete bajo el adorno diagonal.
+    texto(s, 470, 362, 368, 68, 'Entre los dos agentes: mediana de 5,99 ms y percentil 95 de '
+          '11,12 ms, sin pérdidas, frente a cotas de 100 y 250 ms fijadas antes de medir',
+          tam=12.5, color=GRIS)
 
     s = m.contenido('Interfaz de interacción', (
         'Tiempo: 45 s. El objetivo pedía una interfaz móvil, y se construyó una página web que sirve '
@@ -806,12 +844,23 @@ def grafico_odometria(s, x, y, w, h):
 def clip(m, titulo, archivo, poster, pie, notas):
     """Una diapositiva con un clip incrustado: se reproduce con un clic y no depende de internet."""
     ruta = CLIPS / archivo
-    if not ruta.exists():
-        raise SystemExit(f'Falta {ruta}: los clips se generan con Remotion y no se versionan.')
     s = m.contenido(titulo, notas)
     x, y, w, h = 89, 104, 690, 388
-    s.shapes.add_movie(str(ruta), Pt(x), Pt(y), Pt(w), Pt(h), poster_frame_image=str(REC / poster),
-                       mime_type='video/mp4')
+    if ruta.exists():
+        s.shapes.add_movie(str(ruta), Pt(x), Pt(y), Pt(w), Pt(h),
+                           poster_frame_image=str(REC / poster), mime_type='video/mp4')
+    elif SIN_CLIPS:
+        # Vista previa sin los videos: se deja el cuadro del poster y un aviso visible, para
+        # poder revisar el resto de la presentacion sin tener los clips a mano.
+        imagen(s, REC / poster, x, y, w=w)
+        forma(s, MSO_SHAPE.ROUNDED_RECTANGLE, x + w / 2 - 150, y + h / 2 - 22, 300, 44,
+              relleno=NARANJA, borde=NARANJA_BORDE, radio=0.12,
+              parrafos=[{'t': 'VISTA PREVIA: falta el clip', 'negrita': True, 'alin': 'c'}],
+              tam=13, anclaje='m')
+    else:
+        raise SystemExit(f'Falta {ruta}: los clips se generan con Remotion y no se versionan.\n'
+                         f'Para revisar la presentacion sin ellos: '
+                         f'python3 {Path(__file__).name} --sin-clips')
     fuente(s, x, y + h + 1, w, pie)
     return s
 
