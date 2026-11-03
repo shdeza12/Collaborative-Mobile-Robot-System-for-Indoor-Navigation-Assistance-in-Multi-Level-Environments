@@ -979,14 +979,33 @@ costo estaba en el número de mensajes y no en su tamaño.
   \label{fig:red-carga}
 \end{figure}
 
-La solución fue dejar de anunciar todo a todos. Los procesos internos de cada
-vehículo se descubren solo dentro de él, y lo que el coordinador necesita ---la
-navegación, el estado y la media vuelta--- se anuncia únicamente al computador
-portátil. Los agentes no se descubren entre sí, lo que es coherente con el diseño:
-nunca se comunican directamente, siempre a través del coordinador. Con ese
-esquema, el tráfico inalámbrico de un agente bajó de unos 2000 paquetes por
-segundo a unos 600, y el sistema completo con los dos agentes volvió a entre el
-68 y el 74~\% de la tarjeta, del mismo orden que un agente solo.
+La solución llegó en tres intentos, y los dos primeros explican la forma del
+tercero.
+
+El primero fue restringirlo todo: que cada proceso se descubriera solo dentro de
+su propia tarjeta y que lo necesario desde fuera viajara a una lista de pares
+conocidos, sin difusión. Funcionó en lo que buscaba ---el tráfico inalámbrico de
+un agente bajó de unos 2000 paquetes por segundo a unos 600--- pero rompió el
+sistema: el coordinador dejó de ver la navegación de uno de los agentes. La causa
+es una particularidad de la implementación del middleware, que con pares
+conocidos solo anuncia los cuatro primeros participantes de cada máquina mientras
+cada agente tiene unos quince; el resto quedaba invisible. El segundo intento
+devolvió al descubrimiento por red lo que se usa desde fuera y dejó local lo
+interno, pero no llegó a probarse, porque en esa misma sesión el láser de un
+agente dejó de publicar y el vehículo se cayó de la red.
+
+El tercero es el que quedó, y resuelve el problema cambiando dónde vive el
+coordinador en lugar de cómo se anuncian los procesos. El coordinador y el
+grabador pasaron del vehículo al computador portátil, y cada agente tiene a ese
+portátil como \textbf{único interlocutor conocido}. Los procesos internos de cada
+agente se descubren solo dentro de él, y lo que el coordinador necesita ---la
+navegación, el estado y la media vuelta--- se anuncia únicamente al portátil. Los agentes, en consecuencia, no se descubren entre sí, y esa
+restricción no cuesta nada: refleja en la red algo que la arquitectura ya tenía,
+porque los agentes nunca se comunican directamente sino siempre a través del
+coordinador.
+
+Con ese esquema el sistema completo con los dos agentes volvió a trabajar entre
+el 68 y el 74~\% de la tarjeta, del mismo orden que un agente solo.
 
 Conviene subrayar la conclusión, porque no era previsible: \textbf{el límite del
 sistema no fue el ancho de banda del enlace sino el costo de procesamiento del

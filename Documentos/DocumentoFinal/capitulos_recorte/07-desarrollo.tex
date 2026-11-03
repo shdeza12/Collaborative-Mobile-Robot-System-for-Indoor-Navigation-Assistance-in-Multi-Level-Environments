@@ -611,10 +611,14 @@ y el 63~\% de capacidad; al encender el segundo pasaron a ser unos cuarenta y la
 tarjeta subió al 95~\%, con Nav2 sin alcanzar a arrancar. El tráfico rondaba los
 2000 paquetes por segundo, una fracción despreciable del enlace: \textbf{lo que
 no daba abasto era el procesador que atendía esos paquetes, no el enlace}. El aumento no estaba en la navegación,
-que gastaba menos, sino en los procesos que atienden la red. La respuesta fue la
-topología en estrella: los procesos de cada agente se descubren solo dentro de él
-y lo que el coordinador necesita se anuncia únicamente al portátil, de modo que
-los agentes no se ven entre sí ---coherente con el diseño, porque nunca se
+que gastaba menos, sino en los procesos que atienden la red. La respuesta llegó en tres intentos.
+Restringirlo todo al interior de cada tarjeta bajó el tráfico pero dejó al
+coordinador sin ver la navegación de un agente, porque el middleware, con pares
+conocidos, solo anuncia los primeros participantes de cada máquina; un segundo
+intento intermedio no llegó a probarse. El que quedó cambia dónde vive el
+coordinador en vez de cómo se anuncian los procesos: el coordinador y el grabador
+pasaron al portátil, y cada agente lo tiene como único interlocutor conocido, de
+modo que los agentes no se ven entre sí ---coherente con el diseño, porque nunca se
 comunican directamente---. Con ese esquema el sistema completo volvió a entre el
 68 y el 74~\% de la tarjeta. \textbf{El límite no fue el ancho de banda del
 enlace sino el costo de procesamiento del descubrimiento.}
