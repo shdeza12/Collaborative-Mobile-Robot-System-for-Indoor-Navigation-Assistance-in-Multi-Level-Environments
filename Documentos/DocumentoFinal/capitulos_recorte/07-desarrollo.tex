@@ -684,9 +684,10 @@ cinco pasos (preparando, tramo 1, relevo, tramo 2 y fin) marca el paso actual (f
 
 \begin{figure}[!htbp]
   \centering
-  \includegraphics[height=8.4cm]{imagenes/hri_seguimiento.png}\hspace{0.04\textwidth}%
-  \includegraphics[height=8.4cm]{imagenes/hri_confirmacion_piso.png}
-  \caption{Interfaz web. A la izquierda, durante una misión en simulación: el destino elegido, el botón de cancelar y el panel de estado del primer tramo, con el texto del coordinador, el agente activo y la distancia restante. A la derecha, en la etapa de espera de confirmación, durante su prueba automática: el estado lo publica la prueba, con el texto «Prueba de etapa 7», y la página muestra el botón «Ya estoy en el otro piso», de la versión anterior a los ajustes que siguieron a las pruebas con los agentes físicos.}
+  \begin{minipage}[t]{0.31\textwidth}\vspace{0pt}\includegraphics[width=\linewidth]{imagenes/hri_seguimiento.png}\end{minipage}\hfill
+  \begin{minipage}[t]{0.31\textwidth}\vspace{0pt}\includegraphics[width=\linewidth]{imagenes/hri_confirmacion_piso.png}\end{minipage}\hfill
+  \begin{minipage}[t]{0.31\textwidth}\vspace{0pt}\includegraphics[width=\linewidth]{imagenes/hri_confirmacion_subida.png}\end{minipage}
+  \caption{Interfaz web en el teléfono, durante las pruebas del 23 de octubre con los agentes físicos (anexo A, video 8). A la izquierda, el primer tramo de una misión de bajada, con el texto del coordinador, el agente activo y la distancia restante. Al centro y a la derecha, la espera de confirmación en una misión de bajada y en una de subida: el título y el botón dicen el sentido y el piso.}
   \label{fig:hri}
 \end{figure}
 
@@ -703,7 +704,7 @@ usuario, pero no puede saber si la persona ya subió. Sin una pausa explícita, 
 misión podía darse por completada con el usuario todavía en el piso equivocado, y
 la instrumentación lo habría registrado como éxito. Por eso, cuando el segundo
 agente llega a su punto de transferencia, el coordinador pasa a la etapa de espera de confirmación. La página muestra entonces un botón para confirmar el cambio de
-piso, que solo existe en esa etapa (figura~\ref{fig:hri}, derecha). A los 60~s sin
+piso, que solo existe en esa etapa (figura~\ref{fig:hri}, centro y derecha). A los 60~s sin
 confirmación aparece un aviso, y a los 120~s la misión termina como fallida. Los
 plazos se cuentan desde que llega el agente, para que un agente lento no le
 consuma tiempo al usuario, y se miden con el reloj del sistema y no con el de la
@@ -741,7 +742,7 @@ medias vueltas, y después ninguna de diez.
 Las pruebas con los agentes físicos mostraron tres defectos de la página. El título de
 la etapa de confirmación preguntaba siempre «¿Ya subió?», lo que al subir
 resultaba brusco y al bajar del piso 4 al 3 era falso. Ahora sale de comparar el
-piso de origen con el del agente que espera, como «Suba con calma al piso 4» o «Baje con calma al piso 3». El botón dice «Ya estoy en el piso 4», o el piso que
+piso de origen con el del agente que espera, como «Suba con calma al piso 4» o «Baje con calma al piso 3» (figura~\ref{fig:hri}). El botón dice «Ya estoy en el piso 4», o el piso que
 corresponda.
 
 Ese cambio se hizo el día de la campaña, antes de correrla, y aun así los

@@ -79,3 +79,14 @@ cifras están en `S28_campo_pagina_cancelacion.md`.
 5. El clip `175409` empieza 5,3 s antes que la grabación `WA0011`, así que esos primeros segundos de la pantalla van en
    negro, antes de la solicitud de la misión 3. Un primer montaje adelantaba esa pantalla 5,3 s; se detectó al revisar
    cuadros y se corrigió antes de publicar.
+
+## Cuadros para el documento
+
+Las capturas de la interfaz del documento final, de la presentación y del sitio son cuadros de estas grabaciones de pantalla,
+recortados para quitar la barra del teléfono y la del navegador (3 de noviembre).
+
+| Archivo en `DocumentoFinal/imagenes/` | Grabación | Segundo | Misión y etapa |
+|---|---|---|---|
+| `hri_seguimiento.png` | `VID-20261027-WA0010.mp4` | 35 | Salón 403 → Salón 303, primer tramo |
+| `hri_confirmacion_piso.png` | `VID-20261027-WA0010.mp4` | 55 | Salón 403 → Salón 303, espera de confirmación |
+| `hri_confirmacion_subida.png` | `VID-20261027-WA0009.mp4` | 60 | Salón 301 → Salón 401, espera de confirmación |

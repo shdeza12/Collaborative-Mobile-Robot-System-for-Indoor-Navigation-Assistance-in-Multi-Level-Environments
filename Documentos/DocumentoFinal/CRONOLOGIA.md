@@ -405,5 +405,8 @@ Fuente: Entregable S29; `Evidencia/S29_video_pagina_cancelacion.md`; `Evidencia/
   de su montaje y de la carga de las tarjetas. Las medidas del 9 de octubre en campo quedaron en la evidencia. El requisito de
   latencia no se repitió con un agente en cada piso, y el documento lo declara. El documento queda en 99 páginas y el
   recortado, en 79.
+- 3 de noviembre: las figuras de la interfaz en el documento, la presentación y el sitio pasaron a ser cuadros de las pruebas
+  del 23 de octubre, con el mensaje de confirmación según el sentido: «Baje con calma al piso 3» y «Suba con calma al piso 4».
+- 3 de noviembre: la presentación ganó una diapositiva sobre la red y queda en 42 diapositivas y 19 min 20 s.
 
 Fuente: `Evidencia/S30_simulacion_catalayud.md`; `Evidencia/S30_segunda_mision_y_cancelacion.md`; `Evidencia/S26_red_campo_topologia_final.md`; `GUION_SESION_JURADOS.md`.

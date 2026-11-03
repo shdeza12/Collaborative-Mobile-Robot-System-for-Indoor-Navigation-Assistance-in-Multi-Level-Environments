@@ -30,7 +30,7 @@ Objetivo: salir con fechas y con la versión del documento decidida.
 |---|---|---|
 | Versión del documento | ¿La versión recortada, de 79 páginas, es la que se entrega? Pidió entre 60 y 80 | Sí, y se funde como versión vigente |
 | Borrador | ¿Cuándo quiere recibir el borrador completo, antes de la entrega del 13? | Lunes 9 de noviembre |
-| Presustentación | ¿Qué día, a qué hora y en qué sala? ¿Cuánto debe durar? ¿La sala tiene PowerPoint? | 18 min 30 s, sin demostración, con dos clips |
+| Presustentación | ¿Qué día, a qué hora y en qué sala? ¿Cuánto debe durar? ¿La sala tiene PowerPoint? | 19 min 20 s, sin demostración, con dos clips |
 | Sesión con los jurados | ¿Asiste? ¿Hace falta avisar o pedir permiso para usar los pisos 3 y 4 de Catalayud? | Una hora, sin clases en esos pisos |
 | Contenido | ¿Tiene observaciones sobre el documento? | Se incorporan esta semana |
 
@@ -99,7 +99,7 @@ Las rutas en comentarios de siete archivos se copian antes, al empezar el ensayo
 
 1. Entregable 30, en `.md` y `.tex`, con la reunión, el ensayo y la sesión si ya ocurrieron.
 2. [`ESTADO.md`](../ESTADO.md): semana en curso, fecha de corte y pendientes 1 y 2. Las autoridades las ponen los autores, y la
-   presentación tiene 41 diapositivas y 18 min 30 s.
+   presentación tiene 42 diapositivas y 19 min 20 s.
 3. Cronología y sitio: `python3 sitio/generar_semanas.py`, restaurar `s21_1.jpg` y `s27_1.jpg`, y publicar.
 
 Cierre: verificador en 13 de 13 con todo preparado para el commit, y la página de la semana 30 con sus conclusiones publicada.

@@ -717,16 +717,17 @@ def desarrollo(m):
         'darse por completada con la persona en el piso equivocado; la cancelación devuelve al agente '
         'a su escalera.'))
     x1, y1, w1, h1 = imagen(s, FIG / 'hri_seguimiento.png', 66, 106, h=330)
-    x2, y2, w2, h2 = imagen(s, FIG / 'hri_confirmacion_piso.png', x1 + w1 + 12, 106, h=330)
-    fuente(s, 66, 440, x2 + w2 - 66, 'Izquierda: seguimiento de una misión en simulación. Derecha: '
-           'espera de la confirmación de cambio de piso. Fuente: Elaboración propia')
+    x2, y2, w2, h2 = imagen(s, FIG / 'hri_confirmacion_piso.png', x1 + w1 + 8, 106, h=330)
+    x3, y3, w3, h3 = imagen(s, FIG / 'hri_confirmacion_subida.png', x2 + w2 + 8, 106, h=330)
+    fuente(s, 66, 440, x3 + w3 - 66, 'Pruebas del 23 de octubre. Izquierda: seguimiento de una misión. Centro y '
+           'derecha: confirmación al bajar y al subir. Fuente: Elaboración propia')
     vin = ['Página web servida por el portátil: cualquier teléfono, sin instalar nada y sin '
            'internet',
            'El usuario elige origen y destino, y sigue la misión con el texto del coordinador',
            'Confirmación de cambio de piso: aviso a los 60 s y misión fallida a los 120 s',
            'Cancelación: el agente vuelve a su escalera; en seis pruebas quedó a entre 0,07 y '
            '0,34 m de su punto']
-    texto(s, x2 + w2 + 18, 112, 850 - (x2 + w2 + 18), 240,
+    texto(s, x3 + w3 + 18, 112, 850 - (x3 + w3 + 18), 240,
           [{'t': v, 'vineta': True, 'despues': 9} for v in vin], tam=13)
 
     s = m.contenido('Protocolo experimental', (

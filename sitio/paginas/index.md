@@ -19,7 +19,7 @@ hide:
 </div>
 
 <figure markdown>
-![La página del teléfono durante una misión: el robot guía al usuario y la página muestra el paso en que va](img/interfaz_seguimiento.png){ width="380" }
+![La página del teléfono durante una misión: el robot guía al usuario y la página muestra el paso en que va](img/interfaz_seguimiento.png){ width="300" }
 <figcaption>La página del teléfono durante una misión.</figcaption>
 </figure>
 </div>

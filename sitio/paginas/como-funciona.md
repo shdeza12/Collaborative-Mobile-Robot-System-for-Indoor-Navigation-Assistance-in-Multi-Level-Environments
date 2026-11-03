@@ -117,15 +117,25 @@ Cada piso tiene un robot asignado, y esa correspondencia es configuración, no c
 
 Es una página web, no una aplicación: un visitante ocasional no va a instalar nada para preguntar por un salón. No usa bibliotecas externas, porque la red del edificio puede no tener internet.
 
-<div class="dos-graficas" markdown>
+<div class="galeria" markdown>
+
 <figure markdown>
-![La página durante el guiado](img/interfaz_seguimiento.png){ width="320" }
+![La página durante el guiado, con el título «Sígueme»](img/interfaz_seguimiento.png)
 <figcaption>Durante el guiado: el robot activo, hacia dónde va, la distancia y el paso de la misión.</figcaption>
 </figure>
+
 <figure markdown>
-![La página esperando la confirmación del cambio de piso](img/interfaz_confirmacion.png){ width="320" }
-<figcaption>En el relevo: la página pide confirmar el cambio de piso. Si pasan 60 s avisa, y a los 120 s la misión falla.</figcaption>
+![La página en el relevo de una misión de bajada, con el título «Baje con calma al piso 3»](img/interfaz_confirmacion.png)
+<figcaption>En el relevo de bajada, la página pide confirmar la llegada al piso 3.</figcaption>
 </figure>
+
+<figure markdown>
+![La página en el relevo de una misión de subida, con el título «Suba con calma al piso 4»](img/interfaz_confirmacion_subida.png)
+<figcaption>En el de subida, al piso 4. Si pasan 60 s avisa, y a los 120 s la misión falla.</figcaption>
+</figure>
+
 </div>
+
+Las tres capturas son de las pruebas del 23 de octubre con los dos vehículos.
 
 Dos funciones se añadieron al ver el sistema en uso, a pedido del director: la **confirmación del cambio de piso**, para que la misión no se dé por completada con la persona todavía en el piso equivocado, y la **cancelación**, que devuelve el robot activo a su escalera.
