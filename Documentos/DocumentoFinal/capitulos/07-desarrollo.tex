@@ -116,8 +116,8 @@ simulador del curso F1TENTH \autocite{okelly2019f1tenth} y Gazebo
 y con su sistema de control de articulaciones.
 
 La decisión sobre el vehículo se tomó en dos pasos. Primero se resolvió conservar
-un chasis con dirección tipo automóvil. Como cada robot atiende un piso y la
-persona cambia de nivel por la escalera, el vehículo no tiene que entrar a un
+un chasis con dirección tipo automóvil. Como cada robot atiende un piso y el
+usuario cambia de nivel por la escalera, el vehículo no tiene que entrar a un
 ascensor ni subir escalones. La vuelta dentro del pasillo se podía dejar a un
 planificador para automóviles, capaz de maniobrar en varios tiempos.
 Una semana después, por la falta de un modelo de simulación, se cambió al
@@ -194,7 +194,7 @@ comportamiento reactivo no anticipa las restricciones de un vehículo tipo
 automóvil en un pasillo estrecho, y el proyecto pasó a la navegación con un mapa
 y un planificador que conoce esas restricciones.
 
-Después se modeló la primera planta del edificio de pruebas, un pasillo de unos
+Después se modeló el primer piso del edificio de pruebas, un pasillo de unos
 44 por 5~m con las puertas de los salones abiertas. En ella se comprobaron, con el
 vehículo conducido a distancia, el láser, la cámara, la odometría y el árbol de
 transformaciones. La cámara quedó disponible y el sistema final no la usa.
@@ -433,7 +433,7 @@ falta un optimizador: con un solo agente admisible por nivel, el método húngar
 devuelve la misma tabla.
 
 El planificador exige un único punto de transferencia por nivel, y falla con un
-mensaje explícito si encuentra dos. Hoy cada planta tiene una escalera y eso se
+mensaje explícito si encuentra dos. Hoy cada piso tiene una escalera y eso se
 cumple. La verificación está para que, el día que haya dos, la decisión se tome a
 la vista.
 
@@ -451,8 +451,8 @@ medir.
 Los escenarios con varios pisos se construyeron primero en simulación, en
 Gazebo~11 con ROS~2 Humble, con el modelo del AWS DeepRacer migrado a esa versión
 (sección~\ref{sec:migracion}). El entorno evolucionó en varios pasos. Tras los
-pasillos de prueba y la primera planta del edificio
-(sección~\ref{sec:primeros-entornos}), esa planta se duplicó para obtener dos
+pasillos de prueba y el primer piso del edificio
+(sección~\ref{sec:primeros-entornos}), ese piso se duplicó para obtener dos
 niveles. Más tarde se adoptó un modelo más fiel del
 pasillo, cuyo catálogo llegó a 31 puntos de interés: quince en el piso 1 y
 dieciséis en el piso 2. Por último, ese mundo se partió en uno por piso.
@@ -849,13 +849,13 @@ y lo verificó midiendo (tabla~\ref{tab:red-medida}).
 
 La figura~\ref{fig:red-topologia} muestra el montaje. Un enrutador reparte las
 direcciones de toda la red. De él cuelgan por cable dos puntos de acceso, uno en cada
-planta, y cada agente se conecta al de su piso.
+piso, y cada agente se conecta al de su piso.
 
 Los dos papeles se comportan distinto. El enrutador une dos redes, reparte las
 direcciones y encamina el tráfico entre ellas; en esta instalación hay uno solo. Un
 punto de acceso da acceso inalámbrico a una red que ya existe: ni reparte direcciones
 ni encamina, de modo que sus clientes pertenecen a la red del enrutador. Los dos
-equipos de las plantas trabajan en ese segundo papel.
+equipos de los pisos trabajan en ese segundo papel.
 
 Tampoco son repetidores. Un repetidor enlaza por radio con el resto de la red y usa
 la misma antena para hablar con sus clientes y con ese enlace, lo que reduce el
@@ -879,12 +879,12 @@ los agentes admiten las dos bandas. Medido entre los dos agentes, el cambio de b
 redujo el percentil 95 del tiempo de ida y vuelta de 20,76 a 11,12~ms, prácticamente a
 la mitad: mejora la cola de la distribución, que es lo que la interferencia degrada.
 
-Hay un punto de acceso por planta porque la losa entre pisos atenúa la señal, y uno
-solo no cubre las dos plantas con holgura. Los dos trabajan en canales que no se
+Hay un punto de acceso por piso porque la losa entre pisos atenúa la señal, y uno
+solo no cubre los dos pisos con holgura. Los dos trabajan en canales que no se
 solapan, 36 y 44 con 40~MHz de ancho; con 80~MHz un canal centrado en el 36 ocuparía
 hasta el 48 y los dos equipos se estorbarían.
 
-El enlace entre plantas va por cable para no perder la mitad del caudal ni añadir un
+El enlace entre pisos va por cable para no perder la mitad del caudal ni añadir un
 salto inalámbrico a cada mensaje, lo que ocurriría con un repetidor.
 
 Toda la instalación es una sola subred, con un solo servidor de direcciones, y los
@@ -1007,7 +1007,7 @@ diferencia era el enlace del portátil, que seguía en la banda de 2,4~GHz.
     2,4 GHz, un punto de acceso & mensajes de ROS 2 & 7,61 ms & 20,76 ms & 0 \% \\
     5 GHz, un punto de acceso & mensajes de ROS 2 & 5,99 ms & 11,12 ms & 0 \% \\
     5 GHz, dos puntos de acceso & paquetes, entre agentes & 3,75 ms (promedio) & --- & 0 \% \\
-    5 GHz, uno por planta & paquetes, al enrutador & 2,13 y 1,99 ms (promedio) & --- & 0 \% \\ \bottomrule
+    5 GHz, uno por piso & paquetes, al enrutador & 2,13 y 1,99 ms (promedio) & --- & 0 \% \\ \bottomrule
   \end{tabular}
 \end{table}
 
@@ -1016,8 +1016,8 @@ mediana quedó en 5,99~ms y el percentil 95 en 11,12~ms, sin pérdidas, más de 
 magnitud por debajo del límite.
 
 La tercera fila es la ida y vuelta entre los dos agentes en el primer montaje con dos
-puntos de acceso, con los dos en la misma planta. La cuarta corresponde al montaje definitivo, con cada
-agente en el punto de acceso de su planta: la ida y vuelta contra el enrutador, sin
+puntos de acceso, con los dos en el mismo piso. La cuarta corresponde al montaje definitivo, con cada
+agente en el punto de acceso de su piso: y vuelta contra el enrutador, sin
 pérdidas ni duplicados.
 
 Con ese margen, la red no limita el desempeño del sistema. Los límites encontrados
@@ -1089,7 +1089,7 @@ director.
 \subsection{Confirmación de cambio de piso}
 
 En una misión entre niveles, el segundo vehículo llega a su escalera y espera al
-usuario. Pero el vehículo no puede saber si la persona ya subió. Sin una pausa
+usuario. Pero el vehículo no puede saber si ya subió. Sin una pausa
 explícita, la misión podía declararse completada con el usuario todavía en el
 piso equivocado, y la instrumentación lo habría registrado como éxito.
 

@@ -414,7 +414,10 @@ Fuente: Entregable S29; `Evidencia/S29_video_pagina_cancelacion.md`; `Evidencia/
   páginas y el recortado, en 80.
 - 3 de noviembre: el sitio pasó a usar el título del documento y sus términos: el usuario, los agentes y los agentes físicos. Las
   páginas semanales aplican lo mismo al publicar la cronología, los informes y la evidencia, que quedan como se escribieron.
+- 3 de noviembre: el documento y la presentación quedaron con los mismos términos que el sitio: «el usuario» en lugar de «la
+  persona» y «piso» en lugar de «planta» y «nivel», salvo en los objetivos oficiales y en la métrica que sale de ellos. El
+  glosario define al usuario, y la tabla de términos quedó en el repositorio.
 - 3 de noviembre: el ensayo y la sesión con los jurados incluyen ver en RViz la misión 3 grabada en racey. El visor se probó con
   una grabación de deepy del 8 de octubre; grabar con la cadena completa queda para el ensayo.
 
-Fuente: `Evidencia/S30_simulacion_catalayud.md`; `Evidencia/S30_segunda_mision_y_cancelacion.md`; `Evidencia/S26_red_campo_topologia_final.md`; `Evidencia/S30_grabacion_en_rviz.md`; `GUION_SESION_JURADOS.md`.
+Fuente: `Evidencia/S30_simulacion_catalayud.md`; `Evidencia/S30_segunda_mision_y_cancelacion.md`; `Evidencia/S26_red_campo_topologia_final.md`; `Evidencia/S30_grabacion_en_rviz.md`; `TERMINOS.md`; `GUION_SESION_JURADOS.md`.

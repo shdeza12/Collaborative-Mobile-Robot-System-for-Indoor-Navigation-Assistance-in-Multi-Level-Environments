@@ -279,7 +279,7 @@ Preguntas que pueden salir de lo que ven:
 
 | Pregunta | Respuesta |
 |---|---|
-| ¿Qué pasa si dos personas piden el servicio a la vez? | El sistema atiende una misión a la vez, sin cola ni noción de agente ocupado. Una segunda solicitud no está controlada, y se plantea en los trabajos futuros |
+| ¿Qué pasa si dos usuarios piden el servicio a la vez? | El sistema atiende una misión a la vez, sin cola ni noción de agente ocupado. Una segunda solicitud no está controlada, y se plantea en los trabajos futuros |
 | ¿Y si hay gente en el pasillo? | Las pruebas se hicieron con los pasillos despejados. Esquivar personas en movimiento es trabajo futuro y el paso previo a operar en horario de clases |
 | ¿Por qué hay que confirmar el cambio de piso? | El sistema no observa al usuario en la escalera. Avisa a los 60 s, y sin confirmación la misión falla a los 120 s |
 | ¿La simulación está al nivel de los agentes físicos? | En funciones, sí: el mismo coordinador corre en Gazebo en los pisos 3 y 4, con los mismos mapas y destinos, la misma página, y la media vuelta y la llegada de los agentes. Lo físico no: la odometría real, la banda muerta, el radio de giro y la red. La campaña de 30 misiones se hizo en el edificio Gregorio |

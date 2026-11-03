@@ -12,13 +12,13 @@
 \addcontentsline{toc}{chapter}{CONCLUSIONES}
 
 El primer objetivo específico, modelar la arquitectura funcional del sistema, se
-cumplió. Un coordinador central con un agente por nivel convierte el cambio de piso en un problema de coordinación y no de locomoción. Ningún agente necesita
+cumplió. Un coordinador central con un agente por piso convierte el cambio de piso en un problema de coordinación y no de locomoción. Ningún agente necesita
 subir escaleras ni usar el ascensor, y lo que se traspasa en la escalera es la
 responsabilidad de guiar al usuario. Separar la planificación del relevo de
 ROS~2 permitió verificarla de forma exhaustiva y sin simulador, y esa
 verificación encontró defectos que las corridas no habrían mostrado. La
 asignación de tareas resulta trivial por la estructura del problema, con un solo
-agente admisible por nivel; la dificultad está en coordinar dos agendas que
+agente admisible por piso; la dificultad está en coordinar dos agendas que
 dependen una de otra durante el relevo, y ahí está el aporte del trabajo.
 
 El segundo objetivo, la plataforma robótica con los dos agentes, se cumplió. El
@@ -50,8 +50,8 @@ mide o un modelo del edificio sin verificar producen resultados que parecen evid
 
 Sobre la pregunta problema, cómo asistir la orientación de usuarios dentro de
 entornos interiores con múltiples pisos utilizando sistemas robóticos, se
-concluye que un esquema de relevo entre dos agentes, uno por nivel, es una
-respuesta viable. Los agentes se reparten el guiado de una persona que cambia
+concluye que un esquema de relevo entre dos agentes, uno por piso, es una
+respuesta viable. Los agentes se reparten el guiado de un usuario que cambia
 de piso sin que ninguno atraviese la zona de transición y sin modificar el
-edificio. Queda sin medir la experiencia de la persona guiada, que corresponde a
-un estudio con usuarios.
+edificio. Queda sin medir la experiencia del usuario durante el guiado, que corresponde a
+un estudio propio.

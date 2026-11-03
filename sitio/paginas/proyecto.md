@@ -51,6 +51,18 @@ Evaluar el desempeño del sistema mediante pruebas experimentales en un entorno 
 
 </div>
 
+## Términos
+
+El sitio nombra cada cosa como el documento final. La [tabla completa](https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/blob/main/Documentos/TERMINOS.md) está en el repositorio.
+
+| Término | Qué es |
+|---|---|
+| Agente | Cada uno de los dos robots móviles del sistema, construidos sobre la plataforma AWS DeepRacer y dedicados cada uno a un piso del edificio. Tiene su propia navegación y ejecuta los tramos de la misión que le asigna el coordinador. |
+| Usuario | Persona que pide el servicio desde la interfaz y a la que los agentes guían desde su origen hasta su destino. |
+| Misión | Una solicitud de guiado completa, desde que el usuario elige origen y destino hasta que el sistema la cierra. |
+| Relevo | Traspaso de la responsabilidad de guiar a un usuario, de un agente al otro, en un punto acordado de antemano. |
+| Punto de transferencia | Lugar físico, en este trabajo la escalera, donde un agente entrega el guiado y el otro lo recibe. |
+
 ## Alcance
 
 | Dentro del alcance | Fuera del alcance |

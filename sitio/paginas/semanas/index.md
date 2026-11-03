@@ -29,7 +29,7 @@ Cada semana tiene su página con lo que se hizo, las imágenes y lo que se concl
 
 <div class="semanas-grid">
 <a class="semana-tarjeta" href="s17/"><img src="img/s17_5.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 17 · 3 al 9 de agosto</span><span class="titulo">Agente físico liberado y Nav2 en Humble</span></span></a>
-<a class="semana-tarjeta" href="s18/"><img src="img/s18_1.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 18 · 10 al 16 de agosto</span><span class="titulo">Dos agentes aislados y entorno de dos niveles</span></span></a>
+<a class="semana-tarjeta" href="s18/"><img src="img/s18_1.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 18 · 10 al 16 de agosto</span><span class="titulo">Dos agentes aislados y entorno de dos pisos</span></span></a>
 <a class="semana-tarjeta" href="s19/"><img src="img/s19_3.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 19 · 17 al 23 de agosto</span><span class="titulo">Diagnóstico del agente y protocolo</span></span></a>
 <a class="semana-tarjeta" href="s20/"><img src="img/s20_1.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 20 · 24 al 30 de agosto</span><span class="titulo">Coordinador, primera misión y relevo en simulación</span></span></a>
 <a class="semana-tarjeta" href="s21/"><img src="img/s21_1.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 21 · 31 de agosto al 6 de septiembre</span><span class="titulo">Campaña de treinta misiones</span></span></a>

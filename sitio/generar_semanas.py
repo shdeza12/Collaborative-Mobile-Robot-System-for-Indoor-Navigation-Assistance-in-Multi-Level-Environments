@@ -71,7 +71,8 @@ def informe_de(n, ext):
 # El sitio nombra cada cosa como el documento final: el usuario, los agentes (agentes físicos frente a la
 # simulación), el láser, la unidad inercial, las pruebas y los requisitos por su contenido. La cronología, los
 # informes y la evidencia quedan como se escribieron; el cambio se hace aquí, al publicarlos. «Vehículo» sigue
-# solo en enunciados generales sobre vehículos Ackermann, y «AWS DeepRacer» es el nombre de la plataforma.
+# solo en enunciados generales sobre vehículos Ackermann, y «AWS DeepRacer» es el nombre de la plataforma. La tabla
+# completa está en Documentos/TERMINOS.md.
 FRASES = [
     # Las pruebas y los requisitos, por su contenido.
     ('se alcanzaron las compuertas G-1 y G-4', 'se superaron las pruebas de actuación y de los dos agentes en la misma red'),
@@ -111,9 +112,11 @@ FRASES = [
     ('sensores del DeepRacer', 'sensores del agente'),
     ('su descripción del vehículo', 'su descripción del modelo'),
     ('software del vehículo a Raspberry', 'software de la plataforma a Raspberry'),
-    # Piso, cuando «planta» no es el plano.
+    # Piso, cuando «planta» no es el plano, y la media vuelta.
     ('las dos plantas instanciadas', 'los dos pisos instanciados'),
     ('en la misma planta', 'en el mismo piso'),
+    ('dos niveles verticales reales', 'dos pisos reales'),
+    ('Maniobra de volteo', 'Media vuelta'),
 ]
 TERMINOS = [
     (r'campaña con los (?:dos )?veh[ií]culos', 'campaña con los agentes físicos'),
@@ -128,14 +131,17 @@ TERMINOS = [
     (r'(?<![-\w/])robot(?![-\w/.]| Operating)', 'agente'),
     (r'(?<![\w])carros(?!\w)', 'agentes'),
     (r'(?<![\w])carro(?!\w)', 'agente'),
+    (r'\bniveles\b', 'pisos'),
+    (r'\bnivel\b', 'piso'),
 ]
 NOMBRES = [
     (r'\bde racey\b', 'del agente del piso 4'), (r'\bde deepy\b', 'del agente del piso 3'),
     (r'\bracey\b', 'el agente del piso 4'), (r'\bdeepy\b', 'el agente del piso 3'),
     (r'\bamss-(?:ez9n|jgm9)\b', 'el agente'),
 ]
-# Lo que se deja como está: código, enlaces y la frase que habla de la palabra misma.
-PROTEGIDO = re.compile(r'(`[^`]*`|\]\([^)]*\)|https?://\S+|«agente» para los robots)')
+# Lo que se deja como está: código, enlaces, citas entre comillas, la frase que habla de la palabra misma y la
+# métrica oficial.
+PROTEGIDO = re.compile(r'(`[^`]*`|\]\([^)]*\)|https?://\S+|«agente» para los robots|«[^»]*»|[Cc]ontinuidad del servicio entre niveles)')
 
 
 def con_su_caso(original, nuevo):

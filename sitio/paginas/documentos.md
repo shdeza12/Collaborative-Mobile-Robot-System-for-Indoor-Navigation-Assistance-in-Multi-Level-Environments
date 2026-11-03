@@ -20,11 +20,12 @@ Un informe por semana para el director, desde la semana 10: qué se hizo, con qu
 </div>
 
 <div class="decision-tarjeta" markdown>
-### :material-clipboard-check-outline: Protocolo y requisitos
-El protocolo de evaluación, escrito antes de medir, y la matriz de los 36 requisitos con la prueba de cada uno.
+### :material-clipboard-check-outline: Protocolo, requisitos y términos
+El protocolo de evaluación, escrito antes de medir, la matriz de los 36 requisitos con la prueba de cada uno y la tabla de términos del proyecto.
 
 [Protocolo :material-arrow-right:](https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/blob/main/Documentos/PROTOCOLO_EXPERIMENTAL.md){ .md-button }
 [Requisitos :material-arrow-right:](https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/blob/main/Documentos/REQUISITOS.md){ .md-button }
+[Términos :material-arrow-right:](https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/blob/main/Documentos/TERMINOS.md){ .md-button }
 </div>
 
 <div class="decision-tarjeta" markdown>

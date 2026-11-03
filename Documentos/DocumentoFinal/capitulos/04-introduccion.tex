@@ -16,7 +16,7 @@ Quien llega por primera vez construye un mapa mental a partir de información
 parcial, y lo va corrigiendo mientras camina. Ese esfuerzo crece cuando el
 espacio tiene pasillos repetidos, pocos puntos de referencia o señalización
 escasa. Y crece más cuando hay que cambiar de piso, porque la escalera corta la
-continuidad de lo que la persona lleva recorrido. Jiménez Muñoz lo señala al construir una
+continuidad de lo que el usuario lleva recorrido. Jiménez Muñoz lo señala al construir una
 arquitectura cognitiva que mete al usuario dentro de un sistema de mapas de
 varios niveles: la escalera es el punto donde la representación mental del
 recorrido deja de servir \autocite{jimenez2024arquitectura}.
@@ -25,23 +25,23 @@ La robótica móvil colaborativa lleva años resolviendo tareas parecidas. El
 reparto de trabajo entre varios robots tiene base teórica desde que
 \textcite{gerkey2004taxonomy} formalizaron la asignación de tareas en sistemas
 multi-robot.  Casi todos esos sistemas
-operan, sin embargo, en una sola planta.
+operan, sin embargo, en un solo piso.
 
-El cambio de nivel se ha abordado por dos caminos, y los dos pasan por el
+El cambio de piso se ha abordado por dos caminos, y los dos pasan por el
 hardware. \textcite{kim2024indoor} combinan un mapa por piso con un grafo
 topológico y hacen que el robot use el ascensor. \textcite{song2024elevator} van
 más lejos: automatizan ese uso instalando dispositivos conectados en el
 edificio. La otra opción es dotar al robot de mecanismos para subir escaleras.
 Ambas encarecen la plataforma y exigen intervenir la infraestructura.
 
-Este trabajo propone otra. En vez de un robot que cruza de piso, se usan \textbf{dos agentes}, robots móviles dedicados cada uno a un nivel. El usuario sube por su cuenta y el segundo agente lo recibe arriba. El cambio de piso deja de ser un problema
+Este trabajo propone otra. En vez de un robot que cambia de piso, se usan \textbf{dos agentes}, robots móviles dedicados cada uno a un piso. El usuario sube por su cuenta y el segundo agente lo recibe arriba. El cambio de piso deja de ser un problema
 de locomoción y pasa a ser uno de coordinación. Dos agentes se reparten una tarea
 y se la pasan en un punto acordado. Ese traspaso es el \emph{relevo}, y es el aporte que el proyecto declara.
 
 La pregunta que organiza el trabajo es cómo asistir la orientación de usuarios
 dentro de entornos interiores con múltiples pisos utilizando sistemas robóticos,
 y el relevo es la respuesta que se propone y se pone a prueba. No basta con que los agentes se muevan. Hay que demostrar que la asistencia no se interrumpe cuando
-el usuario cambia de nivel, y medirlo con criterios fijados antes de correr los
+el usuario cambia de piso, y medirlo con criterios fijados antes de correr los
 experimentos.
 
 Los agentes se construyeron sobre la plataforma AWS DeepRacer, con software libre. La

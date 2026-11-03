@@ -7,7 +7,7 @@ bitácora de [`ESTADO.md`](../ESTADO.md), pero no se siguen hoy sin contrastarlo
 **Regla:** una guía nueva entra en este índice en el mismo commit en que se crea, y una guía superada pasa
 a `historial/`, no se borra.
 
-*Estado al 2026-11-02.*
+*Estado al 2026-11-03.*
 
 | Quiero… | Seguir | Y tener a mano |
 |---|---|---|
@@ -26,5 +26,6 @@ a `historial/`, no se borra.
 | Conducir un vehículo con el mando | [`GUIA_TELEOP_MANDO.md`](GUIA_TELEOP_MANDO.md) | — |
 | Registrar la evidencia de una prueba | La convención de [`Evidencia/README.md`](Evidencia/README.md) | [`historial/HOJA_CAPTURA_S26.md`](historial/HOJA_CAPTURA_S26.md) como ejemplo |
 | Consultar las interfaces entre coordinador, agentes e interfaz | [`CONTRATO_INTERFACES.md`](CONTRATO_INTERFACES.md) | — |
+| Escribir algo que van a leer el jurado, el director o el público | [`TERMINOS.md`](TERMINOS.md) | [Glosario del documento](DocumentoFinal/capitulos/03-glosario-abreviaturas.tex) |
 | Saber dónde está el proyecto | [`ESTADO.md`](../ESTADO.md) | [`CRONOGRAMA_S17_S32.md`](CRONOGRAMA_S17_S32.md) |
 | Saber qué toca esta semana | [`PLAN_S30.md`](PLAN_S30.md) | [`GUION_SESION_JURADOS.md`](GUION_SESION_JURADOS.md) |

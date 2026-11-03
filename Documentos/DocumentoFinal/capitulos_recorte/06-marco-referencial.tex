@@ -50,9 +50,9 @@ exigir atención constante.
 \textcite{jimenez2024arquitectura} integra al usuario en el propio sistema de
 mapas, con representaciones semánticas y reconocimiento de personas, en una
 plataforma asistencial de varios niveles. Es el antecedente más próximo en
-intención, porque trata a la persona como parte del problema de navegación.
+intención, porque trata al usuario como parte del problema de navegación.
 
-En los tres casos un mismo robot acompaña a la persona durante todo el recorrido.
+En los tres casos un mismo robot acompaña al usuario durante todo el recorrido.
 Ese supuesto es el que este trabajo cambia.
 
 \subsection{Navegación autónoma en interiores}
@@ -77,20 +77,20 @@ robot, cuántos robots requiere una tarea y con cuánta anticipación se decide.
 
 El antecedente más cercano es \textcite{srivastava2025deliver}, que coordinan
 recogida y entrega entre varios robots mediante planificación con relevos. Allí
-lo que pasa de un agente a otro es un paquete; aquí es una persona. Un paquete
-puede esperar indefinidamente en el punto de transferencia, y una persona no. Por
+lo que pasa de un agente a otro es un paquete; aquí es un usuario. Un paquete
+puede esperar indefinidamente en el punto de transferencia, y un usuario no. Por
 eso el relevo de este trabajo incluye una confirmación explícita del usuario al
 llegar al otro piso, con un aviso a los 60~s y un plazo máximo de 120~s. Según la revisión del anteproyecto, todos estos trabajos operan en un solo
-nivel físico.
+piso.
 
 \subsection{Movilidad entre pisos}
 
-El cambio de nivel se ha abordado sobre todo desde la logística y la
+El cambio de piso se ha abordado sobre todo desde la logística y la
 exploración. \textcite{kim2024indoor} combinan un mapa por piso con un grafo
 topológico que los conecta, e integran la interacción con el ascensor.
 \textcite{song2024elevator} automatizan el uso del elevador con dispositivos
 conectados instalados en el edificio. Las dos propuestas atacan la movilidad entre pisos desde la infraestructura y el modelado topológico, y comparten un supuesto: el robot
-cruza de nivel, subiendo o accionando el ascensor. Las dos se orientan a la logística antes que a la asistencia de personas.
+cambia de piso, subiendo o accionando el ascensor. Las dos se orientan a la logística antes que a la asistencia de personas.
 
 \subsection{Aporte de este trabajo frente a los antecedentes}
 \label{sec:aporte}
@@ -113,15 +113,15 @@ supuesto que este proyecto no comparte.
     Robots guía & La integración de navegación e interacción; la localización de Monte Carlo & Un solo robot acompaña todo el recorrido \\ \addlinespace
     Navegación en interiores & El flujo mapa, localización y planificación sobre ROS~2 (Nav2) & Ninguno: se adopta, adaptado a la cinemática del agente \\ \addlinespace
     Coordinación multirrobot & La taxonomía de asignación; la planificación con relevos & Lo que se traspasa puede esperar sin límite \\ \addlinespace
-    Movilidad entre pisos & El mapa por piso unido por un punto de transición & El robot cruza de nivel \\ \addlinespace
+    Movilidad entre pisos & El mapa por piso unido por un punto de transición & El robot cambia de piso \\ \addlinespace
     Distribución del cómputo & La navegación a bordo y la coordinación en un nodo central & --- \\ \bottomrule
   \end{tabular}
 \end{table}
 
 Lo que no aparece en ninguna línea es la combinación que aquí se propone:
 resolver la discontinuidad entre pisos sin que ningún agente la atraviese. El
-recorrido se reparte entre dos agentes dedicados, cada uno a un nivel, y la
-persona pasa de uno a otro en la zona de transición. La diferencia con los
+recorrido se reparte entre dos agentes dedicados, cada uno a un piso, y el
+usuario pasa de uno a otro en la zona de transición. La diferencia con los
 trabajos de movilidad vertical es económica antes que algorítmica. Esos trabajos
 obtienen la continuidad con hardware, con mecanismos para escaleras o con
 intervención del ascensor. Este proyecto la obtiene con comunicación entre
@@ -151,7 +151,7 @@ orientadas hacia la dirección de marcha. Solo esos rayos cambian de longitud
 cuando el agente avanza. El entorno
 se representa con un \textbf{mapa de ocupación}, que dice qué celdas están libres,
 y con \textbf{mapas de costos}, que dan a cada celda un costo de tránsito. La
-\textbf{zona de transición} es el lugar del edificio donde se cambia de nivel; en
+\textbf{zona de transición} es el lugar del edificio donde se cambia de piso; en
 este sistema, la escalera.
 
 En control y locomoción, el agente sigue un \textbf{modelo cinemático tipo
@@ -189,7 +189,7 @@ de ROS~2 en un mismo computador.
 
 En arquitectura del sistema, la \textbf{asignación de tareas} es el reparto de
 actividades entre los agentes según su disponibilidad y su ubicación. Cuando una
-tarea cruza de un nivel a otro, el reparto toma la forma de un
+tarea pasa de un piso a otro, el reparto toma la forma de un
 \textbf{relevo}: un agente entrega la responsabilidad de guiar al usuario y el
 otro la recibe en el \textbf{punto de transferencia}. La \textbf{máquina de
 estados de misión} describe en qué punto va cada misión, y sus estados se
@@ -244,9 +244,9 @@ La asignación de este sistema es ST--SR--IA. Cada agente ejecuta un tramo a la 
 problema de asignación óptima, que el método húngaro resuelve en tiempo
 polinómico \autocite{kuhn1955hungarian}. En este problema, sin embargo, la matriz
 de costos tiene un solo candidato admisible por tarea, porque cada agente está
-confinado a su nivel y hay uno solo por nivel. El método húngaro devuelve siempre
+confinado a su piso y hay uno solo por piso. El método húngaro devuelve siempre
 la correspondencia que el sistema guarda como tabla de configuración, en la que
-cada nivel tiene asignado su agente. La ausencia de un optimizador es, por
+cada piso tiene asignado su agente. La ausencia de un optimizador es, por
 tanto, una consecuencia de la estructura del problema y no una carencia de la
 implementación.
 
@@ -278,7 +278,7 @@ resolver de nuevo el descubrimiento y la serialización--- y frente a ROS~1, sin
 soporte desde 2025 y con un nodo maestro central que sería un punto único de
 fallo en un sistema cuyo propósito es repartir una tarea. ROS~2 no tiene nodo
 maestro, trae el ecosistema de navegación que el trabajo necesita y es el entorno
-en el que el fabricante publica el software del vehículo.
+en el que el fabricante publica el software de la plataforma.
 
 Todos los componentes se comunican mediante ROS~2, que
 \textcite{macenski2022ros2} describen como un rediseño sobre DDS, el estándar de
@@ -306,7 +306,7 @@ espacio de nombres. Un espacio de nombres distinto para cada agente distingue la
 La navegación se construyó sobre Nav2 \autocite{macenski2020marathon} y no a
 medida, porque trae planificador, controlador y recuperaciones probados y permite
 sustituir cada pieza por separado: de sus tres capas hubo que cambiar dos para la
-cinemática del vehículo y el resto se usó tal cual.
+cinemática del agente y el resto se usó tal cual.
 
 Un vehículo con dirección Ackermann está sujeto a una restricción no holonómica:
 no puede desplazarse de lado ni girar sobre su propio eje, y su curvatura está

@@ -74,10 +74,10 @@ maniobras, y el usuario puede cancelar la misión en cualquier momento.
 \textcite{jimenez2024arquitectura} integra al usuario dentro del propio sistema
 de mapas, combinando representaciones semánticas con reconocimiento de personas
 para localizar y seguir a quien acompaña, en una plataforma asistencial de varios
-niveles. Es el antecedente más próximo en intención, porque trata a la persona
+niveles. Es el antecedente más próximo en intención, porque trata al usuario
 como parte del problema de navegación y no como un destinatario externo.
 
-En los tres casos un mismo robot acompaña a la persona durante todo el recorrido.
+En los tres casos un mismo robot acompaña al usuario durante todo el recorrido.
 Ese supuesto es el que este trabajo cambia.
 
 \subsection{Navegación autónoma en interiores}
@@ -148,9 +148,9 @@ sección~\ref{sec:teo-asignacion} usa esa taxonomía, y su extensión por
 El antecedente más cercano a la propuesta de este proyecto es
 \textcite{srivastava2025deliver}, que coordinan recogida y entrega entre varios
 robots mediante planificación con relevos. Allí lo que se traspasa de un agente a
-otro es un paquete; aquí es una persona. La diferencia tiene consecuencias de
+otro es un paquete; aquí es un usuario. La diferencia tiene consecuencias de
 diseño: un paquete puede esperar indefinidamente en el punto de transferencia, y
-una persona no. Por eso el relevo de este trabajo incluye una confirmación
+un usuario no. Por eso el relevo de este trabajo incluye una confirmación
 explícita del usuario cuando llega al otro piso, con un aviso a los 60~s y un
 plazo máximo de 120~s.
 
@@ -226,8 +226,8 @@ supuesto que este proyecto no comparte.
 
 Lo que no aparece en ninguna línea es la combinación que aquí se propone:
 resolver la discontinuidad entre pisos sin que ningún robot la atraviese. El
-recorrido se reparte entre dos agentes dedicados, cada uno a un nivel, y la
-persona pasa de uno a otro en la zona de transición.
+recorrido se reparte entre dos agentes dedicados, cada uno a un nivel, y el
+usuario pasa de uno a otro en la zona de transición.
 
 La diferencia con los trabajos de movilidad vertical es económica antes que
 algorítmica. Esos trabajos obtienen la continuidad con hardware: mecanismos de

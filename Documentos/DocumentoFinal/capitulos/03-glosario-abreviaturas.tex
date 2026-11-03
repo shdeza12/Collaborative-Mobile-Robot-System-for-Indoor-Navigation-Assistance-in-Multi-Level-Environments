@@ -19,7 +19,7 @@
 \ustaseccion{Glosario}
 
 \begin{description}[style=nextline,leftmargin=1.5em,itemsep=0.2em]
-  \item[Agente] Cada uno de los dos robots móviles del sistema, construidos sobre la plataforma AWS DeepRacer y dedicados cada uno a un nivel del edificio. Tiene su propia navegación y ejecuta los tramos de la misión que le asigna el coordinador.
+  \item[Agente] Cada uno de los dos robots móviles del sistema, construidos sobre la plataforma AWS DeepRacer y dedicados cada uno a un piso del edificio. Tiene su propia navegación y ejecuta los tramos de la misión que le asigna el coordinador.
 
   \item[Banda muerta de tracción] Rango de velocidades ordenadas en el que el agente no llega a moverse, porque la señal resultante no vence el
     rozamiento estático. En los agentes de este trabajo abarca todo lo que está por debajo de 0,40~m/s, y condiciona su aproximación final al destino.
@@ -30,7 +30,7 @@
     que la mayoría de las herramientas de navegación supone por omisión.
 
   \item[Continuidad del servicio] Propiedad de no interrumpir la asistencia
-    mientras el usuario cambia de nivel. Es la propiedad que el esquema de relevo
+    mientras el usuario cambia de piso. Es la propiedad que el esquema de relevo
     debe garantizar para responder la pregunta problema.
 
   \item[Localización] Estimación de la posición y la orientación del agente respecto a un marco de referencia fijo.
@@ -61,7 +61,7 @@
   \item[Punto de transferencia] Lugar físico, en este trabajo la escalera, donde
     un agente entrega el guiado y el otro lo recibe.
 
-  \item[Relevo] Traspaso de la responsabilidad de guiar a una persona, de un
+  \item[Relevo] Traspaso de la responsabilidad de guiar a un usuario, de un
     agente al otro, en un punto acordado de antemano. Es el aporte que el
     proyecto declara, y lo que sustituye al hardware de transición vertical.
 
@@ -70,7 +70,10 @@
   \item[Tiempo de respuesta] Intervalo entre la solicitud del usuario y el
     instante en que el agente asignado arranca la tarea.
 
-  \item[Zona de transición] Punto del edificio donde se cambia de nivel:
+  \item[Usuario] Persona que pide el servicio desde la interfaz y a la que los agentes
+    guían desde su origen hasta su destino.
+
+  \item[Zona de transición] Punto del edificio donde se cambia de piso:
     escalera o ascensor. En este sistema ningún agente la atraviesa.
 \end{description}
 

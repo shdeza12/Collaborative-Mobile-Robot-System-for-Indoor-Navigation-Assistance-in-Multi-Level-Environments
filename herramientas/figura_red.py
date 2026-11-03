@@ -80,7 +80,7 @@ def topologia():
     linea(ax, [(38, 56.6), (38, 52), (24, 52), (24, 48.4)])
     linea(ax, [(62, 56.6), (62, 52), (76, 52), (76, 48.4)])
     texto(ax, 24, 53.6, 'cable', 6.2, color=GRIS)
-    texto(ax, 76, 53.6, 'cable entre plantas', 6.2, color=GRIS)
+    texto(ax, 76, 53.6, 'cable entre pisos', 6.2, color=GRIS)
 
     # Un agente colgando de cada punto de acceso, por aire.
     for x0, piso, ip, lat in ((3, '3', '192.168.0.102', '2,13 ms'),

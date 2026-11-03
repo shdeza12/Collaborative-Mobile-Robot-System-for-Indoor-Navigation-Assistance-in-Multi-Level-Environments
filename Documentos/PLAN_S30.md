@@ -49,6 +49,7 @@ Cierre: los dos jurados confirmaron.
 | Tarea | Quién | Cómo | Cierre |
 |---|---|---|---|
 | Observaciones de los autores | Santiago y Jonny las pasan; Claude las aplica | Sobre `main_recorte.pdf`, 80 páginas | Todas aplicadas y compilado sin errores |
+| Términos | Claude; hecho el 3 de noviembre | Una sola palabra para cada cosa en el documento, la presentación y el sitio: [`TERMINOS.md`](TERMINOS.md) | La comprobación de ese archivo solo da lo que permite |
 | Autoridades | Los autores | Completar [`00-autoridades.tex`](DocumentoFinal/capitulos/00-autoridades.tex), que todavía dice «NOMBRES COMPLETOS» | Sin marcadores en el PDF |
 | Justificar las desviaciones | Claude redacta; los autores aprueban | Las técnicas ya están en el documento: DonkeyCar y DeepRacer, CoppeliaSim y Gazebo, aplicación y página web, Humble y Jazzy. Falta el corrimiento de 2 a 4 semanas de la parte técnica ([`CRONOGRAMA_S17_S32.md`](CRONOGRAMA_S17_S32.md), §5) | Cada desviación tiene su lugar en el documento |
 | Fundir la versión recortada | Claude, después del visto bueno del director | Pasar `capitulos_recorte/` a `capitulos/`, compilar y actualizar la página de documentos del sitio | `main.pdf` es la versión recortada |

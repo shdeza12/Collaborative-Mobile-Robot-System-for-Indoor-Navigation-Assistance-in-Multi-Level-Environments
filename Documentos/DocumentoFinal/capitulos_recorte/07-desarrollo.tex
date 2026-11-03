@@ -86,7 +86,7 @@ vehículos con dirección Ackermann, entornos interiores y soporte para mapeo y
 navegación. Entre CoppeliaSim, que proponía el anteproyecto, el simulador del
 curso F1TENTH \autocite{okelly2019f1tenth} y Gazebo \autocite{koenig2004gazebo},
 se eligió Gazebo por su integración directa con ROS~2 y con su sistema de control
-de articulaciones. También se conservó un chasis con dirección tipo automóvil. Cada agente atiende un piso y la persona cambia de nivel por la escalera, así que ningún agente tiene que entrar a un ascensor ni subir escalones. La vuelta dentro del pasillo puede quedar a cargo de un planificador para
+de articulaciones. También se conservó un chasis con dirección tipo automóvil. Cada agente atiende un piso y el usuario cambia de piso por la escalera, así que ningún agente tiene que entrar a un ascensor ni subir escalones. La vuelta dentro del pasillo puede quedar a cargo de un planificador para
 automóviles.
 
 \subsection{El modelo de AWS DeepRacer y su migración a ROS~2 Humble}
@@ -225,7 +225,7 @@ promedio del estado de sus requisitos.
 \label{sec:contrato}
 
 Antes de escribir código se fijó un contrato: qué habla con qué y en qué formato.
-Un coordinador central decide y manda, dos agentes, uno por nivel, ejecutan, y una
+Un coordinador central decide y manda, dos agentes, uno por piso, ejecutan, y una
 interfaz web es la vía por la que el usuario pide el servicio. La comunicación
 sigue tres reglas:
 
@@ -279,10 +279,10 @@ son las marcas de tiempo con que se calculan las métricas. La tabla~\ref{tab:co
     \toprule
     \textbf{Etapa} & \textbf{Significado} \\ \midrule
     Recibida & El coordinador aceptó la solicitud y todavía no asignó agente \\
-    Primer tramo & El agente del nivel de origen va a recoger al usuario y lo guía \\
-    Transferencia & El agente del otro nivel va a su punto de transferencia \\
+    Primer tramo & El agente del piso de origen va a recoger al usuario y lo guía \\
+    Transferencia & El agente del otro piso va a su punto de transferencia \\
     Esperando confirmación & El sistema espera que el usuario confirme que ya cambió de piso \\
-    Segundo tramo & El agente del nivel de destino guía al usuario hasta el final \\
+    Segundo tramo & El agente del piso de destino guía al usuario hasta el final \\
     Completada & La misión terminó con la llegada verificada \\
     Fallida & La misión terminó sin cumplirse, con el motivo en el texto \\
     Cancelando & El usuario canceló y el agente activo regresa a su punto de transferencia \\
@@ -293,38 +293,38 @@ son las marcas de tiempo con que se calculan las métricas. La tabla~\ref{tab:co
 \subsection{El planificador, escrito sin ROS}
 \label{sec:planificador}
 
-El relevo es el aporte declarado del proyecto, y por eso su planificación se escribió como una función pura, sin dependencia de ROS~2 ni estado propio (figura~\ref{fig:planificador}). Entran el catálogo de puntos y un par origen-destino, y salen los tramos que hay que ejecutar. Si el origen y el destino están en el mismo nivel, la misión
+El relevo es el aporte declarado del proyecto, y por eso su planificación se escribió como una función pura, sin dependencia de ROS~2 ni estado propio (figura~\ref{fig:planificador}). Entran el catálogo de puntos y un par origen-destino, y salen los tramos que hay que ejecutar. Si el origen y el destino están en el mismo piso, la misión
 tiene dos tramos del mismo agente: ir a recoger al usuario y llevarlo al destino.
-Si están en niveles distintos, tiene cuatro: los dos anteriores, terminando en el
-punto de transferencia del nivel de origen; el desplazamiento del segundo agente
-a su punto de transferencia; y el guiado final. El punto de encuentro no se negocia: es el punto de transferencia declarado de cada nivel en el catálogo.
+Si están en pisos distintos, tiene cuatro: los dos anteriores, terminando en el
+punto de transferencia del piso de origen; el desplazamiento del segundo agente
+a su punto de transferencia; y el guiado final. El punto de encuentro no se negocia: es el punto de transferencia declarado de cada piso en el catálogo.
 
 \begin{figure}[!htbp]
   \centering
   \includegraphics[width=0.84\textwidth]{imagenes/planificador.png}
-  \caption{Función que planifica una misión. No usa ROS~2: recibe el catálogo, el origen, el destino y la asignación de un agente por nivel, y devuelve la lista de tramos o un error con su motivo, antes de que ningún agente se mueva.}
+  \caption{Función que planifica una misión. No usa ROS~2: recibe el catálogo, el origen, el destino y la asignación de un agente por piso, y devuelve la lista de tramos o un error con su motivo, antes de que ningún agente se mueva.}
   \label{fig:planificador}
 \end{figure}
 
 Fue una de las decisiones más rentables del proyecto. Con el
 relevo dentro del nodo, mezclado con los clientes de acción, la única forma de
 comprobarlo habría sido levantar dos simuladores y observar si el agente llega.
-Como función pura, una prueba automática la recorre entera en milisegundos y sin simulador. El catálogo de la simulación tiene 31 puntos de interés, y cada par ordenado de dos puntos distintos es una solicitud posible: $31 \times 30 = 930$ combinaciones de origen y destino. La prueba planifica las 930 y comprueba en todas que el plan empieza en el origen y termina en el destino, y que ningún agente recibe una meta fuera de su nivel. Comprueba también que una misión de un solo nivel usa un agente y ningún relevo, y que una de dos niveles usa los dos agentes y un relevo. Esa prueba encontró un defecto que
+Como función pura, una prueba automática la recorre entera en milisegundos y sin simulador. El catálogo de la simulación tiene 31 puntos de interés, y cada par ordenado de dos puntos distintos es una solicitud posible: $31 \times 30 = 930$ combinaciones de origen y destino. La prueba planifica las 930 y comprueba en todas que el plan empieza en el origen y termina en el destino, y que ningún agente recibe una meta fuera de su piso. Comprueba también que una misión de un solo piso usa un agente y ningún relevo, y que una de dos pisos usa los dos agentes y un relevo. Esa prueba encontró un defecto que
 una corrida no habría delatado: cuando el origen o el destino era el propio punto
-de transferencia de su nivel, el plan mandaba al mismo agente dos veces a la misma
+de transferencia de su piso, el plan mandaba al mismo agente dos veces a la misma
 pose. Nav2 devuelve éxito al instante ante un desplazamiento de cero metros, así
 que en simulación no se habría visto.
 
 \subsection{La asignación de tareas}
 \label{sec:asignacion}
 
-Cada nivel tiene un agente asignado, y esa correspondencia es un dato de
+Cada piso tiene un agente asignado, y esa correspondencia es un dato de
 configuración, no una constante del código. El coordinador elige el agente al
-aceptar la solicitud, según el nivel del origen y del destino. Con un solo agente
-admisible por nivel no hace falta un optimizador, porque el método húngaro devolvería la misma tabla.
+aceptar la solicitud, según el piso del origen y del destino. Con un solo agente
+admisible por piso no hace falta un optimizador, porque el método húngaro devolvería la misma tabla.
 
-El planificador exige un único punto de transferencia por nivel y falla con un
-mensaje explícito si encuentra dos. Hoy cada planta tiene una escalera y eso se
+El planificador exige un único punto de transferencia por piso y falla con un
+mensaje explícito si encuentra dos. Hoy cada piso tiene una escalera y eso se
 cumple; la verificación está para que, el día que haya dos, la decisión se tome a
 la vista. En los agentes físicos, además, el coordinador no da por buena la llegada que
 informa Nav2, sino que la comprueba con la pose que publica el agente.
@@ -576,15 +576,15 @@ midiendo.
 \end{figure}
 
 Un enrutador reparte las direcciones de toda la red, y de él cuelgan por cable dos
-puntos de acceso, uno por planta. El enrutador une redes, reparte direcciones y
+puntos de acceso, uno por piso. El enrutador une redes, reparte direcciones y
 encamina entre ellas; un punto de acceso solo da acceso inalámbrico a una red que ya
 existe. Tampoco son repetidores, que enlazan por radio con el resto de la red y usan
 la misma antena para eso y para sus clientes, con lo que pierden la mitad del caudal
-y añaden un salto a cada mensaje. Por eso el enlace entre plantas va por cable. Se
+y añaden un salto a cada mensaje. Por eso el enlace entre pisos va por cable. Se
 trabaja en la banda de 5~GHz porque un barrido del sitio encontró 33 redes ajenas en
 la de 2,4~GHz y la parte baja de la de 5~GHz prácticamente vacía. El cambio de banda
 redujo el percentil 95 del tiempo de ida y vuelta de 20,76 a 11,12~ms. Hay un punto
-de acceso por planta porque la losa atenúa la señal, en canales que no se solapan.
+de acceso por piso porque la losa atenúa la señal, en canales que no se solapan.
 
 En la construcción aparecieron tres defectos, y ninguno produjo un mensaje de error.
 A las dos tarjetas les faltaba el fichero con las reglas de uso del espectro, de
@@ -619,9 +619,9 @@ Las cotas del requisito, una mediana de 100~ms y un percentil 95 de 250~ms sin
 pérdidas, se fijaron antes de medir, a partir de los 2~Hz a los que cada agente
 publica su estado. Entre los dos agentes, en la misma sala y sobre 600 mensajes, la
 mediana fue de 5,99~ms y el percentil 95 de 11,12~ms, sin pérdidas, más de un orden
-de magnitud por debajo de las cotas. Con paquetes de red, entre los dos agentes en la misma planta y
+de magnitud por debajo de las cotas. Con paquetes de red, entre los dos agentes en el mismo piso y
 con dos puntos de acceso, la ida y vuelta fue de 3,75~ms en promedio.
-En el montaje definitivo, con cada agente en el punto de acceso de su planta, fue de
+En el montaje definitivo, con cada agente en el punto de acceso de su piso, fue de
 2,13 y 1,99~ms contra el enrutador, sin pérdidas ni duplicados. La red no limita el
 desempeño del sistema: los límites encontrados están en la plataforma.
 
@@ -652,7 +652,7 @@ primeras pruebas giró 160$^\circ$ y 167$^\circ$, en un solo tiempo cada vez, y 
 
 \subsection{Una página web, no una aplicación}
 
-El objetivo pide «una interfaz móvil», y se construyó una página web que se abre en el navegador del teléfono. Para el usuario que el proyecto declara, cumple el objetivo mejor que una aplicación, porque un visitante ocasional
+El objetivo pide «una interfaz móvil», y se construyó una página web que se abre en el navegador del teléfono. Para el usuario que el proyecto declara, cumple el objetivo mejor que una aplicación, porque un usuario ocasional
 no va a instalar nada para preguntar por un salón. La página funciona sin salida
 a internet, porque la red del edificio puede no tenerla, y no usa bibliotecas ni
 recursos externos. Son un archivo HTML, una hoja de estilo y dos programas en JavaScript, que sirve el propio portátil. Se comunica con
@@ -666,7 +666,7 @@ confirmación de cambio de piso.
 \subsection{Lo que el usuario ve}
 
 El usuario elige el origen en una lista y el destino en un catálogo con búsqueda
-por nombre, donde cada destino muestra su piso y, si queda en el otro nivel, la
+por nombre, donde cada destino muestra su piso y, si queda en el otro piso, la
 marca «con relevo» (figura~\ref{fig:hri}, izquierda). Durante la misión, la página muestra un título calculado a
 partir de la etapa, el texto que redacta el coordinador, el agente que está
 guiando, hacia dónde va, el destino final y la distancia restante. Una franja de
@@ -692,8 +692,8 @@ funciones que siguen se añadieron después de ver el sistema en uso.
 
 \subsection{Confirmación de cambio de piso}
 
-En una misión entre niveles, el segundo agente llega a su escalera y espera al
-usuario, pero no puede saber si la persona ya subió. Sin una pausa explícita, la
+En una misión entre pisos, el segundo agente llega a su escalera y espera al
+usuario, pero no puede saber si ya subió. Sin una pausa explícita, la
 misión podía darse por completada con el usuario todavía en el piso equivocado, y
 la instrumentación lo habría registrado como éxito. Por eso, cuando el segundo
 agente llega a su punto de transferencia, el coordinador pasa a la etapa de espera de confirmación. La página muestra entonces un botón para confirmar el cambio de
@@ -781,7 +781,7 @@ las marcas salen de un mismo reloj: en simulación, el de la simulación; en los
 
 Una misión es exitosa si cumple tres condiciones. La pose final del agente, en
 su odometría, está a 0,25~m o menos del destino declarado en el catálogo; en los agentes físicos el umbral es de 0,5~m. La misión llegó a la etapa completada sin pasar
-por fallida. Y, si era entre niveles, hubo un relevo.
+por fallida. Y, si era entre pisos, hubo un relevo.
 
 La regla central del protocolo es que el éxito se mide contra
 la odometría del agente, nunca contra el resultado que devuelve Nav2. Una
@@ -796,7 +796,7 @@ en un banco de pruebas con el reloj del sistema. La continuidad se definió prim
 
 \subsection{Diseño de la campaña en simulación}
 
-La campaña en simulación tiene treinta misiones en dos grupos de quince. En las de un mismo piso, el origen y el destino están en el mismo nivel y no hay relevo; sirven de comparación. En las de dos pisos hay un relevo, y son las que responden la pregunta de investigación.
+La campaña en simulación tiene treinta misiones en dos grupos de quince. En las de un mismo piso, el origen y el destino coinciden en el piso y no hay relevo; sirven de comparación. En las de dos pisos hay un relevo, y son las que responden la pregunta de investigación.
 
 Los pares de origen y destino salen de un sorteo, porque con pares elegidos a mano se corre el riesgo de probar justo los recorridos que funcionan. Se sortean entre los puntos del catálogo menos los dos puntos de transferencia, catorce en el piso 2 y quince en el piso 3, que dan 392 pares posibles dentro de un mismo piso y 420 entre pisos, y ningún par se repite. La semilla del sorteo es la fecha en que se hace, escrita como año, mes y día, y el listado se guarda en el repositorio antes de la primera corrida. Así, nadie puede probar semillas hasta obtener un sorteo conveniente.
 

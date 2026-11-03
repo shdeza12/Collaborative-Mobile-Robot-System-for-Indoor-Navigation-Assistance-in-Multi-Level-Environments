@@ -342,9 +342,9 @@ def planteamiento(m):
     m.separador(['PLANTEAMIENTO DEL', 'PROBLEMA'], 'Tiempo: 3 s.')
     s = m.contenido('Planteamiento del problema', (
         'Tiempo: 50 s. Orientarse exige construir y actualizar una representación mental del '
-        'espacio, y en un edificio de varios pisos el cambio de nivel rompe la continuidad del '
+        'espacio, y en un edificio de varios pisos el cambio de piso rompe la continuidad del '
         'recorrido. La robótica colaborativa tiene una teoría de asignación de tareas aceptada desde '
-        'Gerkey y Matarić (2004), pero la mayoría de sus desarrollos se evaluó en una sola planta '
+        'Gerkey y Matarić (2004), pero la mayoría de sus desarrollos se evaluó en un solo piso '
         '(Nair, 2024). Resolver el cambio de piso con un solo robot exige subir escaleras o '
         'intervenir el ascensor, como hacen Song et al. (2024) con dispositivos conectados en la '
         'cabina: más costo de hardware y obras en el edificio. De ahí la pregunta problema.'))
@@ -406,9 +406,9 @@ def objetivos(m):
 
     s = m.contenido('Alcance', (
         'Tiempo: 30 s. El alcance del sistema: una prueba de concepto con dos agentes, uno por piso, '
-        'que se relevan en la escalera sin que ninguno cruce de nivel; una misión a la vez, en '
+        'que se relevan en la escalera sin que ninguno cambie de piso; una misión a la vez, en '
         'interiores y en condiciones controladas. Los agentes no accionan puertas ni ascensores y no '
-        'transportan carga. La foto es de la campaña del 16 de octubre: una persona sigue al agente '
+        'transportan carga. La foto es de la campaña del 16 de octubre: un usuario sigue al agente '
         'del piso 4.'))
     forma(s, MSO_SHAPE.ROUNDED_RECTANGLE, 70, 128, 330, 372, relleno=BLANCO, borde=AZUL_ALCANCE,
           grosor=1.5, radio=0.08)
@@ -418,14 +418,14 @@ def objetivos(m):
     alcance = ['Desarrollo de una prueba de concepto funcional',
                'Implementación con dos agentes colaborativos, uno por piso',
                'Operación en entorno interior controlado, una misión a la vez',
-               'Guía de usuarios entre pisos mediante relevo, sin que ningún agente cruce de piso',
+               'Guía de usuarios entre pisos mediante relevo, sin que ningún agente cambie de piso',
                'Validación mediante pruebas experimentales en simulación y con los agentes físicos']
     for i, t in enumerate(alcance):
         y = 168 + i * 64
         texto(s, 92, y - 4, 26, 28, '✔', tam=20, fuente='Segoe UI Symbol', color=VERDE)
         texto(s, 118, y, 270, 56, t, tam=14)
     imagen(s, REC / 'foto_guiado.jpg', 430, 140, w=390)
-    fuente(s, 430, 362, 390, 'Una persona sigue al agente del piso 4 en el edificio Catalayud, '
+    fuente(s, 430, 362, 390, 'Un usuario sigue al agente del piso 4 en el edificio Catalayud, '
            '16 de octubre de 2026. Fuente: Elaboración propia')
 
 
@@ -436,9 +436,9 @@ def marco_referencial(m):
         'navegación e interacción; RHINO operó seis días en un museo en 1997. De la navegación en '
         'interiores, el flujo de Nav2 sobre ROS 2. De la coordinación multirrobot, la taxonomía de '
         'asignación y la planificación con relevos, donde lo que se traspasa es un paquete que puede '
-        'esperar; una persona no puede, y por eso el relevo incluye una confirmación con plazo. De '
+        'esperar; un usuario no puede, y por eso el relevo incluye una confirmación con plazo. De '
         'la movilidad entre pisos, el mapa por piso unido por un punto de transición; allí el robot '
-        'cruza de nivel. La combinación nueva es resolver la discontinuidad entre pisos sin que '
+        'cambia de piso. La combinación nueva es resolver la discontinuidad entre pisos sin que '
         'ningún agente la atraviese.'))
     def linea_cita(nombre, cita):
         return [{'t': nombre, 'negrita': True, 'tam': 12}, {'t': cita, 'tam': 9.5, 'color': GRIS}]
@@ -454,7 +454,7 @@ def marco_referencial(m):
          'La taxonomía de asignación; la planificación con relevos',
          'Lo que se traspasa puede esperar sin límite'],
         [linea_cita('Movilidad entre pisos', 'Kim et al. (2024); Song et al. (2024)'),
-         'El mapa por piso unido por un punto de transición', 'El robot cruza de nivel'],
+         'El mapa por piso unido por un punto de transición', 'El robot cambia de piso'],
         [linea_cita('Distribución del cómputo', 'Malavolta et al. (2023)'), 'La navegación a bordo '
          'y la coordinación en un nodo central', 'Ninguno'],
     ]
@@ -578,8 +578,8 @@ def desarrollo(m):
 
     s = m.contenido('Arquitectura funcional', (
         'Tiempo: 55 s. Un coordinador central en el portátil decide y manda; dos agentes, uno por '
-        'piso, ejecutan; la página web es la vía del usuario. Lo que cruza la escalera es la persona, '
-        'y lo que se traspasa entre agentes es la responsabilidad de guiarla. Antes de escribir código '
+        'piso, ejecutan; la página web es la vía del usuario. Lo que cruza la escalera es el usuario, '
+        'y lo que se traspasa entre agentes es la responsabilidad de guiarlo. Antes de escribir código '
         'se fijó un contrato de tres reglas. La tercera evita tener dos copias de la misma lógica en '
         'el coordinador y en la página. Los requisitos se reconstruyeron desde los objetivos: '
         'treinta y seis, cada uno con su prueba. El código del coordinador, del planificador y de la '
@@ -604,10 +604,10 @@ def desarrollo(m):
     s = m.contenido('Planificación del relevo', (
         'Tiempo: 45 s. El relevo se planifica en una función pura, sin ROS 2: entra el catálogo de '
         'puntos y el par origen-destino, y salen los tramos. En el mismo piso son dos tramos del mismo '
-        'agente; entre pisos, cuatro, con el relevo en el punto de transferencia de cada nivel. Así '
+        'agente; entre pisos, cuatro, con el relevo en el punto de transferencia de cada piso. Así '
         'una prueba automática recorre las 930 solicitudes posibles del catálogo de simulación en '
         'milisegundos, y con ella se encontró un defecto que una corrida no habría mostrado. Con un '
-        'agente por nivel, la asignación no necesita optimizador: el método húngaro devolvería la '
+        'agente por piso, la asignación no necesita optimizador: el método húngaro devolvería la '
         'misma tabla. '
         'Abajo, las etapas que publica el coordinador y que sirven de marcas de tiempo.'))
     bx, by, bw, bh = imagen(s, FIG / 'planificador.png', 64, 104, w=445)
@@ -617,7 +617,7 @@ def desarrollo(m):
            'Mismo piso: dos tramos de un agente. Pisos distintos: cuatro tramos y un relevo',
            'Una prueba automática planifica las 930 solicitudes posibles (31 × 30 puntos) en '
            'milisegundos, sin simulador',
-           'Un agente por nivel: la asignación es ST–SR–IA, y el método húngaro devolvería la '
+           'Un agente por piso: la asignación es ST–SR–IA, y el método húngaro devolvería la '
            'misma tabla']
     texto(s, 522, 110, 318, 250, [{'t': v, 'vineta': True, 'despues': 8} for v in vin], tam=13.5)
     texto(s, 64, 350, 400, 18, 'Etapas de una misión, como las publica el coordinador', tam=11,
@@ -632,7 +632,7 @@ def desarrollo(m):
         texto(s, x + (20 if i else 6), 370, 86 if i else 92, 48, {'t': e, 'alin': 'c'}, tam=10.5,
               negrita=True, color=BLANCO, anclaje='m')
     texto(s, 64, 430, 640, 50, 'Con esa prueba se encontró un defecto: con el origen en el punto de '
-          'transferencia de su nivel, el plan mandaba al mismo agente dos veces a la misma pose, y '
+          'transferencia de su piso, el plan mandaba al mismo agente dos veces a la misma pose, y '
           'Nav2 devuelve éxito al instante ante un desplazamiento de cero metros.', tam=12,
           color=GRIS)
 
@@ -676,7 +676,7 @@ def desarrollo(m):
         'Tiempo: 50 s. Que dos agentes se repartan un recorrido descansa en que puedan comunicarse, '
         'así que la red es la condición del relevo y no un detalle de montaje. Se montó una red '
         'propia porque la de la universidad aísla a sus clientes entre sí: los agentes no podrían '
-        'verse. Hay un punto de acceso por planta, en 5 GHz y en canales que no se solapan, unidos '
+        'verse. Hay un punto de acceso por piso, en 5 GHz y en canales que no se solapan, unidos '
         'al enrutador por cable; no son repetidores, que perderían la mitad del caudal. El problema '
         'de mayor efecto no fue el enlace sino el descubrimiento: en ROS 2 cada proceso se anuncia a '
         'todos los demás, y al encender el segundo agente los participantes pasaron de veinte a '
@@ -690,7 +690,7 @@ def desarrollo(m):
     tarjetas = [
         ('Por qué una red propia', 'La red de la universidad aísla a sus clientes entre sí: los '
          'agentes no podrían verse. Y el sistema funciona sin salida a internet'),
-        ('Un punto de acceso por planta', 'En 5 GHz, en canales que no se solapan y unidos al '
+        ('Un punto de acceso por piso', 'En 5 GHz, en canales que no se solapan y unidos al '
          'enrutador por cable. No son repetidores: estos perderían la mitad del caudal'),
         ('El límite no fue el enlace', 'Con las dos cadenas anunciándose, la tarjeta pasó del '
          '52–63 % al 95 % y Nav2 no arrancaba. El enlace iba sobrado'),
@@ -714,7 +714,7 @@ def desarrollo(m):
         'salón. Funciona sin salida a internet. El usuario elige el origen y el destino y sigue la '
         'misión con el texto que redacta el coordinador. La confirmación de cambio de piso y la '
         'cancelación se añadieron al ver el sistema en uso. Sin la confirmación, una misión podía '
-        'darse por completada con la persona en el piso equivocado; la cancelación devuelve al agente '
+        'darse por completada con el usuario en el piso equivocado; la cancelación devuelve al agente '
         'a su escalera.'))
     x1, y1, w1, h1 = imagen(s, FIG / 'hri_seguimiento.png', 66, 106, h=330)
     x2, y2, w2, h2 = imagen(s, FIG / 'hri_confirmacion_piso.png', x1 + w1 + 8, 106, h=330)
@@ -986,7 +986,7 @@ def resultados(m):
              'del 16 de octubre, y se corrigió antes de las pruebas del 23 de octubre.'))
 
     s = m.contenido('Relevo y limitaciones', (
-        'Tiempo: 40 s. Para la persona, el relevo es el tiempo entre llegar a la escalera de su piso '
+        'Tiempo: 40 s. Para el usuario, el relevo es el tiempo entre llegar a la escalera de su piso '
         'y que arranque el guiado en el otro: mediana de 24,8 s, en el que cambia de piso y confirma '
         'en la página. En cuanto a la medición, la continuidad, como criterio binario, no '
         'puede fallar por la forma en que está construida, y por eso se informa el intervalo del '
@@ -994,12 +994,12 @@ def resultados(m):
         'el veredicto y el umbral se corrigió el 25 de septiembre. Y con los agentes físicos la '
         'llegada se tomó de la localización del propio agente, sin flexómetro.'))
     bx, by, bw, bh = imagen(s, REC / 'foto_relevo.jpg', 66, 106, w=395)
-    fuente(s, bx, by + bh + 2, bw, 'Misión 5: la persona baja del piso 4 y el agente del piso 3 la '
+    fuente(s, bx, by + bh + 2, bw, 'Misión 5: el usuario baja del piso 4 y el agente del piso 3 lo '
            'espera en su escalera. Fuente: Elaboración propia')
     forma(s, MSO_SHAPE.ROUNDED_RECTANGLE, 66, 284, 395, 92, relleno=BLANCO, borde=AZUL_CLARO,
           radio=0.12, parrafos=[{'t': '24,8 s', 'fuente': 'Arial Black', 'tam': 24,
                                  'color': AZUL_TITULO, 'alin': 'c'},
-                                {'t': 'mediana, de 18,0 a 29,5 s, desde que la persona llega a la '
+                                {'t': 'mediana, de 18,0 a 29,5 s, desde que el usuario llega a la '
                                       'escalera hasta que arranca el guiado en el otro piso',
                                  'tam': 11.5, 'alin': 'c', 'color': GRIS}], margen=(10, 2, 10, 2))
     texto(s, 66, 386, 395, 80, [{'t': 'La confirmación tomó de 2,3 a 24,7 s; el aviso de los 60 s '
@@ -1022,7 +1022,7 @@ def resultados(m):
 def conclusiones(m):
     m.separador(['CONCLUSIONES'], 'Tiempo: 3 s.')
     s = m.contenido('Conclusiones', (
-        'Tiempo: 50 s. Los cuatro objetivos se cumplieron. Un agente por nivel convierte el cambio de '
+        'Tiempo: 50 s. Los cuatro objetivos se cumplieron. Un agente por piso convierte el cambio de '
         'piso en un problema de coordinación, y separar el planificador de ROS 2 permitió '
         'verificarlo completo. El AWS DeepRacer sirve como agente con tres condiciones que el trabajo '
         'hizo explícitas: el sitio de operación es parte del diseño, la tracción fija la precisión de '
@@ -1030,7 +1030,7 @@ def conclusiones(m):
         'sostiene la cota del 70 % en las dos campañas, con los fallos en la navegación y no en la '
         'coordinación.'))
     concl = [
-        'Un coordinador central con un agente por nivel convierte el cambio de piso en un problema '
+        'Un coordinador central con un agente por piso convierte el cambio de piso en un problema '
         'de coordinación. La asignación es trivial por la estructura del problema; la dificultad '
         'está en coordinar dos agendas que dependen una de otra durante el relevo.',
         'El AWS DeepRacer sirve como agente con tres condiciones: su odometría depende del entorno, '
@@ -1053,11 +1053,11 @@ def conclusiones(m):
 
     s = m.contenido('Respuesta a la pregunta', (
         'Tiempo: 30 s. La respuesta a la pregunta problema es que un esquema de relevo entre dos '
-        'agentes, uno por nivel, es viable. Los agentes se reparten el guiado de una persona que '
+        'agentes, uno por piso, es viable. Los agentes se reparten el guiado de un usuario que '
         'cambia de piso, sin que ninguno atraviese la zona de transición y sin modificar el '
         'edificio. Queda una conclusión de método: decidir qué mide cada criterio fue más difícil que '
-        'construir el sistema. Falta medir la experiencia de la persona guiada, con un estudio con '
-        'usuarios.'))
+        'construir el sistema. Falta medir la experiencia del usuario durante el guiado, con un estudio '
+        'propio.'))
     forma(s, MSO_SHAPE.ROUNDED_RECTANGLE, 66, 130, 306, 150, relleno=NARANJA, borde='F5B195',
           radio=0.16, parrafos='¿Cómo asistir la orientación de usuarios dentro de entornos '
           'interiores con múltiples pisos utilizando sistemas robóticos?', tam=18, negrita=True,
@@ -1065,8 +1065,8 @@ def conclusiones(m):
     forma(s, MSO_SHAPE.RIGHT_ARROW, 382, 186, 56, 40, relleno=AZUL)
     forma(s, MSO_SHAPE.ROUNDED_RECTANGLE, 450, 112, 360, 186, relleno=BLANCO, borde=AZUL_CLARO,
           grosor=1.25, radio=0.1,
-          parrafos='Un esquema de relevo entre dos agentes, uno por nivel, es una respuesta viable: '
-          'los agentes se reparten el guiado de una persona que cambia de piso sin que ninguno '
+          parrafos='Un esquema de relevo entre dos agentes, uno por piso, es una respuesta viable: '
+          'los agentes se reparten el guiado de un usuario que cambia de piso sin que ninguno '
           'atraviese la zona de transición y sin modificar el edificio.', tam=15,
           margen=(14, 6, 12, 6))
     texto(s, 66, 318, 640, 140, [
@@ -1074,8 +1074,8 @@ def conclusiones(m):
               'que no puede fallar, un reloj sin resolución para la magnitud que mide o un modelo del '
               'edificio sin verificar producen resultados que parecen evidencia y no lo son.',
          'vineta': True, 'despues': 10},
-        {'t': 'Queda sin medir la experiencia de la persona guiada, que corresponde a un estudio con '
-              'usuarios.', 'vineta': True}], tam=14)
+        {'t': 'Queda sin medir la experiencia del usuario durante el guiado, que corresponde a un estudio '
+              'propio.', 'vineta': True}], tam=14)
 
 
 def trabajos_futuros(m):
