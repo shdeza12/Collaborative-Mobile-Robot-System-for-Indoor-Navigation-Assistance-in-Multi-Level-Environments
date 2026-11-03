@@ -766,51 +766,6 @@ Con el rumbo estable se pudo reducir de 1,0~m a 0,5~m el margen en el que Nav2 d
 la meta por alcanzada, y con ese margen se superó la prueba de navegación de un
 vehículo (sección~\ref{sec:res-g3}).
 
-\subsection{Los dos vehículos en la misma red}
-\label{sec:dos-vehiculos}
-
-Con los dos vehículos encendidos aparecieron problemas que con uno solo no
-existían. El primero fue de permisos. El software del fabricante se ejecuta con
-el usuario administrador, y la capa de comunicaciones de ROS~2 intercambia los
-datos entre procesos del mismo equipo por memoria compartida, a la que solo ese
-usuario puede escribir. Los programas lanzados con un usuario normal detectaban
-los nodos del fabricante, pero no podían intercambiar mensajes con ellos, y
-ningún error lo advertía. Durante tres semanas eso se interpretó como una avería
-de uno de los vehículos.
-
-El segundo fue de nombres. Los tópicos del software del fabricante no llevan
-espacio de nombres, así que una orden de movimiento llegaba a los dos vehículos y
-la odometría de cada uno recibía el láser del otro. Para resolverlo, cada vehículo
-tiene una partición de comunicaciones propia, que deja esos mensajes dentro del
-vehículo, y la cadena del proyecto corre en un espacio de nombres distinto en cada
-uno.
-
-El tercero apareció en el primer intento de misión con relevo con los dos
-vehículos. Con las dos cadenas completas, unos cuarenta procesos se anunciaban
-unos a otros por la red inalámbrica. La tarjeta de un vehículo pasó de una carga
-de 6 a una de entre 17 y 33, con el procesador al 84--95~\%, y Nav2 no llegaba a
-arrancar. El aumento estaba en los procesos que hablan con la red, mientras la
-navegación gastaba menos que antes.
-
-La solución fue la topología en estrella del diseño
-(sección~\ref{sec:teo-ros2}). Los procesos internos de cada vehículo solo se
-buscan dentro de él. Lo que el coordinador necesita de un vehículo, que es su
-navegación, su estado y su media vuelta, solo se anuncia al computador portátil,
-y los vehículos no se ven entre sí. El coordinador y el grabador de las misiones
-pasaron del vehículo al portátil, dentro de un contenedor con Jazzy, porque la
-acción de navegación de Jazzy no es compatible con la de Humble. Cada vehículo
-publica su pose en el mapa dos veces por segundo, y es lo que el coordinador usa
-para verificar las llegadas.
-
-En las pruebas de laboratorio con todo el sistema, cada tarjeta quedó al 54~\% y
-al 59~\% de uso en reposo, y al 68~\% y al 74~\% navegando, con las ruedas en el
-aire. El controlador de Nav2, que corre a 10~Hz, se atrasó una vez en un vehículo
-y cinco en el otro, sin bajar de 5,5~Hz. La red tiene un punto de acceso por piso
-en la banda de 5~GHz, los dos en la misma subred. Entre los dos vehículos, el
-tiempo de ida y vuelta de los mensajes de ROS~2 tuvo una mediana de 5,99~ms y un
-percentil 95 de 11,12~ms, sin pérdidas. El requisito de comunicación entre los
-vehículos fija un límite de 100~ms para la mediana.
-
 \subsection{La media vuelta en varios tiempos}
 \label{sec:media-vuelta}
 
@@ -843,6 +798,219 @@ automáticas del coordinador, y en la campaña con los dos vehículos la maniobr
 ejecutó 24 veces (sección~\ref{sec:res-completo}).
 
 % ---------------------------------------------------------------------
+% =====================================================================
+%  LA RED QUE COMUNICA A LOS AGENTES
+%  Sección propia, y no una subsección de la plataforma, porque la red no
+%  pertenece a un vehículo: es la infraestructura sobre la que descansa el
+%  aporte del trabajo. Sin ella el relevo no existe.
+%
+%  Fuentes: S26_red_5ghz_regulatorio.md, S26_bucle_capa2_y_red_dos_AP.md,
+%  S26_red_campo_topologia_final.md, S26_piso3_deepy_y_saturacion.md,
+%  S26_laboratorio_carga_dos_vehiculos.md y TOPOLOGIA_RED.md.
+% =====================================================================
+\section{La red que comunica a los agentes}
+\label{sec:red}
+% Etiqueta heredada de la subsección que esta sección sustituye:
+% cuatro remisiones del documento apuntan a ella.
+\label{sec:dos-vehiculos}
+
+El aporte de este trabajo es que dos agentes se repartan un recorrido, y eso
+descansa por completo en que puedan comunicarse. La red no es, por tanto, un
+detalle de montaje: es la condición que hace posible el relevo. Esta sección
+cuenta cómo se construyó, por qué se eligió así y qué costó.
+
+\subsection{Por qué una red inalámbrica local}
+\label{sec:red-por-que}
+
+Los agentes se mueven, de modo que el enlace tiene que ser inalámbrico. Dentro de
+esa restricción se consideraron tres opciones.
+
+\textbf{La red de la universidad} quedó descartada por tres razones, y cualquiera
+de ellas bastaba. Aísla a sus clientes entre sí, de modo que los dos agentes no
+podrían verse; no admite reservas de dirección, y el middleware necesita
+direcciones estables; y no se puede diagnosticar ni modificar, lo que convierte
+cualquier anomalía en algo que el equipo no puede resolver. A eso se añade que su
+disponibilidad depende de terceros, lo que es inaceptable para una demostración
+con fecha fija.
+
+\textbf{Una red móvil} se descartó por una razón de diseño, no de costo: el
+sistema está pensado para funcionar sin salida a internet, porque el edificio no
+siempre la tiene y porque la interfaz debe cargar en el teléfono de un visitante
+sin depender de su plan de datos. Introducir un enlace celular reintroduciría la
+dependencia que el diseño evita.
+
+\textbf{Una red propia sobre Wi-Fi} es la que se adoptó. Reúne las condiciones que
+el sistema necesita: el equipo la controla por completo, permite fijar direcciones
+por dirección física, admite medir y diagnosticar, y no depende de ningún servicio
+externo. El hardware ya estaba disponible, lo que además evitó gasto.
+
+La decisión tiene un límite conocido y conviene declararlo: un enlace inalámbrico
+compartido no garantiza tiempos de entrega. Por eso el proyecto fijó un requisito
+de red con cotas numéricas y lo verificó con medición, en lugar de suponer que el
+enlace sería suficiente (sección~\ref{sec:red-medida}).
+
+\subsection{Cómo quedó construida}
+\label{sec:red-topologia}
+
+La figura~\ref{fig:red-topologia} muestra el montaje. Un encaminador reparte las
+direcciones de toda la red. De él cuelgan, \textbf{por cable}, dos puntos de
+acceso, uno en cada planta, y cada agente se conecta al de su piso.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\textwidth]{imagenes/red_topologia.png}
+  \caption{Montaje físico de la red. Los dos puntos de acceso trabajan en modo
+    puente: no reparten direcciones ni encaminan, de manera que toda la
+    instalación forma una sola subred. Es la condición para que los agentes se
+    descubran entre sí.}
+  \label{fig:red-topologia}
+\end{figure}
+
+Cuatro decisiones de ese montaje merecen explicación, porque las tres primeras se
+tomaron tras medir y la cuarta corrige un error.
+
+\textbf{Banda de 5~GHz.} Un barrido del sitio encontró 33 redes ajenas en la banda
+de 2,4~GHz y la parte baja de la de 5~GHz prácticamente vacía. Las tarjetas de los
+vehículos admiten las dos bandas, así que se eligió la despejada. Medido entre los
+dos agentes, el cambio de banda redujo el percentil 95 del tiempo de ida y vuelta
+de 20,76 a 11,12~ms, prácticamente a la mitad: lo que mejora es la cola de la
+distribución, que es justo lo que la interferencia degrada.
+
+\textbf{Un punto de acceso por planta, en canales separados.} La losa entre pisos
+atenúa la señal, de modo que un solo punto de acceso no cubre las dos plantas con
+holgura. Los dos trabajan en canales que no se solapan, 36 y 44 con 40~MHz de
+ancho; con 80~MHz un canal centrado en el 36 ocuparía hasta el 48 y los dos
+equipos se estorbarían.
+
+\textbf{Enlace entre plantas por cable.} Es la decisión que más problemas evitó.
+Un punto de acceso que repite por aire usa la misma radio para hablar con sus
+clientes y con el resto de la red, lo que reduce a la mitad el caudal disponible y
+añade un salto inalámbrico a cada mensaje. El cable elimina las dos cosas.
+
+\textbf{Una sola subred y un solo servidor de direcciones.} Los dos puntos de
+acceso trabajan en modo puente. Es un requisito del middleware, no una
+preferencia: dos subredes separadas impiden el descubrimiento y el sistema deja de
+funcionar aunque cada agente, por separado, esté perfectamente conectado.
+
+\subsection{Tres defectos que ningún mensaje de error delató}
+\label{sec:red-defectos}
+
+La construcción de la red consumió más tiempo del previsto, y la razón tiene un
+patrón común: los tres defectos que aparecieron se manifestaban como
+funcionamiento normal.
+
+\textbf{La radio no podía transmitir en 5~GHz.} A los dos vehículos les faltaba el
+fichero con las reglas de uso del espectro, de modo que el núcleo del sistema
+operativo dejaba las 31 frecuencias de esa banda en modo de solo escucha. El
+efecto era desconcertante: el vehículo \emph{veía} las redes de 5~GHz en el
+barrido, con buena señal, y al intentar conectarse fallaba sin mensaje. Instalado
+el fichero, quedaron disponibles 13 canales.
+
+\textbf{Un lazo en la red duplicaba el tráfico.} Durante una sesión, los mensajes
+llegaban repetidos. La herramienta habitual de diagnóstico informaba
+\emph{cero por ciento de pérdida} y la red parecía sana. Contando los paquetes que
+el núcleo del sistema operativo recibía en el vehículo se vio lo que pasaba: de
+100 peticiones enviadas, el vehículo recibía 147. La causa era un punto de acceso
+conectado a la vez por cable y por radio, que ofrecía dos caminos a los mismos
+mensajes.
+
+\textbf{Dos servidores de direcciones a la vez.} Un punto de acceso quedó
+repartiendo direcciones de una subred propia mientras el encaminador repartía las
+suyas. Cada equipo recibía dirección de quien respondiera primero, de manera que
+unos quedaban en una subred y otros en otra, al azar. Los agentes dejaban de
+verse sin que nada informara del motivo.
+
+Los tres se encontraron midiendo, no leyendo registros de error, porque ninguno
+produjo uno. Es la misma lección que el trabajo encontró en la odometría: una
+magnitud que no se mide no se puede dar por buena.
+
+\subsection{El descubrimiento y la carga de las tarjetas}
+\label{sec:red-descubrimiento}
+
+El problema de red con mayor efecto sobre el sistema no estuvo en el enlace sino
+en \emph{cuántos} procesos se anunciaban por él.
+
+Con un solo agente en marcha, su tarjeta trabajaba entre el 52 y el 63~\% de
+capacidad. Al encender el segundo, unos cuarenta procesos de las dos cadenas
+pasaron a anunciarse mutuamente por la red inalámbrica, y la tarjeta subió al
+95~\%: Nav2 ya no alcanzaba a arrancar. Lo revelador es que el aumento no estaba
+en la navegación, que gastaba menos que antes, sino en los procesos que atienden
+la red. Ninguno hacía más trabajo útil con dos vehículos que con uno; lo que
+creció fue el número de participantes con los que cada uno negociaba.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.92\textwidth]{imagenes/red_carga.png}
+  \caption{Uso del procesador de la tarjeta de un agente según el esquema de
+    descubrimiento. Con las dos cadenas anunciándose por difusión la tarjeta se
+    satura; limitar el descubrimiento a los participantes necesarios devuelve el
+    sistema completo a un costo comparable al de un solo agente.}
+  \label{fig:red-carga}
+\end{figure}
+
+La solución fue dejar de anunciar todo a todos. Los procesos internos de cada
+vehículo se descubren solo dentro de él, y lo que el coordinador necesita ---la
+navegación, el estado y la media vuelta--- se anuncia únicamente al computador
+portátil. Los agentes no se descubren entre sí, lo que es coherente con el diseño:
+nunca se comunican directamente, siempre a través del coordinador. Con ese
+esquema, el sistema completo con los dos agentes volvió a entre el 68 y el 74~\%
+de la tarjeta, del mismo orden que un agente solo.
+
+Conviene subrayar la conclusión, porque no era previsible: \textbf{el límite del
+sistema no fue el ancho de banda del enlace sino el costo de procesamiento del
+descubrimiento}. El enlace nunca estuvo cerca de saturarse; las tarjetas sí.
+
+\subsection{La red medida}
+\label{sec:red-medida}
+
+El requisito de red exige que los agentes y el coordinador se alcancen con latencia
+acotada. Las cotas ---mediana de 100~ms y percentil 95 de 250~ms para el tiempo de
+ida y vuelta, sin pérdidas--- se fijaron \textbf{antes} de medir, y se derivan de
+la frecuencia a la que cada agente publica su estado: a 2~Hz, el período es de
+500~ms, de modo que una latencia de ida de ese orden desfasaría la información del
+sistema en una muestra entera.
+
+La medida se toma entre los dos agentes, y no contra un tercer equipo, por una
+razón que la propia campaña hizo evidente. Los tiempos medidos desde el computador
+portátil daban promedios de 20 a 24~ms con picos de 140~ms, mientras los agentes
+medían por debajo de 2,2~ms contra el mismo destino: la diferencia era el enlace
+del portátil, que seguía en la banda de 2,4~GHz. Medir desde un equipo que no
+participa en la tarea mide el peor enlace de la cadena.
+
+\begin{table}[H]
+  \centering\small
+  \caption{Comunicación entre los dos agentes. Las dos primeras filas son el
+    instrumento del proyecto, con las cotas inscritas antes de medir, sobre 600
+    mensajes. La tercera corresponde al montaje definitivo y se midió con
+    paquetes de red, no con mensajes del middleware.}
+  \label{tab:red-medida}
+  \begin{tabular}{@{}llccc@{}}
+    \toprule
+    \textbf{Configuración} & \textbf{Medida} & \textbf{Mediana} & \textbf{p95} & \textbf{Pérdida} \\ \midrule
+    2,4 GHz, un punto de acceso & mensajes de ROS 2 & 7,61 ms & 20,76 ms & 0 \% \\
+    5 GHz, un punto de acceso & mensajes de ROS 2 & \textbf{5,99 ms} & \textbf{11,12 ms} & 0 \% \\
+    5 GHz, uno por planta & paquetes de red & 2,13 y 1,99 ms & --- & 0 \% \\ \bottomrule
+  \end{tabular}
+\end{table}
+
+La tabla~\ref{tab:red-medida} reúne lo medido. La segunda fila es la que verifica
+el requisito: con el instrumento del proyecto, entre los dos agentes y contra las
+cotas inscritas, la mediana quedó en 5,99~ms y el percentil 95 en 11,12~ms, sin
+pérdidas, lo que deja un margen de más de un orden de magnitud frente al límite
+exigido.
+
+La tercera fila corresponde al montaje definitivo, con cada agente en el punto de
+acceso de su planta, y se incluye porque es la configuración que el sistema usa de
+verdad. Debe leerse por lo que es: tiempos de ida y vuelta de paquetes de red
+contra el encaminador, sin pérdidas ni duplicados, no una repetición de la medida
+del requisito. \textbf{Esa repetición queda pendiente}, y se señala en las
+limitaciones de la medición.
+
+Con ese margen, la conclusión que importa para el resto del trabajo es que
+\textbf{la red no es el factor que limita el desempeño del sistema}. Los límites
+encontrados están en la plataforma ---la banda muerta de tracción, la odometría
+del láser--- y no en la comunicación entre los agentes.
+
 \section{Interfaz de interacción con el usuario}
 \label{sec:oe3}
 

@@ -543,35 +543,83 @@ y 88,38$^\circ$ en el otro, y con el agente quieto su rumbo se movió
 láser. Con el rumbo estable se redujo de 1,0 a 0,5~m el margen en el que Nav2 da
 la meta por alcanzada, y con ese margen se superó la prueba de navegación de un agente.
 
-\subsection{Los dos agentes en la misma red}
+% ---------------------------------------------------------------------
+%  Versión condensada de la sección «La red que comunica a los agentes»
+%  (§3.5 del documento completo). Se conserva la justificación de la
+%  tecnología, la topología con su figura y la medida frente al requisito;
+%  se resumen los defectos y la carga, que allá van con más detalle.
+% ---------------------------------------------------------------------
+\subsection{La red que comunica a los agentes}
 \label{sec:dos-vehiculos}
+\label{sec:red}
 
-Con los dos agentes encendidos aparecieron tres problemas que con uno solo no
-existían. El primero fue de permisos. El software del fabricante se ejecuta con
-el usuario administrador, y ROS~2 intercambia los datos entre procesos del mismo
-equipo por memoria compartida, a la que solo ese usuario puede escribir. Los
-programas lanzados con otro usuario veían los nodos del fabricante pero no podían
-intercambiar mensajes con ellos, sin ningún error, y durante tres semanas eso
-pareció una avería de uno de los agentes.
+Que dos agentes se repartan un recorrido descansa por completo en que puedan
+comunicarse, de modo que la red no es un detalle de montaje sino la condición que
+hace posible el relevo.
 
-El segundo fue de nombres. Los tópicos del fabricante no llevan espacio de
-nombres, así que una orden de movimiento llegaba a los dos agentes y la
-odometría de cada uno recibía el láser del otro. Cada agente tiene ahora una
-partición de comunicaciones propia, y la cadena del proyecto corre con un espacio
-de nombres distinto en cada uno.
+\textbf{Por qué una red propia sobre Wi-Fi.} Los agentes se mueven, así que el
+enlace tiene que ser inalámbrico. La red de la universidad quedó descartada
+porque aísla a sus clientes entre sí ---los agentes no podrían verse---, no
+admite reservas de dirección y no se puede diagnosticar ni modificar. Una red
+móvil contradiría el diseño, que funciona sin salida a internet porque el
+edificio no siempre la tiene. Una red propia reúne lo que el sistema necesita:
+control completo, direcciones fijas por dirección física y posibilidad de medir.
+Su límite conocido es que un enlace compartido no garantiza tiempos de entrega, y
+por eso el requisito de red fija cotas numéricas y se verifica midiendo.
 
-El tercero apareció en el primer intento de misión con relevo. Con las dos cadenas completas, todos sus procesos se anunciaban unos a otros por la red inalámbrica. La carga de la tarjeta de un agente pasó de 6 a entre 17 y 33, con
-el procesador al 84--95~\%, y Nav2 no llegaba a arrancar. La respuesta fue la topología en estrella del diseño: los procesos de
-cada agente solo se buscan dentro de él, lo que el coordinador necesita solo se
-anuncia al portátil, y los agentes no se ven entre sí. El coordinador y el
-grabador pasaron al portátil, en un contenedor con Jazzy, y verifican las
-llegadas con la pose que cada agente publica dos veces por segundo.
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.96\textwidth]{imagenes/red_topologia.png}
+  \caption{Montaje físico de la red. Los dos puntos de acceso trabajan en modo
+    puente, de manera que toda la instalación forma una sola subred: es la
+    condición para que los agentes se descubran entre sí.}
+  \label{fig:red-topologia}
+\end{figure}
 
-Con todo el sistema en el laboratorio, las tarjetas quedaron al 54~\% y al 59~\%
-de uso en reposo, y al 68~\% y al 74~\% navegando con las ruedas en el aire. El controlador de Nav2, que corre a 10~Hz, no bajó de 5,5~Hz. La red tiene un punto
-de acceso de 5~GHz por piso, en la misma subred. Entre los dos agentes, el
-tiempo de ida y vuelta de los mensajes tuvo una mediana de 5,99~ms y un percentil
-95 de 11,12~ms, sin pérdidas, frente al límite de 100~ms que fija el requisito.
+\textbf{Cómo quedó construida.} Un encaminador reparte las direcciones de toda la
+red y de él cuelgan por cable dos puntos de acceso, uno por planta. Se trabaja en
+la banda de 5~GHz porque un barrido del sitio encontró 33 redes ajenas en la de
+2,4~GHz y la parte baja de la de 5~GHz prácticamente vacía; el cambio de banda
+redujo el percentil 95 del tiempo de ida y vuelta de 20,76 a 11,12~ms. Hay un
+punto de acceso por planta porque la losa atenúa la señal, en canales que no se
+solapan. El enlace entre plantas va por cable: un punto de acceso que repite por
+aire usa la misma radio para sus clientes y para el resto de la red, lo que
+reduce el caudal a la mitad y añade un salto a cada mensaje.
+
+\textbf{Lo que costó construirla.} Aparecieron tres defectos y ninguno produjo un
+mensaje de error. A las dos tarjetas les faltaba el fichero con las reglas de uso
+del espectro, de modo que veían las redes de 5~GHz pero no podían transmitir en
+ellas. Un punto de acceso conectado a la vez por cable y por radio ofrecía dos
+caminos a los mismos mensajes: de 100 peticiones enviadas, un agente recibía 147,
+mientras la herramienta de diagnóstico informaba cero por ciento de pérdida. Y
+durante una sesión hubo dos servidores de direcciones repartiendo subredes
+distintas, con lo que los agentes dejaron de verse al azar. Los tres se
+encontraron midiendo, no leyendo registros.
+
+\textbf{El descubrimiento y la carga.} El problema de mayor efecto no estuvo en el
+enlace sino en cuántos procesos se anunciaban por él. Con un agente, su tarjeta
+trabajaba entre el 52 y el 63~\% de capacidad; al encender el segundo, los
+procesos de las dos cadenas pasaron a anunciarse mutuamente y la tarjeta subió al
+95~\%, con Nav2 sin alcanzar a arrancar. El aumento no estaba en la navegación,
+que gastaba menos, sino en los procesos que atienden la red. La respuesta fue la
+topología en estrella: los procesos de cada agente se descubren solo dentro de él
+y lo que el coordinador necesita se anuncia únicamente al portátil, de modo que
+los agentes no se ven entre sí ---coherente con el diseño, porque nunca se
+comunican directamente---. Con ese esquema el sistema completo volvió a entre el
+68 y el 74~\% de la tarjeta. \textbf{El límite no fue el ancho de banda del
+enlace sino el costo de procesamiento del descubrimiento.}
+
+\textbf{La red medida.} Las cotas del requisito ---mediana de 100~ms y percentil
+95 de 250~ms, sin pérdidas--- se fijaron antes de medir, derivadas de los 2~Hz a
+los que cada agente publica su estado. Entre los dos agentes, sobre 600 mensajes,
+la mediana fue de \textbf{5,99~ms} y el percentil 95 de \textbf{11,12~ms}, sin
+pérdidas: más de un orden de magnitud de margen. En el montaje definitivo, con
+cada agente en el punto de acceso de su planta, el tiempo de ida y vuelta de
+paquetes de red contra el encaminador fue de 2,13 y 1,99~ms, sin pérdidas ni
+duplicados; esa comprobación no sustituye a la del requisito, que no se repitió
+en esa configuración. La conclusión que importa para el resto del trabajo es que
+\textbf{la red no es el factor que limita el desempeño del sistema}: los límites
+encontrados están en la plataforma y no en la comunicación.
 
 \subsection{La media vuelta en varios tiempos}
 \label{sec:media-vuelta}
