@@ -6,14 +6,15 @@ Para leer el proyecto completo, el documento de la tesis. Para el detalle de cad
 
 <div class="decision-tarjeta" markdown>
 ### :material-file-document-outline: La tesis
-El documento final: contexto, marco referencial, desarrollo, resultados, conclusiones y trabajos futuros. La versión publicada es del 15 de octubre y todavía no incluye la campaña con los vehículos.
+El documento final: contexto, marco referencial, desarrollo, resultados, conclusiones y trabajos futuros. La versión publicada es del 1 de noviembre, tiene 94 páginas e incluye la campaña con los vehículos. Hay una versión recortada de 77 páginas, en revisión.
 
 [Descargar el PDF :material-download:](https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/raw/main/Documentos/DocumentoFinal/main.pdf){ .md-button .md-button--primary }
+[Versión recortada :material-download:](https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/raw/main/Documentos/DocumentoFinal/main_recorte.pdf){ .md-button .md-button--primary }
 </div>
 
 <div class="decision-tarjeta" markdown>
 ### :material-calendar-week: Informes semanales
-Un informe por semana para el director, de la semana 10 a la 27: qué se hizo, con qué cifras y qué quedó pendiente.
+Un informe por semana para el director, desde la semana 10: qué se hizo, con qué cifras y qué quedó pendiente.
 
 [Ver los informes :material-arrow-right:](https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/tree/main/Documentos/Entregables){ .md-button }
 </div>

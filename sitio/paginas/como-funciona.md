@@ -46,6 +46,9 @@ El sistema se construyó y se evaluó primero en simulación, y después se llev
 | Llegada | A 0,25 m | A 0,5 m, verificada 1,5 s después de que la navegación termina | Por la banda muerta el vehículo no alcanza la precisión de la simulación, y sigue rodando al terminar la navegación |
 | Media vuelta | La planifica Nav2 | Maniobra propia del agente | En la salida del piso 4, de 2,5 m de ancho, la de Nav2 abortaba contra la pared |
 
+!!! note "Los pisos 3 y 4, también en simulación"
+    La columna «En simulación» describe la campaña de 30 misiones. Desde el 2 de noviembre de 2026 el sistema también corre en Gazebo en los pisos 3 y 4, con los mismos mapas y destinos que los vehículos, con la misma página, y con su media vuelta y su forma de verificar la llegada. Lo físico sigue sin reproducirse: la odometría real, la banda muerta, el radio de giro de cada vehículo y la red. [Ver la evidencia](https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/blob/main/Documentos/Evidencia/S30_simulacion_catalayud.md).
+
 ## Una misión con relevo
 
 Si el origen y el destino están en el mismo piso, la misión tiene dos tramos del mismo robot: ir a recoger a la persona y llevarla. Si están en pisos distintos, tiene cuatro, y el punto de encuentro es siempre la escalera.

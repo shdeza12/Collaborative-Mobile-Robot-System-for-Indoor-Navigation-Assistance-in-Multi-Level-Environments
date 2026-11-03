@@ -387,3 +387,14 @@ Fuente: Entregables S28 y S29; `Evidencia/S28_video_campana.md`; `Evidencia/S28_
   publicó y es el octavo del anexo A. El documento recortado queda en 77 páginas.
 
 Fuente: Entregable S29; `Evidencia/S29_video_pagina_cancelacion.md`; `Evidencia/S29_simulacion_relevo_portatil.md`.
+
+### S30 (2 al 8 de noviembre): sesión con los jurados y simulación en los pisos 3 y 4
+
+- 2 de noviembre: los mundos de los pisos 3 y 4 de Catalayud corrieron en simulación, cada robot en su Gazebo, con los
+  mismos mapas y destinos que los vehículos: 13 misiones encadenadas, 10 completadas y 3 canceladas a propósito, también
+  con la media vuelta y la llegada de los vehículos. Es una comprobación, no una campaña.
+- 2 de noviembre: guion de la sesión de una hora con los jurados, con ensayo, recorrido de cuatro misiones y plan
+  alternativo. Con robots falsos se comprobó que una segunda misión con otra en curso hace fallar la primera, por lo que
+  la sesión usa un solo teléfono.
+
+Fuente: `Evidencia/S30_simulacion_catalayud.md`; `Evidencia/S30_segunda_mision_y_cancelacion.md`; `GUION_SESION_JURADOS.md`.

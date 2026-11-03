@@ -85,5 +85,6 @@ El proyecto no salió en línea recta: empezó con otra plataforma, en un simula
 <a class="semana-tarjeta" href="semanas/s27/"><img src="semanas/img/s27_1.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 27 · 12 al 18 de octubre</span><span class="titulo">Campaña con los dos vehículos</span></span></a>
 <a class="semana-tarjeta" href="semanas/s28/"><img src="semanas/img/s28_1.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 28 · desde el 19 de octubre</span><span class="titulo">Documento final</span></span></a>
 <a class="semana-tarjeta" href="semanas/s29/"><img src="semanas/img/s29_1.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 29 · 26 de octubre al 1 de noviembre</span><span class="titulo">Documento recortado y video de las pruebas</span></span></a>
+<a class="semana-tarjeta" href="semanas/s30/"><img src="semanas/img/s30_1.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 30 · 2 al 8 de noviembre</span><span class="titulo">Sesión con los jurados y simulación en los pisos 3 y 4</span></span></a>
 </div>
 <!-- semanas:fin -->

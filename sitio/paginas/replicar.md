@@ -56,6 +56,18 @@ Todo el código es abierto. La forma más directa de ver el sistema funcionando 
 
     El coordinador, la página del teléfono y una misión con relevo siguen la [guía de arranque](https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/blob/main/Documentos/GUIA_ARRANQUE.md), paso a paso.
 
+    **7. Los pisos 3 y 4 de Catalayud, en simulación.** Cada robot con el mundo y el mapa de su piso:
+
+    ```bash
+    MUNDO=$PWD/simulacion/piso3.world herramientas/robot.sh robot1 nav2 map:=$PWD/Robot/aws-deepracer/deepracer_bringup/maps/piso3.yaml x:=22.10 y:=1.06 yaw:=3.1416 nivel:=3
+    ```
+
+    ```bash
+    MUNDO=$PWD/simulacion/piso4.world herramientas/robot.sh robot2 nav2 map:=$PWD/Robot/aws-deepracer/deepracer_bringup/maps/piso4.yaml x:=24.45 y:=1.21 yaw:=3.1416 nivel:=4
+    ```
+
+    El coordinador con el catálogo de esos pisos y los demás pasos están en la sección 8 de [GUIA_PISOS_3_Y_4.md](https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/blob/main/Documentos/GUIA_PISOS_3_Y_4.md). Sirve para ver el sistema, no para medir.
+
 === "Con los vehículos"
 
     Cada vehículo usa su tarjeta original con Ubuntu 24.04, ROS 2 Jazzy y el software comunitario [deepracer-custom-car](https://github.com/aws-deepracer-community/deepracer-custom-car). El coordinador corre en un portátil con Humble, dentro de un contenedor con Jazzy.

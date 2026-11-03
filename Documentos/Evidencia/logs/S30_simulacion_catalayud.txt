@@ -1,0 +1,104 @@
+# Simulación en los pisos 3 y 4 de Catalayud, 2 de noviembre de 2026 (portátil)
+
+Extractos del registro del coordinador. Hora local (UTC-5). Completo en ~/tesis_evidencia/sim_catalayud_2026-11-02/.
+
+## Modo simulación, sin ventanas: recorrido de la sesión, pedido por un programa
+
+19:34:26  condicion 'simulacion': la llegada se acepta a 0.25 m o menos (§3.3 del protocolo)
+19:34:26  Coordinador listo. 10 puntos, asignacion {1: 'robot1', 2: 'robot2', 3: 'robot1', 4: 'robot2'}
+19:34:28  Mision: piso4_salon_403 -> piso3_salon_303
+19:34:44  llegada verificada contra /odom: 0.116 m
+19:35:04  llegada verificada contra /odom: 0.068 m
+19:35:09  llegada verificada contra /odom: 0.148 m
+19:35:27  llegada verificada contra /odom: 0.085 m
+19:35:27  Mision completada en 58.7 s, 1 relevo(s)
+19:35:30  Mision: piso3_salon_301 -> piso4_salon_401
+19:35:53  llegada verificada contra /odom: 0.108 m
+19:36:30  llegada verificada contra /odom: 0.067 m
+19:36:31  llegada verificada contra /odom: 0.070 m
+19:37:17  llegada verificada contra /odom: 0.147 m
+19:37:17  Mision completada en 106.6 s, 1 relevo(s)
+19:37:20  Mision: piso4_salon_403 -> piso4_salon_401
+19:37:47  llegada verificada contra /odom: 0.138 m
+19:38:17  llegada verificada contra /odom: 0.092 m
+19:38:17  Mision completada en 57.0 s, 0 relevo(s)
+19:38:20  Mision: piso4_salon_401 -> piso3_salon_303
+19:38:20  llegada verificada contra /odom: 0.089 m
+19:39:01  llegada verificada contra /odom: 0.180 m
+19:39:01  llegada verificada contra /odom: 0.128 m
+19:39:14  llegada verificada contra /odom: 0.206 m
+19:39:14  Mision terminada SIN exito tras 53.9 s: Cancelada por el usuario
+
+## Modo vehículos (condicion:=hardware), sin ventanas: el mismo recorrido, y una misión más desde la página
+
+19:39:51  condicion 'hardware': la llegada se acepta a 0.5 m o menos (§3.3 del protocolo)
+19:39:52  Coordinador listo. 10 puntos, asignacion {1: 'robot1', 2: 'robot2', 3: 'robot1', 4: 'robot2'}
+19:39:54  Mision: piso4_salon_403 -> piso3_salon_303
+19:39:57  media vuelta: 164 grados en 1 tiempo. reversa 164 grados (completa el giro)
+19:40:13  llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.115 m
+19:40:16  media vuelta: 164 grados en 1 tiempo. reversa 164 grados (completa el giro)
+19:40:32  llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.139 m
+19:40:34  llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.164 m
+19:40:53  llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.126 m
+19:40:53  Mision completada en 59.8 s, 1 relevo(s)
+19:40:56  Mision: piso3_salon_301 -> piso4_salon_401
+19:41:21  llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.135 m
+19:41:24  media vuelta: 163 grados en 1 tiempo. reversa 163 grados (completa el giro)
+19:41:59  llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.138 m
+19:42:01  llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.109 m
+19:42:09  media vuelta: 163 grados en 1 tiempo. reversa 163 grados (completa el giro)
+19:42:47  llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.162 m
+19:42:47  Mision completada en 110.1 s, 1 relevo(s)
+19:42:50  Mision: piso4_salon_403 -> piso4_salon_401
+19:42:53  media vuelta: 164 grados en 1 tiempo. reversa 164 grados (completa el giro)
+19:43:17  llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.167 m
+19:43:20  media vuelta: 162 grados en 1 tiempo. reversa 162 grados (completa el giro)
+19:43:44  llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.159 m
+19:43:44  Mision completada en 54.0 s, 0 relevo(s)
+19:43:47  Mision: piso4_salon_401 -> piso3_salon_303
+19:43:49  llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.160 m
+19:43:52  media vuelta: 164 grados en 1 tiempo. reversa 164 grados (completa el giro)
+19:44:30  llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.123 m
+19:44:32  llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.139 m
+19:44:40  media vuelta: 163 grados en 1 tiempo. reversa 163 grados (completa el giro)
+19:44:48  llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.140 m
+19:44:48  Mision terminada SIN exito tras 61.4 s: Cancelada por el usuario
+19:46:25  Mision: piso4_salon_403 -> piso3_salon_303
+19:46:28  media vuelta: 163 grados en 1 tiempo. reversa 163 grados (completa el giro)
+19:46:45  llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.103 m
+19:46:48  media vuelta: 163 grados en 1 tiempo. reversa 163 grados (completa el giro)
+19:47:04  llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.116 m
+19:47:08  llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.129 m
+19:47:25  media vuelta: 163 grados en 3 tiempos. reversa 11 grados (corta: mapa a 0.08 m); avance 24 grados (corta: LiDAR a 0.09 m); reversa 117 grados (completa el giro)
+19:47:38  llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.132 m
+19:47:38  Mision completada en 72.6 s, 1 relevo(s)
+
+## Modo vehículos (condicion:=hardware), con ventanas: cuatro misiones de Santiago desde la página
+
+19:53:18  condicion 'hardware': la llegada se acepta a 0.5 m o menos (§3.3 del protocolo)
+19:53:19  Coordinador listo. 10 puntos, asignacion {1: 'robot1', 2: 'robot2', 3: 'robot1', 4: 'robot2'}
+19:55:20  Mision: piso3_salon_301 -> piso3_salon_302
+19:55:55  llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.159 m
+19:55:58  media vuelta: 163 grados en 1 tiempo. reversa 163 grados (completa el giro)
+19:56:06  llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.100 m
+19:56:06  Mision completada en 45.7 s, 0 relevo(s)
+19:56:14  Mision: piso3_salon_301 -> piso3_escalera
+19:56:17  media vuelta: 163 grados en 1 tiempo. reversa 163 grados (completa el giro)
+19:56:21  media vuelta: 163 grados en 1 tiempo. reversa 163 grados (completa el giro)
+19:56:51  llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.121 m
+19:56:51  Mision terminada SIN exito tras 37.1 s: Cancelada por el usuario
+19:57:01  Mision: piso3_escalera -> piso4_salon_402
+19:57:03  llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.124 m
+19:57:08  llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.128 m
+19:57:50  llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.163 m
+19:57:50  Mision completada en 49.1 s, 1 relevo(s)
+19:58:13  Mision: piso3_salon_303 -> piso4_salon_403
+19:58:16  media vuelta: 164 grados en 1 tiempo. reversa 164 grados (completa el giro)
+19:58:28  llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.120 m
+19:58:31  media vuelta: 163 grados en 1 tiempo. reversa 163 grados (completa el giro)
+19:58:42  llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.142 m
+19:58:45  media vuelta: 164 grados en 1 tiempo. reversa 164 grados (completa el giro)
+19:59:17  llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.147 m
+19:59:23  media vuelta: 164 grados en 1 tiempo. reversa 164 grados (completa el giro)
+19:59:39  llegada verificada contra la pose del agente en el mapa (/<ns>/estado): 0.115 m
+19:59:39  Mision completada en 85.9 s, 1 relevo(s)

@@ -23,6 +23,9 @@ regla ya vive en otro documento, aquí se cita en vez de copiarse: la lección d
 hardware (RF-27) tiene otras condiciones iniciales y otra verdad de terreno, y su runbook no está
 escrito (§9.2 del runbook de campaña).
 
+Esta guía corre los mundos del edificio Gregorio, los de la campaña. Para correr el sistema en los pisos 3 y 4 de
+Catalayud, sin medir, las órdenes están en la sección 8 de [`GUIA_PISOS_3_Y_4.md`](GUIA_PISOS_3_Y_4.md).
+
 ## Antes de empezar
 
 Se da por hecho que la instalación del [`README.md`](../README.md) está hecha: repositorio

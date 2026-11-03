@@ -256,3 +256,76 @@ largo.
 esa ambigüedad cuesta más que un número mal leído: produce un descuadre que
 parece de medida y manda a remedir lo que estaba bien. Conviene anotarlo en el
 propio plano.
+
+---
+
+## 8. Los dos pisos en simulación
+
+Objetivo: ver el sistema en los mismos pisos que los vehículos, o ensayarlo, sin los vehículos. Corrió por primera vez el
+2026-11-02 ([`S30_simulacion_catalayud.md`](Evidencia/S30_simulacion_catalayud.md)). No sirve para medir. La campaña pide
+un Gazebo nuevo por misión ([`RUNBOOK_CAMPANA.md`](RUNBOOK_CAMPANA.md)) y un factor de tiempo real de 0,99 o más, y con
+ventanas se leyó 0,94 en un robot.
+
+**Con las cadenas de los vehículos encendidas no se levanta esta simulación:** las dos usan los nombres `/robot1` y
+`/robot2`. Primero se paran las cadenas y los agentes.
+
+Todas las órdenes van desde la raíz del clon, cada una en su terminal.
+
+1. Lanzar cada robot con el mundo y el mapa de su piso. Para no abrir las ventanas de Gazebo, se agrega `gui:=false`.
+
+   ```bash
+   source ~/deepracer_sim_ws/install/setup.bash && MUNDO=$PWD/simulacion/piso3.world herramientas/robot.sh robot1 nav2 map:=$PWD/Robot/aws-deepracer/deepracer_bringup/maps/piso3.yaml x:=22.10 y:=1.06 yaw:=3.1416 nivel:=3
+   ```
+
+   ```bash
+   source ~/deepracer_sim_ws/install/setup.bash && MUNDO=$PWD/simulacion/piso4.world herramientas/robot.sh robot2 nav2 map:=$PWD/Robot/aws-deepracer/deepracer_bringup/maps/piso4.yaml x:=24.45 y:=1.21 yaw:=3.1416 nivel:=4
+   ```
+
+   - Esperado: `map_io` lee `piso3.pgm` y `piso4.pgm`, y `Managed nodes are active` en los dos gestores de ciclo de vida.
+   - `robot.sh` imprime «piso 1, mapa mundo_definitivo_piso1.yaml» porque lee `POSE_INICIAL`, que sigue en Gregorio. Esa
+     línea no cuenta: el mapa es el de `map:=`.
+
+2. Pasar la compuerta.
+
+   ```bash
+   source ~/deepracer_sim_ws/install/setup.bash && herramientas/esperar_nav2.sh robot1 && herramientas/esperar_nav2.sh robot2
+   ```
+
+   - Esperado: `LISTA. Nav2, controladores, parametros y condicion inicial.` dos veces. El «desvío vs tabla de spawn», de
+     41 a 47 m, es informativo y sale de la misma tabla.
+   - Si dice `BLOQUEADO`: relanzar solo ese robot con su orden del paso 1. Pasó el 2 de noviembre.
+   - La primera misión se pide enseguida: mientras la pila espera, el error de localización crece hacia el límite de 0,15 m
+     y 10 grados. Con ventanas, robot1 ya estaba en 7,7 grados.
+
+3. Arrancar el coordinador con el catálogo de los pisos 3 y 4.
+
+   ```bash
+   source ~/deepracer_sim_ws/install/setup.bash && ros2 run coordinacion coordinador --ros-args -p use_sim_time:=true -p condicion:=hardware -p ruta_puntos:=$PWD/Robot/aws-deepracer/deepracer_bringup/config/puntos_interes_pisos34.yaml -p robot_nivel_3:=robot1 -p robot_nivel_4:=robot2
+   ```
+
+   - Esperado: `la llegada se acepta a 0.5 m o menos` y `Coordinador listo. 10 puntos`.
+   - `condicion:=hardware` corre el camino de código de los vehículos: media vuelta del agente y llegada con su pose. Sin
+     ese parámetro, la media vuelta la planifica Nav2 y la llegada se juzga contra `/odom`, con tolerancia de 0,25 m.
+
+4. Levantar la interfaz como en la sección 4 de [`GUIA_ARRANQUE.md`](GUIA_ARRANQUE.md), terminales 5 y 6, y abrir
+   `http://localhost:8000/` en el navegador del portátil. Desde un teléfono no se ha probado en este montaje.
+
+   - Esperado: `conectado` y los diez destinos de los pisos 3 y 4.
+   - Si falla: la misma sección de la guía de arranque.
+
+5. Pedir una misión, por ejemplo Salón 403 → Salón 303, con una sola página abierta
+   ([`S30_segunda_mision_y_cancelacion.md`](Evidencia/S30_segunda_mision_y_cancelacion.md)). Las misiones siguientes salen de
+   donde quedó cada robot.
+
+   - Esperado: «Hemos llegado» y `Mision completada` en el coordinador, con un relevo si la misión cambia de piso.
+   - Si la misión falla: el motivo sale en la página y en la terminal del coordinador.
+
+6. Parar: `Ctrl+C` en las terminales del coordinador, del puente y de la página, y después:
+
+   ```bash
+   herramientas/robot.sh robot1 parar && herramientas/robot.sh robot2 parar
+   ```
+
+   - Esperado: `puerto 11345 libre` y `puerto 11346 libre`.
+
+Cierre: una misión con relevo completada desde la página y los dos puertos libres al terminar.

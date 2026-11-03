@@ -56,4 +56,10 @@ El proyecto se hizo en dos semestres de 2026. Esta línea de tiempo reúne los m
 
 <div class="hito prueba"><div class="cuando">16 de octubre</div><div class="titulo">El sistema completo en el edificio <span class="tipo prueba">prueba</span></div><div class="texto">Nueve misiones del sorteo completadas con relevo entre los pisos 3 y 4. Fin de la toma de datos.</div></div>
 
+<div class="hito prueba"><div class="cuando">23 de octubre</div><div class="titulo">Cancelar una misión con los dos vehículos <span class="tipo prueba">prueba</span></div><div class="texto">Seis misiones canceladas, una o más en cada etapa. En las seis, el vehículo volvió a su escalera, dentro de 0,5 m.</div></div>
+
+<div class="fase">Noviembre · cierre</div>
+
+<div class="hito prueba"><div class="cuando">2 de noviembre</div><div class="titulo">Los pisos 3 y 4, también en simulación <span class="tipo prueba">prueba</span></div><div class="texto">Con los mismos mapas y destinos que los vehículos, 13 misiones encadenadas: 10 completadas y 3 canceladas a propósito. También corrieron la media vuelta y la llegada de los vehículos. Fue una comprobación, no una campaña.</div></div>
+
 </div>

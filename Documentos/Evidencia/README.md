@@ -392,6 +392,14 @@ que el propio documento sostiene:
 - [`S29_video_pagina_cancelacion.md`](S29_video_pagina_cancelacion.md) — Video de las pruebas del 23 de octubre, sincronizado con la pantalla del teléfono (29 de octubre)
 - [`S29_video_cancelacion_mision6.jpg`](S29_video_cancelacion_mision6.jpg) — Cuadro del video: el agente del piso 4 vuelve a su escalera tras cancelar, con el teléfono en «Cancelando»
 
+**Semana 30**
+
+- [`S30_segunda_mision_y_cancelacion.md`](S30_segunda_mision_y_cancelacion.md) — Una segunda misión con otra en curso y la cancelación sin el teléfono, con robots falsos (1 de noviembre)
+- [`S30_segunda_mision_y_cancelacion.py`](S30_segunda_mision_y_cancelacion.py) — El programa de esa prueba
+- [`S30_simulacion_catalayud.md`](S30_simulacion_catalayud.md) — El sistema en simulación en los pisos 3 y 4 de Catalayud: 13 misiones, 10 completadas y 3 canceladas a propósito, también con la media vuelta y la llegada de los vehículos (2 de noviembre)
+- [`S30_pagina_simulacion_piso3.jpg`](S30_pagina_simulacion_piso3.jpg) — La página durante una misión con relevo en esa simulación
+- [`logs/S30_simulacion_catalayud.txt`](logs/S30_simulacion_catalayud.txt) — Extractos del registro del coordinador de esa sesión
+
 ---
 
 ## Capturas recuperadas el 15 de octubre de 2026
