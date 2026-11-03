@@ -22,7 +22,7 @@ ida y vuelta por debajo de 2,2 ms, sin pérdidas y sin paquetes duplicados.
 | Señal | −51 dBm | −59 dBm |
 | Velocidad de recepción | 300 Mbit/s | 360 Mbit/s |
 | Dirección | `192.168.0.102` | `192.168.0.104` |
-| **Ida y vuelta al encaminador** | **2,13 ms** (mín 1,49 · máx 4,08 · desv. 0,56) | **1,99 ms** (mín 1,44 · máx 3,40 · desv. 0,49) |
+| **Ida y vuelta al enrutador** | **2,13 ms** (mín 1,49 · máx 4,08 · desv. 0,56) | **1,99 ms** (mín 1,44 · máx 3,40 · desv. 0,49) |
 | Pérdida | 0 % | 0 % |
 
 Veinte paquetes por vehículo, desde el propio vehículo hacia `192.168.0.1`. Se mide desde el
@@ -36,7 +36,7 @@ Cuarenta paquetes a cada destino, contando duplicados, que es la firma del bucle
 
 | Destino | Recibidos | Duplicados |
 |---|---|---|
-| Encaminador | 40 | **0** |
+| Enrutador | 40 | **0** |
 | deepy | 40 | **0** |
 | racey | 40 | **0** |
 
@@ -50,7 +50,7 @@ cableados, el bucle vuelve.
 
 | Dirección | Equipo |
 |---|---|
-| `192.168.0.1` | encaminador, servidor de direcciones |
+| `192.168.0.1` | enrutador, servidor de direcciones |
 | `192.168.0.102` | deepy |
 | `192.168.0.104` | racey |
 
@@ -61,7 +61,7 @@ repartiendo direcciones de una subred propia y los dos vehículos no podían ver
 ## 3. Por qué no se mide desde el portátil
 
 Durante la sesión, los barridos desde el portátil daban promedios de 20 a 24 ms con picos de 140 ms,
-mientras los vehículos medían por debajo de 2,2 ms contra el mismo encaminador. **La diferencia es el
+mientras los vehículos medían por debajo de 2,2 ms contra el mismo enrutador. **La diferencia es el
 portátil**, que seguía asociado al enlace de respaldo de 2,4 GHz, en la banda donde se contaron 33
 redes ajenas en el sitio.
 
@@ -77,7 +77,7 @@ razón por la que RF-15 está definido entre los dos vehículos y no contra un t
 con **los dos vehículos en la misma sala y el mismo punto de acceso**. Con uno en cada piso y el
 cable entre plantas de por medio no se ha medido.
 
-Las cifras de este informe **no la sustituyen**: son ICMP contra el encaminador, no mensajes de ROS 2
+Las cifras de este informe **no la sustituyen**: son ICMP contra el enrutador, no mensajes de ROS 2
 entre los dos agentes con las cotas inscritas del requisito.
 
 Para cerrarlo hacen falta dos órdenes, con un agente en cada piso. En el que responde:

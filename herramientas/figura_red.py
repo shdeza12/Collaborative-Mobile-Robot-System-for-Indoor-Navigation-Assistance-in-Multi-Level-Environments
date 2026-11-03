@@ -3,7 +3,7 @@
 
 Son dos y se leen juntas:
 
-  red_topologia.png    el montaje fisico -- encaminador, un punto de acceso por
+  red_topologia.png    el montaje fisico -- enrutador, un punto de acceso por
                        piso unidos por cable, y un agente colgando de cada uno.
                        Complementa a arquitectura_vehiculos.png, que es el
                        diagrama logico: quien habla con quien. Esta dice por
@@ -62,9 +62,9 @@ def topologia():
     ax.set_ylim(0, 72)
     ax.axis('off')
 
-    # Encaminador, arriba y al centro: reparte direcciones para todos.
+    # Enrutador, arriba y al centro: reparte direcciones para todos.
     caja(ax, 28, 57, 44, 13, AZUL_FONDO, AZUL)
-    texto(ax, 50, 66.4, 'Encaminador', 8, 'bold', TINTA)
+    texto(ax, 50, 66.4, 'Enrutador', 8, 'bold', TINTA)
     texto(ax, 50, 62.8, 'Reparte las direcciones de toda la red', 6.4)
     texto(ax, 50, 59.8, 'Enlace de respaldo en 2,4 GHz, canal 6', 6.4)
 
@@ -76,7 +76,7 @@ def topologia():
         texto(ax, x0 + 21, 37.6, 'En puente: no reparte direcciones', 6.4)
         texto(ax, x0 + 21, 34.9, 'ni enruta', 6.4)
 
-    # Cable del encaminador a cada punto de acceso.
+    # Cable del enrutador a cada punto de acceso.
     linea(ax, [(38, 56.6), (38, 52), (24, 52), (24, 48.4)])
     linea(ax, [(62, 56.6), (62, 52), (76, 52), (76, 48.4)])
     texto(ax, 24, 53.6, 'cable', 6.2, color=GRIS)

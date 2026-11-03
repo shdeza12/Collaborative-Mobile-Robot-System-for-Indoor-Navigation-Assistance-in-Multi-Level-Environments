@@ -576,8 +576,14 @@ por eso el requisito de red fija cotas numéricas y se verifica midiendo.
   \label{fig:red-topologia}
 \end{figure}
 
-\textbf{Cómo quedó construida.} Un encaminador reparte las direcciones de toda la
-red y de él cuelgan por cable dos puntos de acceso, uno por planta. Se trabaja en
+\textbf{Cómo quedó construida.} Un enrutador reparte las direcciones de toda la
+red y de él cuelgan por cable dos puntos de acceso, uno por planta. Los dos
+papeles son distintos y conviene precisarlos: el enrutador une redes, reparte
+direcciones y encamina entre ellas; un punto de acceso solo da acceso
+inalámbrico a una red que ya existe, sin repartir direcciones ni encaminar.
+\textbf{No son repetidores}, que enlazan por radio con el resto de la red y usan
+la misma antena para eso y para sus clientes, con lo que pierden la mitad del
+caudal y añaden un salto a cada mensaje. Se trabaja en
 la banda de 5~GHz porque un barrido del sitio encontró 33 redes ajenas en la de
 2,4~GHz y la parte baja de la de 5~GHz prácticamente vacía; el cambio de banda
 redujo el percentil 95 del tiempo de ida y vuelta de 20,76 a 11,12~ms. Hay un
@@ -597,10 +603,14 @@ distintas, con lo que los agentes dejaron de verse al azar. Los tres se
 encontraron midiendo, no leyendo registros.
 
 \textbf{El descubrimiento y la carga.} El problema de mayor efecto no estuvo en el
-enlace sino en cuántos procesos se anunciaban por él. Con un agente, su tarjeta
-trabajaba entre el 52 y el 63~\% de capacidad; al encender el segundo, los
-procesos de las dos cadenas pasaron a anunciarse mutuamente y la tarjeta subió al
-95~\%, con Nav2 sin alcanzar a arrancar. El aumento no estaba en la navegación,
+enlace sino en cuántos procesos se anunciaban por él. En ROS~2 cada proceso se
+anuncia periódicamente a todos los demás y mantiene el estado de cada uno, de
+modo que ese trabajo crece aproximadamente con el cuadrado del número de
+participantes. Con un agente había unos veinte y su tarjeta trabajaba entre el 52
+y el 63~\% de capacidad; al encender el segundo pasaron a ser unos cuarenta y la
+tarjeta subió al 95~\%, con Nav2 sin alcanzar a arrancar. El tráfico rondaba los
+2000 paquetes por segundo, una fracción despreciable del enlace: \textbf{lo que
+no daba abasto era el procesador que atendía esos paquetes, no el enlace}. El aumento no estaba en la navegación,
 que gastaba menos, sino en los procesos que atienden la red. La respuesta fue la
 topología en estrella: los procesos de cada agente se descubren solo dentro de él
 y lo que el coordinador necesita se anuncia únicamente al portátil, de modo que
@@ -615,7 +625,7 @@ los que cada agente publica su estado. Entre los dos agentes, sobre 600 mensajes
 la mediana fue de \textbf{5,99~ms} y el percentil 95 de \textbf{11,12~ms}, sin
 pérdidas: más de un orden de magnitud de margen. En el montaje definitivo, con
 cada agente en el punto de acceso de su planta, el tiempo de ida y vuelta de
-paquetes de red contra el encaminador fue de 2,13 y 1,99~ms, sin pérdidas ni
+paquetes de red contra el enrutador fue de 2,13 y 1,99~ms, sin pérdidas ni
 duplicados; esa comprobación no sustituye a la del requisito, que no se repitió
 en esa configuración. La conclusión que importa para el resto del trabajo es que
 \textbf{la red no es el factor que limita el desempeño del sistema}: los límites

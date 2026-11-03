@@ -852,9 +852,23 @@ enlace sería suficiente (sección~\ref{sec:red-medida}).
 \subsection{Cómo quedó construida}
 \label{sec:red-topologia}
 
-La figura~\ref{fig:red-topologia} muestra el montaje. Un encaminador reparte las
+La figura~\ref{fig:red-topologia} muestra el montaje. Un enrutador reparte las
 direcciones de toda la red. De él cuelgan, \textbf{por cable}, dos puntos de
 acceso, uno en cada planta, y cada agente se conecta al de su piso.
+
+Conviene precisar los dos papeles, porque la diferencia no es de vocabulario sino
+de comportamiento. El \textbf{enrutador} une dos redes, reparte las direcciones y
+encamina el tráfico entre ellas; en esta instalación hay uno solo. Un
+\textbf{punto de acceso} da acceso inalámbrico a una red que ya existe: ni reparte
+direcciones ni encamina, de modo que sus clientes pertenecen a la red del
+enrutador. Los dos equipos de las plantas trabajan en ese segundo papel.
+
+\textbf{No son repetidores}, y la distinción importa. Un repetidor enlaza por
+radio con el resto de la red y usa la misma antena para hablar con sus clientes y
+con ese enlace, lo que reduce el caudal a la mitad y añade un salto inalámbrico a
+cada mensaje. Durante la construcción uno de los equipos quedó por error en ese
+modo estando además conectado por cable, con lo que ofrecía dos caminos a los
+mismos mensajes; el efecto se describe en la sección~\ref{sec:red-defectos}.
 
 \begin{figure}[H]
   \centering
@@ -915,7 +929,7 @@ conectado a la vez por cable y por radio, que ofrecía dos caminos a los mismos
 mensajes.
 
 \textbf{Dos servidores de direcciones a la vez.} Un punto de acceso quedó
-repartiendo direcciones de una subred propia mientras el encaminador repartía las
+repartiendo direcciones de una subred propia mientras el enrutador repartía las
 suyas. Cada equipo recibía dirección de quien respondiera primero, de manera que
 unos quedaban en una subred y otros en otra, al azar. Los agentes dejaban de
 verse sin que nada informara del motivo.
@@ -930,13 +944,30 @@ magnitud que no se mide no se puede dar por buena.
 El problema de red con mayor efecto sobre el sistema no estuvo en el enlace sino
 en \emph{cuántos} procesos se anunciaban por él.
 
-Con un solo agente en marcha, su tarjeta trabajaba entre el 52 y el 63~\% de
-capacidad. Al encender el segundo, unos cuarenta procesos de las dos cadenas
-pasaron a anunciarse mutuamente por la red inalámbrica, y la tarjeta subió al
-95~\%: Nav2 ya no alcanzaba a arrancar. Lo revelador es que el aumento no estaba
-en la navegación, que gastaba menos que antes, sino en los procesos que atienden
-la red. Ninguno hacía más trabajo útil con dos vehículos que con uno; lo que
-creció fue el número de participantes con los que cada uno negociaba.
+En ROS~2 cada proceso es un participante de la red, y el middleware los pone de
+acuerdo sin que nadie lleve un directorio central: \textbf{cada participante se
+anuncia periódicamente a todos los demás y mantiene el estado de cada uno} ---qué
+publica, qué consume, si sigue vivo---. Ese trabajo no crece con el número de
+participantes sino aproximadamente con su cuadrado, porque cada uno trata con
+cada uno.
+
+Con un solo agente en marcha había unos veinte participantes y su tarjeta
+trabajaba entre el 52 y el 63~\% de capacidad. Al encender el segundo pasaron a
+ser unos cuarenta, todos anunciándose por la red inalámbrica, y la tarjeta subió
+al 95~\%: Nav2 ya no alcanzaba a arrancar.
+
+Lo revelador está en dónde se fue esa capacidad. \textbf{La navegación gastaba
+menos que antes}, no más: hacía exactamente el mismo trabajo. Lo que se disparó
+fueron los procesos que atienden la red, del 7--13~\% al 42~\% de un núcleo, y el
+resto de procesos del sistema, del 3--6~\% al 63~\%. Ninguno hacía más trabajo
+útil con dos agentes que con uno; lo que creció fue el número de interlocutores
+con los que cada uno negociaba.
+
+Y conviene subrayar qué \emph{no} se saturó. El tráfico inalámbrico de las dos
+cadenas rondaba los 2000 paquetes por segundo, que para un enlace de varios
+cientos de megabits por segundo es una fracción despreciable. \textbf{El enlace iba
+sobrado; lo que no daba abasto era el procesador que atendía esos paquetes.} El
+costo estaba en el número de mensajes y no en su tamaño.
 
 \begin{figure}[H]
   \centering
@@ -953,8 +984,9 @@ vehículo se descubren solo dentro de él, y lo que el coordinador necesita ---l
 navegación, el estado y la media vuelta--- se anuncia únicamente al computador
 portátil. Los agentes no se descubren entre sí, lo que es coherente con el diseño:
 nunca se comunican directamente, siempre a través del coordinador. Con ese
-esquema, el sistema completo con los dos agentes volvió a entre el 68 y el 74~\%
-de la tarjeta, del mismo orden que un agente solo.
+esquema, el tráfico inalámbrico de un agente bajó de unos 2000 paquetes por
+segundo a unos 600, y el sistema completo con los dos agentes volvió a entre el
+68 y el 74~\% de la tarjeta, del mismo orden que un agente solo.
 
 Conviene subrayar la conclusión, porque no era previsible: \textbf{el límite del
 sistema no fue el ancho de banda del enlace sino el costo de procesamiento del
@@ -1002,7 +1034,7 @@ exigido.
 La tercera fila corresponde al montaje definitivo, con cada agente en el punto de
 acceso de su planta, y se incluye porque es la configuración que el sistema usa de
 verdad. Debe leerse por lo que es: tiempos de ida y vuelta de paquetes de red
-contra el encaminador, sin pérdidas ni duplicados, no una repetición de la medida
+contra el enrutador, sin pérdidas ni duplicados, no una repetición de la medida
 del requisito. \textbf{Esa repetición queda pendiente}, y se señala en las
 limitaciones de la medición.
 
