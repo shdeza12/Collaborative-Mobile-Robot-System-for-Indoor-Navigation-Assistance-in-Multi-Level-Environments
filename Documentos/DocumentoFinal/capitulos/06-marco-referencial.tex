@@ -520,6 +520,18 @@ verdad. Esa extensión se plantea en los trabajos futuros.
 \subsection{ROS~2 y la comunicación entre los componentes}
 \label{sec:teo-ros2}
 
+El sistema podía construirse sobre tres bases distintas: escribir la comunicación
+a medida, usar ROS~1 o usar ROS~2. Escribirla a medida habría obligado a resolver
+de nuevo el descubrimiento, la serialización y la sincronización de relojes, que
+son problemas resueltos y ajenos al aporte del trabajo. ROS~1 quedó descartado
+porque su última distribución dejó de tener soporte en 2025 y porque su
+arquitectura depende de un nodo maestro central, un punto único de fallo
+inconveniente en un sistema cuyo propósito es repartir una tarea entre agentes.
+Se eligió \textbf{ROS~2} por tres razones: no tiene nodo maestro, de modo que los
+agentes se descubren entre sí sin un servidor que pueda caerse; trae el
+ecosistema de navegación que el trabajo necesita, en particular Nav2; y es el
+entorno en el que el fabricante publica el software del vehículo empleado.
+
 Todos los componentes se comunican mediante ROS~2. \textcite{macenski2022ros2}
 describen su arquitectura como un rediseño sobre DDS, el estándar de comunicación
 de datos en tiempo real del Object Management Group \autocite{omg2015dds}, y no
@@ -559,6 +571,17 @@ derivada de una base común.
 
 \subsection{Cinemática tipo automóvil y planificación de trayectorias}
 \label{sec:teo-planificacion}
+
+La navegación de cada agente se construyó sobre Nav2, el sistema de navegación
+de ROS~2 que \textcite{macenski2020marathon} presentan como sucesor del de ROS~1.
+La alternativa era escribir planificador, controlador y recuperaciones a medida.
+Se descartó por el reparto de esfuerzo que impone: Nav2 trae esas piezas
+probadas y permite sustituir cada una por separado, que es justo lo que este
+trabajo necesitó. De sus tres capas hubo que cambiar dos para la cinemática del
+vehículo ---planificador y controlador--- y quitar una recuperación; la tercera y
+la maquinaria que las coordina se usaron tal cual. Escribir todo desde cero
+habría consumido en navegación el tiempo que el proyecto dedicó a la
+coordinación, que es su aporte declarado.
 
 Un vehículo con dirección Ackermann está sujeto a una restricción no holonómica:
 no puede desplazarse de lado ni girar sobre su propio eje, y su curvatura está
@@ -640,7 +663,17 @@ movimiento desplaza las partículas según la odometría. Después, el modelo de
 medición las pondera según cuánto se parece el barrido del láser a lo que se
 vería desde esa pose en el mapa. Por último, un remuestreo concentra las
 partículas en las poses más probables. AMCL es la variante que ajusta el número de partículas a la
-incertidumbre; en este trabajo, entre 500 y 2000. Su precisión depende de la
+incertidumbre; en este trabajo, entre 500 y 2000.
+
+Se eligió frente a las dos alternativas habituales por la forma del problema. Un
+sistema de localización y mapeo simultáneos construiría el mapa mientras navega,
+pero aquí el mapa se conoce de antemano ---se deriva del levantamiento de cada
+planta--- y además ese enfoque no funcionó en estos pasillos por la misma razón
+que limita la odometría del láser. Un filtro de Kalman supone una distribución
+unimodal, de modo que no puede representar la duda entre dos tramos de pasillo
+parecidos, que es exactamente el caso de un corredor con hornacinas repetidas. El
+filtro de partículas sí mantiene varias hipótesis a la vez hasta que las
+mediciones descartan todas menos una, y es la localización que Nav2 integra. Su precisión depende de la
 calidad de la odometría entre una actualización y la siguiente.
 
 Como los vehículos no tienen codificadores en las ruedas, la odometría sale del

@@ -273,6 +273,13 @@ extensión se plantea en los trabajos futuros.
 \subsection{ROS~2 y la comunicación entre los componentes}
 \label{sec:teo-ros2}
 
+Se eligió ROS~2 frente a escribir la comunicación a medida ---que obligaría a
+resolver de nuevo el descubrimiento y la serialización--- y frente a ROS~1, sin
+soporte desde 2025 y con un nodo maestro central que sería un punto único de
+fallo en un sistema cuyo propósito es repartir una tarea. ROS~2 no tiene nodo
+maestro, trae el ecosistema de navegación que el trabajo necesita y es el entorno
+en el que el fabricante publica el software del vehículo.
+
 Todos los componentes se comunican mediante ROS~2, que
 \textcite{macenski2022ros2} describen como un rediseño sobre DDS, el estándar de
 comunicación de datos en tiempo real del Object Management Group
@@ -295,6 +302,11 @@ espacio de nombres. Un espacio de nombres distinto para cada agente distingue la
 
 \subsection{Cinemática tipo automóvil, planificación y seguimiento de trayectorias}
 \label{sec:teo-planificacion}
+
+La navegación se construyó sobre Nav2 \autocite{macenski2020marathon} y no a
+medida, porque trae planificador, controlador y recuperaciones probados y permite
+sustituir cada pieza por separado: de sus tres capas hubo que cambiar dos para la
+cinemática del vehículo y el resto se usó tal cual.
 
 Un vehículo con dirección Ackermann está sujeto a una restricción no holonómica:
 no puede desplazarse de lado ni girar sobre su propio eje, y su curvatura está
@@ -351,7 +363,12 @@ movimiento desplaza las partículas según la odometría. Después, el modelo de
 medición las pondera según cuánto se parece el barrido del láser a lo que se vería desde esa
 pose en el mapa, y un remuestreo las concentra en las poses más probables. AMCL
 es la variante que ajusta el número de partículas a la incertidumbre; en este
-trabajo, entre 500 y 2000. Su precisión depende de la calidad de la odometría
+trabajo, entre 500 y 2000. Se eligió frente a
+un sistema de mapeo simultáneo, innecesario porque el mapa se conoce de antemano,
+y frente a un filtro de Kalman, que al suponer una distribución unimodal no puede
+representar la duda entre dos tramos de pasillo parecidos; el filtro de
+partículas mantiene varias hipótesis hasta que las mediciones descartan todas
+menos una. Su precisión depende de la calidad de la odometría
 entre una actualización y la siguiente.
 
 Como los agentes no tienen codificadores en las ruedas, la odometría sale del
