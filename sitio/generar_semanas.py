@@ -67,6 +67,98 @@ def informe_de(n, ext):
     return ruta if os.path.exists(ruta) else None
 
 
+# ------------------------------------------------------------------ términos
+# El sitio nombra cada cosa como el documento final: el usuario, los agentes (agentes físicos frente a la
+# simulación), el láser, la unidad inercial, las pruebas y los requisitos por su contenido. La cronología, los
+# informes y la evidencia quedan como se escribieron; el cambio se hace aquí, al publicarlos. «Vehículo» sigue
+# solo en enunciados generales sobre vehículos Ackermann, y «AWS DeepRacer» es el nombre de la plataforma.
+FRASES = [
+    # Las pruebas y los requisitos, por su contenido.
+    ('se alcanzaron las compuertas G-1 y G-4', 'se superaron las pruebas de actuación y de los dos agentes en la misma red'),
+    ('que exige la compuerta G-2', 'que exige la prueba de odometría'),
+    ('La sesión de pruebas de G-2 y G-3 está', 'La sesión de las pruebas de odometría y de navegación de un agente está'),
+    ('cumplió el criterio de G-2', 'cumplió el criterio de la prueba de odometría'),
+    ('G-3 no se alcanzó:', 'La prueba de navegación de un agente no se superó:'),
+    ('G-3 se alcanzó: con la IMU integrada, `amss-jgm9` encadenó', 'La prueba de navegación de un agente se superó: con la '
+     'unidad inercial integrada, el agente encadenó'),
+    ('G-5 no se corrió:', 'La prueba de la misión con relevo no se corrió:'),
+    ('G-5 y G-6 se alcanzaron el', 'Las pruebas de la misión con relevo y de la campaña se superaron el'),
+    ('RF-28 impide que la misión se complete con la persona', 'La confirmación del cambio de piso impide que la misión se '
+     'complete con el usuario'),
+    ('El requisito RF-15 cumple sobre', 'El requisito de latencia se cumple sobre'),
+    (' (RF-15)', ''), (' (RF-29)', ''),
+    ('Con RF-27 verificado,', 'Con la campaña verificada,'),
+    ('R12 queda cerrado', 'El riesgo de la misión anómala queda cerrado'),
+    ('objetivo específico OE2', 'objetivo específico 2'),
+    ('Cronograma replanificado de S17 a S32', 'Cronograma replanificado de la semana 17 a la 32'),
+    # Los nombres de los dos agentes, donde el piso ya está dicho.
+    ('Cadena de tres tramos de racey en el piso 4', 'Cadena de tres tramos del agente en el piso 4'),
+    # El usuario.
+    ('Una persona pidió una misión', 'Un usuario pidió una misión'),
+    ('mide la confirmación de la persona', 'mide la confirmación del usuario'),
+    # AWS DeepRacer como plataforma; para uno de los dos robots, agente.
+    ('el vehículo AWS DeepRacer', 'el AWS DeepRacer'),
+    ('tarjeta original del DeepRacer', 'tarjeta original del AWS DeepRacer'),
+    ('chasis del DeepRacer', 'chasis del AWS DeepRacer'),
+    ('comunidad del DeepRacer', 'comunidad del AWS DeepRacer'),
+    ('el DeepRacer es un vehículo', 'el AWS DeepRacer es un vehículo'),
+    ('DonkeyCar o DeepRacer', 'DonkeyCar o AWS DeepRacer'),
+    ('El DeepRacer en Gazebo', 'El agente en Gazebo'),
+    ('DeepRacer en el pasillo', 'Agente en el pasillo'),
+    ('El DeepRacer migrado', 'El agente migrado'),
+    ('cinemáticas del DeepRacer', 'cinemáticas del agente'),
+    ('sobre el DeepRacer simulado', 'sobre el agente simulado'),
+    ('sensores del DeepRacer', 'sensores del agente'),
+    ('su descripción del vehículo', 'su descripción del modelo'),
+    ('software del vehículo a Raspberry', 'software de la plataforma a Raspberry'),
+    # Piso, cuando «planta» no es el plano.
+    ('las dos plantas instanciadas', 'los dos pisos instanciados'),
+    ('en la misma planta', 'en el mismo piso'),
+]
+TERMINOS = [
+    (r'campaña con los (?:dos )?veh[ií]culos', 'campaña con los agentes físicos'),
+    (r'(con|en|que|de) los veh[ií]culos(?=[,:.;)]| \(|$)', r'\1 los agentes físicos'),
+    (r'con los veh[ií]culos\b', 'con los agentes físicos'),
+    (r'en los veh[ií]culos\b', 'en los agentes físicos'),
+    (r'veh[ií]culos (?:reales|físicos)', 'agentes físicos'),
+    (r'veh[ií]culo (?:real|físico)', 'agente físico'),
+    (r'veh[ií]culos(?! (?:con (?:dirección|cinemática) )?Ackermann)', 'agentes'),
+    (r'veh[ií]culo(?! (?:con (?:dirección|cinemática) )?Ackermann)', 'agente'),
+    (r'(?<![-\w/])robots(?![-\w/.])', 'agentes'),
+    (r'(?<![-\w/])robot(?![-\w/.]| Operating)', 'agente'),
+    (r'(?<![\w])carros(?!\w)', 'agentes'),
+    (r'(?<![\w])carro(?!\w)', 'agente'),
+]
+NOMBRES = [
+    (r'\bde racey\b', 'del agente del piso 4'), (r'\bde deepy\b', 'del agente del piso 3'),
+    (r'\bracey\b', 'el agente del piso 4'), (r'\bdeepy\b', 'el agente del piso 3'),
+    (r'\bamss-(?:ez9n|jgm9)\b', 'el agente'),
+]
+# Lo que se deja como está: código, enlaces y la frase que habla de la palabra misma.
+PROTEGIDO = re.compile(r'(`[^`]*`|\]\([^)]*\)|https?://\S+|«agente» para los robots)')
+
+
+def con_su_caso(original, nuevo):
+    return nuevo[0].upper() + nuevo[1:] if original[0].isupper() else nuevo
+
+
+def terminos(texto, frases=True):
+    """Devuelve el texto con los términos del sitio. Con frases=False, para los títulos de los documentos de
+    evidencia, cambia solo las palabras: esos títulos conservan sus códigos y sus nombres propios."""
+    if frases:
+        for viejo, nuevo in FRASES:
+            texto = texto.replace(viejo, nuevo)
+    partes = PROTEGIDO.split(texto)
+    for i in range(0, len(partes), 2):
+        for patron, nuevo in TERMINOS + (NOMBRES if frases else []):
+            partes[i] = re.sub(patron, lambda m, n=nuevo: con_su_caso(m.group(0), m.expand(n)), partes[i], flags=re.I)
+        partes[i] = re.sub(r'\bLiDAR\b', 'láser', partes[i])
+        partes[i] = re.sub(r'\bla IMU\b', 'la unidad inercial', partes[i])
+        partes[i] = re.sub(r'\bLa IMU\b', 'La unidad inercial', partes[i])
+        partes[i] = re.sub(r'\(S(\d\d)\)', r'(semana \1)', partes[i])
+    return ''.join(partes)
+
+
 # ------------------------------------------------------------------ cronología
 def limpiar_vineta(v):
     # Las referencias a archivos de captura sobran en el sitio: la imagen ya se muestra.
@@ -96,8 +188,8 @@ def semanas_de_cronologia():
                 actual += ' ' + linea.strip()
         if actual:
             vinetas.append(actual)
-        semanas[n] = {'fechas': fechas, 'titulo': titulo[0].upper() + titulo[1:],
-                      'hecho': [limpiar_vineta(v) for v in vinetas]}
+        semanas[n] = {'fechas': fechas, 'titulo': terminos(titulo[0].upper() + titulo[1:]),
+                      'hecho': [terminos(limpiar_vineta(v)) for v in vinetas]}
     return semanas
 
 
@@ -344,6 +436,7 @@ def pagina(n, s, figs, concl, av, evid, inf, previa, siguiente):
     if VIDEOS.get(n):
         l += ['## En video', '']
         for codigo, pie in VIDEOS[n]:
+            pie = terminos(pie)
             l += ['<figure class="video">',
                   f'<iframe src="https://www.youtube-nocookie.com/embed/{codigo}" title="{pie}" loading="lazy" '
                   'allow="encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>',
@@ -352,6 +445,7 @@ def pagina(n, s, figs, concl, av, evid, inf, previa, siguiente):
     if figs:
         l += ['## En imágenes', '', '<div class="galeria" markdown>', '']
         for archivo, pie in figs:
+            pie = terminos(pie)
             alt = (pie or f'Figura de la semana {n}').replace('"', "'").replace('[', '(').replace(']', ')')
             l += ['<figure markdown>', f'[![{alt}](img/{archivo}){{ loading=lazy }}](img/{archivo})']
             if pie:
@@ -361,9 +455,9 @@ def pagina(n, s, figs, concl, av, evid, inf, previa, siguiente):
     if concl:
         l += ['## Lo que se concluyó', '', '<div class="conclusiones" markdown>', '']
         if len(concl) == 1:
-            l += [concl[0], '']
+            l += [terminos(concl[0]), '']
         else:
-            l += [f'{i}. {c}' for i, c in enumerate(concl, 1)] + ['']
+            l += [f'{i}. {terminos(c)}' for i, c in enumerate(concl, 1)] + ['']
         l += ['</div>', '']
     l += ['## Para leer en detalle', '']
     if inf:
@@ -371,7 +465,7 @@ def pagina(n, s, figs, concl, av, evid, inf, previa, siguiente):
     else:
         l += ['Esta semana no tiene informe en el repositorio.', '']
     if evid:
-        l += ['Evidencia de la semana:', ''] + [f'- [{t}]({GITHUB}{r})' for t, r in evid] + ['']
+        l += ['Evidencia de la semana:', ''] + [f'- [{terminos(t, frases=False)}]({GITHUB}{r})' for t, r in evid] + ['']
     nav = []
     if previa:
         nav.append(f'[:material-arrow-left: Semana {previa}](s{previa:02d}.md)')

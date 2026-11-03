@@ -117,9 +117,11 @@ def carga():
         ax.bar(i, a, 0.52, color=c, alpha=0.22, edgecolor=c, linewidth=1.1, zorder=2)
         if a != b:
             ax.plot([i, i], [b, a], color=c, lw=2.6, solid_capstyle='butt', zorder=3)
-        # La etiqueta va DENTRO de la barra: fuera chocaba con la linea del 100 %.
+        # La etiqueta va DENTRO de la barra, porque fuera chocaba con la linea del 100 %, y
+        # debajo del tramo del rango, para que ese tramo no la cruce.
         etiqueta = f'{b}–{a} %' if a != b else f'{a} %'
-        ax.text(i, a - 5.5, etiqueta, ha='center', va='top', fontsize=7.4,
+        altura = b - 2.5 if a != b else a - 5.5
+        ax.text(i, altura, etiqueta, ha='center', va='top', fontsize=7.4,
                 fontweight='bold', color=TINTA)
 
     ax.axhline(100, color=TINTA2, lw=0.8, ls=(0, (4, 3)), zorder=1)

@@ -9,9 +9,9 @@ hide:
 <div markdown>
 <div class="etiqueta">Proyecto de grado · Universidad Santo Tomás · 2026</div>
 
-# Dos robots que guían a una persona entre los pisos de un edificio
+# Sistema colaborativo de robots móviles para asistencia de orientación en entornos interiores con múltiples pisos
 
-<p class="entrada">La persona pide su destino desde el teléfono. El robot de su piso la lleva hasta la escalera, y el robot del otro piso la recibe y termina el recorrido.</p>
+<p class="entrada">Dos agentes, robots móviles terrestres, uno por piso, se reparten el guiado del usuario. El usuario pide su destino desde el teléfono, el agente de su piso lo lleva hasta la escalera y el agente del otro piso lo recibe y termina el recorrido.</p>
 
 [Ver el proceso :material-timeline-text-outline:](proceso/index.md){ .md-button .md-button--primary }
 [Ver los resultados :material-chart-box-outline:](resultados.md){ .md-button }
@@ -19,32 +19,32 @@ hide:
 </div>
 
 <figure markdown>
-![La página del teléfono durante una misión: el robot guía al usuario y la página muestra el paso en que va](img/interfaz_seguimiento.png){ width="300" }
+![La página del teléfono durante una misión: el agente guía al usuario y la página muestra el paso en que va](img/interfaz_seguimiento.png){ width="300" }
 <figcaption>La página del teléfono durante una misión.</figcaption>
 </figure>
 </div>
 
 <div class="cifras">
-  <div class="cifra"><div class="valor">9 de 9</div><div class="que">misiones con relevo completadas con los vehículos reales, en los pisos 3 y 4</div></div>
+  <div class="cifra"><div class="valor">9 de 9</div><div class="que">misiones con relevo completadas con los agentes físicos, en los pisos 3 y 4</div></div>
   <div class="cifra"><div class="valor">26 de 30</div><div class="que">misiones completadas en simulación; los 4 fallos fueron de precisión de llegada</div></div>
-  <div class="cifra"><div class="valor">0,87 s</div><div class="que">mediana desde la solicitud hasta que el vehículo empieza a moverse</div></div>
-  <div class="cifra"><div class="valor">0,23 m</div><div class="que">error de llegada mediano en los vehículos, según su localización</div></div>
+  <div class="cifra"><div class="valor">0,87 s</div><div class="que">mediana desde la solicitud hasta que el agente empieza a moverse</div></div>
+  <div class="cifra"><div class="valor">0,23 m</div><div class="que">error de llegada mediano con los agentes físicos, según su localización</div></div>
 </div>
 
 ## Cómo funciona, en cuatro pasos
 
 <div class="pasos">
-  <div class="paso"><strong>Pide su destino</strong>Desde el navegador del teléfono, sin instalar nada: elige dónde está y a dónde va.</div>
-  <div class="paso"><strong>El robot de su piso lo guía</strong>Va a recogerlo y lo lleva hasta la escalera.</div>
+  <div class="paso"><strong>El usuario pide su destino</strong>Desde el navegador del teléfono, sin instalar nada: elige dónde está y a dónde va.</div>
+  <div class="paso"><strong>El agente de su piso lo guía</strong>Va a recogerlo y lo lleva hasta la escalera.</div>
   <div class="paso"><strong>Cambia de piso</strong>Sube o baja por su cuenta y lo confirma en el teléfono.</div>
-  <div class="paso"><strong>El otro robot termina</strong>El robot del piso de llegada ya lo espera en la escalera y lo lleva al destino.</div>
+  <div class="paso"><strong>El otro agente termina</strong>El agente del piso de llegada ya lo espera en la escalera y lo lleva al destino.</div>
 </div>
 
 [Ver la arquitectura y el relevo en detalle :material-arrow-right:](como-funciona.md)
 
 ## Semana a semana
 
-El proyecto no salió en línea recta: empezó con otra plataforma, en un simulador, con un seguidor de paredes que no funcionó, y llegó al edificio después de cambiar de piso, de computador de a bordo y de forma de medir. Cada tarjeta abre la página de una semana, con lo que se hizo, sus imágenes y lo que se concluyó.
+El proyecto no salió en línea recta: empezó con otra plataforma, en un simulador, con un seguidor de paredes que no funcionó, y llegó al edificio después de cambiar de piso, de tarjeta y de forma de medir. Cada tarjeta abre la página de una semana, con lo que se hizo, sus imágenes y lo que se concluyó.
 
 <!-- semanas:inicio -->
 ### Fases 2 y 3 · requisitos y diseño conceptual
@@ -67,13 +67,13 @@ El proyecto no salió en línea recta: empezó con otra plataforma, en un simula
 ### Fase 5 · integración del sistema y pruebas
 
 <div class="semanas-grid">
-<a class="semana-tarjeta" href="semanas/s17/"><img src="semanas/img/s17_5.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 17 · 3 al 9 de agosto</span><span class="titulo">Vehículo físico liberado y Nav2 en Humble</span></span></a>
+<a class="semana-tarjeta" href="semanas/s17/"><img src="semanas/img/s17_5.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 17 · 3 al 9 de agosto</span><span class="titulo">Agente físico liberado y Nav2 en Humble</span></span></a>
 <a class="semana-tarjeta" href="semanas/s18/"><img src="semanas/img/s18_1.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 18 · 10 al 16 de agosto</span><span class="titulo">Dos agentes aislados y entorno de dos niveles</span></span></a>
-<a class="semana-tarjeta" href="semanas/s19/"><img src="semanas/img/s19_3.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 19 · 17 al 23 de agosto</span><span class="titulo">Diagnóstico del vehículo y protocolo</span></span></a>
+<a class="semana-tarjeta" href="semanas/s19/"><img src="semanas/img/s19_3.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 19 · 17 al 23 de agosto</span><span class="titulo">Diagnóstico del agente y protocolo</span></span></a>
 <a class="semana-tarjeta" href="semanas/s20/"><img src="semanas/img/s20_1.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 20 · 24 al 30 de agosto</span><span class="titulo">Coordinador, primera misión y relevo en simulación</span></span></a>
 <a class="semana-tarjeta" href="semanas/s21/"><img src="semanas/img/s21_1.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 21 · 31 de agosto al 6 de septiembre</span><span class="titulo">Campaña de treinta misiones</span></span></a>
 <a class="semana-tarjeta" href="semanas/s22/"><img src="semanas/img/s22_5.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 22 · 7 al 13 de septiembre</span><span class="titulo">Interfaz en el teléfono e información de avance</span></span></a>
-<a class="semana-tarjeta" href="semanas/s23/"><img src="semanas/img/s23_1.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 23 · 14 al 20 de septiembre</span><span class="titulo">Segundo vehículo y congelación del código</span></span></a>
+<a class="semana-tarjeta" href="semanas/s23/"><img src="semanas/img/s23_1.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 23 · 14 al 20 de septiembre</span><span class="titulo">Segundo agente y congelación del código</span></span></a>
 <a class="semana-tarjeta" href="semanas/s24/"><img src="semanas/img/s24_1.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 24 · 21 al 27 de septiembre</span><span class="titulo">Decisión de la demostración física y navegación real</span></span></a>
 <a class="semana-tarjeta" href="semanas/s25/"><img src="semanas/img/s25_1.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 25 · 28 de septiembre al 4 de octubre</span><span class="titulo">Aislamiento, piso 2 y paso a los pisos 3 y 4</span></span></a>
 <a class="semana-tarjeta" href="semanas/s26/"><img src="semanas/img/s26_1.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 26 · 5 al 11 de octubre</span><span class="titulo">Unidad inercial, red, llegada verificada y coordinador al portátil</span></span></a>
@@ -82,7 +82,7 @@ El proyecto no salió en línea recta: empezó con otra plataforma, en un simula
 ### Fase 6 · campaña, análisis y escritura
 
 <div class="semanas-grid">
-<a class="semana-tarjeta" href="semanas/s27/"><img src="semanas/img/s27_1.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 27 · 12 al 18 de octubre</span><span class="titulo">Campaña con los dos vehículos</span></span></a>
+<a class="semana-tarjeta" href="semanas/s27/"><img src="semanas/img/s27_1.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 27 · 12 al 18 de octubre</span><span class="titulo">Campaña con los agentes físicos</span></span></a>
 <a class="semana-tarjeta" href="semanas/s28/"><img src="semanas/img/s28_1.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 28 · desde el 19 de octubre</span><span class="titulo">Documento final</span></span></a>
 <a class="semana-tarjeta" href="semanas/s29/"><img src="semanas/img/s29_1.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 29 · 26 de octubre al 1 de noviembre</span><span class="titulo">Documento recortado y video de las pruebas</span></span></a>
 <a class="semana-tarjeta" href="semanas/s30/"><img src="semanas/img/s30_1.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 30 · 2 al 8 de noviembre</span><span class="titulo">Sesión con los jurados y simulación en los pisos 3 y 4</span></span></a>

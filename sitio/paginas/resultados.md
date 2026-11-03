@@ -1,10 +1,10 @@
 # Resultados
 
-Hubo dos campañas, y se reportan por separado porque miden cosas distintas. La de **simulación** mide el sistema completo con relevo en condiciones controladas. La de los **vehículos** mide hasta dónde llega la plataforma física en el edificio.
+Hubo dos campañas, y se reportan por separado porque miden cosas distintas. La de **simulación** mide el sistema completo con relevo en condiciones controladas. La de los **agentes físicos** mide hasta dónde llega la plataforma física en el edificio.
 
 ## La tasa de éxito
 
-Una misión cuenta como exitosa si termina sin fallar, con un relevo cuando es entre pisos, y con el vehículo a menos de la tolerancia del destino: 0,25 m en simulación y 0,5 m en los vehículos. El punto es la tasa observada; la línea, el intervalo de confianza del 95 % (Wilson).
+Una misión cuenta como exitosa si termina sin fallar, con un relevo cuando es entre pisos, y con el agente a menos de la tolerancia del destino: 0,25 m en simulación y 0,5 m con los agentes físicos. El punto es la tasa observada; la línea, el intervalo de confianza del 95 % (Wilson).
 
 <div class="grafica" data-grafica='{
   "tipo": "intervalos", "titulo": "Misiones completadas, con su intervalo de confianza",
@@ -13,13 +13,13 @@ Una misión cuenta como exitosa si termina sin fallar, con un relevo cuando es e
     {"etiqueta": "Simulación, las 30", "valor": 86.7, "bajo": 70.3, "alto": 94.7, "texto": "26 de 30", "serie": 1},
     {"etiqueta": "Simulación, mismo piso", "valor": 80.0, "bajo": 54.8, "alto": 93.0, "texto": "12 de 15", "serie": 1},
     {"etiqueta": "Simulación, con relevo", "valor": 93.3, "bajo": 70.2, "alto": 98.8, "texto": "14 de 15", "serie": 1},
-    {"etiqueta": "Vehículos, con relevo", "valor": 100, "bajo": 70.1, "alto": 100, "texto": "9 de 9", "serie": 2}
+    {"etiqueta": "Agentes físicos, con relevo", "valor": 100, "bajo": 70.1, "alto": 100, "texto": "9 de 9", "serie": 2}
   ],
-  "leyenda": [[1, "Simulación"], [2, "Vehículos reales"]]
+  "leyenda": [[1, "Simulación"], [2, "Agentes físicos"]]
 }'></div>
 
 !!! abstract "Lo que se puede afirmar"
-    Con estas muestras, que la tasa de éxito **supera el 70 %**, en simulación y con los vehículos. Nada más estrecho: con 30 misiones el intervalo mide 24 puntos de ancho, y eso solo se reduce con más repeticiones. Los intervalos de las misiones con y sin relevo se solapan, así que no se puede decir que una sea mejor que la otra.
+    Con estas muestras, que la tasa de éxito **supera el 70 %**, en simulación y con los agentes físicos. Nada más estrecho: con 30 misiones el intervalo mide 24 puntos de ancho, y eso solo se reduce con más repeticiones. Los intervalos de las misiones con y sin relevo se solapan, así que no se puede decir que una sea mejor que la otra.
 
 Los cuatro fallos de la simulación se quedaron cortos: a 0,295, 0,284, 0,311 y 0,347 m del destino, frente a 0,25 m. Ninguno fue de coordinación; los cuatro son de precisión en la aproximación final.
 
@@ -42,8 +42,8 @@ Los cuatro fallos de la simulación se quedaron cortos: a 0,295, 0,284, 0,311 y 
 <div markdown>
 **Lo que dicen estos números**
 
-- El robot arranca en **menos de medio segundo** en las 30 misiones.
-- La **asignación** del robot tarda tan poco que el reloj de la simulación no la ve. Medida aparte con el reloj del sistema: mediana entre 154 y 175 µs, máximo 306 µs.
+- El agente arranca en **menos de medio segundo** en las 30 misiones.
+- La **asignación** del agente tarda tan poco que el reloj de la simulación no la ve. Medida aparte con el reloj del sistema: mediana entre 154 y 175 µs, máximo 306 µs.
 - El **error de llegada** tiene mediana de 0,106 m, entre 0,019 y 0,347 m.
 - La simulación corrió a tiempo real: factor mínimo de 0,9917 en las 30 misiones.
 </div>
@@ -61,26 +61,26 @@ Los cuatro fallos de la simulación se quedaron cortos: a 0,295, 0,284, 0,311 y 
 <div class="galeria" markdown>
 
 <figure markdown>
-![El mundo del piso 3 en Gazebo, con su robot en la salida y el barrido del láser en azul](img/simulacion_catalayud_piso3.png)
-<figcaption>El piso 3 en Gazebo, con su robot en la salida, frente a la escalera.</figcaption>
+![El mundo del piso 3 en Gazebo, con su agente en la salida y el barrido del láser en azul](img/simulacion_catalayud_piso3.png)
+<figcaption>El piso 3 en Gazebo, con su agente en la salida, frente a la escalera.</figcaption>
 </figure>
 
 <figure markdown>
-![El mundo del piso 4 en Gazebo, con su robot en la salida y el barrido del láser en azul](img/simulacion_catalayud_piso4.png)
-<figcaption>El piso 4 en Gazebo, con su robot en la salida, frente a la escalera.</figcaption>
+![El mundo del piso 4 en Gazebo, con su agente en la salida y el barrido del láser en azul](img/simulacion_catalayud_piso4.png)
+<figcaption>El piso 4 en Gazebo, con su agente en la salida, frente a la escalera.</figcaption>
 </figure>
 
 </div>
 
-## Con los vehículos
+## Con los agentes físicos
 
-Nueve misiones del sorteo, en su orden y sin reubicar los vehículos entre una y otra, entre los pisos 3 y 4 del edificio. Todas con relevo en la escalera.
+Nueve misiones del sorteo, en su orden y sin reubicar los agentes entre una y otra, entre los pisos 3 y 4 del edificio. Todas con relevo en la escalera.
 
 <div class="dos-graficas" markdown>
 
 <div class="grafica" data-grafica='{
   "tipo": "barras-v", "titulo": "Duración de cada misión",
-  "sub": "Desde la solicitud hasta la llegada. Incluye el tiempo que la persona tarda en cambiar de piso.",
+  "sub": "Desde la solicitud hasta la llegada. Incluye el tiempo que el usuario tarda en cambiar de piso.",
   "min": 0, "max": 120, "marcas": [0, 30, 60, 90, 120], "decimales": 0, "unidad": "s", "rotulos": false,
   "ejeX": "número de misión", "columnas": ["Misión", "Duración"],
   "datos": [
@@ -98,7 +98,7 @@ Nueve misiones del sorteo, en su orden y sin reubicar los vehículos entre una y
 
 <div class="grafica" data-grafica='{
   "tipo": "barras-v", "estilo": "puntos", "titulo": "Distancia al destino al llegar",
-  "sub": "Según la localización del propio vehículo, 1,5 s después de detenerse.",
+  "sub": "Según la localización del propio agente, 1,5 s después de detenerse.",
   "min": 0, "max": 0.6, "marcas": [0, 0.1, 0.2, 0.3, 0.4, 0.5], "decimalesEje": 1, "decimales": 2, "unidad": "m",
   "umbral": 0.5, "umbralTexto": "tolerancia 0,5 m", "ejeX": "número de misión", "rotulos": false,
   "columnas": ["Misión", "Distancia al destino"],
@@ -120,12 +120,12 @@ Nueve misiones del sorteo, en su orden y sin reubicar los vehículos entre una y
 <div class="cifras">
   <div class="cifra"><div class="valor">87,6 s</div><div class="que">duración mediana de una misión entre pisos</div></div>
   <div class="cifra"><div class="valor">0,87 s</div><div class="que">mediana desde la solicitud hasta el primer movimiento</div></div>
-  <div class="cifra"><div class="valor">0,3 ms</div><div class="que">en asignar el robot, con el reloj del portátil</div></div>
+  <div class="cifra"><div class="valor">0,3 ms</div><div class="que">en asignar el agente, con el reloj del portátil</div></div>
   <div class="cifra"><div class="valor">9 de 9</div><div class="que">misiones sin interrupción del guiado en el relevo</div></div>
 </div>
 
 !!! warning "Cómo leer estas cifras"
-    - En esta campaña la llegada no se midió con flexómetro: la distancia es la que estima la localización del propio vehículo. Como referencia, el 7 de octubre esa localización quedó a 0,10 m o menos del flexómetro en el avance.
+    - En esta campaña la llegada no se midió con flexómetro: la distancia es la que estima la localización del propio agente. Como referencia, el 7 de octubre esa localización quedó a 0,10 m o menos del flexómetro en el avance.
     - Las misiones 1 y 2 se completaron en un segundo intento: el primero de la 1 terminó a 0,526 m del destino, fuera de la tolerancia, y el de la 2 sin poder verificar la llegada. Por decisión del equipo, la tasa cuenta una corrida por misión.
-    - Antes de la primera misión válida, la navegación de los dos vehículos se detuvo y hubo que reiniciarla; la causa no se estableció.
+    - Antes de la primera misión válida, la navegación de los dos agentes se detuvo y hubo que reiniciarla; la causa no se estableció.
     - La misión 10 no terminó: el computador del coordinador se apagó por batería.

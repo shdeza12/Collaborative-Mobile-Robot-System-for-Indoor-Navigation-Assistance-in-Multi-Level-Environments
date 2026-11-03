@@ -3,13 +3,14 @@
 Trabajo de grado · Ingeniería Electrónica · Universidad Santo Tomás · Grupo de Estudio y Desarrollo en
 Robótica (GED)
 
-Dos robots AWS DeepRacer guían a una persona entre los pisos de un edificio. La persona elige su destino
-desde el navegador del teléfono y el robot de su piso la lleva hasta la escalera. Ella cambia de piso y lo
-confirma en el teléfono, y el robot del otro piso la recibe y termina el recorrido. Un coordinador central
-asigna los robots y organiza el relevo. El aporte del proyecto es esa coordinación entre agentes.
+Dos agentes, robots móviles AWS DeepRacer, uno por piso, guían a un usuario entre los pisos de un edificio.
+El usuario elige su destino desde el navegador del teléfono y el agente de su piso lo lleva hasta la escalera.
+Cambia de piso por su cuenta y lo confirma en el teléfono, y el agente del otro piso lo recibe y termina el
+recorrido. Un coordinador central asigna los agentes y organiza el relevo. El aporte del proyecto es esa
+coordinación entre agentes.
 
 [![Sitio del proyecto: semana a semana](https://img.shields.io/badge/Sitio_del_proyecto-semana_a_semana-2a78d6?style=for-the-badge)](https://shdeza12.github.io/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/)
-[![Video de la campaña](https://img.shields.io/badge/Video-campa%C3%B1a_con_los_veh%C3%ADculos-c4302b?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/X3BINGgNxiA)
+[![Video de la campaña](https://img.shields.io/badge/Video-campa%C3%B1a_con_los_agentes_f%C3%ADsicos-c4302b?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/X3BINGgNxiA)
 [![Documento final](https://img.shields.io/badge/Documento_final-PDF-57606a?style=for-the-badge)](Documentos/DocumentoFinal/main.pdf)
 [![Objetivos](https://img.shields.io/badge/Objetivos-4_de_4_cumplidos-1a7f37?style=for-the-badge)](ESTADO.md)
 
@@ -33,10 +34,10 @@ Los 36 requisitos del proyecto están verificados, cada uno con su prueba ([`REQ
 
 | Prueba | Resultado |
 |---|---|
-| Campaña con los dos vehículos, pisos 3 y 4 (16 de octubre de 2026) | 9 de 9 misiones completadas con relevo entre pisos; duración mediana 87,6 s |
+| Campaña con los agentes físicos, pisos 3 y 4 (16 de octubre de 2026) | 9 de 9 misiones completadas con relevo entre pisos; duración mediana 87,6 s |
 | Tiempo de respuesta, de la solicitud al primer movimiento | Mediana 0,87 s |
-| Error de llegada, según la localización del vehículo | Mediana 0,23 m, con tolerancia de 0,5 m |
-| Cancelación desde el teléfono con los vehículos (23 de octubre) | 6 de 6: el vehículo vuelve a su escalera, a 0,07–0,34 m |
+| Error de llegada, según la localización del agente | Mediana 0,23 m, con tolerancia de 0,5 m |
+| Cancelación desde el teléfono con los agentes físicos (23 de octubre) | 6 de 6: el agente vuelve a su escalera, a 0,07–0,34 m |
 | Campaña en simulación, 30 misiones sorteadas | 26 completadas; los 4 fallos fueron llegadas cortas |
 
 El detalle está en el capítulo de resultados del documento final y en
@@ -44,14 +45,14 @@ El detalle está en el capítulo de resultados del documento final y en
 
 ## Cómo funciona
 
-La página del teléfono habla con el coordinador, que corre en un portátil; cada vehículo lleva su propia navegación y solo se comunica con el portátil. El relevo ocurre en la escalera, que la persona sube o baja por su cuenta.
+La página del teléfono habla con el coordinador, que corre en un portátil; cada agente lleva su propia navegación y solo se comunica con el portátil. El relevo ocurre en la escalera, que el usuario sube o baja por su cuenta.
 
-![Arquitectura del sistema con los dos vehículos](Documentos/DocumentoFinal/imagenes/arquitectura_vehiculos.png)
+![Arquitectura del sistema con los dos agentes físicos](Documentos/DocumentoFinal/imagenes/arquitectura_vehiculos.png)
 
 ## Estructura
 
 ```
-Robot/aws-deepracer/   Paquetes ROS 2: coordinador y agentes, modelo del vehículo, lanzadores y mapas
+Robot/aws-deepracer/   Paquetes ROS 2: coordinador y agentes, modelo del AWS DeepRacer, lanzadores y mapas
 interfaz_web/          Página del teléfono (HTML y JavaScript, sin dependencias externas)
 herramientas/          Arranque, verificación, medición y análisis de las misiones
 Documentos/            Documento final, entregables semanales, requisitos, guías y evidencia

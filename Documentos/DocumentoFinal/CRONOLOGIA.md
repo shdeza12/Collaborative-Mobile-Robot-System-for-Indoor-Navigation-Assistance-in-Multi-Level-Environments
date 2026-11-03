@@ -412,6 +412,8 @@ Fuente: Entregable S29; `Evidencia/S29_video_pagina_cancelacion.md`; `Evidencia/
   3,75 ms entre los dos agentes en la misma planta entró al texto. Los autores deciden no repetir el requisito de latencia con un
   agente en cada piso: con uno en cada piso quedan las medidas de ida y vuelta contra el enrutador. El documento queda en 99
   páginas y el recortado, en 80.
+- 3 de noviembre: el sitio pasó a usar el título del documento y sus términos: el usuario, los agentes y los agentes físicos. Las
+  páginas semanales aplican lo mismo al publicar la cronología, los informes y la evidencia, que quedan como se escribieron.
 - 3 de noviembre: el ensayo y la sesión con los jurados incluyen ver en RViz la misión 3 grabada en racey. El visor se probó con
   una grabación de deepy del 8 de octubre; grabar con la cadena completa queda para el ensayo.
 

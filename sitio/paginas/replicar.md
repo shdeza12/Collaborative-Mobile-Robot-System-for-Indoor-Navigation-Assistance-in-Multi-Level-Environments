@@ -1,6 +1,6 @@
 # Replicar el proyecto
 
-Todo el código es abierto. La forma más directa de ver el sistema funcionando es en **simulación**: dos vehículos en Gazebo, uno por piso, con el coordinador y la página del teléfono. Con los **vehículos reales** hacen falta dos AWS DeepRacer y una red local.
+Todo el código es abierto. La forma más directa de ver el sistema funcionando es en **simulación**: dos agentes en Gazebo, uno por piso, con el coordinador y la página del teléfono. Con los **agentes físicos** hacen falta dos AWS DeepRacer y una red local.
 
 !!! info "Qué se necesita"
     Ubuntu 22.04, ROS 2 Humble y Gazebo Classic 11. Un computador con 16 GB de memoria corre los dos procesos de simulación a tiempo real.
@@ -44,7 +44,7 @@ Todo el código es abierto. La forma más directa de ver el sistema funcionando 
     herramientas/verificar_instalacion.sh
     ```
 
-    **6. Dos robots, uno por piso**, cada uno en su terminal:
+    **6. Dos agentes, uno por piso**, cada uno en su terminal:
 
     ```bash
     herramientas/robot.sh robot1 nav2
@@ -56,7 +56,7 @@ Todo el código es abierto. La forma más directa de ver el sistema funcionando 
 
     El coordinador, la página del teléfono y una misión con relevo siguen la [guía de arranque](https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/blob/main/Documentos/GUIA_ARRANQUE.md), paso a paso.
 
-    **7. Los pisos 3 y 4 de Catalayud, en simulación.** Cada robot con el mundo y el mapa de su piso:
+    **7. Los pisos 3 y 4 de Catalayud, en simulación.** Cada agente con el mundo y el mapa de su piso:
 
     ```bash
     MUNDO=$PWD/simulacion/piso3.world herramientas/robot.sh robot1 nav2 map:=$PWD/Robot/aws-deepracer/deepracer_bringup/maps/piso3.yaml x:=22.10 y:=1.06 yaw:=3.1416 nivel:=3
@@ -68,17 +68,17 @@ Todo el código es abierto. La forma más directa de ver el sistema funcionando 
 
     El coordinador con el catálogo de esos pisos y los demás pasos están en la sección 8 de [GUIA_PISOS_3_Y_4.md](https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/blob/main/Documentos/GUIA_PISOS_3_Y_4.md). Sirve para ver el sistema, no para medir.
 
-=== "Con los vehículos"
+=== "Con los agentes físicos"
 
-    Cada vehículo usa su tarjeta original con Ubuntu 24.04, ROS 2 Jazzy y el software comunitario [deepracer-custom-car](https://github.com/aws-deepracer-community/deepracer-custom-car). El coordinador corre en un portátil con Humble, dentro de un contenedor con Jazzy.
+    Cada agente usa su tarjeta original con Ubuntu 24.04, ROS 2 Jazzy y el software comunitario [deepracer-custom-car](https://github.com/aws-deepracer-community/deepracer-custom-car). El coordinador corre en un portátil con Humble, dentro de un contenedor con Jazzy.
 
     | Paso | Qué hace | Herramienta |
     |---|---|---|
-    | Llevar el código a los dos vehículos | Copia y compila lo mismo en los dos | `herramientas/nivelar_carros.sh` |
+    | Llevar el código a los dos agentes | Copia y compila lo mismo en los dos | `herramientas/nivelar_carros.sh` |
     | Navegación sobre el mapa del piso | Arranca Nav2 en el orden correcto y pone la pose de salida | `herramientas/nav2_mapa_guardado.sh` |
     | Coordinador y página | Contenedor del coordinador, puente web y página | `herramientas/coordinador_portatil.sh` |
 
-    Los mapas de los pisos 3 y 4 salen de medidas con flexómetro, no de SLAM. La guía de esos pisos explica cómo se levantaron y dónde va cada vehículo al arrancar: [GUIA_PISOS_3_Y_4.md](https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/blob/main/Documentos/GUIA_PISOS_3_Y_4.md).
+    Los mapas de los pisos 3 y 4 salen de medidas con flexómetro, no de SLAM. La guía de esos pisos explica cómo se levantaron y dónde va cada agente al arrancar: [GUIA_PISOS_3_Y_4.md](https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/blob/main/Documentos/GUIA_PISOS_3_Y_4.md).
 
 ??? question "Si algo no funciona"
     - **Gazebo abre un mundo vacío y no da error** al abrir un mundo a mano: falta la variable `GAZEBO_MODEL_PATH` del paso 4, que apunta a la carpeta `simulacion/`. El lanzador del proyecto la agrega por su cuenta.

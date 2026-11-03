@@ -1,7 +1,7 @@
-site_name: Robots guía en edificios de varios pisos
+site_name: Sistema colaborativo de robots móviles para asistencia de orientación en entornos interiores con múltiples pisos
 site_description: >-
-  Proyecto de grado de la Universidad Santo Tomás: dos robots móviles que guían
-  a una persona entre los pisos de un edificio, con relevo en la escalera.
+  Proyecto de grado de la Universidad Santo Tomás: dos agentes, robots móviles
+  terrestres, uno por piso, se reparten el guiado del usuario con un relevo en la escalera.
 site_author: Santiago Hernández Ávila y Jonny Alejandro Mejía León
 site_url: https://shdeza12.github.io/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/
 repo_url: https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments

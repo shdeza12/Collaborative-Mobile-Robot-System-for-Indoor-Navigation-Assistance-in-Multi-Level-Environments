@@ -28,13 +28,13 @@ Cada semana tiene su página con lo que se hizo, las imágenes y lo que se concl
 ### Fase 5 · integración del sistema y pruebas
 
 <div class="semanas-grid">
-<a class="semana-tarjeta" href="s17/"><img src="img/s17_5.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 17 · 3 al 9 de agosto</span><span class="titulo">Vehículo físico liberado y Nav2 en Humble</span></span></a>
+<a class="semana-tarjeta" href="s17/"><img src="img/s17_5.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 17 · 3 al 9 de agosto</span><span class="titulo">Agente físico liberado y Nav2 en Humble</span></span></a>
 <a class="semana-tarjeta" href="s18/"><img src="img/s18_1.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 18 · 10 al 16 de agosto</span><span class="titulo">Dos agentes aislados y entorno de dos niveles</span></span></a>
-<a class="semana-tarjeta" href="s19/"><img src="img/s19_3.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 19 · 17 al 23 de agosto</span><span class="titulo">Diagnóstico del vehículo y protocolo</span></span></a>
+<a class="semana-tarjeta" href="s19/"><img src="img/s19_3.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 19 · 17 al 23 de agosto</span><span class="titulo">Diagnóstico del agente y protocolo</span></span></a>
 <a class="semana-tarjeta" href="s20/"><img src="img/s20_1.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 20 · 24 al 30 de agosto</span><span class="titulo">Coordinador, primera misión y relevo en simulación</span></span></a>
 <a class="semana-tarjeta" href="s21/"><img src="img/s21_1.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 21 · 31 de agosto al 6 de septiembre</span><span class="titulo">Campaña de treinta misiones</span></span></a>
 <a class="semana-tarjeta" href="s22/"><img src="img/s22_5.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 22 · 7 al 13 de septiembre</span><span class="titulo">Interfaz en el teléfono e información de avance</span></span></a>
-<a class="semana-tarjeta" href="s23/"><img src="img/s23_1.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 23 · 14 al 20 de septiembre</span><span class="titulo">Segundo vehículo y congelación del código</span></span></a>
+<a class="semana-tarjeta" href="s23/"><img src="img/s23_1.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 23 · 14 al 20 de septiembre</span><span class="titulo">Segundo agente y congelación del código</span></span></a>
 <a class="semana-tarjeta" href="s24/"><img src="img/s24_1.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 24 · 21 al 27 de septiembre</span><span class="titulo">Decisión de la demostración física y navegación real</span></span></a>
 <a class="semana-tarjeta" href="s25/"><img src="img/s25_1.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 25 · 28 de septiembre al 4 de octubre</span><span class="titulo">Aislamiento, piso 2 y paso a los pisos 3 y 4</span></span></a>
 <a class="semana-tarjeta" href="s26/"><img src="img/s26_1.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 26 · 5 al 11 de octubre</span><span class="titulo">Unidad inercial, red, llegada verificada y coordinador al portátil</span></span></a>
@@ -43,7 +43,7 @@ Cada semana tiene su página con lo que se hizo, las imágenes y lo que se concl
 ### Fase 6 · campaña, análisis y escritura
 
 <div class="semanas-grid">
-<a class="semana-tarjeta" href="s27/"><img src="img/s27_1.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 27 · 12 al 18 de octubre</span><span class="titulo">Campaña con los dos vehículos</span></span></a>
+<a class="semana-tarjeta" href="s27/"><img src="img/s27_1.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 27 · 12 al 18 de octubre</span><span class="titulo">Campaña con los agentes físicos</span></span></a>
 <a class="semana-tarjeta" href="s28/"><img src="img/s28_1.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 28 · desde el 19 de octubre</span><span class="titulo">Documento final</span></span></a>
 <a class="semana-tarjeta" href="s29/"><img src="img/s29_1.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 29 · 26 de octubre al 1 de noviembre</span><span class="titulo">Documento recortado y video de las pruebas</span></span></a>
 <a class="semana-tarjeta" href="s30/"><img src="img/s30_1.jpg" alt="" loading="lazy"><span class="texto"><span class="num">Semana 30 · 2 al 8 de noviembre</span><span class="titulo">Sesión con los jurados y simulación en los pisos 3 y 4</span></span></a>

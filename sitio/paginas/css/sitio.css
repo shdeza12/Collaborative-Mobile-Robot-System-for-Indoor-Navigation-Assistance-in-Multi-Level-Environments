@@ -41,6 +41,12 @@
 .md-typeset img { border-radius: 8px; }
 .md-typeset figure figcaption { color: var(--sitio-texto-suave); font-size: .7rem; max-width: 46rem; }
 
+/* ---------- Encabezado: el título del proyecto completo, sin puntos suspensivos ---------- */
+.md-header__title { font-size: .72rem; line-height: 1.2; }
+.md-header__topic { height: 100%; align-items: center; white-space: normal; }
+.md-header__topic .md-ellipsis { white-space: normal; text-overflow: clip; }
+@media (max-width: 44.984375em) { .md-header__title { font-size: .5rem; line-height: 1.1; } }
+
 /* ---------- Portada ---------- */
 .portada {
   display: grid; grid-template-columns: 1.15fr 1fr; gap: 2rem; align-items: center;

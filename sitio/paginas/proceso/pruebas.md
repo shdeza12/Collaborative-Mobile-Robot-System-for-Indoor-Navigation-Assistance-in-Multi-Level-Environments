@@ -1,19 +1,19 @@
 # Pruebas de verificación
 
-La demostración con los vehículos se organizó como una escalera de seis pruebas. Cada una tiene un criterio escrito antes de correrla, y la siguiente solo tiene sentido si la anterior se superó. Los criterios los propusieron los autores y los decidió el director; después de la última fecha de revisión, el 16 de octubre, no se tomaron más datos.
+La demostración con los agentes físicos se organizó como una escalera de seis pruebas. Cada una tiene un criterio escrito antes de correrla, y la siguiente solo tiene sentido si la anterior se superó. Los criterios los propusieron los autores y los decidió el director; después de la última fecha de revisión, el 16 de octubre, no se tomaron más datos.
 
 <div class="escalera">
-  <div class="escalon"><div class="num">Prueba 1 · 22 de septiembre</div><h3>Actuación</h3><div class="criterio">El vehículo responde a las órdenes de dirección y tracción.</div><div class="resultado"><span class="estado-ok">Superada</span><br>Los dos vehículos completaron la prueba de actuación entera.</div></div>
+  <div class="escalon"><div class="num">Prueba 1 · 22 de septiembre</div><h3>Actuación</h3><div class="criterio">El agente responde a las órdenes de dirección y tracción.</div><div class="resultado"><span class="estado-ok">Superada</span><br>Los dos agentes completaron la prueba de actuación entera.</div></div>
   <div class="escalon"><div class="num">Prueba 2 · 2 de octubre</div><h3>Odometría</h3><div class="criterio">Error de 10 % o menos sobre un recorrido conocido de 5 m o más.</div><div class="resultado"><span class="estado-ok">Superada</span><br>+3,3 % sobre 14,57 m y −4,6 % sobre 6,68 m, con flexómetro.</div></div>
-  <div class="escalon"><div class="num">Prueba 3 · 7 de octubre</div><h3>Navegación de un vehículo</h3><div class="criterio">Un recorrido de punto a punto con la llegada verificada a 0,5 m o menos.</div><div class="resultado"><span class="estado-ok">Superada</span><br>Tres tramos encadenados; llegadas medidas a 0,06 m y 0,45 m.</div></div>
-  <div class="escalon"><div class="num">Prueba 4 · 22 de septiembre</div><h3>Dos vehículos en la misma red</h3><div class="criterio">Los dos vehículos y el coordinador coexisten sin conflicto de nombres.</div><div class="resultado"><span class="estado-ok">Superada</span><br>Se adelantó porque no dependía de la odometría.</div></div>
-  <div class="escalon"><div class="num">Prueba 5 · 16 de octubre</div><h3>Misión con relevo</h3><div class="criterio">Una misión con relevo de extremo a extremo sobre los dos vehículos, con su registro.</div><div class="resultado"><span class="estado-ok">Superada</span><br>Salón 302 → Salón 402 en 132,5 s.</div></div>
-  <div class="escalon"><div class="num">Prueba 6 · 16 de octubre</div><h3>Campaña con los vehículos</h3><div class="criterio">Entre 5 y 10 misiones del protocolo completo, con su registro.</div><div class="resultado"><span class="estado-ok">Superada</span><br>9 misiones del sorteo completadas. <a href="../../resultados/#con-los-vehiculos">Ver resultados</a></div></div>
+  <div class="escalon"><div class="num">Prueba 3 · 7 de octubre</div><h3>Navegación de un agente</h3><div class="criterio">Un recorrido de punto a punto con la llegada verificada a 0,5 m o menos.</div><div class="resultado"><span class="estado-ok">Superada</span><br>Tres tramos encadenados; llegadas medidas a 0,06 m y 0,45 m.</div></div>
+  <div class="escalon"><div class="num">Prueba 4 · 22 de septiembre</div><h3>Dos agentes en la misma red</h3><div class="criterio">Los dos agentes y el coordinador coexisten sin conflicto de nombres.</div><div class="resultado"><span class="estado-ok">Superada</span><br>Se adelantó porque no dependía de la odometría.</div></div>
+  <div class="escalon"><div class="num">Prueba 5 · 16 de octubre</div><h3>Misión con relevo</h3><div class="criterio">Una misión con relevo de extremo a extremo sobre los dos agentes, con su registro.</div><div class="resultado"><span class="estado-ok">Superada</span><br>Salón 302 → Salón 402 en 132,5 s.</div></div>
+  <div class="escalon"><div class="num">Prueba 6 · 16 de octubre</div><h3>Campaña con los agentes físicos</h3><div class="criterio">Entre 5 y 10 misiones del protocolo completo, con su registro.</div><div class="resultado"><span class="estado-ok">Superada</span><br>9 misiones del sorteo completadas. <a href="../../resultados/#con-los-agentes-fisicos">Ver resultados</a></div></div>
 </div>
 
 ## La odometría, el paso del que dependía todo
 
-El vehículo no tiene codificadores en las ruedas. Su avance sale de comparar barridos del láser, y durante meses esa medida no sirvió. La gráfica muestra la fracción del avance real que registró, medida con flexómetro, en cada entorno. La franja verde es el criterio de la prueba: entre 90 % y 110 %.
+El agente no tiene codificadores en las ruedas. Su avance sale de comparar barridos del láser, y durante meses esa medida no sirvió. La gráfica muestra la fracción del avance real que registró, medida con flexómetro, en cada entorno. La franja verde es el criterio de la prueba: entre 90 % y 110 %.
 
 <div class="grafica" data-grafica='{
   "tipo": "barras-h", "titulo": "Avance registrado por la odometría, como porcentaje del avance real",
@@ -36,7 +36,7 @@ En un pasillo recto y uniforme, cada barrido es casi igual al anterior y la info
 
 ## La navegación y la precisión de llegada
 
-En la primera sesión en el piso 4 las dos llegadas medidas quedaron a 0,57 y 0,62 m, cortas: la navegación daba la meta por alcanzada a 1,0 m. Con la unidad inercial el margen bajó a 0,5 m, y en la sesión siguiente un vehículo encadenó tres tramos sin que nadie lo tocara.
+En la primera sesión en el piso 4 las dos llegadas medidas quedaron a 0,57 y 0,62 m, cortas: la navegación daba la meta por alcanzada a 1,0 m. Con la unidad inercial el margen bajó a 0,5 m, y en la sesión siguiente un agente encadenó tres tramos sin que nadie lo tocara.
 
 <figure markdown>
 ![Recorrido de tres tramos en el piso 4 y regreso a la salida](../img/cadena_piso4.png)
@@ -51,4 +51,4 @@ En la primera sesión en el piso 4 las dos llegadas medidas quedaron a 0,57 y 0,
 | Regreso | Salida | 62,8 s | 6 | 0,34 m | flexómetro |
 
 !!! warning "Lo que limita la precisión"
-    El vehículo no se mueve con órdenes por debajo de 0,40 m/s, así que se aproxima a la meta a esa velocidad y no tiene un régimen de aproximación fina. Es un límite de la plataforma, no del controlador.
+    El agente no se mueve con órdenes por debajo de 0,40 m/s, así que se aproxima a la meta a esa velocidad y no tiene un régimen de aproximación fina. Es un límite de la plataforma, no del controlador.
