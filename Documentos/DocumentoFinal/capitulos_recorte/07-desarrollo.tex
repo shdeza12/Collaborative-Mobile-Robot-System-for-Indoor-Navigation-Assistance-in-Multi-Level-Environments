@@ -677,17 +677,20 @@ confirmación de cambio de piso.
 
 El usuario elige el origen en una lista y el destino en un catálogo con búsqueda
 por nombre, donde cada destino muestra su piso y, si queda en el otro nivel, la
-marca «con relevo». Durante la misión, la página muestra un título calculado a
+marca «con relevo» (figura~\ref{fig:hri}, izquierda). Durante la misión, la página muestra un título calculado a
 partir de la etapa, el texto que redacta el coordinador, el agente que está
 guiando, hacia dónde va, el destino final y la distancia restante. Una franja de
-cinco pasos (preparando, tramo 1, relevo, tramo 2 y fin) marca el paso actual (figura~\ref{fig:hri}, izquierda).
+cinco pasos (preparando, tramo 1, relevo, tramo 2 y fin) marca el paso actual (figura~\ref{fig:hri}, centro).
 
 \begin{figure}[!htbp]
   \centering
-  \begin{minipage}[t]{0.31\textwidth}\vspace{0pt}\includegraphics[width=\linewidth]{imagenes/hri_seguimiento.png}\end{minipage}\hfill
-  \begin{minipage}[t]{0.31\textwidth}\vspace{0pt}\includegraphics[width=\linewidth]{imagenes/hri_confirmacion_piso.png}\end{minipage}\hfill
-  \begin{minipage}[t]{0.31\textwidth}\vspace{0pt}\includegraphics[width=\linewidth]{imagenes/hri_confirmacion_subida.png}\end{minipage}
-  \caption{Interfaz web en el teléfono, durante las pruebas del 23 de octubre con los agentes físicos (anexo A, video 8). A la izquierda, el primer tramo de una misión de bajada, con el texto del coordinador, el agente activo y la distancia restante. Al centro y a la derecha, la espera de confirmación en una misión de bajada y en una de subida: el título y el botón dicen el sentido y el piso.}
+  \includegraphics[height=9.2cm]{imagenes/hri_catalogo.png}\hfill
+  \includegraphics[height=9.2cm]{imagenes/hri_seguimiento.png}\hfill
+  \begin{minipage}[b]{4.05cm}
+    \includegraphics[trim=0 0 0 818,clip,width=\linewidth]{imagenes/hri_confirmacion_piso.png}\\[0.2cm]
+    \includegraphics[trim=0 0 0 832,clip,width=\linewidth]{imagenes/hri_confirmacion_subida.png}
+  \end{minipage}
+  \caption{Interfaz web en el teléfono, en las pruebas del 23 de octubre (anexo A, video 8). A la izquierda, el catálogo de destinos, con el piso de cada uno y la marca «con relevo». En el centro, el primer tramo de una misión, con el texto del coordinador, el agente activo y la distancia restante. A la derecha, la espera de confirmación al bajar y al subir: el título y el botón dicen el sentido y el piso.}
   \label{fig:hri}
 \end{figure}
 
@@ -704,7 +707,7 @@ usuario, pero no puede saber si la persona ya subió. Sin una pausa explícita, 
 misión podía darse por completada con el usuario todavía en el piso equivocado, y
 la instrumentación lo habría registrado como éxito. Por eso, cuando el segundo
 agente llega a su punto de transferencia, el coordinador pasa a la etapa de espera de confirmación. La página muestra entonces un botón para confirmar el cambio de
-piso, que solo existe en esa etapa (figura~\ref{fig:hri}, centro y derecha). A los 60~s sin
+piso, que solo existe en esa etapa (figura~\ref{fig:hri}, derecha). A los 60~s sin
 confirmación aparece un aviso, y a los 120~s la misión termina como fallida. Los
 plazos se cuentan desde que llega el agente, para que un agente lento no le
 consuma tiempo al usuario, y se miden con el reloj del sistema y no con el de la
@@ -751,7 +754,7 @@ navegador cuándo volver a pedir la página. Ahora la página se sirve con la
 indicación de comprobarla cada vez que se abre. El tercer defecto fue de nombres:
 los dos ascensores se llamaban igual en la lista y en una misión se eligió el del
 piso equivocado, así que los nombres repetidos se muestran ahora con su piso, como
-«Ascensor (piso 3)». Los tres ajustes se verificaron con pruebas automáticas y
+«Ascensor (piso 3)» (figura~\ref{fig:hri}, izquierda). Los tres ajustes se verificaron con pruebas automáticas y
 después con un teléfono y los agentes físicos, en una misión de subida y otra de
 bajada.
 

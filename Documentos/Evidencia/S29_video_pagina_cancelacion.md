@@ -87,6 +87,7 @@ recortados para quitar la barra del teléfono y la del navegador (3 de noviembre
 
 | Archivo en `DocumentoFinal/imagenes/` | Grabación | Segundo | Misión y etapa |
 |---|---|---|---|
+| `hri_catalogo.png` | `VID-20261027-WA0010.mp4` | 5 | Salón 403 → Salón 303, catálogo de destinos |
 | `hri_seguimiento.png` | `VID-20261027-WA0010.mp4` | 35 | Salón 403 → Salón 303, primer tramo |
 | `hri_confirmacion_piso.png` | `VID-20261027-WA0010.mp4` | 55 | Salón 403 → Salón 303, espera de confirmación |
 | `hri_confirmacion_subida.png` | `VID-20261027-WA0009.mp4` | 60 | Salón 301 → Salón 401, espera de confirmación |

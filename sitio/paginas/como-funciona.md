@@ -120,6 +120,11 @@ Es una página web, no una aplicación: un visitante ocasional no va a instalar 
 <div class="galeria" markdown>
 
 <figure markdown>
+![El catálogo de destinos, con el piso de cada uno y la marca «con relevo»](img/interfaz_catalogo.png)
+<figcaption>El catálogo: cada destino muestra su piso y, si queda en el otro, la marca «con relevo».</figcaption>
+</figure>
+
+<figure markdown>
 ![La página durante el guiado, con el título «Sígueme»](img/interfaz_seguimiento.png)
 <figcaption>Durante el guiado: el robot activo, hacia dónde va, la distancia y el paso de la misión.</figcaption>
 </figure>
@@ -136,6 +141,6 @@ Es una página web, no una aplicación: un visitante ocasional no va a instalar 
 
 </div>
 
-Las tres capturas son de las pruebas del 23 de octubre con los dos vehículos.
+Las capturas son de las pruebas del 23 de octubre con los dos vehículos.
 
 Dos funciones se añadieron al ver el sistema en uso, a pedido del director: la **confirmación del cambio de piso**, para que la misión no se dé por completada con la persona todavía en el piso equivocado, y la **cancelación**, que devuelve el robot activo a su escalera.
