@@ -93,7 +93,7 @@ Las rutas en comentarios de siete archivos se copian antes, al empezar el ensayo
 | Revisar la presentación y acordar el reparto del guion | Santiago y Jonny | Observaciones aplicadas |
 | Ensayo oral con cronómetro | Santiago y Jonny | Dentro de 15 a 20 min |
 | Probar los dos clips en el computador de la sala | Santiago o Jonny | Se reproducen con un clic |
-| Guía de preguntas de la sustentación, en la guía de estudio | Claude | Publicada el 3 de noviembre; falta agregar al quiz los temas nuevos |
+| Guía de preguntas de la sustentación, en la guía de estudio | Claude | Publicada el 3 de noviembre, con la guía de la sesión y 15 preguntas nuevas en el quiz |
 
 ## 8. Corte del viernes 6
 
