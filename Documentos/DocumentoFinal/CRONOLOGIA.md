@@ -398,5 +398,8 @@ Fuente: Entregable S29; `Evidencia/S29_video_pagina_cancelacion.md`; `Evidencia/
   la sesión usa un solo teléfono.
 - 2 de noviembre: la comprobación entró al documento recortado, en el paso a Catalayud, con las capturas de los dos pisos
   simulados. El documento queda en 78 páginas.
+- 2 de noviembre: la presentación lleva dos clips de 30 s o menos: el relevo de la misión 4 con los agentes físicos y el
+  final de la misión 3 de la campaña en simulación, en un solo piso, porque la grabación de esa campaña no muestra un
+  relevo en movimiento. La presentación queda en 41 diapositivas y 18 min 30 s.
 
 Fuente: `Evidencia/S30_simulacion_catalayud.md`; `Evidencia/S30_segunda_mision_y_cancelacion.md`; `GUION_SESION_JURADOS.md`.

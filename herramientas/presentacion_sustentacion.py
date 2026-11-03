@@ -33,6 +33,7 @@ RAIZ = Path(__file__).resolve().parent.parent
 REC = RAIZ / 'Documentos/Presentacion/plantilla'
 FIG = RAIZ / 'Documentos/DocumentoFinal/imagenes'
 SALIDA = RAIZ / 'Documentos/Presentacion/Presustentacion.pptx'
+CLIPS = RAIZ / 'VIDEOS/editado/clips'  # no se versiona: los clips van dentro del .pptx
 
 # Colores medidos sobre el PDF de la plantilla
 AZUL_TITULO = '001F5F'
@@ -802,6 +803,19 @@ def grafico_odometria(s, x, y, w, h):
         despues_de.addnext(sp) if despues_de is not None else padre.append(sp)
 
 
+def clip(m, titulo, archivo, poster, pie, notas):
+    """Una diapositiva con un clip incrustado: se reproduce con un clic y no depende de internet."""
+    ruta = CLIPS / archivo
+    if not ruta.exists():
+        raise SystemExit(f'Falta {ruta}: los clips se generan con Remotion y no se versionan.')
+    s = m.contenido(titulo, notas)
+    x, y, w, h = 89, 104, 690, 388
+    s.shapes.add_movie(str(ruta), Pt(x), Pt(y), Pt(w), Pt(h), poster_frame_image=str(REC / poster),
+                       mime_type='video/mp4')
+    fuente(s, x, y + h + 1, w, pie)
+    return s
+
+
 def resultados(m):
     m.separador(['RESULTADOS'], 'Tiempo: 3 s.')
     s = m.contenido('Evaluación en simulación', (
@@ -836,6 +850,14 @@ def resultados(m):
               parrafos=[{'t': num, 'fuente': 'Arial Black', 'tam': 19, 'color': AZUL_TITULO,
                          'alin': 'c'}, {'t': lab, 'tam': 10.5, 'alin': 'c', 'color': GRIS}],
               margen=(6, 2, 6, 2))
+
+    clip(m, 'Una misión de la campaña en simulación', 'simulacion_campana_mision3_720p.mp4',
+         'poster_simulacion.jpg', 'Misión 3 de las 30 de la campaña, grabada el 4 de septiembre en los pisos 2 y 3 del '
+         'edificio Gregorio. Fuente: Elaboración propia', (
+             'Tiempo: 35 s. Un clic reproduce el clip, de 30 s y sin audio. Es el final de la misión 3 de la campaña, '
+             'en un solo piso, de ETM9 a ETM6. A la izquierda se mueve el agente de ese piso; a la derecha, el del '
+             'otro piso espera, porque la misión no cambia de piso. El azul es el barrido del láser. La grabación de '
+             'la campaña no muestra un relevo en movimiento: ese se ve en el clip de los agentes físicos.'))
 
     s = m.contenido('Odometría del agente', (
         'Tiempo: 40 s. El agente no tiene codificadores en las ruedas: su odometría sale de comparar '
@@ -903,6 +925,15 @@ def resultados(m):
            'La décima misión quedó interrumpida: el portátil se quedó sin batería']
     texto(s, bx + bw + 14, 204, 790 - (bx + bw + 14), 230,
           [{'t': v, 'vineta': True, 'despues': 7} for v in vin], tam=12)
+
+    clip(m, 'El relevo con los agentes físicos', 'relevo_campana_mision4_720p.mp4', 'poster_relevo.jpg',
+         'Misión 4 de la campaña con los agentes físicos, 16 de octubre, en los pisos 3 y 4 del edificio Catalayud. '
+         'Fuente: Elaboración propia', (
+             'Tiempo: 35 s. Un clic reproduce el clip, de 29 s y sin audio. Misión 4, del Salón 403 al Salón 303. A la '
+             'izquierda, lo que ve el usuario; a la derecha, su teléfono. Cuando el usuario empieza a bajar, aparece '
+             'el agente del piso 3 yendo a recogerlo a la escalera. El usuario confirma en el teléfono y ese agente '
+             'lo guía hasta el salón. Si preguntan: el título «¿Ya subió?» al bajar es de la versión de la página '
+             'del 16 de octubre, y se corrigió antes de las pruebas del 23 de octubre.'))
 
     s = m.contenido('Relevo y limitaciones', (
         'Tiempo: 40 s. Para la persona, el relevo es el tiempo entre llegar a la escalera de su piso '
