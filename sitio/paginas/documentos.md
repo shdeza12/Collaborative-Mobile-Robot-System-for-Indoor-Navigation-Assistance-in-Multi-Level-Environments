@@ -6,7 +6,7 @@ Para leer el proyecto completo, el documento de la tesis. Para el detalle de cad
 
 <div class="decision-tarjeta" markdown>
 ### :material-file-document-outline: La tesis
-El documento final: contexto, marco referencial, desarrollo, resultados, conclusiones y trabajos futuros. La versión publicada es del 3 de noviembre, tiene 98 páginas e incluye la campaña con los vehículos. Hay una versión recortada de 79 páginas, en revisión.
+El documento final: contexto, marco referencial, desarrollo, resultados, conclusiones y trabajos futuros. La versión publicada incluye la campaña con los vehículos, y hay una versión recortada, en revisión.
 
 [Descargar el PDF :material-download:](https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/raw/main/Documentos/DocumentoFinal/main.pdf){ .md-button .md-button--primary }
 [Versión recortada :material-download:](https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/raw/main/Documentos/DocumentoFinal/main_recorte.pdf){ .md-button .md-button--primary }

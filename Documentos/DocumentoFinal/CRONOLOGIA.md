@@ -403,7 +403,7 @@ Fuente: Entregable S29; `Evidencia/S29_video_pagina_cancelacion.md`; `Evidencia/
   relevo en movimiento. La presentación queda en 41 diapositivas y 18 min 30 s.
 - 3 de noviembre: la red pasó a tener sección propia en el documento, con la justificación de la red Wi-Fi propia y figuras
   de su montaje y de la carga de las tarjetas. Las medidas del 9 de octubre en campo quedaron en la evidencia. El requisito de
-  latencia no se repitió con un agente en cada piso, y el documento lo declara. El documento queda en 98 páginas y el
+  latencia no se repitió con un agente en cada piso, y el documento lo declara. El documento queda en 99 páginas y el
   recortado, en 79.
 
 Fuente: `Evidencia/S30_simulacion_catalayud.md`; `Evidencia/S30_segunda_mision_y_cancelacion.md`; `Evidencia/S26_red_campo_topologia_final.md`; `GUION_SESION_JURADOS.md`.

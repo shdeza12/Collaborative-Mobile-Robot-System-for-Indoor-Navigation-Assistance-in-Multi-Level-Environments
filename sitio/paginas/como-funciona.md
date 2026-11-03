@@ -54,8 +54,8 @@ El sistema se construyó y se evaluó primero en simulación, y después se llev
 Los robots se comunican por una red Wi-Fi propia, porque la de la universidad aísla a sus clientes entre sí y no los dejaría verse. Hay un punto de acceso de 5 GHz por piso, unidos por cable, y toda la instalación forma una sola subred.
 
 <figure markdown>
-![Montaje físico de la red: un encaminador, un punto de acceso por piso unido a él por cable y un agente conectado a cada punto de acceso](img/red_topologia.png)
-<figcaption>Montaje físico de la red, con la ida y vuelta de cada agente contra el encaminador.</figcaption>
+![Montaje físico de la red: un enrutador, un punto de acceso por piso unido a él por cable y un agente conectado a cada punto de acceso](img/red_topologia.png)
+<figcaption>Montaje físico de la red, con la ida y vuelta de cada agente contra el enrutador.</figcaption>
 </figure>
 
 Lo que más pesó en las tarjetas fue cuántos procesos se anunciaban por la red. Con los dos vehículos anunciándose entre sí, la tarjeta llegó al 95 % y Nav2 no alcanzaba a arrancar. Con la topología en estrella, en la que cada vehículo se anuncia solo al portátil, el sistema completo usa entre el 68 y el 74 %.
@@ -65,7 +65,7 @@ Lo que más pesó en las tarjetas fue cuántos procesos se anunciaban por la red
 <figcaption>Uso del procesador de la tarjeta según cómo se descubren los procesos.</figcaption>
 </figure>
 
-El requisito de latencia se midió con los dos vehículos en la misma sala. Con uno en cada piso se midió solo la ida y vuelta contra el encaminador, de 2,13 y 1,99 ms, sin pérdidas. [Ver la evidencia](https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/blob/main/Documentos/Evidencia/S26_red_campo_topologia_final.md).
+El requisito de latencia se midió con los dos vehículos en la misma sala. Con uno en cada piso se midió solo la ida y vuelta contra el enrutador, de 2,13 y 1,99 ms, sin pérdidas. [Ver la evidencia](https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/blob/main/Documentos/Evidencia/S26_red_campo_topologia_final.md).
 
 ## Una misión con relevo
 

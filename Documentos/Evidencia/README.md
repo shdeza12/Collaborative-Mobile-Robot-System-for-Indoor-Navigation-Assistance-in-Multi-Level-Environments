@@ -372,7 +372,7 @@ que el propio documento sostiene:
 - [`S26_pruebas_imu.md`](S26_pruebas_imu.md) — Pruebas de la IMU en los dos vehículos (5 de octubre)
 - [`S26_red_5ghz_regulatorio.md`](S26_red_5ghz_regulatorio.md) — La WiFi de los dos vehículos no podía transmitir en 5 GHz (5 de octubre)
 - [`S26_simulacion_tras_actualizacion_ros.md`](S26_simulacion_tras_actualizacion_ros.md) — La simulación de dos robots después de la actualización de ROS del 6 de octubre
-- [`S26_red_campo_topologia_final.md`](S26_red_campo_topologia_final.md) — La red en campo con un agente en cada punto de acceso: ida y vuelta de 2,13 y 1,99 ms contra el encaminador (medido el 9 de octubre, escrito el 3 de noviembre)
+- [`S26_red_campo_topologia_final.md`](S26_red_campo_topologia_final.md) — La red en campo con un agente en cada punto de acceso: ida y vuelta de 2,13 y 1,99 ms contra el enrutador (medido el 9 de octubre, escrito el 3 de noviembre)
 
 **Semana 27**
 
