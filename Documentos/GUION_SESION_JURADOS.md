@@ -147,11 +147,11 @@ Igual en el ensayo y en la sesión. Todo se corre en el portátil, desde la raí
    IMU mide el sesgo del giroscopio.
 
    ```bash
-   NS=robot1 IMU=true MARGEN=0.5 CARRO=192.168.0.102 MAPA=/home/deepracer/tesis/piso3.yaml POSE_X=22.10 POSE_Y=1.06 POSE_YAW=3.1416 bash herramientas/nav2_mapa_guardado.sh
+   NS=robot1 IMU=true MARGEN=0.5 CARRO=192.168.0.102 MAPA=/home/deepracer/tesis/piso3.yaml POSE_X=22.10 POSE_Y=1.06 POSE_YAW=3.1416 bash herramientas/nav2_mapa_guardado.sh  # ruta fija del vehículo
    ```
 
    ```bash
-   NS=robot2 IMU=true MARGEN=0.5 CARRO=192.168.0.104 MAPA=/home/deepracer/tesis/piso4.yaml POSE_X=24.45 POSE_Y=1.21 POSE_YAW=3.1416 bash herramientas/nav2_mapa_guardado.sh
+   NS=robot2 IMU=true MARGEN=0.5 CARRO=192.168.0.104 MAPA=/home/deepracer/tesis/piso4.yaml POSE_X=24.45 POSE_Y=1.21 POSE_YAW=3.1416 bash herramientas/nav2_mapa_guardado.sh  # ruta fija del vehículo
    ```
 
    - Esperado: `CADENA LISTA` en 4 a 4,5 min, con seis nodos `active`.
@@ -160,11 +160,11 @@ Igual en el ensayo y en la sesión. Todo se corre en el portátil, desde la raí
 5. Lanzar el agente en cada vehículo.
 
    ```bash
-   ssh deepracer@192.168.0.102 "sudo -n bash -c 'export FASTRTPS_DEFAULT_PROFILES_FILE=/etc/deepracer-tesis/particion.xml; source /opt/ros/jazzy/setup.bash; source /home/deepracer/coordinacion_ws/install/setup.bash; export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST; source /tmp/nav2_campo/pares.sh; setsid nohup ros2 run coordinacion agente --ros-args -r __ns:=/robot1 -p nivel:=3 -p topico_scan:=/rplidar_ros/scan > /tmp/agente.log 2>&1 &'"
+   ssh deepracer@192.168.0.102 "sudo -n bash -c 'export FASTRTPS_DEFAULT_PROFILES_FILE=/etc/deepracer-tesis/particion.xml; source /opt/ros/jazzy/setup.bash; source /home/deepracer/coordinacion_ws/install/setup.bash; export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST; source /tmp/nav2_campo/pares.sh; setsid nohup ros2 run coordinacion agente --ros-args -r __ns:=/robot1 -p nivel:=3 -p topico_scan:=/rplidar_ros/scan > /tmp/agente.log 2>&1 &'"  # ruta fija del vehículo
    ```
 
    ```bash
-   ssh deepracer@192.168.0.104 "sudo -n bash -c 'export FASTRTPS_DEFAULT_PROFILES_FILE=/etc/deepracer-tesis/particion.xml; source /opt/ros/jazzy/setup.bash; source /home/deepracer/coordinacion_ws/install/setup.bash; export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST; source /tmp/nav2_campo/pares.sh; setsid nohup ros2 run coordinacion agente --ros-args -r __ns:=/robot2 -p nivel:=4 -p topico_scan:=/rplidar_ros/scan > /tmp/agente.log 2>&1 &'"
+   ssh deepracer@192.168.0.104 "sudo -n bash -c 'export FASTRTPS_DEFAULT_PROFILES_FILE=/etc/deepracer-tesis/particion.xml; source /opt/ros/jazzy/setup.bash; source /home/deepracer/coordinacion_ws/install/setup.bash; export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST; source /tmp/nav2_campo/pares.sh; setsid nohup ros2 run coordinacion agente --ros-args -r __ns:=/robot2 -p nivel:=4 -p topico_scan:=/rplidar_ros/scan > /tmp/agente.log 2>&1 &'"  # ruta fija del vehículo
    ```
 
    Para comprobarlo:

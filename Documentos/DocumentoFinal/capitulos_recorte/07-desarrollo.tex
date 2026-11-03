@@ -176,6 +176,16 @@ trabaja con dos distribuciones.
 
 Las pruebas con los agentes físicos empezaron en los pasillos del edificio Gregorio, los mismos que se habían modelado para la simulación. Llevar allí los agentes resultó difícil por el tránsito de personas durante las pruebas, y en esos pasillos uniformes la odometría del láser no registraba el avance. Además, el modelo del piso 3 de Gregorio no correspondía a la planta real. El 2 de octubre el trabajo pasó a los pisos 3 y 4 del edificio Catalayud, que el equipo levantó con flexómetro ese mismo día. De esas medidas salieron los mapas, los mundos simulados y el catálogo de destinos de la campaña física.
 
+Como los mundos simulados salen de las mismas medidas, el sistema también puede correr en simulación en los pisos donde operan los agentes físicos, con un proceso de Gazebo por piso (figura~\ref{fig:sim-catalayud}). Se comprobó el 2 de noviembre, después de la campaña, con los mismos mapas, los mismos destinos y la misma página. De trece misiones, diez se completaron, tres se cancelaron a propósito y ninguna falló, con llegadas entre 0,067 y 0,206~m. Corrieron además dos partes que hasta entonces solo se habían usado con los agentes físicos: la maniobra de media vuelta y la verificación de la llegada con la posición del agente en el mapa. Fue una comprobación de funcionamiento, sin el protocolo de la campaña, y no entra en sus resultados. La simulación sigue sin reproducir lo físico: la odometría real, la respuesta de la tracción y la red entre pisos.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.49\textwidth]{imagenes/simulacion_catalayud_piso3.png}\hfill
+  \includegraphics[width=0.49\textwidth]{imagenes/simulacion_catalayud_piso4.png}
+  \caption{Los pisos 3 (izquierda) y 4 (derecha) del edificio Catalayud en simulación, cada uno en su proceso de Gazebo. Cada agente está en su salida, frente a la escalera, con el barrido del láser en azul.}
+  \label{fig:sim-catalayud}
+\end{figure}
+
 En el camino hubo otros dos tropiezos: una supuesta avería que resultó ser un problema de permisos, y la saturación de la tarjeta con dos cadenas de navegación. El 21 de septiembre se decidió intentar la demostración física con seis pruebas de verificación, y la campaña con los agentes físicos corrió el 16 de octubre.
 
 % =====================================================================

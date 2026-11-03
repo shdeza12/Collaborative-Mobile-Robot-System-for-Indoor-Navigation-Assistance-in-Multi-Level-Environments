@@ -398,6 +398,8 @@ que el propio documento sostiene:
 - [`S30_segunda_mision_y_cancelacion.py`](S30_segunda_mision_y_cancelacion.py) — El programa de esa prueba
 - [`S30_simulacion_catalayud.md`](S30_simulacion_catalayud.md) — El sistema en simulación en los pisos 3 y 4 de Catalayud: 13 misiones, 10 completadas y 3 canceladas a propósito, también con la media vuelta y la llegada de los vehículos (2 de noviembre)
 - [`S30_pagina_simulacion_piso3.jpg`](S30_pagina_simulacion_piso3.jpg) — La página durante una misión con relevo en esa simulación
+- [`S30_gazebo_piso3.png`](S30_gazebo_piso3.png) — El mundo del piso 3 en Gazebo, con robot1 en su salida
+- [`S30_gazebo_piso4.png`](S30_gazebo_piso4.png) — El mundo del piso 4 en Gazebo, con robot2 en su salida
 - [`logs/S30_simulacion_catalayud.txt`](logs/S30_simulacion_catalayud.txt) — Extractos del registro del coordinador de esa sesión
 
 ---

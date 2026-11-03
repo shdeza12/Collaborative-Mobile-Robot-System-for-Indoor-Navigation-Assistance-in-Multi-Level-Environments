@@ -396,5 +396,7 @@ Fuente: Entregable S29; `Evidencia/S29_video_pagina_cancelacion.md`; `Evidencia/
 - 2 de noviembre: guion de la sesión de una hora con los jurados, con ensayo, recorrido de cuatro misiones y plan
   alternativo. Con robots falsos se comprobó que una segunda misión con otra en curso hace fallar la primera, por lo que
   la sesión usa un solo teléfono.
+- 2 de noviembre: la comprobación entró al documento recortado, en el paso a Catalayud, con las capturas de los dos pisos
+  simulados. El documento queda en 78 páginas.
 
 Fuente: `Evidencia/S30_simulacion_catalayud.md`; `Evidencia/S30_segunda_mision_y_cancelacion.md`; `GUION_SESION_JURADOS.md`.

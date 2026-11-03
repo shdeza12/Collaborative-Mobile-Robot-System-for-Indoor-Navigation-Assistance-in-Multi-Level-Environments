@@ -11,7 +11,8 @@ el programa que pidió las misiones están en `~/tesis_evidencia/sim_catalayud_2
 
 ## Resultado
 
-Trece misiones encadenadas, sin reubicar los robots: 10 completadas, 3 canceladas a propósito y ninguna fallida.
+Trece misiones en dos arranques de las pilas, encadenadas y sin reubicar los robots dentro de cada arranque: 10
+completadas, 3 canceladas a propósito y ninguna fallida.
 
 | Corrida | Misión | Resultado | Tiempo total | Relevos |
 |---|---|---|---|---|
@@ -42,6 +43,15 @@ el mapa y el LiDAR cortaron la maniobra: reversa de 11 grados, a 0,08 m del mapa
 LiDAR; y reversa de 117 grados.
 
 ![La página durante una misión con relevo en simulación, en el piso 3 de Catalayud: el título «Baje con calma al piso 3» y el botón de confirmación](S30_pagina_simulacion_piso3.jpg)
+
+## Los dos pisos en Gazebo
+
+Capturas de Santiago a las 20:07, en otro arranque de las mismas órdenes, con los robots todavía en su salida. El factor
+de tiempo real que muestra Gazebo es de 1,00 en las dos.
+
+![El mundo del piso 3 de Catalayud en Gazebo, con robot1 en su salida, frente a la escalera, y el barrido del láser en azul](S30_gazebo_piso3.png)
+
+![El mundo del piso 4 de Catalayud en Gazebo, con robot2 en su salida, frente a la escalera, y el barrido del láser en azul](S30_gazebo_piso4.png)
 
 ## La página
 
@@ -80,7 +90,8 @@ debajo del 0,99 que pide la campaña (RNF-06).
   con robots falsos, en las pruebas del coordinador.
 - Es una comprobación de funcionamiento, no una campaña: no se grabó con `grabar_mision.sh` ni se compusieron registros,
   y en las primeras ocho misiones las solicitudes y las confirmaciones las mandó un programa. No entra en las tasas de
-  éxito de la campaña de 30 misiones, que se hizo en Gregorio, y no cambia el estado de ningún requisito.
+  éxito de la campaña de 30 misiones, que se hizo en Gregorio, y no cambia el estado de ningún requisito. El documento
+  recortado lo recoge con esa aclaración, en el paso a Catalayud (figura 3.3).
 - Gazebo no reproduce la odometría real (láser e IMU), la banda muerta, lo que el vehículo rueda al parar, el radio de
   giro de cada uno ni la red entre pisos. Por eso no anticipa los fallos de campo. Nav2 no abortó aquí en la salida del
   piso 4, de 2,5 m de ancho, como sí lo hizo en el vehículo. La llegada más lejana fue de 0,206 m, frente a los 0,52 m que

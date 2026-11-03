@@ -58,6 +58,20 @@ Los cuatro fallos de la simulación se quedaron cortos: a 0,295, 0,284, 0,311 y 
 !!! info "Comprobación en los pisos 3 y 4, 2 de noviembre"
     Después de las dos campañas, el sistema se corrió en simulación en los pisos 3 y 4: 13 misiones encadenadas, 10 completadas y 3 canceladas a propósito, ninguna fallida, con llegadas entre 0,067 y 0,206 m. Es una comprobación de funcionamiento: no se grabó como la campaña y no entra en las tasas de esta página. [Ver la evidencia](https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/blob/main/Documentos/Evidencia/S30_simulacion_catalayud.md).
 
+<div class="galeria" markdown>
+
+<figure markdown>
+![El mundo del piso 3 en Gazebo, con su robot en la salida y el barrido del láser en azul](img/simulacion_catalayud_piso3.png)
+<figcaption>El piso 3 en Gazebo, con su robot en la salida, frente a la escalera.</figcaption>
+</figure>
+
+<figure markdown>
+![El mundo del piso 4 en Gazebo, con su robot en la salida y el barrido del láser en azul](img/simulacion_catalayud_piso4.png)
+<figcaption>El piso 4 en Gazebo, con su robot en la salida, frente a la escalera.</figcaption>
+</figure>
+
+</div>
+
 ## Con los vehículos
 
 Nueve misiones del sorteo, en su orden y sin reubicar los vehículos entre una y otra, entre los pisos 3 y 4 del edificio. Todas con relevo en la escalera.
