@@ -27,3 +27,4 @@ a `historial/`, no se borra.
 | Registrar la evidencia de una prueba | La convención de [`Evidencia/README.md`](Evidencia/README.md) | [`historial/HOJA_CAPTURA_S26.md`](historial/HOJA_CAPTURA_S26.md) como ejemplo |
 | Consultar las interfaces entre coordinador, agentes e interfaz | [`CONTRATO_INTERFACES.md`](CONTRATO_INTERFACES.md) | — |
 | Saber dónde está el proyecto | [`ESTADO.md`](../ESTADO.md) | [`CRONOGRAMA_S17_S32.md`](CRONOGRAMA_S17_S32.md) |
+| Saber qué toca esta semana | [`PLAN_S30.md`](PLAN_S30.md) | [`GUION_SESION_JURADOS.md`](GUION_SESION_JURADOS.md) |
