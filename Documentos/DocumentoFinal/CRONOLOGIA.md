@@ -401,5 +401,9 @@ Fuente: Entregable S29; `Evidencia/S29_video_pagina_cancelacion.md`; `Evidencia/
 - 2 de noviembre: la presentación lleva dos clips de 30 s o menos: el relevo de la misión 4 con los agentes físicos y el
   final de la misión 3 de la campaña en simulación, en un solo piso, porque la grabación de esa campaña no muestra un
   relevo en movimiento. La presentación queda en 41 diapositivas y 18 min 30 s.
+- 3 de noviembre: la red pasó a tener sección propia en el documento, con la justificación de la red Wi-Fi propia y figuras
+  de su montaje y de la carga de las tarjetas. Las medidas del 9 de octubre en campo quedaron en la evidencia. El requisito de
+  latencia no se repitió con un agente en cada piso, y el documento lo declara. El documento queda en 98 páginas y el
+  recortado, en 79.
 
-Fuente: `Evidencia/S30_simulacion_catalayud.md`; `Evidencia/S30_segunda_mision_y_cancelacion.md`; `GUION_SESION_JURADOS.md`.
+Fuente: `Evidencia/S30_simulacion_catalayud.md`; `Evidencia/S30_segunda_mision_y_cancelacion.md`; `Evidencia/S26_red_campo_topologia_final.md`; `GUION_SESION_JURADOS.md`.

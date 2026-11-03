@@ -49,6 +49,24 @@ El sistema se construyó y se evaluó primero en simulación, y después se llev
 !!! note "Los pisos 3 y 4, también en simulación"
     La columna «En simulación» describe la campaña de 30 misiones. Desde el 2 de noviembre de 2026 el sistema también corre en Gazebo en los pisos 3 y 4, con los mismos mapas y destinos que los vehículos, con la misma página, y con su media vuelta y su forma de verificar la llegada. Lo físico sigue sin reproducirse: la odometría real, la banda muerta, el radio de giro de cada vehículo y la red. [Ver la evidencia](https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/blob/main/Documentos/Evidencia/S30_simulacion_catalayud.md).
 
+## La red entre los dos pisos
+
+Los robots se comunican por una red Wi-Fi propia, porque la de la universidad aísla a sus clientes entre sí y no los dejaría verse. Hay un punto de acceso de 5 GHz por piso, unidos por cable, y toda la instalación forma una sola subred.
+
+<figure markdown>
+![Montaje físico de la red: un encaminador, un punto de acceso por piso unido a él por cable y un agente conectado a cada punto de acceso](img/red_topologia.png)
+<figcaption>Montaje físico de la red, con la ida y vuelta de cada agente contra el encaminador.</figcaption>
+</figure>
+
+Lo que más pesó en las tarjetas fue cuántos procesos se anunciaban por la red. Con los dos vehículos anunciándose entre sí, la tarjeta llegó al 95 % y Nav2 no alcanzaba a arrancar. Con la topología en estrella, en la que cada vehículo se anuncia solo al portátil, el sistema completo usa entre el 68 y el 74 %.
+
+<figure markdown>
+![Uso del procesador de la tarjeta: de 52 a 63 % con una cadena, 95 % con dos por difusión y de 68 a 74 % con dos en estrella](img/red_carga.png)
+<figcaption>Uso del procesador de la tarjeta según cómo se descubren los procesos.</figcaption>
+</figure>
+
+El requisito de latencia se midió con los dos vehículos en la misma sala. Con uno en cada piso se midió solo la ida y vuelta contra el encaminador, de 2,13 y 1,99 ms, sin pérdidas. [Ver la evidencia](https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/blob/main/Documentos/Evidencia/S26_red_campo_topologia_final.md).
+
 ## Una misión con relevo
 
 Si el origen y el destino están en el mismo piso, la misión tiene dos tramos del mismo robot: ir a recoger a la persona y llevarla. Si están en pisos distintos, tiene cuatro, y el punto de encuentro es siempre la escalera.
