@@ -1,32 +1,43 @@
-% DEDICATORIA y AGRADECIMIENTOS son OPCIONALES segun la plantilla, que pide una
-% dedicatoria por pagina segun la cantidad de autores. La escribe cada autor y se
-% transcribe literal. La de Jonny va en su propia pagina: quitar los comentarios de
-% las lineas de abajo y escribir el texto, con su nombre al final.
+% DEDICATORIA y AGRADECIMIENTOS son OPCIONALES segun la plantilla. La plantilla pide
+% una dedicatoria por pagina; por decision de los autores (3 de noviembre de 2026) las
+% dos van en la misma pagina, con el mismo espacio. Cada autor escribe la suya y se
+% transcribe literal. Letra e interlineado son los del documento; solo se acorta el
+% espacio entre parrafos. Si un texto no cabe en su mitad, la compilacion lo avisa con
+% el mensaje "Dedicatoria".
+\newlength{\alturadedicatoria}
+\setlength{\alturadedicatoria}{0.46\textheight}
+\newsavebox{\cajadedicatoria}
+\newcommand{\dedicatoria}[2]{%
+  \sbox{\cajadedicatoria}{\parbox[t]{\textwidth}{\setlength{\parindent}{0pt}%
+    \setlength{\parskip}{4pt}\setstretch{1.241}#2\par
+    {\raggedleft\textit{#1}\par}}}%
+  \ifdim\dimexpr\ht\cajadedicatoria+\dp\cajadedicatoria\relax>\alturadedicatoria
+    \PackageWarningNoLine{Dedicatoria}{El texto de #1 no cabe en su mitad de pagina}%
+  \fi
+  \noindent\parbox[t][\alturadedicatoria][t]{\textwidth}{\usebox{\cajadedicatoria}}\par}
 
 \ustaseccion{Dedicatoria}
 
+\dedicatoria{Santiago Hernández Ávila}{%
 A mis padres, José Alberto Hernández Londoño y Sandra Liliana Ávila Amaya, por ese amor incondicional que me convenció de que podía llegar lejos y por su respaldo absoluto. Me siento profundamente orgulloso de ser fruto de su crianza; siempre estaré en deuda por todo lo que hacen por mí.
 
 A mis hermanos, Nicolás y Esteban Manuel, por ser mi soporte en los momentos más difíciles. Gracias por sus enseñanzas y por cada esfuerzo que me ayudó a aferrarme al sueño de estudiar esta profesión que tanto he anhelado.
 
-A Mariana Mera Gutierrez, por creer en mí y guiarme a ser cada día una mejor persona, estudiante y pareja. Gracias por tu presencia constante y por este amor mutuo.
+A mi pareja, Mariana Mera Gutierrez, por creer en mí y guiarme a ser cada día una mejor persona, estudiante y pareja. Gracias por tu presencia constante y por este amor mutuo.
 
 A mis familiares más cercanos, quienes han sido clave en este camino, apoyándome a mí y a mis padres para alcanzar esta meta en conjunto.
 
 A mi gato Dio, por su compañía silenciosa durante las largas noches de desvelo en el desarrollo de este proyecto.
 
 Este logro es tanto mío como de ustedes. Los amo con todo mi corazón.
+}
 
-\begin{flushright}
-\textit{Santiago Hernández Ávila}
-\end{flushright}
-
-% \clearpage
-% (texto de Jonny)
+% La de Jonny va aqui: quitar los comentarios y poner su texto, con una linea en
+% blanco entre parrafos.
 %
-% \begin{flushright}
-% \textit{Jonny Alejandro Mejía León}
-% \end{flushright}
+% \dedicatoria{Jonny Alejandro Mejía León}{%
+% (texto de Jonny)
+% }
 
 \ustaseccion{Agradecimientos}
 

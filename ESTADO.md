@@ -10,7 +10,7 @@ recorrido semana a semana en [`CRONOLOGIA.md`](Documentos/DocumentoFinal/CRONOLO
 | **Semana en curso** | S29 (26 de octubre al 1 de noviembre de 2026), fase 6: análisis y escritura |
 | **Fecha de corte** | 2026-11-01 (domingo). Pruebas del 23 de octubre registradas, con la corrección del retraso de la página; documento recortado y revisado, sin siglas de más y con el mapa del piso 4 corregido; video de las pruebas publicado y en el anexo A |
 | **Último entregable formal** | Semana 29 ([`Entregable_semana_29.tex`](Documentos/Entregables/Entregable_semana_29.tex) y su versión [`.md`](Documentos/Entregables/Entregable_semana_29.md)) |
-| **Documento final** | Compila en el portátil, sin errores ([`DocumentoFinal/`](Documentos/DocumentoFinal/)): la versión definitiva (`main.pdf`) tiene 79 páginas, y queda en 80 con la dedicatoria de Jonny. El director pide entre 60 y 80 |
+| **Documento final** | Compila en el portátil, sin errores ([`DocumentoFinal/`](Documentos/DocumentoFinal/)): la versión definitiva (`main.pdf`) tiene 79 páginas, también con la dedicatoria de Jonny, que va en la misma página que la de Santiago. El director pide entre 60 y 80 |
 
 ## Objetivos específicos
 

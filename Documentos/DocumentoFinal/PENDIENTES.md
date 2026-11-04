@@ -39,9 +39,10 @@ espectro. Se borró la nota al revisor que lo preguntaba.
 
 ## 4. Dedicatoria · `capitulos/01-dedicatoria-agradecimientos.tex`
 
-La escribe cada autor, una página por autor. La de Santiago está desde el 3 de
-noviembre. La de Jonny está comentada, con su página reservada: una página con el
-título y nada debajo es peor que no ponerla. Los agradecimientos sí están escritos.
+La escribe cada autor. Por decisión de los autores, las dos van en la misma página y
+con el mismo espacio, aunque la plantilla pide una por página. La de Santiago está
+desde el 3 de noviembre. La de Jonny tiene su bloque comentado, con espacio para unas
+14 líneas, y la compilación avisa si no cabe. Los agradecimientos sí están escritos.
 
 ---
 

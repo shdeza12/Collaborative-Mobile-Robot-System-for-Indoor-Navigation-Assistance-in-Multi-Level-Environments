@@ -27,7 +27,7 @@ Objetivo: salir con fechas y con la versión del documento decidida.
 
 | Tema | Qué preguntar | Lo que propone el equipo |
 |---|---|---|
-| Versión del documento | ¿La versión definitiva, de 79 páginas, es la que se entrega? Pidió entre 60 y 80. Con la dedicatoria de Jonny queda en 80, **en el límite exacto** | Sí. **Avisar de que no queda margen:** lo que entre después hay que compensarlo quitando otro tanto |
+| Versión del documento | ¿La versión definitiva, de 79 páginas, es la que se entrega? Pidió entre 60 y 80, y queda **una página de margen** | Sí. Lo que entre después de esa página hay que compensarlo quitando otro tanto |
 | Borrador | ¿Cuándo quiere recibir el borrador completo, antes de la entrega del 13? | Lunes 9 de noviembre |
 | Presustentación | ¿Qué día, a qué hora y en qué sala? ¿Cuánto debe durar? ¿La sala tiene PowerPoint? | 19 min 20 s, sin demostración, con dos clips |
 | Sesión con los jurados | ¿Asiste? ¿Hace falta avisar o pedir permiso para usar los pisos 3 y 4 de Catalayud? | Una hora, sin clases en esos pisos |
@@ -53,7 +53,7 @@ Cierre: los dos jurados confirmaron.
 | Autoridades | Los autores | Completar [`00-autoridades.tex`](DocumentoFinal/capitulos/00-autoridades.tex), que todavía dice «NOMBRES COMPLETOS» | Sin marcadores en el PDF |
 | Justificar las desviaciones | Claude redacta; los autores aprueban | Las técnicas ya están en el documento: DonkeyCar y DeepRacer, CoppeliaSim y Gazebo, aplicación y página web, Humble y Jazzy. Falta el corrimiento de 2 a 4 semanas de la parte técnica ([`CRONOGRAMA_S17_S32.md`](CRONOGRAMA_S17_S32.md), §5) | Cada desviación tiene su lugar en el documento |
 | Versión definitiva | Claude; hecho el 3 de noviembre, a pedido de los autores | La recortada pasó a `capitulos/` y a `main.tex`. La larga queda en la etiqueta de git `documento-version-larga` | `main.pdf` es la versión definitiva |
-| Dedicatoria de Jonny | Jonny la escribe; Claude la transcribe | En `capitulos/01-dedicatoria-agradecimientos.tex`, en su propia página, como pide la plantilla. Ya tiene la página reservada | El documento queda en 80 páginas |
+| Dedicatoria de Jonny | Jonny la escribe; Claude la transcribe | En `capitulos/01-dedicatoria-agradecimientos.tex`, en la misma página y con el mismo espacio que la de Santiago: unas 14 líneas, cerca de 180 palabras. La plantilla pide una por página; así lo decidieron los autores | El documento sigue en 79 páginas |
 | Entregar el borrador | Los autores | En la fecha que acuerden con el director | Criterio de cierre de la semana 31 |
 
 ## 4. Ensayo
