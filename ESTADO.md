@@ -8,9 +8,9 @@ recorrido semana a semana en [`CRONOLOGIA.md`](Documentos/DocumentoFinal/CRONOLO
 | | |
 |---|---|
 | **Semana en curso** | S29 (26 de octubre al 1 de noviembre de 2026), fase 6: análisis y escritura |
-| **Fecha de corte** | 2026-11-04 (miércoles). Portada del sitio con la foto de los dos agentes físicos, y revisión del documento en curso, sin versionar, a la espera de la lectura de los autores. Pruebas del 23 de octubre registradas, con la corrección del retraso de la página; documento recortado y revisado, sin siglas de más y con el mapa del piso 4 corregido; video de las pruebas publicado y en el anexo A |
+| **Fecha de corte** | 2026-11-04 (miércoles). Portada del sitio con la foto de los dos agentes físicos, y revisión del documento subida como versión aparte, a la espera de la lectura de los autores. Pruebas del 23 de octubre registradas, con la corrección del retraso de la página; documento recortado y revisado, sin siglas de más y con el mapa del piso 4 corregido; video de las pruebas publicado y en el anexo A |
 | **Último entregable formal** | Semana 29 ([`Entregable_semana_29.tex`](Documentos/Entregables/Entregable_semana_29.tex) y su versión [`.md`](Documentos/Entregables/Entregable_semana_29.md)) |
-| **Documento final** | Compila en el portátil, sin errores ([`DocumentoFinal/`](Documentos/DocumentoFinal/)): la versión definitiva (`main.pdf`) tiene 79 páginas, también con la dedicatoria de Jonny, que va en la misma página que la de Santiago. El director pide entre 60 y 80. La revisión del 4 de noviembre, con las referencias actualizadas y la redacción corregida, tiene 62 páginas numeradas y 81 hojas |
+| **Documento final** | Compila en el portátil, sin errores ([`DocumentoFinal/`](Documentos/DocumentoFinal/)): la versión definitiva (`main.pdf`) tiene 79 páginas, también con la dedicatoria de Jonny, que va en la misma página que la de Santiago. El director pide entre 60 y 80. La revisión del 4 de noviembre, con las referencias actualizadas y la redacción corregida, está aparte en [`main_revision.pdf`](Documentos/DocumentoFinal/main_revision.pdf), con 62 páginas numeradas y 81 hojas; `main.pdf` sigue siendo la versión anterior hasta que se apruebe. Registro en [`REVISION_2026-11-04.md`](Documentos/DocumentoFinal/REVISION_2026-11-04.md) |
 
 ## Objetivos específicos
 

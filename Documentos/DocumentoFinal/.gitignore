@@ -29,3 +29,6 @@ cambios_recorte.pdf
 
 # PDF de cambios de la revisión del 27 de octubre (versión anotada frente a la corregida).
 cambios_revision_27oct.pdf
+
+# PDF de cambios de la revisión del 4 de noviembre: lo arma latexdiff entre main.tex y main_revision.tex.
+cambios_revision_4nov.pdf

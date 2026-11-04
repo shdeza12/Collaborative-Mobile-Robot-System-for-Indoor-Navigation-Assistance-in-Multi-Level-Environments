@@ -1,0 +1,60 @@
+% =====================================================================
+%  TRABAJOS FUTUROS
+%
+%  Revisión del 27 de octubre: las cinco líneas que pidieron los autores
+%  (navegación, cómputo, evasión de obstáculos, otro controlador e interacción
+%  por voz). Las seis anteriores, de campañas más grandes a evaluación con
+%  usuarios, se quitaron por indicación de los autores. El 3 de noviembre, también
+%  a pedido de los autores, se añadió la de más agentes y misiones simultáneas, que
+%  el marco teórico deja anunciada.
+% =====================================================================
+\chapter*{Trabajos futuros}
+\addcontentsline{toc}{chapter}{TRABAJOS FUTUROS}
+
+\paragraph{Una navegación más precisa.} La navegación de los agentes se puede
+mejorar en dos frentes. El primero es la tracción: el agente no se mueve por
+debajo de 0,40~m/s, de modo que calibrar el variador o cambiar la relación de transmisión
+le daría el régimen lento que hoy le falta para la aproximación final. El
+segundo es la medida del avance: codificadores en las ruedas, u odometría visual
+con las cámaras que el agente ya lleva, darían una medida que no depende de que
+el pasillo tenga estructura. Con las dos, la tolerancia de llegada podría volver
+a 0,25~m y el sistema dejaría de depender del entorno para localizarse.
+
+\paragraph{Más capacidad de cómputo.} La tarjeta original, de dos núcleos,
+queda entre el 54 y el 59~\% de uso en reposo con la navegación completa, y su
+carga se dispara cuando los procesos de los dos agentes se anuncian en la red.
+Adaptar la plataforma a una Raspberry Pi~4 o~5, de cuatro núcleos, daría margen
+para la navegación, para un controlador más exigente y para la evasión de
+obstáculos. Para la Raspberry Pi~4, la comunidad de AWS DeepRacer ya publica el
+software de la plataforma.
+
+\paragraph{Evasión de obstáculos.} Las pruebas se hicieron con los pasillos
+despejados. En un edificio en uso, el agente tiene que esquivar a las personas
+que se cruzan y los objetos que cambian de sitio, y no solo detenerse ante
+ellos. Integrar la evasión de obstáculos en movimiento, y probarla con
+personas que caminan por el pasillo, es el paso previo a operar en horario de
+clases.
+
+\paragraph{Más agentes y misiones simultáneas.} El sistema atiende una misión a la
+vez, con un solo agente por piso, y con esas dos condiciones la asignación es
+trivial. Con dos o más agentes elegibles por tarea, o con varias solicitudes a la
+vez, harían falta una cola de solicitudes, la noción de agente ocupado y un método
+que decida entre candidatos, como el húngaro o una subasta. Es la extensión natural
+del trabajo para edificios con más afluencia, y obliga a medir de nuevo el costo del
+descubrimiento en la red, que crece con el número de procesos.
+
+\paragraph{Un controlador predictivo.} El seguimiento de trayectorias usa
+Regulated Pure Pursuit, que sigue la ruta punto a punto y cuya protección de
+seguridad anula la curvatura cuando una inversión de marcha queda cerca de la
+meta. Un controlador predictivo, como el MPPI que incluye Nav2 y que admite
+cinemática tipo automóvil, optimiza el movimiento varios pasos hacia adelante y
+tiene en cuenta los obstáculos. Con él, la media vuelta podría volver a Nav2 y
+la aproximación final sería más precisa. Como exige más cómputo, va de la mano de la línea anterior.
+
+\paragraph{Interacción por voz.} La interfaz pide elegir el origen y el destino
+en listas. Con reconocimiento de voz a texto y un modelo de lenguaje, el usuario
+podría pedir el servicio hablando, por ejemplo «lléveme al Salón 402», y el
+sistema le explicaría cada etapa en voz alta. Como la red del edificio puede no
+tener salida a internet, los dos modelos tendrían que ejecutarse en el computador del coordinador. El de lenguaje solo traduciría la petición a un origen y un
+destino del catálogo, sin decidir el recorrido, que sigue a cargo del
+planificador.

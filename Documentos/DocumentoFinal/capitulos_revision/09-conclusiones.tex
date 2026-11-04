@@ -1,0 +1,43 @@
+% =====================================================================
+%  CONCLUSIONES (versión de revisión, se compila con main_revision.tex)
+%
+%  Correcciones del 4 de noviembre. Un párrafo por objetivo específico, que es lo
+%  que pide la plantilla. Cada uno dice lo obtenido, su causa y lo que implica.
+%  No se mencionan defectos ya corregidos ni se repite lo que el documento ya dijo.
+% =====================================================================
+\chapter*{Conclusiones}
+\addcontentsline{toc}{chapter}{CONCLUSIONES}
+
+Al modelar la arquitectura funcional se comprobó que el cambio de piso puede
+resolverse como un problema de coordinación, sin que ningún agente suba escaleras ni
+use el ascensor. En ninguna misión de las dos campañas falló la asignación ni el
+relevo, y a ello contribuyó escribir la planificación sin dependencia de ROS~2, lo que
+permitió probar todas las combinaciones de origen y destino sin usar el simulador. Con
+un solo agente admisible por piso, la asignación resulta trivial; la dificultad y el aporte del trabajo están en coordinar dos agendas que dependen una de otra durante el relevo.
+
+La plataforma AWS DeepRacer sirve como agente de guiado en interiores, pero su
+desempeño depende del sitio y de la tracción. Al no tener codificadores en las ruedas,
+su avance solo puede medirse donde el pasillo ofrece estructura al láser: en el
+edificio Gregorio la odometría registró como máximo el 73~\% del avance real, mientras
+que en Catalayud, con el mismo estimador, cumplió el criterio de la prueba. El sitio de operación debe elegirse como parte del diseño. Por debajo de 0,40~m/s la
+tracción no responde, por lo que el agente no tiene una aproximación fina y la
+tolerancia de llegada tuvo que fijarse en 0,5~m, el doble de la admitida en simulación.
+Con una tarjeta de dos núcleos fue necesario llevar la coordinación a un computador
+portátil, y la duración de las sesiones queda limitada por las baterías, que en las pruebas se agotaron en los agentes y en ese computador.
+
+Para operar el sistema basta una página web servida en la red local: en las pruebas
+con los agentes físicos cada misión se pidió, se siguió y se confirmó desde un
+teléfono, sin instalar nada y sin salida a internet. Sin embargo, las funciones que más
+la acercan a una operación real no estaban en el anteproyecto y se añadieron al ver el
+sistema en uso. Gracias a la confirmación de cambio de piso, una misión no se da por
+completada con el usuario en el piso equivocado, un caso que la instrumentación habría
+registrado como éxito, y la cancelación devolvió al agente a su escalera en las seis
+misiones canceladas. Por lo tanto, los requisitos de una interfaz como esta no pueden cerrarse de antemano.
+
+Con la evaluación experimental se puede afirmar, con 95~\% de confianza, que la tasa de
+éxito del sistema supera el 70~\%, tanto en las treinta misiones en simulación como en
+las nueve con los agentes físicos, aunque esas muestras no permiten precisar cuánto la
+supera. En ese último caso, la cota se apoya en la localización del propio agente, pues la
+llegada no se midió con flexómetro. Como todos los fallos fueron de navegación, sobre
+todo de precisión de llegada, y ninguno de asignación ni de relevo, la mejora del
+sistema pasa primero por la navegación.

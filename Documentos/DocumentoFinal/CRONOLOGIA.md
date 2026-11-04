@@ -422,5 +422,12 @@ Fuente: Entregable S29; `Evidencia/S29_video_pagina_cancelacion.md`; `Evidencia/
   con las dedicatorias de los dos autores en una misma página.
 - 3 de noviembre: el ensayo y la sesión con los jurados incluyen ver en RViz la misión 3 grabada en racey. El visor se probó con
   una grabación de deepy del 8 de octubre; grabar con la cadena completa queda para el ensayo.
+- 4 de noviembre: revisión del documento, en una versión aparte, después de leer y medir siete tesis en español de temas
+  parecidos. Las ideas quedaron enlazadas dentro de la oración, con menos repeticiones. Las conclusiones pasaron a un párrafo por
+  objetivo, sin defectos ya corregidos. Las referencias son de 2021 en adelante, salvo 14 antiguas muy relevantes, y sus fichas
+  se comprobaron contra Crossref. Salió la tesis de Jiménez Muñoz, que no trata de pisos. Queda en 62 páginas numeradas y 81 hojas,
+  a la espera de que los autores la lean.
+- 4 de noviembre: la portada del sitio muestra la foto de los dos agentes físicos, sin fondo, y el documento en revisión la incluye
+  en los componentes del agente.
 
 Fuente: `Evidencia/S30_simulacion_catalayud.md`; `Evidencia/S30_segunda_mision_y_cancelacion.md`; `Evidencia/S26_red_campo_topologia_final.md`; `Evidencia/S30_grabacion_en_rviz.md`; `TERMINOS.md`; `GUION_SESION_JURADOS.md`.
