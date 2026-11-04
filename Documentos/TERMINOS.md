@@ -48,8 +48,7 @@ La primera mención de los agentes en un documento lleva aposición: «dos agent
 
 | Texto | Cómo queda |
 |---|---|
-| Documento final, versión recortada | Aplicado en todo |
-| Documento final, versión larga | Aplicado en los preliminares, la introducción y la contextualización, que comparte con la recortada, y «el usuario» y «piso» en los demás capítulos. Conserva «vehículo» y «nivel» hasta fundirla con la recortada, que la reemplaza |
+| Documento final | Aplicado en todo. La versión larga anterior queda en la etiqueta de git `documento-version-larga` |
 | Presentación y su guion | Aplicado en todo |
 | Sitio y README | Aplicado en todo. Las páginas semanales salen de `sitio/generar_semanas.py`, que aplica estos términos al publicar la cronología, los informes y la evidencia. Los títulos de los documentos de evidencia conservan sus códigos y nombres |
 | Lo que se les dice a los jurados | Las frases entre comillas de [`GUION_SESION_JURADOS.md`](GUION_SESION_JURADOS.md) |
@@ -60,10 +59,10 @@ La primera mención de los agentes en un documento lleva aposición: «dos agent
 Antes de publicar un capítulo, con la raíz del repositorio como carpeta de trabajo:
 
 ```bash
-grep -nE '\b(la|una|esa|esta) persona\b|\bvisitantes?\b|\bveh[ií]culos?\b|\bniveles?\b|\bplantas?\b|\bLiDAR\b' Documentos/DocumentoFinal/capitulos_recorte/*.tex
+grep -nE '\b(la|una|esa|esta) persona\b|\bvisitantes?\b|\bveh[ií]culos?\b|\bniveles?\b|\bplantas?\b|\bLiDAR\b' Documentos/DocumentoFinal/capitulos/*.tex
 ```
 
 - Esperado: solo lo que permite la sección «Lo que se conserva».
 - Si aparece otra cosa: se cambia por el término de la tabla, frase por frase, porque cambia la concordancia («la persona
   confirma» pasa a «el usuario confirma», y «la lleva» a «lo lleva»).
-- Cierre: el capítulo compila y el recortado sigue dentro de las 80 páginas.
+- Cierre: el capítulo compila y el documento sigue dentro de las 80 páginas.

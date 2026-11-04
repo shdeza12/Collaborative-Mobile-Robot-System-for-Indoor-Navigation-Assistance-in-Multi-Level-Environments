@@ -24,6 +24,20 @@
 % =====================================================================
 \documentclass[12pt,letterpaper,oneside]{report}
 \usepackage{usta-proyecto-grado}
+% Colocación de figuras y tablas (revisión del 27 de octubre): una figura de media
+% página comparte la página con el texto en lugar de quedarse sola en una página de
+% flotantes, y cada figura queda cerca del párrafo que la cita.
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\bottomfraction}{0.6}
+\renewcommand{\textfraction}{0.12}
+\renewcommand{\floatpagefraction}{0.8}
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{4}
+% Códigos QR de los anexos, y direcciones largas que se pueden cortar en los guiones.
+\usepackage{qrcode}
+\expandafter\def\expandafter\UrlBreaks\expandafter{\UrlBreaks\do\-}
+
 
 % ---------------------------------------------------------- bibliografía ---
 \addbibresource{referencias.bib}
@@ -43,7 +57,7 @@
 \ustacodirector{}
 \ustaasesor{}                        % vacío = no se imprime el bloque
 \ustaanio{2026}
-\ustames{octubre}
+\ustames{noviembre}
 
 % ---------------------------------------------------- notas en el PDF ---
 % Los bloques «Nota para la revisión» quedan APAGADOS: el texto sigue en los
@@ -112,5 +126,10 @@
 % =====================================================================
 \ustaseccion{Referencias bibliográficas}
 \printbibliography[heading=none]
+
+% =====================================================================
+%  ANEXOS
+% =====================================================================
+\input{capitulos/11-anexos}
 
 \end{document}

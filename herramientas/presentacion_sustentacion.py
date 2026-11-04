@@ -1083,7 +1083,8 @@ def trabajos_futuros(m):
     s = m.contenido('Trabajos futuros', (
         'Tiempo: 35 s. Una navegación más precisa, con tracción lenta y una medida del avance que no '
         'dependa del pasillo. Más capacidad de cómputo, con una Raspberry Pi 4 o 5. Evasión de '
-        'obstáculos en movimiento, para operar en horario de clases. Un controlador predictivo como '
+        'obstáculos en movimiento, para operar en horario de clases. Más agentes por piso y misiones '
+        'simultáneas, donde el método de asignación empieza a decidir. Un controlador predictivo como '
         'el MPPI de Nav2. E interacción por voz, con los modelos en el portátil, porque la red puede '
         'no tener internet.'))
     lineas = [
@@ -1093,17 +1094,19 @@ def trabajos_futuros(m):
          'la comunidad del DeepRacer ya publica el software para la Pi 4'),
         ('Evasión de obstáculos', 'Esquivar personas y objetos en movimiento, y probarlo con gente '
          'en el pasillo, antes de operar en horario de clases'),
+        ('Más agentes y misiones', 'Una cola de solicitudes y un método que decida entre candidatos, '
+         'como el húngaro o una subasta'),
         ('Controlador predictivo', 'El MPPI de Nav2 admite cinemática tipo automóvil: la media '
          'vuelta podría volver a Nav2 y la llegada sería más precisa'),
         ('Interacción por voz', 'Voz a texto y un modelo de lenguaje en el portátil, que traduzcan la '
          'petición a un origen y un destino del catálogo'),
     ]
     for i, (cab, cuerpo) in enumerate(lineas):
-        y = 116 + i * 70
+        y = 110 + i * 60
         forma(s, MSO_SHAPE.RECTANGLE, 64, y + 16, 300, 30, borde=AZUL)
         forma(s, MSO_SHAPE.ROUNDED_RECTANGLE, 88, y, 262, 33, relleno=AZUL, radio=0.12,
               parrafos=cab, tam=15, negrita=True, color=BLANCO, margen=(14, 0, 6, 0))
-        texto(s, 380, y - 2, 410 - (30 if i == 4 else 0), 52, cuerpo, tam=13, anclaje='m')
+        texto(s, 380, y - 2, 410 - (30 if i >= 4 else 0), 52, cuerpo, tam=13, anclaje='m')
 
 
 REFERENCIAS = [

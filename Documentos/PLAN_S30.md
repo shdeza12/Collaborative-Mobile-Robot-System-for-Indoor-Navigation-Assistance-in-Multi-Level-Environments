@@ -16,7 +16,7 @@ una hora con los jurados.
 | Mié 4 | Ensayo en Catalayud (§4) | los dos | Recorrido cronometrado, guion corregido y evidencia |
 | Jue 5 | Sesión, si esa es la fecha (§5). Si no, observaciones del documento (§3) | los dos, si hay sesión | Evidencia de la sesión |
 | Vie 6 | Sesión, si esa es la fecha. Pendientes de los vehículos, solo después de la sesión (§6). Corte de la semana en la noche (§8) | los dos, si hay sesión o pendientes | Entregable 30, tablero y sitio |
-| Sáb 7 y dom 8 | Fundir la versión recortada y dejar listo el borrador (§3). Sin vehículos | no | Borrador listo para entregarlo el lunes 9 |
+| Sáb 7 y dom 8 | Aplicar las correcciones y dejar listo el borrador (§3). Sin vehículos | no | Borrador listo para entregarlo el lunes 9 |
 
 A 3 de noviembre los jurados no han respondido, así que el ensayo no espera: sigue el miércoles 4, y el día de la sesión se
 repite el calentamiento.
@@ -27,7 +27,7 @@ Objetivo: salir con fechas y con la versión del documento decidida.
 
 | Tema | Qué preguntar | Lo que propone el equipo |
 |---|---|---|
-| Versión del documento | ¿La versión recortada, de **80 páginas**, es la que se entrega? Pidió entre 60 y 80, así que está **en el límite exacto** | Sí, y se funde como versión vigente. **Avisar de que no queda margen:** lo que entre después hay que compensarlo quitando otro tanto |
+| Versión del documento | ¿La versión definitiva, de 79 páginas, es la que se entrega? Pidió entre 60 y 80. Con la dedicatoria de Jonny queda en 80, **en el límite exacto** | Sí. **Avisar de que no queda margen:** lo que entre después hay que compensarlo quitando otro tanto |
 | Borrador | ¿Cuándo quiere recibir el borrador completo, antes de la entrega del 13? | Lunes 9 de noviembre |
 | Presustentación | ¿Qué día, a qué hora y en qué sala? ¿Cuánto debe durar? ¿La sala tiene PowerPoint? | 19 min 20 s, sin demostración, con dos clips |
 | Sesión con los jurados | ¿Asiste? ¿Hace falta avisar o pedir permiso para usar los pisos 3 y 4 de Catalayud? | Una hora, sin clases en esos pisos |
@@ -48,11 +48,12 @@ Cierre: los dos jurados confirmaron.
 
 | Tarea | Quién | Cómo | Cierre |
 |---|---|---|---|
-| Observaciones de los autores | Santiago y Jonny las pasan; Claude las aplica | Sobre `main_recorte.pdf`, 80 páginas | Todas aplicadas y compilado sin errores |
+| Observaciones de los autores | Santiago y Jonny las pasan; Claude las aplica | Sobre `main.pdf`, 79 páginas | Todas aplicadas y compilado sin errores |
 | Términos | Claude; hecho el 3 de noviembre | Una sola palabra para cada cosa en el documento, la presentación y el sitio: [`TERMINOS.md`](TERMINOS.md) | La comprobación de ese archivo solo da lo que permite |
 | Autoridades | Los autores | Completar [`00-autoridades.tex`](DocumentoFinal/capitulos/00-autoridades.tex), que todavía dice «NOMBRES COMPLETOS» | Sin marcadores en el PDF |
 | Justificar las desviaciones | Claude redacta; los autores aprueban | Las técnicas ya están en el documento: DonkeyCar y DeepRacer, CoppeliaSim y Gazebo, aplicación y página web, Humble y Jazzy. Falta el corrimiento de 2 a 4 semanas de la parte técnica ([`CRONOGRAMA_S17_S32.md`](CRONOGRAMA_S17_S32.md), §5) | Cada desviación tiene su lugar en el documento |
-| Fundir la versión recortada | Claude, después del visto bueno del director | Pasar `capitulos_recorte/` a `capitulos/`, compilar y actualizar la página de documentos del sitio | `main.pdf` es la versión recortada |
+| Versión definitiva | Claude; hecho el 3 de noviembre, a pedido de los autores | La recortada pasó a `capitulos/` y a `main.tex`. La larga queda en la etiqueta de git `documento-version-larga` | `main.pdf` es la versión definitiva |
+| Dedicatoria de Jonny | Jonny la escribe; Claude la transcribe | En `capitulos/01-dedicatoria-agradecimientos.tex`, en su propia página, como pide la plantilla. Ya tiene la página reservada | El documento queda en 80 páginas |
 | Entregar el borrador | Los autores | En la fecha que acuerden con el director | Criterio de cierre de la semana 31 |
 
 ## 4. Ensayo

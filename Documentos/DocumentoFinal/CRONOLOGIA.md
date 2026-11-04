@@ -417,6 +417,9 @@ Fuente: Entregable S29; `Evidencia/S29_video_pagina_cancelacion.md`; `Evidencia/
 - 3 de noviembre: el documento y la presentación quedaron con los mismos términos que el sitio: «el usuario» en lugar de «la
   persona» y «piso» en lugar de «planta» y «nivel», salvo en los objetivos oficiales y en la métrica que sale de ellos. El
   glosario define al usuario, y la tabla de términos quedó en el repositorio.
+- 3 de noviembre: versión definitiva del documento. La recortada pasó a ser la única, con la dedicatoria que faltaba frente a
+  la plantilla y una línea más de trabajos futuros, sobre más agentes por piso y misiones simultáneas. Queda en 79 páginas, y
+  en 80 con la dedicatoria de Jonny.
 - 3 de noviembre: el ensayo y la sesión con los jurados incluyen ver en RViz la misión 3 grabada en racey. El visor se probó con
   una grabación de deepy del 8 de octubre; grabar con la cadena completa queda para el ensayo.
 

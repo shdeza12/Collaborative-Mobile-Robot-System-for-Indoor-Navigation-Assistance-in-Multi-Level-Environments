@@ -1,91 +1,56 @@
 % =====================================================================
-%  CONCLUSIONES  —  un párrafo por objetivo específico, que es una de las
-%  dos formas que admite la plantilla y la que menos margen deja a la
-%  vaguedad. 2026-10-15: sin códigos del repositorio ni fechas de bitácora.
-%  2026-10-19: cerradas con la campaña de los dos vehículos.
+%  CONCLUSIONES
+%
+%  Un párrafo por objetivo específico y uno por la pregunta problema, como
+%  sugiere la plantilla. Revisión del 27 de octubre: cada párrafo dice qué se
+%  concluye del objetivo, no repite los resultados; las cifras quedan en el
+%  capítulo de resultados, salvo la cota de la tasa de éxito. Sin primera
+%  persona y sin remisiones a otras secciones.
 % =====================================================================
 \chapter*{Conclusiones}
 \addcontentsline{toc}{chapter}{CONCLUSIONES}
 
 El primer objetivo específico, modelar la arquitectura funcional del sistema, se
-cumplió. El sistema tiene un contrato de interfaces escrito, treinta y seis
-requisitos con su prueba, y una capa de coordinación que ejecuta el relevo entre
-niveles. Escribir el planificador como función pura, sin depender de la capa de
-comunicaciones de ROS~2, resultó más valioso de lo previsto. Permite verificar las
-930 combinaciones de origen y destino en milisegundos, y encontró defectos que una
-corrida en el simulador no habría delatado, como planes que mandaban al mismo
-robot dos veces a la misma pose. La asignación de tareas es óptima por la
-estructura del problema, con un solo agente admisible por nivel, y el aporte del
-trabajo está en coordinar dos agendas que dependen una de otra durante el relevo.
+cumplió. Un coordinador central con un agente por piso convierte el cambio de piso en un problema de coordinación y no de locomoción. Ningún agente necesita
+subir escaleras ni usar el ascensor, y lo que se traspasa en la escalera es la
+responsabilidad de guiar al usuario. Separar la planificación del relevo de
+ROS~2 permitió verificarla de forma exhaustiva y sin simulador, y esa
+verificación encontró defectos que las corridas no habrían mostrado. La
+asignación de tareas resulta trivial por la estructura del problema, con un solo
+agente admisible por piso; la dificultad está en coordinar dos agendas que
+dependen una de otra durante el relevo, y ahí está el aporte del trabajo.
 
-El segundo objetivo, la plataforma robótica de dos vehículos, se cumplió. Los dos
-vehículos están integrados, y Nav2 quedó configurado para cinemática tipo
-automóvil, con el planificador, el controlador y el árbol de comportamiento
-sustituidos por los que esa cinemática admite (sección~\ref{sec:nav2-ackermann}).
-La odometría cumple su criterio, con un error entre $-4{,}6$~\% y $+3{,}3$~\% sobre
-recorridos de 6,68 y 14,57~m, y el director dio por superada la prueba
-correspondiente. La navegación de un vehículo con la llegada verificada también
-se superó. En una cadena de tres tramos sin intervención, las llegadas medidas con
-flexómetro quedaron entre 0,06 y 0,45~m de la meta, dentro de la tolerancia de
-0,5~m (sección~\ref{sec:res-g3}). Los dos vehículos operan juntos en la misma red,
-con un tiempo de ida y vuelta de los mensajes de 5,99~ms de mediana. En la campaña
-completaron nueve misiones seguidas con relevo sin que se los reubicara, con 24
-medias vueltas en pasillos de 2,5 a 3,2~m de ancho.
+El segundo objetivo, la plataforma robótica con los dos agentes, se cumplió. El
+AWS DeepRacer sirve como agente de un sistema de guiado en interiores, con tres
+condiciones que este trabajo hizo explícitas. Su odometría depende del entorno:
+sin codificadores en las ruedas, el avance solo se mide si el pasillo tiene
+estructura, y por eso la elección del sitio de operación es parte del diseño y
+no un detalle de la prueba. Su tracción no responde por debajo de 0,40~m/s, lo
+que fija la precisión de llegada en 0,5~m. Y su tarjeta de dos núcleos obliga a
+repartir el cómputo, con la navegación a bordo y la coordinación en un
+computador aparte. Queda abierta la estabilidad en sesiones de varias horas.
 
-Quedan dos límites en la plataforma. El primero es la banda muerta de tracción
-(sección~\ref{sec:banda-muerta}). El vehículo no avanza por debajo de 0,40~m/s y no
-tiene régimen de aproximación fina, y por eso la tolerancia de llegada con los
-vehículos es de 0,5~m y no de 0,25~m, como en simulación. El segundo es la
-estabilidad en sesiones largas: tras horas encendidos y con el procesador muy
-cargado, la navegación de los dos vehículos dejó de responder y hubo que
-reiniciarla, por una causa que no se estableció.
-
-El tercer objetivo, la interfaz de interacción con el usuario, se cumplió. La
-interfaz funciona desde el navegador de un teléfono, sin instalación y sin salida
-a internet, y se operó con ella una misión completa con relevo desde un
-dispositivo real. Dos funciones se añadieron después de ver el sistema en uso.
-Una es la confirmación de cambio de piso, que impide dar por completada una
-misión con el usuario en el nivel equivocado. La otra es la cancelación, que no
-funcionaba porque el servidor de acción rechazaba las solicitudes sin informar.
-Con la interfaz se pidieron y siguieron todas las misiones de la campaña con los
-vehículos, y la confirmación de cambio de piso se usó en cada relevo. Esas pruebas
-mostraron defectos de la página que ya están corregidos
-(sección~\ref{sec:ajustes-campo}). El título de la confirmación no indicaba si el
-usuario sube o baja, dos destinos de pisos distintos tenían el mismo nombre y el
-teléfono conservaba una versión anterior de la página.
+El tercer objetivo, la interfaz de interacción con el usuario, se cumplió. Una
+página web servida en la red local basta para pedir, seguir, confirmar y
+cancelar una misión desde cualquier teléfono, sin instalación y sin salida a
+internet. La confirmación de cambio de piso y la cancelación, añadidas al ver el
+sistema en uso, son las funciones que más lo acercan a una operación real. La primera impide dar por terminada una misión con el usuario en el piso
+equivocado, y la segunda devuelve al agente a su escalera en cualquier etapa.
 
 El cuarto objetivo, la evaluación experimental, se cumplió en simulación y con
-los vehículos. La campaña de treinta misiones sorteadas en simulación fue válida,
-sin descartes, y permite afirmar con 95~\% de confianza que la tasa de éxito
-supera el 70~\%. Con los dos vehículos, en los pisos 3 y 4, las nueve misiones
-sorteadas que llegaron a correr se completaron con relevo, lo que sostiene la
-misma cota (sección~\ref{sec:res-completo}). Su tiempo total tuvo una mediana de
-87,6~s, el tiempo de respuesta, de 0,87~s, y el de asignación fue de 0,3~ms. La
-llegada de esa campaña se verificó con la localización de cada vehículo y no con
-una medida externa (sección~\ref{sec:lim-llegada}). Lo demostrado es que cada
-vehículo, según su propia estimación, terminó a menos de 0,5~m del destino. Las misiones 1 y 2 se completaron al segundo
-intento, y esos primeros intentos se declaran fuera de la tasa.
+los agentes físicos. La campaña en simulación permite afirmar, con 95~\% de
+confianza, que la tasa de éxito del sistema supera el 70~\%, y la campaña física
+muestra que el sistema completo funciona en un edificio real con la misma cota.
+Los fallos de las dos campañas estuvieron en la precisión de llegada de los
+agentes y no en la coordinación. La evaluación dejó además una conclusión de
+método: decidir qué mide cada criterio fue más difícil que construir el sistema.
+Un criterio que no puede fallar, un reloj sin resolución para la magnitud que
+mide o un modelo del edificio sin verificar producen resultados que parecen evidencia y no lo son. Ninguno de esos casos habría aparecido corriendo más experimentos.
 
-Sobre la pregunta problema y el objetivo general, la respuesta de este trabajo
-es un esquema de relevo, y el esquema es viable. Dos robots dedicados
-cada uno a un nivel pueden repartirse el guiado de un usuario que cambia de piso,
-sin que ninguno atraviese la zona de transición vertical y sin modificar el
-edificio. Eso quedó demostrado en simulación, con una campaña medida y válida, y
-sobre los dos vehículos reales, que ejecutaron el relevo entre los pisos 3 y 4 en
-cada una de las nueve misiones de su campaña. La odometría y la navegación de los
-vehículos, que durante meses hicieron dudar de que el esquema fuera ejecutable
-fuera de la simulación, dejaron de ser el límite. Lo que el trabajo no mide es la
-experiencia del usuario durante el guiado, que queda para un estudio propio.
-
-Queda una conclusión de método. En este proyecto costó más averiguar qué medía
-cada prueba que construir el sistema, como muestran tres casos. El tiempo de
-asignación valía cero en todas las grabaciones, porque el reloj de la simulación
-no tenía resolución para medirlo, hasta que se caracterizó en un banco aparte. El
-criterio de continuidad entre niveles no podía dar un resultado negativo, así que
-sus treinta verificaciones no eran evidencia. Y la correspondencia entre el modelo
-del edificio y el edificio real se daba por supuesta, y resultó falsa en un 25~\%
-la primera vez que se midió. Los tres se encontraron preguntando si el criterio
-podía fallar, y ninguno habría aparecido corriendo más experimentos. La campaña con
-los vehículos añadió un caso más. El intervalo del relevo, que en simulación medía
-la reacción del sistema, en los vehículos medía a veces cuánto tardaba el usuario
-en confirmar, y solo se vio al descomponer cada misión en sus etapas.
+Sobre la pregunta problema, cómo asistir la orientación de usuarios dentro de
+entornos interiores con múltiples pisos utilizando sistemas robóticos, se
+concluye que un esquema de relevo entre dos agentes, uno por piso, es una
+respuesta viable. Los agentes se reparten el guiado de un usuario que cambia
+de piso sin que ninguno atraviese la zona de transición y sin modificar el
+edificio. Queda sin medir la experiencia del usuario durante el guiado, que corresponde a
+un estudio propio.
