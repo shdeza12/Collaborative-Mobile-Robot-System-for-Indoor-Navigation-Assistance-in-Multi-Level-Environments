@@ -18,9 +18,9 @@ hide:
 [Replicarlo :material-wrench-outline:](replicar.md){ .md-button }
 </div>
 
-<figure markdown>
-![La página del teléfono durante una misión: el agente guía al usuario y la página muestra el paso en que va](img/interfaz_seguimiento.png){ width="300" }
-<figcaption>La página del teléfono durante una misión.</figcaption>
+<figure class="foto-agentes" markdown>
+![Los dos agentes físicos, construidos sobre la plataforma AWS DeepRacer, con dos cámaras al frente y el láser en la parte superior](img/agentes_fisicos.png)
+<figcaption>Los dos agentes físicos, construidos sobre AWS DeepRacer.</figcaption>
 </figure>
 </div>
 
