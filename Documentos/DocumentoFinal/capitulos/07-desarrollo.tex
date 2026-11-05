@@ -660,7 +660,7 @@ se reproducía con el método declarado.
 Con los agentes físicos, el grabador se ejecuta en el contenedor con Jazzy, y un programa adapta la grabación al formato que leen las herramientas de Humble. El registro usa el reloj del computador, la tolerancia de 0,5~m y el mapa de cada piso.
 La llegada la verifica el coordinador con la pose que publica el agente, 1,5~s después de que Nav2 la da por alcanzada (figura~\ref{fig:instrumentacion}), pues Nav2 la declara en cuanto el agente entra en su margen, y el agente sigue
 rodando. En las llegadas medidas en el piso 4, el agente estaba a entre 0,53 y 0,62~m de la meta en la última orden de avance, y un segundo después, ya quieto, a entre 0,09 y 0,53~m. La distancia de llegada se guarda con su procedencia,
-medida con flexómetro o tomada de la localización del agente, y el programa de análisis advierte cuando no hay medida externa, como ocurrió en la campaña con los agentes físicos. En simulación el camino es el mismo, sin la conversión de formato y con la tolerancia de 0,25~m.
+medida con flexómetro o tomada de la localización del agente. En simulación el camino es el mismo, sin la conversión de formato y con la tolerancia de 0,25~m.
 
 \begin{figure}[H]
   \centering

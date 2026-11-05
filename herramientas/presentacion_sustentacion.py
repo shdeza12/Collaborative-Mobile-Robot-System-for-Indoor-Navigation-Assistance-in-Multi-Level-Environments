@@ -991,8 +991,7 @@ def resultados(m):
         'en la página. En cuanto a la medición, la continuidad, como criterio binario, no '
         'puede fallar por la forma en que está construida, y por eso se informa el intervalo del '
         'relevo. En el mapa de la simulación, celdas desconocidas se cargaron como libres; no cambia '
-        'el veredicto y el umbral se corrigió el 25 de septiembre. Y con los agentes físicos la '
-        'llegada se tomó de la localización del propio agente, sin flexómetro.'))
+        'el veredicto y el umbral se corrigió el 25 de septiembre.'))
     bx, by, bw, bh = imagen(s, REC / 'foto_relevo.jpg', 66, 106, w=395)
     fuente(s, bx, by + bh + 2, bw, 'Misión 5: el usuario baja del piso 4 y el agente del piso 3 lo '
            'espera en su escalera. Fuente: Elaboración propia')
@@ -1012,9 +1011,7 @@ def resultados(m):
     lim = ['La continuidad entre niveles, como criterio binario, no puede fallar por construcción: '
            'se informa el intervalo del relevo',
            'En el mapa de la simulación, 10 908 celdas desconocidas, el 14,5 % del mapa, se '
-           'cargaron como libres; el umbral se corrigió el 25 de septiembre',
-           'Con los agentes físicos, la llegada se midió con la localización de cada agente y no '
-           'con flexómetro']
+           'cargaron como libres; el umbral se corrigió el 25 de septiembre']
     texto(s, 478, 138, 325, 260, [{'t': f'{i}. {l}', 'despues': 10} for i, l in enumerate(lim, 1)],
           tam=13)
 

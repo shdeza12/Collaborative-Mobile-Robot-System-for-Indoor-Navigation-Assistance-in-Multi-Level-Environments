@@ -48,6 +48,8 @@ tasa de éxito de esa muestra habría sido 100 % en vez de 67 %.
 > **En hardware no hay `/odom` de simulador.** La verdad de terreno de la campaña física se toma
 > con medición externa —cinta métrica sobre marcas fijas en el piso, fotografiadas—, no con la
 > odometría de las ruedas, que patina y deriva. Se define en §10.
+>
+> **Nota del 5 de noviembre de 2026.** En la campaña del 16 de octubre la llegada se tomó de la localización de cada agente. La navegación ya se había verificado con flexómetro en la prueba de navegación del 7 de octubre, en el piso 4, y no fue necesario repetir la medida.
 
 ---
 

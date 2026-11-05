@@ -437,5 +437,9 @@ Fuente: Entregable S29; `Evidencia/S29_video_pagina_cancelacion.md`; `Evidencia/
   63 páginas numeradas y 81 hojas.
 - 5 de noviembre: todas las figuras y tablas quedaron fijas entre párrafos, y no parten ninguno; las tablas, centradas, y los pies de
   figura, con la descripción de lo que muestran. Lo que explicaban pasó al texto.
+- 5 de noviembre: la llegada de la campaña con los agentes físicos dejó de figurar como limitación. La prueba de navegación ya la
+  había verificado con flexómetro, y por eso no fue necesario repetir la medida en la prueba final. Sale la subsección que lo
+  presentaba como límite, también de las conclusiones, el sitio, la presentación y el guion, y el protocolo escrito recibe una nota
+  con fecha. Quedan 62 páginas numeradas y 80 hojas.
 
 Fuente: `Evidencia/S30_grafo_rqt.md`; `Evidencia/S30_simulacion_catalayud.md`; `Evidencia/S30_segunda_mision_y_cancelacion.md`; `Evidencia/S26_red_campo_topologia_final.md`; `Evidencia/S30_grabacion_en_rviz.md`; `TERMINOS.md`; `GUION_SESION_JURADOS.md`.

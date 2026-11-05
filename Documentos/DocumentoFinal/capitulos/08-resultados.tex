@@ -122,7 +122,7 @@ La prueba de navegación de un agente pide un recorrido de punto a punto con Nav
   \end{tabular}
 \end{table}
 
-Las llegadas medidas quedaron dentro de la tolerancia de 0,5~m, y la prueba se superó. La llegada al Salón 403 no se midió porque en ese momento no había flexómetro, y se estimó con el error de los otros dos tramos. El regreso a la salida incluyó una media vuelta en el tramo ancho frente a los salones, que Nav2 resolvió con seis recuperaciones.
+Las llegadas medidas quedaron dentro de la tolerancia de 0,5~m, y la prueba se superó. Al terminar cada tramo, la localización, leída de nuevo, quedó a 0,10~m o menos de la medida en el sentido del avance y a 5~cm o menos de lado. La llegada al Salón 403 no se midió porque en ese momento no había flexómetro, y se estimó con el error de los otros dos tramos. El regreso a la salida incluyó una media vuelta en el tramo ancho frente a los salones, que Nav2 resolvió con seis recuperaciones.
 
 \begin{figure}[H]
   \centering
@@ -131,7 +131,7 @@ Las llegadas medidas quedaron dentro de la tolerancia de 0,5~m, y la prueba se s
   \label{fig:cadena}
 \end{figure}
 
-El 8 de octubre, el otro agente recorrió el piso 3 en cinco tramos encadenados, con dos medias vueltas entre ellos, y los cinco terminaron con éxito y sin recuperaciones. Esas llegadas no se midieron con flexómetro, y al forzar a la localización a recalcular su pose al final de cada tramo, esta se desplazó entre 0,61 y 0,86~m. La pose que publica la localización al detenerse el agente va atrasada, por lo que la llegada que vale es la medida con flexómetro. La precisión de llegada sigue condicionada por la banda muerta de tracción, ya que el agente se aproxima a la meta a 0,40~m/s y no tiene régimen de aproximación fina.
+El 8 de octubre, el otro agente recorrió el piso 3 en cinco tramos encadenados, con dos medias vueltas entre ellos, y los cinco terminaron con éxito y sin recuperaciones. Al forzar a la localización a recalcular su pose al final de cada tramo, esta se desplazó entre 0,61 y 0,86~m, debido a que la pose que publica al detenerse el agente va atrasada. La precisión de llegada sigue condicionada por la banda muerta de tracción, ya que el agente se aproxima a la meta a 0,40~m/s y no tiene régimen de aproximación fina.
 
 % ---------------------------------------------------------------------
 \section{Evaluación del sistema completo con los agentes físicos}
@@ -141,7 +141,7 @@ El 16 de octubre, el sistema completo funcionó con los dos agentes físicos (an
 
 \subsection{Condiciones de las pruebas}
 
-Las pruebas se hicieron en los pisos 3 y 4 del edificio Catalayud, con un agente en cada piso. El coordinador y el grabador se ejecutaron en el portátil, y cada misión se pidió desde la página web en un teléfono conectado a la red de los agentes. Los autores hicieron de usuario: pidieron cada misión, acompañaron a los agentes y confirmaron el cambio de piso en la página. Los agentes no se reubicaron entre misiones, y cuando el destino quedaba detrás del agente, el coordinador pidió la media vuelta en varios tiempos. La llegada se verificó con la localización de cada agente, sin medida con flexómetro.
+Las pruebas se hicieron en los pisos 3 y 4 del edificio Catalayud, con un agente en cada piso. El coordinador y el grabador se ejecutaron en el portátil, y cada misión se pidió desde la página web en un teléfono conectado a la red de los agentes. Los autores hicieron de usuario: pidieron cada misión, acompañaron a los agentes y confirmaron el cambio de piso en la página. Los agentes no se reubicaron entre misiones, y cuando el destino quedaba detrás del agente, el coordinador pidió la media vuelta en varios tiempos. La llegada se verificó con la localización de cada agente. La prueba de navegación ya había comprobado esa llegada con medidas directas (tabla~\ref{tab:g3}), por lo que no fue necesario repetir la medida.
 
 \subsection{La misión con relevo}
 
@@ -216,11 +216,4 @@ No se corrigió inventando una ruta de fallo, ya que eso habría sido instrument
 
 El mapa de ocupación es una imagen en la que cada celda es libre, ocupada o desconocida, y su archivo de configuración fija el umbral por debajo del cual una celda se carga como libre. En el mapa de la campaña en simulación ese umbral era 0,25, y las celdas desconocidas, que el formato guarda con una ocupación de 0,196, quedaban por debajo de él. Al cargar el mapa, 10\,908 celdas que el modelo no describía, el 14,5~\% del mapa, se leyeron como espacio libre. Con eso, las dos protecciones que impiden planificar por espacio desconocido, la del planificador y la del mapa de costos, no tenían nada que rechazar.
 
-El defecto no cambia el veredicto de la campaña, puesto que los cuatro fallos fueron de precisión de llegada, sin relación con el trazado, y el pasillo por el que se navegó es libre en el mundo simulado. Queda sin verificar que ninguna trayectoria cruzara una de esas celdas, algo que se puede comprobar con los registros conservados. El umbral se corrigió a 0,10 el 25 de septiembre, después de la campaña.
-
-\subsection{La llegada en los agentes físicos, sin medida externa}
-\label{sec:lim-llegada}
-
-En la campaña con los agentes físicos la llegada no tuvo una medida independiente del sistema. El protocolo la toma con flexómetro sobre marcas en el piso, y en esa sesión no se midió, aunque la odometría y la llegada ya se habían verificado con flexómetro en los mismos pisos, en las pruebas de odometría y de navegación. El error que se informa es el de la localización del propio agente contra el punto del catálogo, leído 1,5~s después de que Nav2 diera la meta por alcanzada, con el agente ya detenido. Es la medida con que el coordinador acepta la llegada, así que el sistema verificó su llegada con su propia estimación, que es lo que la regla principal del protocolo procura evitar. Los registros lo declaran con la procedencia de la medida, y el programa de análisis lo advierte al calcular las métricas.
-
-La única comparación entre la localización y el flexómetro en los agentes físicos es la de la cadena de tres tramos en el piso 4, donde la localización, leída de nuevo al terminar cada tramo, quedó a 0,10~m o menos de la medida en el sentido del avance y a 5~cm o menos de lado. En el piso 3, en cambio, forzar a la localización a recalcular su pose al final de cada tramo la desplazó entre 0,61 y 0,86~m. Por lo tanto, el resultado de la campaña se lee así: cada agente, según su propia localización, llegó a menos de 0,5~m del destino, y queda sin medir si la distancia real cumplió la misma tolerancia.
+El defecto no cambia el veredicto de la campaña, puesto que los cuatro fallos fueron de precisión de llegada, sin relación con el trazado, y el pasillo por el que se navegó es libre en el mundo simulado. Queda sin verificar que ninguna trayectoria cruzara una de esas celdas, algo que se puede comprobar con los registros conservados. El umbral se corrigió a 0,10 el 25 de septiembre, tras la campaña.

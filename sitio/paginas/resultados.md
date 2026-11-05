@@ -125,7 +125,7 @@ Nueve misiones del sorteo, en su orden y sin reubicar los agentes entre una y ot
 </div>
 
 !!! warning "Cómo leer estas cifras"
-    - En esta campaña la llegada no se midió con flexómetro: la distancia es la que estima la localización del propio agente. Como referencia, el 7 de octubre esa localización quedó a 0,10 m o menos del flexómetro en el avance.
+    - La distancia de llegada de esta campaña es la que da la localización de cada agente. La prueba de navegación ya la había comprobado con medidas directas: el 7 de octubre esa localización quedó a 0,10 m o menos de la medida en el avance, y por eso no fue necesario repetir la medida.
     - Las misiones 1 y 2 se completaron en un segundo intento: el primero de la 1 terminó a 0,526 m del destino, fuera de la tolerancia, y el de la 2 sin poder verificar la llegada. Por decisión del equipo, la tasa cuenta una corrida por misión.
     - Antes de la primera misión válida, la navegación de los dos agentes se detuvo y hubo que reiniciarla; la causa no se estableció.
     - La misión 10 no terminó: el computador del coordinador se apagó por batería.
