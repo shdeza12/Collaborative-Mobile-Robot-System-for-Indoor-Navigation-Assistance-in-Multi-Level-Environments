@@ -44,7 +44,7 @@ El sistema se construyó y se evaluó primero en simulación, y después se llev
 | Sensado | Láser simulado de 10 m | Láser RPLIDAR y la unidad inercial de la tarjeta; cámaras apagadas | Las cámaras no se usan y cargaban la tarjeta |
 | Odometría | La del simulador | La del láser, combinada con la unidad inercial | El agente no tiene codificadores en las ruedas, y con el láser solo el rumbo derivaba 5,9° por minuto |
 | Mapa | Calculado del mundo simulado | Derivado de la planta medida con flexómetro | El mapeo con SLAM a bordo no funcionó en ningún pasillo |
-| Escenario | Pisos 1 y 2 | Pisos 3 y 4 | El modelo del piso 2 no correspondía al edificio, y en sus pasillos uniformes el láser no veía el avance |
+| Escenario | Pisos 1 y 2 | Pisos 3 y 4 | El mapa del piso 2 no correspondía al edificio, porque el mundo simulado estaba mal medido, y en sus pasillos uniformes el láser no veía el avance |
 | Llegada | A 0,25 m | A 0,5 m, verificada 1,5 s después de que la navegación termina | Por la banda muerta el agente no alcanza la precisión de la simulación, y sigue rodando al terminar la navegación |
 | Media vuelta | La planifica Nav2 | Maniobra propia del agente | En la salida del piso 4, de 2,5 m de ancho, la de Nav2 abortaba contra la pared |
 

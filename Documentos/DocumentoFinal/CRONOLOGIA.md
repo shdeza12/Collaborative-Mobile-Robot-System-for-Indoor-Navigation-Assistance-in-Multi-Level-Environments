@@ -441,5 +441,8 @@ Fuente: Entregable S29; `Evidencia/S29_video_pagina_cancelacion.md`; `Evidencia/
   había verificado con flexómetro, y por eso no fue necesario repetir la medida en la prueba final. Sale la subsección que lo
   presentaba como límite, también de las conclusiones, el sitio, la presentación y el guion, y el protocolo escrito recibe una nota
   con fecha. Quedan 62 páginas numeradas y 80 hojas.
+- 5 de noviembre: la prueba de navegación del 30 de septiembre en Gregorio ya no se atribuye solo a la odometría. El agente no tenía
+  la unidad inercial, la navegación no estaba ajustada y el mapa cargado no correspondía al edificio, porque el mundo simulado estaba
+  mal medido. El error de lado pasó de 1,17 a 0,15 m al corregir el mapa, y el de avance, de 2,62 m, siguió.
 
 Fuente: `Evidencia/S30_grafo_rqt.md`; `Evidencia/S30_simulacion_catalayud.md`; `Evidencia/S30_segunda_mision_y_cancelacion.md`; `Evidencia/S26_red_campo_topologia_final.md`; `Evidencia/S30_grabacion_en_rviz.md`; `TERMINOS.md`; `GUION_SESION_JURADOS.md`.

@@ -540,8 +540,8 @@ def desarrollo(m):
         '2026. En abril se pasó del DonkeyCar al modelo del AWS DeepRacer, migrado a ROS 2 Humble. '
         'Entre agosto y septiembre se integró todo en simulación, con los pisos 2 y 3 del edificio '
         'Gregorio, y la campaña de treinta misiones corrió el 4 y el 5 de septiembre. Con los agentes '
-        'físicos, en los pasillos uniformes de Gregorio la odometría no registraba el avance y el '
-        'tránsito de personas dificultaba las pruebas. El 2 de octubre se pasó a los pisos 3 y 4 del '
+        'físicos, en los pasillos uniformes de Gregorio la odometría no registraba el avance, el mapa '
+        'salía de un mundo simulado mal medido y el tránsito de personas dificultaba las pruebas. El 2 de octubre se pasó a los pisos 3 y 4 del '
         'edificio Catalayud, y la campaña física corrió el 16 de octubre.'))
     periodos = [
         ('Feb.–mar.', 'Planteamiento y requisitos', 'Anteproyecto y sustentación; requisitos '
