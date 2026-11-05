@@ -21,6 +21,8 @@ Tres reglas ordenan la comunicación:
 
 Los dos agentes no se ven entre sí: cada uno solo se anuncia al portátil. Esta topología en estrella salió de una prueba fallida, cuando con los dos agentes hablándose todo con todo las tarjetas se saturaron ([ver la decisión](proceso/decisiones.md#coordinador-en-el-portatil)).
 
+El grafo real, con el sistema completo en simulación y una misión con relevo en curso, tiene 69 nodos. Es muy grande para verlo aquí, así que está como [archivo aparte, que se puede ampliar :material-download:](https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/blob/main/Documentos/Evidencia/S30_grafo_rqt.pdf).
+
 ## De la simulación a los agentes físicos
 
 El sistema se construyó y se evaluó primero en simulación, y después se llevó a los dos agentes físicos. La estructura se mantuvo: un coordinador, un agente por piso, el relevo en la escalera y las mismas reglas de comunicación. También el código: el del coordinador, el planificador, los mensajes y la página es el mismo en los dos destinos. Lo que cambió fue cómo se implementa cada bloque.

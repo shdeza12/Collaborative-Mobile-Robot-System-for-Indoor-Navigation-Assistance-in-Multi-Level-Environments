@@ -429,5 +429,8 @@ Fuente: Entregable S29; `Evidencia/S29_video_pagina_cancelacion.md`; `Evidencia/
   a la espera de que los autores la lean.
 - 4 de noviembre: la portada del sitio muestra la foto de los dos agentes físicos, sin fondo, y el documento en revisión la incluye
   en los componentes del agente.
+- 5 de noviembre: se capturó el grafo real de nodos con `rqt_graph`, con el sistema completo en simulación en los pisos 3 y 4 y
+  una misión con relevo en curso: 69 nodos. Con los agentes físicos no se puede ver completo desde el portátil. Por su tamaño va
+  como archivo aparte, en el anexo C del documento en revisión, y el diagrama sigue en el capítulo como vista de los nodos principales.
 
-Fuente: `Evidencia/S30_simulacion_catalayud.md`; `Evidencia/S30_segunda_mision_y_cancelacion.md`; `Evidencia/S26_red_campo_topologia_final.md`; `Evidencia/S30_grabacion_en_rviz.md`; `TERMINOS.md`; `GUION_SESION_JURADOS.md`.
+Fuente: `Evidencia/S30_grafo_rqt.md`; `Evidencia/S30_simulacion_catalayud.md`; `Evidencia/S30_segunda_mision_y_cancelacion.md`; `Evidencia/S26_red_campo_topologia_final.md`; `Evidencia/S30_grabacion_en_rviz.md`; `TERMINOS.md`; `GUION_SESION_JURADOS.md`.

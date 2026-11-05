@@ -220,7 +220,7 @@ El contrato se implementó como un paquete propio de mensajes de ROS~2. La acci�
 de guiado recibe el origen y el destino, devuelve el estado durante la misión y,
 al final, el tiempo total y el número de relevos o el motivo del fallo. Cada
 cambio de etapa (tabla~\ref{tab:etapas-mision}) se publica, y esas publicaciones
-son las marcas de tiempo con que se calculan las métricas. La tabla~\ref{tab:contrato} reúne las interfaces entre los componentes, y la figura~\ref{fig:nodos} muestra todos los nodos del sistema en la campaña con los agentes físicos y lo que circula entre ellos.
+son las marcas de tiempo con que se calculan las métricas. La tabla~\ref{tab:contrato} reúne las interfaces entre los componentes, y la figura~\ref{fig:nodos} muestra los nodos principales del sistema en la campaña con los agentes físicos y lo que circula entre ellos. El anexo C trae el grafo completo, obtenido en simulación.
 
 \begin{table}[!htbp]
   \centering\footnotesize
@@ -243,7 +243,7 @@ son las marcas de tiempo con que se calculan las métricas. La tabla~\ref{tab:co
 \begin{figure}[!htbp]
   \centering
   \includegraphics[width=0.96\textwidth]{imagenes/nodos_sistema.png}
-  \caption{Nodos de ROS~2 del sistema en la campaña con los agentes físicos. Los dos agentes son iguales; en borde discontinuo, los componentes del fabricante. Las flechas siguen el sentido de los datos y llevan el nombre del tópico, servicio o acción. El navegador pide la ruta al planificador y su seguimiento al controlador, y la pose que estima \texttt{amcl} llega a los demás nodos por las transformadas.}
+  \caption{Nodos principales de ROS~2 del sistema en la campaña con los agentes físicos. Los dos agentes son iguales; en borde discontinuo, los componentes del fabricante. Las flechas siguen el sentido de los datos y llevan el nombre del tópico, servicio o acción. El navegador pide la ruta al planificador y su seguimiento al controlador, y la pose que estima \texttt{amcl} llega a los demás nodos por las transformadas.}
   \label{fig:nodos}
 \end{figure}
 
