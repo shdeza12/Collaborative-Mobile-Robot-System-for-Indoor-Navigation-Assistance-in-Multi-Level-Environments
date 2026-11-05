@@ -36,13 +36,7 @@ código QR abre el video correspondiente.
 \chapter*{Anexo B. Repositorio del proyecto}
 \addcontentsline{toc}{chapter}{ANEXO B. REPOSITORIO DEL PROYECTO}
 
-El repositorio público del proyecto guarda toda su trazabilidad. Contiene el
-código de los agentes, del coordinador y de la interfaz; la matriz de requisitos,
-con la prueba que declara cumplido cada uno; el protocolo experimental; el
-registro de cada misión de las dos campañas y el programa que calcula las
-métricas; la evidencia de cada sesión de trabajo, con sus mediciones; los
-entregables semanales y la bitácora del proyecto. El sitio del proyecto presenta
-el mismo contenido para leerlo en el navegador.
+Repositorio público con el código, los requisitos, el protocolo, los registros de las misiones y la evidencia del proyecto, y sitio que presenta ese contenido en el navegador.
 
 \begin{table}[H]
   \centering\small
@@ -58,9 +52,7 @@ el mismo contenido para leerlo en el navegador.
 \chapter*{Anexo C. Grafo de nodos del sistema}
 \addcontentsline{toc}{chapter}{ANEXO C. GRAFO DE NODOS DEL SISTEMA}
 
-Grafo de nodos y tópicos de ROS~2 obtenido con el generador de la herramienta \texttt{rqt\_graph} el 5 de noviembre de 2026, con el sistema completo en simulación en los pisos 3 y 4 del edificio Catalayud: los dos agentes, el coordinador, el grabador y el puente de la página, durante una misión con relevo pedida y confirmada desde la página, que se completó en 99,0~s. Reúne 69 nodos, así que aquí se ve solo su forma general: para leerlo hay que ampliarlo en este PDF, sin perder detalle, o abrir el archivo aparte.
-
-La captura se hizo en simulación debido a que, con los agentes físicos, el portátil solo admite cuatro procesos de ROS~2 durante una misión, y el láser y las transformadas no salen de cada agente. De ahí que no aparezcan los nodos propios de los agentes físicos, como la odometría del láser, la unidad inercial, el filtro y el puente a los servos, que sí muestra la figura~\ref{fig:nodos}.
+Grafo de nodos y tópicos de ROS~2 obtenido con \texttt{rqt\_graph}, con el sistema completo en simulación. Para leerlo, se amplía en este PDF o se abre el archivo del enlace.
 
 \begin{center}
   \includegraphics[width=\textwidth]{imagenes/grafo_nodos_rqt.pdf}
