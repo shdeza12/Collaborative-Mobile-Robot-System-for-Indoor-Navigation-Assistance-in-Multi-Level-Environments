@@ -5,31 +5,31 @@
 % =====================================================================
 \ustaseccion{Resumen}
 
-Orientarse en un edificio de varios pisos es difícil para quien no lo conoce, y
-el cambio de piso corta la continuidad del recorrido. Las soluciones robóticas
-existentes resuelven ese salto de dos maneras: dotando al robot de mecanismos
-para subir escaleras, o conectándolo al ascensor. Las dos son caras y obligan a
-intervenir el edificio.
+Orientarse en un edificio de varios pisos resulta difícil para quien no lo conoce,
+ya que el cambio de piso corta la continuidad del recorrido. Las soluciones robóticas
+existentes resuelven ese salto dotando al robot de mecanismos para subir escaleras o
+conectándolo al ascensor, dos opciones costosas que además obligan a intervenir el
+edificio.
 
-Este trabajo propone y evalúa una alternativa. Dos agentes, robots móviles terrestres, uno por piso, se reparten el guiado de un usuario mediante un protocolo de relevo
-en la zona de escaleras. Ningún agente cambia de piso. Un coordinador central
-asigna el agente según el piso del origen y del destino. El usuario pide el
-servicio desde una interfaz web que funciona en cualquier teléfono, sin instalar
-nada y sin salida a internet.
+Este trabajo propone y evalúa una alternativa en la que dos agentes, robots móviles
+terrestres, uno por piso, se reparten el guiado de un usuario mediante un protocolo de
+relevo en la zona de escaleras, sin que ninguno cambie de piso. Un coordinador asigna
+el agente según el piso del origen y del destino, y el usuario pide el servicio desde
+una interfaz web que funciona en cualquier teléfono, sin instalar nada y sin salida a
+internet.
 
 La evaluación siguió un protocolo escrito antes de instrumentar el sistema, con
-cuatro métricas de definición operativa. En simulación, treinta misiones
-sorteadas dieron una campaña válida sin descartes, que permite afirmar con 95~\%
-de confianza que la tasa de éxito supera el 70~\%.
-
-De diez misiones sorteadas con los agentes físicos, uno por piso, nueve se
-completaron con relevo, con un tiempo total mediano de 87,6~s y la
-llegada a menos de 0,5~m del destino según la localización de cada agente. La
-décima se interrumpió porque el computador del coordinador se quedó sin batería.
-La tracción no responde por debajo de 0,40~m/s, y eso limita la precisión de llegada.
+cuatro métricas de definición operativa. En simulación, treinta misiones sorteadas
+dieron una campaña válida, sin descartes, que permite afirmar con 95~\% de confianza
+que la tasa de éxito supera el 70~\%. Con los agentes físicos, de diez misiones
+sorteadas se completaron nueve con relevo, con un tiempo total mediano de 87,6~s y la
+llegada a menos de 0,5~m del destino según la localización de cada agente, mientras
+que la décima se interrumpió porque el computador del coordinador se quedó sin
+batería. La principal limitación está en la plataforma, cuya tracción no responde por
+debajo de 0,40~m/s, lo que restringe la precisión de llegada.
 
 \vspace{1em}
-\textbf{Palabras clave:} robótica móvil colaborativa; sistemas multi-robot;
+\textbf{Palabras clave:} robótica móvil colaborativa; sistemas multirrobot;
 navegación en interiores; protocolo de relevo; interacción humano-robot; ROS~2.
 
 \ustaseccion{Abstract}

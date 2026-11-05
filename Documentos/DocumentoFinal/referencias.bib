@@ -1,27 +1,25 @@
 % =====================================================================
 %  Bibliografía del proyecto de grado.
-%  Las 25 primeras entradas se transcriben del capítulo 10 del anteproyecto
-%  (Documentos/Anteproyecto_Jonny_Santi.pdf).
-%
-%  NO se conserva aquí la numeración que tenían allí. Se intentó, como comentario
-%  al lado de cada clave, y resultó contraproducente: el número del anteproyecto
-%  no coincide con el que el documento final asigna —que va por orden de primera
-%  aparición— y al revisar el .bib parecía que las citas apuntaban a otra cosa.
+%  Revisión del 4 de noviembre de 2026: de 2021 en adelante, salvo las antiguas muy
+%  relevantes; cada ficha se comprobó contra Crossref y OpenAlex, y cada fuente nueva se
+%  leyó antes de atribuirle una afirmación.
 %  Estilo de salida: IEEE (biblatex style=ieee).
 % =====================================================================
 
-@inproceedings{bojarski2016end,
-  author    = {Bojarski, Mariusz and others},
-  title     = {End to End Learning for Self-Driving Cars},
-  booktitle = {IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
-  address   = {Daejeon, South Korea}, year = {2016},
-  note      = {Preprint, arXiv:1604.07316}}
+% ------------------------------------------- conservadas de la lista anterior ---
+@article{wilson1927probable,
+  author  = {Wilson, Edwin B.},
+  title   = {Probable Inference, the Law of Succession, and Statistical Inference},
+  journal = {Journal of the American Statistical Association},
+  volume  = {22}, number = {158}, pages = {209--212}, year = {1927},
+  doi     = {10.1080/01621459.1927.10502953}}
 
-@inproceedings{chen2025lite,
-  author    = {Chen, J. and others},
-  title     = {{LITE}: A Learning-Integrated Topological Explorer for Multi-Floor Indoor Environments},
-  booktitle = {IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
-  pages     = {1--8}, year = {2025}, doi = {10.1109/IROS60139.2025.11246317}}
+@article{brown2001interval,
+  author  = {Brown, Lawrence D. and Cai, T. Tony and DasGupta, Anirban},
+  title   = {Interval Estimation for a Binomial Proportion},
+  journal = {Statistical Science},
+  volume  = {16}, number = {2}, pages = {101--133}, year = {2001},
+  doi     = {10.1214/ss/1009213286}}
 
 @article{gerkey2004taxonomy,
   author  = {Gerkey, Brian P. and Matari\'{c}, Maja J.},
@@ -30,290 +28,12 @@
   volume  = {23}, number = {9}, pages = {939--954}, year = {2004},
   doi     = {10.1177/0278364904045564}}
 
-@article{gong2026stairway,
-  author  = {Gong, Z. and others},
-  title   = {Stairway to Success: An Online Floor-Aware Zero-Shot Object-Goal Navigation Framework via {LLM}-Driven Coarse-to-Fine Exploration},
-  journal = {IEEE Robotics and Automation Letters},
-  volume  = {11}, number = {3}, pages = {1--8}, year = {2026},
-  doi     = {10.1109/LRA.2026.3655265}}
-
-@mastersthesis{jimenez2024arquitectura,
-  author  = {Jim\'{e}nez Mu\~{n}oz, M.},
-  title   = {Arquitectura cognitiva para integraci\'{o}n de usuarios humanos dentro de un sistema de mapas multinivel en una plataforma rob\'{o}tica asistencial},
-  school  = {Universidad Polit\'{e}cnica de Madrid, Dept. Ing. Industrial},
-  address = {Madrid, Espa\~{n}a}, year = {2024}}
-
-@article{kehoe2015cloud,
-  author  = {Kehoe, Ben and Patil, Sachin and Abbeel, Pieter and Goldberg, Ken},
-  title   = {A Survey of Research on Cloud Robotics and Automation},
-  journal = {IEEE Transactions on Automation Science and Engineering},
-  volume  = {12}, number = {2}, pages = {398--409}, year = {2015},
-  doi     = {10.1109/TASE.2014.2376492}}
-
-@article{kim2024indoor,
-  author  = {Kim, T. and Kang, G. and Lee, D. and Shim, D. H.},
-  title   = {Development of an Indoor Delivery Mobile Robot for a Multi-Floor Environment},
-  journal = {IEEE Access}, volume = {12}, pages = {1--12}, year = {2024},
-  doi     = {10.1109/ACCESS.2024.3381489}}
-
-@inproceedings{zain2025obstacle,
-  author    = {Zain, L. H.},
-  title     = {Real-Time Obstacle Avoidance for a Mobile Robot Using {CNN}-Based Sensor Fusion},
-  booktitle = {International Conference on Robotics and Automation (ICRA)},
-  year      = {2025}, note = {Preprint, arXiv:2509.08095}}
-
-@inproceedings{li2023bug,
-  author    = {Li, A. and Gurocak, H.},
-  title     = {Modified Bug Algorithm with Proximity Sensors to Reduce Human-Cobot Collisions},
-  booktitle = {9th International Conference on Automation, Robotics and Applications (ICARA)},
-  pages     = {1--6}, year = {2023}, doi = {10.1109/ICARA56516.2023.10126056}}
-
-@article{lopez2024enhancing,
-  author  = {L\'{o}pez Vel\'{a}squez, J. and Acosta Amaya, G. A. and Jim\'{e}nez Builes, J. A.},
-  title   = {Enhancing Mobile Robot Navigation: Integrating Reactive Autonomy through Deep Learning and Fuzzy Behavior},
-  journal = {Journal of Intelligent \& Robotic Systems},
-  volume  = {110}, number = {2}, pages = {45--58}, year = {2024},
-  doi     = {10.1007/s10846-024-02045-2}}
-
-@inproceedings{luo2025elevator,
-  author    = {Luo, S. and Yu, Q. and Zhu, C.},
-  title     = {``Elevator or Stairs'': A Layered Reinforcement Learning Approach for Robot Multi-Floor Navigation in High-Traffic Scenarios},
-  booktitle = {International Conference on Advanced Computing and Intelligent Robotics Applications (ACIRA)},
-  pages     = {1--8}, year = {2025}, doi = {10.1109/ACIRA67680.2025.11334740}}
-
-@article{macenski2022ros2,
-  author  = {Macenski, Steven and Foote, Tully and Gerkey, Brian and Lalancette, Chris and Woodall, William},
-  title   = {Robot Operating System 2: Design, Architecture, and Uses in the Wild},
-  journal = {Science Robotics}, volume = {7}, number = {66}, pages = {eabm6074},
-  year    = {2022}, doi = {10.1126/scirobotics.abm6074}}
-
-@article{malavolta2023offloading,
-  author  = {Malavolta, I. and others},
-  title   = {Computation Offloading for Ground Robotic Systems Communicating over {WiFi}},
-  journal = {Empirical Software Engineering},
-  volume  = {28}, number = {3}, pages = {1--35}, year = {2023},
-  doi     = {10.1007/s10664-022-10268-0}}
-
-@inproceedings{nair2024collaborative,
-  author    = {Nair, B. R.},
-  title     = {Collaborative Perception in Multi-Robot Systems: Case Studies in Household Cleaning and Warehouse Operations},
-  booktitle = {6th International Conference on Robotics and Computer Vision (ICRCV)},
-  pages     = {1--6}, year = {2024}, doi = {10.1109/ICRCV60186.2024.00012}}
-
-@article{omer2025multilayer,
-  author  = {Omer, K. and Monteriu, A.},
-  title   = {Multi-Layer Robotic Controller for Enhancing the Safety of Mobile Robot Navigation in Human-Centered Indoor Environments},
-  journal = {Frontiers in Robotics and AI}, volume = {12}, pages = {1--15},
-  year    = {2025}, doi = {10.3389/frobt.2025.00001}}
-
-@misc{piguave2023multirobot,
-  author = {Piguave Toala, A. E. and Ronquillo Manosalvas, D. S.},
-  title  = {Dise\~{n}o e implementaci\'{o}n de un sistema multi-robot de c\'{o}digo abierto para ambientes colaborativos en {ROS2}},
-  note   = {Proyecto integrador, Fac. Ing. Electr\'{o}nica, Escuela Superior Polit\'{e}cnica del Litoral},
-  address = {Guayaquil, Ecuador}, year = {2023}}
-
-@inproceedings{roszkowska2023multilevel,
-  author    = {Roszkowska, E. and Makowski-Czerski, P. and Janiec, L.},
-  title     = {Multi-Level Control for Multiple Mobile Robot Systems},
-  booktitle = {IEEE International Conference on Robotics and Automation (ICRA)},
-  pages     = {1--7}, year = {2023}, doi = {10.1109/ICRA48891.2023.10160734}}
-
-@inproceedings{rudrusamy2022broadcast,
-  author    = {Rudrusamy, B. and others},
-  title     = {Multi-Robot Systems Using Broadcast Control Framework with Visual-Based Tracking},
-  booktitle = {7th International Conference on Mechanical Engineering and Robotics Research (ICMERR)},
-  pages     = {1--6}, year = {2022}, doi = {10.1109/ICMERR56497.2022.10097802}}
-
-@inproceedings{sojan2025autonomous,
-  author    = {Sojan, A. and Thomas, C. and Raj, B. and Simon, S. A. and John, S. K. and Jose, A. A.},
-  title     = {Autonomous Indoor Navigator},
-  booktitle = {11th International Conference on Smart Computing and Communication (ICSCC)},
-  pages     = {1--6}, year = {2025}, doi = {10.1109/ICSCC66177.2025.11233830}}
-
-@inproceedings{song2024elevator,
-  author    = {Song, Z. and Lou, S. and Tan, R. and Lv, C.},
-  title     = {Robot-Elevator Interaction through {IoT} Devices for Autonomous Robot Multi-Floor Transition},
-  booktitle = {10th International Conference on Electrical Engineering, Control and Robotics (EECR)},
-  pages     = {1--6}, year = {2024}, doi = {10.1109/EECR60807.2024.10607245}}
-
-@inproceedings{srivastava2025deliver,
-  author    = {Srivastava, A. K. and Levin, J. M. and Dames, P.},
-  title     = {{DELIVER}: A System for Coordinated Multi-Robot Pickup and Delivery Using Relay Planning},
-  booktitle = {IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
-  pages     = {1--8}, year = {2025}}
-
-@article{tahir2025edge,
-  author  = {Tahir, N. and Parasuraman, R.},
-  title   = {Edge Computing and Its Application in Robotics: A Survey},
-  journal = {MDPI Sensors}, volume = {25}, number = {2}, pages = {1--25},
-  year    = {2025}, doi = {10.3390/s25020001}}
-
-@inproceedings{varghese2023multirobot,
-  author    = {Varghese, G. T. and others},
-  title     = {Multi-Robot System for Mapping and Localization},
-  booktitle = {8th International Conference on Robotics and Automation Engineering (ICRAE)},
-  pages     = {1--6}, year = {2023}, doi = {10.1109/ICRAE59816.2023.10458504}}
-
-@article{xu2025modular,
-  author  = {Xu, X. and Prieto, S. A. and Garc\'{i}a de Soto, B.},
-  title   = {A Modular {ROS} Framework for Cooperative Multi-Robot Task Allocation in Digital Environments},
-  journal = {MDPI Sensors}, volume = {25}, number = {4}, pages = {1--20},
-  year    = {2025}, doi = {10.3390/s25040001}}
-
-@article{zhan2025kubernetes,
-  author  = {Zhan, J. and Yu, X. and Westerlund, T.},
-  title   = {Mejorando la resiliencia de los sistemas multirrob\'{o}ticos basados en {ROS} 2 con {K}ubernetes: un estudio de caso sobre el posicionamiento},
-  journal = {MDPI Sensors}, volume = {25}, number = {16}, pages = {5067},
-  year    = {2025}, doi = {10.3390/s25165067}}
-
-% =====================================================================
-%  A partir de aquí, referencias nuevas del documento final.
-%  Candidatos que el trabajo ya usa y el anteproyecto no citaba:
-%    - NTC 1486 de ICONTEC (2022), que es la norma de esta plantilla
-%    - ASTM F3244-21, citada en el §3 del mapa de trabajo para el N de RF-27
-%    - Documentación de Nav2 (First-Time Robot Setup Guide), origen de la
-%      escalera de siete peldaños que ordena el trabajo de hardware
-% =====================================================================
-
-% --------------------------------------------------------- normativa ---
-@techreport{conpes3975,
-  author      = {{Departamento Nacional de Planeación}},
-  title       = {Documento {CONPES} 3975: Política Nacional para la Transformación Digital e Inteligencia Artificial},
-  institution = {Consejo Nacional de Política Económica y Social},
-  address     = {Bogotá D.C., Colombia}, year = {2019}}
-
-@techreport{conpes4069,
-  author      = {{Departamento Nacional de Planeación}},
-  title       = {Documento {CONPES} 4069: Política Nacional de Ciencia, Tecnología e Innovación 2022--2031},
-  institution = {Consejo Nacional de Política Económica y Social},
-  address     = {Bogotá D.C., Colombia}, year = {2021}}
-
-@techreport{ntc1486,
-  author      = {{ICONTEC}},
-  title       = {{NTC} 1486: Documentación. Presentación de tesis, trabajos de grado y otros trabajos de investigación},
-  institution = {Instituto Colombiano de Normas Técnicas y Certificación},
-  address     = {Bogotá D.C., Colombia}, year = {2022}}
-
-% ------------------------------------------------- herramientas de software ---
-@misc{nav2setup,
-  author       = {{Nav2 Project}},
-  title        = {First-Time Robot Setup Guide},
-  howpublished = {Documentación de Nav2, \url{https://docs.nav2.org}},
-  note         = {Consultado en septiembre de 2026}}
-
-% Plataformas y simuladores evaluados en el primer semestre (entregables de
-% las semanas 10 a 13). Añadidas el 19 de octubre de 2026.
-@misc{donkeycar,
-  author       = {{Donkey Car Project}},
-  title        = {Donkey Car: an open source {DIY} self driving platform for small scale cars},
-  howpublished = {\url{https://www.donkeycar.com}},
-  note         = {Consultado en abril de 2026}}
-
-@misc{awsdeepracer2021,
-  author       = {{AWS DeepRacer}},
-  title        = {aws-deepracer: simulation artifacts, core components and configuration files to integrate the {AWS DeepRacer} device with the {ROS} Navigation stack},
-  howpublished = {Repositorio de GitHub, \url{https://github.com/aws-deepracer/aws-deepracer}},
-  year         = {2021}}
-
-@misc{deepracercustomcar,
-  author       = {{AWS DeepRacer Community}},
-  title        = {deepracer-custom-car: custom software stack for the {AWS DeepRacer}},
-  howpublished = {Repositorio de GitHub, \url{https://github.com/aws-deepracer-community/deepracer-custom-car}},
-  note         = {Consultado en mayo y agosto de 2026}}
-
-@misc{okelly2019f1tenth,
-  author       = {O'Kelly, Matthew and Sukhil, Varundev and Abbas, Houssam and others},
-  title        = {{F1/10}: An Open-Source Autonomous Cyber-Physical Platform},
-  howpublished = {arXiv:1901.08567},
-  year         = {2019}}
-
-% =====================================================================
-%  Referencias añadidas el 15 de octubre de 2026 para justificar el marco
-%  teórico y el desarrollo. Cada una se verificó contra el editor, el
-%  repositorio del autor o un índice bibliográfico. Donde no se pudo
-%  confirmar el DOI o las páginas, el campo se omite en vez de suponerlo.
-% =====================================================================
-
-% ------------------------------------------------- robots guía ---
-@article{burgard1999experiences,
-  author  = {Burgard, Wolfram and Cremers, Armin B. and Fox, Dieter and H\"{a}hnel, Dirk and Lakemeyer, Gerhard and Schulz, Dirk and Steiner, Walter and Thrun, Sebastian},
-  title   = {Experiences with an Interactive Museum Tour-Guide Robot},
-  journal = {Artificial Intelligence},
-  volume  = {114}, number = {1--2}, pages = {3--55}, year = {1999}}
-
-@inproceedings{guerreiro2019cabot,
-  author    = {Guerreiro, Jo\~{a}o and Sato, Daisuke and Asakawa, Saki and Dong, Huixu and Kitani, Kris M. and Asakawa, Chieko},
-  title     = {{CaBot}: Designing and Evaluating an Autonomous Navigation Robot for Blind People},
-  booktitle = {21st International ACM SIGACCESS Conference on Computers and Accessibility (ASSETS)},
-  address   = {Pittsburgh, PA, USA},
-  pages     = {68--82}, year = {2019}, doi = {10.1145/3308561.3353771}}
-
-% ------------------------------------------- asignación de tareas ---
 @article{korsah2013comprehensive,
   author  = {Korsah, G. Ayorkor and Stentz, Anthony and Dias, M. Bernardine},
   title   = {A Comprehensive Taxonomy for Multi-Robot Task Allocation},
   journal = {The International Journal of Robotics Research},
   volume  = {32}, number = {12}, pages = {1495--1512}, year = {2013},
   doi     = {10.1177/0278364913496484}}
-
-@article{kuhn1955hungarian,
-  author  = {Kuhn, Harold W.},
-  title   = {The {H}ungarian Method for the Assignment Problem},
-  journal = {Naval Research Logistics Quarterly},
-  volume  = {2}, number = {1--2}, pages = {83--97}, year = {1955},
-  doi     = {10.1002/nav.3800020109}}
-
-@article{smith1980contract,
-  author  = {Smith, Reid G.},
-  title   = {The Contract Net Protocol: High-Level Communication and Control in a Distributed Problem Solver},
-  journal = {IEEE Transactions on Computers},
-  volume  = {C-29}, number = {12}, pages = {1104--1113}, year = {1980}}
-
-@article{gerkey2002sold,
-  author  = {Gerkey, Brian P. and Matari\'{c}, Maja J.},
-  title   = {Sold!: Auction Methods for Multirobot Coordination},
-  journal = {IEEE Transactions on Robotics and Automation},
-  volume  = {18}, number = {5}, pages = {758--768}, year = {2002}}
-
-@article{choi2009consensus,
-  author  = {Choi, Han-Lim and Brunet, Luc and How, Jonathan P.},
-  title   = {Consensus-Based Decentralized Auctions for Robust Task Allocation},
-  journal = {IEEE Transactions on Robotics},
-  volume  = {25}, number = {4}, pages = {912--926}, year = {2009},
-  doi     = {10.1109/TRO.2009.2022423}}
-
-% ------------------------------------------------- navegación ---
-@book{siegwart2011introduction,
-  author    = {Siegwart, Roland and Nourbakhsh, Illah R. and Scaramuzza, Davide},
-  title     = {Introduction to Autonomous Mobile Robots},
-  edition   = {2},
-  publisher = {MIT Press}, address = {Cambridge, MA, USA}, year = {2011}}
-
-@book{thrun2005probabilistic,
-  author    = {Thrun, Sebastian and Burgard, Wolfram and Fox, Dieter},
-  title     = {Probabilistic Robotics},
-  publisher = {MIT Press}, address = {Cambridge, MA, USA}, year = {2005}}
-
-@inproceedings{macenski2020marathon,
-  author    = {Macenski, Steve and Mart\'{i}n, Francisco and White, Ruffin and Gin\'{e}s Clavero, Jonatan},
-  title     = {The Marathon 2: A Navigation System},
-  booktitle = {IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
-  address   = {Las Vegas, NV, USA}, year = {2020},
-  eprint    = {2003.00368}, eprinttype = {arXiv}}
-
-@article{macenski2023survey,
-  author  = {Macenski, Steve and Moore, Tom and Lu, David V. and Merzlyakov, Alexey and Ferguson, Michael},
-  title   = {From the Desks of {ROS} Maintainers: A Survey of Modern \& Capable Mobile Robotics Algorithms in the {Robot Operating System 2}},
-  journal = {Robotics and Autonomous Systems},
-  volume  = {168}, pages = {104493}, year = {2023},
-  doi     = {10.1016/j.robot.2023.104493}}
-
-@inproceedings{lu2014layered,
-  author    = {Lu, David V. and Hershberger, Dave and Smart, William D.},
-  title     = {Layered Costmaps for Context-Sensitive Navigation},
-  booktitle = {IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
-  address   = {Chicago, IL, USA},
-  pages     = {709--715}, year = {2014}}
 
 @article{reeds1990optimal,
   author  = {Reeds, James A. and Shepp, Lawrence A.},
@@ -329,33 +49,10 @@
   volume  = {29}, number = {5}, pages = {485--501}, year = {2010},
   doi     = {10.1177/0278364909359210}}
 
-@misc{macenski2024smac,
-  author     = {Macenski, Steve and Booker, Matthew and Wallace, Joshua},
-  title      = {Open-Source, Cost-Aware Kinematically Feasible Planning for Mobile and Surface Robotics},
-  year       = {2024},
-  eprint     = {2401.13078}, eprinttype = {arXiv}}
-
-@techreport{coulter1992implementation,
-  author      = {Coulter, R. Craig},
-  title       = {Implementation of the Pure Pursuit Path Tracking Algorithm},
-  institution = {Robotics Institute, Carnegie Mellon University},
-  number      = {CMU-RI-TR-92-01},
-  address     = {Pittsburgh, PA, USA}, year = {1992}}
-
-@article{macenski2023rpp,
-  author  = {Macenski, Steve and Singh, Shrijit and Mart\'{i}n, Francisco and Gin\'{e}s, Jonatan},
-  title   = {Regulated Pure Pursuit for Robot Path Tracking},
-  journal = {Autonomous Robots},
-  volume  = {47}, pages = {685--694}, year = {2023},
-  eprint  = {2305.20026}, eprinttype = {arXiv}}
-
-% ----------------------------------------- localización y odometría ---
-@inproceedings{fox1999monte,
-  author    = {Fox, Dieter and Burgard, Wolfram and Dellaert, Frank and Thrun, Sebastian},
-  title     = {Monte {C}arlo Localization: Efficient Position Estimation for Mobile Robots},
-  booktitle = {Proceedings of the Sixteenth National Conference on Artificial Intelligence (AAAI)},
-  address   = {Orlando, FL, USA},
-  pages     = {343--349}, year = {1999}}
+@book{thrun2005probabilistic,
+  author    = {Thrun, Sebastian and Burgard, Wolfram and Fox, Dieter},
+  title     = {Probabilistic Robotics},
+  publisher = {MIT Press}, address = {Cambridge, MA, USA}, year = {2005}}
 
 @inproceedings{jaimez2016planar,
   author    = {Jaimez, Mariano and Monroy, Javier G. and Gonz\'{a}lez-Jim\'{e}nez, Javier},
@@ -377,14 +74,6 @@
   booktitle = {13th International Conference on Intelligent Autonomous Systems (IAS-13)},
   address   = {Padova, Italy}, year = {2014}}
 
-@article{macenski2021slam,
-  author  = {Macenski, Steve and Jambrecic, Ivona},
-  title   = {{SLAM} Toolbox: {SLAM} for the Dynamic World},
-  journal = {Journal of Open Source Software},
-  volume  = {6}, number = {61}, pages = {2783}, year = {2021},
-  doi     = {10.21105/joss.02783}}
-
-% ------------------------------------- simulación, comunicación, web ---
 @inproceedings{koenig2004gazebo,
   author    = {Koenig, Nathan and Howard, Andrew},
   title     = {Design and Use Paradigms for {Gazebo}, an Open-Source Multi-Robot Simulator},
@@ -392,12 +81,12 @@
   address   = {Sendai, Japan},
   pages     = {2149--2154}, year = {2004}}
 
-@techreport{omg2015dds,
-  author      = {{Object Management Group}},
-  title       = {Data Distribution Service ({DDS}), Version 1.4},
-  institution = {Object Management Group},
-  number      = {formal/15-04-10},
-  year        = {2015}}
+@inproceedings{macenski2020marathon,
+  author    = {Macenski, Steve and Mart\'{i}n, Francisco and White, Ruffin and Gin\'{e}s Clavero, Jonatan},
+  title     = {The Marathon 2: A Navigation System},
+  booktitle = {IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
+  address   = {Las Vegas, NV, USA}, year = {2020},
+  eprint    = {2003.00368}, eprinttype = {arXiv}}
 
 @incollection{crick2017rosbridge,
   author    = {Crick, Christopher and Jay, Graylin and Osentoski, Sarah and Pitzer, Benjamin and Jenkins, Odest Chadwicke},
@@ -408,25 +97,45 @@
   publisher = {Springer}, address = {Cham, Switzerland}, year = {2017},
   doi       = {10.1007/978-3-319-29363-9_28}}
 
-% ------------------------------------------------ evaluación ---
-@article{wilson1927probable,
-  author  = {Wilson, Edwin B.},
-  title   = {Probable Inference, the Law of Succession, and Statistical Inference},
-  journal = {Journal of the American Statistical Association},
-  volume  = {22}, number = {158}, pages = {209--212}, year = {1927},
-  doi     = {10.1080/01621459.1927.10502953}}
+@techreport{omg2015dds,
+  author      = {{Object Management Group}},
+  title       = {Data Distribution Service ({DDS}), Version 1.4},
+  institution = {Object Management Group},
+  number      = {formal/15-04-10},
+  year        = {2015}}
 
-@article{brown2001interval,
-  author  = {Brown, Lawrence D. and Cai, T. Tony and DasGupta, Anirban},
-  title   = {Interval Estimation for a Binomial Proportion},
-  journal = {Statistical Science},
-  volume  = {16}, number = {2}, pages = {101--133}, year = {2001},
-  doi     = {10.1214/ss/1009213286}}
+@article{macenski2021slam,
+  author  = {Macenski, Steve and Jambrecic, Ivona},
+  title   = {{SLAM} Toolbox: {SLAM} for the Dynamic World},
+  journal = {Journal of Open Source Software},
+  volume  = {6}, number = {61}, pages = {2783}, year = {2021},
+  doi     = {10.21105/joss.02783}}
 
-@book{popper1959logic,
-  author    = {Popper, Karl R.},
-  title     = {The Logic of Scientific Discovery},
-  publisher = {Hutchinson}, address = {London, UK}, year = {1959}}
+@article{macenski2022ros2,
+  author  = {Macenski, Steven and Foote, Tully and Gerkey, Brian and Lalancette, Chris and Woodall, William},
+  title   = {Robot Operating System 2: Design, Architecture, and Uses in the Wild},
+  journal = {Science Robotics}, volume = {7}, number = {66}, pages = {eabm6074},
+  year    = {2022}, doi = {10.1126/scirobotics.abm6074}}
+
+@article{macenski2023rpp,
+  author  = {Macenski, Steve and Singh, Shrijit and Mart\'{i}n, Francisco and Gin\'{e}s, Jonatan},
+  title   = {Regulated Pure Pursuit for Robot Path Tracking},
+  journal = {Autonomous Robots},
+  volume  = {47}, pages = {685--694}, year = {2023},
+  eprint  = {2305.20026}, eprinttype = {arXiv}}
+
+@article{macenski2023survey,
+  author  = {Macenski, Steve and Moore, Tom and Lu, David V. and Merzlyakov, Alexey and Ferguson, Michael},
+  title   = {From the Desks of {ROS} Maintainers: A Survey of Modern \& Capable Mobile Robotics Algorithms in the {Robot Operating System 2}},
+  journal = {Robotics and Autonomous Systems},
+  volume  = {168}, pages = {104493}, year = {2023},
+  doi     = {10.1016/j.robot.2023.104493}}
+
+@misc{macenski2024smac,
+  author     = {Macenski, Steve and Booker, Matthew and Wallace, Joshua},
+  title      = {Open-Source, Cost-Aware Kinematically Feasible Planning for Mobile and Surface Robotics},
+  year       = {2024},
+  eprint     = {2401.13078}, eprinttype = {arXiv}}
 
 @techreport{astm2021f3244,
   author      = {{ASTM International}},
@@ -434,3 +143,195 @@
   institution = {ASTM International},
   number      = {ASTM F3244-21},
   address     = {West Conshohocken, PA, USA}, year = {2021}}
+
+@techreport{conpes4069,
+  author      = {{Departamento Nacional de Planeación}},
+  title       = {Documento {CONPES} 4069: Política Nacional de Ciencia, Tecnología e Innovación 2022--2031},
+  institution = {Consejo Nacional de Política Económica y Social},
+  address     = {Bogotá D.C., Colombia}, year = {2021}}
+
+@misc{awsdeepracer2021,
+  author       = {{AWS DeepRacer}},
+  title        = {aws-deepracer: simulation artifacts, core components and configuration files to integrate the {AWS DeepRacer} device with the {ROS} Navigation stack},
+  howpublished = {Repositorio de GitHub, \url{https://github.com/aws-deepracer/aws-deepracer}},
+  year         = {2021}}
+
+@misc{deepracercustomcar,
+  author       = {{AWS DeepRacer Community}},
+  title        = {deepracer-custom-car: custom software stack for the {AWS DeepRacer}},
+  howpublished = {Repositorio de GitHub, \url{https://github.com/aws-deepracer-community/deepracer-custom-car}},
+  note         = {Consultado en mayo y agosto de 2026}}
+
+@misc{donkeycar,
+  author       = {{Donkey Car Project}},
+  title        = {Donkey Car: an open source {DIY} self driving platform for small scale cars},
+  howpublished = {\url{https://www.donkeycar.com}},
+  note         = {Consultado en abril de 2026}}
+
+@misc{nav2setup,
+  author       = {{Nav2 Project}},
+  title        = {First-Time Robot Setup Guide},
+  howpublished = {Documentación de Nav2, \url{https://docs.nav2.org}},
+  note         = {Consultado en septiembre de 2026}}
+
+@inproceedings{sojan2025autonomous,
+  author    = {Sojan, A. and Thomas, C. and Raj, B. and Simon, S. A. and John, S. K. and Jose, A. A.},
+  title     = {Autonomous Indoor Navigator},
+  booktitle = {11th International Conference on Smart Computing and Communication (ICSCC)},
+  pages     = {1--6}, year = {2025}, doi = {10.1109/ICSCC66177.2025.11233830}}
+
+
+% ---------------------------------------------------- antecedentes y problema ---
+@article{gathmorad2024strategic,
+  author  = {Gath-Morad, Michal and Gr\"{u}bel, Jascha and Steemers, Koen and Sailer, Kerstin and Ben-Alon, Lola and H\"{o}lscher, Christoph and Aguilar, Leonel},
+  title   = {The Role of Strategic Visibility in Shaping Wayfinding Behavior in Multilevel Buildings},
+  journal = {Scientific Reports}, volume = {14}, number = {1}, pages = {3735}, year = {2024},
+  doi     = {10.1038/s41598-024-53420-6}}
+
+@inproceedings{kayukawa2023enhancing,
+  author    = {Kayukawa, Seita and Sato, Daisuke and Murata, Masayuki and Ishihara, Tatsuya and Takagi, Hironobu and Morishima, Shigeo and Asakawa, Chieko},
+  title     = {Enhancing Blind Visitor's Autonomy in a Science Museum Using an Autonomous Navigation Robot},
+  booktitle = {CHI Conference on Human Factors in Computing Systems},
+  pages     = {1--14}, year = {2023}, doi = {10.1145/3544548.3581220}}
+
+@article{omer2025multilayer,
+  author  = {Omer, Karameldeen and Monteri\`{u}, Andrea},
+  title   = {Multi-Layer Robotic Controller for Enhancing the Safety of Mobile Robot Navigation in Human-Centered Indoor Environments},
+  journal = {Frontiers in Robotics and AI}, volume = {12}, pages = {1629931}, year = {2025},
+  doi     = {10.3389/frobt.2025.1629931}}
+
+@article{xiao2022motion,
+  author  = {Xiao, Xuesu and Liu, Bo and Warnell, Garrett and Stone, Peter},
+  title   = {Motion Planning and Control for Mobile Robot Navigation Using Machine Learning: A Survey},
+  journal = {Autonomous Robots}, volume = {46}, number = {5}, pages = {569--597}, year = {2022},
+  doi     = {10.1007/s10514-022-10039-8}}
+
+@inproceedings{zain2025obstacle,
+  author    = {Zain, Lamiaa H.},
+  title     = {Real-Time Obstacle Avoidance for a Mobile Robot Using {CNN}-Based Sensor Fusion},
+  booktitle = {7th Novel Intelligent and Leading Emerging Sciences Conference (NILES)},
+  pages     = {287--291}, year = {2025}, doi = {10.1109/NILES68063.2025.11232269}}
+
+@article{lopez2024enhancing,
+  author  = {L\'{o}pez-Vel\'{a}squez, Juli\'{a}n and Acosta Amaya, Gustavo Alonso and Jim\'{e}nez Builes, Jovani Alberto},
+  title   = {Enhancing Mobile Robot Navigation: Integrating Reactive Autonomy through Deep Learning and Fuzzy Behavior},
+  journal = {Revista EIA}, volume = {21}, number = {42}, year = {2024},
+  doi     = {10.24050/reia.v21i42.1764}}
+
+@inproceedings{varghese2023multirobot,
+  author    = {Varghese, Glace T. and Reddy, Thambbireddygare G. C. and Menon, Anjana K. and Paul, Ajay and Kochuvila, Sreeja and Divya, R. Varma and others},
+  title     = {Multi-Robot System for Mapping and Localization},
+  booktitle = {8th International Conference on Robotics and Automation Engineering (ICRAE)},
+  pages     = {79--84}, year = {2023}, doi = {10.1109/ICRAE59816.2023.10458504}}
+
+% ------------------------------------------------- coordinación entre robots ---
+@inproceedings{nair2024collaborative,
+  author    = {Nair, Bharath Rajiv},
+  title     = {Collaborative Perception in Multi-Robot Systems: Case Studies in Household Cleaning and Warehouse Operations},
+  booktitle = {6th International Conference on Robotics and Computer Vision (ICRCV)},
+  pages     = {195--200}, year = {2024}, doi = {10.1109/ICRCV62709.2024.10758617}}
+
+@article{roszkowska2023multilevel,
+  author  = {Roszkowska, El\.{z}bieta and Makowski-Czerski, Piotr and Janiec, Lukasz},
+  title   = {Multi-Level Control for Multiple Mobile Robot Systems},
+  journal = {Discrete Event Dynamic Systems}, volume = {33}, pages = {425--453}, year = {2023},
+  doi     = {10.1007/s10626-023-00383-x}}
+
+@inproceedings{rudrusamy2022broadcast,
+  author    = {Rudrusamy, Bhuvendhraa and Tan, Chun Wei and Yang, Mun Ping and Ramunathan, Rohindaran and Ng, Yu Jin and Choong, Florence Chiao Mei and others},
+  title     = {Multi-Robot Systems Using Broadcast Control Framework with Visual-Based Tracking},
+  booktitle = {7th International Conference on Mechanical Engineering and Robotics Research (ICMERR)},
+  pages     = {33--39}, year = {2022}, doi = {10.1109/ICMERR56497.2022.10097802}}
+
+@article{xu2026modular,
+  author  = {Xu, Xinghui and Prieto, Samuel A. and Garc\'{i}a de Soto, Borja},
+  title   = {A Modular {ROS}--{MARL} Framework for Cooperative Multi-Robot Task Allocation in Construction Digital Environments},
+  journal = {Buildings}, volume = {16}, number = {3}, pages = {539}, year = {2026},
+  doi     = {10.3390/buildings16030539}}
+
+@article{zhang2025kubernetes,
+  author  = {Zhang, Jiaqiang and Yu, Xianjia and Westerlund, Tomi},
+  title   = {Enhancing the Resilience of {ROS}~2-Based Multi-Robot Systems with {K}ubernetes: A Case Study on {UWB}-Based Relative Positioning},
+  journal = {Sensors}, volume = {25}, number = {16}, pages = {5067}, year = {2025},
+  doi     = {10.3390/s25165067}}
+
+@misc{piguave2023multirobot,
+  author       = {Piguave Toala, Anthonny Ernesto and Ronquillo Manosalvas, Diego Sebastian},
+  title        = {Dise\~{n}o e implementaci\'{o}n de un sistema multi-robot de c\'{o}digo abierto para ambientes colaborativos en {ROS2}},
+  howpublished = {Proyecto integrador, Escuela Superior Polit\'{e}cnica del Litoral, Guayaquil, Ecuador},
+  year         = {2023}}
+
+@article{yumbla2025open,
+  author  = {Yumbla, Francisco and Fajardo-Pruna, Marcelo and Piguave, Anthonny and Ronquillo, Diego and Ortiz, Ricardo and Choi, Jongseong Brad and D\'{i}az, Gabriel and Pa\~{n}eda, Xabiel G. and Moon, Hyungpil},
+  title   = {An Open-Source Multi-Robot Framework System for Collaborative Environments Based on {ROS2}},
+  journal = {IEEE Access}, volume = {13}, pages = {16288--16302}, year = {2025},
+  doi     = {10.1109/ACCESS.2025.3530391}}
+
+@inproceedings{srivastava2026deliver,
+  author    = {Srivastava, Alkesh Kumar and Levin, Jared Michael and Derrico, Alexander and Dames, Philip},
+  title     = {{DELIVER}: A System for {LLM}-Guided Coordinated Multi-Robot Pickup and Delivery Using {V}oronoi-Based Relay Planning},
+  booktitle = {IEEE/SICE International Symposium on System Integration (SII)},
+  pages     = {1154--1160}, year = {2026}, doi = {10.1109/SII64115.2026.11404461}}
+
+@article{quinton2023market,
+  author  = {Quinton, F\'{e}lix and Grand, Christophe and Lesire, Charles},
+  title   = {Market Approaches to the Multi-Robot Task Allocation Problem: A Survey},
+  journal = {Journal of Intelligent \& Robotic Systems}, volume = {107}, number = {2}, pages = {29}, year = {2023},
+  doi     = {10.1007/s10846-022-01803-0}}
+
+% --------------------------------------------------- movilidad entre pisos ---
+@article{kim2024indoor,
+  author  = {Kim, Taejin and Kang, Gyuree and Lee, Daegyu and Shim, David Hyunchul},
+  title   = {Development of an Indoor Delivery Mobile Robot for a Multi-Floor Environment},
+  journal = {IEEE Access}, volume = {12}, pages = {45202--45215}, year = {2024},
+  doi     = {10.1109/ACCESS.2024.3381489}}
+
+@inproceedings{song2024elevator,
+  author    = {Song, Zhi and Tan, Runjia and Lou, Shanhe and Lv, Chen},
+  title     = {Robot-Elevator Interaction through {IoT} Devices for Autonomous Robot Multi-Floor Transition},
+  booktitle = {10th International Conference on Electrical Engineering, Control and Robotics (EECR)},
+  pages     = {30--34}, year = {2024}, doi = {10.1109/EECR60807.2024.10607245}}
+
+@inproceedings{luo2025elevator,
+  author    = {Luo, Shuanglong and Yu, Qian and Zhu, Chuang},
+  title     = {``Elevator or Stairs'': A Layered Reinforcement Learning Approach for Robot Multi-Floor Navigation in High-Traffic Scenarios},
+  booktitle = {International Conference on Advanced Computing and Intelligent Robotics Applications (ACIRA)},
+  pages     = {149--153}, year = {2025}, doi = {10.1109/ACIRA67680.2025.11334740}}
+
+@inproceedings{chen2025lite,
+  author    = {Chen, Junhao and Zhang, Zhen and Zhu, Chengrui and Hou, Xiaojun and Hu, Tianyang and Wu, Huifeng and others},
+  title     = {{LITE}: A Learning-Integrated Topological Explorer for Multi-Floor Indoor Environments},
+  booktitle = {IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
+  pages     = {9533--9540}, year = {2025}, doi = {10.1109/IROS60139.2025.11246317}}
+
+@article{gong2026stairway,
+  author  = {Gong, Zeying and Li, Rong and Hu, Tianshuai and Qiu, Ronghe and Kong, Lingdong and Zhang, Lingfeng and others},
+  title   = {Stairway to Success: An Online Floor-Aware Zero-Shot Object-Goal Navigation Framework via {LLM}-Driven Coarse-to-Fine Exploration},
+  journal = {IEEE Robotics and Automation Letters}, volume = {11}, number = {3}, pages = {2943--2950}, year = {2026},
+  doi     = {10.1109/LRA.2026.3655265}}
+
+% ------------------------------------------------- distribución del cómputo ---
+@article{tahir2025edge,
+  author  = {Tahir, Nazish and Parasuraman, Ramviyas Nattanmai},
+  title   = {Edge Computing and Its Application in Robotics: A Survey},
+  journal = {Journal of Sensor and Actuator Networks}, volume = {14}, number = {4}, pages = {65}, year = {2025},
+  doi     = {10.3390/jsan14040065}}
+
+@article{dordevic2023offloading,
+  author  = {{\DJ}or{\dj}evi\'{c}, Milica and Albonico, Michel and Lewis, Grace A. and Malavolta, Ivano and Lago, Patricia},
+  title   = {Computation Offloading for Ground Robotic Systems Communicating over {WiFi}: An Empirical Exploration on Performance and Energy Trade-offs},
+  journal = {Empirical Software Engineering}, volume = {28}, number = {6}, pages = {140}, year = {2023},
+  doi     = {10.1007/s10664-023-10351-6}}
+
+% ------------------------------------------------------ odometría y normativa ---
+@article{tuna2024xicp,
+  author  = {Tuna, Turcan and Nubert, Julian and Nava, Yoshua and Khattak, Shehryar and Hutter, Marco},
+  title   = {{X-ICP}: Localizability-Aware {LiDAR} Registration for Robust Localization in Extreme Environments},
+  journal = {IEEE Transactions on Robotics}, volume = {40}, pages = {452--471}, year = {2024},
+  doi     = {10.1109/TRO.2023.3335691}}
+
+@techreport{conpes4144,
+  author      = {{Departamento Nacional de Planeación}},
+  title       = {Documento {CONPES} 4144: Política Nacional de Inteligencia Artificial},
+  institution = {Consejo Nacional de Política Económica y Social},
+  address     = {Bogotá D.C., Colombia}, year = {2025}}

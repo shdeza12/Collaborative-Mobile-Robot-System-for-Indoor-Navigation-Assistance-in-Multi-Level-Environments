@@ -10,7 +10,6 @@ El documento final: contexto, marco referencial, desarrollo, resultados, conclus
 
 [Descargar el PDF :material-download:](https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/raw/main/Documentos/DocumentoFinal/main.pdf){ .md-button .md-button--primary }
 
-Hay además una [versión en revisión :material-download:](https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/raw/main/Documentos/DocumentoFinal/main_revision.pdf), del 4 de noviembre, con las referencias actualizadas y la redacción corregida. Reemplazará a la anterior cuando los autores la aprueben.
 </div>
 
 <div class="decision-tarjeta" markdown>

@@ -7,29 +7,22 @@
 
 \section{Planteamiento del problema}
 
-Orientarse en un edificio desconocido exige construir y actualizar una
-representación mental del espacio. El proceso se complica cuando el entorno tiene
-visibilidad limitada, estructuras repetidas y varios puntos de decisión.
+Orientarse en un edificio desconocido exige construir y actualizar una representación
+mental del espacio, un proceso que se complica cuando el entorno tiene visibilidad
+limitada, estructuras repetidas y varios puntos de decisión. Las edificaciones de
+varios pisos añaden una dificultad propia, debido a que el cambio de piso rompe la
+continuidad espacial y obliga a integrar información vertical en el recorrido.
 
+Aunque la robótica móvil colaborativa ha avanzado en exploración, logística y
+cobertura distribuida, la mayoría de esos desarrollos se evaluó en entornos de un solo
+piso, donde la segmentación vertical no es el problema central. Los casos de limpieza
+doméstica y de almacén que documenta \textcite{nair2024collaborative} son
+representativos de ese escenario.
 
-Las edificaciones de varios pisos añaden una dificultad propia. El cambio de
-piso rompe la continuidad espacial y obliga a integrar información vertical en
-el recorrido. Es el mismo problema que \textcite{kim2024indoor} resuelven para un
-robot, con un grafo topológico entre pisos.
-
-La robótica móvil colaborativa ha avanzado en exploración, logística y cobertura
-distribuida. La asignación de tareas entre agentes tiene una formalización
-aceptada desde el trabajo de \textcite{gerkey2004taxonomy}. Pero la mayoría de
-esos desarrollos se evaluó en entornos de un solo piso, donde la segmentación
-vertical no es el problema central. Los casos de limpieza doméstica y de almacén
-que documenta \textcite{nair2024collaborative} son representativos de ese
-escenario plano.
-
-Resolver el cambio de piso con un solo robot resulta caro. Exige mecanismos de
-locomoción capaces de subir escaleras, o intervenir el sistema de control del
-ascensor. \textcite{song2024elevator} lo hacen instalando dispositivos conectados
-en la propia cabina. Las dos opciones elevan el costo del hardware y
-obligan a modificar el edificio.
+Resolver el cambio de piso con un solo robot, por su parte, resulta costoso, ya que
+exige mecanismos de locomoción capaces de subir escaleras o intervenir el sistema de
+control del ascensor. Queda abierta, entonces, la manera de asistir a un usuario que
+cambia de piso sin encarecer la plataforma ni modificar el edificio.
 
 \section{Pregunta problema}
 

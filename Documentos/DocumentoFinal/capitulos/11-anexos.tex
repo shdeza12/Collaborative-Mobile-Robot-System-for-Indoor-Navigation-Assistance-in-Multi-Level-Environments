@@ -7,6 +7,8 @@
 %  son de otras asignaturas y no entran. La descripción de cada uno sigue la
 %  de su entregable semanal o la del sitio del proyecto.
 %  Anexo B, añadido el mismo día: el repositorio, con toda la trazabilidad.
+%  Anexo C, añadido el 5 de noviembre a pedido de los autores: el grafo real de nodos, como archivo
+%  aparte porque no se leería en una página.
 % =====================================================================
 \chapter*{Anexo A. Videos del proyecto}
 \addcontentsline{toc}{chapter}{ANEXO A. VIDEOS DEL PROYECTO}
@@ -50,5 +52,26 @@ el mismo contenido para leerlo en el navegador.
     \textbf{Recurso} & \textbf{Dirección} & \textbf{Código} \\ \midrule
     Repositorio & \url{https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments} & \raisebox{-0.85\height}{\qrcode[height=2cm]{https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments}} \\ \addlinespace
     Sitio del proyecto & \url{https://shdeza12.github.io/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/} & \raisebox{-0.85\height}{\qrcode[height=2cm]{https://shdeza12.github.io/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/}} \\ \bottomrule
+  \end{tabular}
+\end{table}
+
+\chapter*{Anexo C. Grafo de nodos del sistema}
+\addcontentsline{toc}{chapter}{ANEXO C. GRAFO DE NODOS DEL SISTEMA}
+
+Grafo de nodos y tópicos de ROS~2 obtenido con el generador de la herramienta \texttt{rqt\_graph} el 5 de noviembre de 2026, con el sistema completo en simulación en los pisos 3 y 4 del edificio Catalayud: los dos agentes, el coordinador, el grabador y el puente de la página, durante una misión con relevo pedida y confirmada desde la página, que se completó en 99,0~s. Reúne 69 nodos, así que aquí se ve solo su forma general: para leerlo hay que ampliarlo en este PDF, sin perder detalle, o abrir el archivo aparte.
+
+La captura se hizo en simulación debido a que, con los agentes físicos, el portátil solo admite cuatro procesos de ROS~2 durante una misión, y el láser y las transformadas no salen de cada agente. De ahí que no aparezcan los nodos propios de los agentes físicos, como la odometría del láser, la unidad inercial, el filtro y el puente a los servos, que sí muestra la figura~\ref{fig:nodos}.
+
+\begin{center}
+  \includegraphics[width=\textwidth]{imagenes/grafo_nodos_rqt.pdf}
+\end{center}
+
+\begin{table}[H]
+  \centering\small
+  \renewcommand{\arraystretch}{1.3}
+  \begin{tabular}{@{}p{0.2\textwidth} p{0.56\textwidth} c@{}}
+    \toprule
+    \textbf{Recurso} & \textbf{Dirección} & \textbf{Código} \\ \midrule
+    Grafo de nodos, en PDF & \url{https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/blob/main/Documentos/Evidencia/S30_grafo_rqt.pdf} & \raisebox{-0.85\height}{\qrcode[height=2cm]{https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/blob/main/Documentos/Evidencia/S30_grafo_rqt.pdf}} \\ \bottomrule
   \end{tabular}
 \end{table}

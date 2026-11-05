@@ -2,7 +2,7 @@
 
 Captura del grafo de ROS 2 con el generador de `rqt_graph`, para tener la evidencia junto al diagrama del documento, que está
 dibujado a mano con `herramientas/figura_diagramas.py`. El grafo es demasiado grande para una página del documento: en una
-página horizontal la letra quedaría en unos 2 puntos. Por eso va como archivo aparte, en el anexo C.
+página horizontal la letra quedaría en unos 2 puntos. Por eso el anexo C lo trae en una franja que se lee ampliándola en el PDF, y además como archivo aparte.
 
 Archivos: [`S30_grafo_rqt.pdf`](S30_grafo_rqt.pdf), que se puede ampliar sin perder detalle, y
 [`S30_grafo_rqt.png`](S30_grafo_rqt.png). Lista de nodos y tópicos en
@@ -44,7 +44,7 @@ necesita el sistema. Además, el láser, las transformadas y los nodos internos 
 | `waypoint_follower`, gestores de ciclo de vida y mapas de costos | No | Sí |
 | Servidor HTTP de la página | Sí | No: no es un nodo de ROS |
 
-El diagrama muestra los nodos principales, no todos. El capítulo decía «todos los nodos» y se corrigió en la versión de revisión.
+El diagrama muestra los nodos principales, no todos. El capítulo decía «todos los nodos» y se corrigió.
 
 ## Límites
 
