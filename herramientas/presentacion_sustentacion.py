@@ -405,7 +405,7 @@ def objetivos(m):
               margen=0)
 
     s = m.contenido('Alcance', (
-        'Tiempo: 30 s. El alcance del sistema: una prueba de concepto con dos agentes, uno por piso, '
+        'Tiempo: 20 s. El alcance del sistema: una prueba de concepto con dos agentes, uno por piso, '
         'que se relevan en la escalera sin que ninguno cambie de piso; una misión a la vez, en '
         'interiores y en condiciones controladas. Los agentes no accionan puertas ni ascensores y no '
         'transportan carga. La foto es de la campaña del 16 de octubre: un usuario sigue al agente '
@@ -432,7 +432,7 @@ def objetivos(m):
 def marco_referencial(m):
     m.separador(['MARCO REFERENCIAL'], 'Tiempo: 3 s.')
     s = m.contenido('Antecedentes', (
-        'Tiempo: 50 s. De los robots guía se toma la integración de '
+        'Tiempo: 40 s. De los robots guía se toma la integración de '
         'navegación e interacción; RHINO operó seis días en un museo en 1997. De la navegación en '
         'interiores, el flujo de Nav2 sobre ROS 2. De la coordinación multirrobot, la taxonomía de '
         'asignación y la planificación con relevos, donde lo que se traspasa es un paquete que puede '
@@ -465,7 +465,7 @@ def marco_referencial(m):
           'ni con la intervención del ascensor.', tam=13.5, margen=(12, 4, 12, 4))
 
     s = m.contenido('Marco teórico', (
-        'Tiempo: 50 s. En la taxonomía de Gerkey y Matarić, la asignación del sistema es ST–SR–IA: '
+        'Tiempo: 40 s. En la taxonomía de Gerkey y Matarić, la asignación del sistema es ST–SR–IA: '
         'cada agente hace un tramo a la vez, cada tramo lo hace un solo agente y la decisión se toma '
         'al llegar la solicitud. El relevo acopla las agendas de los dos agentes, que es la clase XD '
         'de Korsah et al. ROS 2 se comunica sobre DDS, un estándar de comunicación de datos en tiempo '
@@ -473,6 +473,8 @@ def marco_referencial(m):
         'caminos de Reeds-Shepp y el controlador Regulated Pure Pursuit. La localización AMCL usa la '
         'odometría del láser, que en un pasillo uniforme no registra el avance. La evaluación usa el '
         'intervalo de Wilson, la falsabilidad de cada criterio y la norma ASTM F3244-21.'))
+    # El marco legal y ambiental se resume en una linea al pie: tenia
+    # diapositiva propia y 20 s que rinden mas en el desarrollo.
     forma(s, MSO_SHAPE.ROUNDED_RECTANGLE, 131, 100, 284, 52, relleno=AZUL, radio=0.1,
           parrafos={'t': 'Fundamentos teóricos', 'alin': 'c'}, tam=24, fuente='Calibri',
           color=BLANCO)
@@ -507,42 +509,19 @@ def marco_referencial(m):
     imagen(s, REC / 'icono_hri.jpg', 612, 280, w=175)
     fuente(s, 590, 392, 220, 'Fuente: Imagen generada con IA', alin='c')
 
-    s = m.contenido('Marco legal y ambiental', (
-        'Tiempo: 20 s. El proyecto se enmarca en los CONPES 3975 y 4069, que piden a la academia '
-        'prototipos con herramientas de la Cuarta Revolución Industrial. El alcance excluye que los '
-        'agentes interactúen mecánicamente con el edificio. El impacto ambiental es mínimo: equipo '
-        'institucional que ya existía y baterías que van a los canales de residuos electrónicos.'))
-    tarjetas = [
-        (70, 'Marco legal', [
-            'CONPES 3975: Política Nacional para la Transformación Digital e Inteligencia Artificial',
-            'CONPES 4069: Política Nacional de Ciencia, Tecnología e Innovación',
-            'Los agentes no accionan puertas ni ascensores, no transportan carga y no cruzan la zona '
-            'de transición']),
-        (425, 'Marco ambiental', [
-            'Equipo institucional que ya existía: el proyecto no compró los agentes',
-            'Baterías pequeñas: una sesión de campo gasta una fracción de su carga',
-            'Las baterías de polímero de litio van a los canales de disposición de residuos '
-            'electrónicos']),
-    ]
-    for x, cab, vin in tarjetas:
-        forma(s, MSO_SHAPE.ROUNDED_RECTANGLE, x, 125, 335, 290, relleno=BLANCO, borde=AZUL,
-              radio=0.06)
-        forma(s, MSO_SHAPE.ROUNDED_RECTANGLE, x, 125, 335, 44, relleno=AZUL, radio=0.2,
-              parrafos={'t': cab, 'alin': 'c'}, tam=22, fuente='Calibri', color=BLANCO)
-        texto(s, x + 16, 185, 305, 220, [{'t': v, 'vineta': True, 'despues': 10} for v in vin],
-              tam=14)
-
 
 def desarrollo(m):
     m.separador(['DESARROLLO'], 'Tiempo: 3 s.')
     s = m.contenido('Recorrido del trabajo', (
-        'Tiempo: 45 s. El trabajo siguió las seis fases del anteproyecto entre febrero y octubre de '
+        'Tiempo: 40 s. El trabajo siguió las seis fases del anteproyecto entre febrero y octubre de '
         '2026. En abril se pasó del DonkeyCar al modelo del AWS DeepRacer, migrado a ROS 2 Humble. '
         'Entre agosto y septiembre se integró todo en simulación, con los pisos 2 y 3 del edificio '
         'Gregorio, y la campaña de treinta misiones corrió el 4 y el 5 de septiembre. Con los agentes '
         'físicos, en los pasillos uniformes de Gregorio la odometría no registraba el avance, el mapa '
         'salía de un mundo simulado mal medido y el tránsito de personas dificultaba las pruebas. El 2 de octubre se pasó a los pisos 3 y 4 del '
-        'edificio Catalayud, y la campaña física corrió el 16 de octubre.'))
+        'edificio Catalayud, y la campaña física corrió el 16 de octubre. Esta línea de tiempo es el '
+        'mapa; las diapositivas que siguen entran en cada pieza: primero las decisiones de tecnología, '
+        'después la arquitectura, la plataforma, la red, la interfaz y cómo se midió todo.'))
     periodos = [
         ('Feb.–mar.', 'Planteamiento y requisitos', 'Anteproyecto y sustentación; requisitos '
          'funcionales y restricciones'),
@@ -575,6 +554,34 @@ def desarrollo(m):
     for ruta, x, pie in fotos:
         bx, by, bw, bh = imagen(s, ruta, x, 318, w=160, h=112)
         fuente(s, x, by + bh + 3, 160, pie, alin='c')
+
+    s = m.contenido('Por qué estas tecnologías', (
+        'Tiempo: 50 s. Cada pieza de la base se eligió descartando alternativas, y conviene decir '
+        'frente a qué. ROS 2 frente a ROS 1, que está sin soporte desde 2025 y depende de un nodo '
+        'maestro central, un punto único de fallo en un sistema cuyo propósito es repartir una '
+        'tarea; y frente a escribir la comunicación a medida, que obligaría a resolver de nuevo el '
+        'descubrimiento y la serialización. Nav2 frente a una navegación propia, porque permite '
+        'sustituir cada capa por separado: de sus tres capas hubo que cambiar dos para la '
+        'cinemática del vehículo. AMCL frente a un filtro de Kalman, que al suponer una '
+        'distribución unimodal no puede representar la duda entre dos tramos de pasillo parecidos. '
+        'Y una red propia frente a la de la universidad, que aísla a sus clientes entre sí: los '
+        'agentes no podrían verse.'))
+    cabeceras = ['Se eligió', 'Frente a', 'Por qué']
+    filas = [
+        ['ROS 2', 'ROS 1; comunicación a medida',
+         'Sin nodo maestro central; trae el ecosistema de navegación'],
+        ['Nav2', 'Navegación propia',
+         'Se sustituye capa por capa: hubo que cambiar dos de sus tres'],
+        ['AMCL', 'Filtro de Kalman; SLAM',
+         'Mantiene varias hipótesis entre pasillos parecidos; el mapa ya se conoce'],
+        ['Red propia de 5 GHz', 'Red de la universidad; red móvil',
+         'La de la universidad aísla a sus clientes: los agentes no se verían'],
+    ]
+    tabla(s, 62, 108, [128, 196, 404], [cabeceras] + filas, alto=46, tam=12.5, altos={0: 26})
+    texto(s, 62, 368, 728, 70,
+          'En los cuatro casos la alternativa no se descartó por costo sino porque impedía algo que '
+          'el sistema necesita. El caso más claro es el de la red: con los clientes aislados entre '
+          'sí, el relevo no puede existir.', tam=13, color=GRIS)
 
     s = m.contenido('Arquitectura funcional', (
         'Tiempo: 55 s. Un coordinador central en el portátil decide y manda; dos agentes, uno por '
@@ -730,13 +737,14 @@ def desarrollo(m):
     texto(s, x3 + w3 + 18, 112, 850 - (x3 + w3 + 18), 240,
           [{'t': v, 'vineta': True, 'despues': 9} for v in vin], tam=13)
 
-    s = m.contenido('Protocolo experimental', (
-        'Tiempo: 45 s. El protocolo se escribió antes de instrumentar el sistema, para que ni el '
-        'instrumento ni los recorridos se eligieran después de ver los resultados. Cada métrica tiene '
-        'un evento de inicio y uno de fin que registra una máquina. El éxito se mide contra la '
-        'odometría del agente y no contra el resultado de Nav2, que en una prueba dio éxito con el '
-        'agente a 0,296 m de la meta. Las misiones se sortearon con una semilla fija, y una corrida '
-        'fallida cuenta como fallo salvo causas de una lista cerrada.'))
+    s = m.contenido('Las cuatro métricas', (
+        'Tiempo: 40 s. Las cuatro métricas no se eligieron al final: son las que fijó el objetivo '
+        'específico cuatro en el anteproyecto, antes de construir nada. Y cada una está definida por '
+        'un evento de inicio y uno de fin que registra una máquina, no una persona con cronómetro. '
+        'Esa definición operativa es lo que permite que otro grupo repita la medida y obtenga lo '
+        'mismo. Donde hubo que decidir fue en los bordes: el primer movimiento del agente, por '
+        'ejemplo, se define como tres muestras de odometría a 0,02 metros por segundo o más, porque '
+        'un umbral más bajo cuenta el ruido del sensor como movimiento.'))
     filas = [
         ['Métrica', 'Inicio', 'Fin'],
         ['Tiempo de respuesta', 'El coordinador acepta la solicitud', 'Primer movimiento del agente '
@@ -747,14 +755,29 @@ def desarrollo(m):
         ['Continuidad entre niveles', 'El primer agente alcanza su punto de transferencia',
          'Primer movimiento del segundo agente'],
     ]
-    tabla(s, 66, 108, [160, 255, 300], filas, alto=38, tam=12, altos={0: 24, 3: 28})
+    tabla(s, 66, 112, [160, 255, 300], filas, alto=38, tam=12, altos={0: 24, 3: 28})
+    texto(s, 66, 318, 728, 90,
+          'Las cuatro vienen del objetivo específico 4, fijadas en el anteproyecto antes de '
+          'instrumentar. Cada una se define por eventos que registra una máquina, de modo que la '
+          'medida es repetible: otro grupo con el mismo protocolo obtiene lo mismo.', tam=13,
+          color=GRIS)
+
+    s = m.contenido('El criterio y las campañas', (
+        'Tiempo: 40 s. Una misión es exitosa si la pose final queda dentro de la tolerancia y la '
+        'misión se completa sin pasar por fallida. La llegada se mide contra la odometría del agente '
+        'y no contra el resultado de Nav2, que en una prueba dio éxito con el agente a 0,296 metros '
+        'de la meta. Las misiones se sortearon con semilla fija antes de correr, para que los '
+        'recorridos no se eligieran después de ver los resultados. Y un criterio que no puede fallar '
+        'no aporta evidencia: uno de los nuestros no podía dar resultado negativo, se detectó, y la '
+        'continuidad pasó a declararse como invariante del diseño. La tasa de éxito se reporta con '
+        'el intervalo de Wilson, más fiable que la aproximación normal cuando la muestra es pequeña '
+        'o la proporción se acerca a uno, que son los dos casos de este trabajo.'))
     cajas = [
-        (66, 'Criterio de éxito', ['Pose final a 0,25 m o menos del destino en simulación, y a '
-                                   '0,5 m o menos con los agentes físicos',
+        (66, 'Criterio de éxito', ['Pose final a 0,25 m o menos en simulación, y a 0,5 m o menos '
+                                   'con los agentes físicos',
                                    'Medida con la odometría del agente, nunca con el resultado de '
                                    'Nav2',
-                                   'Etapa completada sin pasar por fallida y, entre pisos, con '
-                                   'relevo']),
+                                   'Completada sin pasar por fallida y, entre pisos, con relevo']),
         (420, 'Diseño de las campañas', ['Simulación: 30 misiones sorteadas, 15 en un piso y 15 '
                                          'entre pisos',
                                          'Agentes físicos: 10 misiones sorteadas entre los pisos 3 '
@@ -763,14 +786,26 @@ def desarrollo(m):
                                          'el 20 %, la campaña no vale']),
     ]
     for x, cab, vin in cajas:
-        forma(s, MSO_SHAPE.ROUNDED_RECTANGLE, x, 300, 340, 150, relleno=BLANCO, borde=AZUL_CLARO,
+        forma(s, MSO_SHAPE.ROUNDED_RECTANGLE, x, 110, 340, 150, relleno=BLANCO, borde=AZUL_CLARO,
               radio=0.08, parrafos=[{'t': cab, 'negrita': True, 'tam': 14, 'color': AZUL_TITULO,
                                      'despues': 4}] +
               [{'t': v, 'vineta': True, 'despues': 3} for v in vin], tam=12, anclaje='t',
               margen=(10, 7, 8, 4))
-    texto(s, 66, 460, 640, 40, 'Instrumentación: grabación de ROS de cada misión, registro validado '
-          'contra un esquema y un analizador que calcula las métricas con sus intervalos', tam=12,
-          color=GRIS)
+    forma(s, MSO_SHAPE.ROUNDED_RECTANGLE, 66, 278, 694, 86, relleno=BLANCO, borde=NARANJA_BORDE,
+          radio=0.07, parrafos=[
+              {'t': 'Un criterio que no puede fallar no aporta evidencia', 'negrita': True,
+               'tam': 14, 'color': NARANJA_BORDE, 'despues': 4},
+              {'t': 'Uno de los criterios no podía dar resultado negativo: los dos puntos del '
+                    'código capaces de producir un incumplimiento ocurrían fuera de la ventana en '
+                    'que se evaluaba. Se detectó, y la continuidad pasó a declararse como '
+                    'invariante del diseño, no como resultado experimental.'}],
+          tam=12.5, anclaje='t', margen=(10, 8, 8, 5))
+    texto(s, 66, 378, 694, 70,
+          'La tasa de éxito se reporta con el intervalo de Wilson, no con la aproximación normal: '
+          'es más fiable cuando la muestra es pequeña o la proporción se acerca a 0 o a 1, que son '
+          'los dos casos de este trabajo. Instrumentación: grabación de ROS de cada misión, '
+          'registro validado contra un esquema y un analizador que calcula las métricas con sus '
+          'intervalos.', tam=12.5, color=GRIS)
 
 
 def grafico_odometria(s, x, y, w, h):
@@ -1078,7 +1113,7 @@ def conclusiones(m):
 def trabajos_futuros(m):
     m.separador(['TRABAJOS FUTUROS'], 'Tiempo: 3 s.')
     s = m.contenido('Trabajos futuros', (
-        'Tiempo: 35 s. Una navegación más precisa, con tracción lenta y una medida del avance que no '
+        'Tiempo: 30 s. Una navegación más precisa, con tracción lenta y una medida del avance que no '
         'dependa del pasillo. Más capacidad de cómputo, con una Raspberry Pi 4 o 5. Evasión de '
         'obstáculos en movimiento, para operar en horario de clases. Más agentes por piso y misiones '
         'simultáneas, donde el método de asignación empieza a decidir. Un controlador predictivo como '
@@ -1209,7 +1244,8 @@ def main():
     resultados(m)
     conclusiones(m)
     trabajos_futuros(m)
-    referencias(m)
+    # referencias(m)  -> las referencias pasan a los anexos: 361 palabras
+    #                    proyectadas 5 s no las lee nadie, y el PDF las conserva.
     anexos(m)
     cierre(m)
     for s in m.prs.slides:  # el número de página, encima de todo, como en la plantilla
