@@ -434,6 +434,8 @@ Fuente: Entregable S29; `Evidencia/S29_video_pagina_cancelacion.md`; `Evidencia/
   como archivo aparte, en el anexo C del documento en revisión, y el diagrama sigue en el capítulo como vista de los nodos principales.
 - 5 de noviembre: la revisión pasó a ser el único documento (`main.tex`), para que lo lea el director, con el grafo dentro del
   anexo C, además del archivo aparte. La versión anterior queda en la etiqueta de git `documento-antes-revision-2026-11-04`. Son
-  63 páginas numeradas y 82 hojas.
+  63 páginas numeradas y 81 hojas.
+- 5 de noviembre: todas las figuras y tablas quedaron fijas entre párrafos, y no parten ninguno; las tablas, centradas, y los pies de
+  figura, con la descripción de lo que muestran. Lo que explicaban pasó al texto.
 
 Fuente: `Evidencia/S30_grafo_rqt.md`; `Evidencia/S30_simulacion_catalayud.md`; `Evidencia/S30_segunda_mision_y_cancelacion.md`; `Evidencia/S26_red_campo_topologia_final.md`; `Evidencia/S30_grabacion_en_rviz.md`; `TERMINOS.md`; `GUION_SESION_JURADOS.md`.
