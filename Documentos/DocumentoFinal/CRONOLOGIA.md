@@ -444,5 +444,9 @@ Fuente: Entregable S29; `Evidencia/S29_video_pagina_cancelacion.md`; `Evidencia/
 - 5 de noviembre: la prueba de navegación del 30 de septiembre en Gregorio ya no se atribuye solo a la odometría. El agente no tenía
   la unidad inercial, la navegación no estaba ajustada y el mapa cargado no correspondía al edificio, porque el mundo simulado estaba
   mal medido. El error de lado pasó de 1,17 a 0,15 m al corregir el mapa, y el de avance, de 2,62 m, siguió.
+- 5 de noviembre: documento compacto. Se quitó el premio de LaTeX a cortar la página antes de un título o de una lista, que dejaba
+  huecos de 3 a 5 cm; trabajos futuros y referencias siguen en la misma hoja, y el índice va con interlineado menor. La red pasa a
+  sección propia y la tabla de componentes del agente pasa a ser la lista de componentes del sistema, con el enrutador, los puntos de
+  acceso y los cables. Quedan 61 páginas numeradas y 78 hojas.
 
 Fuente: `Evidencia/S30_grafo_rqt.md`; `Evidencia/S30_simulacion_catalayud.md`; `Evidencia/S30_segunda_mision_y_cancelacion.md`; `Evidencia/S26_red_campo_topologia_final.md`; `Evidencia/S30_grabacion_en_rviz.md`; `TERMINOS.md`; `GUION_SESION_JURADOS.md`.

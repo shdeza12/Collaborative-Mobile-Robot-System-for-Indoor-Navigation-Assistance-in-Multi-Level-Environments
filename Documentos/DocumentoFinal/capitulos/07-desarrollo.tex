@@ -328,6 +328,7 @@ código. El del coordinador, el del planificador, el de los mensajes y el de la 
 ROS~2 y completó una misión en cada uno. Lo que cambió fue la implementación de los bloques. La tabla~\ref{tab:sim-vehiculos} reúne cada cambio con su causa, y la
 figura~\ref{fig:arquitectura-vehiculos} muestra el sistema como funcionó en la campaña con los agentes físicos.
 
+
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.86\textwidth]{imagenes/arquitectura_vehiculos.png}
@@ -339,7 +340,7 @@ figura~\ref{fig:arquitectura-vehiculos} muestra el sistema como funcionó en la 
   \centering\footnotesize
   \caption{Cambios en la implementación al pasar de la simulación a los agentes físicos.}
   \label{tab:sim-vehiculos}
-  \begin{tabular}{@{}p{0.13\textwidth}p{0.21\textwidth}p{0.27\textwidth}p{0.31\textwidth}@{}}
+  \begin{tabular}{@{}p{0.13\textwidth}p{0.22\textwidth}p{0.29\textwidth}p{0.30\textwidth}@{}}
     \toprule
     \textbf{Parte} & \textbf{En simulación} & \textbf{En los agentes físicos} & \textbf{Causa} \\ \midrule
     Distribución de ROS~2 & Humble en todos los componentes & Jazzy en los agentes y en el coordinador, que se ejecuta en un contenedor del portátil; Humble en la página y en rosbridge & El software de la tarjeta original solo existe para Ubuntu 24.04 con Jazzy, la simulación no existe en Jazzy, y la acción de navegación de Jazzy no es compatible con la de Humble \\ \addlinespace
@@ -359,32 +360,12 @@ figura~\ref{fig:arquitectura-vehiculos} muestra el sistema como funcionó en la 
 \section{Plataforma robótica}
 \label{sec:plataforma}
 
-\subsection{Componentes del agente}
+\subsection{Componentes del sistema}
 \label{sec:componentes}
 
 Los dos agentes operan con su tarjeta original, para la que el software de la comunidad solo se publica sobre Ubuntu 24.04 con ROS~2 Jazzy, y cada uno atiende un piso
-del edificio Catalayud, uno el 3 y otro el 4 (tabla~\ref{tab:vehiculo} y figura~\ref{fig:agentes-fisicos}). El láser que traía el kit no era el que describía el primer informe de hardware, y se identificó
+del edificio Catalayud, uno el 3 y otro el 4 (figura~\ref{fig:agentes-fisicos}). La tabla~\ref{tab:vehiculo} reúne los componentes del sistema, incluidos los de la red. El láser que traía el kit no era el que describía el primer informe de hardware, y se identificó
 leyendo el modelo que informa el propio sensor.
-
-La autonomía de las baterías limitó la duración de las sesiones de campo. El 29 de septiembre, la batería de tracción de un agente estaba descargada y la de cómputo del
-otro se agotó durante la sesión, y esta última volvió a agotarse el 2 de octubre. El 16 de octubre, el portátil se apagó dos veces por falta de batería.
-
-\begin{table}[H]
-  \centering\footnotesize
-  \caption{Componentes de cada agente y del portátil.}
-  \label{tab:vehiculo}
-  \begin{tabular}{@{}p{0.25\textwidth}p{0.68\textwidth}@{}}
-    \toprule
-    \textbf{Componente} & \textbf{Descripción} \\ \midrule
-    Chasis & AWS DeepRacer, escala 1:18, dirección Ackermann, motor de tracción con variador y servomotor de dirección \\ \addlinespace
-    Cómputo & Tarjeta original, procesador Intel Atom E3930 de dos núcleos, 4~GB de memoria; Ubuntu 24.04 y ROS~2 Jazzy \\ \addlinespace
-    Láser & RPLIDAR A1M8-R5: 360$^\circ$, 360 muestras por barrido, alcance de 0,15 a 12~m, entre 6,8 y 7~Hz \\ \addlinespace
-    Unidad inercial & Bosch BMI160 integrada en la tarjeta, por I2C: giroscopio y acelerómetro \\ \addlinespace
-    Cámaras & Estéreo; desactivadas por software, porque el sistema no las usa y cargaban la tarjeta \\ \addlinespace
-    Alimentación & Una batería para el cómputo y otra de polímero de litio para la tracción \\ \addlinespace
-    Portátil & Ubuntu 22.04 y ROS~2 Humble (AMD Ryzen 5 PRO 5650U, 16~GB); el coordinador se ejecuta en un contenedor con Jazzy \\ \bottomrule
-  \end{tabular}
-\end{table}
 
 \begin{figure}[H]
   \centering
@@ -392,6 +373,36 @@ otro se agotó durante la sesión, y esta última volvió a agotarse el 2 de oct
   \caption{Los dos agentes físicos, construidos sobre la plataforma AWS DeepRacer.}
   \label{fig:agentes-fisicos}
 \end{figure}
+
+La autonomía de las baterías limitó la duración de las sesiones de campo. El 29 de septiembre, la batería de tracción de un agente estaba descargada y la de cómputo del
+otro se agotó durante la sesión, y esta última volvió a agotarse el 2 de octubre. El 16 de octubre, el portátil se apagó dos veces por falta de batería.
+
+\begin{table}[H]
+  \centering\footnotesize
+  \caption{Lista de componentes del sistema.}
+  \label{tab:vehiculo}
+  \begin{tabular}{@{}p{0.23\textwidth}cp{0.62\textwidth}@{}}
+    \toprule
+    \textbf{Componente} & \textbf{Cant.} & \textbf{Descripción} \\ \midrule
+    \multicolumn{3}{@{}l}{\textit{Agentes}} \\
+    Chasis & 2 & AWS DeepRacer, escala 1:18, dirección Ackermann, motor de tracción con variador y servomotor de dirección \\
+    Tarjeta de cómputo & 2 & Tarjeta original, procesador Intel Atom E3930 de dos núcleos, 4~GB de memoria; Ubuntu 24.04 y ROS~2 Jazzy \\
+    Láser & 2 & RPLIDAR A1M8-R5, por USB: 360$^\circ$, 360 muestras por barrido, alcance de 0,15 a 12~m, entre 6,8 y 7~Hz \\
+    Unidad inercial & 2 & Bosch BMI160 integrada en la tarjeta, por I2C: giroscopio y acelerómetro \\
+    Cámaras & 2 pares & Estéreo; desactivadas por software, porque el sistema no las usa y cargaban la tarjeta \\
+    Batería de cómputo & 2 & Alimenta la tarjeta \\
+    Batería de tracción & 2 & Polímero de litio \\ \addlinespace
+    \multicolumn{3}{@{}l}{\textit{Coordinación e interacción}} \\
+    Portátil & 1 & Ubuntu 22.04 y ROS~2 Humble (AMD Ryzen 5 PRO 5650U, 16~GB); el coordinador se ejecuta en un contenedor con Jazzy \\
+    Teléfono & 1 & Abre la interfaz web, conectado a la red de los agentes \\ \addlinespace
+    \multicolumn{3}{@{}l}{\textit{Red}} \\
+    Enrutador & 1 & TP-Link TL-WR940N: reparte las direcciones de la red y da un enlace de respaldo a 2,4~GHz \\
+    Puntos de acceso & 2 & FiberHome, uno por piso, en modo puente: 5~GHz, canal 44 en el piso 3 y canal 36 en el piso 4 \\
+    Cables de red & 2 & Del enrutador a cada punto de acceso, entre puertos LAN: uno en el mismo piso y otro entre pisos \\ \addlinespace
+    \multicolumn{3}{@{}l}{\textit{Medición}} \\
+    Flexómetro & 1 & Levantamiento de las plantas y medida del avance y de la llegada en las pruebas de odometría y de navegación \\ \bottomrule
+  \end{tabular}
+\end{table}
 
 \subsection{Nav2 sobre un agente que no gira sobre su eje}
 \label{sec:nav2-ackermann}
@@ -413,9 +424,7 @@ activos. En el laboratorio, la cadena quedó lista en 4~min 4~s en un agente y e
 
 Como el agente no tiene codificadores en las ruedas, su única odometría sale de comparar barridos sucesivos del láser. Desde que se midió por primera vez, el 26 de agosto en
 simulación, hasta el cambio de edificio, el 2 de octubre, no dio una medida utilizable por falta de información en la señal. En los pasillos del edificio Gregorio registró desde el
-1,3~\% del avance real, en simulación, hasta el 73~\%, con un agente físico en el hall del piso 3.
-
-La odometría no fue la única causa de que la navegación fallara en ese hall el 30 de septiembre. El agente aún no tenía la unidad inercial, la navegación no estaba ajustada para el agente físico, pues en esa misma sesión hubo que corregir una odometría invertida y subir el margen de llegada de Nav2 de 0,25 a 1,0~m, y el mapa cargado no correspondía al entorno real, porque el mundo simulado del que salía estaba mal medido. Las dos llegadas medidas quedaron a 1,43 y 1,26~m del destino. Con el mapa sin corregir, la localización terminó a 1,17~m de lado de la posición medida con flexómetro, con una incertidumbre de hasta 3,44~m. Al corregir el mapa en la misma sesión, el error de lado bajó a 0,15~m y la incertidumbre a 0,66~m, pero a lo largo del hall la separación llegó a 2,62~m (figura~\ref{fig:hall}), con la odometría registrando todavía el 73~\% del avance.
+1,3~\% del avance real, en simulación, hasta el 73~\%, con un agente físico en el hall del piso 3 (figura~\ref{fig:hall}).
 
 \begin{figure}[H]
   \centering
@@ -423,6 +432,8 @@ La odometría no fue la única causa de que la navegación fallara en ese hall e
   \caption{Tres recorridos de un agente en el hall del piso 3 del edificio Gregorio, sobre el mapa corregido: pose de la localización (círculo) y posición medida con flexómetro (cuadrado).}
   \label{fig:hall}
 \end{figure}
+
+La odometría no fue la única causa de que la navegación fallara en ese hall el 30 de septiembre. El agente aún no tenía la unidad inercial, la navegación no estaba ajustada para el agente físico, pues en esa misma sesión hubo que corregir una odometría invertida y subir el margen de llegada de Nav2 de 0,25 a 1,0~m, y el mapa cargado no correspondía al entorno real, porque el mundo simulado del que salía estaba mal medido. Las dos llegadas medidas quedaron a 1,43 y 1,26~m del destino. Con el mapa sin corregir, la localización terminó a 1,17~m de lado de la posición medida con flexómetro, con una incertidumbre de hasta 3,44~m. Al corregir el mapa en la misma sesión, el error de lado bajó a 0,15~m y la incertidumbre a 0,66~m, pero a lo largo del hall la separación llegó a 2,62~m (figura~\ref{fig:hall}), con la odometría registrando todavía el 73~\% del avance.
 
 La solución fue cambiar de entorno, con un criterio que salió de la misma medida: hace falta estructura no uniforme dentro del alcance del sensor durante todo el recorrido. Los pisos 3
 y 4 del edificio Catalayud la tienen: entre las hornacinas de los salones, los casilleros, la papelera, el ascensor y la escalera suman ocho cambios de perfil en 25~m, uno cada
@@ -472,7 +483,22 @@ publica a 25~Hz y el filtro se ejecuta a 15~Hz, para no cargar la tarjeta. En un
 con el agente quieto su rumbo se movió 0,3$^\circ$ o menos por minuto. La posición, en cambio, no mejora, ya que sigue saliendo del láser. Con el rumbo estable se redujo de 1,0 a 0,5~m el margen en
 el que Nav2 da la meta por alcanzada, y con ese margen se superó la prueba de navegación de un agente.
 
-\subsection{La red que comunica a los agentes}
+\subsection{La media vuelta en varios tiempos}
+\label{sec:media-vuelta}
+
+Como en la operación real, cada misión empieza donde terminó la anterior, y el siguiente usuario queda a menudo detrás del agente, que en pasillos de 2,5 a 3,2~m de ancho tiene que dar la vuelta en varios
+tiempos. En el piso 4, a la salida del pasillo de 2,5~m, la media vuelta de Nav2 abortó dos veces contra la pared, debido a que el planificador proponía cada segundo una maniobra distinta. Además, con la misma
+orden, el motor retrocedía a 1,7 veces la velocidad de avance, por lo que se añadió al puente una escala de 0,75 para la marcha atrás.
+
+La media vuelta se escribió como una maniobra propia del agente, en lugar de seguir ajustando Nav2, que en ese caso trabajaba en el límite de lo que su controlador resuelve. La maniobra alterna marcha atrás y
+avance con la dirección a tope y empieza hacia el costado con más espacio. Cada tiempo se corta cuando la huella prevista del agente queda a menos de 0,10~m de un obstáculo, visto por el láser o marcado en el
+mapa, donde la escalera está cerrada porque el láser no ve su borde.
+
+El coordinador la pide antes de una meta que queda a más de 110$^\circ$ del rumbo del agente y a más de 1,5~m, y si no se completa en 120~s, sigue Nav2. En sus primeras pruebas giró 160$^\circ$ y 167$^\circ$,
+en un solo tiempo cada vez, y en la campaña con los agentes físicos se ejecutó 24 veces.
+
+% =====================================================================
+\section{La red que comunica a los agentes}
 \label{sec:dos-vehiculos}
 \label{sec:red}
 
@@ -484,23 +510,23 @@ propia sobre Wi-Fi reúne lo que el sistema necesita: control completo, direccio
 tiempos de entrega, por lo que el requisito de red fija cotas numéricas y se verifica midiendo.
 
 
-Un enrutador reparte las direcciones de toda la red, y de él cuelgan por cable dos puntos de acceso, uno por piso (figura~\ref{fig:red-topologia}). Los dos trabajan en modo puente, de manera que toda la instalación forma una sola subred, condición para que cada agente y el portátil se descubran. El enrutador une redes, reparte direcciones y encamina entre ellas, mientras que un
+Un enrutador reparte las direcciones de toda la red, y de él cuelgan por cable dos puntos de acceso, uno por piso (tabla~\ref{tab:vehiculo} y figura~\ref{fig:red-topologia}). Los dos trabajan en modo puente, de manera que toda la instalación forma una sola subred, condición para que cada agente y el portátil se descubran. El enrutador une redes, reparte direcciones y encamina entre ellas, mientras que un
 punto de acceso solo da acceso inalámbrico a una red que ya existe. Tampoco son repetidores, que enlazan por radio con el resto de la red y usan la misma antena para eso y para sus clientes, con lo que
 pierden la mitad del caudal y añaden un salto a cada mensaje; por esa razón, el enlace entre pisos va por cable. Se trabaja en la banda de 5~GHz porque un barrido del sitio encontró 33 redes ajenas en
 la de 2,4~GHz y la parte baja de la de 5~GHz prácticamente vacía, y el cambio de banda redujo el percentil 95 del tiempo de ida y vuelta de 20,76 a 11,12~ms. Hay un punto de acceso por piso, en canales
 que no se solapan, debido a que la losa atenúa la señal.
 
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.86\textwidth]{imagenes/red_topologia.png}
-  \caption{Montaje físico de la red.}
-  \label{fig:red-topologia}
-\end{figure}
-
 Durante la construcción aparecieron defectos que no producían ningún mensaje de error y que solo se encontraron al medir. A las dos tarjetas les faltaba el fichero con las reglas de uso del espectro, por lo
 cual veían las redes de 5~GHz pero no podían transmitir en ellas. Un punto de acceso conectado a la vez por cable y por radio ofrecía dos caminos a los mismos mensajes: de 100 peticiones enviadas, un
 agente recibía 147, mientras la herramienta de diagnóstico informaba cero por ciento de pérdida. Además, durante una sesión hubo dos servidores de direcciones repartiendo subredes distintas, con lo que
 los agentes dejaron de verse al azar.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.78\textwidth]{imagenes/red_topologia.png}
+  \caption{Montaje físico de la red.}
+  \label{fig:red-topologia}
+\end{figure}
 
 El problema de mayor efecto estuvo en cuántos procesos se anunciaban por el enlace. En ROS~2 cada proceso se anuncia periódicamente a todos los demás y mantiene el estado de cada uno, con lo que ese
 trabajo crece aproximadamente con el cuadrado del número de participantes. Con un agente había del orden de veinte y su tarjeta trabajaba entre el 52 y el 63~\% de capacidad, mientras que al encender el
@@ -516,20 +542,6 @@ Las cotas del requisito, una mediana de 100~ms y un percentil 95 de 250~ms sin p
 misma sala y sobre 600 mensajes, la mediana fue de 5,99~ms y el percentil 95 de 11,12~ms, sin pérdidas, más de un orden de magnitud por debajo de las cotas. Con paquetes de red, entre los dos agentes en el
 mismo piso y con dos puntos de acceso, la ida y vuelta fue de 3,75~ms en promedio. En el montaje definitivo, con cada agente en el punto de acceso de su piso, fue de 2,13 y 1,99~ms contra el enrutador, sin
 pérdidas ni duplicados. Por lo tanto, la red no limita el desempeño del sistema, cuyos límites están en la plataforma.
-
-\subsection{La media vuelta en varios tiempos}
-\label{sec:media-vuelta}
-
-Como en la operación real, cada misión empieza donde terminó la anterior, y el siguiente usuario queda a menudo detrás del agente, que en pasillos de 2,5 a 3,2~m de ancho tiene que dar la vuelta en varios
-tiempos. En el piso 4, a la salida del pasillo de 2,5~m, la media vuelta de Nav2 abortó dos veces contra la pared, debido a que el planificador proponía cada segundo una maniobra distinta. Además, con la misma
-orden, el motor retrocedía a 1,7 veces la velocidad de avance, por lo que se añadió al puente una escala de 0,75 para la marcha atrás.
-
-La media vuelta se escribió como una maniobra propia del agente, en lugar de seguir ajustando Nav2, que en ese caso trabajaba en el límite de lo que su controlador resuelve. La maniobra alterna marcha atrás y
-avance con la dirección a tope y empieza hacia el costado con más espacio. Cada tiempo se corta cuando la huella prevista del agente queda a menos de 0,10~m de un obstáculo, visto por el láser o marcado en el
-mapa, donde la escalera está cerrada porque el láser no ve su borde.
-
-El coordinador la pide antes de una meta que queda a más de 110$^\circ$ del rumbo del agente y a más de 1,5~m, y si no se completa en 120~s, sigue Nav2. En sus primeras pruebas giró 160$^\circ$ y 167$^\circ$,
-en un solo tiempo cada vez, y en la campaña con los agentes físicos se ejecutó 24 veces.
 
 % =====================================================================
 \section{Interfaz de interacción con el usuario}

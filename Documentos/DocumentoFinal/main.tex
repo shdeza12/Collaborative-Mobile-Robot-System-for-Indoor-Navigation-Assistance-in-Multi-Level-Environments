@@ -24,6 +24,12 @@
 % =====================================================================
 \documentclass[12pt,letterpaper,oneside]{report}
 \usepackage{usta-proyecto-grado}
+% Páginas compactas (5 de noviembre): LaTeX premia cortar la página antes de un título o de una lista, y
+% como el pie de página no se estira, dejaba huecos de 3 a 5 cm. Sin ese premio la página se llena.
+\makeatletter
+\@secpenalty=0 \@beginparpenalty=0 \@endparpenalty=0 \@itempenalty=0
+\makeatother
+
 % Colocación de figuras y tablas (5 de noviembre): van con [H], fijas entre párrafos y después del
 % que las cita, porque con [htbp] saltaban a la página siguiente y partían el párrafo.
 \renewcommand{\topfraction}{0.85}
@@ -64,6 +70,9 @@
 % en PENDIENTES.md, que es donde se les hace seguimiento.
 % Para volver a verlos en el PDF: borrar la línea de abajo.
 \ustanotasrevisorfalse
+
+% Referencias: menos separación entre entradas, para que la lista no deje una hoja casi vacía.
+\setlength{\bibitemsep}{0pt}
 
 \begin{document}
 
@@ -123,7 +132,7 @@
 % =====================================================================
 %  REFERENCIAS
 % =====================================================================
-\ustaseccion{Referencias bibliográficas}
+\ustaseccioncontinua{Referencias bibliográficas}
 \printbibliography[heading=none]
 
 % =====================================================================

@@ -297,8 +297,15 @@
 % índice, y deja un CONTENIDO con las líneas a media página de distancia. Se
 % anula dentro de las listas, que llevan su propio espaciado.
 \makeatletter
+% Referencias en la misma hoja en que termina el capítulo anterior.
+\newcommand{\ustaseccioncontinua}[1]{\par\addvspace{2.2em}%
+  \let\usta@cp\clearpage\let\clearpage\relax\ustaseccion{#1}\let\clearpage\usta@cp}
+% Capítulos sin número que siguen en la misma hoja: trabajos futuros y anexos cortos
+% no dejan una hoja casi vacía.
+\newcommand{\ustacapitulocontinuo}[1]{\par\addvspace{2.2em}%
+  \let\usta@cp\clearpage\let\clearpage\relax\chapter*{#1}\let\clearpage\usta@cp}
 \newcommand{\usta@lista}[1]{\begingroup
-  \setlength{\parskip}{0pt}\@starttoc{#1}\endgroup}
+  \setlength{\parskip}{0pt}\setstretch{1.1}\@starttoc{#1}\endgroup}
 \renewcommand{\tableofcontents}{\usta@lista{toc}}
 \renewcommand{\listoffigures}{\usta@lista{lof}}
 \renewcommand{\listoftables}{\usta@lista{lot}}

@@ -69,6 +69,28 @@ Lo que más pesó en las tarjetas fue cuántos procesos se anunciaban por la red
 
 El requisito de latencia se midió con los dos agentes en la misma sala, con una mediana de 5,99 ms. Con paquetes de red, entre los dos agentes en el mismo piso, la ida y vuelta fue de 3,75 ms. Con uno en cada piso, contra el enrutador, fue de 2,13 y 1,99 ms, sin pérdidas ni duplicados. [Ver la evidencia](https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/blob/main/Documentos/Evidencia/S26_red_campo_topologia_final.md).
 
+## Lista de componentes
+
+| Componente | Cant. | Descripción |
+|---|---|---|
+| **Agentes** | | |
+| Chasis | 2 | AWS DeepRacer, escala 1:18, dirección Ackermann, motor de tracción con variador y servomotor de dirección |
+| Tarjeta de cómputo | 2 | Tarjeta original, Intel Atom E3930 de dos núcleos, 4 GB de memoria; Ubuntu 24.04 y ROS 2 Jazzy |
+| Láser | 2 | RPLIDAR A1M8-R5, por USB: 360°, 360 muestras por barrido, alcance de 0,15 a 12 m |
+| Unidad inercial | 2 | Bosch BMI160 integrada en la tarjeta: giroscopio y acelerómetro |
+| Cámaras | 2 pares | Estéreo; desactivadas, porque el sistema no las usa y cargaban la tarjeta |
+| Batería de cómputo | 2 | Alimenta la tarjeta |
+| Batería de tracción | 2 | Polímero de litio |
+| **Coordinación e interacción** | | |
+| Portátil | 1 | Ubuntu 22.04 y ROS 2 Humble (AMD Ryzen 5 PRO 5650U, 16 GB); el coordinador corre en un contenedor con Jazzy |
+| Teléfono | 1 | Abre la interfaz web, conectado a la red de los agentes |
+| **Red** | | |
+| Enrutador | 1 | TP-Link TL-WR940N: reparte las direcciones y da un enlace de respaldo a 2,4 GHz |
+| Puntos de acceso | 2 | FiberHome, uno por piso, en modo puente: 5 GHz, canal 44 en el piso 3 y canal 36 en el piso 4 |
+| Cables de red | 2 | Del enrutador a cada punto de acceso, entre puertos LAN: uno en el mismo piso y otro entre pisos |
+| **Medición** | | |
+| Flexómetro | 1 | Levantamiento de las plantas y medida del avance y de la llegada en las pruebas de odometría y de navegación |
+
 ## Una misión con relevo
 
 Si el origen y el destino están en el mismo piso, la misión tiene dos tramos del mismo agente: ir a recoger al usuario y llevarlo. Si están en pisos distintos, tiene cuatro, y el punto de encuentro es siempre la escalera.

@@ -82,6 +82,8 @@ El tiempo de asignación quedó por debajo de 100~ms en las treinta misiones, va
 La odometría del agente sale de comparar barridos sucesivos del láser, y entre el 26 de agosto y el 2 de octubre no produjo una medida utilizable. La tabla~\ref{tab:odometria}
 reúne lo que se midió en cada entorno, como fracción del avance real medido con flexómetro, frente al criterio de la prueba, un error de 10~\% o menos.
 
+El estimador es el mismo en todas las filas: lo que cambió fue el entorno. En un pasillo con hornacinas, casilleros y quiebres, con ocho cambios de perfil en 25~m, la odometría queda dentro del $\pm$5~\% sin cambiar un parámetro. Con las dos mediciones del pasillo del piso 4, de 6,68 y 14,57~m, cumplió el criterio de la prueba, del que dependía todo lo demás con los agentes físicos. Las dos últimas filas ya incluyen la unidad inercial; el segundo de esos tramos mide 2,82~m, por debajo de los 5~m que pide el criterio, y se incluye como dato de la misma cadena.
+
 \begin{table}[H]
   \centering\small
   \caption{Fracción del avance real que registra la odometría, por entorno.}
@@ -99,8 +101,6 @@ reúne lo que se midió en cada entorno, como fracción del avance real medido c
     Catalayud, piso 4, con la unidad inercial & 2,82 m & 104,9 \% & cumple \\ \bottomrule
   \end{tabular}
 \end{table}
-
-El estimador es el mismo en todas las filas: lo que cambió fue el entorno. En un pasillo con hornacinas, casilleros y quiebres, con ocho cambios de perfil en 25~m, la odometría queda dentro del $\pm$5~\% sin cambiar un parámetro. Con las dos mediciones del pasillo del piso 4, de 6,68 y 14,57~m, cumplió el criterio de la prueba, del que dependía todo lo demás con los agentes físicos. Las dos últimas filas ya incluyen la unidad inercial; el segundo de esos tramos mide 2,82~m, por debajo de los 5~m que pide el criterio, y se incluye como dato de la misma cadena.
 
 \subsection{La navegación y la precisión de llegada}
 \label{sec:res-g3}
