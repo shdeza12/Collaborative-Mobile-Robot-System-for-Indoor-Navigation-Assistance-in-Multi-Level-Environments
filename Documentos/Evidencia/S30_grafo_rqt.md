@@ -4,6 +4,9 @@ Captura del grafo de ROS 2 con el generador de `rqt_graph`, para tener la eviden
 dibujado a mano con `herramientas/figura_diagramas.py`. El grafo es demasiado grande para una página del documento: en una
 página horizontal la letra quedaría en unos 2 puntos. Por eso el anexo C lo trae en una franja que se lee ampliándola en el PDF, y además como archivo aparte.
 
+> Nota del 5 de noviembre, más tarde: a pedido de los autores, el anexo C quedó sin la franja, solo con el enlace a este archivo y su
+> código QR.
+
 Archivos: [`S30_grafo_rqt.pdf`](S30_grafo_rqt.pdf), que se puede ampliar sin perder detalle, y
 [`S30_grafo_rqt.png`](S30_grafo_rqt.png). Lista de nodos y tópicos en
 [`logs/S30_grafo_rqt_nodos_topicos.txt`](logs/S30_grafo_rqt_nodos_topicos.txt). Los registros y la grabación de la misión están en

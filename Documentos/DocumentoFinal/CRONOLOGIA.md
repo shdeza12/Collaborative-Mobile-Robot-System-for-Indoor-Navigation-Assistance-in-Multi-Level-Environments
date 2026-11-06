@@ -448,5 +448,7 @@ Fuente: Entregable S29; `Evidencia/S29_video_pagina_cancelacion.md`; `Evidencia/
   huecos de 3 a 5 cm; trabajos futuros y referencias siguen en la misma hoja, y el índice va con interlineado menor. La red pasa a
   sección propia y la tabla de componentes del agente pasa a ser la lista de componentes del sistema, con el enrutador, los puntos de
   acceso y los cables. Quedan 61 páginas numeradas y 78 hojas.
+- 5 de noviembre: a pedido de los autores, el anexo C queda sin la imagen del grafo de `rqt_graph`, con el enlace al archivo y su
+  código QR.
 
 Fuente: `Evidencia/S30_grafo_rqt.md`; `Evidencia/S30_simulacion_catalayud.md`; `Evidencia/S30_segunda_mision_y_cancelacion.md`; `Evidencia/S26_red_campo_topologia_final.md`; `Evidencia/S30_grabacion_en_rviz.md`; `TERMINOS.md`; `GUION_SESION_JURADOS.md`.
