@@ -450,5 +450,8 @@ Fuente: Entregable S29; `Evidencia/S29_video_pagina_cancelacion.md`; `Evidencia/
   acceso y los cables. Quedan 61 páginas numeradas y 78 hojas.
 - 5 de noviembre: a pedido de los autores, el anexo C queda sin la imagen del grafo de `rqt_graph`, con el enlace al archivo y su
   código QR.
+- 6 de noviembre: la sección de la red suma una tabla con la dirección IP y la MAC de cada equipo, y el diagrama de la red las
+  muestra, con el portátil y el teléfono. El enrutador queda en el piso 4, de donde sale el cable al punto de acceso del piso 3, como
+  confirmaron los autores; el diagrama anterior lo tenía al revés. Quedan 62 páginas numeradas y 79 hojas.
 
 Fuente: `Evidencia/S30_grafo_rqt.md`; `Evidencia/S30_simulacion_catalayud.md`; `Evidencia/S30_segunda_mision_y_cancelacion.md`; `Evidencia/S26_red_campo_topologia_final.md`; `Evidencia/S30_grabacion_en_rviz.md`; `TERMINOS.md`; `GUION_SESION_JURADOS.md`.

@@ -510,11 +510,32 @@ propia sobre Wi-Fi reúne lo que el sistema necesita: control completo, direccio
 tiempos de entrega, por lo que el requisito de red fija cotas numéricas y se verifica midiendo.
 
 
-Un enrutador reparte las direcciones de toda la red, y de él cuelgan por cable dos puntos de acceso, uno por piso (tabla~\ref{tab:vehiculo} y figura~\ref{fig:red-topologia}). Los dos trabajan en modo puente, de manera que toda la instalación forma una sola subred, condición para que cada agente y el portátil se descubran. El enrutador une redes, reparte direcciones y encamina entre ellas, mientras que un
+Un enrutador, en el piso 4 junto al punto de acceso de ese piso, reparte las direcciones de toda la red, y de él salen por cable los dos puntos de acceso, uno por piso: el del piso 4, en el mismo piso, y el del piso 3, con un cable que baja desde el piso 4 (tabla~\ref{tab:vehiculo} y figura~\ref{fig:red-topologia}). Los dos trabajan en modo puente, de manera que toda la instalación forma una sola subred, condición para que cada agente y el portátil se descubran. El enrutador une redes, reparte direcciones y encamina entre ellas, mientras que un
 punto de acceso solo da acceso inalámbrico a una red que ya existe. Tampoco son repetidores, que enlazan por radio con el resto de la red y usan la misma antena para eso y para sus clientes, con lo que
 pierden la mitad del caudal y añaden un salto a cada mensaje; por esa razón, el enlace entre pisos va por cable. Se trabaja en la banda de 5~GHz porque un barrido del sitio encontró 33 redes ajenas en
 la de 2,4~GHz y la parte baja de la de 5~GHz prácticamente vacía, y el cambio de banda redujo el percentil 95 del tiempo de ida y vuelta de 20,76 a 11,12~ms. Hay un punto de acceso por piso, en canales
 que no se solapan, debido a que la losa atenúa la señal.
+
+La tabla~\ref{tab:direcciones-red} da la dirección lógica y la física de cada equipo. Las de los agentes están reservadas en el
+enrutador por su dirección física, así que no cambian entre sesiones, y los puntos de acceso, que trabajan en puente, figuran por la
+dirección física de su radio de 5~GHz, a la que se asocian los agentes. El teléfono del usuario recibe una dirección del enrutador al
+conectarse.
+
+\begin{table}[H]
+  \centering\footnotesize
+  \caption{Direcciones lógicas y físicas de los equipos de la red en los pisos 3 y 4 del edificio Catalayud.}
+  \label{tab:direcciones-red}
+  \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}p{0.27\textwidth}>{\raggedright\arraybackslash}p{0.22\textwidth}>{\raggedright\arraybackslash}p{0.2\textwidth}@{}}
+    \toprule
+    \textbf{Equipo} & \textbf{Conexión} & \textbf{Dirección IP} & \textbf{Dirección MAC} \\ \midrule
+    Enrutador TP-Link \mbox{TL-WR940N} & En el piso~4; cable a cada punto de acceso y red de respaldo a 2,4~GHz & \texttt{192.168.0.1/24}, fija & \texttt{60:32:B1:77:FB:CC} \\ \addlinespace
+    Punto de acceso del piso~3 & Cable entre pisos al enrutador; 5~GHz, canal~44 & --- & \texttt{8C:5F:AD:37:AA:46} \\ \addlinespace
+    Punto de acceso del piso~4 & Cable al enrutador, en el mismo piso; 5~GHz, canal~36 & --- & \texttt{8C:5F:AD:37:D2:16} \\ \addlinespace
+    Agente del piso~3 & Wi-Fi al punto de acceso de su piso & \texttt{192.168.0.102}, reservada por su MAC & \texttt{80:91:33:ED:8C:F3} \\ \addlinespace
+    Agente del piso~4 & Wi-Fi al punto de acceso de su piso & \texttt{192.168.0.104}, reservada por su MAC & \texttt{80:91:33:F3:E6:AB} \\ \addlinespace
+    Portátil & Wi-Fi a la red de respaldo del enrutador & \texttt{192.168.0.105}, asignada por el enrutador & \texttt{D8:80:83:5E:C1:D7} \\ \bottomrule
+  \end{tabular}
+\end{table}
 
 Durante la construcción aparecieron defectos que no producían ningún mensaje de error y que solo se encontraron al medir. A las dos tarjetas les faltaba el fichero con las reglas de uso del espectro, por lo
 cual veían las redes de 5~GHz pero no podían transmitir en ellas. Un punto de acceso conectado a la vez por cable y por radio ofrecía dos caminos a los mismos mensajes: de 100 peticiones enviadas, un
@@ -523,8 +544,8 @@ los agentes dejaron de verse al azar.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.78\textwidth]{imagenes/red_topologia.png}
-  \caption{Montaje físico de la red.}
+  \includegraphics[width=0.9\textwidth]{imagenes/red_topologia.png}
+  \caption{Montaje físico de la red en los pisos 3 y 4 del edificio Catalayud, con las direcciones IP y MAC de los equipos.}
   \label{fig:red-topologia}
 \end{figure}
 

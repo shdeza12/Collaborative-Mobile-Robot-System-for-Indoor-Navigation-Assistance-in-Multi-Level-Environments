@@ -57,8 +57,19 @@ Los agentes se comunican por una red Wi-Fi propia, porque la de la universidad a
 
 <figure markdown>
 ![Montaje físico de la red: un enrutador, un punto de acceso por piso unido a él por cable y un agente conectado a cada punto de acceso](img/red_topologia.png)
-<figcaption>Montaje físico de la red, con la ida y vuelta de cada agente contra el enrutador.</figcaption>
+<figcaption>Montaje físico de la red en los pisos 3 y 4 de Catalayud, con las direcciones IP y MAC de los equipos y la ida y vuelta de cada agente contra el enrutador.</figcaption>
 </figure>
+
+El enrutador está en el piso 4, junto al punto de acceso de ese piso, y del piso 4 baja el cable al punto de acceso del piso 3. Las direcciones de los agentes están reservadas por su MAC, y los puntos de acceso, que trabajan en puente, figuran por la MAC de su radio de 5 GHz. El teléfono recibe una dirección del enrutador al conectarse.
+
+| Equipo | Conexión | Dirección IP | Dirección MAC |
+|---|---|---|---|
+| Enrutador TP-Link TL-WR940N | En el piso 4; cable a cada punto de acceso y red de respaldo a 2,4 GHz | `192.168.0.1/24`, fija | `60:32:B1:77:FB:CC` |
+| Punto de acceso del piso 3 | Cable entre pisos al enrutador; 5 GHz, canal 44 | — | `8C:5F:AD:37:AA:46` |
+| Punto de acceso del piso 4 | Cable al enrutador, en el mismo piso; 5 GHz, canal 36 | — | `8C:5F:AD:37:D2:16` |
+| Agente del piso 3 | Wi-Fi al punto de acceso de su piso | `192.168.0.102`, reservada por su MAC | `80:91:33:ED:8C:F3` |
+| Agente del piso 4 | Wi-Fi al punto de acceso de su piso | `192.168.0.104`, reservada por su MAC | `80:91:33:F3:E6:AB` |
+| Portátil | Wi-Fi a la red de respaldo del enrutador | `192.168.0.105`, asignada por el enrutador | `D8:80:83:5E:C1:D7` |
 
 Lo que más pesó en las tarjetas fue cuántos procesos se anunciaban por la red. Con los dos agentes anunciándose entre sí, la tarjeta llegó al 95 % y Nav2 no alcanzaba a arrancar. Con la topología en estrella, en la que cada agente se anuncia solo al portátil, el sistema completo usa entre el 68 y el 74 %.
 
