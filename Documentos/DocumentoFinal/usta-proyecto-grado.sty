@@ -198,38 +198,38 @@
   \end{titlepage}}
 
 % --------------------------------------------------- nota de aceptación ---
-% Toda la hoja va CENTRADA: el titulo, el bloque de rayas y las firmas. Antes
-% iba alineada a la derecha, que es como la trae la plantilla de Word, pero ahi
-% queda descolgada del resto del documento.
+% Alineada como en la plantilla: titulo, rayas y firmas a la derecha; lugar y
+% fecha a la izquierda.
 \newcommand{\ustanotaaceptacion}{%
   \clearpage
-  \begin{center}
+  \begin{flushright}
   {\bfseries\large Nota de aceptación:\par}
   \vspace{1cm}
   \begin{minipage}{0.62\textwidth}
+    \raggedleft
     \rule{\linewidth}{0.4pt}\\[0.9cm]
     \rule{\linewidth}{0.4pt}\\[0.9cm]
     \rule{\linewidth}{0.4pt}\\[0.9cm]
     \rule{\linewidth}{0.4pt}\\[2cm]
-    \rule{\linewidth}{0.4pt}\\ \centering Firma del Director\\[1.2cm]
+    \rule{\linewidth}{0.4pt}\\ Firma del Director\\[1.2cm]
     % La plantilla trae aqui una raya para el codirector. Se quita: el proyecto
     % no tuvo codirector, y una firma que nadie va a estampar no debe aparecer.
     % Si llegara a nombrarse uno, se devuelve esta linea y se rellena
     % \ustacodirector en main.tex, que es lo que imprime su nombre en la
     % contraportada.
-    \rule{\linewidth}{0.4pt}\\ \centering Firma del Jurado 1\\[1.2cm]
-    \rule{\linewidth}{0.4pt}\\ \centering Firma del Jurado 2
+    \rule{\linewidth}{0.4pt}\\ Firma del Jurado 1\\[1.2cm]
+    \rule{\linewidth}{0.4pt}\\ Firma del Jurado 2
   \end{minipage}
+  \end{flushright}
   \vfill
-  Bogotá D.C., Colombia\\ \@ustames\ de \@ustaanio
-  \end{center}
+  \noindent Bogotá D.C.\\ Colombia\\ \@ustames\ de \@ustaanio
   \clearpage}
 
 % ------------------------------------------------------------ advertencia ---
 % Texto obligatorio, se transcribe literal de la plantilla.
 \newcommand{\ustaadvertencia}{%
   \clearpage
-  {\centering\bfseries\large ADVERTENCIA\par}
+  {\noindent\bfseries\large ADVERTENCIA\par}
   \vspace{1cm}
   La Universidad Santo Tomás no se hace responsable de las opiniones y conceptos
   expresados en el trabajo de grado, solo velará por qué no se publique nada
@@ -243,7 +243,7 @@
   \clearpage
   \phantomsection
   \addcontentsline{toc}{chapter}{#1}%
-  {\centering\bfseries\large\MakeUppercase{#1}\par}
+  {\noindent\bfseries\large\MakeUppercase{#1}\par}
   \vspace{1em}}
 
 % -------------------------------------------------- notas al revisor ---
@@ -288,7 +288,7 @@
 % Por omisión \tableofcontents y sus hermanas emiten su propio \chapter*, así
 % que puestas detrás de \ustaseccion saldría el encabezado DOS veces: el de
 % \ustaseccion y el de la lista. Se despojan de su título y se quedan solo con
-% las entradas; el encabezado, centrado y en mayúsculas como pide la plantilla,
+% las entradas; el encabezado, a la izquierda y en mayúsculas como en la plantilla,
 % lo pone \ustaseccion.
 %
 % '\@starttoc{xxx}' es el mecanismo interno que lee el .toc/.lof/.lot y lo
@@ -305,7 +305,7 @@
 \newcommand{\ustacapitulocontinuo}[1]{\par\addvspace{2.2em}%
   \let\usta@cp\clearpage\let\clearpage\relax\chapter*{#1}\let\clearpage\usta@cp}
 \newcommand{\usta@lista}[1]{\begingroup
-  \setlength{\parskip}{0pt}\setstretch{1.1}\@starttoc{#1}\endgroup}
+  \setlength{\parskip}{0pt}\setstretch{1.1}{\raggedleft Pág.\par}\@starttoc{#1}\endgroup}
 \renewcommand{\tableofcontents}{\usta@lista{toc}}
 \renewcommand{\listoffigures}{\usta@lista{lof}}
 \renewcommand{\listoftables}{\usta@lista{lot}}

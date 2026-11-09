@@ -455,3 +455,13 @@ Fuente: Entregable S29; `Evidencia/S29_video_pagina_cancelacion.md`; `Evidencia/
   confirmaron los autores; el diagrama anterior lo tenía al revés. Quedan 62 páginas numeradas y 79 hojas.
 
 Fuente: `Evidencia/S30_grafo_rqt.md`; `Evidencia/S30_simulacion_catalayud.md`; `Evidencia/S30_segunda_mision_y_cancelacion.md`; `Evidencia/S26_red_campo_topologia_final.md`; `Evidencia/S30_grabacion_en_rviz.md`; `TERMINOS.md`; `GUION_SESION_JURADOS.md`.
+
+### S31 (9 al 15 de noviembre): documento organizado por objetivos
+
+- 9 de noviembre: a sugerencia del director, propuesta del documento de máximo 60 páginas, con el desarrollo organizado por los cuatro
+  objetivos específicos, los ocho videos del anexo A citados en el texto y la matriz de los 36 requisitos con su prueba. Queda en 59 hojas
+  y 45 páginas numeradas, en `main_objetivos.tex`, junto a la versión vigente.
+- 9 de noviembre: autoridades académicas con los nombres que dieron los autores; falta el Vicerrector Académico General. Los preliminares
+  quedan alineados como en la plantilla de la Universidad: títulos a la izquierda, autoridades y nota de aceptación a la derecha.
+
+Fuente: `Documentos/DocumentoFinal/main_objetivos.tex`.

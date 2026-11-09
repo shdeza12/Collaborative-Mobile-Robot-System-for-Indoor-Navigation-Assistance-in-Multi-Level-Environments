@@ -1,0 +1,100 @@
+% =====================================================================
+%  MARCO REFERENCIAL (versión de 60 páginas)
+%  Recorte del capítulo vigente: los antecedentes van sin subsecciones y el
+%  marco conceptual solo con los términos que usa el documento.
+% =====================================================================
+\chapter{Marco referencial}
+\label{cap:marco}
+
+\section{Antecedentes}
+\label{sec:antecedentes}
+
+El uso de robots autónomos para acompañar a personas en edificios públicos ya se prueba fuera del laboratorio. \textcite{kayukawa2023enhancing} guiaron a visitantes ciegos por un museo de ciencias con un robot autónomo y el teléfono como canal de consulta, y los participantes lo exploraron de forma segura e independiente. Compartir el espacio plantea además un problema de seguridad, que \textcite{omer2025multilayer} abordan con un control de navegación en tres capas; en este proyecto la respuesta se apoya en la operación, ya que una persona acompaña a cada agente durante las maniobras y el usuario puede cancelar la misión en cualquier momento. En estos trabajos un mismo robot acompaña al usuario durante todo el recorrido, y ese es el supuesto que aquí se cambia.
+
+En navegación en interiores, \textcite{sojan2025autonomous} integran la construcción de mapas, la localización con AMCL y la planificación con Nav2, y dejan la navegación entre pisos como trabajo futuro. Nav2 es el sucesor en ROS~2 de la pila de navegación de la primera generación \autocite{macenski2020marathon}, y la revisión de sus mantenedores \autocite{macenski2023survey} sirvió para elegir los componentes de este trabajo. \textcite{varghese2023multirobot} llevan el problema a varios robots con TurtleBot3, ROS y Gazebo, dentro de un árbol de transformaciones común, mientras que este proyecto separa a cada agente con su propio espacio de nombres. La navegación por aprendizaje, con la que \textcite{zain2025obstacle} genera órdenes de dirección a partir de imágenes y que \textcite{lopez2024enhancing} ensayaron en un Donkey Car, la plataforma que propuso inicialmente este proyecto, requiere muchos datos y es poco explicable \autocite{xiao2022motion}, y del edificio no existen datos etiquetados con los cuales entrenar. Con planificación clásica, en cambio, cada decisión del agente se puede inspeccionar cuando hay que explicar un fallo.
+
+En coordinación entre robots, \textcite{nair2024collaborative} basa la cooperación en compartir la información sensorial, y \textcite{roszkowska2023multilevel} proponen un supervisor central que autoriza el paso de cada robot a su siguiente etapa. \textcite{rudrusamy2022broadcast} validan en interiores un control por difusión y observan que las trayectorias reales difieren de las simuladas, \textcite{xu2026modular} integran aprendizaje por refuerzo multiagente en un marco modular sobre ROS para asignar tareas, y \textcite{zhang2025kubernetes} estudian cómo mantener operativo un sistema sobre ROS~2 cuando falla uno de los agentes. De alcance comparable, por tratarse de un proyecto de grado de ingeniería, es el trabajo de \textcite{piguave2023multirobot}, cuya versión publicada \autocite{yumbla2025open} describe una arquitectura centralizada sobre ROS~2 y Gazebo. El antecedente más cercano es DELIVER, de \textcite{srivastava2026deliver}, que divide el entorno en regiones y calcula puntos de relevo en sus fronteras, donde un robot entrega un objeto al siguiente. Allí lo que se traspasa puede esperar indefinidamente, mientras que aquí se traspasa el guiado de un usuario; por esa razón, el relevo de este trabajo incluye una confirmación explícita al llegar al otro piso, con un aviso a los 60~s y un plazo máximo de 120~s.
+
+El cambio de piso se ha abordado sobre todo desde la logística y la exploración. \textcite{kim2024indoor} combinan un mapa por piso con un grafo topológico e incluyen la interacción con el ascensor, \textcite{song2024elevator} automatizan su uso con actuadores que se instalan en el edificio, y \textcite{luo2025elevator} deciden entre ascensor y escalera con aprendizaje por refuerzo jerárquico. En exploración, \textcite{chen2025lite} extienden a varios pisos los métodos bidimensionales y \textcite{gong2026stairway} incorporan la conciencia de piso a la navegación hacia objetos. En cuanto al cómputo, \textcite{tahir2025edge} revisan las soluciones que lo acercan al borde de la red, y \textcite{dordevic2023offloading} encuentran que la mayor ganancia al delegarlo está en el reconocimiento de objetos; como este sistema no reconoce objetos, la navegación se ejecuta a bordo de cada agente y solo la coordinación se centraliza en un computador portátil.
+
+Ninguna de esas líneas propone resolver la discontinuidad entre pisos sin que ningún agente la atraviese. Aquí el recorrido se reparte entre dos agentes, cada uno dedicado a un piso, y el usuario pasa de uno a otro en la zona de transición. Los trabajos de movilidad entre pisos obtienen la continuidad con hardware o con intervención del ascensor, mientras que este proyecto la obtiene con comunicación entre agentes. La tabla~\ref{tab:antecedentes} resume lo que cada línea aporta a este proyecto y el supuesto que este trabajo cambia.
+
+\begin{table}[H]
+  \centering\footnotesize\setstretch{1.0}
+  \caption{Líneas de antecedentes, lo que aportan a este trabajo y el supuesto
+    que este trabajo cambia.}
+  \label{tab:antecedentes}
+  \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.2\textwidth}>{\raggedright\arraybackslash}p{0.36\textwidth}>{\raggedright\arraybackslash}p{0.36\textwidth}@{}}
+    \toprule
+    \textbf{Línea} & \textbf{Lo que se toma de ella} & \textbf{Supuesto que no se comparte} \\ \midrule
+    Robots guía & La interacción durante el guiado y el teléfono como canal con el usuario & Un solo robot acompaña todo el recorrido \\ \addlinespace
+    Navegación en interiores & El flujo mapa, localización y planificación sobre ROS~2 (Nav2) & Ninguno: se adopta, adaptado a la cinemática del agente \\ \addlinespace
+    Coordinación multirrobot & La taxonomía de asignación; la planificación con relevos & Lo que se traspasa puede esperar sin límite \\ \addlinespace
+    Movilidad entre pisos & El mapa por piso unido por un punto de transición & El robot cambia de piso \\ \addlinespace
+    Distribución del cómputo & La navegación a bordo y la coordinación en un computador aparte & --- \\ \bottomrule
+  \end{tabular}
+\end{table}
+
+\section{Marco conceptual}
+\label{sec:conceptual}
+
+En navegación y percepción, cada agente percibe con un \textbf{LiDAR}, un sensor láser que mide distancias en 360$^\circ$ en un plano, y con una \textbf{unidad de medición inercial}, que mide la velocidad de giro y la aceleración. Como no tiene codificadores en las ruedas, su \textbf{odometría} sale de comparar barridos sucesivos del láser, y \textbf{AMCL} la corrige contra un mapa conocido. La \textbf{información de avance} de un barrido es la fracción de sus rayos que inciden sobre superficies orientadas hacia la dirección de marcha, los únicos que cambian de longitud cuando el agente avanza. El entorno se representa con un \textbf{mapa de ocupación}, que dice qué celdas están libres, y con \textbf{mapas de costos}, que dan a cada celda un costo de tránsito.
+
+En control y locomoción, el agente sigue un \textbf{modelo cinemático tipo automóvil}, o de \textbf{dirección Ackermann}: tiene un radio de giro mínimo, no gira sobre su propio eje y para invertir el rumbo en un pasillo angosto hace una \textbf{media vuelta en varios tiempos}. Las órdenes llegan al motor y al servomotor como señales de \textbf{modulación por ancho de pulso}, y la tracción tiene una \textbf{banda muerta}: por debajo de 0,40~m/s el motor no mueve al agente.
+
+En comunicación, \textbf{ROS~2} organiza el software en \textbf{nodos} que se comunican por \textbf{tópicos}, \textbf{servicios} y \textbf{acciones}; una acción representa una tarea larga, con meta, retroalimentación y resultado, y se puede cancelar. Por debajo usa \textbf{DDS}, en el que los participantes se encuentran por \textbf{descubrimiento}. Quién habla con quién lo deciden el \textbf{dominio}, la \textbf{partición} y el \textbf{espacio de nombres}, un prefijo como \texttt{/robot1} que indica a qué agente pertenece cada tópico. El puente \textit{rosbridge} traduce entre ROS~2 y mensajes JSON sobre WebSocket, y un \textbf{contenedor} permite tener dos versiones de ROS~2 en un mismo computador.
+
+En arquitectura, la \textbf{asignación de tareas} reparte las actividades entre los agentes y, cuando una tarea pasa de un piso a otro, toma la forma de un \textbf{relevo} en el \textbf{punto de transferencia}. La \textbf{máquina de estados de misión} describe en qué punto va cada misión, el \textbf{planificador puro} calcula sus tramos sin depender del middleware, y el \textbf{registro de misión} es el documento estructurado que se compone de la grabación de cada ejecución. La \textbf{interacción humano-robot} toma aquí la forma de una interfaz web con \textbf{retroalimentación literal}: muestra tal cual el texto que redacta el coordinador.
+
+En evaluación, las métricas del anteproyecto son el \textbf{tiempo de respuesta}, el \textbf{tiempo de asignación}, la \textbf{tasa de éxito} y la \textbf{continuidad de servicio}. Un \textbf{invariante estructural} es una propiedad que se cumple siempre por el diseño y que, por lo mismo, no es un resultado experimental.
+
+\section{Marco teórico}
+\label{sec:teorico}
+
+\subsection{Asignación de tareas en sistemas multirrobot}
+
+\textcite{gerkey2004taxonomy} clasifican la asignación de tareas entre robots según tres ejes: robots que ejecutan una sola tarea a la vez (ST) o varias (MT), tareas que requieren un solo robot (SR) o varios (MR), y asignación instantánea (IA) o extendida en el tiempo (TA). La de este sistema es ST--SR--IA, una instancia del problema de asignación óptima que el método húngaro resuelve en tiempo polinómico. Sin embargo, la matriz de costos tiene un solo candidato admisible por tarea, debido a que cada agente está confinado a su piso, de modo que el método devolvería siempre la correspondencia que el sistema guarda como configuración. Por la misma razón se descartaron los mecanismos de mercado \autocite{quinton2023market}: cualquier subasta tendría un único postor.
+
+La misión completa se sale de esa clase, puesto que el tramo del segundo agente no puede empezar hasta que el primero termine el suyo y el usuario cambie de piso. \textcite{korsah2013comprehensive} extienden la taxonomía según la interdependencia entre tareas, y en su clasificación esta misión pertenece a la clase XD, de dependencias entre agendas. En ello consiste el aporte del trabajo: la asignación es trivial y óptima por construcción, mientras que la coordinación del relevo pertenece a una clase que la taxonomía clásica no contempla. El sistema atiende una misión a la vez; con varios agentes elegibles o misiones simultáneas, la elección del agente pasaría a depender del método de asignación.
+
+\subsection{ROS~2 y la comunicación entre los componentes}
+
+Se eligió ROS~2 frente a escribir la comunicación a medida y frente a ROS~1, sin soporte desde 2025 y con un nodo maestro que sería un punto único de fallo. \textcite{macenski2022ros2} lo describen como un rediseño sobre DDS \autocite{omg2015dds}, que aporta el descubrimiento automático y las políticas de calidad de servicio. El descubrimiento tiene un costo que crece con el tamaño del sistema y que, sobre una red inalámbrica, compite con la navegación por el procesador de cada agente. Para limitarlo, ROS~2 Jazzy permite restringir el descubrimiento a los procesos del mismo computador y declarar una lista fija de equipos, con lo que la red adopta una topología en estrella hacia el portátil. La partición deja dentro de cada agente los tópicos del fabricante, que no llevan espacio de nombres.
+
+\subsection{Cinemática tipo automóvil, planificación y seguimiento}
+
+Un vehículo con dirección Ackermann no puede desplazarse de lado ni girar sobre su propio eje, y su curvatura está acotada, por lo que los planificadores clásicos producen rutas que no puede seguir \autocite{macenski2024smac}. \textcite{reeds1990optimal} resolvieron el camino más corto entre dos poses para un automóvil que avanza y retrocede, y \textcite{dolgov2010path} propusieron el A* híbrido, una búsqueda sobre la posición y la orientación en la que cada expansión respeta la cinemática. Nav2 \autocite{macenski2020marathon} lo implementa en el planificador Smac, con el modelo Reeds-Shepp, y trabaja sobre mapas de costos por capas \autocite{macenski2023survey}.
+
+El controlador convierte la trayectoria en órdenes de velocidad. El algoritmo Pure Pursuit elige un punto a una distancia de anticipación $\ell$ del agente y calcula el arco que lleva hasta él; llamando $y$ a la distancia lateral del punto, la curvatura ordenada es
+\begin{equation}
+  \kappa = \frac{2\,y}{\ell^{2}} .
+\end{equation}
+La versión Regulated Pure Pursuit \autocite{macenski2023rpp}, que usa este trabajo, añade una regulación de velocidad y la marcha atrás. Cerca de la meta tiene un límite: cuando una cúspide queda muy cerca, una protección del controlador anula la curvatura y el agente maniobra decenas de veces en el mismo punto, razón por la cual la media vuelta se resolvió con una maniobra propia.
+
+\subsection{Localización, odometría y observabilidad}
+
+La localización de Monte Carlo representa la creencia sobre la pose con un conjunto de partículas que el modelo de movimiento desplaza y el láser pondera \autocite{thrun2005probabilistic}; AMCL ajusta su número a la incertidumbre, en este trabajo entre 500 y 2000. Como los agentes no tienen codificadores, la odometría sale del paquete rf2o, que estima el movimiento plano a partir de barridos consecutivos \autocite{jaimez2016planar}.
+
+Todo estimador que se apoya en la geometría del entorno hereda la degeneración que \textcite{zhang2016degeneracy} formalizan: hay direcciones en las que las mediciones no restringen la solución. El problema sigue abierto, y \textcite{tuna2024xicp} detectan esas direcciones durante el registro del láser para no actualizar la pose a lo largo de ellas. En un pasillo recto y uniforme cada barrido es casi idéntico al anterior y la posición longitudinal resulta inobservable. A diferencia de un error de calibración, esa limitación no se corrige ajustando parámetros, y la construcción de mapas la comparte \autocite{macenski2021slam}. El rumbo, en cambio, lo mide de forma directa el giroscopio, y un filtro de Kalman extendido \autocite{moore2014generalized} combina las dos fuentes: de la odometría láser toma el avance y de la unidad inercial, el giro.
+
+\subsection{Simulación e interfaz web}
+
+La campaña se ejecutó en Gazebo~11 con ROS~2 Humble \autocite{koenig2004gazebo}. El tiempo que ven los nodos avanza en saltos de 100~ms, lo que fija la resolución de los tiempos medidos. La interfaz usa \textit{rosbridge} \autocite{crick2017rosbridge}, cuya versión para ROS~2 expone las acciones con operaciones que la biblioteca de cliente web más difundida no implementa.
+
+\subsection{Evaluación experimental}
+
+La tasa de éxito es una proporción estimada sobre una muestra pequeña, para la que el intervalo de la aproximación normal no es fiable \autocite{brown2001interval}. Por esa razón se usa el de \textcite{wilson1927probable}: con $n$ misiones, proporción observada $\hat{p}$ y cuantil $z$ ($z = 1{,}96$ para el 95~\%),
+\begin{equation}
+  \frac{\hat{p} + \dfrac{z^{2}}{2n} \pm z\sqrt{\dfrac{\hat{p}(1-\hat{p})}{n} + \dfrac{z^{2}}{4n^{2}}}}{1 + \dfrac{z^{2}}{n}} .
+\end{equation}
+La norma ASTM F3244-21 \autocite{astm2021f3244} establece un método de prueba para la navegación de robots con repeticiones entre marcas fijas: si las $n$ repeticiones salen bien, la fiabilidad mínima que se demuestra con confianza $C$ es $R = (1-C)^{1/n}$, que con $n = 9$ y $C = 0{,}85$ da $R \approx 0{,}81$.
+
+\section{Marco legal}
+\label{sec:legal}
+
+El proyecto se inscribe en la Política Nacional de Ciencia, Tecnología e Innovación 2022--2031 \autocite{conpes4069} y en la Política Nacional de Inteligencia Artificial \autocite{conpes4144}, como prototipo de asistencia robótica sobre plataformas de bajo costo y software abierto. Su alcance excluye que los agentes interactúen mecánicamente con el edificio, lo que evita intervenir sistemas sujetos a regulación de seguridad en edificaciones.
+
+\section{Marco ambiental}
+\label{sec:ambiental}
+
+El impacto ambiental es mínimo, ya que los dos agentes son equipo institucional que ya existía y el edificio no se modifica. Las baterías de polímero de litio de la tracción deben entregarse como residuo electrónico al final de su vida útil.

@@ -7,8 +7,8 @@ recorrido semana a semana en [`CRONOLOGIA.md`](Documentos/DocumentoFinal/CRONOLO
 
 | | |
 |---|---|
-| **Semana en curso** | S29 (26 de octubre al 1 de noviembre de 2026), fase 6: análisis y escritura |
-| **Fecha de corte** | 2026-11-05 (jueves). Grafo real de nodos capturado con `rqt_graph` en simulación, en el anexo C ([`S30_grafo_rqt.md`](Documentos/Evidencia/S30_grafo_rqt.md)). Portada del sitio con la foto de los dos agentes físicos, y documento unificado con la revisión, para la lectura del director. Pruebas del 23 de octubre registradas, con la corrección del retraso de la página; documento recortado y revisado, sin siglas de más y con el mapa del piso 4 corregido; video de las pruebas publicado y en el anexo A |
+| **Semana en curso** | S31 (9 al 15 de noviembre de 2026): elaboración del documento final |
+| **Fecha de corte** | 2026-11-09 (lunes). Propuesta del documento con el desarrollo por objetivos ([`main_objetivos.pdf`](Documentos/DocumentoFinal/main_objetivos.pdf)), que se envía al director; autoridades académicas puestas y preliminares alineados según la plantilla. Grafo real de nodos capturado con `rqt_graph` en simulación, en el anexo C ([`S30_grafo_rqt.md`](Documentos/Evidencia/S30_grafo_rqt.md)). Portada del sitio con la foto de los dos agentes físicos, y documento unificado con la revisión, para la lectura del director. Pruebas del 23 de octubre registradas, con la corrección del retraso de la página; documento recortado y revisado, sin siglas de más y con el mapa del piso 4 corregido; video de las pruebas publicado y en el anexo A |
 | **Último entregable formal** | Semana 29 ([`Entregable_semana_29.tex`](Documentos/Entregables/Entregable_semana_29.tex) y su versión [`.md`](Documentos/Entregables/Entregable_semana_29.md)) |
 | **Documento final** | Compila en el portátil, sin errores ([`DocumentoFinal/`](Documentos/DocumentoFinal/)): la versión definitiva ([`main.pdf`](Documentos/DocumentoFinal/main.pdf)) tiene 62 páginas numeradas y 79 hojas, con espacio para la dedicatoria de Jonny, que va en la misma página que la de Santiago. El director pide entre 60 y 80. Incluye la revisión del 4 de noviembre, con registro en [`REVISION_2026-11-04.md`](Documentos/DocumentoFinal/REVISION_2026-11-04.md); la versión anterior queda en la etiqueta `documento-antes-revision-2026-11-04` |
 
@@ -30,7 +30,7 @@ Matriz completa en [`REQUISITOS.md`](Documentos/REQUISITOS.md): los 36 requisito
 
 ## Pendiente
 
-1. Documento final: faltan los nombres de las autoridades académicas, que hay que tomar de la fuente oficial de la Universidad, y la dedicatoria de Jonny. La versión recortada ya es la definitiva.
+1. Documento final: faltan la dedicatoria de Jonny, en `capitulos/01-dedicatoria-agradecimientos.tex`, y el nombre del Vicerrector Académico General, que la plantilla incluye. Falta decidir si `main_objetivos` (59 hojas, 45 numeradas) reemplaza a `main`.
 2. Presustentación (2 a 6 de noviembre, fuera del cronograma; día sin confirmar): la propuesta de presentación está en [`Presustentacion.pptx`](Documentos/Presentacion/Presustentacion.pptx), con la plantilla de la presentación del anteproyecto: 39 diapositivas y notas del orador que suman 17 min 20 s. Se arma con `python3 herramientas/presentacion_sustentacion.py` y falta la revisión de los autores. La tarjeta de acceso del jurado, con los códigos QR de la red y de la página, se genera ese día con `python3 herramientas/tarjeta_jurado.py`, con el portátil ya en la red `DEEPRACER` (pide la clave al ejecutarse).
 3. Registro de misión: la etapa de cancelación sale como `8` y no como `CANCELANDO`.
 4. Imagen `coordinador_jazzy` del portátil: reconstruirla con el agente nuevo.
