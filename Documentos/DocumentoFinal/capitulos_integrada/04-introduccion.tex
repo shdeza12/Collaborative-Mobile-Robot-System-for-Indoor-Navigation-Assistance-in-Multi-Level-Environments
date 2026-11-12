@@ -1,0 +1,44 @@
+% =====================================================================
+%  INTRODUCCIÓN: párrafos continuos, sin subsecciones,
+%  como pide la plantilla. Las citas nombran al autor dentro de la frase.
+% =====================================================================
+\chapter*{Introducción}
+\addcontentsline{toc}{chapter}{INTRODUCCIÓN}
+
+Quien entra por primera vez a un edificio grande construye un mapa mental con
+información parcial y lo va corrigiendo mientras camina. Ese esfuerzo crece cuando el
+espacio tiene pasillos repetidos, pocos puntos de referencia o señalización escasa, y
+crece aún más al cambiar de piso, ya que la escalera interrumpe lo que el usuario lleva
+recorrido. \textcite{gathmorad2024strategic} lo estudiaron con 149 participantes que
+buscaban destinos en edificios virtuales de varios pisos, y encontraron que, en los
+recorridos entre pisos, la eficiencia depende de lo que el edificio deja ver y de lo
+que cada participante espera encontrar en él.
+
+Desde hace años, la robótica móvil colaborativa resuelve tareas parecidas, y el reparto
+de trabajo entre varios robots tiene base teórica desde que
+\textcite{gerkey2004taxonomy} formalizaron la asignación de tareas en sistemas
+multirrobot. Sin embargo, casi todos esos sistemas operan en un solo piso. Cuando se
+ha abordado el cambio de piso, la solución ha pasado por el hardware:
+\textcite{kim2024indoor} combinan un mapa por piso con un grafo topológico y hacen que
+el robot use el ascensor, mientras que \textcite{song2024elevator} automatizan ese uso
+con dispositivos conectados que se instalan en el edificio. La otra opción es dotar al
+robot de mecanismos para subir escaleras. En todos los casos se encarece la plataforma
+o se interviene la infraestructura.
+
+Este trabajo propone otro camino: en lugar de un robot que cambia de piso, dos
+agentes, robots móviles terrestres, uno por piso. El usuario cambia de piso por su
+cuenta y el agente del otro piso lo recibe en la escalera, de modo que el problema deja
+de ser de locomoción y pasa a ser de coordinación. Ese traspaso del guiado entre dos
+agentes, en un punto acordado de antemano, es el \emph{relevo}, y constituye el aporte
+del proyecto.
+
+La pregunta que organiza el trabajo es cómo asistir la orientación de usuarios dentro
+de entornos interiores con múltiples pisos utilizando sistemas robóticos. Como respuesta se propone y se pone a prueba el relevo, para lo cual hay que demostrar que la
+asistencia no se interrumpe cuando el usuario cambia de piso y medirlo con criterios
+fijados antes de los experimentos.
+
+Para implementarlo, los agentes se construyeron sobre la plataforma AWS DeepRacer, con software libre. El
+coordinador se comunica con cada agente a través de ROS~2, y el usuario pide el
+servicio desde una página web, sin instalar nada y
+sin salida a internet. Primero se evaluó en simulación, con treinta misiones sorteadas, y después con los agentes físicos, con diez misiones sorteadas
+entre los pisos 3 y 4 del edificio Catalayud, en la sede principal de la Universidad Santo Tomás.
