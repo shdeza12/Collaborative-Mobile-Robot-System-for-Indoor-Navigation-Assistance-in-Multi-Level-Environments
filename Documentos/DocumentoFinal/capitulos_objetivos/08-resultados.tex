@@ -93,7 +93,7 @@ La prueba de navegación de un agente pide un recorrido de punto a punto con Nav
 \section{Evaluación del sistema completo con los agentes físicos}
 \label{sec:res-completo}
 
-El 16 de octubre, el sistema completo funcionó con los dos agentes físicos en los pisos 3 y 4 del edificio Catalayud (anexo A, video 7). Cada misión se pidió desde la página web en un teléfono, y los autores hicieron de usuario: acompañaron a los agentes y confirmaron el cambio de piso. Los agentes no se reubicaron entre misiones, y cuando el destino quedaba detrás del agente, el coordinador pidió la media vuelta en varios tiempos. La llegada se verificó con la localización de cada agente, que la prueba de navegación ya había comprobado con medidas directas (tabla~\ref{tab:g3}).
+El sistema completo funcionó con los dos agentes físicos en los pisos 3 y 4 del edificio Catalayud (anexo A, video 7). Se realizó la validación del cambio de piso desde la interfaz web para móvil: cada misión se pidió desde la página en un teléfono y la confirmación de piso se dio al llegar a la escalera. Lo validado es el funcionamiento del sistema y no la experiencia de uso, ya que la evaluación no incluyó participantes ajenos al proyecto. Los agentes no se reubicaron entre misiones, y cuando el destino quedaba detrás del agente, el coordinador pidió la media vuelta en varios tiempos. La llegada se verificó con la localización de cada agente, que la prueba de navegación ya había comprobado con medidas directas (tabla~\ref{tab:g3}).
 
 La primera prueba fue una misión del Salón 302 al Salón 402, que se completó en 132,5~s, con un relevo y con la llegada a 0,444~m del destino; entre la llegada del primer agente a la escalera y el arranque del segundo pasaron 61,1~s. Esa sesión sirvió de ensayo del montaje y sus misiones no forman parte de la campaña: de las doce grabadas, siete se completaron y cinco terminaron fallidas; en cuatro, el coordinador rechazó una llegada con el agente a entre 0,51 y 0,78~m del punto, y en la otra Nav2 abortó la navegación.
 
@@ -140,14 +140,40 @@ El tiempo entre la llegada a la escalera del piso de origen y el arranque del gu
 
 \subsection{Criterio de conteo e incidencias}
 
-En la tasa de éxito cada misión cuenta una sola vez, con el intento que se completó, mientras que el protocolo cuenta como fallo toda ejecución fallida, por lo que se declaran los intentos que la tasa deja fuera. Las misiones 1 y 2 se completaron al segundo intento: en el primero de la misión 1, el coordinador rechazó la llegada al ascensor con el agente a 0,526~m del punto, y en el de la misión 2 no tenía la pose del agente para verificar la llegada.
+En la tasa de éxito cada misión cuenta una sola vez, con el intento que se completó, mientras que el protocolo cuenta como fallo
+toda ejecución fallida. La tabla~\ref{tab:incidencias} declara los intentos que la tasa deja fuera. Tras reiniciar las cadenas de
+navegación con la pose de salida, las nueve misiones se ejecutaron sin tocar los agentes.
 
-Antes de esos intentos, la navegación de los dos agentes dejó de responder, y ocho intentos de la misión 1 terminaron rechazados o abortados. La detención ocurrió después de que el portátil se apagara por falta de batería, con los agentes ya con horas encendidos. Se reiniciaron las cadenas de navegación con la pose de salida, y después las nueve misiones se ejecutaron sin tocar los agentes. La misión 10 empezó y no terminó, pues el portátil volvió a apagarse por falta de batería poco después de pedirla. Antes se había pedido por error el ascensor del piso 4 del edificio Catalayud como destino, debido a que los ascensores de los dos pisos aparecían en la página con el mismo nombre; ese intento no es una misión del sorteo y no se cuenta.
+\begin{table}[H]
+  \centering\footnotesize\setstretch{1.0}
+  \caption{Intentos que la tasa de éxito deja fuera, con el criterio con que se cuentan.}
+  \label{tab:incidencias}
+  \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.20\textwidth}>{\raggedright\arraybackslash}p{0.42\textwidth}>{\raggedright\arraybackslash}p{0.32\textwidth}@{}}
+    \toprule
+    \textbf{Intento} & \textbf{Qué ocurrió} & \textbf{Cómo se cuenta} \\ \midrule
+    Misión 1, ocho intentos iniciales & La navegación de los dos agentes dejó de responder, después de que el portátil se apagara por falta de batería y con los agentes ya con horas encendidos & Rechazados o abortados; se declaran como fallos \\ \addlinespace
+    Misión 1, intento siguiente & El coordinador rechazó la llegada con el agente a 0,526~m del punto & Fallo declarado; la misión se completó al intento siguiente \\ \addlinespace
+    Misión 2, primer intento & El coordinador no tenía la pose del agente para verificar la llegada & Fallo declarado; la misión se completó al intento siguiente \\ \addlinespace
+    Misión 10 & El portátil volvió a apagarse por falta de batería poco después de pedirla & Empezada y no terminada \\ \addlinespace
+    Destino pedido por error & Se pidió el ascensor del piso 4 del edificio Catalayud, debido a que los de los dos pisos aparecían en la página con el mismo nombre & No es una misión del sorteo y no se cuenta \\ \bottomrule
+  \end{tabular}
+\end{table}
 
 % ---------------------------------------------------------------------
 \section{Limitaciones de la medición}
 \label{sec:limitaciones}
 
-La continuidad del servicio es la variable de respuesta principal del cuarto objetivo, y su criterio binario se cumplió en las treinta misiones. Ese resultado no es evidencia: el criterio exige que, dentro de la ventana de la misión, el coordinador nunca esté inactivo ni tenga el agente sin asignar, y los dos únicos puntos del código que producen esos valores ocurren antes de que la ventana se abra. La continuidad se declaró como un invariante estructural del diseño, y la afirmación se apoyó en una magnitud que sí varía, el intervalo del relevo, que en las quince misiones entre pisos tuvo una mediana de 0,1~s y un máximo de 0,2~s, es decir, uno o dos pasos del reloj de la simulación.
+Dos aspectos acotan lo que puede afirmarse a partir de la medición (tabla~\ref{tab:limitaciones}). El primero es de método: un
+criterio que se cumple siempre por construcción no aporta evidencia, por más que el dato lo acompañe.
 
-En el mapa de la campaña en simulación, el umbral con que se cargan las celdas libres era 0,25, y las celdas desconocidas, que el formato guarda con una ocupación de 0,196, quedaban por debajo de él: 10\,908 celdas que el modelo no describía, el 14,5~\% del mapa, se leyeron como espacio libre. El defecto no cambia el veredicto de la campaña, puesto que los cuatro fallos fueron de precisión de llegada y el pasillo por el que se navegó es libre. Queda sin verificar que ninguna trayectoria cruzara una de esas celdas. El umbral se corrigió a 0,10 después de la campaña.
+\begin{table}[H]
+  \centering\footnotesize\setstretch{1.0}
+  \caption{Limitaciones de la medición y su efecto sobre lo que puede afirmarse.}
+  \label{tab:limitaciones}
+  \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.19\textwidth}>{\raggedright\arraybackslash}p{0.37\textwidth}>{\raggedright\arraybackslash}p{0.38\textwidth}@{}}
+    \toprule
+    \textbf{Limitación} & \textbf{En qué consiste} & \textbf{Efecto sobre el veredicto} \\ \midrule
+    La continuidad no se mide, se construye & El criterio exige que el coordinador nunca esté inactivo ni sin agente asignado dentro de la ventana de la misión, y los dos únicos puntos del código que producen esos valores ocurren antes de que la ventana se abra & Se cumplió en las treinta misiones, pero el resultado no es evidencia. Se declara como invariante estructural del diseño y la afirmación se apoya en una magnitud que sí varía: el intervalo del relevo, de mediana 0,1~s y máximo 0,2~s en las quince misiones entre pisos \\ \addlinespace
+    Umbral de celdas libres del mapa de simulación & El umbral de carga era 0,25 y las celdas desconocidas se guardan con ocupación 0,196, de modo que 10\,908 celdas que el modelo no describía, el 14,5~\% del mapa, se leyeron como espacio libre & No cambia el veredicto, puesto que los cuatro fallos fueron de precisión de llegada y el pasillo por el que se navegó es libre. Queda sin verificar que ninguna trayectoria cruzara una de esas celdas; el umbral se corrigió a 0,10 después de la campaña \\ \bottomrule
+  \end{tabular}
+\end{table}

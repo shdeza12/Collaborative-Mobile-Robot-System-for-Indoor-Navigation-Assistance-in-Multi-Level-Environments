@@ -6,55 +6,43 @@
 %  por voz). Las seis anteriores, de campañas más grandes a evaluación con
 %  usuarios, se quitaron por indicación de los autores. El 3 de noviembre, también
 %  a pedido de los autores, se añadió la de más agentes y misiones simultáneas, que
-%  el marco teórico deja anunciada.
+%  el marco teórico deja anunciada. Correccion 29 del director (11 de noviembre): las
+%  mejoras del sistema van en un parrafo y una tabla, y el trabajo futuro propiamente
+%  dicho se apoya en la literatura.
 % =====================================================================
 \ustacapitulocontinuo{Trabajos futuros}
 \addcontentsline{toc}{chapter}{TRABAJOS FUTUROS}
 
-\paragraph{Una navegación más precisa.} La navegación de los agentes se puede
-mejorar en dos frentes. El primero es la tracción: el agente no se mueve por
-debajo de 0,40~m/s, de modo que calibrar el variador o cambiar la relación de transmisión
-le daría el régimen lento que hoy le falta para la aproximación final. El
-segundo es la medida del avance: codificadores en las ruedas, u odometría visual
-con las cámaras que el agente ya lleva, darían una medida que no depende de que
-el pasillo tenga estructura. Con las dos, la tolerancia de llegada podría volver
-a 0,25~m y el sistema dejaría de depender del entorno para localizarse.
+Lo que sigue se separa en dos. Por un lado, las mejoras que admite el sistema construido sobre lo que
+ya hace, reunidas en la tabla~\ref{tab:mejoras}. Por otro, las líneas que el problema deja abiertas y
+que la literatura reciente ya recorre.
 
-\paragraph{Más capacidad de cómputo.} La tarjeta original, de dos núcleos,
-queda entre el 54 y el 59~\% de uso en reposo con la navegación completa, y su
-carga se dispara cuando los procesos de los dos agentes se anuncian en la red.
-Adaptar la plataforma a una Raspberry Pi~4 o~5, de cuatro núcleos, daría margen
-para la navegación, para un controlador más exigente y para la evasión de
-obstáculos. Para la Raspberry Pi~4, la comunidad de AWS DeepRacer ya publica el
-software de la plataforma.
+\begin{table}[H]
+  \centering\footnotesize\setstretch{1.0}
+  \caption{Mejoras que admite el sistema construido.}
+  \label{tab:mejoras}
+  \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.19\textwidth}>{\raggedright\arraybackslash}p{0.37\textwidth}>{\raggedright\arraybackslash}p{0.38\textwidth}@{}}
+    \toprule
+    \textbf{Frente} & \textbf{Lo que lo limita hoy} & \textbf{Qué lo resolvería} \\ \midrule
+    Precisión de la navegación & El agente no se mueve por debajo de 0,40~m/s, de modo que no tiene régimen de aproximación fina, y la medida del avance depende de que el pasillo tenga estructura & Calibrar el variador o cambiar la relación de transmisión, y añadir codificadores en las ruedas u odometría visual con las cámaras que el agente ya lleva; con las dos, la tolerancia de llegada podría volver a 0,25~m \\ \addlinespace
+    Capacidad de cómputo & La tarjeta original, de dos núcleos, queda entre el 54 y el 59~\% de uso en reposo con la navegación completa & Adaptar la plataforma a una Raspberry Pi~4 o~5, de cuatro núcleos; para la~4, la comunidad de AWS DeepRacer ya publica el software \\ \addlinespace
+    Evasión de obstáculos & Las pruebas se hicieron con los pasillos despejados, y el agente solo se detiene ante lo que aparece & Integrar la evasión en movimiento y probarla con personas que caminan por el pasillo, paso previo a operar en horario de clases \\ \addlinespace
+    Seguimiento de trayectorias & Regulated Pure Pursuit anula la curvatura cuando una inversión de marcha queda cerca de la meta & Un controlador predictivo, como el MPPI que incluye Nav2 y que admite cinemática tipo automóvil; exige más cómputo, así que va con la línea anterior \\ \addlinespace
+    Forma de pedir el servicio & La interfaz obliga a elegir origen y destino en listas & Reconocimiento de voz y un modelo de lenguaje ejecutados en el computador del coordinador, que traduzcan la petición a un par del catálogo sin decidir el recorrido \\ \bottomrule
+  \end{tabular}
+\end{table}
 
-\paragraph{Evasión de obstáculos.} Las pruebas se hicieron con los pasillos
-despejados. En un edificio en uso, el agente tiene que esquivar a las personas
-que se cruzan y los objetos que cambian de sitio, y no solo detenerse ante
-ellos. Integrar la evasión de obstáculos en movimiento, y probarla con
-personas que caminan por el pasillo, es el paso previo a operar en horario de
-clases.
+\paragraph{Coordinación de varios agentes.} El sistema atiende una misión a la vez, con un solo agente
+por piso, y con esas dos condiciones la asignación es trivial. Llevarlo a tres pisos, o atender varias
+solicitudes a la vez, convierte el reparto en un problema de optimización multiagente, para el que el
+estado del arte propone hoy el aprendizaje por refuerzo multiagente: \textcite{xu2026modular} presentan
+un marco modular sobre ROS que lo aplica a la asignación cooperativa de tareas entre varios robots. La
+misma técnica abre la oportunidad de coordinar varios vehículos que operen sobre un mismo piso, escenario
+que este trabajo no contempla y que obliga además a medir de nuevo el costo del descubrimiento en la red,
+que crece con el número de procesos.
 
-\paragraph{Más agentes y misiones simultáneas.} El sistema atiende una misión a la
-vez, con un solo agente por piso, y con esas dos condiciones la asignación es
-trivial. Con dos o más agentes elegibles por tarea, o con varias solicitudes a la
-vez, harían falta una cola de solicitudes, la noción de agente ocupado y un método
-que decida entre candidatos, como el húngaro o una subasta. Es la extensión natural
-del trabajo para edificios con más afluencia, y obliga a medir de nuevo el costo del
-descubrimiento en la red, que crece con el número de procesos.
-
-\paragraph{Un controlador predictivo.} El seguimiento de trayectorias usa
-Regulated Pure Pursuit, que sigue la ruta punto a punto y cuya protección de
-seguridad anula la curvatura cuando una inversión de marcha queda cerca de la
-meta. Un controlador predictivo, como el MPPI que incluye Nav2 y que admite
-cinemática tipo automóvil, optimiza el movimiento varios pasos hacia adelante y
-tiene en cuenta los obstáculos. Con él, la media vuelta podría volver a Nav2 y
-la aproximación final sería más precisa. Como exige más cómputo, va de la mano de la línea anterior.
-
-\paragraph{Interacción por voz.} La interfaz pide elegir el origen y el destino
-en listas. Con reconocimiento de voz a texto y un modelo de lenguaje, el usuario
-podría pedir el servicio hablando, por ejemplo «lléveme al Salón 402», y el
-sistema le explicaría cada etapa en voz alta. Como la red del edificio puede no
-tener salida a internet, los dos modelos tendrían que ejecutarse en el computador del coordinador. El de lenguaje solo traduciría la petición a un origen y un
-destino del catálogo, sin decidir el recorrido, que sigue a cargo del
-planificador.
+\paragraph{Decidir la vía del cambio de piso.} Este trabajo fija la escalera como punto de relevo. En un
+edificio que ofrece escalera y ascensor, la elección deja de ser un dato del diseño y pasa a depender del
+tráfico y de la espera: \textcite{luo2025elevator} la abordan con aprendizaje por refuerzo por capas para
+navegación multipiso en escenarios de alta afluencia. Incorporar esa decisión al coordinador, conservando
+el relevo entre agentes, extendería el sistema a edificios donde la vía más rápida no siempre es la misma.

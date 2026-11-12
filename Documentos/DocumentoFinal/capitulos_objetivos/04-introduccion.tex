@@ -5,7 +5,8 @@
 \chapter*{Introducción}
 \addcontentsline{toc}{chapter}{INTRODUCCIÓN}
 
-Quien entra por primera vez a un edificio grande construye un mapa mental con
+Quien entra por primera vez a un edificio grande —un entorno estructurado, con
+pasillos, pisos y accesos definidos— construye un mapa mental con
 información parcial y lo va corrigiendo mientras camina. Ese esfuerzo crece cuando el
 espacio tiene pasillos repetidos, pocos puntos de referencia o señalización escasa, y
 crece aún más al cambiar de piso, ya que la escalera interrumpe lo que el usuario lleva
@@ -14,16 +15,16 @@ buscaban destinos en edificios virtuales de varios pisos, y encontraron que, en 
 recorridos entre pisos, la eficiencia depende de lo que el edificio deja ver y de lo
 que cada participante espera encontrar en él.
 
-Desde hace años, la robótica móvil colaborativa resuelve tareas parecidas, y el reparto
-de trabajo entre varios robots tiene base teórica desde que
+La robótica móvil colaborativa resuelve tareas parecidas, y el reparto
+de trabajo entre varios robots tiene base teórica desde 2004, cuando
 \textcite{gerkey2004taxonomy} formalizaron la asignación de tareas en sistemas
 multirrobot. Sin embargo, casi todos esos sistemas operan en un solo piso. Cuando se
 ha abordado el cambio de piso, la solución ha pasado por el hardware:
 \textcite{kim2024indoor} combinan un mapa por piso con un grafo topológico y hacen que
 el robot use el ascensor, mientras que \textcite{song2024elevator} automatizan ese uso
 con dispositivos conectados que se instalan en el edificio. La otra opción es dotar al
-robot de mecanismos para subir escaleras. En todos los casos se encarece la plataforma
-o se interviene la infraestructura.
+robot de mecanismos para subir escaleras. En todos los casos aumentan los requerimientos
+tecnológicos de la plataforma, y con ello los costos, o se interviene la infraestructura.
 
 Este trabajo propone otro camino: en lugar de un robot que cambia de piso, dos
 agentes, robots móviles terrestres, uno por piso. El usuario cambia de piso por su

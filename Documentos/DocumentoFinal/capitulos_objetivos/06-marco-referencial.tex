@@ -6,7 +6,7 @@
 \chapter{Marco referencial}
 \label{cap:marco}
 
-\section{Antecedentes}
+\section{Estado del arte}
 \label{sec:antecedentes}
 
 El uso de robots autónomos para acompañar a personas en edificios públicos ya se prueba fuera del laboratorio. \textcite{kayukawa2023enhancing} guiaron a visitantes ciegos por un museo de ciencias con un robot autónomo y el teléfono como canal de consulta, y los participantes lo exploraron de forma segura e independiente. Compartir el espacio plantea además un problema de seguridad, que \textcite{omer2025multilayer} abordan con un control de navegación en tres capas; en este proyecto la respuesta se apoya en la operación, ya que una persona acompaña a cada agente durante las maniobras y el usuario puede cancelar la misión en cualquier momento. En estos trabajos un mismo robot acompaña al usuario durante todo el recorrido, y ese es el supuesto que aquí se cambia.
@@ -44,7 +44,7 @@ En control y locomoción, el agente sigue un \textbf{modelo cinemático tipo aut
 
 En comunicación, \textbf{ROS~2} organiza el software en \textbf{nodos} que se comunican por \textbf{tópicos}, \textbf{servicios} y \textbf{acciones}; una acción representa una tarea larga, con meta, retroalimentación y resultado, y se puede cancelar. Por debajo usa \textbf{DDS}, en el que los participantes se encuentran por \textbf{descubrimiento}. Quién habla con quién lo deciden el \textbf{dominio}, la \textbf{partición} y el \textbf{espacio de nombres}, un prefijo como \texttt{/robot1} que indica a qué agente pertenece cada tópico. El puente \textit{rosbridge} traduce entre ROS~2 y mensajes JSON sobre WebSocket, y un \textbf{contenedor} permite tener dos versiones de ROS~2 en un mismo computador.
 
-En arquitectura, la \textbf{asignación de tareas} reparte las actividades entre los agentes y, cuando una tarea pasa de un piso a otro, toma la forma de un \textbf{relevo} en el \textbf{punto de transferencia}. La \textbf{máquina de estados de misión} describe en qué punto va cada misión, el \textbf{planificador puro} calcula sus tramos sin depender del middleware, y el \textbf{registro de misión} es el documento estructurado que se compone de la grabación de cada ejecución. La \textbf{interacción humano-robot} toma aquí la forma de una interfaz web con \textbf{retroalimentación literal}: muestra tal cual el texto que redacta el coordinador.
+En arquitectura, la \textbf{asignación de tareas} reparte las actividades entre los agentes y, cuando una tarea pasa de un piso a otro, toma la forma de un \textbf{relevo} en el \textbf{punto de transferencia}. La \textbf{máquina de estados de misión} describe en qué punto va cada misión, el \textbf{planificador puro} calcula sus tramos sin depender del middleware, y el \textbf{registro de misión} es el documento estructurado que se compone de la grabación de cada ejecución. La \textbf{interacción humano-robot} (HRI) toma aquí la forma de una interfaz web con \textbf{retroalimentación literal}: muestra tal cual el texto que redacta el coordinador.
 
 En evaluación, las métricas del anteproyecto son el \textbf{tiempo de respuesta}, el \textbf{tiempo de asignación}, la \textbf{tasa de éxito} y la \textbf{continuidad de servicio}. Un \textbf{invariante estructural} es una propiedad que se cumple siempre por el diseño y que, por lo mismo, no es un resultado experimental.
 
