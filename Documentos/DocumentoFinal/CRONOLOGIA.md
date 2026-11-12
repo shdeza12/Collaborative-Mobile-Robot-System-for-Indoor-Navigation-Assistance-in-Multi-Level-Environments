@@ -464,4 +464,4 @@ Fuente: `Evidencia/S30_grafo_rqt.md`; `Evidencia/S30_simulacion_catalayud.md`; `
 - 9 de noviembre: autoridades académicas con los nombres que dieron los autores; falta el Vicerrector Académico General. Los preliminares
   quedan alineados como en la plantilla de la Universidad: títulos a la izquierda, autoridades y nota de aceptación a la derecha.
 
-Fuente: `Documentos/DocumentoFinal/main_objetivos.tex`.
+Fuente: `Documentos/DocumentoFinal/main_definitivo.tex` (se llamaba `main_objetivos.tex`).

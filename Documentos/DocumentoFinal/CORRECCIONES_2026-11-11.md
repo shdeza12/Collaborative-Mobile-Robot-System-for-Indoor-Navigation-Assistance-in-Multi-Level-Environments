@@ -2,6 +2,8 @@
 
 Primera tanda, dictada por los autores el 11 de noviembre de 2026 sobre `main_objetivos.pdf`, la versión que se envió al director Armando. Las páginas, secciones, figuras y tablas son las de ese PDF; las líneas, las de `capitulos_objetivos/` y de los capítulos comunes que usa `main_objetivos.tex`. Cada corrección vale también para `main_integrada`, salvo donde se dice otra cosa.
 
+La lista consolidada de cambios frente al documento entregado está en [CAMBIOS_DOCUMENTO_2026-11-11.md](CAMBIOS_DOCUMENTO_2026-11-11.md), y la comprobación de cada corrección, en [VERIFICACION_CORRECCIONES_2026-11-11.md](VERIFICACION_CORRECCIONES_2026-11-11.md). El documento corregido se llama ahora `main_definitivo.tex`.
+
 **Estado:** aplicado el 11 de noviembre en `main_objetivos.tex`, que quedó en 60 hojas, 46 numeradas. Las preguntas de 5.1, 5.3 y 5.4 no cambian el documento. El resumen para Jonny está en `Correcciones_2026-11-11_Jonny.pdf`. Falta la segunda tanda, que el director envió el mismo 11 de noviembre.
 
 Respuestas de los autores a la sección 7: (1) la redacción en inglés se la sugirió el director pensando que a la IA le resulta más fácil, y se aplicó al resumen y al abstract; (2) se preguntó si estado del arte y antecedentes son lo mismo, y la sección pasó a «Estado del arte», con una tabla de comparación por trabajo; (3) la lectura de 1.6 es la correcta; (4) la figura de la red se regeneró sin las MAC. Los 2 Hz se explicaron como propone 5.2. La tabla 3.8 y el comité de ética quedan sin cambio en el documento.
