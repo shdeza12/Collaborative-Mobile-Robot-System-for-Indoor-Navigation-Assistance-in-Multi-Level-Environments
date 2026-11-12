@@ -19,8 +19,8 @@ hide:
 </div>
 
 <figure class="foto-agentes" markdown>
-![Los dos agentes físicos, construidos sobre la plataforma AWS DeepRacer, con dos cámaras al frente y el láser en la parte superior](img/agentes_fisicos.png)
-<figcaption>Los dos agentes físicos, construidos sobre AWS DeepRacer.</figcaption>
+![Los dos agentes físicos, con el sistema cargado en la plataforma AWS DeepRacer, con dos cámaras al frente y el láser en la parte superior](img/agentes_fisicos.png)
+<figcaption>Los dos agentes físicos, con el sistema cargado en la plataforma AWS DeepRacer.</figcaption>
 </figure>
 </div>
 

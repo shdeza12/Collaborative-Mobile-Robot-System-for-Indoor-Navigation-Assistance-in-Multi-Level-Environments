@@ -64,7 +64,7 @@ Del alcance salieron las restricciones que condicionan el diseño: el edificio n
     \multicolumn{3}{@{}l}{\textit{Restricciones del alcance}} \\
     30 & Ningún agente cambia de piso & Altura de cada agente constante durante la misión \\
     31 & Sin manipular objetos ni intervenir el edificio & Por diseño: el agente solo tiene tracción y dirección \\
-    32 & Interiores y condiciones controladas & En la campaña, solo los dos autores en el pasillo \\
+    32 & Interiores y condiciones controladas & En la campaña, sin personas ajenas a la prueba en el pasillo \\
     33 & Plataforma de bajo costo & AWS DeepRacer en lugar de DonkeyCar \\
     34 & Trayectorias aptas para dirección Ackermann & Radio mínimo y sin giro sobre el propio eje \\
     35 & Simulación a tiempo real & Factor de tiempo real de 0,99 o más \\
@@ -95,6 +95,8 @@ Cada piso del edificio Gregorio es un mundo de Gazebo con su mapa de navegación
 
 La prueba de navegación con un agente físico, en el hall del extremo oeste del piso 3 de Gregorio, no se superó: las dos llegadas medidas quedaron a 1,43 y 1,26~m del destino. El agente aún no tenía la unidad inercial, y la navegación no estaba ajustada para el agente físico, pues en esa misma sesión hubo que corregir una odometría invertida y subir el margen de llegada de Nav2 de 0,25 a 1,0~m. Además, el mapa cargado no correspondía al entorno real, dado que el mundo simulado del que salía daba el hall 0,84~m más ancho de lo que es, 4,24~m frente a 3,40~m, un 25~\% de error.
 
+Con el mapa sin corregir, la localización terminó a 1,17~m de lado de la posición medida con flexómetro. Al corregirlo, ese error bajó a 0,15~m, aunque a lo largo del hall la separación llegó a 2,62~m, con la odometría del láser registrando el 73~\% del avance. La campaña en simulación no depende de esa diferencia, ya que en ella el mundo y el mapa salen del mismo modelo. Con los agentes físicos se cambió de edificio, dado que en Gregorio el tránsito de personas dificultaba las pruebas, el modelo no correspondía a la planta real y, en sus pasillos rectos y uniformes, la odometría del láser no registraba el avance.
+
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.72\textwidth]{imagenes/mapas_gregorio.png}
@@ -102,11 +104,7 @@ La prueba de navegación con un agente físico, en el hall del extremo oeste del
   \label{fig:mapas-gregorio}
 \end{figure}
 
-Con el mapa sin corregir, la localización terminó a 1,17~m de lado de la posición medida con flexómetro. Al corregirlo, ese error bajó a 0,15~m, aunque a lo largo del hall la separación llegó a 2,62~m, con la odometría del láser registrando el 73~\% del avance. La campaña en simulación no depende de esa diferencia, ya que en ella el mundo y el mapa salen del mismo modelo. Con los agentes físicos se cambió de edificio, dado que en Gregorio el tránsito de personas dificultaba las pruebas, el modelo no correspondía a la planta real y, en sus pasillos rectos y uniformes, la odometría del láser no registraba el avance.
-
 El edificio Catalayud se eligió con un criterio que salió de esa medida: como el agente estima su avance comparando barridos sucesivos del láser, necesita estructura no uniforme dentro del alcance del sensor durante todo el recorrido. Sus pisos 3 y 4 la tienen, ya que entre las hornacinas de los salones, los casilleros, la papelera, el ascensor y la escalera suman ocho cambios de perfil en 25~m, uno cada tres metros. Cada piso es un pasillo recto, con los tres salones al este, en hornacinas de 0,99 y 1,01~m de fondo, y el ascensor y la escalera al oeste (figura~\ref{fig:mapas-catalayud}).
-
-El mapeo con SLAM en los propios agentes no dio un mapa utilizable en ningún pasillo, por la misma falta de información de avance. Los pisos 3 y 4 del edificio Catalayud se levantaron entonces con flexómetro, y de ese levantamiento se derivaron el mundo simulado, el mapa de navegación y el catálogo de destinos, de manera que simulación y edificio coinciden al salir de la misma fuente. La herramienta que genera las plantas suma las dos paredes de cada pasillo y avisa si no cierran dentro del 2~\%; las plantas cierran al 0,62~\% en el piso 3 y al 0,32~\% en el piso 4.
 
 \begin{figure}[H]
   \centering
@@ -115,9 +113,18 @@ El mapeo con SLAM en los propios agentes no dio un mapa utilizable en ningún pa
   \label{fig:mapas-catalayud}
 \end{figure}
 
+El mapeo con SLAM en los propios agentes no entregó un mapa utilizable en ningún pasillo, por la misma falta de información de avance. Los pisos 3 y 4 del edificio Catalayud se levantaron entonces con flexómetro, y de ese levantamiento se derivaron el mundo simulado, el mapa de navegación y el catálogo de destinos, de manera que simulación y edificio coinciden al salir de la misma fuente. La herramienta que genera las plantas suma las dos paredes de cada pasillo y avisa si no cierran dentro del 2~\%; las plantas cierran al 0,62~\% en el piso 3 y al 0,32~\% en el piso 4.
+
 \subsection{Arquitectura general y módulos}
 
 La arquitectura consta de una interfaz web por la que entra la solicitud, un coordinador que la reparte y dos agentes, uno por piso, con su pila de navegación (figura~\ref{fig:arquitectura}). Ningún agente atraviesa la zona de transición: la cruza el usuario, y lo que se traspasa entre agentes en la escalera es la responsabilidad de guiarlo.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.9\textwidth]{imagenes/arquitectura_simulacion.png}
+  \caption{Arquitectura del sistema en simulación.}
+  \label{fig:arquitectura}
+\end{figure}
 
 Sus módulos son percepción, localización, planificación, control, locomoción, comunicación, coordinación e interfaz. Los cinco primeros se ejecutan en cada agente, la coordinación y la interfaz se sirven desde el portátil, y la comunicación los enlaza. La figura~\ref{fig:nodos} muestra los nodos principales en la campaña con los agentes físicos y lo que circula entre ellos, con los componentes del fabricante en borde discontinuo, y el anexo C enlaza el grafo completo, obtenido en simulación.
 
@@ -125,14 +132,7 @@ El funcionamiento se definió como un escenario de relevo en siete pasos. El usu
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.62\textwidth]{imagenes/arquitectura_simulacion.png}
-  \caption{Arquitectura del sistema en simulación.}
-  \label{fig:arquitectura}
-\end{figure}
-
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.64\textwidth]{imagenes/nodos_sistema.png}
+  \includegraphics[width=\textwidth]{imagenes/nodos_sistema.png}
   \caption{Nodos principales de ROS~2 en la campaña con los agentes físicos.}
   \label{fig:nodos}
 \end{figure}
@@ -145,7 +145,7 @@ Cada piso tiene un agente asignado, esa correspondencia es un dato de configurac
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.68\textwidth]{imagenes/planificador.png}\hspace*{0.76cm}
+  \includegraphics[width=0.93\textwidth]{imagenes/planificador.png}\hspace*{1.04cm}
   \caption{Función que planifica una misión.}
   \label{fig:planificador}
 \end{figure}
@@ -155,7 +155,13 @@ Como función pura, una prueba automática la recorre entera en milisegundos y s
 \subsection{Esquema de comunicación entre agentes}
 \label{sec:contrato}
 
-El esquema se fijó en un contrato de interfaces que define qué habla con qué y en qué formato (tabla~\ref{tab:contrato}), implementado como un paquete propio de mensajes. La comunicación sigue tres reglas: el coordinador manda a un agente solo mediante la acción de navegación de ROS~2 o la petición de una media vuelta, sin publicar velocidades; la interfaz habla solo con el coordinador; y el texto que ve el usuario lo redacta el coordinador. La interfaz lo muestra literal, lo que evita tener dos copias de la misma lógica. Cada cambio de etapa (tabla~\ref{tab:etapas-mision}) se publica, y esas publicaciones son las marcas de tiempo con que se calculan las métricas.
+El esquema se fijó en un contrato de interfaces que define qué habla con qué y en qué formato (tabla~\ref{tab:contrato}), implementado como un paquete propio de mensajes. La comunicación sigue tres reglas:
+\begin{itemize}[leftmargin=*]
+  \item el coordinador manda a un agente solo mediante la acción de navegación de ROS~2 o la petición de una media vuelta, sin publicar velocidades;
+  \item la interfaz habla solo con el coordinador;
+  \item el texto que ve el usuario lo redacta el coordinador, y la interfaz lo muestra literal, lo que evita tener dos copias de la misma lógica.
+\end{itemize}
+Cada cambio de etapa (tabla~\ref{tab:etapas-mision}) se publica, y esas publicaciones son las marcas de tiempo con que se calculan las métricas.
 
 \begin{table}[H]
   \centering\footnotesize\setstretch{1.0}
@@ -198,12 +204,12 @@ El esquema se fijó en un contrato de interfaces que define qué habla con qué 
 \section{Segundo objetivo específico: plataforma robótica}
 \label{sec:plataforma}
 
-La plataforma se construyó sobre dos agentes AWS DeepRacer (figura~\ref{fig:agentes-fisicos}), cada uno a cargo de un piso del edificio Catalayud, integrando los módulos de locomoción, sensado, procesamiento y comunicación que nombra el objetivo. La tabla~\ref{tab:vehiculo} reúne los componentes del sistema.
+El sistema se cargó en dos agentes de la plataforma AWS DeepRacer (figura~\ref{fig:agentes-fisicos}), cada uno a cargo de un piso del edificio Catalayud, y en ellos se integraron los módulos de locomoción, sensado, procesamiento y comunicación que nombra el objetivo. La tabla~\ref{tab:vehiculo} reúne los componentes del sistema.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.42\textwidth]{imagenes/agentes_fisicos.jpg}
-  \caption{Los dos agentes físicos, construidos sobre la plataforma AWS DeepRacer.}
+  \includegraphics[width=0.5\textwidth]{imagenes/agentes_fisicos.jpg}
+  \caption{Los dos agentes físicos, con el sistema cargado en la plataforma AWS DeepRacer.}
   \label{fig:agentes-fisicos}
 \end{figure}
 
@@ -237,11 +243,11 @@ La plataforma se construyó sobre dos agentes AWS DeepRacer (figura~\ref{fig:age
 \subsection{Selección de la plataforma y del simulador}
 \label{sec:donkeycar}
 
-El anteproyecto planteó construir los agentes sobre DonkeyCar, una plataforma abierta de vehículos a escala con dirección tipo automóvil \autocite{donkeycar}, con una Raspberry Pi~4, simulación en CoppeliaSim y visión con OpenCV. Para analizarla se instaló su simulador y se empezó un modelo propio del agente para ROS~2 (figura~\ref{fig:etapas-plataforma}, izquierda). Su ecosistema no se actualiza desde hace años, su simulador no se comunica con ROS~2, de modo que no permite probar el mapeo, la localización ni la comunicación entre agentes, y no existía un modelo para Gazebo con dirección Ackermann que funcionara en ROS~2 Humble.
+El anteproyecto planteó construir los agentes sobre DonkeyCar, una plataforma abierta de vehículos a escala con dirección tipo automóvil \autocite{donkeycar}, con una Raspberry Pi~4, simulación en CoppeliaSim y visión con OpenCV. Para analizarla se instaló su simulador y se empezó un modelo propio del agente para ROS~2 (figura~\ref{fig:etapas-plataforma}, izquierda). Ese simulador no se comunica con ROS~2, de modo que no permite probar el mapeo, la localización ni la comunicación entre agentes, y no existía un modelo para Gazebo con dirección Ackermann que funcionara en ROS~2 Humble.
 
 Para el simulador se fijaron cuatro criterios: compatibilidad con ROS~2 Humble, vehículos con dirección Ackermann, entornos interiores y soporte para mapeo y navegación. Entre CoppeliaSim, el simulador del curso F1TENTH y Gazebo \autocite{koenig2004gazebo}, se eligió Gazebo por su integración directa con ROS~2 y con su sistema de control de articulaciones.
 
-Como plataforma se adoptó AWS DeepRacer. Es la misma clase de vehículo que el DonkeyCar, AWS publicó en código abierto su modelo de simulación con un complemento de cinemática Ackermann para Gazebo \autocite{awsdeepracer2021}, y la universidad ya tenía dos, con lo que el tiempo disponible pudo dedicarse a la coordinación. El costo fue convivir con el software del fabricante, cuyos nodos ocupan el láser, se ejecutan con el usuario administrador y publican sin espacio de nombres. La tarjeta original, además, solo admite el software de la comunidad \autocite{deepracercustomcar} sobre Ubuntu 24.04 y ROS~2 Jazzy, y la integración de Gazebo~11 con ROS~2 no está publicada para Jazzy, de manera que el proyecto trabaja con dos distribuciones.
+Como plataforma se adoptó AWS DeepRacer. Es la misma clase de vehículo que el DonkeyCar, AWS publicó en código abierto su modelo de simulación con un complemento de cinemática Ackermann para Gazebo \autocite{awsdeepracer2021}, y el laboratorio de robótica de la universidad ya contaba con dos, con lo que el tiempo disponible pudo dedicarse a la coordinación. El costo fue convivir con el software del fabricante, cuyos nodos ocupan el láser, se ejecutan con el usuario administrador y publican sin espacio de nombres. La tarjeta original, además, solo admite el software de la comunidad \autocite{deepracercustomcar} sobre Ubuntu 24.04 y ROS~2 Jazzy, y la integración de Gazebo~11 con ROS~2 no está publicada para Jazzy, de manera que el proyecto trabaja con dos distribuciones.
 
 \begin{figure}[H]
   \centering
@@ -284,38 +290,38 @@ La banda muerta de tracción llevó a fijar la tolerancia de llegada con los age
 \label{sec:dos-vehiculos}
 \label{sec:red}
 
-Como los agentes se mueven, el enlace tiene que ser inalámbrico. La red de la universidad quedó descartada, ya que aísla a sus clientes entre sí, no admite reservas de dirección y no se puede diagnosticar ni modificar, y una red móvil contradiría el diseño, que funciona sin salida a internet. Una red propia sobre Wi-Fi da control completo, direcciones fijas y posibilidad de medir, con el límite de que un enlace compartido no garantiza tiempos de entrega, por lo que el requisito de red fija cotas numéricas y se verifica midiendo.
+Como los agentes se mueven, el enlace tiene que ser inalámbrico. La red de la universidad quedó descartada, ya que aísla a sus clientes entre sí, no admite reservas de dirección y no se puede diagnosticar ni modificar. Tampoco servía una red móvil, pues el sistema está diseñado para funcionar sin salida a internet. Una red propia sobre Wi-Fi da control completo, direcciones fijas y posibilidad de medir, con el límite de que un enlace compartido no garantiza tiempos de entrega, por lo que el requisito de red fija cotas numéricas y se verifica midiendo.
 
-Un enrutador, en el piso 4 del edificio Catalayud junto al punto de acceso de ese piso, reparte las direcciones de toda la red, y de él salen por cable los dos puntos de acceso: el del piso 4, en el mismo piso, y el del piso 3, con un cable que baja desde el piso 4 (figura~\ref{fig:red-topologia}). Los dos trabajan en modo puente, de manera que toda la instalación forma una sola subred, condición para que cada agente y el portátil se descubran. El enlace entre pisos va por cable, debido a que un repetidor usa la misma antena para enlazar y para sus clientes, con lo que pierde la mitad del caudal. En la banda de 2,4~GHz un barrido del sitio encontró 33 redes ajenas, de manera que se trabaja en la de 5~GHz, y el cambio de banda redujo el percentil 95 del tiempo de ida y vuelta de 20,76 a 11,12~ms. Hay un punto de acceso por piso, en canales que no se solapan, ya que la losa atenúa la señal. La tabla~\ref{tab:direcciones-red} da la dirección lógica y la física de cada equipo.
+Un enrutador, en el piso 4 del edificio Catalayud junto al punto de acceso de ese piso, reparte las direcciones de toda la red, y de él salen por cable los dos puntos de acceso: el del piso 4, en el mismo piso, y el del piso 3, con un cable que baja desde el piso 4 (figura~\ref{fig:red-topologia}). Los dos trabajan en modo puente, de manera que toda la instalación forma una sola subred, condición para que cada agente y el portátil se descubran. El enlace entre pisos va por cable, debido a que un repetidor usa la misma antena para enlazar y para sus clientes, con lo que pierde la mitad del caudal. En la banda de 2,4~GHz un barrido del sitio encontró 33 redes ajenas, de manera que se trabaja en la de 5~GHz, y el cambio de banda redujo el percentil 95 del tiempo de ida y vuelta de 20,76 a 11,12~ms. Hay un punto de acceso por piso, en canales que no se solapan, ya que la losa atenúa la señal. La tabla~\ref{tab:direcciones-red} da la dirección IP de cada equipo.
 
 \begin{table}[H]
   \centering\footnotesize\setstretch{1.0}
-  \caption{Direcciones lógicas y físicas de los equipos de la red en los pisos 3 y 4 del edificio Catalayud.}
+  \caption{Direcciones IP de los equipos de la red en los pisos 3 y 4 del edificio Catalayud.}
   \label{tab:direcciones-red}
-  \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}p{0.27\textwidth}>{\raggedright\arraybackslash}p{0.22\textwidth}>{\raggedright\arraybackslash}p{0.2\textwidth}@{}}
+  \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.24\textwidth}>{\raggedright\arraybackslash}p{0.38\textwidth}>{\raggedright\arraybackslash}p{0.3\textwidth}@{}}
     \toprule
-    \textbf{Equipo} & \textbf{Conexión} & \textbf{Dirección IP} & \textbf{Dirección MAC} \\ \midrule
-    Enrutador TP-Link \mbox{TL-WR940N} & En el piso~4; cable a cada punto de acceso y red de respaldo a 2,4~GHz & \texttt{192.168.0.1/24}, fija & \texttt{60:32:B1:77:FB:CC} \\ \addlinespace
-    Punto de acceso del piso~3 & Cable entre pisos al enrutador; 5~GHz, canal~44 & --- & \texttt{8C:5F:AD:37:AA:46} \\ \addlinespace
-    Punto de acceso del piso~4 & Cable al enrutador, en el mismo piso; 5~GHz, canal~36 & --- & \texttt{8C:5F:AD:37:D2:16} \\ \addlinespace
-    Agente del piso~3 & Wi-Fi al punto de acceso de su piso & \texttt{192.168.0.102}, reservada por su MAC & \texttt{80:91:33:ED:8C:F3} \\ \addlinespace
-    Agente del piso~4 & Wi-Fi al punto de acceso de su piso & \texttt{192.168.0.104}, reservada por su MAC & \texttt{80:91:33:F3:E6:AB} \\ \addlinespace
-    Portátil & Wi-Fi a la red de respaldo del enrutador & \texttt{192.168.0.105}, asignada por el enrutador & \texttt{D8:80:83:5E:C1:D7} \\ \bottomrule
+    \textbf{Equipo} & \textbf{Conexión} & \textbf{Dirección IP} \\ \midrule
+    Enrutador TP-Link \mbox{TL-WR940N} & En el piso~4; cable a cada punto de acceso y red de respaldo a 2,4~GHz & \texttt{192.168.0.1/24}, fija \\ \addlinespace
+    Punto de acceso del piso~3 & Cable entre pisos al enrutador; 5~GHz, canal~44 & --- \\ \addlinespace
+    Punto de acceso del piso~4 & Cable al enrutador, en el mismo piso; 5~GHz, canal~36 & --- \\ \addlinespace
+    Agente del piso~3 & Wi-Fi al punto de acceso de su piso & \texttt{192.168.0.102}, reservada en el enrutador \\ \addlinespace
+    Agente del piso~4 & Wi-Fi al punto de acceso de su piso & \texttt{192.168.0.104}, reservada en el enrutador \\ \addlinespace
+    Portátil & Wi-Fi a la red de respaldo del enrutador & \texttt{192.168.0.105}, asignada por el enrutador \\ \bottomrule
   \end{tabular}
 \end{table}
 
-Las fallas de la red no producían ningún mensaje de error y se encontraron al medir. A las dos tarjetas les faltaba el fichero con las reglas de uso del espectro, por lo cual veían las redes de 5~GHz pero no podían transmitir en ellas, y un punto de acceso conectado a la vez por cable y por radio hacía que de 100 peticiones enviadas un agente recibiera 147.
+Las fallas de la red no producían ningún mensaje de error y se encontraron al medir. Para trabajar en 5~GHz hubo que habilitar esa banda en los agentes. A sus tarjetas les faltaba la base de datos regulatoria del sistema operativo, que fija los canales en que puede emitir la radio, y sin ella las 31 frecuencias de 5~GHz quedaban en solo escucha: los agentes veían las redes, pero no podían transmitir en ellas. Se instaló esa base en los dos agentes, junto con un servicio que fija el dominio regulatorio en cada arranque, y al reiniciarlos cada tarjeta pasó de ninguno a 13 canales utilizables, entre ellos del 36 al 48 con 23~dBm, mientras el enlace pasó de 802.11n a 802.11ac. La otra falla fue un punto de acceso conectado a la vez por cable y por radio, que hacía que de 100 peticiones enviadas un agente recibiera 147.
 
-En ROS~2 cada proceso se anuncia periódicamente a todos los demás, con lo que ese trabajo crece aproximadamente con el cuadrado del número de participantes. Con un agente su tarjeta trabajaba entre el 52 y el 63~\% de capacidad, mientras que al encender el segundo subió al 95~\% y Nav2 no alcanzó a arrancar. El coordinador y el grabador se llevaron por ello al portátil, que quedó como único interlocutor conocido de cada agente; los agentes no se ven entre sí, lo que coincide con el diseño, y el sistema completo volvió a entre el 68 y el 74~\% de la tarjeta.
+En ROS~2 cada proceso se anuncia periódicamente a todos los demás, con lo que ese trabajo crece aproximadamente con el cuadrado del número de participantes. Con un agente su tarjeta trabajaba entre el 52~\% y el 63~\% de capacidad, mientras que al encender el segundo subió al 95~\% y Nav2 no alcanzó a arrancar. El coordinador y el grabador se llevaron por ello al portátil, que quedó como único interlocutor conocido de cada agente; los agentes no se ven entre sí, lo que coincide con el diseño, y el sistema completo volvió a entre el 68~\% y el 74~\% de la tarjeta.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.66\textwidth]{imagenes/red_topologia.png}
-  \caption{Montaje físico de la red en los pisos 3 y 4 del edificio Catalayud, con las direcciones IP y MAC de los equipos.}
+  \includegraphics[width=0.9\textwidth]{imagenes/red_topologia.png}
+  \caption{Montaje físico de la red en los pisos 3 y 4 del edificio Catalayud, con las direcciones IP de los equipos.}
   \label{fig:red-topologia}
 \end{figure}
 
-Las cotas del requisito, una mediana de 100~ms y un percentil 95 de 250~ms sin pérdidas, se fijaron antes de medir, a partir de los 2~Hz a los que cada agente publica su estado. Entre los dos agentes, en la misma sala y sobre 600 mensajes, la mediana fue de 5,99~ms y el percentil 95 de 11,12~ms, sin pérdidas. En el montaje definitivo, con cada agente en el punto de acceso de su piso del edificio Catalayud, la ida y vuelta fue de 2,13 y 1,99~ms contra el enrutador, sin pérdidas ni duplicados, de modo que la red no limita el desempeño del sistema.
+Las cotas del requisito, una mediana de 100~ms y un percentil 95 de 250~ms sin pérdidas, se fijaron antes de medir a partir del periodo de 0,5~s con que cada agente publica su estado, a 2~Hz. Con una latencia de ida de ese orden, la posición que recibe el coordinador llegaría atrasada una publicación, de modo que el límite es de 1~s de ida y vuelta, y las cotas dejan un margen de 10 veces en la mediana y de 4 en el percentil 95. Esa frecuencia alcanza para el uso que tiene el estado: el coordinador toma de él la posición de cada agente físico para decidir la media vuelta y para verificar la llegada, que comprueba con el agente ya detenido, mientras que el control del movimiento corre a bordo, en la navegación de cada agente. Entre los dos agentes, en la misma sala y sobre 600 mensajes, la mediana fue de 5,99~ms y el percentil 95 de 11,12~ms, sin pérdidas. En el montaje definitivo, con cada agente en el punto de acceso de su piso del edificio Catalayud, la ida y vuelta fue de 2,13 y 1,99~ms contra el enrutador, sin pérdidas ni duplicados, de modo que la red no limita el desempeño del sistema.
 
 \subsection{Integración de los módulos}
 \label{sec:integracion}
@@ -354,7 +360,14 @@ Al llevar el sistema a los agentes físicos se mantuvo su estructura: un coordin
   \end{tabular}
 \end{table}
 
-Lo que cambió fue la implementación de los bloques (tabla~\ref{tab:sim-vehiculos} y figura~\ref{fig:arquitectura-vehiculos}).
+Lo que cambió fue la implementación de los bloques (figura~\ref{fig:arquitectura-vehiculos} y tabla~\ref{tab:sim-vehiculos}).
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.82\textwidth]{imagenes/arquitectura_vehiculos.png}
+  \caption{Arquitectura del sistema en la campaña con los agentes físicos.}
+  \label{fig:arquitectura-vehiculos}
+\end{figure}
 
 \begin{table}[H]
   \centering\footnotesize\setstretch{1.0}
@@ -369,19 +382,12 @@ Lo que cambió fue la implementación de los bloques (tabla~\ref{tab:sim-vehicul
     Locomoción & Complemento Ackermann de Gazebo & Puente de la orden de velocidad a los servos, con una escala por agente & La tracción real tiene banda muerta y funciona en lazo abierto \\ \addlinespace
     Sensado & Láser simulado de 10~m de alcance & RPLIDAR A1M8 y la unidad inercial de la tarjeta; cámaras apagadas & Las cámaras no se usan y cargaban la tarjeta \\ \addlinespace
     Odometría & La del simulador & La del láser, combinada con la unidad inercial & El agente no tiene codificadores en las ruedas \\ \addlinespace
-    Mapa & Calculado del mundo simulado & Derivado de la planta medida con flexómetro & El mapeo con SLAM a bordo no dio un mapa utilizable \\ \addlinespace
+    Mapa & Calculado del mundo simulado & Derivado de la planta medida con flexómetro & El mapeo con SLAM a bordo no entregó un mapa utilizable \\ \addlinespace
     Escenario & Pisos 2 y 3 del edificio Gregorio & Pisos 3 y 4 del edificio Catalayud, levantados con flexómetro & Tránsito de personas, mundo simulado mal medido y pasillos uniformes en Gregorio \\ \addlinespace
     Llegada & Tolerancia de 0,25~m & Tolerancia de 0,5~m, verificada con la pose del agente 1,5~s después de que Nav2 da la meta por alcanzada & Banda muerta; el agente sigue rodando cuando Nav2 declara la llegada \\ \addlinespace
     Media vuelta & La planifica Nav2 & Maniobra propia del agente, vigilada con el láser y el mapa & La de Nav2 abortó contra la pared en el piso 4 de Catalayud \\ \bottomrule
   \end{tabular}
 \end{table}
-
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.58\textwidth]{imagenes/arquitectura_vehiculos.png}
-  \caption{Arquitectura del sistema en la campaña con los agentes físicos.}
-  \label{fig:arquitectura-vehiculos}
-\end{figure}
 
 % =====================================================================
 \section{Tercer objetivo específico: interfaz móvil}
@@ -394,21 +400,21 @@ El objetivo pide una interfaz móvil basada en la selección de localizaciones d
 
 El usuario elige el origen en una lista y el destino en un catálogo con búsqueda por nombre, donde cada destino muestra su piso y, si queda en el otro piso, la marca «con relevo» (figura~\ref{fig:hri}, izquierda). Los dos ascensores del edificio Catalayud se llamaban igual en la lista, y en una misión se eligió el del piso equivocado, así que los nombres repetidos se muestran con su piso, como «Ascensor (piso 3)». Durante la misión, la página muestra el texto que redacta el coordinador, el agente que está guiando, hacia dónde va y la distancia restante, y una franja de cinco pasos marca el paso actual (figura~\ref{fig:hri}, centro).
 
-\subsection{Confirmación de cambio de piso}
-
-En una misión entre pisos, el segundo agente llega a su escalera y no puede saber si el usuario ya cambió de piso. Por esa razón, cuando llega a su punto de transferencia, el coordinador pasa a la etapa de espera y la página muestra un botón para confirmar el cambio de piso (figura~\ref{fig:hri}, derecha), con un texto que depende del sentido, como «Suba con calma al piso 4» o «Baje con calma al piso 3». A los 60~s sin confirmación aparece un aviso, y a los 120~s la misión termina como fallida. Los plazos se cuentan desde que llega el agente, y si el usuario confirma antes, la confirmación se retiene y se aplica al llegar.
-
 \begin{figure}[H]
   \centering
-  \includegraphics[height=7.6cm]{imagenes/hri_catalogo.png}\hfill
-  \includegraphics[height=7.6cm]{imagenes/hri_seguimiento.png}\hfill
-  \begin{minipage}[b]{3.35cm}
+  \includegraphics[height=9.2cm]{imagenes/hri_catalogo.png}\hspace{0.8cm}
+  \includegraphics[height=9.2cm]{imagenes/hri_seguimiento.png}\hspace{0.8cm}
+  \begin{minipage}[b]{4.05cm}
     \includegraphics[trim=0 0 0 818,clip,width=\linewidth]{imagenes/hri_confirmacion_piso.png}\\[0.2cm]
     \includegraphics[trim=0 0 0 832,clip,width=\linewidth]{imagenes/hri_confirmacion_subida.png}
   \end{minipage}
-  \caption{Interfaz web en el teléfono durante las pruebas del 23 de octubre (anexo A, video 8): catálogo de destinos (izquierda), primer tramo de una misión (centro) y espera de confirmación al bajar y al subir (derecha).}
+  \caption{Interfaz web en el teléfono durante las pruebas con los agentes físicos (anexo A, video 8): catálogo de destinos (izquierda), primer tramo de una misión (centro) y espera de confirmación al bajar y al subir (derecha).}
   \label{fig:hri}
 \end{figure}
+
+\subsection{Confirmación de cambio de piso}
+
+En una misión entre pisos, el segundo agente llega a su escalera y no puede saber si el usuario ya cambió de piso. Por esa razón, cuando llega a su punto de transferencia, el coordinador pasa a la etapa de espera y la página muestra un botón para confirmar el cambio de piso (figura~\ref{fig:hri}, derecha), con un texto que depende del sentido, como «Suba con calma al piso 4» o «Baje con calma al piso 3». A los 60~s sin confirmación aparece un aviso, y a los 120~s la misión termina como fallida. Los plazos se cuentan desde que llega el agente, y si el usuario confirma antes, la confirmación se retiene y se aplica al llegar.
 
 \subsection{Cancelación}
 
@@ -446,7 +452,7 @@ La campaña en simulación, en los pisos 2 y 3 del edificio Gregorio (anexo A, v
 
 Una ejecución fallida cuenta como fallo y solo se descarta si la causa es ajena al sistema y está en la lista cerrada. Esa lista admite la caída del simulador, un controlador del agente que no se activa, el factor de tiempo real por debajo de 0,99, un fallo de la máquina anfitriona o una cancelación por una causa externa anotada antes de conocer el resultado. Si los descartes superan el 20~\%, la campaña no es válida. Para que las métricas temporales valgan, la simulación debe ejecutarse a tiempo real, y en las treinta misiones el factor de tiempo real tuvo un mínimo de 0,9917 y una media de 0,9973.
 
-La campaña con los agentes físicos, del 16 de octubre, en los pisos 3 y 4 del edificio Catalayud (anexo A, video 7), parte de diez misiones sorteadas con la semilla 20261013, cinco de subida y cinco de bajada. Se ejecutaron en ese orden y sin reubicar los agentes entre misiones, como ocurriría en la operación real.
+La campaña con los agentes físicos en los pisos 3 y 4 del edificio Catalayud (anexo A, video 7) parte de diez misiones sorteadas con la semilla 20261013, cinco de subida y cinco de bajada. Se ejecutaron en ese orden y sin reubicar los agentes entre misiones, como ocurriría en la operación real.
 
 \subsection{Instrumentación y análisis}
 \label{sec:instrumentacion}
@@ -455,7 +461,7 @@ Cada misión deja una grabación de datos de ROS (\textit{rosbag}) con los tópi
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.64\textwidth]{imagenes/instrumentacion.png}
+  \includegraphics[width=\textwidth]{imagenes/instrumentacion.png}
   \caption{Instrumentación de una misión: verificación de la llegada con los agentes físicos (arriba) y camino de la grabación hasta las métricas (abajo).}
   \label{fig:instrumentacion}
 \end{figure}

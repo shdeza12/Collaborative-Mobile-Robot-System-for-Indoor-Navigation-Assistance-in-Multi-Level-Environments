@@ -1,0 +1,75 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-noshorthands]{babel}
+\usepackage{mathptmx}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{booktabs,array,longtable}
+\usepackage[hidelinks]{hyperref}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.5em}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+\begin{document}
+
+{\Large\textbf{Correcciones del director al documento final}}
+
+Observaciones del director Armando Mateus Rojas sobre el documento que se le entregó: la
+versión organizada por objetivos específicos, de 59 hojas. Las páginas son las de ese PDF.
+
+\section*{Documento}
+
+{\small
+\begin{longtable}{@{}L{0.04\textwidth}L{0.24\textwidth}L{0.66\textwidth}@{}}
+\toprule
+\textbf{N.º} & \textbf{Dónde} & \textbf{Corrección} \\ \midrule
+\endfirsthead
+\toprule
+\textbf{N.º} & \textbf{Dónde} & \textbf{Corrección} \\ \midrule
+\endhead
+\bottomrule
+\endfoot
+1 & Todo el documento & ¿«Web» se escribe con mayúscula? \\ \addlinespace
+2 & Todo el documento & Hay secciones en las que se escribe «interacción humano-robot» completo en vez de HRI; debería usarse como en el glosario. \\ \addlinespace
+3 & Todo el documento & Sugerencia: redactar el documento en inglés y, a partir de esa versión, pasarlo al español. \\ \addlinespace
+4 & Autoridades académicas y nota de aceptación & Hay fechas en las que «noviembre» está en minúscula. \\ \addlinespace
+5 & Abstract & En vez de «written», «defined», y lo mismo con «before». \\ \addlinespace
+6 & Abstract & «of ten randomised» está mal; sería mejor «nine out of ten missions». \\ \addlinespace
+7 & Glosario & La definición de agente está mal; tiene que ser más general. \\ \addlinespace
+8 & Abreviaturas & AMCL está bien y HRI está bien. Los términos técnicos no están tan bien vistos; es mejor dejar los conceptos de ingeniería y las técnicas de ingeniería. \\ \addlinespace
+9 & Introducción, pág. 1 & Al párrafo «Quien entra por primera vez a un edificio grande construye un mapa mental con información parcial y lo va corrigiendo mientras camina. Ese esfuerzo crece cuando el espacio tiene pasillos repetidos, pocos puntos de referencia o señalización escasa…» agregarle «entorno estructurado». \\ \addlinespace
+10 & Introducción, pág. 1 & «Desde hace años» es ambiguo. \\ \addlinespace
+11 & Introducción, pág. 1 & «Encarecer» está mal; mejor «sin aumentar los requerimientos tecnológicos y con ello los costos». \\ \addlinespace
+12 & Marco referencial, pág. 4 & No hay estado del arte. \\ \addlinespace
+13 & 3.1.2, pág. 13 & «El mapeo con SLAM en los propios agentes no dio»: mejor «no entregó». \\ \addlinespace
+14 & Interfaz web & ¿Qué puerto se usó para la interfaz web? ¿El 8080? \\ \addlinespace
+15 & 3.1.5, pág. 16 & Las reglas deberían ir en viñetas. \\ \addlinespace
+16 & Figura 3.6, pág. 18 & La descripción dice «construidos»; mejor «cargados» (\textit{uploaded}). \\ \addlinespace
+17 & 3.2.1, pág. 19 & «Su ecosistema no se actualiza desde hace años»: es mejor «No se ha actualizado». \\ \addlinespace
+18 & 3.2.1, pág. 19 & «y la universidad ya tenía dos»: es mejor «y el laboratorio de robótica de la universidad ya contaba con dos». \\ \addlinespace
+19 & 3.2.5, pág. 21 & «Contradiría» no queda bien. Falta mencionar el trabajo que se hizo para activar 5~GHz en los agentes. \\ \addlinespace
+20 & 3.2.5, pág. 22 & «52 y el 63~\%»: falta el \% en «52~\%». \\ \addlinespace
+21 & Tabla 3.6 y figura 3.8, págs. 22 y 23 & No es necesario nombrar las direcciones MAC. \\ \addlinespace
+22 & 3.2.5, pág. 23 & «a partir de los 2~Hz a los que cada agente publica su estado»: ¿por qué 2~Hz? \\ \addlinespace
+23 & Tabla 3.8, pág. 25 & ¿Tiene alguna metodología sim2real? ¿Está basada en alguna metodología sim2real? \\ \addlinespace
+24 & Interfaz web & ¿Hasta qué punto la interfaz web no va a comité de ética? \\ \addlinespace
+25 & 3.4, pág. 29, y 4.3, pág. 33 & «del 16 de octubre»: esa fecha es irrelevante mencionarla. \\ \addlinespace
+26 & 4.3, pág. 33 & No se dice que los autores hicieron de usuario; sería más bien algo como «se realizó validación del cambio de piso desde la interfaz web para móvil». \\ \addlinespace
+27 & 4.3.3 y 4.4, pág. 36 & Una forma de reducir tanto texto es poner tablas; en estos párrafos aplica. \\ \addlinespace
+28 & Conclusiones, pág. 37 & Preguntar si se puede poner «Discusión» o cambiar el capítulo a «Discusión y conclusiones». En la discusión se presenta y se explica lo que se hizo, siempre de mayor a menor nivel (de la ingeniería a lo técnico). En las conclusiones se responde a los objetivos presentando lo que se hizo para cada uno, solo con los resultados generales más relevantes y sin explicaciones. \\ \addlinespace
+29 & Trabajos futuros, pág. 38 & Están orientados a características técnicas, que son más mejoras de lo que hay que trabajo futuro propiamente dicho. No está mal, pero sería solo un párrafo y una tabla, y después otros párrafos con trabajos futuros a partir de lo encontrado en la literatura. Por ejemplo: «La integración para 3 pisos puede requerir procesos de optimización multiagente; una alternativa que actualmente se encuentra en el estado del arte es MARL como se propone en [XX] y [XX]. Así mismo, una oportunidad identificada es la inclusión de MARL para la coordinación de varios vehículos en el escenario en que varios operen sobre el mismo piso». \\
+\end{longtable}}
+
+\section*{Presentación}
+
+{\small
+\begin{longtable}{@{}L{0.04\textwidth}L{0.24\textwidth}L{0.66\textwidth}@{}}
+\toprule
+\textbf{N.º} & \textbf{Dónde} & \textbf{Corrección} \\ \midrule
+\endfirsthead
+\bottomrule
+\endfoot
+30 & Conclusiones & Presentarlas como en la presentación de sustentación de Katherin: con un brazo robótico para las de ingeniería y engranajes para las técnicas. \\
+\end{longtable}}
+
+\end{document}

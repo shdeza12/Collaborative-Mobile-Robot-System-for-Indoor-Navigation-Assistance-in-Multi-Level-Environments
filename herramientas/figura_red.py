@@ -56,14 +56,13 @@ def linea(ax, puntos, discontinua=False, grosor=0.9, color=GRIS):
 
 def topologia():
     """El montaje fisico: por donde pasan de verdad los mensajes, con la direccion
-    logica (IP) y la fisica (MAC) de cada equipo.
+    IP de cada equipo. Desde el 11 de noviembre va sin las direcciones MAC, por
+    correccion de los autores: no hacen falta para leer el montaje.
 
     El enrutador esta en el piso 4, junto al punto de acceso de ese piso, y del
     piso 4 sale el cable al punto de acceso del piso 3 (confirmado por los
-    autores el 6 de noviembre). Las MAC de los puntos de acceso son las de su
-    radio de 5 GHz, leidas de las redes guardadas en el portatil; las de los
-    agentes y el enrutador, de TOPOLOGIA_RED.md. Los puntos de acceso van sin IP
-    y el telefono sin direcciones, por decision de los autores.
+    autores el 6 de noviembre). Los puntos de acceso van sin IP y el telefono
+    sin direcciones, por decision de los autores.
     """
     fig = plt.figure(figsize=(6.5, 5.3))
     ax = fig.add_axes([0, 0, 1, 1])
@@ -74,7 +73,7 @@ def topologia():
     # Enrutador, arriba y al centro: reparte direcciones para todos.
     caja(ax, 23, 61, 54, 19, AZUL_FONDO, AZUL)
     texto(ax, 50, 76.6, 'Enrutador TP-Link TL-WR940N · piso 4', 8, 'bold', TINTA)
-    texto(ax, 50, 73.0, 'IP 192.168.0.1/24 · MAC 60:32:B1:77:FB:CC', 6.4, color=TINTA)
+    texto(ax, 50, 73.0, 'IP 192.168.0.1/24', 6.4, color=TINTA)
     texto(ax, 50, 69.6, 'Reparte las direcciones de toda la red', 6.4)
     texto(ax, 50, 66.4, 'Red de respaldo DEEPRACER en 2,4 GHz, canal 6', 6.4)
 
@@ -84,23 +83,20 @@ def topologia():
     texto(ax, 10.5, 68.8, 'Interfaz web', 6.2)
     linea(ax, [(19.4, 70.5), (22.6, 70.5)], discontinua=True)
     caja(ax, 81, 61, 17, 19, AGENTE_FONDO, TINTA2, radio=1.6)
-    texto(ax, 89.5, 76.6, 'Portátil', 7.6, 'bold', TINTA)
-    texto(ax, 89.5, 73.0, 'IP 192.168.0.105', 5.9, color=TINTA)
-    texto(ax, 89.5, 69.8, 'MAC D8:80:83:5E:C1:D7', 5.9, color=TINTA)
-    texto(ax, 89.5, 66.4, 'Coordinador', 6.0)
-    texto(ax, 89.5, 63.6, 'y página web', 6.0)
+    texto(ax, 89.5, 76.0, 'Portátil', 7.6, 'bold', TINTA)
+    texto(ax, 89.5, 72.0, 'IP 192.168.0.105', 5.9, color=TINTA)
+    texto(ax, 89.5, 67.6, 'Coordinador', 6.0)
+    texto(ax, 89.5, 64.8, 'y página web', 6.0)
     linea(ax, [(77.4, 70.5), (80.6, 70.5)], discontinua=True)
     texto(ax, 21, 72.6, 'Wi-Fi', 5.6, color=GRIS)
     texto(ax, 79, 72.6, 'Wi-Fi', 5.6, color=GRIS)
 
     # Los dos puntos de acceso, uno por piso, en puente y unidos por cable.
-    for x0, piso, canal, mac in ((3, '3', '44', '8C:5F:AD:37:AA:46'),
-                                 (55, '4', '36', '8C:5F:AD:37:D2:16')):
+    for x0, piso, canal in ((3, '3', '44'), (55, '4', '36')):
         caja(ax, x0, 35, 42, 16, VERDE_FONDO, VERDE)
-        texto(ax, x0 + 21, 47.4, f'Punto de acceso · piso {piso}', 7.6, 'bold', TINTA)
-        texto(ax, x0 + 21, 43.8, f'MAC {mac}', 6.4, color=TINTA)
-        texto(ax, x0 + 21, 40.4, f'5 GHz · canal {canal} · 40 MHz', 6.4)
-        texto(ax, x0 + 21, 37.4, 'En puente: no reparte direcciones ni enruta', 6.0)
+        texto(ax, x0 + 21, 46.8, f'Punto de acceso · piso {piso}', 7.6, 'bold', TINTA)
+        texto(ax, x0 + 21, 42.8, f'5 GHz · canal {canal} · 40 MHz', 6.4)
+        texto(ax, x0 + 21, 39.2, 'En puente: no reparte direcciones ni enruta', 6.0)
 
     # Cable del enrutador a cada punto de acceso: el del piso 3 baja entre pisos.
     linea(ax, [(38, 60.6), (38, 56), (24, 56), (24, 51.4)])
@@ -109,13 +105,12 @@ def topologia():
     texto(ax, 76, 57.6, 'cable', 6.2, color=GRIS)
 
     # Un agente colgando de cada punto de acceso, por aire.
-    for x0, piso, ip, mac, lat in ((3, '3', '192.168.0.102', '80:91:33:ED:8C:F3', '2,13 ms'),
-                                   (55, '4', '192.168.0.104', '80:91:33:F3:E6:AB', '1,99 ms')):
+    for x0, piso, ip, lat in ((3, '3', '192.168.0.102', '2,13 ms'),
+                              (55, '4', '192.168.0.104', '1,99 ms')):
         caja(ax, x0 + 4, 11, 34, 16.5, AGENTE_FONDO, TINTA2, radio=1.6)
-        texto(ax, x0 + 21, 24.0, f'Agente del piso {piso}', 7.6, 'bold', TINTA)
-        texto(ax, x0 + 21, 20.6, f'IP {ip}, reservada', 6.4, color=TINTA)
-        texto(ax, x0 + 21, 17.4, f'MAC {mac}', 6.4, color=TINTA)
-        texto(ax, x0 + 21, 14.2, f'ida y vuelta {lat}', 6.4)
+        texto(ax, x0 + 21, 23.4, f'Agente del piso {piso}', 7.6, 'bold', TINTA)
+        texto(ax, x0 + 21, 19.4, f'IP {ip}, reservada', 6.4, color=TINTA)
+        texto(ax, x0 + 21, 15.6, f'ida y vuelta {lat}', 6.4)
         linea(ax, [(x0 + 21, 34.6), (x0 + 21, 27.9)], discontinua=True)
         texto(ax, x0 + 29, 31.2, 'Wi-Fi', 6.2, color=GRIS)
 

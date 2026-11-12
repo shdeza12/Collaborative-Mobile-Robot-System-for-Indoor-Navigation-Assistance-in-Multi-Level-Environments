@@ -5,13 +5,15 @@
 % =====================================================================
 \ustaseccion{Glosario}
 
-\setstretch{1.1}
+\setstretch{1.0}
 \begin{description}[style=unboxed,leftmargin=0pt,itemsep=0em,parsep=0pt]
-  \item[Agente.] Cada uno de los dos robots móviles del sistema, construidos sobre AWS DeepRacer y dedicados cada uno a un piso.
+  \item[Agente.] Sistema que percibe su entorno por medio de sensores y actúa sobre él de forma autónoma para cumplir una tarea. En este trabajo, cada uno de los dos robots móviles terrestres del sistema, uno por piso.
   \item[Cinemática tipo automóvil (dirección Ackermann).] Modelo de un vehículo que dirige con el eje delantero, tiene radio de giro mínimo y no puede girar sobre su propio eje.
   \item[Continuidad del servicio.] Propiedad de no interrumpir la asistencia mientras el usuario cambia de piso.
+  \item[Entorno estructurado.] Espacio de geometría regular y conocida de antemano, como el interior de un edificio con pasillos, muros y escaleras, a diferencia de los entornos abiertos o naturales.
   \item[Localización.] Estimación de la posición y la orientación del agente respecto a un marco de referencia fijo.
   \item[Misión.] Una solicitud de guiado completa, desde que el usuario elige origen y destino hasta que el sistema la cierra.
+  \item[MPPI (\textit{Model Predictive Path Integral}).] Controlador predictivo que en cada ciclo simula muchas trayectorias posibles, las evalúa según la ruta y los obstáculos, y aplica la orden que combina las mejores. Nav2 lo incluye y admite vehículos tipo automóvil.
   \item[Odometría.] Estimación del desplazamiento del agente a partir de sus propias mediciones; aquí, de barridos sucesivos del láser.
   \item[Punto de transferencia.] Lugar físico, en este trabajo la escalera, donde un agente entrega el guiado y el otro lo recibe.
   \item[Relevo.] Traspaso de la responsabilidad de guiar a un usuario, de un agente al otro, en un punto acordado de antemano.
@@ -23,16 +25,14 @@
 
 \ustaseccioncontinua{Abreviaturas}
 
-\setstretch{1.1}
+\setstretch{1.0}
 \begin{description}[style=unboxed,leftmargin=0pt,itemsep=0em,parsep=0pt]
   \item[AMCL.] \textit{Adaptive Monte Carlo Localization}, localización adaptativa por método de Monte Carlo.
-  \item[AWS.] \textit{Amazon Web Services}, fabricante de la plataforma DeepRacer.
-  \item[DDS.] \textit{Data Distribution Service}, protocolo de transporte sobre el que ROS~2 implementa sus comunicaciones.
   \item[GED.] Grupo de Estudio y Desarrollo en Robótica.
   \item[HRI.] \textit{Human-Robot Interaction}, interacción humano-robot.
   \item[IMU.] \textit{Inertial Measurement Unit}, unidad de medición inercial.
-  \item[JSON.] \textit{JavaScript Object Notation}, formato de intercambio de datos en texto.
-  \item[Nav2.] \textit{Navigation2}, marco de navegación autónoma de ROS~2.
+  \item[LiDAR.] \textit{Light Detection and Ranging}, sensor que mide distancias con un haz láser.
+  \item[MARL.] \textit{Multi-Agent Reinforcement Learning}, aprendizaje por refuerzo multiagente.
   \item[ROS.] \textit{Robot Operating System}. La versión empleada es ROS~2.
   \item[SLAM.] \textit{Simultaneous Localization and Mapping}, localización y mapeo simultáneos.
 \end{description}
