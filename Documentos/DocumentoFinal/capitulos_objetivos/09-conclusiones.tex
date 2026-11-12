@@ -1,50 +1,53 @@
 % =====================================================================
 %  CONCLUSIONES (versión por objetivos)
 %
-%  Parte de las conclusiones que aprobaron los autores (commit 8fa9f2a). El 11 de
-%  noviembre de 2026, por corrección del director, cada párrafo empieza por lo que
-%  se hizo para su objetivo y se quitaron las causas, que pasaron a la discusión:
-%  la planificación sin ROS 2, la falta de codificadores, la banda muerta como
-%  causa de la tolerancia, la tarjeta de dos núcleos y lo que la instrumentación
-%  habría registrado sin la confirmación. Lo demás conserva su redacción.
+%  Parte de las conclusiones que aprobaron los autores (commit 8fa9f2a). Las causas
+%  pasaron a la discusión (corrección del director del 11 de noviembre de 2026).
+%  Corrección del 12 de noviembre: la primera parte de cada conclusión va hacia su
+%  objetivo, con lo que el objetivo pide como sujeto, y lo que sigue dice qué se
+%  concluye. La interfaz se nombra con la sigla HRI. Los objetivos no se tocan.
 % =====================================================================
 \chapter*{Conclusiones}
 \addcontentsline{toc}{chapter}{CONCLUSIONES}
 
-Al modelar la arquitectura funcional, con sus requerimientos, sus escenarios de
-operación en los edificios Gregorio y Catalayud, una asignación de tareas por piso y
-un esquema de comunicación centrado en un coordinador, se comprobó que el cambio de
-piso puede resolverse como un problema de coordinación, sin que ningún agente suba
-escaleras ni use el ascensor. En ninguna misión de las dos campañas falló la
-asignación ni el relevo. Con un solo agente admisible por piso, la asignación resulta
-trivial; la dificultad y el aporte del trabajo están en coordinar dos agendas que
-dependen una de otra durante el relevo.
+La arquitectura funcional del sistema colaborativo quedó modelada con treinta y seis
+requerimientos, escenarios de operación en dos pisos de los edificios Gregorio y
+Catalayud, una asignación de tareas por piso y una comunicación entre agentes que
+pasa por un coordinador. Con ella se comprobó que el cambio de piso puede resolverse
+como un problema de coordinación, sin que ningún agente suba escaleras ni use el
+ascensor. En ninguna misión de las dos campañas falló la asignación ni el relevo. Con
+un solo agente admisible por piso, la asignación resulta trivial; la dificultad y el
+aporte del trabajo están en coordinar dos agendas que dependen una de otra durante el
+relevo.
 
-Se desarrolló la plataforma robótica cargando el sistema en dos agentes, que integran
-locomoción, sensado, procesamiento y comunicación. La plataforma AWS
-DeepRacer sirve como agente de guiado en interiores, pero su desempeño depende del
-sitio y de la tracción. En el edificio Gregorio la odometría registró como máximo el
-73~\% del avance real, mientras que en Catalayud, con el mismo estimador, cumplió el
-criterio de la prueba. El sitio de operación debe elegirse como parte del diseño. Por
-debajo de 0,40~m/s la tracción no responde, y la tolerancia de llegada se fijó en
-0,5~m, el doble de la admitida en simulación. La coordinación se llevó a un computador
-portátil, y la duración de las sesiones queda limitada por las baterías, que en las
-pruebas se agotaron en los agentes y en ese computador.
+La plataforma robótica móvil, desarrollada con dos AWS DeepRacer en lugar de los
+DonkeyCar previstos, mostró que un vehículo comercial de bajo costo puede servir como
+agente de guiado en interiores, siempre que el sitio de operación se elija como parte
+del diseño. Con el mismo estimador, su odometría cumplió el criterio de la prueba en
+el edificio Catalayud y registró como máximo el 73~\% del avance real en el edificio
+Gregorio. Sus límites están en la tracción, que no responde por debajo de 0,40~m/s y
+obliga a una tolerancia de llegada de 0,5~m, el doble de la admitida en simulación, y en
+la tarjeta de cómputo, que no alcanza para coordinar a los dos agentes, de modo que la
+coordinación debe ejecutarse fuera de ellos. Las baterías, además, limitan la
+duración de cada sesión.
 
-Se programó la interfaz móvil como una página web servida en la red local, y para
-operar el sistema basta con ella: en las pruebas con los agentes físicos cada misión
-se pidió, se siguió y se confirmó desde un teléfono, sin instalar nada y sin salida a
-internet. Sin embargo, las funciones que más la acercan a una operación real no
-estaban en el anteproyecto y se añadieron al ver el sistema en uso. Con la
-confirmación de cambio de piso, una misión no se da por completada con el usuario en
-el piso equivocado, y la cancelación devolvió al agente a su escalera en las seis
-misiones canceladas. Por lo tanto, los requisitos de una interfaz como esta no pueden
-cerrarse de antemano.
+La interfaz web (HRI), basada en la selección de origen y destino, mostró que para
+operar el sistema basta una página web servida en la red local, sin instalar nada y
+sin salida a internet: desde un teléfono se pidió, se siguió y se confirmó cada misión
+con los agentes físicos. Mostró también que el relevo de un usuario necesita funciones
+que el relevo de un objeto no requiere: la confirmación del cambio de piso, sin la
+cual una misión podría darse por completada con el usuario en el piso equivocado, y la
+cancelación, que devolvió al agente a su escalera en las seis misiones canceladas.
+Esas dos funciones no estaban en el anteproyecto y surgieron al usar el sistema, por
+lo que los requisitos de una interfaz de este tipo no pueden cerrarse de antemano.
 
-Con la evaluación experimental, hecha con un protocolo definido antes de instrumentar
-el sistema, se puede afirmar, con 95~\% de confianza, que la tasa de éxito del sistema
-supera el 70~\%, tanto en las treinta misiones en simulación como en las nueve con los
-agentes físicos, aunque esas muestras no permiten precisar cuánto la supera. Con los
-agentes físicos, el tiempo total mediano de una misión fue de 87,6~s. Todos los fallos
-fueron de navegación, sobre todo de precisión de llegada, y ninguno de asignación ni
-de relevo, de modo que la mejora del sistema pasa primero por la navegación.
+El desempeño del sistema se evaluó en un entorno interior controlado con las cuatro
+métricas que fija el objetivo: tiempo de respuesta, tiempo de asignación, tasa de
+éxito y continuidad del servicio, medidas con un protocolo definido antes de
+instrumentar el sistema. Con esa evaluación se puede afirmar, con 95~\% de confianza,
+que la tasa de éxito del sistema supera el 70~\%, tanto en las treinta misiones en
+simulación como en las nueve con los agentes físicos, aunque esas muestras no permiten
+precisar cuánto la supera. Con los agentes físicos, el tiempo total mediano de una
+misión fue de 87,6~s. Todos los fallos fueron de navegación, sobre todo de precisión
+de llegada, y ninguno de asignación ni de relevo, de modo que la mejora del sistema
+pasa primero por la navegación.

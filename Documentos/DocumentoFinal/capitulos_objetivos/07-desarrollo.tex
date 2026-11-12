@@ -404,7 +404,7 @@ Lo que cambió fue la implementación de los bloques (tabla~\ref{tab:sim-vehicul
 \label{sec:oe3}
 \label{sec:ajustes-campo}
 
-El objetivo pide una interfaz móvil basada en la selección de localizaciones de origen y destino, y se cumplió con una página web que se abre en el navegador del teléfono, porque un usuario ocasional no va a instalar nada para preguntar por un salón. La página funciona sin salida a internet, sin bibliotecas ni recursos externos: son un archivo HTML, una hoja de estilo y dos programas en JavaScript, que sirve el propio portátil en el puerto 8000. Se comunica con ROS~2 por el puente \textit{rosbridge}, en el puerto 9090, que no tiene autenticación, así que el firewall del portátil solo admite conexiones a esos dos puertos desde la red de los agentes.
+El objetivo pide una interfaz móvil basada en la selección de localizaciones de origen y destino, y se cumplió con un servicio web que se abre en el navegador del teléfono. Se eligió un servicio web en lugar de una aplicación porque no obliga al usuario a descargar nada: los dispositivos móviles actuales traen un navegador de fábrica, y un usuario ocasional no va a instalar una aplicación para preguntar por un salón. La página funciona sin salida a internet, sin bibliotecas ni recursos externos: son un archivo HTML, una hoja de estilo y dos programas en JavaScript, que sirve el propio portátil en el puerto 8000. Se comunica con ROS~2 por el puente \textit{rosbridge}, en el puerto 9090, que no tiene autenticación, así que el firewall del portátil solo admite conexiones a esos dos puertos desde la red de los agentes.
 
 \subsection{Selección de origen y destino}
 
