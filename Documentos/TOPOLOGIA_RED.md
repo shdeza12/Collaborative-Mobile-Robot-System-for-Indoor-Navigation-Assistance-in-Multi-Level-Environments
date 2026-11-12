@@ -77,8 +77,9 @@ es el punto único de fallo, y eso se mitiga teniéndolo a mano, no cambiándolo
 > **Nota del 6 de noviembre: así quedó el montaje final.** El FiberHome `AA` quedó en el piso 3 (canal 44; radio de 5 GHz
 > `8C:5F:AD:37:AA:46`) y el `D2` en el piso 4 (canal 36; `8C:5F:AD:37:D2:16`), al revés de lo que asignan los pasos 1 a 4; las
 > radios salen de las redes `DEEPRACER_P3-5G` y `DEEPRACER_P4-5G` guardadas en el portátil. El enrutador quedó en el piso 4 y el
-> cable entre pisos va al punto de acceso del piso 3, como confirmaron los autores. El portátil usa la `192.168.0.105` en
-> `DEEPRACER`, con la MAC `D8:80:83:5E:C1:D7`. La tabla completa está en la sección de la red del documento final.
+> cable entre pisos va al punto de acceso del piso 3, como confirmaron los autores. El portátil usa la `192.168.0.105`, con la MAC
+> `D8:80:83:5E:C1:D7`, y se asocia al punto de acceso de su piso en 5 GHz, no a `DEEPRACER`; el teléfono del usuario,
+> igual. El enlace de 2,4 GHz del enrutador queda solo como respaldo. La tabla completa está en la sección de la red del documento final.
 
 | Vehículo | MAC de `mlan0` | IP que debe tener |
 |---|---|---|

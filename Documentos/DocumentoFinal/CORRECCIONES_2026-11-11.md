@@ -2,7 +2,7 @@
 
 Primera tanda, dictada por los autores el 11 de noviembre de 2026 sobre `main_objetivos.pdf`, la versión que se envió al director Armando. Las páginas, secciones, figuras y tablas son las de ese PDF; las líneas, las de `capitulos_objetivos/` y de los capítulos comunes que usa `main_objetivos.tex`. Cada corrección vale también para `main_integrada`, salvo donde se dice otra cosa.
 
-La lista consolidada de cambios frente al documento entregado está en [CAMBIOS_DOCUMENTO_2026-11-11.md](CAMBIOS_DOCUMENTO_2026-11-11.md), y la comprobación de cada corrección, en [VERIFICACION_CORRECCIONES_2026-11-11.md](VERIFICACION_CORRECCIONES_2026-11-11.md). El documento corregido se llama ahora `main_definitivo.tex`.
+La lista consolidada de cambios frente al documento entregado está en [CAMBIOS_DOCUMENTO_2026-11-11.md](CAMBIOS_DOCUMENTO_2026-11-11.md), y la comprobación de cada corrección, en [VERIFICACION_CORRECCIONES_2026-11-11.md](VERIFICACION_CORRECCIONES_2026-11-11.md). El documento corregido se llama ahora `main_definitivo.tex`. El 12 de noviembre se fusionó con la rama de Jonny (pull request 8): su dedicatoria, el puerto de la interfaz (corrección 14), la definición de agente con la coordinación y las correcciones de la versión larga; además, el portátil y el teléfono figuran en la red de 5 GHz de su piso, con la de 2,4 GHz solo de respaldo.
 
 **Estado:** aplicado el 11 de noviembre en `main_objetivos.tex`, que quedó en 60 hojas, 46 numeradas. Las preguntas de 5.1, 5.3 y 5.4 no cambian el documento. El resumen para Jonny está en `Correcciones_2026-11-11_Jonny.pdf`. Falta la segunda tanda, que el director envió el mismo 11 de noviembre.
 

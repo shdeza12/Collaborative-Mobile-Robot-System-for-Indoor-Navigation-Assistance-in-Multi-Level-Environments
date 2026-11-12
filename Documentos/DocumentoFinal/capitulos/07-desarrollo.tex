@@ -53,8 +53,7 @@ dirección y su árbol de transformaciones (figura~\ref{fig:donkeycar}).
   \label{fig:donkeycar}
 \end{figure}
 
-Con ese trabajo se identificaron las limitaciones de la plataforma. El ecosistema DonkeyCar no se actualiza desde hace
-años y no es compatible con las versiones recientes de ROS~2. Su simulador tampoco se comunica con ROS~2, así que no
+Con ese trabajo se identificaron las limitaciones de la plataforma. Su simulador no se comunica con ROS~2, así que no
 permite probar el mapeo, la localización, la planificación ni la comunicación entre agentes, que son el núcleo del
 proyecto. Además, no existía un modelo del DonkeyCar para Gazebo con dirección Ackermann que funcionara en ROS~2 Humble.
 
@@ -349,7 +348,7 @@ figura~\ref{fig:arquitectura-vehiculos} muestra el sistema como funcionó en la 
     Locomoción & Complemento Ackermann de Gazebo con \texttt{ros2\_control} & Puente de la orden de velocidad a los servos, con una escala por agente & La tracción real tiene banda muerta y funciona en lazo abierto \\ \addlinespace
     Sensado & Láser simulado de 10~m de alcance & RPLIDAR A1M8 y la unidad inercial de la tarjeta; cámaras apagadas & Las cámaras no se usan y cargaban la tarjeta \\ \addlinespace
     Odometría & La del simulador & La del láser, combinada con la unidad inercial mediante un filtro & El agente no tiene codificadores en las ruedas, y con el láser solo el rumbo derivaba 5,9$^\circ$ por minuto \\ \addlinespace
-    Mapa & Calculado de la geometría del mundo simulado & Derivado de la planta medida con flexómetro & El mapeo con SLAM a bordo no dio un mapa utilizable en ningún pasillo \\ \addlinespace
+    Mapa & Calculado de la geometría del mundo simulado & Derivado de la planta medida con flexómetro & El mapeo con SLAM a bordo no entregó un mapa utilizable en ningún pasillo \\ \addlinespace
     Escenario & Pisos 2 y 3 del edificio Gregorio & Pisos 3 y 4 del edificio Catalayud, levantados con flexómetro & En Gregorio el tránsito de personas dificultaba las pruebas, el mapa no correspondía a la planta real, por un mundo simulado mal medido, y en sus pasillos uniformes la odometría del láser no veía el avance \\ \addlinespace
     Llegada & Tolerancia de 0,25~m & Tolerancia de 0,5~m, verificada con la pose del agente 1,5~s después de que Nav2 da la meta por alcanzada & Por la banda muerta, el agente no alcanza la precisión de la simulación, y sigue rodando cuando Nav2 declara la llegada \\ \addlinespace
     Media vuelta & La planifica Nav2, con marcha atrás & Maniobra propia del agente, vigilada con el láser y el mapa & En la salida del piso 4, de 2,5~m de ancho, la media vuelta de Nav2 abortó contra la pared \\ \bottomrule
@@ -370,7 +369,7 @@ leyendo el modelo que informa el propio sensor.
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.62\textwidth]{imagenes/agentes_fisicos.jpg}
-  \caption{Los dos agentes físicos, construidos sobre la plataforma AWS DeepRacer.}
+  \caption{Los dos agentes físicos, cargados sobre la plataforma AWS DeepRacer.}
   \label{fig:agentes-fisicos}
 \end{figure}
 
@@ -394,7 +393,7 @@ otro se agotó durante la sesión, y esta última volvió a agotarse el 2 de oct
     Batería de tracción & 2 & Polímero de litio \\ \addlinespace
     \multicolumn{3}{@{}l}{\textit{Coordinación e interacción}} \\
     Portátil & 1 & Ubuntu 22.04 y ROS~2 Humble (AMD Ryzen 5 PRO 5650U, 16~GB); el coordinador se ejecuta en un contenedor con Jazzy \\
-    Teléfono & 1 & Abre la interfaz web, conectado a la red de los agentes \\ \addlinespace
+    Teléfono & 1 & Abre la interfaz web, conectado a la misma red de 5~GHz de los agentes \\ \addlinespace
     \multicolumn{3}{@{}l}{\textit{Red}} \\
     Enrutador & 1 & TP-Link TL-WR940N: reparte las direcciones de la red y da un enlace de respaldo a 2,4~GHz \\
     Puntos de acceso & 2 & FiberHome, uno por piso, en modo puente: 5~GHz, canal 44 en el piso 3 y canal 36 en el piso 4 \\
@@ -516,24 +515,33 @@ pierden la mitad del caudal y añaden un salto a cada mensaje; por esa razón, e
 la de 2,4~GHz y la parte baja de la de 5~GHz prácticamente vacía, y el cambio de banda redujo el percentil 95 del tiempo de ida y vuelta de 20,76 a 11,12~ms. Hay un punto de acceso por piso, en canales
 que no se solapan, debido a que la losa atenúa la señal.
 
-La tabla~\ref{tab:direcciones-red} da la dirección lógica y la física de cada equipo. Las de los agentes están reservadas en el
-enrutador por su dirección física, así que no cambian entre sesiones, y los puntos de acceso, que trabajan en puente, figuran por la
-dirección física de su radio de 5~GHz, a la que se asocian los agentes. El teléfono del usuario recibe una dirección del enrutador al
+La tabla~\ref{tab:direcciones-red} da la dirección de cada equipo. Las de los agentes están reservadas en el
+enrutador por su dirección física, así que no cambian entre sesiones. El teléfono del usuario recibe una dirección del enrutador al
 conectarse.
+
+Todo lo que interviene en una misión trabaja sobre esa misma banda, y no solo los agentes: el portátil que ejecuta el coordinador y
+el teléfono desde el que el usuario pide el servicio se asocian también al punto de acceso de su piso, de modo que el enlace de
+2,4~GHz del enrutador queda únicamente como respaldo. La razón se midió. En la sesión del 9 de octubre, los barridos lanzados desde
+un portátil que había quedado asociado a ese respaldo daban entre 20 y 24~ms de media, con picos de 140~ms, mientras los agentes,
+sobre los puntos de acceso de 5~GHz, medían por debajo de 2,2~ms contra el mismo enrutador: la diferencia no estaba en la red, sino
+en el enlace de quien medía. Como los puntos de acceso trabajan en puente, asociarse a ellos no altera la subred ni las direcciones
+reservadas, y el descubrimiento entre participantes no se ve afectado. Tres teléfonos distintos han abierto la interfaz web y cursado
+peticiones al coordinador sobre esa misma red de 5~GHz.
 
 \begin{table}[H]
   \centering\footnotesize
-  \caption{Direcciones lógicas y físicas de los equipos de la red en los pisos 3 y 4 del edificio Catalayud.}
+  \caption{Direcciones de los equipos de la red en los pisos 3 y 4 del edificio Catalayud.}
   \label{tab:direcciones-red}
-  \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}p{0.27\textwidth}>{\raggedright\arraybackslash}p{0.22\textwidth}>{\raggedright\arraybackslash}p{0.2\textwidth}@{}}
+  \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.26\textwidth}>{\raggedright\arraybackslash}p{0.40\textwidth}>{\raggedright\arraybackslash}p{0.28\textwidth}@{}}
     \toprule
-    \textbf{Equipo} & \textbf{Conexión} & \textbf{Dirección IP} & \textbf{Dirección MAC} \\ \midrule
-    Enrutador TP-Link \mbox{TL-WR940N} & En el piso~4; cable a cada punto de acceso y red de respaldo a 2,4~GHz & \texttt{192.168.0.1/24}, fija & \texttt{60:32:B1:77:FB:CC} \\ \addlinespace
-    Punto de acceso del piso~3 & Cable entre pisos al enrutador; 5~GHz, canal~44 & --- & \texttt{8C:5F:AD:37:AA:46} \\ \addlinespace
-    Punto de acceso del piso~4 & Cable al enrutador, en el mismo piso; 5~GHz, canal~36 & --- & \texttt{8C:5F:AD:37:D2:16} \\ \addlinespace
-    Agente del piso~3 & Wi-Fi al punto de acceso de su piso & \texttt{192.168.0.102}, reservada por su MAC & \texttt{80:91:33:ED:8C:F3} \\ \addlinespace
-    Agente del piso~4 & Wi-Fi al punto de acceso de su piso & \texttt{192.168.0.104}, reservada por su MAC & \texttt{80:91:33:F3:E6:AB} \\ \addlinespace
-    Portátil & Wi-Fi a la red de respaldo del enrutador & \texttt{192.168.0.105}, asignada por el enrutador & \texttt{D8:80:83:5E:C1:D7} \\ \bottomrule
+    \textbf{Equipo} & \textbf{Conexión} & \textbf{Dirección IP} \\ \midrule
+    Enrutador TP-Link \mbox{TL-WR940N} & En el piso~4; cable a cada punto de acceso y red de respaldo a 2,4~GHz & \texttt{192.168.0.1/24}, fija \\ \addlinespace
+    Punto de acceso del piso~3 & Cable entre pisos al enrutador; 5~GHz, canal~44 & --- \\ \addlinespace
+    Punto de acceso del piso~4 & Cable al enrutador, en el mismo piso; 5~GHz, canal~36 & --- \\ \addlinespace
+    Agente del piso~3 & Wi-Fi al punto de acceso de su piso & \texttt{192.168.0.102}, reservada en el enrutador \\ \addlinespace
+    Agente del piso~4 & Wi-Fi al punto de acceso de su piso & \texttt{192.168.0.104}, reservada en el enrutador \\ \addlinespace
+    Portátil & Wi-Fi al punto de acceso de su piso, en 5~GHz & \texttt{192.168.0.105}, asignada por el enrutador \\ \addlinespace
+    Teléfono del usuario & Wi-Fi al punto de acceso de su piso, en 5~GHz & Asignada por el enrutador al conectarse \\ \bottomrule
   \end{tabular}
 \end{table}
 
@@ -571,8 +579,8 @@ pérdidas ni duplicados. Por lo tanto, la red no limita el desempeño del sistem
 \subsection{La interfaz como página web}
 
 El objetivo pide «una interfaz móvil», y se construyó una página web que se abre en el navegador del teléfono, porque un usuario ocasional no va a instalar nada para preguntar por un salón. La página funciona sin
-salida a internet, puesto que la red del edificio puede no tenerla, y no usa bibliotecas ni recursos externos: son un archivo HTML, una hoja de estilo y dos programas en JavaScript, que sirve el propio portátil.
-Se comunica con ROS~2 por el puente \textit{rosbridge}, que no tiene autenticación, así que el firewall del portátil solo admite conexiones desde la red de los agentes.
+salida a internet, puesto que la red del edificio puede no tenerla, y no usa bibliotecas ni recursos externos: son un archivo HTML, una hoja de estilo y dos programas en JavaScript, que sirve el propio portátil en el puerto 8000.
+Se comunica con ROS~2 por el puente \textit{rosbridge}, en el puerto 9090, que no tiene autenticación, así que el firewall del portátil solo admite conexiones a esos dos puertos desde la red de los agentes.
 
 El primer programa es un cliente propio del protocolo del puente, y el segundo es la lógica de la página, que recibe el catálogo de puntos al conectarse y el estado de la misión una vez por segundo, pide y cancela
 con la acción de guiado y publica la confirmación de cambio de piso.

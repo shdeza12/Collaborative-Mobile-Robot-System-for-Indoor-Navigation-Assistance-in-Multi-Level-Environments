@@ -53,7 +53,7 @@ El sistema se construyó y se evaluó primero en simulación, y después se llev
 
 ## La red entre los dos pisos
 
-Los agentes se comunican por una red Wi-Fi propia, porque la de la universidad aísla a sus clientes entre sí y no los dejaría verse. Hay un punto de acceso de 5 GHz por piso, unidos por cable, y toda la instalación forma una sola subred.
+Los agentes se comunican por una red Wi-Fi propia, porque la de la universidad aísla a sus clientes entre sí y no los dejaría verse. Hay un punto de acceso de 5 GHz por piso, unidos por cable, y toda la instalación forma una sola subred. El portátil del coordinador y el teléfono del usuario también se conectan al punto de acceso de 5 GHz de su piso; la red de 2,4 GHz del enrutador queda solo como respaldo.
 
 <figure markdown>
 ![Montaje físico de la red: un enrutador, un punto de acceso por piso unido a él por cable y un agente conectado a cada punto de acceso](img/red_topologia.png)
@@ -69,7 +69,8 @@ El enrutador está en el piso 4, junto al punto de acceso de ese piso, y del pis
 | Punto de acceso del piso 4 | Cable al enrutador, en el mismo piso; 5 GHz, canal 36 | — |
 | Agente del piso 3 | Wi-Fi al punto de acceso de su piso | `192.168.0.102`, reservada en el enrutador |
 | Agente del piso 4 | Wi-Fi al punto de acceso de su piso | `192.168.0.104`, reservada en el enrutador |
-| Portátil | Wi-Fi a la red de respaldo del enrutador | `192.168.0.105`, asignada por el enrutador |
+| Portátil | Wi-Fi al punto de acceso de su piso, en 5 GHz | `192.168.0.105`, asignada por el enrutador |
+| Teléfono del usuario | Wi-Fi al punto de acceso de su piso, en 5 GHz | Asignada por el enrutador al conectarse |
 
 Lo que más pesó en las tarjetas fue cuántos procesos se anunciaban por la red. Con los dos agentes anunciándose entre sí, la tarjeta llegó al 95 % y Nav2 no alcanzaba a arrancar. Con la topología en estrella, en la que cada agente se anuncia solo al portátil, el sistema completo usa entre el 68 % y el 74 %.
 

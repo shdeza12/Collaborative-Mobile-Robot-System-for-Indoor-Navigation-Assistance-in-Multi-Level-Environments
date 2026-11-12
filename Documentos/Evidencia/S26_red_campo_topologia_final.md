@@ -69,6 +69,12 @@ Conviene dejarlo escrito porque es un error fácil de cometer y conduce a conclu
 red: medir desde el portátil mide el peor enlace de la cadena, no el de los vehículos. Es la misma
 razón por la que RF-15 está definido entre los dos vehículos y no contra un tercero.
 
+> Esto dejó de ser solo una advertencia de método y pasó a ser un cambio de configuración: el portátil del
+> coordinador y el teléfono del usuario se asocian al punto de acceso de 5 GHz de su piso, y el enlace de
+> 2,4 GHz del enrutador queda como respaldo. Las redes `DEEPRACER_P3-5G` y `DEEPRACER_P4-5G` guardadas en el
+> portátil registran asociación a los dos puntos de acceso el 8 de octubre, a las 16:56 y a las 17:06, y tres
+> teléfonos distintos han abierto la interfaz web y cursado peticiones al coordinador sobre esa misma red.
+
 ## 4. Lo que no se midió, y cómo se obtendría
 
 **Decisión de los autores, 3 de noviembre: esta medida no se repite.** RF-15 queda verificado con los dos registros en la

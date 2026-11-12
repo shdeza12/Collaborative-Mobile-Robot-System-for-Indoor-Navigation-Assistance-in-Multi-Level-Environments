@@ -292,7 +292,7 @@ La banda muerta de tracción llevó a fijar la tolerancia de llegada con los age
 
 Como los agentes se mueven, el enlace tiene que ser inalámbrico. La red de la universidad quedó descartada, ya que aísla a sus clientes entre sí, no admite reservas de dirección y no se puede diagnosticar ni modificar. Tampoco servía una red móvil, pues el sistema está diseñado para funcionar sin salida a internet. Una red propia sobre Wi-Fi da control completo, direcciones fijas y posibilidad de medir, con el límite de que un enlace compartido no garantiza tiempos de entrega, por lo que el requisito de red fija cotas numéricas y se verifica midiendo.
 
-Un enrutador, en el piso 4 del edificio Catalayud junto al punto de acceso de ese piso, reparte las direcciones de toda la red, y de él salen por cable los dos puntos de acceso: el del piso 4, en el mismo piso, y el del piso 3, con un cable que baja desde el piso 4 (figura~\ref{fig:red-topologia}). Los dos trabajan en modo puente, de manera que toda la instalación forma una sola subred, condición para que cada agente y el portátil se descubran. El enlace entre pisos va por cable, debido a que un repetidor usa la misma antena para enlazar y para sus clientes, con lo que pierde la mitad del caudal. En la banda de 2,4~GHz un barrido del sitio encontró 33 redes ajenas, de manera que se trabaja en la de 5~GHz, y el cambio de banda redujo el percentil 95 del tiempo de ida y vuelta de 20,76 a 11,12~ms. Hay un punto de acceso por piso, en canales que no se solapan, ya que la losa atenúa la señal. La tabla~\ref{tab:direcciones-red} da la dirección IP de cada equipo.
+Un enrutador, en el piso 4 del edificio Catalayud junto al punto de acceso de ese piso, reparte las direcciones de toda la red, y de él salen por cable los dos puntos de acceso: el del piso 4, en el mismo piso, y el del piso 3, con un cable que baja desde el piso 4 (figura~\ref{fig:red-topologia}). Los dos trabajan en modo puente, de manera que toda la instalación forma una sola subred, condición para que cada agente y el portátil se descubran. El enlace entre pisos va por cable, debido a que un repetidor usa la misma antena para enlazar y para sus clientes, con lo que pierde la mitad del caudal. En la banda de 2,4~GHz un barrido del sitio encontró 33 redes ajenas, de manera que se trabaja en la de 5~GHz, y el cambio de banda redujo el percentil 95 del tiempo de ida y vuelta de 20,76 a 11,12~ms. Hay un punto de acceso por piso, en canales que no se solapan, ya que la losa atenúa la señal. El portátil del coordinador y el teléfono del usuario se asocian también al punto de acceso de 5~GHz de su piso, y el enlace de 2,4~GHz del enrutador queda solo como respaldo. Con el portátil asociado a ese respaldo, sus mediciones daban entre 20 y 24~ms de media, con picos de 140~ms, mientras los agentes, sobre 5~GHz, medían por debajo de 2,2~ms contra el mismo enrutador. La tabla~\ref{tab:direcciones-red} da la dirección IP de cada equipo.
 
 \begin{table}[H]
   \centering\footnotesize\setstretch{1.0}
@@ -306,11 +306,12 @@ Un enrutador, en el piso 4 del edificio Catalayud junto al punto de acceso de es
     Punto de acceso del piso~4 & Cable al enrutador, en el mismo piso; 5~GHz, canal~36 & --- \\ \addlinespace
     Agente del piso~3 & Wi-Fi al punto de acceso de su piso & \texttt{192.168.0.102}, reservada en el enrutador \\ \addlinespace
     Agente del piso~4 & Wi-Fi al punto de acceso de su piso & \texttt{192.168.0.104}, reservada en el enrutador \\ \addlinespace
-    Portátil & Wi-Fi a la red de respaldo del enrutador & \texttt{192.168.0.105}, asignada por el enrutador \\ \bottomrule
+    Portátil & Wi-Fi al punto de acceso de su piso, en 5~GHz & \texttt{192.168.0.105}, asignada por el enrutador \\ \addlinespace
+    Teléfono del usuario & Wi-Fi al punto de acceso de su piso, en 5~GHz & Asignada por el enrutador al conectarse \\ \bottomrule
   \end{tabular}
 \end{table}
 
-Las fallas de la red no producían ningún mensaje de error y se encontraron al medir. Para trabajar en 5~GHz hubo que habilitar esa banda en los agentes. A sus tarjetas les faltaba la base de datos regulatoria del sistema operativo, que fija los canales en que puede emitir la radio, y sin ella las 31 frecuencias de 5~GHz quedaban en solo escucha: los agentes veían las redes, pero no podían transmitir en ellas. Se instaló esa base en los dos agentes, junto con un servicio que fija el dominio regulatorio en cada arranque, y al reiniciarlos cada tarjeta pasó de ninguno a 13 canales utilizables, entre ellos del 36 al 48 con 23~dBm, mientras el enlace pasó de 802.11n a 802.11ac. La otra falla fue un punto de acceso conectado a la vez por cable y por radio, que hacía que de 100 peticiones enviadas un agente recibiera 147.
+Las fallas de la red no producían ningún mensaje de error y se encontraron al medir. Para trabajar en 5~GHz hubo que habilitar esa banda en los agentes. A sus tarjetas les faltaba la base de datos regulatoria del sistema operativo, que fija los canales en que puede emitir la radio, y sin ella las 31 frecuencias de 5~GHz quedaban en solo escucha: los agentes veían las redes, pero no podían transmitir en ellas. Al intentar conectarse, el agente fallaba sin informar de la causa, y el defecto se encontró al revisar el estado de cada frecuencia y no al contar las que la tarjeta lista. Se instaló esa base en los dos agentes, junto con un servicio que fija el dominio regulatorio en cada arranque, y al reiniciarlos cada tarjeta pasó de ninguno a 13 canales utilizables, entre ellos del 36 al 48 con 23~dBm, mientras el enlace pasó de 802.11n a 802.11ac. La otra falla fue un punto de acceso conectado a la vez por cable y por radio, que hacía que de 100 peticiones enviadas un agente recibiera 147.
 
 En ROS~2 cada proceso se anuncia periódicamente a todos los demás, con lo que ese trabajo crece aproximadamente con el cuadrado del número de participantes. Con un agente su tarjeta trabajaba entre el 52~\% y el 63~\% de capacidad, mientras que al encender el segundo subió al 95~\% y Nav2 no alcanzó a arrancar. El coordinador y el grabador se llevaron por ello al portátil, que quedó como único interlocutor conocido de cada agente; los agentes no se ven entre sí, lo que coincide con el diseño, y el sistema completo volvió a entre el 68~\% y el 74~\% de la tarjeta.
 
@@ -332,6 +333,8 @@ Los escenarios de los pisos 2 y 3 del edificio Gregorio se montaron en Gazebo~11
 
 Como los mundos simulados de los pisos 3 y 4 del edificio Catalayud salen del mismo levantamiento que sus mapas, el sistema también se comprobó en simulación en esos pisos (figura~\ref{fig:sim-procesos}, derecha), sin el protocolo de la campaña: de trece misiones, diez se completaron, tres se cancelaron a propósito y ninguna falló, con llegadas entre 0,067 y 0,206~m. La simulación sigue sin reproducir la odometría real, la respuesta de la tracción y la red entre pisos.
 
+Al llevar el sistema a los agentes físicos se mantuvo su estructura: un coordinador, un agente por piso, el relevo en la escalera y las reglas del contrato. También se mantuvo el código del coordinador, del planificador, de los mensajes y de la página, que compila sin cambios en las dos distribuciones de ROS~2. La integración con los agentes físicos se comprobó con seis pruebas de verificación sucesivas, cada una con un criterio escrito antes de ejecutarla (tabla~\ref{tab:pruebas-verificacion}).
+
 \begin{figure}[H]
   \centering
   \includegraphics[height=4cm]{imagenes/simulacion_relevo_dos_procesos.png}\hfill
@@ -340,8 +343,6 @@ Como los mundos simulados de los pisos 3 y 4 del edificio Catalayud salen del mi
   \caption{Misión con relevo en simulación, con un proceso de Gazebo por piso (izquierda), y pisos 3 (centro) y 4 (derecha) del edificio Catalayud en simulación.}
   \label{fig:sim-procesos}
 \end{figure}
-
-Al llevar el sistema a los agentes físicos se mantuvo su estructura: un coordinador, un agente por piso, el relevo en la escalera y las reglas del contrato. También se mantuvo el código del coordinador, del planificador, de los mensajes y de la página, que compila sin cambios en las dos distribuciones de ROS~2. La integración con los agentes físicos se comprobó con seis pruebas de verificación sucesivas, cada una con un criterio escrito antes de ejecutarla (tabla~\ref{tab:pruebas-verificacion}).
 
 \label{sec:pruebas-verificacion}
 \begin{table}[H]
@@ -360,22 +361,25 @@ Al llevar el sistema a los agentes físicos se mantuvo su estructura: un coordin
   \end{tabular}
 \end{table}
 
-Lo que cambió fue la implementación de los bloques (figura~\ref{fig:arquitectura-vehiculos} y tabla~\ref{tab:sim-vehiculos}).
+Lo que cambió fue la implementación de los bloques (tabla~\ref{tab:sim-vehiculos} y figura~\ref{fig:arquitectura-vehiculos}).
 
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.82\textwidth]{imagenes/arquitectura_vehiculos.png}
-  \caption{Arquitectura del sistema en la campaña con los agentes físicos.}
-  \label{fig:arquitectura-vehiculos}
-\end{figure}
-
-\begin{table}[H]
-  \centering\footnotesize\setstretch{1.0}
+% Tabla larga: ocupa casi una hoja y, si no se parte, deja un hueco antes de ella.
+{\footnotesize\setstretch{1.0}
+\setlength{\LTpre}{0.6\baselineskip}\setlength{\LTpost}{0.6\baselineskip}
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.13\textwidth}>{\raggedright\arraybackslash}p{0.205\textwidth}>{\raggedright\arraybackslash}p{0.285\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}@{}}
   \caption{Cambios en la implementación al pasar de la simulación a los agentes físicos.}
-  \label{tab:sim-vehiculos}
-  \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.13\textwidth}>{\raggedright\arraybackslash}p{0.205\textwidth}>{\raggedright\arraybackslash}p{0.285\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}@{}}
-    \toprule
-    \textbf{Parte} & \textbf{En simulación} & \textbf{En los agentes físicos} & \textbf{Causa} \\ \midrule
+  \label{tab:sim-vehiculos} \\
+  \toprule
+  \textbf{Parte} & \textbf{En simulación} & \textbf{En los agentes físicos} & \textbf{Causa} \\ \midrule
+  \endfirsthead
+  \multicolumn{4}{@{}l}{\textit{Continuación de la tabla~\ref{tab:sim-vehiculos}}} \\ \addlinespace
+  \toprule
+  \textbf{Parte} & \textbf{En simulación} & \textbf{En los agentes físicos} & \textbf{Causa} \\ \midrule
+  \endhead
+  \bottomrule
+  \endfoot
+  \bottomrule
+  \endlastfoot
     Distribución de ROS~2 & Humble en todos los componentes & Jazzy en los agentes y en el coordinador, en un contenedor del portátil; Humble en la página y en rosbridge & El software de la tarjeta solo existe para Jazzy y la simulación no existe en Jazzy \\ \addlinespace
     Coordinador & En el portátil, junto a los dos simuladores & En el portátil, después de un intento en uno de los agentes & En una tarjeta, con las dos navegaciones encendidas, la carga subió de 6 a entre 17 y 33 y Nav2 no arrancaba \\ \addlinespace
     Comunicación & Un computador; un espacio de nombres por agente & Red inalámbrica; una partición por agente y topología en estrella hacia el portátil & Los tópicos del fabricante no llevan espacio de nombres, y el descubrimiento saturaba las tarjetas \\ \addlinespace
@@ -385,20 +389,30 @@ Lo que cambió fue la implementación de los bloques (figura~\ref{fig:arquitectu
     Mapa & Calculado del mundo simulado & Derivado de la planta medida con flexómetro & El mapeo con SLAM a bordo no entregó un mapa utilizable \\ \addlinespace
     Escenario & Pisos 2 y 3 del edificio Gregorio & Pisos 3 y 4 del edificio Catalayud, levantados con flexómetro & Tránsito de personas, mundo simulado mal medido y pasillos uniformes en Gregorio \\ \addlinespace
     Llegada & Tolerancia de 0,25~m & Tolerancia de 0,5~m, verificada con la pose del agente 1,5~s después de que Nav2 da la meta por alcanzada & Banda muerta; el agente sigue rodando cuando Nav2 declara la llegada \\ \addlinespace
-    Media vuelta & La planifica Nav2 & Maniobra propia del agente, vigilada con el láser y el mapa & La de Nav2 abortó contra la pared en el piso 4 de Catalayud \\ \bottomrule
-  \end{tabular}
-\end{table}
+    Media vuelta & La planifica Nav2 & Maniobra propia del agente, vigilada con el láser y el mapa & La de Nav2 abortó contra la pared en el piso 4 de Catalayud \\
+\end{longtable}}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.82\textwidth]{imagenes/arquitectura_vehiculos.png}
+  \caption{Arquitectura del sistema en la campaña con los agentes físicos.}
+  \label{fig:arquitectura-vehiculos}
+\end{figure}
 
 % =====================================================================
 \section{Tercer objetivo específico: interfaz móvil}
 \label{sec:oe3}
 \label{sec:ajustes-campo}
 
-El objetivo pide una interfaz móvil basada en la selección de localizaciones de origen y destino, y se cumplió con una página web que se abre en el navegador del teléfono, porque un usuario ocasional no va a instalar nada para preguntar por un salón. La página funciona sin salida a internet, sin bibliotecas ni recursos externos: son un archivo HTML, una hoja de estilo y dos programas en JavaScript, que sirve el propio portátil. Se comunica con ROS~2 por el puente \textit{rosbridge}, que no tiene autenticación, así que el firewall del portátil solo admite conexiones desde la red de los agentes.
+El objetivo pide una interfaz móvil basada en la selección de localizaciones de origen y destino, y se cumplió con una página web que se abre en el navegador del teléfono, porque un usuario ocasional no va a instalar nada para preguntar por un salón. La página funciona sin salida a internet, sin bibliotecas ni recursos externos: son un archivo HTML, una hoja de estilo y dos programas en JavaScript, que sirve el propio portátil en el puerto 8000. Se comunica con ROS~2 por el puente \textit{rosbridge}, en el puerto 9090, que no tiene autenticación, así que el firewall del portátil solo admite conexiones a esos dos puertos desde la red de los agentes.
 
 \subsection{Selección de origen y destino}
 
 El usuario elige el origen en una lista y el destino en un catálogo con búsqueda por nombre, donde cada destino muestra su piso y, si queda en el otro piso, la marca «con relevo» (figura~\ref{fig:hri}, izquierda). Los dos ascensores del edificio Catalayud se llamaban igual en la lista, y en una misión se eligió el del piso equivocado, así que los nombres repetidos se muestran con su piso, como «Ascensor (piso 3)». Durante la misión, la página muestra el texto que redacta el coordinador, el agente que está guiando, hacia dónde va y la distancia restante, y una franja de cinco pasos marca el paso actual (figura~\ref{fig:hri}, centro).
+
+\subsection{Confirmación de cambio de piso}
+
+En una misión entre pisos, el segundo agente llega a su escalera y no puede saber si el usuario ya cambió de piso. Por esa razón, cuando llega a su punto de transferencia, el coordinador pasa a la etapa de espera y la página muestra un botón para confirmar el cambio de piso (figura~\ref{fig:hri}, derecha), con un texto que depende del sentido, como «Suba con calma al piso 4» o «Baje con calma al piso 3». A los 60~s sin confirmación aparece un aviso, y a los 120~s la misión termina como fallida. Los plazos se cuentan desde que llega el agente, y si el usuario confirma antes, la confirmación se retiene y se aplica al llegar.
 
 \begin{figure}[H]
   \centering
@@ -411,10 +425,6 @@ El usuario elige el origen en una lista y el destino en un catálogo con búsque
   \caption{Interfaz web en el teléfono durante las pruebas con los agentes físicos (anexo A, video 8): catálogo de destinos (izquierda), primer tramo de una misión (centro) y espera de confirmación al bajar y al subir (derecha).}
   \label{fig:hri}
 \end{figure}
-
-\subsection{Confirmación de cambio de piso}
-
-En una misión entre pisos, el segundo agente llega a su escalera y no puede saber si el usuario ya cambió de piso. Por esa razón, cuando llega a su punto de transferencia, el coordinador pasa a la etapa de espera y la página muestra un botón para confirmar el cambio de piso (figura~\ref{fig:hri}, derecha), con un texto que depende del sentido, como «Suba con calma al piso 4» o «Baje con calma al piso 3». A los 60~s sin confirmación aparece un aviso, y a los 120~s la misión termina como fallida. Los plazos se cuentan desde que llega el agente, y si el usuario confirma antes, la confirmación se retiene y se aplica al llegar.
 
 \subsection{Cancelación}
 

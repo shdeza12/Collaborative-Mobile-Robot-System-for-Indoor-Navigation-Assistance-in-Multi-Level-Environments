@@ -75,21 +75,24 @@ def topologia():
     texto(ax, 50, 76.6, 'Enrutador TP-Link TL-WR940N · piso 4', 8, 'bold', TINTA)
     texto(ax, 50, 73.0, 'IP 192.168.0.1/24', 6.4, color=TINTA)
     texto(ax, 50, 69.6, 'Reparte las direcciones de toda la red', 6.4)
-    texto(ax, 50, 66.4, 'Red de respaldo DEEPRACER en 2,4 GHz, canal 6', 6.4)
+    texto(ax, 50, 66.4, 'Enlace de respaldo DEEPRACER en 2,4 GHz, canal 6', 6.4)
 
-    # El telefono y el portatil se conectan al enrutador por la red de 2,4 GHz.
+    # El telefono y el portatil se asocian al punto de acceso de 5 GHz de su piso
+    # (confirmado por los autores el 12 de noviembre); el enlace de 2,4 GHz del
+    # enrutador queda solo como respaldo. Se dibujan sobre el punto de acceso del
+    # piso 3 y del piso 4, pero cada uno usa el del piso en que esta.
     caja(ax, 2, 64, 17, 13, AGENTE_FONDO, TINTA2, radio=1.6)
     texto(ax, 10.5, 72.6, 'Teléfono', 7.6, 'bold', TINTA)
     texto(ax, 10.5, 68.8, 'Interfaz web', 6.2)
-    linea(ax, [(19.4, 70.5), (22.6, 70.5)], discontinua=True)
+    linea(ax, [(10.5, 63.6), (10.5, 51.4)], discontinua=True)
+    texto(ax, 6.2, 57.6, 'Wi-Fi\n5 GHz', 5.6, color=GRIS)
     caja(ax, 81, 61, 17, 19, AGENTE_FONDO, TINTA2, radio=1.6)
     texto(ax, 89.5, 76.0, 'Portátil', 7.6, 'bold', TINTA)
     texto(ax, 89.5, 72.0, 'IP 192.168.0.105', 5.9, color=TINTA)
     texto(ax, 89.5, 67.6, 'Coordinador', 6.0)
     texto(ax, 89.5, 64.8, 'y página web', 6.0)
-    linea(ax, [(77.4, 70.5), (80.6, 70.5)], discontinua=True)
-    texto(ax, 21, 72.6, 'Wi-Fi', 5.6, color=GRIS)
-    texto(ax, 79, 72.6, 'Wi-Fi', 5.6, color=GRIS)
+    linea(ax, [(89.5, 60.6), (89.5, 51.4)], discontinua=True)
+    texto(ax, 93.8, 56.0, 'Wi-Fi\n5 GHz', 5.6, color=GRIS)
 
     # Los dos puntos de acceso, uno por piso, en puente y unidos por cable.
     for x0, piso, canal in ((3, '3', '44'), (55, '4', '36')):

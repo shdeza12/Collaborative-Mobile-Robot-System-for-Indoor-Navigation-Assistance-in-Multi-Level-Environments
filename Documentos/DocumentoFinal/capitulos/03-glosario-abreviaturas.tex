@@ -19,7 +19,7 @@
 \ustaseccion{Glosario}
 
 \begin{description}[style=nextline,leftmargin=1.5em,itemsep=0.2em]
-  \item[Agente] Cada uno de los dos robots móviles del sistema, construidos sobre la plataforma AWS DeepRacer y dedicados cada uno a un piso del edificio. Tiene su propia navegación y ejecuta los tramos de la misión que le asigna el coordinador.
+  \item[Agente] Entidad autónoma que percibe su entorno, decide por sí misma y actúa sobre él para cumplir un objetivo, y que puede coordinarse con otras para repartirse una tarea. En este trabajo, cada agente es un robot móvil terrestre dedicado a un piso del edificio: tiene su propia navegación y ejecuta los tramos de la misión que le asigna el coordinador.
 
   \item[Banda muerta de tracción] Rango de velocidades ordenadas en el que el agente no llega a moverse, porque el programa que traduce la orden al variador las convierte en tracción nula. En los agentes de este trabajo abarca todo lo que está por debajo de 0,40~m/s, y condiciona su aproximación final al destino.
 
