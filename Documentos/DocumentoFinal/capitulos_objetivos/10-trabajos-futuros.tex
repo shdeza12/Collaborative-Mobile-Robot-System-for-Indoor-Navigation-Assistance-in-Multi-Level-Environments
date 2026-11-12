@@ -1,0 +1,52 @@
+% =====================================================================
+%  TRABAJOS FUTUROS (versión por objetivos)
+%
+%  Corrección del director del 11 de noviembre de 2026: las líneas que había
+%  eran mejoras técnicas de lo hecho, así que van en un párrafo y una tabla; los
+%  trabajos futuros propiamente dichos salen del estado del arte.
+% =====================================================================
+\ustacapitulocontinuo{Trabajos futuros}
+\addcontentsline{toc}{chapter}{TRABAJOS FUTUROS}
+
+Las limitaciones de la plataforma y de la operación que mostraron las pruebas se
+pueden atender con las mejoras de la tabla~\ref{tab:mejoras}, que no cambian la
+arquitectura del sistema.
+
+\begin{table}[H]
+  \centering\footnotesize\setstretch{1.0}
+  \caption{Mejoras técnicas del sistema y la limitación que atiende cada una.}
+  \label{tab:mejoras}
+  \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.33\textwidth}>{\raggedright\arraybackslash}p{0.42\textwidth}@{}}
+    \toprule
+    \textbf{Mejora} & \textbf{Limitación que atiende} & \textbf{Cómo} \\ \midrule
+    Navegación más precisa & El agente no se mueve por debajo de 0,40~m/s y solo mide su avance donde el pasillo tiene estructura & Calibrar el variador o cambiar la relación de transmisión, y medir el avance con codificadores en las ruedas u odometría visual con las cámaras que el agente ya lleva; la tolerancia de llegada podría volver a 0,25~m \\ \addlinespace
+    Más capacidad de cómputo & La tarjeta, de dos núcleos, queda entre el 54~\% y el 59~\% de uso en reposo con la navegación completa & Adaptar la plataforma a una Raspberry Pi~4 o~5, de cuatro núcleos; la comunidad de AWS DeepRacer ya publica el software para la Raspberry Pi~4 \\ \addlinespace
+    Evasión de obstáculos & Las pruebas se hicieron con los pasillos despejados & Esquivar personas y objetos en movimiento, y no solo detenerse ante ellos, y probarlo con personas que caminan por el pasillo antes de operar en horario de clases \\ \addlinespace
+    Controlador predictivo & Regulated Pure Pursuit anula la curvatura cuando una inversión de marcha queda cerca de la meta & Usar MPPI, que incluye Nav2 y admite cinemática tipo automóvil, para devolver la media vuelta a Nav2 y afinar la aproximación final; exige más cómputo \\ \addlinespace
+    Interacción por voz & El usuario elige el origen y el destino en listas & Reconocimiento de voz a texto y un modelo de lenguaje en el computador del coordinador, que solo traduzca la petición a un origen y un destino del catálogo \\ \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{Más de dos pisos.} Con más pisos, una misión sigue teniendo un solo
+relevo, entre el agente del piso de origen y el del piso de destino. Lo que cambia es
+que varias solicitudes a la vez compiten por los mismos agentes, y decidir cuál atiende
+cada tramo y en qué orden puede requerir procesos de optimización multiagente. Una
+alternativa que hoy se encuentra en el estado del arte es el
+aprendizaje por refuerzo multiagente (MARL), que \textcite{xu2026modular} integran en
+un marco modular sobre ROS para asignar tareas entre varios robots y cuyas
+aplicaciones en sistemas multirrobot revisan \textcite{orr2023multiagent}.
+
+\paragraph{Varios agentes en un mismo piso.} Así mismo, una oportunidad identificada
+es la inclusión de MARL para coordinar varios agentes que operen sobre un mismo piso.
+Con dos o más agentes elegibles por tarea, la asignación deja de ser una regla fija y
+hacen falta una cola de solicitudes y la noción de agente ocupado; además de los
+mecanismos de mercado, como la subasta \autocite{quinton2023market}, MARL permitiría
+aprender esa coordinación a partir de la operación. Es la extensión natural para
+edificios con más afluencia, y obliga a medir de nuevo el costo del descubrimiento en
+la red, que crece con el número de procesos.
+
+\paragraph{Usuarios que no pueden usar la escalera.} El relevo supone que el usuario
+cambia de piso por la escalera. Para quien no puede usarla, el punto de transferencia
+tendría que estar en el ascensor, y la elección entre escalera y ascensor, que
+\textcite{luo2025elevator} resuelven para el robot con aprendizaje por refuerzo
+jerárquico, pasaría a depender del usuario.

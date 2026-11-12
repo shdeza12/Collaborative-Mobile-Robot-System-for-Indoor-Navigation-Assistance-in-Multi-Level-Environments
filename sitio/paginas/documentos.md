@@ -6,9 +6,9 @@ Para leer el proyecto completo, el documento de la tesis. Para el detalle de cad
 
 <div class="decision-tarjeta" markdown>
 ### :material-file-document-outline: La tesis
-El documento final: contexto, marco referencial, desarrollo, resultados, conclusiones y trabajos futuros. Es la versión definitiva, en revisión.
+El documento final: contexto, marco referencial, desarrollo, resultados, conclusiones y trabajos futuros. Es la versión organizada por objetivos específicos, con las correcciones del director.
 
-[Descargar el PDF :material-download:](https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/raw/main/Documentos/DocumentoFinal/main.pdf){ .md-button .md-button--primary }
+[Descargar el PDF :material-download:](https://github.com/shdeza12/Collaborative-Mobile-Robot-System-for-Indoor-Navigation-Assistance-in-Multi-Level-Environments/raw/main/Documentos/DocumentoFinal/main_objetivos.pdf){ .md-button .md-button--primary }
 
 </div>
 

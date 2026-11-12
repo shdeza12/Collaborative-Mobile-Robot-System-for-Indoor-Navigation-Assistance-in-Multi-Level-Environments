@@ -56,16 +56,13 @@ def linea(ax, puntos, discontinua=False, grosor=0.9, color=GRIS):
 
 def topologia():
     """El montaje fisico: por donde pasan de verdad los mensajes, con la direccion
-    logica (IP) y la fisica (MAC) de cada equipo.
+    IP de cada equipo. Desde el 11 de noviembre va sin las direcciones MAC, por
+    correccion de los autores: no hacen falta para leer el montaje.
 
     El enrutador esta en el piso 4, junto al punto de acceso de ese piso, y del
     piso 4 sale el cable al punto de acceso del piso 3 (confirmado por los
-    autores el 6 de noviembre). Las direcciones fisicas se retiraron de la figura
-    y de la tabla a peticion del director (correccion 21): no aportan al lector y
-    no se pueden verificar; quedan en Evidencia/ para reproducir el montaje. Los
-    puntos de acceso van sin IP y el telefono sin direcciones. El portatil del
-    coordinador y el telefono del usuario se asocian al punto de acceso de su
-    piso: el enlace de 2,4 GHz del enrutador queda solo como respaldo.
+    autores el 6 de noviembre). Los puntos de acceso van sin IP y el telefono
+    sin direcciones, por decision de los autores.
     """
     fig = plt.figure(figsize=(6.5, 5.3))
     ax = fig.add_axes([0, 0, 1, 1])
@@ -80,26 +77,25 @@ def topologia():
     texto(ax, 50, 69.6, 'Reparte las direcciones de toda la red', 6.4)
     texto(ax, 50, 66.4, 'Red de respaldo DEEPRACER en 2,4 GHz, canal 6', 6.4)
 
-    # El telefono y el portatil tambien trabajan en 5 GHz, asociados al punto de
-    # acceso de su piso, no al enlace de respaldo de 2,4 GHz del enrutador.
+    # El telefono y el portatil se conectan al enrutador por la red de 2,4 GHz.
     caja(ax, 2, 64, 17, 13, AGENTE_FONDO, TINTA2, radio=1.6)
     texto(ax, 10.5, 72.6, 'Teléfono', 7.6, 'bold', TINTA)
     texto(ax, 10.5, 68.8, 'Interfaz web', 6.2)
-    linea(ax, [(10.5, 63.6), (10.5, 51.4)], discontinua=True)
-    texto(ax, 17.2, 54.5, 'Wi-Fi 5 GHz', 5.6, color=GRIS)
+    linea(ax, [(19.4, 70.5), (22.6, 70.5)], discontinua=True)
     caja(ax, 81, 61, 17, 19, AGENTE_FONDO, TINTA2, radio=1.6)
-    texto(ax, 89.5, 76.4, 'Portátil', 7.6, 'bold', TINTA)
-    texto(ax, 89.5, 72.4, 'IP 192.168.0.105', 6.2, color=TINTA)
-    texto(ax, 89.5, 68.4, 'Coordinador', 6.2)
-    texto(ax, 89.5, 65.0, 'y página web', 6.2)
-    linea(ax, [(89.5, 60.6), (89.5, 51.4)], discontinua=True)
-    texto(ax, 82.8, 54.5, 'Wi-Fi 5 GHz', 5.6, color=GRIS)
+    texto(ax, 89.5, 76.0, 'Portátil', 7.6, 'bold', TINTA)
+    texto(ax, 89.5, 72.0, 'IP 192.168.0.105', 5.9, color=TINTA)
+    texto(ax, 89.5, 67.6, 'Coordinador', 6.0)
+    texto(ax, 89.5, 64.8, 'y página web', 6.0)
+    linea(ax, [(77.4, 70.5), (80.6, 70.5)], discontinua=True)
+    texto(ax, 21, 72.6, 'Wi-Fi', 5.6, color=GRIS)
+    texto(ax, 79, 72.6, 'Wi-Fi', 5.6, color=GRIS)
 
     # Los dos puntos de acceso, uno por piso, en puente y unidos por cable.
     for x0, piso, canal in ((3, '3', '44'), (55, '4', '36')):
         caja(ax, x0, 35, 42, 16, VERDE_FONDO, VERDE)
-        texto(ax, x0 + 21, 47.2, f'Punto de acceso · piso {piso}', 7.6, 'bold', TINTA)
-        texto(ax, x0 + 21, 43.0, f'5 GHz · canal {canal} · 40 MHz', 6.4)
+        texto(ax, x0 + 21, 46.8, f'Punto de acceso · piso {piso}', 7.6, 'bold', TINTA)
+        texto(ax, x0 + 21, 42.8, f'5 GHz · canal {canal} · 40 MHz', 6.4)
         texto(ax, x0 + 21, 39.2, 'En puente: no reparte direcciones ni enruta', 6.0)
 
     # Cable del enrutador a cada punto de acceso: el del piso 3 baja entre pisos.
@@ -112,11 +108,11 @@ def topologia():
     for x0, piso, ip, lat in ((3, '3', '192.168.0.102', '2,13 ms'),
                               (55, '4', '192.168.0.104', '1,99 ms')):
         caja(ax, x0 + 4, 11, 34, 16.5, AGENTE_FONDO, TINTA2, radio=1.6)
-        texto(ax, x0 + 21, 23.8, f'Agente del piso {piso}', 7.6, 'bold', TINTA)
-        texto(ax, x0 + 21, 19.6, f'IP {ip}, reservada', 6.4, color=TINTA)
-        texto(ax, x0 + 21, 15.4, f'ida y vuelta {lat}', 6.4)
+        texto(ax, x0 + 21, 23.4, f'Agente del piso {piso}', 7.6, 'bold', TINTA)
+        texto(ax, x0 + 21, 19.4, f'IP {ip}, reservada', 6.4, color=TINTA)
+        texto(ax, x0 + 21, 15.6, f'ida y vuelta {lat}', 6.4)
         linea(ax, [(x0 + 21, 34.6), (x0 + 21, 27.9)], discontinua=True)
-        texto(ax, x0 + 30, 31.2, 'Wi-Fi 5 GHz', 6.2, color=GRIS)
+        texto(ax, x0 + 29, 31.2, 'Wi-Fi', 6.2, color=GRIS)
 
     # Lo que la figura tiene que dejar claro de una sola vez.
     caja(ax, 10, 1.5, 80, 7.5, NARANJA_FONDO, NARANJA)

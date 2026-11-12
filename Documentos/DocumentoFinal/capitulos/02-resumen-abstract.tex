@@ -2,31 +2,33 @@
 %  RESUMEN Y ABSTRACT
 %  La plantilla fija 150-250 palabras y pide objetivo, metodo, resultados y
 %  discusion. Las palabras clave son obligatorias en los dos idiomas.
+%  Desde el 11 de noviembre de 2026, por sugerencia del director, el abstract
+%  se redacta primero y el resumen es su traduccion: los dos dicen lo mismo.
 % =====================================================================
 \ustaseccion{Resumen}
 
-Orientarse en un edificio de varios pisos resulta difícil para quien no lo conoce,
-ya que el cambio de piso corta la continuidad del recorrido. Las soluciones robóticas
-existentes resuelven ese salto dotando al robot de mecanismos para subir escaleras o
-conectándolo al ascensor, dos opciones costosas que además obligan a intervenir el
-edificio.
+Orientarse en un edificio de varios pisos que no se conoce es difícil, y el cambio de
+piso corta la continuidad del recorrido. Las soluciones
+robóticas existentes resuelven ese salto de dos maneras: dotando al robot de mecanismos
+para subir escaleras, lo que aumenta sus requerimientos tecnológicos y sus
+costos, o conectándolo al ascensor, lo que obliga a intervenir el edificio.
 
 Este trabajo propone y evalúa una alternativa en la que dos agentes, robots móviles
 terrestres, uno por piso, se reparten el guiado de un usuario mediante un protocolo de
-relevo en la zona de escaleras, sin que ninguno cambie de piso. Un coordinador asigna
-el agente según el piso del origen y del destino, y el usuario pide el servicio desde
-una interfaz web que funciona en cualquier teléfono, sin instalar nada y sin salida a
-internet.
+relevo en la escalera, de modo que ninguno cambia de piso. Un coordinador
+asigna el agente según los pisos de origen y destino, y el usuario pide el servicio
+desde una interfaz web que funciona en cualquier teléfono, sin instalar nada y sin
+salida a internet.
 
-La evaluación siguió un protocolo escrito antes de instrumentar el sistema, con
+La evaluación siguió un protocolo definido antes de instrumentar el sistema, con
 cuatro métricas de definición operativa. En simulación, treinta misiones sorteadas
-dieron una campaña válida, sin descartes, que permite afirmar con 95~\% de confianza
-que la tasa de éxito supera el 70~\%. Con los agentes físicos, de diez misiones
-sorteadas se completaron nueve con relevo, con un tiempo total mediano de 87,6~s y la
-llegada a menos de 0,5~m del destino según la localización de cada agente, mientras
-que la décima se interrumpió porque el computador del coordinador se quedó sin
-batería. La principal limitación está en la plataforma, cuya tracción no responde por
-debajo de 0,40~m/s, lo que restringe la precisión de llegada.
+dieron una campaña válida, sin descartes, y una tasa de éxito superior al 70~\% con
+95~\% de confianza. Con los agentes físicos se completaron con relevo
+nueve de diez misiones sorteadas, con un tiempo total mediano de 87,6~s y la llegada a
+menos de 0,5~m del destino según la localización de cada agente; la décima se
+interrumpió al agotarse la batería del computador del coordinador. La principal
+limitación está en la plataforma, cuya tracción no responde por debajo de 0,40~m/s, lo
+que restringe la precisión de llegada.
 
 \vspace{1em}
 \textbf{Palabras clave:} robótica móvil colaborativa; sistemas multirrobot;
@@ -34,27 +36,27 @@ navegación en interiores; protocolo de relevo; interacción humano-robot; ROS~2
 
 \ustaseccion{Abstract}
 
-Finding one's way inside a multi-storey building is hard for first-time
-visitors, and changing floors breaks the continuity of the route. Existing
-robotic solutions address that gap in two ways: by equipping the robot to climb
-stairs, or by interfacing it with the building lift. Both are expensive and
-require modifying the infrastructure.
+Finding one's way inside an unfamiliar multi-storey building is hard, and changing
+floors breaks the continuity of the route. Existing robotic solutions
+bridge that gap in two ways: by equipping the robot to climb stairs, which raises its
+technological requirements and cost, or by connecting it to the building
+lift, which requires modifying the infrastructure.
 
-This work proposes and evaluates an alternative. Two agents, ground mobile robots, one per floor, share the task of guiding a user through a handover protocol at the
-stairwell. Neither agent changes floors. A central coordinator assigns
-the agent according to the floor of the origin and the destination. The user
-requests the service from a web interface that runs on any phone, with no
-installation and no internet access.
+This work proposes and evaluates an alternative in which two agents, ground mobile
+robots, one per floor, share the guidance of a user through a handover protocol at the
+stairwell, so that neither agent changes floors. A coordinator assigns the agent
+according to the origin and destination floors, and the user requests the
+service from a web interface that runs on any phone, with no installation and no
+internet access.
 
 The evaluation followed a protocol defined prior to instrumenting the system, with
-four operationally defined metrics. In simulation, thirty randomised missions
-gave a valid campaign with no discards, which supports, with 95~\% confidence,
-the claim that the success rate exceeds 70~\%.
-
-Nine out of ten randomised missions with the physical agents, one per floor,
-were completed with a handover, with a median total time
-of 87.6~s and arrival within 0.5~m of the goal according to each agent's own localisation. The tenth was interrupted when the coordinator's computer ran out
-of battery. Traction does not respond below 0.40~m/s, which limits arrival accuracy.
+four operationally defined metrics. In simulation, thirty randomised missions gave a
+valid campaign with no discards and a success rate above 70~\% with 95~\% confidence. Nine out of ten randomised missions with the physical
+agents were completed with a handover, with a median total time of 87.6~s and arrival
+within 0.5~m of the goal according to each agent's own localisation; the tenth was
+interrupted when the coordinator's computer ran out of battery. The main limitation
+lies in the platform, whose traction does not respond below 0.40~m/s, which limits
+arrival accuracy.
 
 \vspace{1em}
 \textbf{Keywords:} collaborative mobile robotics; multi-robot systems; indoor

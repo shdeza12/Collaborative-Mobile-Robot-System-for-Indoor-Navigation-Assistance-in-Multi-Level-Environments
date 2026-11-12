@@ -33,7 +33,7 @@ Las cuatro misiones fallidas quedaron a 0,295, 0,284, 0,311 y 0,347~m del destin
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.8\textwidth]{imagenes/llegada_simulacion.png}\hspace*{0.48cm}
+  \includegraphics[width=0.95\textwidth]{imagenes/llegada_simulacion.png}\hspace*{0.57cm}
   \caption{Error de llegada de las treinta misiones en simulación, por grupo, con la tolerancia de 0,25~m (línea discontinua), las cuatro misiones fuera de ella (en naranja) y la mediana de cada fila (marca vertical).}
   \label{fig:llegada-sim}
 \end{figure}
@@ -84,7 +84,7 @@ La prueba de navegación de un agente pide un recorrido de punto a punto con Nav
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.78\textwidth]{imagenes/cadena_piso4.png}
+  \includegraphics[width=\textwidth]{imagenes/cadena_piso4.png}
   \caption{Cadena de tres tramos en el piso 4 del edificio Catalayud y regreso a la salida: recorrido según la localización, llegadas medidas con flexómetro y llegada estimada al Salón 403.}
   \label{fig:cadena}
 \end{figure}
@@ -93,13 +93,13 @@ La prueba de navegación de un agente pide un recorrido de punto a punto con Nav
 \section{Evaluación del sistema completo con los agentes físicos}
 \label{sec:res-completo}
 
-El sistema completo funcionó con los dos agentes físicos en los pisos 3 y 4 del edificio Catalayud (anexo A, video 7). Se realizó la validación del cambio de piso desde la interfaz web para móvil: cada misión se pidió desde la página en un teléfono y la confirmación de piso se dio al llegar a la escalera. Lo validado es el funcionamiento del sistema y no la experiencia de uso, ya que la evaluación no incluyó participantes ajenos al proyecto. Los agentes no se reubicaron entre misiones, y cuando el destino quedaba detrás del agente, el coordinador pidió la media vuelta en varios tiempos. La llegada se verificó con la localización de cada agente, que la prueba de navegación ya había comprobado con medidas directas (tabla~\ref{tab:g3}).
+El sistema completo funcionó con los dos agentes físicos en los pisos 3 y 4 del edificio Catalayud (anexo A, video 7). Cada misión se pidió desde la interfaz web en un teléfono, y desde la misma interfaz se validó el cambio de piso en cada relevo. Los agentes no se reubicaron entre misiones, y cuando el destino quedaba detrás del agente, el coordinador pidió la media vuelta en varios tiempos. La llegada se verificó con la localización de cada agente, que la prueba de navegación ya había comprobado con medidas directas (tabla~\ref{tab:g3}).
 
 La primera prueba fue una misión del Salón 302 al Salón 402, que se completó en 132,5~s, con un relevo y con la llegada a 0,444~m del destino; entre la llegada del primer agente a la escalera y el arranque del segundo pasaron 61,1~s. Esa sesión sirvió de ensayo del montaje y sus misiones no forman parte de la campaña: de las doce grabadas, siete se completaron y cinco terminaron fallidas; en cuatro, el coordinador rechazó una llegada con el agente a entre 0,51 y 0,78~m del punto, y en la otra Nav2 abortó la navegación.
 
 \subsection{La campaña con las misiones sorteadas}
 
-De las diez misiones sorteadas, las nueve que llegaron a ejecutarse se completaron, todas con relevo (tabla~\ref{tab:campana-vehiculos}). Con nueve éxitos en nueve misiones, el intervalo de Wilson al 95~\% va del 70,1 al 100~\%, lo que permite afirmar que la tasa de éxito con los agentes físicos supera el 70~\%, la misma cota de la campaña en simulación. Con la expresión de la norma ASTM F3244-21, nueve repeticiones sin fallo demuestran una fiabilidad mínima de 0,81 con un 85~\% de confianza.
+De las diez misiones sorteadas, las nueve que llegaron a ejecutarse se completaron, todas con relevo (tabla~\ref{tab:campana-vehiculos}). Con nueve éxitos en nueve misiones, el intervalo de Wilson al 95~\% va del 70,1~\% al 100~\%, lo que permite afirmar que la tasa de éxito con los agentes físicos supera el 70~\%, la misma cota de la campaña en simulación, aunque con una tolerancia de llegada de 0,5~m en lugar de 0,25~m. Con la expresión de la norma ASTM F3244-21, nueve repeticiones sin fallo demuestran una fiabilidad mínima de 0,81 con un 85~\% de confianza.
 
 \begin{table}[H]
   \centering\footnotesize\setstretch{1.0}
@@ -127,7 +127,7 @@ La figura~\ref{fig:campana-vehiculos} descompone el tiempo de cada misión en su
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.64\textwidth]{imagenes/campana_vehiculos_etapas.png}
+  \includegraphics[width=0.9\textwidth]{imagenes/campana_vehiculos_etapas.png}
   \caption{Duración de cada etapa en las nueve misiones de la campaña con los agentes físicos, con la espera de la confirmación de piso en rayado.}
   \label{fig:campana-vehiculos}
 \end{figure}
@@ -140,22 +140,20 @@ El tiempo entre la llegada a la escalera del piso de origen y el arranque del gu
 
 \subsection{Criterio de conteo e incidencias}
 
-En la tasa de éxito cada misión cuenta una sola vez, con el intento que se completó, mientras que el protocolo cuenta como fallo
-toda ejecución fallida. La tabla~\ref{tab:incidencias} declara los intentos que la tasa deja fuera. Tras reiniciar las cadenas de
-navegación con la pose de salida, las nueve misiones se ejecutaron sin tocar los agentes.
+En la tasa de éxito cada misión cuenta una sola vez, con el intento que se completó, mientras que el protocolo cuenta como fallo toda ejecución fallida, por lo que se declaran los intentos que la tasa deja fuera (tabla~\ref{tab:incidencias}). Después de reiniciar las cadenas de navegación, las nueve misiones se ejecutaron sin tocar los agentes.
 
 \begin{table}[H]
   \centering\footnotesize\setstretch{1.0}
-  \caption{Intentos que la tasa de éxito deja fuera, con el criterio con que se cuentan.}
+  \caption{Intentos de la campaña con los agentes físicos que la tasa de éxito no cuenta.}
   \label{tab:incidencias}
-  \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.20\textwidth}>{\raggedright\arraybackslash}p{0.42\textwidth}>{\raggedright\arraybackslash}p{0.32\textwidth}@{}}
+  \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.19\textwidth}>{\raggedright\arraybackslash}p{0.33\textwidth}>{\raggedright\arraybackslash}p{0.23\textwidth}@{}}
     \toprule
-    \textbf{Intento} & \textbf{Qué ocurrió} & \textbf{Cómo se cuenta} \\ \midrule
-    Misión 1, ocho intentos iniciales & La navegación de los dos agentes dejó de responder, después de que el portátil se apagara por falta de batería y con los agentes ya con horas encendidos & Rechazados o abortados; se declaran como fallos \\ \addlinespace
-    Misión 1, intento siguiente & El coordinador rechazó la llegada con el agente a 0,526~m del punto & Fallo declarado; la misión se completó al intento siguiente \\ \addlinespace
-    Misión 2, primer intento & El coordinador no tenía la pose del agente para verificar la llegada & Fallo declarado; la misión se completó al intento siguiente \\ \addlinespace
-    Misión 10 & El portátil volvió a apagarse por falta de batería poco después de pedirla & Empezada y no terminada \\ \addlinespace
-    Destino pedido por error & Se pidió el ascensor del piso 4 del edificio Catalayud, debido a que los de los dos pisos aparecían en la página con el mismo nombre & No es una misión del sorteo y no se cuenta \\ \bottomrule
+    \textbf{Intento} & \textbf{Qué ocurrió} & \textbf{Causa} & \textbf{Cómo se contó} \\ \midrule
+    Misión 1, ocho intentos & Rechazados o abortados & La navegación de los dos agentes dejó de responder después de que el portátil se apagara por falta de batería, con los agentes ya con horas encendidos & No cuentan; se reiniciaron las cadenas de navegación con la pose de salida \\ \addlinespace
+    Misión 1, primer intento después del reinicio & El coordinador rechazó la llegada al ascensor & El agente quedó a 0,526~m del punto, fuera de la tolerancia de 0,5~m & Se completó al segundo intento \\ \addlinespace
+    Misión 2, primer intento & El coordinador no verificó la llegada & No tenía la pose del agente & Se completó al segundo intento \\ \addlinespace
+    Pedido al ascensor del piso 4 & Destino equivocado & Los ascensores de los dos pisos aparecían en la página con el mismo nombre & No es una misión del sorteo y no se cuenta \\ \addlinespace
+    Misión 10 & Empezó y no terminó & El portátil volvió a apagarse por falta de batería poco después de pedirla & Queda fuera de la tasa \\ \bottomrule
   \end{tabular}
 \end{table}
 
@@ -163,17 +161,16 @@ navegación con la pose de salida, las nueve misiones se ejecutaron sin tocar lo
 \section{Limitaciones de la medición}
 \label{sec:limitaciones}
 
-Dos aspectos acotan lo que puede afirmarse a partir de la medición (tabla~\ref{tab:limitaciones}). El primero es de método: un
-criterio que se cumple siempre por construcción no aporta evidencia, por más que el dato lo acompañe.
+Dos aspectos de la medición limitan lo que se puede afirmar con la campaña en simulación (tabla~\ref{tab:limitaciones}).
 
 \begin{table}[H]
   \centering\footnotesize\setstretch{1.0}
-  \caption{Limitaciones de la medición y su efecto sobre lo que puede afirmarse.}
+  \caption{Limitaciones de la medición en la campaña en simulación.}
   \label{tab:limitaciones}
-  \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.19\textwidth}>{\raggedright\arraybackslash}p{0.37\textwidth}>{\raggedright\arraybackslash}p{0.38\textwidth}@{}}
+  \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.16\textwidth}>{\raggedright\arraybackslash}p{0.38\textwidth}>{\raggedright\arraybackslash}p{0.38\textwidth}@{}}
     \toprule
-    \textbf{Limitación} & \textbf{En qué consiste} & \textbf{Efecto sobre el veredicto} \\ \midrule
-    La continuidad no se mide, se construye & El criterio exige que el coordinador nunca esté inactivo ni sin agente asignado dentro de la ventana de la misión, y los dos únicos puntos del código que producen esos valores ocurren antes de que la ventana se abra & Se cumplió en las treinta misiones, pero el resultado no es evidencia. Se declara como invariante estructural del diseño y la afirmación se apoya en una magnitud que sí varía: el intervalo del relevo, de mediana 0,1~s y máximo 0,2~s en las quince misiones entre pisos \\ \addlinespace
-    Umbral de celdas libres del mapa de simulación & El umbral de carga era 0,25 y las celdas desconocidas se guardan con ocupación 0,196, de modo que 10\,908 celdas que el modelo no describía, el 14,5~\% del mapa, se leyeron como espacio libre & No cambia el veredicto, puesto que los cuatro fallos fueron de precisión de llegada y el pasillo por el que se navegó es libre. Queda sin verificar que ninguna trayectoria cruzara una de esas celdas; el umbral se corrigió a 0,10 después de la campaña \\ \bottomrule
+    \textbf{Aspecto} & \textbf{Qué se encontró} & \textbf{Efecto en el resultado} \\ \midrule
+    Continuidad del servicio & Es la variable de respuesta principal del cuarto objetivo, y su criterio binario se cumplió en las treinta misiones. El criterio exige que, dentro de la ventana de la misión, el coordinador nunca esté inactivo ni tenga el agente sin asignar, y los dos únicos puntos del código que producen esos valores ocurren antes de que la ventana se abra & El resultado no es evidencia: la continuidad se declaró como un invariante estructural del diseño y se apoyó en el intervalo del relevo, que en las quince misiones entre pisos tuvo una mediana de 0,1~s y un máximo de 0,2~s, uno o dos pasos del reloj de la simulación \\ \addlinespace
+    Umbral de celdas libres del mapa & El umbral con que se cargan las celdas libres era 0,25, y las celdas desconocidas, que el formato guarda con una ocupación de 0,196, quedaban por debajo de él: 10\,908 celdas que el modelo no describía, el 14,5~\% del mapa, se leyeron como espacio libre & No cambia el veredicto, puesto que los cuatro fallos fueron de precisión de llegada y el pasillo por el que se navegó es libre. Queda sin verificar que ninguna trayectoria cruzara una de esas celdas. El umbral se corrigió a 0,10 después de la campaña \\ \bottomrule
   \end{tabular}
 \end{table}

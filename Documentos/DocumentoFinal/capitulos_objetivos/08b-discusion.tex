@@ -1,0 +1,35 @@
+% =====================================================================
+%  DISCUSIÓN
+%  Corrección del director del 11 de noviembre de 2026: capítulo aparte, que
+%  presenta y explica lo que se hizo de mayor a menor nivel, de la ingeniería del
+%  sistema a lo técnico, y lo contrasta con el estado del arte. Las causas y las
+%  explicaciones que antes estaban en las conclusiones viven aquí.
+% =====================================================================
+\chapter{Discusión}
+\label{cap:discusion}
+
+\section{El cambio de piso como problema de coordinación}
+
+Los trabajos de movilidad entre pisos obtienen la continuidad del recorrido con el propio robot: \textcite{kim2024indoor} y \textcite{song2024elevator} lo hacen usar el ascensor, \textcite{luo2025elevator} le enseñan a elegir entre ascensor y escalera, y la otra opción es dotarlo de mecanismos para subir escaleras. En este trabajo la continuidad se obtuvo con coordinación, sin que ningún agente cambiara de piso, y en las treinta misiones en simulación y las nueve completadas con los agentes físicos el coordinador asignó el agente y, cuando correspondía, ejecutó el relevo sin fallar. La contrapartida de esa decisión es que el usuario cambia de piso por su cuenta, de modo que el sistema supone que puede usar la escalera.
+
+El relevo más cercano en la literatura, el de DELIVER \autocite{srivastava2026deliver}, traspasa objetos que pueden esperar sin límite en la frontera entre dos regiones. Traspasar el guiado de un usuario obligó a añadir lo que un objeto no necesita: una confirmación explícita del cambio de piso, con un aviso a los 60~s y un plazo máximo de 120~s. Con los agentes físicos la confirmación tomó entre 2,3 y 24,7~s y el aviso no llegó a mostrarse, así que el plazo no limitó ninguna misión.
+
+Con un solo agente admisible por piso, la asignación se reduce a una regla, el agente del piso de origen, y no necesita los mecanismos de mercado que revisan \textcite{quinton2023market} ni el aprendizaje multiagente de \textcite{xu2026modular}. La dificultad estuvo en coordinar dos agendas que dependen una de otra durante el relevo, la clase de dependencias que \textcite{korsah2013comprehensive} llaman XD. Escribir la planificación sin dependencia de ROS~2 permitió probar todas las combinaciones de origen y destino sin usar el simulador, y esa decisión es la que hizo manejable la coordinación.
+
+\section{Alcance de la evaluación}
+
+Las dos campañas permiten afirmar, con 95~\% de confianza, que la tasa de éxito supera el 70~\%, pero no cuánto la supera: con treinta misiones el intervalo de la campaña en simulación mide 24 puntos porcentuales de ancho, y con nueve misiones el de los agentes físicos va del 70,1~\% al 100~\%. Las dos tasas, además, no son comparables entre sí, puesto que se midieron con tolerancias de llegada distintas, 0,25~m en simulación y 0,5~m con los agentes físicos: con la tolerancia de la simulación, solo cinco de las nueve llegadas de la campaña física habrían quedado dentro. La continuidad del servicio se cumple por construcción, de modo que la evidencia del relevo está en su intervalo, con una mediana de 0,1~s en simulación; con los agentes físicos, cuando el segundo agente tuvo que desplazarse hasta su escalera, arrancó en menos de 1,3~s.
+
+Todos los fallos ocurrieron en la navegación de un agente. En simulación, las cuatro misiones fallidas se quedaron cortas del destino, y con los agentes físicos los intentos que la tasa no cuenta fueron de navegación o de la verificación de la llegada. Ninguno fue de asignación ni de relevo, por lo que la mejora del sistema pasa primero por la navegación de cada agente y no por la coordinación.
+
+\section{La plataforma y la interfaz}
+
+La plataforma AWS DeepRacer sirvió como agente de guiado en interiores, pero su desempeño dependió del sitio. \textcite{rudrusamy2022broadcast} observaron que las trayectorias reales difieren de las simuladas, y aquí la diferencia se concentró en la medida del avance y en la tracción (tabla~\ref{tab:sim-vehiculos}). Sin codificadores en las ruedas, el agente mide su avance comparando barridos del láser, y esa medida solo funciona donde el pasillo ofrece estructura. En el hall del piso 3 del edificio Gregorio la odometría registró el 73~\% del avance, mientras que en los pisos 3 y 4 del edificio Catalayud, con el mismo estimador, cumplió el criterio de la prueba. El sitio de operación terminó siendo parte del diseño.
+
+En la interfaz, el teléfono, que en el museo de \textcite{kayukawa2023enhancing} complementaba al robot para consultar explicaciones y llamar al personal, fue aquí el único canal con el usuario y bastó para pedir, seguir y confirmar cada misión sin instalar nada y sin salida a internet. Las funciones que más la acercan a una operación real, la confirmación del cambio de piso y la cancelación, no estaban en el anteproyecto y se añadieron al ver el sistema en uso. Sin la confirmación, una misión con el usuario en el piso equivocado se habría registrado como éxito, y la cancelación devolvió al agente a su escalera en las seis misiones canceladas. Los requisitos de una interfaz de este tipo, por lo tanto, no se pueden cerrar de antemano.
+
+\section{Aspectos técnicos de la implementación}
+
+Por debajo de 0,40~m/s la tracción no responde, de modo que el agente no tiene una aproximación fina y la tolerancia de llegada con los agentes físicos se fijó en 0,5~m, el doble de la admitida en simulación. La tarjeta original, de dos núcleos, llegó al 95~\% de su capacidad al encender el segundo agente, por el anuncio periódico de los procesos de ROS~2 en la red, y la coordinación pasó a un computador aparte. La navegación sigue a bordo de cada agente, en línea con \textcite{dordevic2023offloading}, que sitúan la mayor ganancia de delegar el cómputo en el reconocimiento de objetos, algo que este sistema no hace. Las baterías limitaron la duración de las sesiones.
+
+Centralizar la coordinación tiene un costo que la campaña dejó ver: el portátil del coordinador es un punto único de fallo. Se apagó dos veces por falta de batería; después de la primera, la navegación de los dos agentes dejó de responder y hubo que reiniciarla, y la segunda cortó la décima misión. \textcite{zhang2025kubernetes} muestran que en un sistema sobre ROS~2 la falla de un agente puede propagarse al resto, y aquí ese papel lo tiene el coordinador. El diseño lo acota en parte, ya que la navegación corre a bordo y ningún agente depende del otro, pero una misión en curso no sobrevive a la caída del coordinador.
